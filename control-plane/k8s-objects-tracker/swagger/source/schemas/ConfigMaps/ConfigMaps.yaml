@@ -1,0 +1,8 @@
+type: object
+required:
+  - configmaps
+properties:
+  configmaps:
+    type: array
+    items:
+      $ref: "./ConfigMap.yaml"

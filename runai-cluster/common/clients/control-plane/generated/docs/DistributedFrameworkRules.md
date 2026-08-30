@@ -1,0 +1,174 @@
+# DistributedFrameworkRules
+
+## Properties
+
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**SourceOfRule** | Pointer to [**NullableSourceOfRule**](SourceOfRule.md) |  | [optional] 
+**Required** | Pointer to **NullableBool** | Whether the field is mandatory, default to false. | [optional] 
+**CanEdit** | Pointer to **NullableBool** | Whether the value of the field is editable, default to true | [optional] 
+**Options** | Pointer to [**[]DistributedFrameworkOptionsOptionsInner**](DistributedFrameworkOptionsOptionsInner.md) |  | [optional] 
+
+## Methods
+
+### NewDistributedFrameworkRules
+
+`func NewDistributedFrameworkRules() *DistributedFrameworkRules`
+
+NewDistributedFrameworkRules instantiates a new DistributedFrameworkRules object
+This constructor will assign default values to properties that have it defined,
+and makes sure properties required by API are set, but the set of arguments
+will change when the set of required properties is changed
+
+### NewDistributedFrameworkRulesWithDefaults
+
+`func NewDistributedFrameworkRulesWithDefaults() *DistributedFrameworkRules`
+
+NewDistributedFrameworkRulesWithDefaults instantiates a new DistributedFrameworkRules object
+This constructor will only assign default values to properties that have it defined,
+but it doesn't guarantee that properties required by API are set
+
+### GetSourceOfRule
+
+`func (o *DistributedFrameworkRules) GetSourceOfRule() SourceOfRule`
+
+GetSourceOfRule returns the SourceOfRule field if non-nil, zero value otherwise.
+
+### GetSourceOfRuleOk
+
+`func (o *DistributedFrameworkRules) GetSourceOfRuleOk() (*SourceOfRule, bool)`
+
+GetSourceOfRuleOk returns a tuple with the SourceOfRule field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetSourceOfRule
+
+`func (o *DistributedFrameworkRules) SetSourceOfRule(v SourceOfRule)`
+
+SetSourceOfRule sets SourceOfRule field to given value.
+
+### HasSourceOfRule
+
+`func (o *DistributedFrameworkRules) HasSourceOfRule() bool`
+
+HasSourceOfRule returns a boolean if a field has been set.
+
+### SetSourceOfRuleNil
+
+`func (o *DistributedFrameworkRules) SetSourceOfRuleNil(b bool)`
+
+ SetSourceOfRuleNil sets the value for SourceOfRule to be an explicit nil
+
+### UnsetSourceOfRule
+`func (o *DistributedFrameworkRules) UnsetSourceOfRule()`
+
+UnsetSourceOfRule ensures that no value is present for SourceOfRule, not even an explicit nil
+### GetRequired
+
+`func (o *DistributedFrameworkRules) GetRequired() bool`
+
+GetRequired returns the Required field if non-nil, zero value otherwise.
+
+### GetRequiredOk
+
+`func (o *DistributedFrameworkRules) GetRequiredOk() (*bool, bool)`
+
+GetRequiredOk returns a tuple with the Required field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetRequired
+
+`func (o *DistributedFrameworkRules) SetRequired(v bool)`
+
+SetRequired sets Required field to given value.
+
+### HasRequired
+
+`func (o *DistributedFrameworkRules) HasRequired() bool`
+
+HasRequired returns a boolean if a field has been set.
+
+### SetRequiredNil
+
+`func (o *DistributedFrameworkRules) SetRequiredNil(b bool)`
+
+ SetRequiredNil sets the value for Required to be an explicit nil
+
+### UnsetRequired
+`func (o *DistributedFrameworkRules) UnsetRequired()`
+
+UnsetRequired ensures that no value is present for Required, not even an explicit nil
+### GetCanEdit
+
+`func (o *DistributedFrameworkRules) GetCanEdit() bool`
+
+GetCanEdit returns the CanEdit field if non-nil, zero value otherwise.
+
+### GetCanEditOk
+
+`func (o *DistributedFrameworkRules) GetCanEditOk() (*bool, bool)`
+
+GetCanEditOk returns a tuple with the CanEdit field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetCanEdit
+
+`func (o *DistributedFrameworkRules) SetCanEdit(v bool)`
+
+SetCanEdit sets CanEdit field to given value.
+
+### HasCanEdit
+
+`func (o *DistributedFrameworkRules) HasCanEdit() bool`
+
+HasCanEdit returns a boolean if a field has been set.
+
+### SetCanEditNil
+
+`func (o *DistributedFrameworkRules) SetCanEditNil(b bool)`
+
+ SetCanEditNil sets the value for CanEdit to be an explicit nil
+
+### UnsetCanEdit
+`func (o *DistributedFrameworkRules) UnsetCanEdit()`
+
+UnsetCanEdit ensures that no value is present for CanEdit, not even an explicit nil
+### GetOptions
+
+`func (o *DistributedFrameworkRules) GetOptions() []DistributedFrameworkOptionsOptionsInner`
+
+GetOptions returns the Options field if non-nil, zero value otherwise.
+
+### GetOptionsOk
+
+`func (o *DistributedFrameworkRules) GetOptionsOk() (*[]DistributedFrameworkOptionsOptionsInner, bool)`
+
+GetOptionsOk returns a tuple with the Options field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetOptions
+
+`func (o *DistributedFrameworkRules) SetOptions(v []DistributedFrameworkOptionsOptionsInner)`
+
+SetOptions sets Options field to given value.
+
+### HasOptions
+
+`func (o *DistributedFrameworkRules) HasOptions() bool`
+
+HasOptions returns a boolean if a field has been set.
+
+### SetOptionsNil
+
+`func (o *DistributedFrameworkRules) SetOptionsNil(b bool)`
+
+ SetOptionsNil sets the value for Options to be an explicit nil
+
+### UnsetOptions
+`func (o *DistributedFrameworkRules) UnsetOptions()`
+
+UnsetOptions ensures that no value is present for Options, not even an explicit nil
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

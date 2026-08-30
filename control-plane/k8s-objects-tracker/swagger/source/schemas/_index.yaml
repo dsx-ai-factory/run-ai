@@ -1,0 +1,33 @@
+ClusterId:
+  $ref: "../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+ScopeType:
+  $ref: "./Scopes/ScopeType.yaml"
+ScopeId:
+  $ref: "./Scopes/ScopeId.yaml"
+PVCs:
+  $ref: "./PVCs/PVCs.yaml"
+PVC:
+  $ref: "./PVCs/PVC.yaml"
+PVCName:
+  $ref: "./PVCs/PVCName.yaml"
+SecretCreationRequest:
+  $ref: "./Secrets/SecretCreationRequest.yaml"
+Secrets:
+  $ref: "./Secrets/Secrets.yaml"
+Secret:
+  $ref: "./Secrets/Secret.yaml"
+SecretName:
+  $ref: "./Secrets/SecretName.yaml"
+SecretType:
+  $ref: "./Secrets/SecretType.yaml"
+# Obsolete (for cluster versions < 2.15)
+SingleSecret:
+  $ref: "./Secrets/Obsolete/SingleSecret.yaml"
+AllSecrets:
+  $ref: "./Secrets/Obsolete/AllSecrets.yaml"
+SinglePVC:
+  $ref: "./PVCs/Obsolete/SinglePVC.yaml"
+AllPVCs:
+  $ref: "./Secrets/Obsolete/AllSecrets.yaml"
+Origin:
+  $ref: "./Common/Origin.yaml"

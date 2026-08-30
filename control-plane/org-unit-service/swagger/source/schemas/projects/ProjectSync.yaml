@@ -1,0 +1,73 @@
+type: object
+required:
+  - id
+  - name
+  - parent
+  - createdAt
+  - updatedAt
+properties:
+  id:
+    type: string
+    example: 33
+  name:
+    type: string
+    example: organization1
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  requestedNamespace:
+    type: string
+    description: the project's namespace only if requested
+    nullable: true
+    example: runai-proj1
+  enforceRunaiScheduler:
+    type: boolean
+    description: a flag to enforce that all pods in this namespace will be scheduled with runai-scheduler. Supported for cluster v2.21+
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time
+  deletedAt:
+    type: string
+    format: date-time
+    nullable: true
+  parent:
+    $ref: "../DepartmentProjectParent.yaml"
+  schedulingRules:
+    $ref: "../SchedulingRules.yaml"
+  defaultNodePools:
+    description: default order of node pools for workloads. will be enforced if no list is defined in workload policy
+    type: array
+    nullable: true
+    items:
+      type: string
+  nodeTypes:
+    $ref: '../nodetypes/NodeTypesPerWorkload.yaml'
+  resources:
+    type: array
+    items:
+      $ref: "../ResourcesSync.yaml"
+    description: Resources assigned to this Organization per Node Pool
+  deletion:
+    $ref: "./Deletion.yaml"
+  permissions:
+    type: object
+    properties:
+      users:
+        type: array
+        items:
+          type: string
+        description: Names of users that have permissions to the project.
+      groups:
+        type: array
+        items:
+          type: string
+        description: Names of groups that have permissions to the project.
+      applications:
+        type: array
+        items:
+          type: string
+        description: Names of applications that have permissions to the project.
+    description: Deprecated. Instead, use the `accessRules` API to add permissions to a specific subject in the project scope.
+    deprecated: true

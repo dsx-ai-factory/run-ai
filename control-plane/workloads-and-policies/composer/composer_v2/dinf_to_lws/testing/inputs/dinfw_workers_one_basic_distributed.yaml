@@ -1,0 +1,7 @@
+servingPort:
+  port: 8081
+workers: 1
+leader:
+  image: python:3.8
+worker:
+  image: python:2.7

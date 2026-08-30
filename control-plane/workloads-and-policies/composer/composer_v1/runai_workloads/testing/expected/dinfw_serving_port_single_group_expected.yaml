@@ -1,0 +1,59 @@
+Dinfw:
+  leaderSpec:
+    environment:
+      items:
+        RUNAI_JOB_NAME:
+          value: ${RUNAI_JOB_NAME}
+        RUNAI_PROJECT:
+          value: ${RUNAI_PROJECT}
+    image:
+      value: python:3.8
+    labels:
+      items:
+        run.ai/control-plane-managed:
+          value: "true"
+  metadata: {}
+  spec:
+    priorityClassName:
+      value: very-high
+    servingPorts:
+      items:
+        serving-port:
+          value:
+            authorizationType: authorizedGroups
+            authorizedGroups: data-science-team
+            port: 8081
+    username:
+      value: test
+  status: {}
+JobSpec: {}
+MasterSpec: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections:
+    - authorizationType: authorizedGroups
+      authorizedGroups:
+      - data-science-team
+      connectionType: ServingPort
+      containerPort: 8081
+      correlationName: serving-port
+      name: ServingPort
+      toolType: custom
+    id: ""
+    name: Leader
+    replicaType: Leader
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: dinfw_serving_port_single_group, Rules: , Type: DistributedInference'
+  images:
+  - python:3.8
+  name: 'Value: dinfw_serving_port_single_group, Rules: , Type: DistributedInference'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: DistributedInference
+  version: v1alpha1

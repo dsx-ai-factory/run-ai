@@ -1,0 +1,4 @@
+type: string
+enum:
+  - HAS_QUOTA
+  - NON_DEFAULT_RANK

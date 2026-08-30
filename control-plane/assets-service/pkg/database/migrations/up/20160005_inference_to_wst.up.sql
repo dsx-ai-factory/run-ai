@@ -1,0 +1,1 @@
+ALTER TABLE assets_supported_workload_types ADD COLUMN IF NOT EXISTS inference boolean DEFAULT false;

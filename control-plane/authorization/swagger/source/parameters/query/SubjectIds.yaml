@@ -1,0 +1,11 @@
+name: subjectIds
+in: query
+required: false
+description: The ids of the subjects to filter the response for.
+explode: false
+schema:
+  type: array
+  maxItems: 100
+  items:
+    type: string
+    example: "some.user@run.ai"

@@ -1,0 +1,4 @@
+description: Defines additional annotation attributes to be applied to PVCs created under this storage class. Each attribute describes an annotation key and its expected value format, display name, and purpose.
+type: array
+items:
+  $ref: "PvcAddedAttribute.yaml"

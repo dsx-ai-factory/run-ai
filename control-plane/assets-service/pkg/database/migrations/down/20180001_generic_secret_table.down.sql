@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS assets_generic_secret;

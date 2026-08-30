@@ -1,0 +1,1 @@
+ALTER TABLE pvcs DROP COLUMN IF EXISTS data_sharing;

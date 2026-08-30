@@ -1,0 +1,27 @@
+{{- if .Values.tempBackendSettings.enabled }}
+  {{- include "common.configMap" (list . .Values.tempBackendSettings "control-plane.tempBackendSettings.configmap") }}
+  {{- end }}
+
+  {{- define "control-plane.tempBackendSettings.configmap" -}}
+  {{- $top := first . }}
+data:
+  SERVICE_NAME: {{ $top.Values.tempBackendSettings.name | quote }}
+  SERVICE_PORT: {{ $top.Values.tempBackendSettings.service.port | quote }}
+  SERVER_HEALTH_ENDPOINT: {{ $top.Values.tempBackendSettings.config.server.healthEndpoint | quote }}
+  DB_NAME: {{ $top.Values.tempBackendSettings.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_VERBOSE_LOGGING: {{ $top.Values.tempBackendSettings.config.dbVerboseLogging | default $top.Values.global.postgresql.dbVerboseLogging | quote }}
+  DB_HOST: {{ $top.Values.tempBackendSettings.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SSL_MODE: {{ $top.Values.tempBackendSettings.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_PORT: {{ $top.Values.tempBackendSettings.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  DB_SCHEMA: {{ $top.Values.tempBackendSettings.config.dbScheme | default "backend" | quote }}
+  DB_MIGRATION_FILES: {{ $top.Values.tempBackendSettings.config.migrationFiles | quote }}
+  CLUSTER_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.clusterService.name ($top.Values.clusterService.service.port | toString) | quote }}
+  TENANT_MANAGER_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.tenantsManager.name ($top.Values.tenantsManager.service.port | toString) | quote }}
+  IDENTITY_MANAGER_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.identityManager.name ($top.Values.identityManager.service.port | toString) | quote }}
+  BFF_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.bffService.name ($top.Values.bffService.service.port | toString) | quote }}
+  DATAVOLUMES_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.datavolumes.name ($top.Values.datavolumes.service.port | toString) | quote }}
+  WORKLOADS_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.workloads.name ($top.Values.workloads.service.port | toString) | quote }}
+  SHOW_ALPHA_FLAGS: {{ dig "backend" "config" "showAlphaFlags" $top.Values.tempBackendSettings.config.showAlphaFlags ($top.Values | toJson | fromJson) | toString | quote }}
+  CATALOG_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.catalogService.name ($top.Values.catalogService.service.port | toString) | quote }}
+  AUTHORIZATION_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.authorization.name ($top.Values.authorization.service.port | toString) | quote }}
+{{- end }}

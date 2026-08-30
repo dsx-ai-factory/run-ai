@@ -1,0 +1,1 @@
+ALTER TABLE assets_pvc DROP COLUMN IF EXISTS ephemeral;

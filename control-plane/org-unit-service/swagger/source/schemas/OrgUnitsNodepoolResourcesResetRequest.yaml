@@ -1,0 +1,14 @@
+type: object
+required:
+  - clusterId
+  - nodePoolId
+  - action
+properties:
+  clusterId:
+    $ref: "../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  nodePoolId:
+    type: string
+    description: The node pool id to which the request applies
+    example: "22"
+  action:
+    $ref: "./NodepoolResourcesResetAction.yaml"

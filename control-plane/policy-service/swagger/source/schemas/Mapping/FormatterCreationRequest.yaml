@@ -1,0 +1,28 @@
+type: object
+description: The specification used to create a formatter.
+required:
+  - name
+properties:
+  name:
+    $ref: "./FormatterName.yaml"
+  description:
+    $ref: "./MappingDescriptionOptional.yaml"
+  fields:
+    $ref: "./FormatterFields.yaml"
+example:
+  name: podSpec
+  description: "formatter for podSpec"
+  fields:
+    containerPort:
+      setExpr: |
+        {"ports":[{"containerPort":$ARGS.named.containerPort,"protocol":$ARGS.named.protocol}]}
+      getExpr: ".spec.containers[0].ports"
+      arrayKey:
+        argName: containerPort
+      argsInfo:
+        containerPort: integer
+        hostIP: ipaddress
+      argsEnum:
+        protocol:
+          - TCP
+          - UDP

@@ -1,0 +1,17 @@
+description: Information about a Hugging Face model.
+required:
+  - modelName
+properties:
+  modelName:
+    description: the model name
+    type: string
+    example: "meta-llama/Llama-3.2-1B-Instruct"
+  gated:
+    description: is the model gated
+    type: boolean
+  authorized:
+    description: is the token authorized for the model
+    type: boolean
+  language:
+    description: is the model a language model
+    type: boolean

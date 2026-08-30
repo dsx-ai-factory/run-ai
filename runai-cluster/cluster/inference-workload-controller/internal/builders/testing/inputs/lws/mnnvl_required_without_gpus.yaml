@@ -1,0 +1,20 @@
+apiVersion: run.ai/v1alpha1
+kind: DistributedInferenceWorkload
+metadata:
+  name: test-lws
+  namespace: runai-team-a
+  labels:
+    run.ai/MNNVL: Required
+spec:
+  workers:
+    value: 1
+  replicas:
+    value: 1
+  nodePools:
+    value: mnnvl-node-1 mnnvl-node-2
+leaderSpec:
+  image:
+    value: leader-image:latest
+workerSpec:
+  image:
+    value: worker-image:latest

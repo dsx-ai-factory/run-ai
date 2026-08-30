@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS assets_secret_volume;

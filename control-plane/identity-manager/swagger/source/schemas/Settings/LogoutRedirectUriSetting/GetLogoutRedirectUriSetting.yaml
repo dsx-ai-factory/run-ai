@@ -1,0 +1,25 @@
+type: object
+properties:
+  value:
+    type: object
+    properties:
+      uri:
+        type: string
+        description: The URI where users will be redirected after logging out of the application
+        nullable: true
+        pattern: '/^(https?://)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(:[0-9]{1,5})?(/[^\s]*)?$|^$/'
+        example: 'https://example.com/logout'
+        maxLength: 2048
+  displayName:
+    type: string
+    description: Human-readable name for this setting
+    readOnly: true
+  description:
+    type: string
+    description: Description of what this setting controls
+    readOnly: true
+example:
+  value:
+    uri: "https://example.com/logout-success"
+  displayName: Logout Redirect URI
+  description: The URI where users will be redirected after logging out of the application

@@ -1,0 +1,10 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+packages:
+  github.com/run-ai/runai/runai-clients/policy-service-client:
+    interfaces:
+      IPolicyClient: {}
+      IPolicyExternalClient: {}

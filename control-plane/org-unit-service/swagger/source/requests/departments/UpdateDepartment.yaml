@@ -1,0 +1,39 @@
+summary: Update department
+operationId: update_department
+x-service: org-unit-service
+description: Update department by Id
+x-test-coverage:
+  - control-plane/org-unit-service/pkg/test/department_api_test.go
+x-authorize:
+  resource-type: department
+  action: update
+  resource-id: departmentId
+x-audit: true
+tags:
+  - Departments
+parameters:
+  - $ref: "../../../../../infra/openapi/docs/parameters/path/DepartmentId.yaml"
+requestBody:
+  description: Department to update.
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: "../../schemas/departments/DepartmentUpdateRequest.yaml"
+responses:
+  200:
+    description: Updated
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/departments/Department.yaml"
+  400:
+    $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+  401:
+    $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+  403:
+    $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+  404:
+    $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+  503:
+    $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

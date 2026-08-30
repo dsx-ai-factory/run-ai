@@ -1,0 +1,33 @@
+dir: '{{.InterfaceDir}}/mocks'
+structname: Mock{{.InterfaceName}}
+pkgname: mocks
+template: testify
+packages:
+  github.com/run-ai/runai/runai-installer/installer/internal/helm:
+    interfaces:
+      HelmClientAPI: {}
+  github.com/run-ai/runai/runai-installer/installer/internal/installations/base:
+    interfaces:
+      HelmInstaller: {}
+      InstallStep: {}
+  github.com/run-ai/runai/runai-installer/installer/internal/installations/prereq/components:
+    interfaces:
+      Prerequisite: {}
+  github.com/run-ai/runai/runai-installer/installer/internal/installations/prereq/steps:
+    interfaces:
+      CRDChecker: {}
+      TrainingOperatorExecutor: {}
+  github.com/run-ai/runai/runai-installer/installer/internal/installations/runaiinstall/cert:
+    interfaces:
+      CertHandler: {}
+  github.com/run-ai/runai/runai-installer/installer/internal/k8s:
+    interfaces:
+      K8sClients: {}
+  github.com/run-ai/runai/runai-installer/installer/internal/tui/inputs:
+    interfaces:
+      Input: {}
+  github.com/run-ai/runai/runai-installer/installer/internal/tui/screens/common:
+    interfaces:
+      Options: {}
+      OptionsSelector: {}
+      Screen: {}

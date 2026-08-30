@@ -1,0 +1,72 @@
+get:
+  summary: List reports
+  operationId: list_reports
+  x-authorize:
+    resource-type: project
+    action: read
+  x-service: org-unit-service
+  x-test-coverage:
+    - e2e/src/test/suites/advancedSuite/reportsApi/consumptionReport.test.ts
+  tags:
+    - Reports
+  parameters:
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/ReportsFilterBy.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/ReportsSortBy.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/Search.yaml'
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - reports
+            properties:
+              reports:
+                $ref: '../../schemas/reports/Reports.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+post:
+  summary: Create a new report request.
+  operationId: create_report
+  x-authorize:
+    resource-type: project
+    action: create
+  x-service: org-unit-service
+  x-test-coverage:
+    - e2e/src/test/suites/advancedSuite/reportsApi/consumptionReport.test.ts
+  x-audit: true
+  tags:
+    - Reports
+  requestBody:
+    description: Report to create.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/reports/ReportRequestFields.yaml'
+  responses:
+    202:
+      description: Accepted.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/reports/Report.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

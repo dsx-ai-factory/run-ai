@@ -1,0 +1,15 @@
+package business
+
+import (
+	"context"
+
+	"github.com/run-ai/runai/control-plane/identity-manager/pkg/models"
+)
+
+//go:generate mockery --name IdpDal
+type IdpDal interface {
+	SaveIdpMetadata(ctx context.Context, idpMetadata *models.IdpMetadata) error
+	UpdateIdpMetadata(ctx context.Context, newIdpMetadata *models.IdpMetadata) error
+	GetIdpMetadata(ctx context.Context, tenantId string, idpAlias string) (*models.IdpMetadata, error)
+	DeleteIdpMetadata(ctx context.Context, tenantId string, idpAlias string) error
+}

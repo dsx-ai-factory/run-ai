@@ -1,0 +1,23 @@
+package logs
+
+import (
+	"io"
+
+	io2 "github.com/run-ai/runai/runai-cluster/cluster/cluster-api/internal/autogenerate/mocks/io"
+	"github.com/run-ai/runai/runai-cluster/cluster/cluster-api/internal/websocket/keepalive"
+	proxy2 "github.com/run-ai/runai/runai-cluster/cluster/cluster-api/internal/websocket/proxy"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+)
+
+var _ = Describe("Logs", func() {
+	Describe("ProxyFactory", func() {
+		It("should create a new one way proxy", func() {
+			proxyFactory := NewOneWayProxyFactory()
+			reader, _ := io.Pipe()
+			proxy := proxyFactory(reader, &io2.MockReadWriteCloser{}, &keepalive.NoKeepalive{})
+			Expect(proxy).To(BeAssignableToTypeOf(&proxy2.OneWayProxy{}))
+		})
+	})
+})

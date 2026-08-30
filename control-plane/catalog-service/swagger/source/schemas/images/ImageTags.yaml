@@ -1,0 +1,13 @@
+type: object
+properties:
+  name:
+    type: string
+    description: The name of the image
+  tags:
+    type: array
+    description: The tags of the image
+    items:
+      type: string
+required:
+  - tags
+  - name

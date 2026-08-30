@@ -1,0 +1,33 @@
+get:
+  summary: Get the k8s object of a workload
+  description: >
+    Returns a point-in-time snapshot of the workload's top-level Kubernetes custom
+    resource, as read from the Kubernetes API server. The response is sanitized
+    and wrapped with the retrieval timestamp.
+  operationId: GetWorkloadObject
+  tags:
+    - K8sObject
+  x-runai-team: Suricata
+  x-no-authorization: true  # authorizing internally via WorkloadResolverMiddleware
+  x-internal: true
+  parameters:
+    - $ref: "../parameters/WorkloadId.yaml"
+  responses:
+    200:
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Object.yaml"
+    400:
+      $ref: '../../../../../control-plane/infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../control-plane/infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../control-plane/infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../../control-plane/infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../control-plane/infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../control-plane/infra/openapi/docs/responses/503ServiceUnavailable.yaml'

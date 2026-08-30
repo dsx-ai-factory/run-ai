@@ -1,0 +1,34 @@
+type: object
+properties:
+  value:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for the admin message
+      msg:
+        type: string
+        description: The message content displayed to users. Supports a limited HTML subset for basic formatting
+      createdAt:
+        type: integer
+        format: int64
+        description: Time the message was created, as a Unix timestamp
+      enableDismiss:
+        type: boolean
+        description: When true, users can dismiss the message from; when false, the message persists until it is updated or removed
+  displayName:
+    type: string
+    description: Human-readable name for this setting
+    readOnly: true
+  description:
+    type: string
+    description: Short explanation of what this setting controls, shown alongside the setting
+    readOnly: true
+example:
+  value:
+    id: "550e8400-e29b-41d4-a716-446655440000"
+    msg: "System maintenance scheduled for this weekend"
+    createdAt: 1706886400000
+    enableDismiss: true
+  displayName: Admin message
+  description: Write a message that will be displayed to all users

@@ -1,0 +1,6 @@
+type: object
+description: The data type of each argument referenced by the JQ expression as $ARGS.named.<argName>.
+additionalProperties:
+  $ref: "./MappingFieldType.yaml"
+example:
+  privileged: string

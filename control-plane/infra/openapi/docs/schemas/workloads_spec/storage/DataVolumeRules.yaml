@@ -1,0 +1,7 @@
+properties:
+  id:
+    $ref: "../../policy_rules/StringRules.yaml"
+  mountPath:
+    $ref: "../../policy_rules/StringRules.yaml"
+nullable: true
+type: object

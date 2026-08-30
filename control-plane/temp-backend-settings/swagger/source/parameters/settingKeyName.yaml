@@ -1,0 +1,9 @@
+name: key
+in: path
+required: true
+description: |
+  The setting key name (PascalCase format matching the TenantSettingKeys enum).
+  Examples: CPUResourcesQuota, AdminMessage, EnablePolicies
+schema:
+  type: string
+  example: CPUResourcesQuota

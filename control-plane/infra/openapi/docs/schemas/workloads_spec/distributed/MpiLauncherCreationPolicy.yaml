@@ -1,0 +1,6 @@
+description: Define whether the MPI Launcher is created in parallel with the workers, or if its creation is postponed until all workers are in  Ready state. This prevents failures when the launcher attempts to connect to workers that are not yet ready.
+type: string
+enum:
+  - AtStartup
+  - WaitForWorkersReady
+nullable: true

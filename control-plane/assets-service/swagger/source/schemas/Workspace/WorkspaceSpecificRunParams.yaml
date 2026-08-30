@@ -1,0 +1,56 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+allOf:
+- $ref: ../Workload/SpecificRunConnections.yaml
+- $ref: ../Workload/AllowOverQuota.yaml
+- nullable: true
+  properties:
+    annotations:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/Annotations.yaml
+    args:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/Args.yaml
+    autoDeletionTimeAfterCompletionSeconds:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/AutoDeletionTimeAfterPreemption.yaml
+    backoffLimit:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/BackoffLimit.yaml
+    category:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/Category.yaml
+    command:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/Command.yaml
+    environmentVariables:
+      $ref: ../Common/EnvironmentVariablesOfAsset.yaml
+    imagePullSecrets:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/ImagePullSecrets.yaml
+    labels:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/Labels.yaml
+    nodeAffinityRequired:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/NodeAffinityRequired.yaml
+    nodePools:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/NodePools.yaml
+    nodeType:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/NodeType.yaml
+    podAffinity:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/PodAffinity.yaml
+    preemptibility:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/Preemptibility.yaml
+    priorityClass:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/PriorityClass.yaml
+    restartPolicy:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/RestartPolicy.yaml
+    runAsGid:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/RunAsGid.yaml
+    runAsUid:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/RunAsUid.yaml
+    supplementalGroups:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/SupplementalGroups.yaml
+    terminateAfterPreemption:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/TerminateAfterPreemption.yaml
+    terminationGracePeriodSeconds:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/TerminationGracePeriod.yaml
+    tolerations:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/Tolerations.yaml
+  type: object
+nullable: true
+type: object

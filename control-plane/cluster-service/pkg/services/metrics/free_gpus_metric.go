@@ -1,0 +1,38 @@
+package metrics
+
+import (
+	"github.com/google/uuid"
+	"github.com/run-ai/runai/control-plane/cluster-service/pkg/runaimetrics"
+	metrics_client "github.com/run-ai/runai/control-plane/metrics-service/pkg/client"
+)
+
+func GetFreeGpusMetric(clusterIdsFilter []uuid.UUID, nodePoolFilter []string, metricGroupBy MetricGroupBy) metrics_client.Metric {
+	switch metricGroupBy {
+	case GroupByNode:
+		return runaimetrics.RunaiFreeGpuCountPerNodeMetric{
+			Filters: runaimetrics.RunaiFreeGpuCountPerNodeFilters{
+				ClusterId: clusterIdsFilter,
+				Nodepool:  nodePoolFilter,
+			},
+		}
+	case GroupByNodePool:
+		return runaimetrics.RunaiFreeGpuCountPerNodepoolMetric{
+			Filters: runaimetrics.RunaiFreeGpuCountPerNodepoolFilters{
+				ClusterId: clusterIdsFilter,
+				Nodepool:  nodePoolFilter,
+			},
+		}
+	case GroupByCluster:
+		return runaimetrics.RunaiFreeGpuCountPerClusterMetric{
+			Filters: runaimetrics.RunaiFreeGpuCountPerClusterFilters{
+				ClusterId: clusterIdsFilter,
+			},
+		}
+	default: // GroupByTenant
+		return runaimetrics.RunaiFreeGpuCountPerTenantMetric{
+			Filters: runaimetrics.RunaiFreeGpuCountPerTenantFilters{
+				ClusterId: clusterIdsFilter,
+			},
+		}
+	}
+}

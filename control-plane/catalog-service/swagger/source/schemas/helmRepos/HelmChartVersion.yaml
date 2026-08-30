@@ -1,0 +1,17 @@
+type: object
+required:
+  - version
+properties:
+  version:
+    type: string
+    description: The version of the chart (SemVer).
+  appVersion:
+    type: string
+    description: The application version the chart represents.
+  description:
+    type: string
+    description: A one-line description of the chart version.
+  created:
+    type: string
+    format: date-time
+    description: The date and time this chart version was created.

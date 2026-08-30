@@ -1,0 +1,49 @@
+policy:
+  id: test-policy
+  effectiveRules:
+    # blocked combined with both spec and item selectors. Forbids any port
+    # that declares a protocol across all containers; ports without a
+    # protocol — and containers with no ports at all — are accepted.
+    - field: port-protocol
+      specSelector: allContainers
+      itemSelector: allPorts
+      enforcements:
+        - blocked: true
+
+  breakdown:
+    fields:
+      port-protocol:
+        - specSelectors: [allContainers]
+          specRef: protocol
+          formatter:
+            builtin: KeyValue
+          itemSelectors:
+            allPorts:
+              query: "(.ports // [])[]"
+    specSelectors:
+      allContainers:
+        query: |
+          (
+            .spec.template.spec.containers[]?,
+            .spec.template.spec.initContainers[]?
+          )
+          | select(.)
+
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: blocked-port-protocol
+  spec:
+    template:
+      spec:
+        containers:
+          - name: no-ports               # passes: no ports at all
+          - name: ports-without-protocol # passes: ports set, no protocol on any
+            ports:
+              - containerPort: 80
+              - containerPort: 8080
+          - name: ports-with-protocol    # fails: at least one port has protocol set
+            ports:
+              - containerPort: 443
+                protocol: TCP

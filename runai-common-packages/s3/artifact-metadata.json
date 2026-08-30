@@ -1,0 +1,4 @@
+{
+  "service_name": "s3",
+  "artifact_type": "go"
+}

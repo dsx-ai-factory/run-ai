@@ -1,0 +1,47 @@
+apiVersion: kubeflow.org/v1
+kind: PyTorchJob
+metadata:
+  annotations:
+    example.com/annotation: test-value
+  labels:
+    app: pytorch-test
+  name: test
+spec:
+  elasticPolicy:
+    maxReplicas: 4
+    maxRestarts: 3
+    minReplicas: 1
+    nProcPerNode: 1
+    rdzvBackend: c10d
+    rdzvHost: localhost
+    rdzvId: test-job
+    rdzvPort: 29500
+  pytorchReplicaSpecs:
+    Master:
+      replicas: 1
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - image: pytorch/pytorch:2.0
+            name: pytorch
+          initContainers:
+          - image: pytorch/pytorch:2.0
+            name: init
+    Worker:
+      replicas: 2
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - image: pytorch/pytorch:2.0
+            name: pytorch
+          initContainers:
+          - image: pytorch/pytorch:2.0
+            name: init
+  runPolicy:
+    activeDeadlineSeconds: 86400
+    backoffLimit: 3
+    cleanPodPolicy: Running
+    suspend: false
+    ttlSecondsAfterFinished: 3600

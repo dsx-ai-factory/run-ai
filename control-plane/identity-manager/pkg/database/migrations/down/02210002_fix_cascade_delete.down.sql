@@ -1,0 +1,1 @@
+ALTER TABLE reconciler_versions DROP CONSTRAINT if exists reconciler_versions_tenant_id_fkey;

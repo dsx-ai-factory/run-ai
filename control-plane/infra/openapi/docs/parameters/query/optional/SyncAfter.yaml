@@ -1,0 +1,8 @@
+name: after
+description: search for updates with update counter greater than the value passed for this parameter
+in: query
+required: false
+schema:
+  type: integer
+  format: int64
+  example: 123

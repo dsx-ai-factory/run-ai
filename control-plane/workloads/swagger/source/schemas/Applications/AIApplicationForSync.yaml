@@ -1,0 +1,29 @@
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+  name:
+    type: string
+  source:
+    type: string
+  type:
+    type: string
+  departmentId:
+    type: string
+  departmentName:
+    type: string
+  projectId:
+    type: string
+  projectName:
+    type: string
+  k8sPhase:
+    type: string
+  resources:
+    type: array
+    items:
+      $ref: "./AIApplicationSyncResource.yaml"
+  action:
+    $ref: './AIApplicationSyncAction.yaml'
+  actionInfo:
+    $ref: './AIApplicationSyncActionInfo.yaml'

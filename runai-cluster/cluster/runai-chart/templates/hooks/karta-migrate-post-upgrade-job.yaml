@@ -1,0 +1,63 @@
+{{- /*
+ResourceInterface -> Karta migration: post-upgrade phase.
+
+Runs after the main chart deploys (weight>=2). Re-runs the migration to
+catch any RIs the agent may have created in the upgrade window, then
+strips legacy finalizers and deletes both the RI CRs and the RI CRD.
+Per design.md the RI CRD itself is kept until the next release, so by
+default `--remove-rid` is opt-in via `kartaMigrate.removeRid`.
+*/}}
+{{- if .Values.kartaMigrate.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: karta-migrate-post
+  namespace: runai
+  annotations:
+    "helm.sh/hook": post-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- include "jobAnnotations" . | nindent 4 }}
+  labels:
+    run.ai/hook: karta-migrate-post
+    {{- include "jobLabels" . | nindent 4 }}
+spec:
+  backoffLimit: {{ .Values.kartaMigrate.backoffLimit | default 3 }}
+  activeDeadlineSeconds: {{ .Values.kartaMigrate.activeDeadlineSeconds | default 600 }}
+  template:
+    metadata:
+      annotations:
+        {{- include "jobAnnotations" . | nindent 8 }}
+      labels:
+        run.ai/hook: karta-migrate-post
+        {{- include "jobLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: karta-migrate
+      imagePullSecrets:{{ include "imagePullSecretList" . | nindent 8 }}
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: {{ include "kartaMigrate.image" . }}
+          imagePullPolicy: {{ .Values.kartaMigrate.image.pullPolicy | default "IfNotPresent" }}
+          command:
+            - /app/karta-migrate
+          args:
+            {{- if .Values.kartaMigrate.removeRid }}
+            - --remove-rid
+            {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          {{- with .Values.kartaMigrate.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      affinity:{{- include "deploymentAffinity" . | nindent 8 }}
+      tolerations: {{- include "deploymentTolerations" . | nindent 8 }}
+{{- end }}

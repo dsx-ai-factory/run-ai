@@ -1,0 +1,70 @@
+cert-manager:
+  enabled: false
+fluentd:
+  enabled: false
+ingress-nginx:
+  enabled: false
+kube-prometheus-stack:
+  enabled: true
+  prometheus:
+    prometheusSpec:
+      externalLabels:
+        clusterId: 6ccef91a-9181-4aff-b7b1-b43c4adedf09
+      remoteWrite:
+        - remoteTimeout: 30s
+          tlsConfig:
+            insecureSkipVerify: true
+          url: 'https://<MASTER_OP_URL>/api/v1/receive'
+          writeRelabelConfigs:
+            - action: keep
+              # TODO: remove Mig ??
+              regex: (kube_pod_info|kube_node_status_capacity|runai_node_nodepool|kube_node_status_allocatable|dcgm_gpu_utilization|DCGM_GPU_LAST_NOT_IDLE_TIME|reporter_push_gateway_.*|docker_metrics.*|kube_pod_container_resource_requests_memory_bytes|kube_pod_container_resource_requests_cpu_cores|kube_pod_container_resource_requests|kube_pod_init_container_resource_requests|kube_pod_status_phase|kube_node_status_condition|kube_job_created|runai_node_gpu_used_memory|runai_node_gpu_used_memory_bytes|runai_node_gpu_total_memory|runai_node_gpu_last_not_idle_time|runai_gpus_is_running_with_pod2|runai_node_gpu_info|runai_node_gpu_utilization|runai_pod_group_gpu_utilization|runai_used_shared_gpu_per_node|runai_utilization_full_gpu_jobs|runai_utilization_shared_gpu_jobs|runai_docker_gpu_utilization|runai_requested_gpus|runai_pod_phase_with_info|runai_pod_group_phase_with_info|runai_pod_container_info|runai_pod_status_phase|runai_queue_info|runai_queue_deserved_gpus|runai_queue_quota_cpu_cores|runai_queue_quota_memory_bytes|runai_pod_group_total_runtime|runai_pod_group_total_wait_time|runai_node_cpu_utilization|runai_cpu_utilization|runai_job_cpu_usage|runai_node_memory_utilization|runai_memory_utilization|runai_node_memory_used_bytes|runai_memory_used_bytes|runai_job_memory_used_bytes|runai_node_requested_memory_bytes|runai_active_job_memory_requested_bytes|runai_node_cpu_requested|runai_active_job_cpu_requested_cores|runai_pod_group_image|runai_active_job_cpu_limits|runai_active_job_memory_limits|runai_allocated_gpus|runai_mig_mode_gpu_count|runai_mig_mode_info|runai_mig_mode_allocated_gpus|runai_requested_gpus_memory|runai_pod_group_used_gpu_memory_by_gpu|runai_pod_group_used_gpu_memory|runai_cluster_name|runai_requested_mig_devices|runai_running_job_cpu_limit_cores|runai_running_job_cpu_requested_cores|runai_running_job_memory_limit_bytes|runai_running_job_memory_requested_bytes|runai_job_allocated_gpus|runai_cluster_cpu_utilization|runai_gpu_is_allocated|runai_running_job_cpu_used_cores|runai_running_job_memory_used_bytes|runai_cluster_memory_used_bytes|runai_cluster_memory_utilization|runai_node_cpu_requested_cores|runai_gpu_last_active_time|runai_node_total_memory_bytes|runai_node_used_memory_bytes|runai_job_gpu_utilization|runai_job_image|runai_job_status_with_info|runai_job_total_runtime|runai_job_total_wait_time|runai_job_used_gpu_memory_bytes|runai_job_used_gpu_memory_bytes_with_gpu_node|runai_job_status_with_info|runai_project_guaranteed_gpus|runai_project_info|runai_job_requested_gpus|runai_job_requested_gpu_memory|runai_gpu_is_running_fractional_job|runai_gpu_utilization_non_fractional_jobs|runai_gpu_utilization_with_pod_info|runai_pod_group_swap_memory_used_bytes|runai_gpu_last_active_time_info|runai_pod_cpu_usage|runai_pod_memory_used_bytes|revision_app_request_count|revision_app_request_latencies_sum|revision_app_request_latencies_count|revision_app_request_latencies_bucket|runai_deployment_request_rate|runai_deployment_request_latencies|runai_workload_total_run_time|runai_workload_total_wait_time|runai_node_gpu_total_memory_excluding_mig|runai_node_gpu_used_memory_excluding_mig|runai_cluster_gpu_count|runai_pod_gpu_utilization_with_pod_info|runai_pod_used_gpu_memory_with_pod_info|podgroups_scheduled_by_action)
+              sourceLabels:
+                - __name__
+  prometheusOperator:
+    enabled: true
+runai-operator:
+  config:
+    agent:
+      authAsApp: true
+      clientId: 7931d16e-7ab8-4b4c-8d75-bb5da274ce2a
+      clientName: runai_agent_runai
+      rejectUnauthorized: false
+    cluster-sync:
+      SSLCertificateVerification: false
+      authAsApp: true
+      clientId: 7931d16e-7ab8-4b4c-8d75-bb5da274ce2a
+      clientName: runai_agent_runai
+    global:
+      certMangerIssuerEmail: support@run.ai
+      gkeCluster: false
+      openshift: false
+      postgresql:
+        postgresqlDatabase: backend
+      useCertManager: false
+    init-ca:
+      enabled: true
+    mps-server:
+      enabled: false
+    project-controller:
+      clusterWideSecret: true
+      createNamespaces: true
+      createRoleBindings: true
+      createServiceMonitors: true
+      limitRange: false
+    researcher-service:
+      args:
+        authEnabled: true
+      enabled: true
+      ingress:
+        enabled: false
+      oauthProxy:
+        clientId: researcher-ui
+        clientSecret: <UPDATE_CLIENT_SECRET>
+        providerType: oidc
+    runaiBackend:
+      clusterId: 6ccef91a-9181-4aff-b7b1-b43c4adedf09
+      clusterName: test-ci
+      password: unused
+      username: unused
+  enabled: true

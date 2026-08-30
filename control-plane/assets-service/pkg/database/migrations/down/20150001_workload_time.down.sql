@@ -1,0 +1,2 @@
+ALTER TABLE workloads ALTER COLUMN created_at DROP DEFAULT;
+ALTER TABLE workloads ALTER COLUMN updated_at DROP DEFAULT;

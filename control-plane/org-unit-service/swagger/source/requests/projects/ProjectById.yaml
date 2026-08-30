@@ -1,0 +1,6 @@
+put:
+  $ref: "./UpdateProject.yaml"
+get:
+  $ref: "./GetProject.yaml"
+delete:
+  $ref: "./DeleteProject.yaml"

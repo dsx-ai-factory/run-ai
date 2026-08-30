@@ -1,0 +1,47 @@
+type: object
+required:
+  - id
+  - tenantId
+  - clusterName
+  - createdBy
+  - createdAt
+  - updatedBy
+  - updatedAt
+  - isDefault
+properties:
+  id:
+    type: string
+    description: The NodePool id
+    readOnly: true
+    example: 5
+  tenantId:
+    description: The id of the tenant.
+    type: integer
+    example: 1
+    format: int32
+  clusterName:
+    type: string
+    example: prod-cluster
+  createdBy:
+    type: string
+    example: user@lab.com
+  createdAt:
+    type: string
+    format: date-time
+  updatedBy:
+    type: string
+    example: user@lab.com
+  updatedAt:
+    type: string
+    format: date-time
+  deletedBy:
+    type: string
+    example: user@lab.com
+  deletedAt:
+    type: string
+    nullable: true
+    format: date-time
+  isDefault:
+    type: boolean
+    description: Is the Node Pool is the cluster default
+    example: false

@@ -1,0 +1,14 @@
+domain: run.ai
+layout:
+- go.kubebuilder.io/v3
+projectName: external-workload-integrator
+repo: github.com/run-ai/runai/runai-cluster/cluster/external-workload-integrator
+resources:
+- api:
+    crdVersion: v1
+  domain: run.ai
+  group: run
+  kind: ExternalWorkload
+  path: github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1alpha1
+  version: v1alpha1
+version: "3"

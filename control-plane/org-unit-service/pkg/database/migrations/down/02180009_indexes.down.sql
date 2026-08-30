@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS resources_org_unit_data_id;

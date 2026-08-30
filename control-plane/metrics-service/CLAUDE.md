@@ -1,0 +1,50 @@
+# metrics-service — Build Context
+
+**Type:** container
+**Team:** Phoenix
+**Module:** `github.com/run-ai/runai/control-plane/metrics-service`
+
+## Make targets
+
+Targets come from the service `Makefile` plus the shared includes
+(`../../build/makefile/control-plane.mk`, `index.mk`, and the `golang.mk` /
+`openapi.mk` they pull in).
+
+| Target | What it does |
+|--------|-------------|
+| `build` | `openapi-build` then `build-go` — bundle/generate OpenAPI, then compile the Go binary for amd64 + arm64 |
+| `build-go` | `build-go-amd` + `build-go-arm` — both arch binaries |
+| `build-go-amd` | Compiles `cmd/main.go` for `GOOS=linux GOARCH=amd64` (FIPS `GOFIPS140=v1.0.0`) inside the Go builder container → `bin/metrics-service-amd64` |
+| `build-go-arm` | Same for `arm64` → `bin/metrics-service-arm64` |
+| `test` | `build` + `test-ginkgo` (unit) + `integration-tests` |
+| `test-ginkgo` | Runs the Ginkgo unit-test suites in the builder container |
+| `integration-tests` | Builds the promtool agent + integration-test binary, then runs the docker-compose suite (`AGENT_PORT=8090`, abort-on-container-exit, torn down after) |
+| `integration-tests-debug` | Compose `run-setup` profile only (run tests from IDE) |
+| `build-integration-tests` | Compiles `integration-tests/tests` test binary + `docker compose build` |
+| `mockery` / `validate_mockery` | Installs mockery `v2.53.6` (if needed) and regenerates test mocks |
+| `lint` | `lint-go` — golangci-lint in the builder container |
+| `purify` | `purify-go` — `go fmt` + `go vet` + `go mod tidy` |
+| `validate` | `openapi-validate` — validate the OpenAPI spec |
+| `openapi-lint` | Lint the swagger bundle |
+| `local-deploy` | `openapi-generate-code` + `build-go` + `docker-build-generic` + `docker-push-generic` |
+
+## Key build notes
+
+- Generated code: OpenAPI server stubs (`internal/generated`) + Go client (`pkg/client/generated`) are generated with openapi-generator `v7.12.0`, `VERSIONED_CLIENT=true`. `make build` runs `openapi-build` first; run generation before hand-building and never edit generated dirs. Test mocks are mockery `v2.53.6` (`make mockery`).
+- Runtime base image: final image is `FROM scratch`; a `registry.access.redhat.com/ubi9/ubi-minimal` stage supplies `/etc/passwd`, `/etc/group`, certs (`/etc/ssl`, `/etc/pki`) and a writable `/tmp`. Runs as user `65532:65532`. Bundles SQL migrations (`internal/database/migrations/up|down`), the swagger bundle, and `NOTICE`.
+- Build args: `TARGETARCH` (selects `bin/metrics-service-$TARGETARCH`).
+- Build command (what local-dev.sh actually runs for this service): it is in `CP_GO_SERVICES`, so `build_go_service` runs, in two steps:
+  1. Compile the amd64 binary in the builder container:
+     `make build-go-amd OS=linux ARCH=amd64 DOCKERHUB_PROXY= GITHUB_TOKEN=`
+     (`DOCKERHUB_PROXY=` pulls the Go builder image from Docker Hub; `GITHUB_TOKEN=` is emptied in the make call — the private-module token is applied elsewhere.)
+  2. Build + load the image: `docker buildx build --platform linux/amd64 --provenance=false --load --build-arg TARGETARCH=amd64 -t runai-local/metrics-service:0.0.0 .`
+     Image ref: `runai-local/metrics-service:0.0.0` (tag `0.0.0` — the CP chart appVersion; any other tag breaks the local deploy).
+- Config model: config-file driven. `cmd/main.go` loads the YAML at `CONF_PATH` plus a secrets folder; struct tags are config-file keys (not env vars), each overridable by its uppercase env-var equivalent. Sample: `integration-tests/config.yaml`.
+- Integration tests: require docker-compose + backing services (Prometheus with a bundled promtool agent, PostgreSQL); run with `AGENT_PORT=8090`.
+
+## local-dev.sh iteration
+
+This is a control-plane service:
+```bash
+./local-dev.sh --skip-build-rc --skip-cluster
+```

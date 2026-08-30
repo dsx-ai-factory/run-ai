@@ -1,0 +1,34 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    project: team-a
+    workloadKind: InferenceWorkload
+    workloadName: test-preemptibility
+  name: inference-preemptibility
+  namespace: runai-team-a
+spec:
+  template:
+    metadata:
+      labels:
+        kai.scheduler/preemptibility: preemptible
+        project: team-a
+        release: test-preemptibility
+        run.ai/inferenceworkload: test-preemptibility
+        workloadKind: InferenceWorkload
+        workloadName: test-preemptibility
+    spec:
+      containers:
+      - image: nginx:latest
+        name: ""
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources: {}
+      enableServiceLinks: false
+      schedulerName: runai-scheduler
+status: {}

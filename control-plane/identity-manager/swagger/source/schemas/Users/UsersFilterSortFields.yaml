@@ -1,0 +1,2 @@
+type: string
+enum: [username, createdBy, lastLogin, creationTime, lastUpdated, type, firstName, lastName, fullName]

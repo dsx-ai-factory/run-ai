@@ -1,0 +1,101 @@
+{{- /*
+  Pre-upgrade MD5 guardrail Job. Bundled PostgreSQL only.
+
+  Image: it must speak MD5 to read pg_authid on the *current* (pre-upgrade,
+  MD5-capable) postgres. The new chart image is FIPS (can't compute MD5), so we
+  `lookup` the CURRENTLY-DEPLOYED postgres image and run on that. Fallbacks keep
+  render valid when lookup returns nothing (template/dry-run/first-install).
+*/}}
+{{- if and .Values.postgresql.enabled .Values.postgresql.md5Guard.enabled }}
+{{- $img := printf "%s/%s:%s" .Values.postgresql.image.registry .Values.postgresql.image.repository (.Values.postgresql.image.tag | toString) -}}
+{{- /* Try the canonical name first; fall back to release-name-derived only if not found. */ -}}
+{{- $pgStsName := "runai-backend-postgresql" -}}
+{{- if not (lookup "apps/v1" "StatefulSet" .Release.Namespace "runai-backend-postgresql") -}}
+{{- $pgStsName = printf "%s-postgresql" .Release.Name -}}
+{{- end -}}
+{{- $sts := (lookup "apps/v1" "StatefulSet" .Release.Namespace $pgStsName) -}}
+{{- if $sts }}{{- range $sts.spec.template.spec.containers }}{{- if eq .name "postgresql" }}{{- $img = .image }}{{- end }}{{- end }}{{- end -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: runai-backend-scram-md5-guard
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "1"
+    # keep the Job (and its runbook logs) after a failed run; recreated next attempt
+    helm.sh/hook-delete-policy: before-hook-creation
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 240
+  template:
+    metadata:
+      labels:
+        sidecar.istio.io/inject: "false"
+    spec:
+      restartPolicy: Never
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: scram-md5-guard
+          image: {{ $img | quote }}
+          imagePullPolicy: IfNotPresent
+          command: [/bin/sh, /scripts/guard.sh]
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop: [ALL]
+          env:
+            - name: PG_HOST
+              value: '{{ .Values.global.postgresql.auth.host }}'
+            - name: PG_PORT
+              value: '{{ .Values.global.postgresql.auth.port }}'
+            - name: PG_DB
+              value: '{{ .Values.global.postgresql.auth.database }}'
+            - name: PG_POD
+              value: {{ printf "%s-0" $pgStsName }}
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          resources:
+            limits: { cpu: 200m, memory: 256Mi }
+            requests: { cpu: 50m, memory: 64Mi }
+          volumeMounts:
+            - name: secrets
+              mountPath: /etc/scram-guard/secrets
+              readOnly: true
+            - name: scripts
+              mountPath: /scripts
+              readOnly: true
+      volumes:
+        - name: secrets
+          projected:
+            sources:
+              - secret:
+                  name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+                  items:
+                    - key: '{{ include "control-plane.postgresql.admin.password.secret.key" . }}'
+                      path: postgres-password
+                    - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                      path: password
+              - secret:
+                  name: runai-backend-grafana-db
+                  optional: true
+                  items:
+                    - key: GRAFANA_DB_PASSWORD
+                      path: grafana-password
+        - name: scripts
+          configMap:
+            name: runai-backend-scram-md5-guard
+{{- end }}

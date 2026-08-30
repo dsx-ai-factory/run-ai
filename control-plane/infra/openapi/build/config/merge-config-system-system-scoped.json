@@ -1,0 +1,42 @@
+{
+    "inputs": [
+      {
+        "inputFile": "../swagger/rootApiSystemScoped.yaml"
+      },
+      {
+        "inputFile": "../swagger/rootApiTags.yaml"
+      },
+      {
+        "inputFile": "../../specs/tenants-manager.yaml",
+        "operationSelection": {
+          "includeTags": ["Tenant"]
+        }
+      },
+      {
+        "inputFile": "../../specs/cluster-service.yaml",
+        "operationSelection": {
+          "includeTags": ["Clusters"]
+        }
+      },
+      {
+        "inputFile": "../../specs/identity-manager.yaml",
+        "operationSelection": {
+          "excludeTags": ["Health"]
+        }
+      },
+      {
+        "inputFile": "../../specs/audit-service.yaml",
+        "operationSelection": {
+          "excludeTags": ["Health"]
+        }
+      },
+      {
+        "inputFile": "../../specs/authorization.yaml",
+        "operationSelection": {
+          "excludeTags": ["Health"]
+        }
+      }
+    ],
+    "output": "../_build/runai-system-scoped.yaml"
+  }
+

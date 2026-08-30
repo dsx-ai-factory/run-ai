@@ -1,0 +1,7 @@
+{
+    "packageVersion" : "1.18",
+    "gitUserId" : "run-ai",
+    "gitRepoId" : "control-plane/temp-backend-settings",
+    "sourceFolder" : "pkg/api",
+    "packageName" : "api"
+}

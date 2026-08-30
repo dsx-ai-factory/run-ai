@@ -1,0 +1,115 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: runai-anyworkload-validation
+  labels:
+    app: runai
+webhooks:
+- name: anyworkload-controller.runai.svc
+  admissionReviewVersions: ["v1"]
+  sideEffects: None
+  failurePolicy: Fail
+  clientConfig:
+    service:
+      name: anyworkload-controller
+      namespace: runai
+      path: /validate-workloadrunner
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: ["run.ai"]
+    apiVersions: ["v1alpha1"]
+    resources: ["workloadrunners"]
+- name: workloadrunner-ownership.anyworkload-controller.runai.svc
+  admissionReviewVersions: ["v1"]
+  sideEffects: None
+  failurePolicy: Fail
+  clientConfig:
+    service:
+      name: anyworkload-controller
+      namespace: runai
+      path: /validate-workload-ownership-protection
+  rules:
+  - operations: ["CREATE", "UPDATE", "DELETE"]
+    apiGroups: ["run.ai"]
+    apiVersions: ["v1alpha1"]
+    resources: ["workloadrunners"]
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: runai-anyworkload-mutation
+  labels:
+    app: runai
+webhooks:
+- name: anyworkload-controller.runai.svc
+  admissionReviewVersions: ["v1"]
+  sideEffects: None
+  failurePolicy: Fail
+  clientConfig:
+    service:
+      name: anyworkload-controller
+      namespace: runai
+      path: /mutate-workloadrunner
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: ["run.ai"]
+    apiVersions: ["v1alpha1"]
+    resources: ["workloadrunners"]
+- name: workloadrunner-ownership.anyworkload-controller.runai.svc
+  admissionReviewVersions: ["v1"]
+  sideEffects: None
+  failurePolicy: Fail
+  clientConfig:
+    service:
+      name: anyworkload-controller
+      namespace: runai
+      path: /mutate-workload-ownership
+  rules:
+  - operations: ["UPDATE"]
+    apiGroups: ["run.ai"]
+    apiVersions: ["v1alpha1"]
+    resources: ["workloadrunners"]
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: runai-workload-ownership-protection-validation
+  labels:
+    app: runai
+webhooks:
+- name: anyworkload-controller.runai.svc
+  admissionReviewVersions: ["v1"]
+  sideEffects: None
+  failurePolicy: Fail
+  clientConfig:
+    service:
+      name: anyworkload-controller
+      namespace: runai
+      path: /validate-workload-ownership-protection
+  rules:
+  - operations: ["UPDATE", "DELETE"]
+    apiGroups: ["run.ai"]
+    apiVersions: ["v2alpha1"]
+    resources: ["trainingworkloads"]
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: runai-workload-ownership-mutation
+  labels:
+    app: runai
+webhooks:
+- name: anyworkload-controller.runai.svc
+  admissionReviewVersions: ["v1"]
+  sideEffects: None
+  failurePolicy: Fail
+  clientConfig:
+    service:
+      name: anyworkload-controller
+      namespace: runai
+      path: /mutate-workload-ownership
+  rules:
+  - operations: ["UPDATE"]
+    apiGroups: ["run.ai"]
+    apiVersions: ["v2alpha1"]
+    resources: ["trainingworkloads"]

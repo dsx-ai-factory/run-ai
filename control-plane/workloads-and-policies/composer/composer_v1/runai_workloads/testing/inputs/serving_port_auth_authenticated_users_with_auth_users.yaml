@@ -1,0 +1,8 @@
+image: ubuntu
+servingPort:
+  container: 8080
+  protocol: http
+  authorizationType: authenticatedUsers
+  authorizedUsers:
+    - user1
+    - user2

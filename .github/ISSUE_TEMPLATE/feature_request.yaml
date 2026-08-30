@@ -1,0 +1,52 @@
+name: Feature request
+description: Suggest a new feature or enhancement.
+title: "[feature] "
+labels: ["kind/feature", "triage/needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing a feature. Please describe the use case first — that helps reviewers evaluate the proposal even if the suggested solution turns out not to be the right shape.
+
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use case
+      description: What are you trying to accomplish? Describe the user / operator / workflow that would benefit.
+      placeholder: |
+        As a [role], I want [capability] so that [outcome].
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How would you like this feature to work? Include CLI shape, API shape, or UI mockups where relevant. This is a starting point — we expect the design to evolve through discussion.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What other approaches have you considered? Why is the proposed solution preferred?
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Links to related issues, prior discussions, comparable features in other products, etc.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      options:
+        - label: I agree to follow this project's [Code of Conduct](../blob/HEAD/CODE_OF_CONDUCT.md).
+          required: true

@@ -1,0 +1,49 @@
+{{- if .Values.workloadsManager.enabled }}
+{{- include "common.configMap" (list . .Values.workloadsManager "control-plane.workloadsManager.configmap") }}
+{{- end }}
+
+{{- define "control-plane.workloadsManager.configmap" -}}
+{{- $top := first . }}
+data:
+  SERVICE_PORT: {{ $top.Values.workloadsManager.service.port | quote }}
+  MIGRATION_FILES: {{ $top.Values.workloadsManager.config.migrationFiles | quote }}
+  SERVICE_NAME: {{ $top.Values.workloadsManager.name | quote }}
+  SERVER_WRITE_TIMEOUT: {{ $top.Values.workloadsManager.config.server.writeTimeout | quote }}
+  SERVER_READ_TIMEOUT: {{ $top.Values.workloadsManager.config.server.readTimeout | quote }}
+  SERVER_IDLE_TIMEOUT: {{ $top.Values.workloadsManager.config.server.idleTimeout | quote }}
+  TRACING_ENABLED: {{ $top.Values.workloadsManager.config.tracingEnabled | default $top.Values.global.config.tracingEnabled | quote }}
+  AUDIT_ENABLED: {{ $top.Values.workloadsManager.config.auditEnabled | default $top.Values.global.config.auditEnabled | quote }}
+  AUDIT_ENABLE_PRINT_TO_STDOUT: {{ $top.Values.workloadsManager.config.auditEnablePrintToStdout | default $top.Values.global.config.auditEnablePrintToStdout | quote }}
+  DB_NAME: {{ $top.Values.workloadsManager.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_VERBOSE_LOGGING: {{ $top.Values.workloadsManager.config.dbVerboseLogging | default $top.Values.global.postgresql.dbVerboseLogging | quote }}
+  DB_HOST: {{ $top.Values.workloadsManager.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SSL_MODE: {{ $top.Values.workloadsManager.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_PORT: {{ $top.Values.workloadsManager.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  DB_SCHEMA: {{ $top.Values.workloadsManager.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+
+  WORKLOADS_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.workloads.name ($top.Values.workloads.service.port | toString) | quote }}
+  ORG_UNIT_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.orgUnitService.name (toString $top.Values.orgUnitService.service.port) }}
+  CLUSTER_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.clusterService.name ($top.Values.clusterService.service.port | toString) | quote }}
+  AUTHORIZATION_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.authorization.name ($top.Values.authorization.service.port | toString) | quote }}
+  POLICY_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.policyService.name ($top.Values.policyService.service.port | toString) | quote }}
+
+  {{- $cacheEnabled := $top.Values.workloadsManager.config.cacheEnabled | default false }}
+  CACHE_ENABLED: {{ $cacheEnabled | quote }}
+  {{- if eq (toString $cacheEnabled) "true" }}
+  CACHE_MAX_RECORD_SIZE_KB: {{ $top.Values.workloadsManager.config.cacheMaxRecordSizeKb | default 10000 | quote }}
+  CACHE_MAX_STORE_SIZE_MB: {{ $top.Values.workloadsManager.config.cacheMaxStoreSizeMb | default 100 | quote }}
+  CACHE_TTL_SECONDS: {{ $top.Values.workloadsManager.config.cacheTTLSeconds| default 600 | quote }}
+  {{- end }}
+
+  PUBSUB_URL: {{ $top.Values.global.pubsub.url | quote }}
+  PUBSUB_TYPE: {{ $top.Values.global.pubsub.type | quote }}
+  PUBSUB_ENABLE_ADDITIONAL_SUBSCRIBER: {{ $top.Values.global.pubsub.additionalSubscriber.enabled | quote }}
+  {{- if $top.Values.global.pubsub.additionalSubscriber.enabled }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_TYPE: {{ $top.Values.global.pubsub.additionalSubscriber.type | quote }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_URL: {{ $top.Values.global.pubsub.additionalSubscriber.url | quote }}
+  {{- end }}
+
+  CLUSTER_CACHE_EXPIRATION_SEC: {{ $top.Values.workloadsManager.config.clusterCacheExpirationSeconds | quote }}
+  CLUSTER_CACHE_CLEANUP_SEC: {{ $top.Values.workloadsManager.config.clusterCacheCleanupSeconds | quote }}
+  SUSPEND_DEF_CACHE_TTL_SEC: {{ $top.Values.workloadsManager.config.suspendDefCacheTTLSeconds | quote }}
+{{- end }}

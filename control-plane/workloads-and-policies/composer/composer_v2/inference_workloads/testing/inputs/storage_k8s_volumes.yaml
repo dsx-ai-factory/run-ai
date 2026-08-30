@@ -1,0 +1,22 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+storage:
+  hostPath:
+    - name: scratch
+      path: /tmp/scratch
+      mountPath: /scratch
+  configMapVolume:
+    - name: app-config
+      configMap: my-config
+      mountPath: /config
+  secretVolume:
+    - name: credentials
+      secret: my-secret
+      mountPath: /secrets
+  emptyDirVolume:
+    - name: cache
+      path: /cache
+      medium: Memory
+      sizeLimit: 1Gi

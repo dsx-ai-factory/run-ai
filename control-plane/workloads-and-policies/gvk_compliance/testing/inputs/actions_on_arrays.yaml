@@ -1,0 +1,105 @@
+policy:
+  id: test-policy
+
+  # Every value-scoped enforcement (range, match, options, quantityRange) passes
+  # its onValue payload through asSlice so the same rule works against a
+  # scalar spec field or an array spec field. This test binds each rule to
+  # an array-valued field where the first element is compliant and a later
+  # element fails — the expected result must contain one validation error
+  # per rule, which proves asSlice iterates every element (the failing one
+  # is never the first).
+  effectiveRules:
+    - field: arrRangeMax
+      specSelector: self
+      enforcements:
+        - range: { max: 10 }          # [1, 5, 99] -> 99 fails
+
+    - field: arrRangeMin
+      specSelector: self
+      enforcements:
+        - range: { min: 10 }          # [50, 60, 1] -> 1 fails
+
+    - field: arrRangeStep
+      specSelector: self
+      enforcements:
+        - range: { step: 5 }          # [10, 20, 3] -> 3 fails (not a multiple of 5)
+
+    - field: arrMatch
+      specSelector: self
+      enforcements:
+        - match: "^[a-z]+$"          # ["foo", "bar", "123baz"] -> last fails
+
+    - field: arrOptions
+      specSelector: self
+      enforcements:
+        - options: [red, blue, green]  # ["red", "blue", "purple"] -> purple fails
+
+    - field: arrQtyRangeMax
+      specSelector: self
+      enforcements:
+        - quantityRange: { max: "1Gi" }      # ["100Mi", "500Mi", "5Gi"] -> 5Gi fails
+
+    - field: arrQtyRangeMin
+      specSelector: self
+      enforcements:
+        - quantityRange: { min: "1Gi" }      # ["2Gi", "1Gi", "500Mi"] -> 500Mi fails
+
+    - field: arrQtyRangeStep
+      specSelector: self
+      enforcements:
+        - quantityRange: { step: "100m" }    # ["100m", "200m", "150m"] -> 150m fails
+
+  # Minimal breakdown: each field sits at the root of the spec and uses the
+  # KeyValue builtin with specRef == fieldName so the get expression returns
+  # the whole array (a single []any value) rather than streaming its
+  # elements. That way the array reaches onValue intact and asSlice is
+  # exercised.
+  breakdown:
+    fields:
+      arrRangeMax:
+        - specSelectors: [self]
+          specRef: arrRangeMax
+          formatter: { builtin: KeyValue }
+      arrRangeMin:
+        - specSelectors: [self]
+          specRef: arrRangeMin
+          formatter: { builtin: KeyValue }
+      arrRangeStep:
+        - specSelectors: [self]
+          specRef: arrRangeStep
+          formatter: { builtin: KeyValue }
+      arrMatch:
+        - specSelectors: [self]
+          specRef: arrMatch
+          formatter: { builtin: KeyValue }
+      arrOptions:
+        - specSelectors: [self]
+          specRef: arrOptions
+          formatter: { builtin: KeyValue }
+      arrQtyRangeMax:
+        - specSelectors: [self]
+          specRef: arrQtyRangeMax
+          formatter: { builtin: KeyValue }
+      arrQtyRangeMin:
+        - specSelectors: [self]
+          specRef: arrQtyRangeMin
+          formatter: { builtin: KeyValue }
+      arrQtyRangeStep:
+        - specSelectors: [self]
+          specRef: arrQtyRangeStep
+          formatter: { builtin: KeyValue }
+    specSelectors:
+      self:
+        query: "."
+
+workload:
+  apiVersion: test/v1
+  kind: Synthetic
+  arrRangeMax: [1, 5, 99]
+  arrRangeMin: [50, 60, 1]
+  arrRangeStep: [10, 20, 3]
+  arrMatch: [foo, bar, 123baz]
+  arrOptions: [red, blue, purple]
+  arrQtyRangeMax: ["100Mi", "500Mi", "5Gi"]
+  arrQtyRangeMin: ["2Gi", "1Gi", "500Mi"]
+  arrQtyRangeStep: ["100m", "200m", "150m"]

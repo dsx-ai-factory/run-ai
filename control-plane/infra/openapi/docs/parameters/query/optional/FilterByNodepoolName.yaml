@@ -1,0 +1,7 @@
+name: nodepoolName
+in: query
+description: Filter using the nodepool.
+required: false
+schema:
+  type: string
+  example: "default"

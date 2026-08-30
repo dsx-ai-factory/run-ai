@@ -1,0 +1,9 @@
+description: array of xpath expression with fields that their values should be cleared
+type: object
+properties:
+  fieldsToClear:
+    items:
+      type: string
+      example: spec.image
+      minLength: 1
+nullable: true

@@ -1,0 +1,6 @@
+type: object
+required:
+    - type
+    - config
+allOf:
+    - $ref: "./NotificationChannelForPatch.yaml"

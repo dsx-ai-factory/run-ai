@@ -1,0 +1,6 @@
+ARG GO_VERSION=1.25
+
+FROM prom/prometheus:v3.10.0 AS promtool
+
+FROM golang:${GO_VERSION}
+COPY --from=promtool /bin/promtool /usr/local/bin/promtool

@@ -1,0 +1,147 @@
+{{- define "common.ingress.metadata" -}}
+{{- $ingress := index . 1 }}
+{{- with $ingress.annotations }}
+annotations:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- define "common.ingress.tpl" -}}
+{{- $top := first . }}
+{{- $ingress := index . 1 }}
+{{- $service := index . 2 }}
+{{- $obj := index . 3 }}
+{{- $fullName := include "common.fullname" $top }}
+{{- $svcPort := $service.port }}
+{{- if semverCompare ">=1.19-0" $top.Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1
+{{- else if semverCompare ">=1.14-0" $top.Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  {{- include "common.metadata" (append (list $top $obj) "common.ingress.metadata") | nindent 2 }}
+  name: {{ include "common.fullname" $top }}-{{ $obj.name }}
+spec:
+{{- if $ingress.tls }}
+  tls:
+  {{- range $ingress.tls }}
+  - hosts:
+    {{- range .hosts }}
+    - {{ . | quote }}
+    {{- end }}
+    secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range $ingress.hosts }}
+  - host: {{ .host | quote }}
+    http:
+      paths:
+      {{- range .paths }}
+      - path: {{ .path }}
+        {{- if and .pathType (semverCompare ">=1.18-0" $top.Capabilities.KubeVersion.GitVersion) }}
+        pathType: {{ .pathType }}
+        {{- end }}
+        backend:
+          {{- if semverCompare ">=1.19-0" $top.Capabilities.KubeVersion.GitVersion }}
+          service:
+            name: {{ $fullName }}-{{ $obj.name }}
+            port:
+              number: {{ $svcPort }}
+          {{- else }}
+          serviceName: {{ $fullName }}-{{ $obj.name }}
+          servicePort: {{ $svcPort }}
+          {{- end }}
+      {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- define "common.ingress" -}}
+{{- $ingress := index . 1 }}
+{{- if $ingress.enabled }}
+  {{- include "common.utils.merge" (append . "common.ingress.tpl") }}
+{{- end }}
+{{- end }}
+
+{{- define "control-plane.ingress" -}}
+{{- $top := first . }}
+{{- $ingress := index . 1 }}
+
+{{- $name := $ingress.name -}}
+{{- $serviceName := $ingress.serviceName -}}
+{{- $ingressClass := $ingress.ingressClass -}}
+{{- $domain := $ingress.domain -}}
+{{- $tlsSecretName := $ingress.tlsSecretName -}}
+{{- $extraDomains := $ingress.extraDomains -}}
+{{- $extraAnnotations := $ingress.extraAnnotations -}}
+{{- $isPreview := $ingress.isPreview -}}
+{{- $multiTenancy := $ingress.multiTenancy -}}
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  {{- include "common.metadata" (append (list $top $ingress) "common.ingress.metadata") | nindent 2 }}
+  name: {{ include "common.fullname" $top }}-{{ $name }}
+  annotations:
+    {{- if $extraAnnotations }}
+    {{- toYaml $extraAnnotations | nindent 4 }}
+    {{- end }}
+    {{- if $isPreview }}
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-by-header: x-runai-preview
+    nginx.ingress.kubernetes.io/canary-by-header-value: "true"
+    {{- end }}
+spec:
+  ingressClassName: {{ $ingressClass }}
+  rules:
+    - host: "{{ $domain }}"
+      http:
+        paths:
+          - backend:
+              service:
+                name: {{ $serviceName }}
+                port:
+                  name: http
+            path: "/"
+            pathType: Prefix
+
+  {{- if $multiTenancy }}
+    - host: "*.{{ $domain }}"
+      http:
+        paths:
+          - backend:
+              service:
+                name: {{ $serviceName }}
+                port:
+                  name: http
+            path: "/"
+            pathType: Prefix
+    {{- end }}
+    {{- range $extraDomains }}
+    - host: "{{ . }}"
+      http:
+        paths:
+          - backend:
+              service:
+                name: {{ $serviceName }}
+                port:
+                  name: http
+            path: "/"
+            pathType: Prefix
+
+    {{- end  }}
+  tls:
+    - hosts:
+      {{- if $multiTenancy }}
+        - "*.{{ $domain }}"
+      {{- end }}
+      {{- with $extraDomains }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+        - "{{ $domain }}"
+      secretName: {{ $tlsSecretName }}
+---
+{{- end -}}

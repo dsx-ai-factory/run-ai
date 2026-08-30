@@ -1,0 +1,1 @@
+ALTER TABLE clusters ADD COLUMN IF NOT EXISTS "delete_requested_at" TIMESTAMPTZ;

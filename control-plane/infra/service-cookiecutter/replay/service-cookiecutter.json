@@ -1,0 +1,27 @@
+{
+  "cookiecutter": {
+    "app_name": "example-service",
+    "go_version": "1.21",
+    "use_postgresql": true,
+    "use_redis": true,
+    "use_nats": true,
+    "remove_gitkeep": false,
+    "add_service_to_ci": false,
+    "add_to_helm_chart": false,
+    "__app_name_camel_case_upper": "ExampleService",
+    "__app_name_camel_case_lower": "exampleService",
+    "__app_name_underscore_lower": "example_service",
+    "_template": "../service-cookiecutter",
+    "_output_dir": "/local",
+    "_repo_dir": "../service-cookiecutter"
+  },
+  "_cookiecutter": {
+    "app_name": "example-service",
+    "go_version": "1.21",
+    "use_postgresql": true,
+    "use_redis": true,
+    "remove_gitkeep": false,
+    "add_service_to_ci": false,
+    "add_to_helm_chart": false
+  }
+}

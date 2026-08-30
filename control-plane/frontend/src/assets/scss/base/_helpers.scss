@@ -1,0 +1,130 @@
+.display-none {
+  display: none;
+}
+
+.opacity-0 {
+  opacity: 0;
+}
+
+.opacity-1 {
+  opacity: 1;
+}
+
+.ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.no-underline {
+  text-decoration: unset !important;
+}
+
+.hide-if-last-child {
+  &:last-child {
+    display: none;
+  }
+}
+
+.no-margin {
+  margin: 0;
+}
+
+.offset-left-8 {
+  margin-left: -8px;
+}
+
+// gap (legacy — prefer b-gap-* below)
+@for $gap from 1 through 30 {
+  .gap-#{$gap} {
+    gap: #{$gap}px;
+  }
+}
+
+// =============================================================================
+// Design-system spacing utilities (Figma spacing tokens)
+// Pattern: b-{property}-{size}
+// Sizes: 3xs(3px) 2xs(5px) xs(7px) s(10px) m(16px) l(20px) xl(26px) 2xl(40px)
+// =============================================================================
+$b-space-sizes: (
+  "3xs": var(--space-3xs),
+  "2xs": var(--space-2xs),
+  "xs": var(--space-xs),
+  "s": var(--space-s),
+  "m": var(--space-m),
+  "l": var(--space-l),
+  "xl": var(--space-xl),
+  "2xl": var(--space-2xl),
+);
+
+@each $size, $value in $b-space-sizes {
+  // padding
+  .b-pa-#{$size} {
+    padding: $value;
+  }
+  .b-pt-#{$size} {
+    padding-top: $value;
+  }
+  .b-pr-#{$size} {
+    padding-right: $value;
+  }
+  .b-pb-#{$size} {
+    padding-bottom: $value;
+  }
+  .b-pl-#{$size} {
+    padding-left: $value;
+  }
+  .b-px-#{$size} {
+    padding-left: $value;
+    padding-right: $value;
+  }
+  .b-py-#{$size} {
+    padding-top: $value;
+    padding-bottom: $value;
+  }
+
+  // margin
+  .b-ma-#{$size} {
+    margin: $value;
+  }
+  .b-mt-#{$size} {
+    margin-top: $value;
+  }
+  .b-mr-#{$size} {
+    margin-right: $value;
+  }
+  .b-mb-#{$size} {
+    margin-bottom: $value;
+  }
+  .b-ml-#{$size} {
+    margin-left: $value;
+  }
+  .b-mx-#{$size} {
+    margin-left: $value;
+    margin-right: $value;
+  }
+  .b-my-#{$size} {
+    margin-top: $value;
+    margin-bottom: $value;
+  }
+
+  // gap
+  .b-gap-#{$size} {
+    gap: $value;
+  }
+}
+
+// Shadow utilities
+.b-shadow-s {
+  box-shadow: var(--shadow-s);
+}
+.b-shadow-m {
+  box-shadow: var(--shadow-m);
+}
+.b-shadow-l {
+  box-shadow: var(--shadow-l);
+}

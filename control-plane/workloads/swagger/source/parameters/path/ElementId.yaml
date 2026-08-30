@@ -1,0 +1,7 @@
+name: elementId
+in: path
+required: true
+description: The unique identifier of the structure element.
+schema:
+  type: string
+  format: uuid

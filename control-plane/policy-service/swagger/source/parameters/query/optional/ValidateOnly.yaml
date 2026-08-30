@@ -1,0 +1,6 @@
+name: validateOnly
+in: query
+required: false
+description: Validate the given policy payload without applying it
+schema:
+  type: boolean

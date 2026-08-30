@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS last_used_by_workload;

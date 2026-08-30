@@ -1,0 +1,73 @@
+get:
+  summary: Get a list of tenants.
+  description: Retrieve a list of tenants and their details.
+  x-service: tenants-manager
+  x-test-coverage:
+  - e2e/src/test/suites/sphinxSuite/tenant.test.ts
+  operationId: get_tenants
+  x-authorize:
+    resource-type: tenant
+    action: read
+  tags:
+  - Tenant
+  parameters:
+  - $ref: "../../parameters/query/deleted.yaml"
+  - $ref: "../../parameters/query/filterByName.yaml"
+  - $ref: "../../parameters/query/filterByAlias.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Tenants/Tenants.yaml'
+            x-schema-name: Tenants
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+post:
+  summary: Create tenant
+  x-service: tenants-manager
+  x-test-coverage:
+  - e2e/src/test/suites/sphinxSuite/tenant.test.ts
+  operationId: create_tenant
+  x-authorize:
+    resource-type: tenant
+    action: create
+  tags:
+  - Tenant
+  requestBody:
+    description: The tenant to create.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/Tenants/TenantCreationRequest.yaml'
+  responses:
+    201:
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Tenants/TenantCreationResponse.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    409:
+      $ref: '../../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

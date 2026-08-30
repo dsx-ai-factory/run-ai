@@ -1,0 +1,16 @@
+{
+  "service_name": "oauth2-proxy",
+  "artifact_type": "container",
+  "skip_container_validation": true,
+  "notifications": {
+    "slack": {
+      "mention": "@viper"
+    }
+  },
+  "jira": {
+    "team_name": "Viper Team"
+  },
+  "ngc": {
+    "guest_access": true
+  }
+}

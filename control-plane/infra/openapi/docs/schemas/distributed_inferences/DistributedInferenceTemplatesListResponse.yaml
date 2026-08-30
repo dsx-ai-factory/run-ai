@@ -1,0 +1,8 @@
+properties:
+  entries:
+    type: array
+    items:
+      $ref: "./DistributedInferenceTemplatesListResponseItem.yaml"
+  pagination:
+    $ref: "../common/PaginationInfo.yaml"
+

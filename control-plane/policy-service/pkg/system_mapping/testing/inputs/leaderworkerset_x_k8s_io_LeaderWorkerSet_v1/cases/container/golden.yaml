@@ -1,0 +1,74 @@
+apiVersion: leaderworkerset.x-k8s.io/v1
+kind: LeaderWorkerSet
+metadata:
+  name: test
+spec:
+  leaderWorkerTemplate:
+    leaderTemplate:
+      metadata: {}
+      spec:
+        containers:
+        - image: lws/worker:v1
+          imagePullPolicy: IfNotPresent
+          name: leader
+          resources:
+            limits:
+              cpu: "4"
+              memory: 8Gi
+            requests:
+              cpu: "2"
+              memory: 4Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+        initContainers:
+        - image: lws/worker:v1
+          imagePullPolicy: IfNotPresent
+          name: init
+          resources:
+            limits:
+              cpu: "4"
+              memory: 8Gi
+            requests:
+              cpu: "2"
+              memory: 4Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+    size: 1
+    workerTemplate:
+      metadata: {}
+      spec:
+        containers:
+        - image: lws/worker:v1
+          imagePullPolicy: IfNotPresent
+          name: worker
+          resources:
+            limits:
+              cpu: "4"
+              memory: 8Gi
+            requests:
+              cpu: "2"
+              memory: 4Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+        initContainers:
+        - image: lws/worker:v1
+          imagePullPolicy: IfNotPresent
+          name: init
+          resources:
+            limits:
+              cpu: "4"
+              memory: 8Gi
+            requests:
+              cpu: "2"
+              memory: 4Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+  replicas: 1

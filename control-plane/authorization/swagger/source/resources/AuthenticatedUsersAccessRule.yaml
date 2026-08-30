@@ -1,0 +1,38 @@
+post:
+  summary: Create an access rule for authenticated users/service accounts
+  description: Creates an access rule bound to every authenticated user and service account for the given role and scope.
+  operationId: create_authenticated_users_access_rule
+  x-service: authorization
+  x-test-coverage:
+    - control-plane/authorization/pkg/services/access_rules_api_test.go
+  x-audit: true
+  x-authorize:
+    resource-type: access_rules
+    action: create
+  tags:
+    - Access rules
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/AccessRules/AuthenticatedUsersAccessRuleCreationFields.yaml'
+  responses:
+    '201':
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/AccessRules/AccessRule.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

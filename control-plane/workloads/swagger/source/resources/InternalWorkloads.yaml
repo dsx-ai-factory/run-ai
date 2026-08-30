@@ -1,0 +1,33 @@
+post:
+  summary: Create a workload by the control plane.
+  operationId: internal_create_workload
+  x-service: workloads
+  x-test-coverage:
+    - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
+    - e2e/src/test/suites/parallel/workloads/jobsStatus.test.ts
+  x-internal: true
+  x-no-authorization: true
+  tags:
+    - Workloads
+  requestBody:
+    description: The workload info in the control plane.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Workloads/WorkloadCreationFields.yaml'
+  responses:
+    201:
+      description: Created successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Workloads/Workload.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    409:
+      $ref: '../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

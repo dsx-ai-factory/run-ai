@@ -1,0 +1,7 @@
+image: jupyter/scipy-notebook
+command: "start-notebook.sh --serve-project=${RUNAI_PROJECT}"
+args: "--NotebookApp.base_url=/${RUNAI_PROJECT}/${RUNAI_JOB_NAME} --project=${RUNAI_PROJECT} --job=${RUNAI_JOB_NAME} --uid=${RUNAI_UID} --gid=${RUNAI_GID}"
+security:
+  uidGidSource: custom
+  runAsUid: 1000
+  runAsGid: 2000

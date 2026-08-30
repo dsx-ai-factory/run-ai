@@ -1,0 +1,66 @@
+get:
+  summary: List datasource assets.
+  description: Returns a combined list of data-sources.
+  operationId: list_datasource_assets
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_datasources_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
+    - e2e/src/test/suites/parallel/submitUI/connectToJupiterUI.test.ts
+    - e2e/src/test/suites/parallel/dataSource/dataSourceUI.test.ts
+  x-no-authorization: true
+  tags:
+    - Datasources
+  parameters:
+    - $ref: "../parameters/query/optional/AssetNameFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetScopeFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetProjectFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetDepartmentFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetClusterFilter.yaml"
+    - $ref: "../parameters/query/optional/IncludeUsageInfo.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToProject.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToWorkloadType.yaml"
+    - $ref: "../parameters/query/optional/IncludeStatus.yaml"
+    - $ref: "../parameters/query/optional/AssetIdsFilter.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToReplicaType.yaml"
+    - $ref: "../parameters/query/optional/IncludeDataVolumes.yaml"
+    - $ref: "../parameters/query/optional/includeDescendants.yaml"
+    - $ref: "../parameters/query/optional/DatasourceTypeFilter.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Datasource/DatasourceListResponse.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+
+post:
+  tags:
+    - Datasources
+  summary: Placeholder.
+  operationId: create_datasource_asset
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_datasources_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
+    - e2e/src/test/suites/parallel/submitUI/connectToJupiterUI.test.ts
+    - e2e/src/test/suites/parallel/dataSource/dataSourceUI.test.ts
+  x-no-authorization: true
+  x-internal: true
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Asset/AssetMeta.yaml"
+  responses:
+    501:
+      $ref: "../../../../infra/openapi/docs/responses/501NotImplemented.yaml"

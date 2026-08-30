@@ -1,0 +1,112 @@
+openapi: 3.0.3
+info:
+  title: Run:AI Provisioner Service
+  version: 0.1.0
+  license:
+    name: Proprietary
+    url: https://www.run.ai
+servers:
+  - url: /
+paths:
+  /environments:
+    post:
+      tags:
+        - Provision
+      summary: Create environment provisioning job
+      operationId: createEnvironment
+      x-no-authorization: true
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEnvironmentRequest'
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentAccepted'
+        '400':
+          description: Bad Request
+  /environments/{id}:
+    get:
+      tags:
+        - Provision
+      summary: Get environment provisioning status
+      operationId: getEnvironment
+      x-no-authorization: true
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentStatus'
+        '404':
+          description: Not Found
+components:
+  schemas:
+    CreateEnvironmentRequest:
+      type: object
+      required: [ provisioningMode, domain, wildcarddomain ]
+      properties:
+        provisioningMode:
+          type: string
+          enum: [ control-plane-only, full ]
+        domain:
+          type: string
+        wildcarddomain:
+          type: string
+        kubernetesDistribution:
+          type: string
+          enum: [ openshift ]
+          description: Optional Kubernetes distribution type
+        userEmail:
+          type: string
+          description: Email for the local user to create. Required when provisioningMode is 'full', ignored for 'control-plane-only'.
+        projectName:
+          type: string
+          description: Name of the project to create. Required when provisioningMode is 'full', ignored for 'control-plane-only'.
+          example: my-project
+    EnvironmentAccepted:
+      type: object
+      properties:
+        id:
+          type: string
+        phase:
+          type: string
+          example: pending
+        mode:
+          type: string
+          enum: [ control-plane-only, full ]
+        createdAt:
+          type: string
+          format: date-time
+    EnvironmentStatus:
+      type: object
+      properties:
+        id:
+          type: string
+        phase:
+          type: string
+          enum: [ pending, in_progress, succeeded, failed ]
+        message:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+        mode:
+          type: string
+          enum: [ control-plane-only, full ]
+
+

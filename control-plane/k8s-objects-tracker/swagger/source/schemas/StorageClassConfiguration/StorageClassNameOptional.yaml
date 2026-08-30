@@ -1,0 +1,4 @@
+description: The name of the storage class.
+type: string
+example: Standard
+nullable: true

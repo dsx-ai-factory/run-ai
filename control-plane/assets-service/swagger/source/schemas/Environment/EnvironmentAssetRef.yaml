@@ -1,0 +1,15 @@
+description: Reference information about environment asset.
+required:
+  - id
+  - name
+properties:
+  id:
+    $ref: "../../../../../infra/openapi/docs/schemas/assets/AssetId.yaml"
+  name:
+    $ref: "../Asset/AssetName.yaml"
+  toolTypes:
+    description: the type of tools as defined in the connections of the environment asset.
+    type: array
+    nullable: true
+    items:
+      $ref: "./ToolType.yaml"

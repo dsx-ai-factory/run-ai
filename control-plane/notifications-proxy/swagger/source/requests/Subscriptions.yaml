@@ -1,0 +1,65 @@
+get:
+  x-no-authorization: true
+  x-service: notifications-proxy
+  x-test-coverage:
+    - src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts
+  tags:
+    - Subscriptions
+  operationId: getUserSubscriptions
+  summary: Get user subscriptions
+  description: Get user subscriptions
+  responses:
+    '200':
+      description: User subscriptions
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Subscriptions.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    501:
+      $ref: '../../../../infra/openapi/docs/responses/501NotImplemented.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+post:
+  x-no-authorization: true
+  x-service: notifications-proxy
+  x-test-coverage:
+    - src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts
+  tags:
+    - Subscriptions
+  operationId: createSubscription
+  summary: Create user subscription
+  description: Create user subscription
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Subscription.yaml'
+  responses:
+    '200':
+      description: Subscription created successfully
+      content:
+        application/json:
+            schema:
+              $ref: '../schemas/Subscription.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    501:
+      $ref: '../../../../infra/openapi/docs/responses/501NotImplemented.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

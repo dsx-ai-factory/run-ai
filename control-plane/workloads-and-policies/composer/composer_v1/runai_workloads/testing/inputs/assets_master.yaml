@@ -1,0 +1,5 @@
+image: ubuntu
+storage:
+  hostPath:
+  - path: /my/volume/master
+    mountPath: /mount/path/vol/master

@@ -1,0 +1,12 @@
+DROP INDEX IF EXISTS roles_scope_tenant_id_idx;
+
+ALTER TABLE IF EXISTS roles DROP COLUMN IF EXISTS scope_type;
+ALTER TABLE IF EXISTS roles DROP COLUMN IF EXISTS scope_id;
+ALTER TABLE IF EXISTS roles DROP COLUMN IF EXISTS scope_name;
+ALTER TABLE IF EXISTS roles DROP COLUMN IF EXISTS custom;
+ALTER TABLE IF EXISTS roles DROP COLUMN IF EXISTS enabled;
+ALTER TABLE IF EXISTS roles DROP COLUMN IF EXISTS cluster_role_predefined_id;
+
+DROP INDEX IF EXISTS disabled_roles_scope_idx;
+DROP INDEX IF EXISTS disabled_roles_role_idx;
+DROP TABLE IF EXISTS disabled_roles;

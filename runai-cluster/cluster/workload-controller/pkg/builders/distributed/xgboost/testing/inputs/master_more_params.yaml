@@ -1,0 +1,75 @@
+apiVersion: run.ai/v2alpha1
+kind: DistributedWorkload
+metadata:
+  name: dist-0
+  namespace: runai-team-a
+  uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+spec:
+  jobType: XGBoostJob
+  cpu:
+    value: "3"
+  createHomeDir:
+    value: true
+  gpu:
+    value: "0.5"
+  image:
+    value: ubuntu
+  name:
+    value: job-0
+  allowPrivilegeEscalation:
+    value: true
+  preemptible:
+    value: true
+  workers:
+    value: 3
+  runAsGid:
+    value: 20
+  runAsUid:
+    value: 501
+  runAsUser:
+    value: true
+  stdin:
+    value: true
+  supplementalGroups:
+    value: 20;30;40
+  tty:
+    value: true
+  username:
+    value: user.name
+  workingDir:
+    value: /tmp/work
+  runPolicy:
+    values:
+      backoffLimit:
+        value: 3
+      cleanPodPolicy:
+        value: None
+masterSpec:
+  cpu:
+    value: "1"
+  gpu:
+    value: "0"
+  hostIpc:
+    value: true
+  hostNetwork:
+    value: true
+  image:
+    value: ubuntu
+  allowPrivilegeEscalation:
+    value: true
+  runAsGid:
+    value: 30
+  runAsUid:
+    value: 601
+  runAsUser:
+    value: true
+  nodeAffinityRequired:
+    nodeSelectorTerms:
+    - matchExpressions:
+      - key: key1
+        operator: In
+        values:
+        - a
+    - matchExpressions:
+      - key: key2
+        operator: Exists

@@ -1,0 +1,5 @@
+required:
+  - meta
+properties:
+  meta:
+    $ref: "./TemplateCreationMetaFields.yaml"

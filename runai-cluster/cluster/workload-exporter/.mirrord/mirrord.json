@@ -1,0 +1,12 @@
+{
+    "target": {
+        "path": {
+            "deployment": "workload-exporter"
+        },
+        "namespace": "runai"
+    },
+    "feature": {
+        "env": true,
+        "fs": "read"
+    }
+}

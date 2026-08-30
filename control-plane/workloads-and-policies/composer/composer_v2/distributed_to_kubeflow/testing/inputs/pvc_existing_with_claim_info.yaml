@@ -1,0 +1,9 @@
+image: ubuntu
+storage:
+  pvc:
+    - existingPvc: true
+      path: "/path/ro"
+      readOnly: true
+      claimName: myclaim
+      claimInfo:
+        size: 10M

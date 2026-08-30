@@ -1,0 +1,33 @@
+apiVersion: run.ai/v1alpha1
+kind: DistributedInferenceWorkload
+metadata:
+  name: test-lws
+  namespace: runai-team-a
+spec:
+  workers:
+    value: 1
+  replicas: 
+    value: 1
+leaderSpec:
+  image: 
+    value: leader-image:latest
+  servingPorts:
+    items:
+      serving-port:
+        value:
+          port: 8080
+  readinessProbe:
+    values:
+      httpGetPort:
+        value: 8080
+      httpGetPath:
+        value: /ready
+workerSpec:
+  image:
+    value: worker-image:latest
+  readinessProbe:
+    values:
+      httpGetPort:
+        value: 9090
+      httpGetPath:
+        value: /

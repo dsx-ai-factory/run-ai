@@ -1,0 +1,11 @@
+allOf:
+  - $ref: './DatavolumeStatus.yaml'
+  - type: object
+    required:
+      - datavolumeId
+    properties:
+      datavolumeId:
+        type: string
+        format: uuid
+        description: The id of the datavolume
+        example: 71f69d83-ba66-4822-adf5-55ce55efd210

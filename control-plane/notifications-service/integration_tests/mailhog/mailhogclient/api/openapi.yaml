@@ -1,0 +1,307 @@
+openapi: 3.0.1
+info:
+  title: MailHog API
+  version: 2.0.0
+servers:
+- url: /
+paths:
+  /api/v2/messages:
+    get:
+      description: |
+        Retrieve a list of messages
+      parameters:
+      - description: Start index
+        explode: true
+        in: query
+        name: start
+        required: false
+        schema:
+          default: 0.0
+          format: int64
+          type: number
+        style: form
+      - description: Number of messages
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50.0
+          format: int64
+          type: number
+        style: form
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Messages"
+          description: Successful response
+  /api/v2/search:
+    get:
+      description: |
+        Search messages
+      parameters:
+      - description: Kind of search
+        explode: true
+        in: query
+        name: kind
+        required: true
+        schema:
+          enum:
+          - from
+          - to
+          - containing
+          type: string
+        style: form
+      - description: Search parameter
+        explode: true
+        in: query
+        name: query
+        required: true
+        schema:
+          type: string
+        style: form
+      - description: Start index
+        explode: true
+        in: query
+        name: start
+        required: false
+        schema:
+          default: 0.0
+          format: int64
+          type: number
+        style: form
+      - description: Number of messages
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50.0
+          format: int64
+          type: number
+        style: form
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Messages_1"
+          description: Successful response
+components:
+  schemas:
+    Path:
+      example:
+        mailbox: mailbox
+        domain: domain
+        relays:
+        - relays
+        - relays
+        params: params
+      properties:
+        relays:
+          items:
+            type: string
+          type: array
+        mailbox:
+          type: string
+        domain:
+          type: string
+        params:
+          type: string
+      title: Path
+      type: object
+    Messages:
+      example:
+        total: 0.8008281904610115
+        start: 6.027456183070403
+        count: 1.4658129805029452
+        items:
+        - headers: "{}"
+          size: 5.962133916683182
+          created: 2000-01-23T04:56:07.000+00:00
+          from:
+            mailbox: mailbox
+            domain: domain
+            relays:
+            - relays
+            - relays
+            params: params
+          id: id
+          to:
+          - mailbox: mailbox
+            domain: domain
+            relays:
+            - relays
+            - relays
+            params: params
+          - mailbox: mailbox
+            domain: domain
+            relays:
+            - relays
+            - relays
+            params: params
+        - headers: "{}"
+          size: 5.962133916683182
+          created: 2000-01-23T04:56:07.000+00:00
+          from:
+            mailbox: mailbox
+            domain: domain
+            relays:
+            - relays
+            - relays
+            params: params
+          id: id
+          to:
+          - mailbox: mailbox
+            domain: domain
+            relays:
+            - relays
+            - relays
+            params: params
+          - mailbox: mailbox
+            domain: domain
+            relays:
+            - relays
+            - relays
+            params: params
+      properties:
+        total:
+          description: Total number of stored messages
+          format: int64
+          type: number
+        start:
+          description: Start index of first returned message
+          format: int64
+          type: number
+        count:
+          description: Number of returned messages
+          format: int64
+          type: number
+        items:
+          items:
+            $ref: "#/components/schemas/Message"
+          type: array
+      title: Messages
+      type: object
+    Message:
+      example:
+        headers: "{}"
+        size: 5.962133916683182
+        created: 2000-01-23T04:56:07.000+00:00
+        from:
+          mailbox: mailbox
+          domain: domain
+          relays:
+          - relays
+          - relays
+          params: params
+        id: id
+        to:
+        - mailbox: mailbox
+          domain: domain
+          relays:
+          - relays
+          - relays
+          params: params
+        - mailbox: mailbox
+          domain: domain
+          relays:
+          - relays
+          - relays
+          params: params
+      properties:
+        id:
+          type: string
+        from:
+          $ref: "#/components/schemas/Path"
+        to:
+          items:
+            $ref: "#/components/schemas/Path"
+          type: array
+        headers:
+          properties: {}
+          type: object
+        size:
+          format: int64
+          type: number
+        created:
+          format: date-time
+          type: string
+      title: Message
+      type: object
+    Messages_1:
+      example:
+        total: 0.8008281904610115
+        start: 6.027456183070403
+        count: 1.4658129805029452
+        messages:
+        - headers: "{}"
+          size: 5.962133916683182
+          created: 2000-01-23T04:56:07.000+00:00
+          from:
+            mailbox: mailbox
+            domain: domain
+            relays:
+            - relays
+            - relays
+            params: params
+          id: id
+          to:
+          - mailbox: mailbox
+            domain: domain
+            relays:
+            - relays
+            - relays
+            params: params
+          - mailbox: mailbox
+            domain: domain
+            relays:
+            - relays
+            - relays
+            params: params
+        - headers: "{}"
+          size: 5.962133916683182
+          created: 2000-01-23T04:56:07.000+00:00
+          from:
+            mailbox: mailbox
+            domain: domain
+            relays:
+            - relays
+            - relays
+            params: params
+          id: id
+          to:
+          - mailbox: mailbox
+            domain: domain
+            relays:
+            - relays
+            - relays
+            params: params
+          - mailbox: mailbox
+            domain: domain
+            relays:
+            - relays
+            - relays
+            params: params
+      properties:
+        total:
+          description: Total number of stored messages
+          format: int64
+          type: number
+        start:
+          description: Start index of first returned message
+          format: int64
+          type: number
+        count:
+          description: Number of returned messages
+          format: int64
+          type: number
+        messages:
+          items:
+            $ref: "#/components/schemas/Message"
+          type: array
+      title: Messages
+      type: object
+x-original-swagger-version: "2.0"

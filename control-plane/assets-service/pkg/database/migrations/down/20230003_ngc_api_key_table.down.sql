@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS assets_ngc_api_key; 

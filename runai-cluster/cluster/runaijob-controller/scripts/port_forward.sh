@@ -1,0 +1,1 @@
+kubectl port-forward -n runai deployment/runai-job-controller 10000

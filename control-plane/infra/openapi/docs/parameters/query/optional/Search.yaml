@@ -1,0 +1,7 @@
+name: search
+in: query
+required: false
+description: Filter results by a free text search.
+schema:
+  type: string
+  example: "test project"

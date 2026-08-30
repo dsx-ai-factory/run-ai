@@ -1,0 +1,6 @@
+type: array
+items:
+  $ref: './NetworkTopologyLabel.yaml'
+description: A list of Kubernetes node label key/value pairs that represent the node’s position in the cluster’s network topology (for example, region, zone, block, rack, or hostname).
+  The topology is attached to the node pool on which the workload runs. The label order represents the hierarchy, from farthest (first) to closest (last). These labels are used by the NVIDIA Run:ai Scheduler when making placement decisions.
+nullable: true

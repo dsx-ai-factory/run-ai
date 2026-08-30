@@ -1,0 +1,26 @@
+type: object
+properties:
+  length:
+    type: object
+    description: >
+      Enforces the field's length (character count for strings, element count
+      for slices, arrays, and maps) to fall within the inclusive range
+      [min, max]. At least one of `min`/`max` must be specified.
+    nullable: true
+    properties:
+      min:
+        description: Enforces the minimum length.
+        type: integer
+        format: int32
+        minimum: 0
+        nullable: true
+      max:
+        description: Enforces the maximum length.
+        type: integer
+        format: int32
+        minimum: 0
+        nullable: true
+example:
+  length:
+    min: 1
+    max: 64

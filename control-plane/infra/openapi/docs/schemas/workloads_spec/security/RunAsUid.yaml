@@ -1,0 +1,8 @@
+description: The user id to run the entrypoint of the container which executes the workspace.
+  Default to the value specified in the environment asset `runAsUid` field (optional).
+  Use only when the source uid/gid of the environment asset is not `fromTheImage`, and
+  `overrideUidGidInWorkspace` is enabled.
+type: integer
+format: int64
+example: 500
+nullable: true

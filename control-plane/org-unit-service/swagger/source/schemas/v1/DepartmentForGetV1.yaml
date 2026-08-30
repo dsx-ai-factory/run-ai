@@ -1,0 +1,49 @@
+allOf:
+  - $ref: "./DepartmentV1CommonFieldsResponse.yaml"
+  - required:
+      - projects
+    properties:
+      tenantId:
+        type: integer
+        description: The tenant id this cluster belongs to.
+        example: 42
+      clusterUuid:
+        type: string
+        example: "d4e09285-59e2-4df8-91e1-9119f9afb1dd"
+        description: The cluster UUID this department belongs to.
+      createdAt:
+        type: string
+        description: The creation date of the department.
+        format: date-time
+        example: "2021-12-14T16:04:15.099Z"
+      id:
+        type: integer
+        format: int32
+        description: The unique id identifying the department.
+        example: 2
+      projects:
+        type: array
+        items:
+          $ref: './ProjectV1.yaml'
+        description: Projects under this department.
+        example: [{id: 16, name: "team-a", deserved_gpus: 3}]
+      projectsDeservedGpus:
+        type: string
+        description: Deprecated. Instead, use 'nodePoolsResources' field. Total deserved GPUs of the projects under this department - as string.
+        example: "3.00"
+        deprecated: true
+      departmentAdmins:
+        type: array
+        items:
+          type: string
+        description: Id's of users with department admin role that are assigned to managed the department
+      quotaStatuses:
+        type: array
+        nullable: true
+        items:
+          type: object
+      projectAggregatedNodePoolsResources:
+        type: array
+        nullable: true
+        items:
+          type: object

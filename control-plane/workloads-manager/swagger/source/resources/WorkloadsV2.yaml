@@ -1,0 +1,40 @@
+post:
+  summary: Create a workload.
+  description: Submit a workload with metadata and a Kubernetes manifest.
+  operationId: create_workload_v2
+  x-service: workloads-manager
+  x-test-coverage:
+    - control-plane/workloads-manager/pkg/services/services_test.go
+  x-authorize:
+    resource-type: workloads
+    action: create
+  tags:
+    - Workloads V2
+  parameters:
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/DryRun.yaml'
+  requestBody:
+    description: Workload metadata and manifest
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/WorkloadsV2/WorkloadV2CreateRequest.yaml"
+  responses:
+    202:
+      description: Workload creation request accepted.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/WorkloadsV2/WorkloadV2.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    409:
+      $ref: '../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

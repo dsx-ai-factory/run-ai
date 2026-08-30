@@ -1,0 +1,52 @@
+suite: premium features (call-home) and enterprise licensing
+templates:
+  - templates/validate.yaml
+
+tests:
+  #
+  # Free install defaults
+  #   helm install runai-backend .
+  #
+  - it: does not fail validation on a default free install
+    template: templates/validate.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  #
+  # Opt-out
+  #   helm install runai-backend . --set isEnterprise=true \
+  #     --set telemetryService.enabled=false
+  #
+  - it: opting out of call-home when enterprise does not fail validation
+    template: templates/validate.yaml
+    set:
+      isEnterprise: true
+      telemetryService.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  #
+  # Guardrail
+  #   helm install runai-backend . --set telemetryService.enabled=true   # rejected: not enterprise
+  #
+  - it: fails when call-home is enabled without isEnterprise
+    template: templates/validate.yaml
+    set:
+      telemetryService.enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: "telemetryService (call-home) is a premium feature; set isEnterprise=true to enable it"
+
+  #
+  # Enterprise enables premium on its own (call-home derived from isEnterprise)
+  #   helm install runai-backend . --set isEnterprise=true
+  #
+  - it: isEnterprise alone passes validation
+    template: templates/validate.yaml
+    set:
+      isEnterprise: true
+    asserts:
+      - hasDocuments:
+          count: 0

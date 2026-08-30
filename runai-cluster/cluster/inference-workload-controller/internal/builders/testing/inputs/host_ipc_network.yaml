@@ -1,0 +1,28 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  name: host-ipc-network
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  image:
+    value: image
+  imagePullPolicy:
+    value: Always
+  name:
+    value: host-ipc-network
+  gpu:
+    value: "1"
+  username:
+    value: user.name
+  hostIpc:
+    value: true
+  hostNetwork:
+    value: true
+  ports:
+    items:
+      serving-port:
+        value:
+          serviceType: ServingPort
+          container: 8080
+status: {}

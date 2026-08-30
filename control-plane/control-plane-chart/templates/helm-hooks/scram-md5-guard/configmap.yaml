@@ -1,0 +1,121 @@
+{{- /*
+  Pre-upgrade guardrail. If any DB role still uses a legacy MD5
+  password verifier, the FIPS postgres image in this version can't authenticate
+  it and the upgrade would fail mid-way. This job BLOCKS the upgrade and prints
+  a tailored, verified fix runbook. Bundled PostgreSQL only.
+*/}}
+{{- if and .Values.postgresql.enabled .Values.postgresql.md5Guard.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: runai-backend-scram-md5-guard
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: pre-upgrade
+    helm.sh/hook-weight: "-7"
+    helm.sh/hook-delete-policy: before-hook-creation
+data:
+  guard.sh: |
+    #!/bin/sh
+    # Pre-upgrade guardrail. BLOCKS (exit 1) ONLY on a CONFIRMED MD5 finding;
+    # every error / uncertainty -> exit 0, so a healthy upgrade is never falsely
+    # blocked. When it blocks, it prints a tailored fix runbook to this job's log.
+    set -u
+    SEC=/etc/scram-guard/secrets
+    {{- $pgStsName := "runai-backend-postgresql" }}
+    {{- if not (lookup "apps/v1" "StatefulSet" .Release.Namespace "runai-backend-postgresql") }}
+    {{- $pgStsName = printf "%s-postgresql" .Release.Name }}
+    {{- end }}
+    PGHOST="${PG_HOST:-{{ $pgStsName }}}"
+    PGPORT="${PG_PORT:-5432}"
+    PGDB="${PG_DB:-backend}"
+    NS="${POD_NAMESPACE:-runai-backend}"
+    POD="${PG_POD:-{{ printf "%s-0" $pgStsName }}}"
+    BACKUP=/bitnami/postgresql/scram_roles_backup.sql
+    say(){ echo "$*"; }
+
+    A="$(cat "$SEC/postgres-password" 2>/dev/null || true)"
+    [ -z "$A" ] && { say "[md5-guard] no admin password available; cannot verify -> allowing upgrade."; exit 0; }
+    q(){ PGPASSWORD="$A" psql -h "$PGHOST" -p "$PGPORT" -U postgres -d "$PGDB" -X -q -A -t -v ON_ERROR_STOP=1 "$@"; }
+
+    # Bounded wait for a working superuser connection (fail-open if never reachable).
+    n=0; ok=0
+    while [ "$n" -lt 30 ]; do q -c 'SELECT 1' >/dev/null 2>&1 && { ok=1; break; }; n=$((n+1)); sleep 2; done
+    if [ "$ok" -ne 1 ]; then
+      say "[md5-guard] could not verify MD5 state (postgres unreachable/auth) -> allowing upgrade."
+      say "[md5-guard] If the upgrade later fails with 'DETAIL: unsupported', see the recovery playbook."
+      exit 0
+    fi
+
+    q -c "SELECT rolname FROM pg_authid WHERE rolpassword LIKE 'md5%' ORDER BY 1;" > /tmp/md5roles 2>/dev/null
+    if [ ! -s /tmp/md5roles ]; then say "[md5-guard] no MD5 verifiers -> OK, upgrade may proceed."; exit 0; fi
+
+    # --- CONFIRMED MD5: classify each role via verify-before-alter. Emit psql
+    # -v vars + :'var' ALTERs so the password is escaped by psql (safe for any
+    # character, incl. quotes) and never appears literally in the printed block. ---
+    esc(){ printf '%s' "$1" | sed "s/'/''/g"; }
+    : > /tmp/vars; : > /tmp/alters; : > /tmp/manual; COUNT=0; IDX=0
+    while IFS= read -r r; do
+      [ -z "$r" ] && continue
+      COUNT=$((COUNT + 1))
+      stored="$(q -c "SELECT rolpassword FROM pg_authid WHERE rolname='$(esc "$r")';" 2>/dev/null)"
+      hit=""
+      # candidate secret (mounted here) -> path the same value lives at INSIDE the postgres pod
+      for pair in "postgres-password:/opt/bitnami/postgresql/secrets/postgres-password" "password:/opt/bitnami/postgresql/secrets/password" "grafana-password:/etc/scram-rehash-extra/grafana-password"; do
+        f="${pair%%:*}"; podpath="${pair#*:}"
+        pw="$(cat "$SEC/$f" 2>/dev/null)" || pw=""
+        [ -z "$pw" ] && continue
+        if [ "md5$(printf '%s' "$pw$r" | md5sum | cut -d' ' -f1)" = "$stored" ]; then hit="$podpath"; break; fi
+      done
+      if [ -n "$hit" ]; then
+        IDX=$((IDX + 1))
+        printf '  -v v%s="$(cat %s)" \\\n' "$IDX" "$hit" >> /tmp/vars
+        printf "  ALTER ROLE \"%s\" PASSWORD :'v%s';\n" "$r" "$IDX" >> /tmp/alters
+      else
+        printf "  - %s\n" "$r" >> /tmp/manual
+      fi
+    done < /tmp/md5roles
+
+    # ---- print the runbook (column-0 so the command block is copy-paste-safe) ----
+    cat <<RUNBOOK
+
+    ============================================================================
+    UPGRADE BLOCKED  --  legacy MD5 database passwords
+    ============================================================================
+    This version ships a FIPS PostgreSQL image that CANNOT authenticate MD5
+    password verifiers. ${COUNT} database role(s) still use MD5, so the upgrade
+    would fail part-way. Do the 3 steps below, then re-run the upgrade.
+
+    1) BACK UP the role passwords (small, restorable -- roles only):
+    kubectl exec -n ${NS} ${POD} -c postgresql -- bash -c 'PGPASSWORD=\$(cat /opt/bitnami/postgresql/secrets/postgres-password) pg_dumpall -U postgres -h 127.0.0.1 --roles-only > ${BACKUP}'
+
+    2) VERIFY the backup exists and is non-empty (expect a non-zero size):
+    kubectl exec -n ${NS} ${POD} -c postgresql -- ls -l ${BACKUP}
+
+    3) RE-HASH the affected roles to SCRAM (same passwords, read from the mounted
+    secrets -- nothing is typed). Copy the whole block:
+    kubectl exec -i -n ${NS} ${POD} -c postgresql -- bash <<'FIX'
+    export PGPASSWORD=\$(cat /opt/bitnami/postgresql/secrets/postgres-password)
+    export PGOPTIONS="-c password_encryption=scram-sha-256"
+    psql -U postgres -h 127.0.0.1 -d ${PGDB} -v ON_ERROR_STOP=1 \\
+    RUNBOOK
+    cat /tmp/vars
+    say "  <<SQL"
+    cat /tmp/alters
+    cat <<RUNBOOK2
+    SQL
+    FIX
+    RUNBOOK2
+    if [ -s /tmp/manual ]; then
+      say ""
+      say "    NOTE: the role(s) below have MD5 but NO matching secret (custom-created)."
+      say "    Add an ALTER ROLE line for each inside the block above, supplying its password:"
+      cat /tmp/manual
+    fi
+    cat <<RUNBOOK3
+
+    Then re-run the upgrade.  (Restore if ever needed: psql -U postgres -f ${BACKUP})
+    ============================================================================
+    RUNBOOK3
+    exit 1
+{{- end }}

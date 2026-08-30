@@ -1,0 +1,24 @@
+description: |
+  Layer 3 case "replica" for kubeflow.org/JAXJob/v1. SETs replica-level
+  fields (replicas, restartPolicy) and pod metadata for Worker replica type.
+effectiveRules:
+  # ----- Worker replica spec -----
+  - field: replicas
+    specSelector: workerReplicaSpec
+    enforcements: [{ set: { value: 4 } }]
+  - field: restartPolicy
+    specSelector: workerReplicaSpec
+    enforcements: [{ set: { value: OnFailure } }]
+
+  # ----- Worker pod metadata -----
+  - field: labels
+    specSelector: workerPodMetadata
+    enforcements: [{ set: { key: "replica.type", value: "worker" } }]
+  - field: annotations
+    specSelector: workerPodMetadata
+    enforcements: [{ set: { key: "replica.example.com/role", value: "worker" } }]
+
+  # ----- container image (verify policy modifies skeleton) -----
+  - field: image
+    specSelector: allContainers
+    enforcements: [{ set: { value: "jax/jax:0.4.0" } }]

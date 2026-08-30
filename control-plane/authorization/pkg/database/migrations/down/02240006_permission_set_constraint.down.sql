@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS role_to_permission_set DROP CONSTRAINT IF EXISTS role_to_permission_sets_key;

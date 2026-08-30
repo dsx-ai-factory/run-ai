@@ -1,0 +1,1 @@
+ALTER TABLE metrics.reports DROP COLUMN IF EXISTS description;

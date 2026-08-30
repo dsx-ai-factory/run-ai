@@ -1,0 +1,372 @@
+# Reference manifest showing ALL fields reachable by the
+# nvidia.com/DynamoGraphDeployment/v1alpha1 mapping.
+# Used by Layer 1 (structure) and Layer 2 (GET-side) tests.
+#
+# Structure:
+#   - workloadSpec fields (.spec): backendFramework, restart
+#   - serviceSpec fields (.spec.services.<name>): replicas, componentType, etc.
+#   - podSpec fields (via extraPodSpec): standard K8s pod spec
+#   - container fields: standard K8s container spec
+#
+# Note: DynamoGraphDeployment has dynamic service names (map keys).
+# We test with two services: service-a and service-b.
+apiVersion: nvidia.com/v1alpha1
+kind: DynamoGraphDeployment
+metadata:
+  name: test-dynamo
+  namespace: default
+  labels:
+    app: test
+  annotations:
+    example.com/annotation: "test-value"
+spec:
+  # ===== Workload-level fields =====
+  backendFramework: vllm
+  restart:
+    id: "restart-1"
+    strategy:
+      type: Sequential
+
+  # ===== Services (map with dynamic keys) =====
+  services:
+    service-a:
+      # Service-level fields (convenience shortcuts)
+      replicas: 2
+      componentType: worker
+      subComponentType: model
+      dynamoNamespace: test-ns
+      globalDynamoNamespace: true
+      serviceName: svc-a
+      sharedMemory:
+        size: "2Gi"
+        disabled: false
+      checkpoint:
+        enabled: true
+        checkpointRef: "ckpt-ref"
+      multinode:
+        nodeCount: 4
+      ingress:
+        enabled: true
+        host: "example.com"
+        path: "/api"
+        ingressClassName: nginx
+      modelRef:
+        name: my-model
+        namespace: model-ns
+
+      # Pod metadata shortcut
+      extraPodMetadata:
+        labels:
+          app: test
+        annotations:
+          example.com/annotation: "test-value"
+
+      # extraPodSpec - the actual PodSpec (overrides shortcuts above)
+      extraPodSpec:
+        # ----- podSpec field group -----
+        activeDeadlineSeconds: 60
+        automountServiceAccountToken: true
+        dnsConfig:
+          nameservers: ["1.1.1.1"]
+          searches: ["example.com"]
+          options:
+            - name: ndots
+              value: "5"
+        hostAliases:
+          - ip: "127.0.0.1"
+            hostnames: ["foo"]
+        dnsPolicy: ClusterFirst
+        enableServiceLinks: true
+        hostIPC: false
+        hostNetwork: false
+        hostPID: false
+        hostUsers: true
+        hostname: test
+        setHostnameAsFQDN: false
+        shareProcessNamespace: false
+        subdomain: test
+        terminationGracePeriodSeconds: 30
+        affinity:
+          nodeAffinity: {}
+          podAffinity: {}
+          podAntiAffinity: {}
+        tolerations:
+          - key: test
+            operator: Equal
+            value: somevalue
+            effect: NoSchedule
+            tolerationSeconds: 60
+        nodeSelector:
+          test: somevalue
+        overhead:
+          cpu: "100m"
+          memory: "256Mi"
+        imagePullSecrets:
+          - name: test
+        readinessGates:
+          - conditionType: ContainersReady
+        schedulingGates:
+          - name: example.com/gate
+        volumes:
+          - name: cm-vol
+            configMap:
+              name: cm
+              defaultMode: 420
+              items:
+                - key: foo
+                  path: foo
+              optional: false
+          - name: empty-vol
+            emptyDir:
+              medium: Memory
+              sizeLimit: "1Gi"
+        nodeName: test
+        preemptionPolicy: PreemptLowerPriority
+        priority: 1
+        priorityClassName: test
+        restartPolicy: Never
+        runtimeClassName: test
+        serviceAccountName: test
+
+        # ----- podSpecAndContainer (pod-scope security context) -----
+        securityContext:
+          fsGroup: 1
+          fsGroupChangePolicy: OnRootMismatch
+          supplementalGroups: [1, 2]
+          runAsGroup: 1
+          runAsNonRoot: true
+          runAsUser: 1
+          seccompProfile:
+            type: Localhost
+            localhostProfile: foo
+
+        # mainContainer - override for the main container
+        mainContainer:
+          image: main-override
+          resources:
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+            requests:
+              cpu: "1"
+              memory: "2Gi"
+
+        containers:
+          - name: test
+            args: ["arg-1"]
+            command: ["cmd-1"]
+            env:
+              - name: AS_VALUE
+                value: somevalue
+              - name: FROM_CM
+                valueFrom:
+                  configMapKeyRef:
+                    name: cm
+                    key: key
+                    optional: false
+              - name: FROM_SECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: secret
+                    key: key
+                    optional: false
+            envFrom:
+              - prefix: cm_
+                configMapRef:
+                  name: cm
+                  optional: false
+              - prefix: secret_
+                secretRef:
+                  name: secret
+                  optional: false
+            image: test
+            imagePullPolicy: IfNotPresent
+            ports:
+              - name: http
+                containerPort: 80
+                protocol: TCP
+                hostPort: 81
+                hostIP: "127.0.0.1"
+            resources:
+              limits:
+                cpu: "1"
+                memory: "1Gi"
+              requests:
+                cpu: "1"
+                memory: "1Gi"
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                add: ["NET_BIND_SERVICE"]
+                drop: ["ALL"]
+              privileged: false
+              procMount: Default
+              readOnlyRootFilesystem: false
+              runAsGroup: 1
+              runAsNonRoot: true
+              runAsUser: 1
+              seccompProfile:
+                type: Localhost
+                localhostProfile: foo
+            stdin: false
+            stdinOnce: false
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            tty: false
+            workingDir: /tmp
+            volumeMounts:
+              - name: cm-vol
+                mountPath: /etc/cm
+                mountPropagation: None
+                readOnly: true
+                subPath: foo
+                subPathExpr: foo
+
+        initContainers:
+          - name: test
+            args: ["init-arg"]
+            command: ["init-cmd"]
+            env:
+              - name: AS_VALUE
+                value: somevalue
+            envFrom:
+              - prefix: cm_
+                configMapRef:
+                  name: cm
+                  optional: false
+            image: test
+            imagePullPolicy: IfNotPresent
+            ports:
+              - name: http
+                containerPort: 80
+                protocol: TCP
+            resources:
+              limits:
+                cpu: "1"
+                memory: "1Gi"
+              requests:
+                cpu: "1"
+                memory: "1Gi"
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsGroup: 1
+              runAsNonRoot: true
+              runAsUser: 1
+            stdin: false
+            stdinOnce: false
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            tty: false
+            workingDir: /tmp
+            volumeMounts:
+              - name: cm-vol
+                mountPath: /etc/cm
+                mountPropagation: None
+                readOnly: true
+                subPath: foo
+                subPathExpr: foo
+
+    # Second service (minimal for testing iteration)
+    service-b:
+      replicas: 1
+      componentType: router
+      extraPodSpec:
+        terminationGracePeriodSeconds: 30
+        serviceAccountName: test
+        containers:
+          - name: test
+            image: test
+            resources:
+              limits:
+                cpu: "1"
+                memory: "1Gi"
+              requests:
+                cpu: "1"
+                memory: "1Gi"
+        initContainers:
+          - name: test
+            image: test
+            command: ["init-cmd"]
+
+    # A service named "test" so parameterized selectors (serviceAppContainerByName, etc.)
+    # can be validated with the default "test" sample value.
+    test:
+      replicas: 1
+      componentType: worker
+      extraPodMetadata:
+        labels:
+          app: test
+        annotations:
+          example.com/annotation: "test-value"
+      extraPodSpec:
+        terminationGracePeriodSeconds: 30
+        serviceAccountName: test
+        volumes:
+          - name: cm-vol
+            configMap:
+              name: cm
+          - name: host-vol
+            hostPath:
+              path: /tmp
+              type: Directory
+          - name: nfs-vol
+            nfs:
+              server: "1.1.1.1"
+              path: /export
+              readOnly: false
+          - name: pvc-vol
+            persistentVolumeClaim:
+              claimName: pvc
+              readOnly: false
+          - name: secret-vol
+            secret:
+              secretName: secret
+              defaultMode: 420
+              items:
+                - key: foo
+                  path: foo
+              optional: false
+        resourceClaims:
+          - name: claimRefByName
+            resourceClaimName: shared-claim
+          - name: claimRefByTemplate
+            resourceClaimTemplateName: shared-template
+        securityContext:
+          supplementalGroupsPolicy: Strict
+          appArmorProfile:
+            type: Localhost
+            localhostProfile: foo
+        mainContainer:
+          image: test
+          resources:
+            limits:
+              cpu: "1"
+            claims:
+              - name: claim
+                request: shared-request
+        containers:
+          - name: test
+            image: test
+            env:
+              - name: FROM_FIELD
+                valueFrom:
+                  fieldRef:
+                    apiVersion: v1
+                    fieldPath: metadata.name
+              - name: FROM_RESOURCE
+                valueFrom:
+                  resourceFieldRef:
+                    containerName: test
+                    divisor: "1"
+                    resource: limits.cpu
+            securityContext:
+              appArmorProfile:
+                type: Localhost
+                localhostProfile: foo
+            volumeMounts:
+              - name: cm-vol
+                mountPath: /etc/cm
+                recursiveReadOnly: Disabled
+        initContainers:
+          - name: test
+            image: test

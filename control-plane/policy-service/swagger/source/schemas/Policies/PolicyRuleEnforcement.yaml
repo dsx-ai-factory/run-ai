@@ -1,0 +1,18 @@
+description: >-
+  A single enforcement on a policy rule. Exactly one enforcement type is
+  expressed per object (for example set, default, required, blocked, options,
+  match, or one of the grouped range, length, elements, items, or quantityRange
+  constraints); combine multiple enforcement objects on a rule to apply several
+  constraints to the same field.
+anyOf:
+  - $ref: "./PolicyEnforcementSet.yaml"
+  - $ref: "./PolicyEnforcementDefault.yaml"
+  - $ref: "./PolicyEnforcementRequired.yaml"
+  - $ref: "./PolicyEnforcementBlocked.yaml"
+  - $ref: "./PolicyEnforcementLength.yaml"
+  - $ref: "./PolicyEnforcementOptions.yaml"
+  - $ref: "./PolicyEnforcementMatch.yaml"
+  - $ref: "./PolicyEnforcementRange.yaml"
+  - $ref: "./PolicyEnforcementElements.yaml"
+  - $ref: "./PolicyEnforcementItems.yaml"
+  - $ref: "./PolicyEnforcementQuantityRange.yaml"

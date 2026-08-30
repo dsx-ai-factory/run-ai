@@ -1,0 +1,70 @@
+policyInfo:
+  worker:
+    defaults:
+      compute:
+        cpuCoreLimit: 5
+        extendedResources:
+          attributes:
+            quantity: 20M
+          instances:
+          - resource: aaa/bbb
+          - quantity: 10M
+            resource: ccc/ddd
+      image: ubuntu
+      nodePools:
+      - node-pool-1
+      - node-pool-2
+      - node-pool-5
+      storage:
+        pvc:
+          attributes:
+            claimInfo:
+              size: 1M
+              storageClass: standard
+          instances:
+          - path: /aaa/bbb
+    rules:
+      image:
+        required: true
+      nodePools:
+        options:
+        - value: node-pool-1
+        - value: node-pool-2
+        - value: node-pool-3
+      nodeType:
+        options:
+        - value: node-1
+        - value: node-2
+      storage:
+        pvc:
+          attributes:
+            claimInfo:
+              storageClass:
+                canEdit: false
+          instances:
+            canAdd: false
+      workingDir:
+        required: true
+projectInfo:
+  name: project-1
+spec:
+  worker:
+    compute:
+      cpuCoreLimit: 5
+      extendedResources:
+      - quantity: 20M
+        resource: aaa/bbb
+      - quantity: 10M
+        resource: ccc/ddd
+    image: ubuntu
+    nodePools:
+    - node-pool-1
+    - node-pool-2
+    - node-pool-5
+    storage:
+      pvc:
+      - claimInfo:
+          size: 1M
+          storageClass: standard
+        name: pol-0
+        path: /aaa/bbb

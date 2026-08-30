@@ -1,0 +1,5 @@
+in: query
+name: timestamps
+description: Include timestamps on each line in the log output. Defaults to false.
+schema:
+  type: boolean

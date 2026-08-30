@@ -1,0 +1,11 @@
+type: object
+required:
+  - clusterId
+  - pods
+properties:
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  pods:
+    type: array
+    items:
+      $ref: './PodSyncFields.yaml'

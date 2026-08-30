@@ -1,0 +1,16 @@
+type: object
+properties:
+  id:
+    type: string
+    example: meta-llama/Llama-3.1-405B-Instruct
+    description: the huggingface model id
+  gated:
+    type: boolean
+    example: false
+  downloads:
+    type: integer
+    example: 558919
+  trending:
+    type: boolean
+    description: indicates if the model is trending
+    example: true

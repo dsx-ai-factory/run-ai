@@ -1,0 +1,20 @@
+codecov:
+  notify:
+    require_ci_to_pass: true
+comment:
+  layout: "header, diff, tree"
+  require_changes: false
+  branches: null
+  behavior: default
+  flags: null
+  paths: null
+coverage:
+  precision: 2
+  range:
+  - 70.0
+  - 100.0
+  round: down
+  status:
+    changes: false
+    patch: true
+    project: true

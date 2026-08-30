@@ -1,0 +1,89 @@
+package client
+
+import (
+	"reflect"
+	"testing"
+)
+
+func TestGetDefaultRedirectUris(t *testing.T) {
+	testCases := []struct {
+		name            string
+		tenantUrl       string
+		appHost         string
+		oldRedirectUris *[]string
+		expected        *[]string
+	}{
+		{
+			name:            "no old redirect uris",
+			tenantUrl:       "https://tenant.run.ai",
+			appHost:         "https://app.run.ai",
+			oldRedirectUris: nil,
+			expected: &[]string{
+				"https://tenant.run.ai/login/callback",
+				"https://tenant.run.ai/login/callback?runai_flow=invite",
+				"https://tenant.run.ai/oauth-code",
+				"https://tenant.run.ai",
+				"https://app.run.ai/login/callback",
+				"https://app.run.ai/oauth-code",
+				"http://localhost",
+			},
+		},
+		{
+			name:      "with old redirect uris: broad wildcards and bare appHost are stripped, specific paths kept",
+			tenantUrl: "https://tenant.run.ai",
+			appHost:   "https://app.run.ai",
+			oldRedirectUris: &[]string{
+				"https://tenant.run.ai/*",
+				"https://tenant.run.ai/login/callback/*",
+				"https://abcd.tenant.run.ai",
+				"https://app.run.ai",
+				"https://app.run.ai/*",
+				"https://app.run.ai/login/callback",
+				"https://app.run.ai/login/callback/*",
+				"https://app.run.ai/oauth-code",
+				"http://localhost:*",
+			},
+			expected: &[]string{
+				"https://tenant.run.ai/login/callback",
+				"https://tenant.run.ai/login/callback?runai_flow=invite",
+				"https://tenant.run.ai/oauth-code",
+				"https://tenant.run.ai",
+				"https://app.run.ai/login/callback",
+				"https://app.run.ai/oauth-code",
+				"http://localhost",
+				"https://abcd.tenant.run.ai",
+			},
+		},
+		{
+			name:      "filters out legacy grafana redirect uris and broad wildcards",
+			tenantUrl: "https://tenant.run.ai",
+			appHost:   "https://app.run.ai",
+			oldRedirectUris: &[]string{
+				"https://tenant.run.ai/*",
+				"https://grafana-tenant.run.ai/login/generic_oauth",
+				"https://abcd.tenant.run.ai",
+				"https://other-sso.run.ai/login/generic_oauth",
+				"http://localhost:*",
+			},
+			expected: &[]string{
+				"https://tenant.run.ai/login/callback",
+				"https://tenant.run.ai/login/callback?runai_flow=invite",
+				"https://tenant.run.ai/oauth-code",
+				"https://tenant.run.ai",
+				"https://app.run.ai/login/callback",
+				"https://app.run.ai/oauth-code",
+				"http://localhost",
+				"https://abcd.tenant.run.ai",
+				"https://other-sso.run.ai/login/generic_oauth",
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual := getDefaultRedirectUris(tc.tenantUrl, tc.appHost, tc.oldRedirectUris)
+			if !reflect.DeepEqual(actual, tc.expected) {
+				t.Errorf("Expected %v, got %v", tc.expected, actual)
+			}
+		})
+	}
+}

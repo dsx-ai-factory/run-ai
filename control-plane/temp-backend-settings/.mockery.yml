@@ -1,0 +1,9 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+packages:
+  github.com/run-ai/runai/control-plane/temp-backend-settings/pkg/services:
+    interfaces:
+      SettingsManagerInterface: {}

@@ -1,0 +1,106 @@
+apiVersion: leaderworkerset.x-k8s.io/v1
+kind: LeaderWorkerSet
+metadata:
+  annotations:
+    workloadApiVersion: run.ai/v1alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    project: team-a
+    release: test-path-rewrite-haproxy-http
+    run.ai/top-owner-uid: ""
+    workloadKind: DistributedInferenceWorkload
+    workloadName: test-path-rewrite-haproxy-http
+  name: test-path-rewrite-haproxy-http
+  namespace: runai-team-a
+spec:
+  leaderWorkerTemplate:
+    leaderTemplate:
+      metadata:
+        labels:
+          run.ai/top-owner-uid: ""
+      spec:
+        containers:
+        - image: image
+          name: leader
+          ports:
+          - containerPort: 8080
+            name: port-8080
+            protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+          resources: {}
+        schedulerName: runai-scheduler
+    workerTemplate:
+      metadata:
+        labels:
+          run.ai/top-owner-uid: ""
+      spec:
+        containers:
+        - image: image
+          name: worker
+          resources: {}
+        schedulerName: runai-scheduler
+  rolloutStrategy:
+    type: RollingUpdate
+  startupPolicy: LeaderCreated
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  name: dinfw-test-path-rewrite-haproxy-http-sp-0
+  namespace: runai-team-a
+  ownerReferences:
+  - apiVersion: run.ai/v1alpha1
+    blockOwnerDeletion: true
+    controller: true
+    kind: DistributedInferenceWorkload
+    name: test-path-rewrite-haproxy-http
+    uid: ""
+spec:
+  ports:
+  - name: serving-port
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    leaderworkerset.sigs.k8s.io/name: test-path-rewrite-haproxy-http
+    leaderworkerset.sigs.k8s.io/worker-index: "0"
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    haproxy.org/path-rewrite: /team-a/test-workload(/|$)(.*) /\2
+    nginx.ingress.kubernetes.io/proxy-body-size: 8g
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  name: dinfw-test-path-rewrite-haproxy-http-sp-0
+  namespace: runai-team-a
+  ownerReferences:
+  - apiVersion: run.ai/v1alpha1
+    blockOwnerDeletion: true
+    controller: true
+    kind: DistributedInferenceWorkload
+    name: test-path-rewrite-haproxy-http
+    uid: ""
+spec:
+  ingressClassName: haproxy
+  rules:
+  - host: cluster-domain.mock
+    http:
+      paths:
+      - backend:
+          service:
+            name: dinfw-test-path-rewrite-haproxy-http-sp-0
+            port:
+              number: 80
+        path: /team-a/test-workload
+        pathType: Prefix
+status:
+  loadBalancer: {}

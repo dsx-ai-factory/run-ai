@@ -1,0 +1,31 @@
+type: object
+description: Create or update a mapping for a given workload type.
+required:
+  - workloadType
+properties:
+  workloadType:
+    description: >-
+      The Kubernetes group, version, and kind of the workload type this mapping
+      applies to.
+    allOf:
+      - $ref: "../../../../../workloads-manager/swagger/source/schemas/WorkloadsV2/GVK.yaml"
+  description:
+    $ref: "./MappingDescriptionOptional.yaml"
+  specSelectors:
+    $ref: "./SpecSelectors.yaml"
+
+example:
+  workloadType:
+    group: apps
+    kind: Deployment
+    version: v1
+  description: Tenant override for this workload type.
+  specSelectors:
+    containerByName:
+      description: Containers with a given name.
+      query: >
+        .spec.template.spec.containers[]
+        | select(.name == $ARGS.named.containerName)
+      fieldGroups:
+        - podSpecContainer
+        - podSpecAndContainer

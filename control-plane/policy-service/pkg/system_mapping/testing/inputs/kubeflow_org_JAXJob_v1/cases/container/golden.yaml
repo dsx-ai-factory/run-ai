@@ -1,0 +1,41 @@
+apiVersion: kubeflow.org/v1
+kind: JAXJob
+metadata:
+  name: test
+spec:
+  jaxReplicaSpecs:
+    Worker:
+      replicas: 2
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - image: jax/jax:0.4.0
+            imagePullPolicy: IfNotPresent
+            name: jax
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 1000
+          initContainers:
+          - image: jax/jax:0.4.0
+            imagePullPolicy: IfNotPresent
+            name: init
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 1000

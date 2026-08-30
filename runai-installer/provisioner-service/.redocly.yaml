@@ -1,0 +1,6 @@
+extends:
+  - recommended
+rules:
+  security-defined: off
+  info-license: warn
+

@@ -1,0 +1,1 @@
+ALTER TABLE assets_pvc ADD COLUMN if not exists ephemeral boolean NOT NULL DEFAULT false;

@@ -1,0 +1,65 @@
+{{- if and (.Values.global.ingress.enabled) (eq .Values.global.config.kubernetesDistribution "openshift") }}
+{{- if .Values.traefik.enabled }}
+{{- $certificate := .Values.global.ingress.openshift.route.tls.certificate -}}
+{{- $key := .Values.global.ingress.openshift.route.tls.key -}}
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: {{ .Release.Name }}-traefik
+  annotations:
+    haproxy.router.openshift.io/hsts_header: max-age=31536000;includeSubDomains;preload
+spec:
+  host: {{ .Values.global.domain }}
+  path: /
+  to:
+    kind: Service
+    name: {{ .Release.Name }}-traefik
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: None
+    {{- if $certificate }}
+    certificate: |-
+      {{- $certificate | nindent 6 }}
+    {{- end }}
+    {{- if $key }}
+    key: |-
+      {{- $key | nindent 6 }}
+    {{- end }}
+  wildcardPolicy: None
+
+{{- if .Values.global.multiTenancy.enabled }}
+---
+
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: {{ .Release.Name }}-traefik-wc
+  annotations:
+    haproxy.router.openshift.io/hsts_header: max-age=31536000;includeSubDomains;preload
+spec:
+  host: wildcard.{{ .Values.global.domain }}
+  path: /
+  to:
+    kind: Service
+    name: {{ .Release.Name }}-traefik
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: None
+    {{- if $certificate }}
+    certificate: |-
+      {{- $certificate | nindent 6 }}
+    {{- end }}
+    {{- if $key }}
+    key: |-
+      {{- $key | nindent 6 }}
+    {{- end }}
+  wildcardPolicy: Subdomain
+{{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,28 @@
+apiVersion: run.ai/v2alpha1
+kind: InteractiveWorkload
+metadata:
+  creationTimestamp: null
+  name: job-3
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  image:
+    value: ubuntu
+  name:
+    value: job-3
+  pvcs:
+    items:
+      pvc-0:
+        value:
+          path: /tmp/existing
+          readOnly: true
+          claimName: existing
+          existingPvc: true
+      pvc-1:
+        value:
+          path: this/should/not/be/ignored
+          claimName: scratch-volume
+          size: 10M
+          readWriteMany: true
+          storageClass: scratch-storage-class
+          ephemeral: true

@@ -1,0 +1,47 @@
+required:
+  - id
+  - name
+  - scopeType
+  - scopeId
+  - createdBy
+  - createdAt
+  - workloadType
+properties:
+  id:
+    $ref: "./TemplateId.yaml"
+  name:
+    $ref: "./TemplateName.yaml"
+  description:
+    $ref: "./TemplateDescription.yaml"
+  workloadType:
+    $ref: "../workloads/WorkloadType.yaml"
+  scopeType:
+    $ref: "../scopes/ScopeType.yaml"
+  scopeId:
+    $ref: "../scopes/ScopeId.yaml"
+  clusterId:
+    $ref: "../scopes/ClusterIdOptional.yaml"
+  departmentId:
+    $ref: "../scopes/DepartmentIdOptional.yaml"
+  projectId:
+    $ref: "../scopes/ProjectIdOptional.yaml"
+  createdBy:
+    description: The user who created the template
+    type: string
+    example: test@lab.com
+  createdAt:
+    description: The creation time of the template.
+    type: string
+    format: date-time
+    example: 2022-01-01T03:49:52.531Z
+  updatedBy:
+    description: The user who recently updated the template
+    type: string
+    nullable: true
+    example: test@lab.com
+  updatedAt:
+    description: The time of the recent update.
+    type: string
+    nullable: true
+    format: date-time
+    example: 2022-01-01T03:49:52.531Z

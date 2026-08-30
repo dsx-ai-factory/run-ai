@@ -1,0 +1,20 @@
+{{- /* Only runs for the Helm-managed PostgreSQL subchart. */}}
+{{- if .Values.postgresql.enabled }}
+{{- include "common.job" (list . .Values.postgresqlUserInit .Values.postgresqlUserInit.serviceAccount "control-plane.postgresqlUserInit.job") }}
+{{- end }}
+
+{{- define "control-plane.postgresqlUserInit.job" -}}
+{{- $top := first . }}
+{{- $postgresqlUserInit := deepCopy (index . 1) }}
+{{- if eq $top.Values.global.config.kubernetesDistribution "openshift" }}
+{{- $_ := unset $postgresqlUserInit.securityContext "runAsUser" }}
+{{- end }}
+spec:
+  template:
+    spec:
+      containers:
+      - {{- include "common.container" (list $top $postgresqlUserInit) | nindent 12 }}
+      restartPolicy: OnFailure
+      initContainers:
+        {{- include "awaitingPostgresReadinessContainer" . | nindent 8 }}
+{{- end }}

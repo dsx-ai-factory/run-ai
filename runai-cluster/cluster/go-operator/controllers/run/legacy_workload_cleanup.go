@@ -1,0 +1,154 @@
+package run
+
+import (
+	"context"
+	"fmt"
+	"strings"
+
+	legacycleanup "github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/legacy-workload-cleanup"
+	cu "github.com/run-ai/runai/runai-cluster/cluster/go-operator/pkg/controller-utils"
+	runaiv1 "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1"
+	batchv1 "k8s.io/api/batch/v1"
+	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+)
+
+func (r *RunAIConfigReconciler) reconcileLegacyWorkloadCleanup(
+	ctx context.Context,
+	config *runaiv1.RunaiConfig,
+) (bool, error) {
+	if config == nil {
+		return false, fmt.Errorf("RunaiConfig is missing")
+	}
+	if condition := config.Status.GetCondition(runaiv1.ConditionTypeLegacyWorkloadCleanupComplete); condition != nil &&
+		condition.Status == metav1.ConditionTrue {
+		return false, nil
+	}
+
+	annotations := config.GetAnnotations()
+	sourceVersion := annotations[legacycleanup.SourceVersionAnnotation]
+	if sourceVersion == "" {
+		controllersDisabled, stateErr := legacycleanup.ControllersDisabled(config)
+		if stateErr != nil {
+			return setCleanupCondition(config, metav1.ConditionFalse, runaiv1.LegacyWorkloadCleanupBlocked, stateErr.Error()), nil
+		}
+		if controllersDisabled {
+			return clearCleanupCondition(config), nil
+		}
+		return setCleanupCondition(
+			config,
+			metav1.ConditionFalse,
+			runaiv1.LegacyWorkloadCleanupBlocked,
+			"cleanup source version annotation is missing while legacy controllers are enabled",
+		), nil
+	}
+	shouldRun, err := legacycleanup.SourceRequiresCleanup(sourceVersion)
+	if err != nil {
+		return setCleanupCondition(config, metav1.ConditionFalse, runaiv1.LegacyWorkloadCleanupBlocked, err.Error()), nil
+	}
+	if !shouldRun {
+		return clearCleanupCondition(config), nil
+	}
+
+	if err := legacycleanup.ValidateReadinessMarker(config); err != nil {
+		return setCleanupCondition(
+			config, metav1.ConditionFalse, runaiv1.LegacyWorkloadCleanupWaitingForReady, err.Error(),
+		), nil
+	}
+
+	controllersDisabled, err := legacycleanup.ControllersDisabled(config)
+	if err != nil {
+		return setCleanupCondition(config, metav1.ConditionFalse, runaiv1.LegacyWorkloadCleanupBlocked, err.Error()), nil
+	}
+
+	job := &batchv1.Job{}
+	jobKey := client.ObjectKey{Namespace: runaiv1.DefaultNamespace, Name: legacycleanup.CleanupJobName}
+	err = r.localClusterClient.Get(ctx, jobKey, job)
+	if apierrors.IsNotFound(err) {
+		return setCleanupCondition(
+			config, metav1.ConditionFalse, runaiv1.LegacyWorkloadCleanupCreating,
+			"Creating legacy workload cleanup Job",
+		), nil
+	}
+	if err != nil {
+		return false, fmt.Errorf("get cleanup Job %s: %w", jobKey, err)
+	}
+
+	if condition := trueJobCondition(job, batchv1.JobFailed); condition != nil {
+		return setCleanupCondition(
+			config, metav1.ConditionFalse, runaiv1.LegacyWorkloadCleanupFailed, jobConditionError(condition),
+		), nil
+	}
+	if condition := trueJobCondition(job, batchv1.JobComplete); condition != nil {
+		if !controllersDisabled {
+			return setCleanupCondition(
+				config, metav1.ConditionFalse, runaiv1.LegacyWorkloadCleanupFailed,
+				"cleanup Job completed while legacy controllers remained enabled; delete the Job to retry",
+			), nil
+		}
+		return setCleanupCondition(
+			config, metav1.ConditionTrue, runaiv1.LegacyWorkloadCleanupCompleted,
+			"Legacy workload controller cleanup is complete",
+		), nil
+	}
+
+	return setCleanupCondition(
+		config, metav1.ConditionFalse, runaiv1.LegacyWorkloadCleanupRunning,
+		"Legacy workload cleanup Job is running",
+	), nil
+}
+
+func setCleanupCondition(
+	config *runaiv1.RunaiConfig,
+	status metav1.ConditionStatus,
+	reason runaiv1.ConditionReason,
+	message string,
+) bool {
+	existing := config.Status.GetCondition(runaiv1.ConditionTypeLegacyWorkloadCleanupComplete)
+	if existing != nil && existing.Status == status && existing.Reason == string(reason) &&
+		existing.Message == message && existing.ObservedGeneration == config.Generation {
+		return false
+	}
+	cu.SetCondition(
+		config, runaiv1.ConditionTypeLegacyWorkloadCleanupComplete, status, reason, message, config.Generation,
+	)
+	return true
+}
+
+func clearCleanupCondition(config *runaiv1.RunaiConfig) bool {
+	conditions := config.Status.Conditions
+	for i := range conditions {
+		if conditions[i].Type != string(runaiv1.ConditionTypeLegacyWorkloadCleanupComplete) {
+			continue
+		}
+		config.Status.Conditions = append(conditions[:i], conditions[i+1:]...)
+		return true
+	}
+	return false
+}
+
+func trueJobCondition(job *batchv1.Job, conditionType batchv1.JobConditionType) *batchv1.JobCondition {
+	for i := range job.Status.Conditions {
+		condition := &job.Status.Conditions[i]
+		if condition.Type == conditionType && condition.Status == corev1.ConditionTrue {
+			return condition
+		}
+	}
+	return nil
+}
+
+func jobConditionError(condition *batchv1.JobCondition) string {
+	parts := make([]string, 0, 2)
+	if condition.Reason != "" {
+		parts = append(parts, condition.Reason)
+	}
+	if condition.Message != "" {
+		parts = append(parts, condition.Message)
+	}
+	if len(parts) == 0 {
+		return "cleanup Job failed"
+	}
+	return strings.Join(parts, ": ")
+}

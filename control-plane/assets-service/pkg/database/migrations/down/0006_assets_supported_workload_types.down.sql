@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS assets_supported_workload_types;

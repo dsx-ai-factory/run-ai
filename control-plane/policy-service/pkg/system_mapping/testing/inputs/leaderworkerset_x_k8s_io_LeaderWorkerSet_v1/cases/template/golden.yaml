@@ -1,0 +1,29 @@
+apiVersion: leaderworkerset.x-k8s.io/v1
+kind: LeaderWorkerSet
+metadata:
+  name: test
+spec:
+  leaderWorkerTemplate:
+    leaderTemplate:
+      metadata: {}
+      spec:
+        containers:
+        - image: lws/worker:v1
+          name: leader
+        initContainers:
+        - image: lws/worker:v1
+          name: init
+    restartPolicy: RecreateGroupOnPodRestart
+    size: 4
+    subGroupPolicy:
+      subGroupSize: 2
+    workerTemplate:
+      metadata: {}
+      spec:
+        containers:
+        - image: lws/worker:v1
+          name: worker
+        initContainers:
+        - image: lws/worker:v1
+          name: init
+  replicas: 1

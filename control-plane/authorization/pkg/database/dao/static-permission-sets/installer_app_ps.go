@@ -1,0 +1,44 @@
+package static_permission_sets
+
+import (
+	"github.com/run-ai/runai/control-plane/authorization/generated/pkg/api"
+	"github.com/run-ai/runai/control-plane/authorization/pkg/database/models"
+)
+
+var InstallerAppPS = models.PermissionSet{
+	Name:        "Installer app permission set",
+	Description: "",
+	Internal:    true,
+	Permissions: []models.RolePermission{
+		{
+			ResourceType: api.RESOURCETYPE_TENANT,
+			Read:         true,
+		},
+		{
+			ResourceType: api.RESOURCETYPE_CLUSTER_CONFIG,
+			Read:         true,
+			Sync:         true,
+		},
+		{
+			ResourceType: api.RESOURCETYPE_CLUSTER,
+			Create:       true,
+			Read:         true,
+		},
+		{
+			ResourceType: api.RESOURCETYPE_CLUSTERS_MINIMAL,
+			Read:         true,
+		},
+		{
+			ResourceType: api.RESOURCETYPE_SECURITY_SETTINGS,
+			Read:         true,
+		},
+		{
+			ResourceType: api.RESOURCETYPE_BRANDING_SETTINGS,
+			Read:         true,
+		},
+		{
+			ResourceType: api.RESOURCETYPE_SETTINGS,
+			Read:         true,
+		},
+	},
+}

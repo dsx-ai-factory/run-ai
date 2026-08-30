@@ -1,0 +1,16 @@
+apiVersion: run.ai/v1alpha1
+kind: DistributedInferenceWorkload
+metadata:
+  name: test-path-rewrite-nginx-http
+  namespace: runai-team-a
+spec:
+  servingPorts:
+    items:
+      serving-port:
+        value:
+          port: 8080
+          exposedUrl: https://cluster-domain.mock/team-a/test-workload
+leaderSpec:
+  image:
+    value: image
+

@@ -1,0 +1,1 @@
+drop view if exists events_of_workload_view;

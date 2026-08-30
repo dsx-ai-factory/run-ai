@@ -1,0 +1,46 @@
+image: hello
+args: SHOULD FAIL ARG
+
+environmentVariables:
+  - name: FIXED_ENV
+    value: SHOULD_FAIL_ENV_VALUE
+  - name: CAN_CHANGE_ENV
+    value: CHANGED_VALUE
+  - name: ADDED_ENV
+    value: ADDED_VALUE
+
+priorityClass: build
+
+storage:
+  hostPath:
+    - name: FIXED_HOST_PATH_ITEM
+      path: SHOULD_FAIL_PATH
+      mountPath: SHOULD_FAIL_MOUNT_PATH
+    - name: CAN_CHANGE_HOST_PATH_ITEM
+      path: CHANGED_PATH
+      mountPath: CHANGED_MOUNT_PATH
+    - name: ADDED_HOST_PATH_ITEM
+      path: ADDED_PATH
+      mountPath: ADDED_MOUNT_PATH
+
+  pvc:
+    - name: ATTRIBUTE_DEFAULTS_CHANGED
+      claimInfo:
+        accessMode:
+          readWriteMany: false
+          readWriteOnce: true
+          readOnlyMany: true
+    - name: ATTRIBUTE_DEFAULTS_OK
+      claimInfo:
+        accessMode:
+          readWriteMany: true
+          readWriteOnce: false
+          readOnlyMany: true
+
+ports:
+  - name: FIXED_PORT
+    container: 8801
+  - name: CAN_CHANGE_PORT
+    container: 8802
+  - name: ADDED_PORT
+    container: 8003

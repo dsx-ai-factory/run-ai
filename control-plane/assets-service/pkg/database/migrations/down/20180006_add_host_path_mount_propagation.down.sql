@@ -1,0 +1,1 @@
+ALTER TABLE assets_host_path DROP COLUMN if exists mount_propagation;

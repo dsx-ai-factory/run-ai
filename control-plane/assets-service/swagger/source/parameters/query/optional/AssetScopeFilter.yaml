@@ -1,0 +1,6 @@
+name: scope
+in: query
+required: false
+description: "Filters results by scope. Returns only assets that belong to the specified scope. Mutually exclusive with includeDescendants. Valid values: tenant, cluster, department, project."
+schema:
+  type: string

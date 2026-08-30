@@ -1,0 +1,10 @@
+name: operatingSystem
+in: path
+required: true
+description: The operating system name.
+schema:
+  type: string
+  enum: [linux, windows, darwin]
+  maxLength: 7
+  minLength: 4
+  example: linux

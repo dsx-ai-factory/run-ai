@@ -1,0 +1,4 @@
+image: vllm/vllm-openai:latest
+servingPort:
+  container: 8000
+  authorizationType: public

@@ -1,0 +1,11 @@
+x-internal: true
+description: sync configuration of a given cluster
+type: object
+properties:
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  avoidDeletionsOfObsoletePolicies:
+    description: true if a customer requested to avoid deletions of obsolete policies on the cluster.
+      The implication is that the customer is responsible for any inconsistency b/w control plane and
+      cluster policies, that the system attempts to prevent by deleting inconsistent cluster policies.
+    type: boolean

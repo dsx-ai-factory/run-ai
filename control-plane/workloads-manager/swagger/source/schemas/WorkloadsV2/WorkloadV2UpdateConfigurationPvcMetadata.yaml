@@ -1,0 +1,32 @@
+type: object
+additionalProperties: false
+description: |
+  PVC metadata forwarded to the created PVC as-is.
+  The Namespace is determined by the WorkloadRunner.
+required:
+  - name
+properties:
+  name:
+    type: string
+    description: |
+      PVC name. Must be unique across the workload's PVCs and conform to
+      Kubernetes DNS-1123 subdomain rules.
+    pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
+    minLength: 1
+    maxLength: 253
+    example: my-pytorch-pvc
+  labels:
+    type: object
+    description: |
+      Labels to apply to the created PVC. Map of string keys and string values.
+    additionalProperties:
+      type: string
+    example:
+      team: research
+  annotations:
+    type: object
+    description: |
+      Annotations to apply to the created PVC. Map of string keys and string
+      values. Commonly used to pass CSI driver hints.
+    additionalProperties:
+      type: string

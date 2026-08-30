@@ -1,0 +1,4 @@
+allOf:
+  - $ref: "../../../../../infra/openapi/docs/schemas/assets/AssetsIds.yaml"
+nullable: true
+type: object

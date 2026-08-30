@@ -1,0 +1,36 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    project: team-a
+    workloadKind: InferenceWorkload
+    workloadName: inference-workingdir
+  name: inference-0
+  namespace: runai-team-a
+spec:
+  template:
+    metadata:
+      annotations:
+        user: aviad.hayumi
+      labels:
+        project: team-a
+        release: inference-workingdir
+        run.ai/inferenceworkload: inference-workingdir
+        workloadKind: InferenceWorkload
+        workloadName: inference-workingdir
+    spec:
+      containers:
+      - image: image
+        name: ""
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources: {}
+        workingDir: /home/runai
+      enableServiceLinks: false
+      schedulerName: runai-scheduler
+status: {}

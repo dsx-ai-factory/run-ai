@@ -1,0 +1,60 @@
+services:
+
+  postgres:
+    profiles:
+      - localdebug
+    image: postgres:18.4
+    container_name: postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: runai
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    expose:
+      - 5432
+    volumes:
+      - ./config/postgres/initdb:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  bff-service:
+    profiles:
+      - localdebug
+    container_name: bff-service
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    environment:
+      - SERVICE_NAME=bff-service
+      - USE_MOCKS=true
+      - NOTIFICATIONS_ENABLED=false
+      - SERVER_HEALTH_ENDPOINT=/health
+      - CACHE_ENABLED=true
+      - CACHE_TYPE=inmemory
+    env_file: config/bff-service/config.yaml
+    volumes:
+      - ./config/bff-service/secrets:/etc/secrets
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "./bff-service", "--health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      postgres:
+        condition: service_healthy
+  bff-service-tests:
+    profiles:
+      - notlocaldebug
+    build:
+      context: ../
+      dockerfile: integration-tests/Dockerfile
+    env_file: config/integ-tests/config.yaml
+    depends_on:
+      bff-service:
+        condition: service_healthy

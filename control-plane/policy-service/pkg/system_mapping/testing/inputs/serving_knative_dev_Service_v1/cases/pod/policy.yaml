@@ -1,0 +1,282 @@
+description: |
+  Layer 3 case "pod" for serving.knative.dev/Service/v1. SETs every field reachable
+  through the podSpec field group plus the pod-scope variations of the
+  podSpecAndContainer field group (i.e. .spec.template.spec.securityContext
+  and friends — same fields surface on each container in the container case).
+
+  Custom formatters used in this case (one rule per produced array entry,
+  merged by the formatter's arrayKey):
+
+    * dnsOptions, hostAliases, tolerations, readinessGates,
+      reservedResourceClaims (runai-podSpec, array fields).
+    * nodeSelectors, resourceOverheads (runai-podSpec, map fields keyed by
+      the entry's key+value pair).
+    * configMapVolumes, emptyDirVolumes, hostPathVolumes, nfsVolumes,
+      pvcVolumes, secretVolumes (runai-podSpec, one volume per kind).
+
+  All other rules use KeyValue. Read together with cases/pod/golden.yaml.
+effectiveRules:
+  # ----- pod scalars (KeyValue) -----
+  - field: activeDeadlineSeconds
+    specSelector: podSpec
+    enforcements: [{ set: { value: 60 } }]
+  - field: automountServiceAccountToken
+    specSelector: podSpec
+    enforcements: [{ set: { value: true } }]
+  - field: dnsPolicy
+    specSelector: podSpec
+    enforcements: [{ set: { value: ClusterFirst } }]
+  - field: enableServiceLinks
+    specSelector: podSpec
+    enforcements: [{ set: { value: true } }]
+  - field: hostIPC
+    specSelector: podSpec
+    enforcements: [{ set: { value: false } }]
+  - field: hostNetwork
+    specSelector: podSpec
+    enforcements: [{ set: { value: false } }]
+  - field: hostPID
+    specSelector: podSpec
+    enforcements: [{ set: { value: false } }]
+  - field: hostUsers
+    specSelector: podSpec
+    enforcements: [{ set: { value: true } }]
+  - field: hostname
+    specSelector: podSpec
+    enforcements: [{ set: { value: test } }]
+  - field: setHostnameAsFQDN
+    specSelector: podSpec
+    enforcements: [{ set: { value: false } }]
+  - field: shareProcessNamespace
+    specSelector: podSpec
+    enforcements: [{ set: { value: false } }]
+  - field: subdomain
+    specSelector: podSpec
+    enforcements: [{ set: { value: test } }]
+  - field: terminationGracePeriodSeconds
+    specSelector: podSpec
+    enforcements: [{ set: { value: 30 } }]
+  - field: nodeName
+    specSelector: podSpec
+    enforcements: [{ set: { value: test } }]
+  - field: preemptionPolicy
+    specSelector: podSpec
+    enforcements: [{ set: { value: PreemptLowerPriority } }]
+  - field: priority
+    specSelector: podSpec
+    enforcements: [{ set: { value: 1 } }]
+  - field: priorityClassName
+    specSelector: podSpec
+    enforcements: [{ set: { value: test } }]
+  - field: restartPolicy
+    specSelector: podSpec
+    enforcements: [{ set: { value: Always } }]
+  - field: runtimeClassName
+    specSelector: podSpec
+    enforcements: [{ set: { value: test } }]
+  - field: serviceAccountName
+    specSelector: podSpec
+    enforcements: [{ set: { value: test } }]
+
+  # ----- DNS -----
+  - field: dnsNameservers
+    specSelector: podSpec
+    enforcements: [{ set: { value: ["1.1.1.1"] } }]
+  - field: dnsSearches
+    specSelector: podSpec
+    enforcements: [{ set: { value: ["example.com"] } }]
+  - field: dnsOptions # custom formatter
+    specSelector: podSpec
+    enforcements:
+      - set: { name: ndots, value: "5" }
+
+  # ----- host aliases (custom) -----
+  - field: hostAliases
+    specSelector: podSpec
+    enforcements:
+      - set:
+          ip: "127.0.0.1"
+          hostnames: ["foo"]
+
+  # ----- affinity (KeyValue scalar OBJECTs) -----
+  - field: nodeAffinity
+    specSelector: podSpec
+    enforcements:
+      - set:
+          value:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: kubernetes.io/os
+                      operator: In
+                      values:
+                        - linux
+  - field: podAffinity
+    specSelector: podSpec
+    enforcements:
+      - set:
+          value:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  labelSelector:
+                    matchLabels:
+                      app: test
+                  topologyKey: kubernetes.io/hostname
+  - field: podAntiAffinity
+    specSelector: podSpec
+    enforcements:
+      - set:
+          value:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  labelSelector:
+                    matchLabels:
+                      app: test
+                  topologyKey: kubernetes.io/hostname
+
+  # ----- tolerations (custom) -----
+  - field: tolerations
+    specSelector: podSpec
+    enforcements:
+      - set:
+          key: test
+          operator: Equal
+          value: somevalue
+          effect: NoSchedule
+          seconds: 60
+
+  # ----- node selector (custom map) -----
+  - field: nodeSelectors
+    specSelector: podSpec
+    enforcements:
+      - set: { key: test, value: somevalue }
+
+  # ----- resource overhead (custom map) -----
+  - field: resourceOverheads
+    specSelector: podSpec
+    enforcements: [{ set: { key: cpu, value: "100m" } }]
+  - field: resourceOverheads
+    specSelector: podSpec
+    enforcements: [{ set: { key: memory, value: "256Mi" } }]
+
+  # ----- imagePullSecrets (KeyValue array of {name}) -----
+  - field: imagePullSecrets
+    specSelector: podSpec
+    enforcements: [{ set: { value: [{ name: test }] } }]
+
+  # ----- readinessGates (custom) -----
+  - field: readinessGates
+    specSelector: podSpec
+    enforcements:
+      - set: { conditionType: ContainersReady }
+
+  # ----- schedulingGates (KeyValue NAMES_ARRAY) -----
+  - field: schedulingGates
+    specSelector: podSpec
+    enforcements: [{ set: { value: [{ name: example.com/gate }] } }]
+
+  # ----- reservedResourceClaims (custom; two entries to exercise both
+  # mutually-exclusive shapes: by-name vs by-template) -----
+  - field: reservedResourceClaims
+    specSelector: podSpec
+    enforcements:
+      - set:
+          name: claimRefByName
+          resourceClaimName: shared-claim
+  - field: reservedResourceClaims
+    specSelector: podSpec
+    enforcements:
+      - set:
+          name: claimRefByTemplate
+          resourceClaimTemplateName: shared-template
+
+  # ----- volumes (one per kind, custom formatters; merged into .volumes
+  # by .name which is the formatter's arrayKey) -----
+  - field: configMapVolumes
+    specSelector: podSpec
+    enforcements:
+      - set:
+          name: cm-vol
+          configMapName: cm
+          defaultMode: 420
+          items: [{ key: foo, path: foo }]
+          optional: false
+  - field: emptyDirVolumes
+    specSelector: podSpec
+    enforcements:
+      - set:
+          name: empty-vol
+          medium: Memory
+          sizeLimit: "1Gi"
+  - field: hostPathVolumes
+    specSelector: podSpec
+    enforcements:
+      - set:
+          name: host-vol
+          path: /tmp
+          type: Directory
+  - field: nfsVolumes
+    specSelector: podSpec
+    enforcements:
+      - set:
+          name: nfs-vol
+          server: "1.1.1.1"
+          path: /export
+          readOnly: false
+  - field: pvcVolumes
+    specSelector: podSpec
+    enforcements:
+      - set:
+          name: pvc-vol
+          claimName: pvc
+          readOnly: false
+  - field: secretVolumes
+    specSelector: podSpec
+    enforcements:
+      - set:
+          name: secret-vol
+          secretName: secret
+          defaultMode: 420
+          items: [{ key: foo, path: foo }]
+          optional: false
+
+  # ----- pod-scope securityContext fields (KeyValue from podSpec) -----
+  - field: fsGroup
+    specSelector: podSpec
+    enforcements: [{ set: { value: 1 } }]
+  - field: fsGroupChangePolicy
+    specSelector: podSpec
+    enforcements: [{ set: { value: OnRootMismatch } }]
+  - field: supplementalGroups
+    specSelector: podSpec
+    enforcements: [{ set: { value: [1, 2] } }]
+  - field: supplementalGroupsPolicy
+    specSelector: podSpec
+    enforcements: [{ set: { value: Strict } }]
+
+  # ----- pod-scope securityContext fields shared with containers
+  # (KeyValue from podSpecAndContainer; the same field re-fires under
+  # allAppContainers / allInitContainers in the container case) -----
+  - field: appArmorProfile-Type
+    specSelector: podSpec
+    enforcements: [{ set: { value: Localhost } }]
+  - field: appArmorProfile-LocalhostProfile
+    specSelector: podSpec
+    enforcements: [{ set: { value: foo } }]
+  - field: runAsGroup
+    specSelector: podSpec
+    enforcements: [{ set: { value: 1 } }]
+  - field: runAsNonRoot
+    specSelector: podSpec
+    enforcements: [{ set: { value: true } }]
+  - field: runAsUser
+    specSelector: podSpec
+    enforcements: [{ set: { value: 1 } }]
+  - field: seccompProfile-Type
+    specSelector: podSpec
+    enforcements: [{ set: { value: Localhost } }]
+  - field: seccompProfile-Localhost
+    specSelector: podSpec
+    enforcements: [{ set: { value: foo } }]

@@ -1,0 +1,50 @@
+type: string
+description: |
+  Resource type enum for authorization. 
+  
+  Note: The 'apps' resource type is DEPRECATED. Please use 'service-account' instead for managing service accounts.
+enum:
+  - department
+  - tenant
+  - project
+  - cluster
+  - cluster-config
+  - nodepools
+  - nodes
+  - settings
+  - security-settings
+  - notification-settings
+  - branding-settings
+  - users
+  - apps
+  - service-account
+  - roles
+  - access_rules
+  - workloads
+  - applications
+  - workspaces
+  - trainings
+  - inferences
+  - environments
+  - pvc-assets
+  - git-assets
+  - host-path-assets
+  - nfs-assets
+  - s3-assets
+  - compute-resources
+  - templates
+  - credentials
+  - events-history
+  - policies
+  - cm-volume-assets
+  - datavolumes
+  - secret-volume-assets
+  - storage-class-configuration
+  - access-keys
+  - workload-properties
+  - network-topologies
+  - registries
+  - workload-integration-metrics
+  - nodepools-minimal
+  - clusters-minimal
+  - users-minimal

@@ -1,0 +1,88 @@
+type: object
+required:
+  - type
+  - name
+  - id
+  - clusterId
+  - projectId
+  - createdAt
+properties:
+  type:
+    type: string
+    example: "runai-job"
+  group:
+    type: string
+    description: The Kubernetes API group associated with the workload resource.
+    example: "batch"
+  version:
+    type: string
+    description: The Kubernetes API version associated with the workload resource.
+    example: "v1"
+  name:
+    type: string
+    example: "very-important-job"
+  id:
+    type: string
+    format: uuid
+  submittedBy:
+    type: string
+    example: "researcher@run.ai"
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  projectId:
+    type: string
+    example: "1"
+  projectName:
+    type: string
+    example: "project1"
+  departmentId:
+    type: string
+    example: "1"
+  departmentName:
+    type: string
+    example: "department1"
+  createdAt:
+    type: string
+    format: date-time
+    example: 2022-01-01T03:49:52.531Z
+  requestedResources:
+    $ref: "./WorkloadRequestResources.yaml"
+  requestedPods:
+    $ref: "./RequestedPods.yaml"
+  requestedNodePools:
+    type: array
+    items:
+      type: string
+      example: "default"
+  datasources:
+    type: array
+    items:
+      $ref: "./Datasource.yaml"
+  environments:
+    type: array
+    items:
+      $ref: "./Environment.yaml"
+  externalConnections:
+    type: array
+    items:
+      $ref: "./Connection.yaml"
+  distributedFramework:
+    type: string
+    example: "Pytorch"
+  images:
+    type: array
+    items:
+      type: string
+      example: "ubi-minimal:latest"
+  fullySaasWorkload:
+    type: boolean
+    example: false
+  category:
+    type: string
+    example: Train
+  sourceApi:
+    $ref: "./SourceApi.yaml"
+  preemptibility:
+    type: string
+    example: "non-preemptible"
+    nullable: true

@@ -1,0 +1,10 @@
+image: ubuntu
+
+compute:
+  extendedResources:
+    - resource: "gpu/amd"
+      quantity: 12M
+    - resource: "gpu/google"
+      exclude: true
+    - resource: "tesla/car"
+  cpuCoreRequest: 1.3

@@ -1,0 +1,7 @@
+description: The policy describes how to deal with pods when the job is finished.
+type: string
+enum:
+  - None
+  - All
+  - Running
+nullable: true

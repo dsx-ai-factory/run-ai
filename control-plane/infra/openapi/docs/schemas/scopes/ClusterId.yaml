@@ -1,0 +1,4 @@
+description: The id of the cluster.
+type: string
+format: uuid
+example: 71f69d83-ba66-4822-adf5-55ce55efd210

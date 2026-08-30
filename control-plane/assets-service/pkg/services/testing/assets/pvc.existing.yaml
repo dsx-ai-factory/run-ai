@@ -1,0 +1,5 @@
+spec:
+  existingPvc: true
+  claimName: existing-claim
+  path: /my/existing/pvc/path
+  readOnly: true

@@ -1,0 +1,5 @@
+compute:
+  extendedResources:
+    attributes:
+      quantity: 1G
+image: ubuntu

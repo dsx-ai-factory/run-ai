@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 8g
+  name: standalone-ingress
+  namespace: runai-test
+  ownerReferences:
+  - apiVersion: run.ai/v1alpha1
+    kind: WorkloadRunner
+    name: standalone-ingress-workload
+    uid: test-uid-12345
+  resourceVersion: "1"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: external-app.example.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: external-service
+            port:
+              number: 9000
+        path: /
+        pathType: Prefix
+status:
+  loadBalancer: {}

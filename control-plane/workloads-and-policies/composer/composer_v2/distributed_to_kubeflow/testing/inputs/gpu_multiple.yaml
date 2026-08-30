@@ -1,0 +1,4 @@
+image: ubuntu
+
+compute:
+  gpuDevicesRequest: 5

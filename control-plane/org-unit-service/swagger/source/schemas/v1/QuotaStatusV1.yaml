@@ -1,0 +1,13 @@
+type: array
+items:
+  properties:
+    nodePoolName:
+      type: string
+      description: The node pool name which the current quota status refers to.
+    allocated:
+      $ref: './QuotaStatusResourceListV1.yaml'
+    allocatedNonPreemptible:
+      $ref: './QuotaStatusResourceListV1.yaml'
+    requested:
+      $ref: './QuotaStatusResourceListV1.yaml'
+description: The current quota status for each node pool. Supported only for cluster versions 2.15+ or higher.

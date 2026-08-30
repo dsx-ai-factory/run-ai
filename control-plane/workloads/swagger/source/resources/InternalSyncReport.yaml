@@ -1,0 +1,32 @@
+post:
+  summary: report workload sync issues
+  description: needed when the updates are not sent directly from the cluster to the workloads service, but to another service
+    (e.g workloads-manager) so the other service can use this API to notify the workload service about sync issues
+  operationId: report_sync_issues
+  x-internal: true
+  x-service: workloads
+  x-no-authorization: true
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/sync_test.go
+  tags:
+    - Sync
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../../../infra/openapi/docs/schemas/sync/ClusterSyncReport.yaml"
+  responses:
+    204:
+      description: No response.
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

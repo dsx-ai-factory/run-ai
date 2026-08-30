@@ -1,0 +1,9 @@
+type: object
+x-internal: true
+deprecated: true
+description: Deprecated top-level placementStrategy kept ONLY in the GET response so older runai-cluster agents that still read it continue to work.
+properties:
+  cpu:
+    $ref: "./PlacementStrategy.yaml"
+  gpu:
+    $ref: "./PlacementStrategy.yaml"

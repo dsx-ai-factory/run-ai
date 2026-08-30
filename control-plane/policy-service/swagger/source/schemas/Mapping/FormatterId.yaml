@@ -1,0 +1,3 @@
+description: The unique identifier for the formatter.
+type: string
+format: uuid

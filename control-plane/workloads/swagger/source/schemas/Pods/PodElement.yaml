@@ -1,0 +1,15 @@
+type: object
+required:
+  - elementId
+  - hierarchyLevel
+properties:
+  elementId:
+    type: string
+    format: uuid
+    description: The unique identifier of the workload structure element this pod is associated with.
+  hierarchyLevel:
+    type: integer
+    format: int32
+    description: The hierarchy level of this pod's associated workload structure element. Level 1 represents the top of the hierarchy, with levels 2 and 3 representing progressively nested elements.
+    minimum: 1
+    maximum: 3

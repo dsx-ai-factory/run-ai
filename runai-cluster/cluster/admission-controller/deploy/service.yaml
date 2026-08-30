@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: runai-admission-controller
+  namespace: runai
+  labels:
+    app: runai-admission-controller
+spec:
+  publishNotReadyAddresses: true
+  ports:
+    - port: 443
+      targetPort: 8443
+  selector:
+    app: runai-admission-controller

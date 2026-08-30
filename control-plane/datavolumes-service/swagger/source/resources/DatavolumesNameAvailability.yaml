@@ -1,0 +1,27 @@
+get:
+  summary: Data volumes name availability.
+  description: Checks if a specified data volume name is available under the given scope (e.g., project or department).
+    Returns a 204 No Content response if the name is available, or 409 Conflict if the name is already in use.
+  operationId: datavolume_name_availability
+  x-service: datavolumes-service
+  x-test-coverage:
+    - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+  x-authorize:
+    resource-type: datavolumes
+    action: read
+  tags:
+    - Datavolumes
+  parameters:
+    - $ref: "../parameters/query/mandatory/DataVolumeName.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
+  responses:
+    204:
+      description: The name is available to use
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    409:
+      $ref: "../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

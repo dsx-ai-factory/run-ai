@@ -1,0 +1,61 @@
+suite: Test Global Tolerations
+
+excludeTemplates:
+  # Excluding subcharts which will not be affected by global tolerations
+  - charts/*
+
+tests:
+  - it: should render deployments with global tolerations
+    set:
+      global.tolerations:
+        - key: "test-taint"
+          operator: "Equal"
+          value: "test-value"
+          effect: "NoSchedule"
+          tolerationSeconds: 3600
+    documentSelector:
+      path: kind
+      value: Deployment
+      matchMany: true
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: spec.template.spec.tolerations
+          value:
+            - key: "test-taint"
+              operator: "Equal"
+              value: "test-value"
+              effect: "NoSchedule"
+              tolerationSeconds: 3600
+  - it: should append global tolerations to specific tolerations
+    set:
+      global.tolerations:
+        - key: "test-taint"
+          operator: "Equal"
+          value: "test-value"
+          effect: "NoSchedule"
+          tolerationSeconds: 3600
+      assetsService.tolerations:
+        - key: "test-taint-2"
+          operator: "Equal"
+          value: "test-value"
+          effect: "NoSchedule"
+          tolerationSeconds: 3600
+    templates:
+      - templates/assets-service/deployment.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.tolerations
+          value:
+            - key: "test-taint-2"
+              operator: "Equal"
+              value: "test-value"
+              effect: "NoSchedule"
+              tolerationSeconds: 3600
+            - key: "test-taint"
+              operator: "Equal"
+              value: "test-value"
+              effect: "NoSchedule"
+              tolerationSeconds: 3600

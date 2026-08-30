@@ -1,0 +1,41 @@
+apiVersion: nvidia.com/v1alpha1
+kind: DynamoGraphDeployment
+metadata:
+  name: test-dynamo
+  namespace: default
+spec:
+  backendFramework: vllm
+  services:
+    service-a:
+      componentType: worker
+      extraPodSpec:
+        containers:
+        - image: placeholder-a
+          name: main
+        initContainers:
+        - image: placeholder-a
+          name: init
+      replicas: 1
+    service-b:
+      componentType: router
+      extraPodSpec:
+        containers:
+        - image: placeholder-b
+          name: main
+        initContainers:
+        - image: placeholder-b
+          name: init
+      replicas: 2
+    service-c:
+      componentType: inference
+      extraPodMetadata:
+        labels:
+          app: dynamo-inference
+      extraPodSpec:
+        priorityClassName: high-priority
+        serviceAccountName: inference-sa
+        tolerations:
+        - effect: NoSchedule
+          key: nvidia.com/gpu
+          operator: Exists
+      replicas: 1

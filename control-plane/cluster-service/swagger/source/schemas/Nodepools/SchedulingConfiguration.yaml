@@ -1,0 +1,30 @@
+type: object
+nullable: true
+properties:
+  gpuPodsPlacementStrategy:
+    $ref: "./GpuPodsPlacementStrategy.yaml"
+  cpuPodsPlacementStrategy:
+    $ref: "./CpuPodsPlacementStrategy.yaml"
+  placementStrategy:
+    description: |
+      Deprecated. Use gpuPodsPlacementStrategy and cpuPodsPlacementStrategy instead.
+      On write, when a new field is provided it takes precedence over the equivalent field here.
+      On read, both this field and the new fields are returned; this field reflects the node-level strategies.
+    deprecated: true
+    properties:
+      cpu:
+        $ref: "./PlacementStrategy.yaml"
+      gpu:
+        $ref: "./PlacementStrategy.yaml"
+  minGuaranteedRuntime:
+    description: Minimum duration (e.g., 5d8h40m) that a preemptible workload is guaranteed to run once scheduled and bound to a node. During this period, it is considered non-preemptible even if a higher-priority workload becomes eligible. Defaults to 0 (immediate preemption allowed).
+    type: string
+    example: "5d8h40m"
+    nullable: true
+    pattern: ^(0|[+]?((\d+(\.\d+)?)(ns|us|µs|μs|ms|s|m|h|d|w))+$)
+  timeBasedFairShare:
+    $ref: "./TimeBasedFairShare.yaml"
+  numaAwareScheduling:
+    description: "When enabled, the Scheduler places workloads so that GPU, CPU, and CPU memory are allocated within the same NUMA node where possible, minimizing cross-NUMA fragmentation and improving performance. Requires the NodeResourceTopology (NRT) component and a Topology Manager policy other than 'none' on the pool's nodes. When disabled, the Scheduler places workloads using aggregate node capacity only, without considering NUMA topology."
+    type: boolean
+    nullable: true

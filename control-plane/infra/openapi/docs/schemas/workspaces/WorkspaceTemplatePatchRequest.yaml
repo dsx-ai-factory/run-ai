@@ -1,0 +1,8 @@
+allOf:
+  - $ref: "../templates/TemplatePatchMeta.yaml"
+  - properties:
+      spec:
+        $ref: "WorkspaceTemplateSpec.yaml"
+  - $ref: "../common/FieldsToClear.yaml"
+  - $ref: "../templates/TemplateAssets.yaml"
+

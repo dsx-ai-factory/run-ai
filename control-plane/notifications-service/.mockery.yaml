@@ -1,0 +1,74 @@
+dir: "{{.InterfaceDir}}/mocks"
+outpkg: "mocks"
+mockname: "{{.InterfaceName}}"
+filename: "{{.InterfaceName}}.go"
+with-expecter: False
+packages:
+  github.com/run-ai/runai/control-plane/notifications-service/internal/config/advanced:
+    interfaces:
+      ConfigProviderDao:
+  github.com/run-ai/runai/control-plane/notifications-service/internal/config/advanced/http_listener/encryption:
+    interfaces:
+      EncrypterDecrypterer:
+  github.com/run-ai/runai/control-plane/notifications-service/internal/config/advanced/http_listener:
+    interfaces:
+      IsHealthyer:
+      ListenerDao:
+      TenantDao:
+      UserDao:
+      SinksDao:
+      NotificationKindsDao:
+  github.com/run-ai/runai/control-plane/notifications-service/internal/postgres/configprovider:
+    interfaces:
+      ValidationDao:
+  github.com/run-ai/runai/control-plane/notifications-service/internal/sinks/smtp:
+    interfaces:
+      SmtpClienter:
+  github.com/run-ai/runai/control-plane/notifications-service/internal/sinks:
+    interfaces:
+      Sinker:
+      SlackClienter:
+      EventDaoer:
+  github.com/run-ai/runai/control-plane/notifications-service/internal/events:
+    interfaces:
+      EventHandler:
+  github.com/run-ai/runai/control-plane/notifications-service/internal/filter:
+    interfaces:     
+      FilteringConfigProvider:
+      Factory:
+      Filter:
+  github.com/run-ai/runai/control-plane/notifications-service/internal/enrich:
+    interfaces:     
+      Factory: 
+  github.com/run-ai/runai/control-plane/notifications-service/internal/listen:
+    interfaces:     
+      Factory: 
+      ListeningConfigProvider:
+  github.com/run-ai/runai/control-plane/notifications-service/internal/notify:
+    interfaces:     
+      Factory: 
+      Listener:
+  github.com/run-ai/runai/control-plane/notifications-service/internal/route:
+    interfaces:
+      Route:
+      RouteConfigProvider:
+      RouterConfigProvider:
+  github.com/run-ai/runai/control-plane/notifications-service/internal/app:
+    config:
+      dir: "{{.InterfaceDir}}"
+      inpackage: true
+      outpkg: "app"
+      mockname: "{{.InterfaceName}}Mock"
+      filename: "{{.InterfaceName}}Mock.go"
+    interfaces:
+      RoutesRegister:
+      Cleaner:
+      ConfigUpdatesListener:
+      ConfigurationProvider:
+  github.com/run-ai/runai/control-plane/notifications-service/internal/history/api:
+    interfaces:
+      EventsHistoryServicer:
+  github.com/run-ai/runai/control-plane/notifications-service/internal/history:
+    interfaces:
+      EventsRepository:
+      EventsCleanerer:

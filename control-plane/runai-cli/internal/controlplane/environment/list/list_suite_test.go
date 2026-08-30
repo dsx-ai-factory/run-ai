@@ -1,0 +1,13 @@
+package list
+
+import (
+	"testing"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+)
+
+func TestEnvironmentList(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Environment List Suite")
+}

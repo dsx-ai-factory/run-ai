@@ -1,0 +1,30 @@
+get:
+  deprecated: true
+  summary: Get Mac installer script commands
+  description: |
+    This endpoint returns a Mac script commands that can be used to install the Run:AI CLI.
+  operationId: get_installer_mac_commands_deprecated
+  x-service: cli-exposer
+  x-test-coverage:
+    - cli-exposer/pkg/services/api_cli_service_test.go
+  x-no-authorization: true
+  tags:
+    - Researcher Command Line Interface Deprecated
+  responses:
+    '200':
+      description: A text commands to install the CLI on Mac
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Command.yaml'
+          example: "Contents of the commands to install the CLI on Mac"
+    400:
+        $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

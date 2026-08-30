@@ -1,0 +1,9 @@
+{{- include "common.deployment" (list . .Values.frontend .Values.frontend.autoscaling .Values.frontend.serviceAccount "control-plane.frontend.deployment" ) }}
+
+{{- define "control-plane.frontend.deployment" -}}
+spec:
+  template:
+    spec:
+      containers:
+      - {{- include "common.container" . | nindent 8 }}
+{{- end }}

@@ -1,0 +1,4 @@
+image: jupyter
+
+terminateAfterPreemption: true
+autoDeletionTimeAfterCompletionSeconds: 84000

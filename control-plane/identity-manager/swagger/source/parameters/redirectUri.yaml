@@ -1,0 +1,6 @@
+name: redirect_uri
+in: query
+required: true 
+description: The redirect uri to redirect to after the authorization server completes the authorization flow
+schema:
+  type: string

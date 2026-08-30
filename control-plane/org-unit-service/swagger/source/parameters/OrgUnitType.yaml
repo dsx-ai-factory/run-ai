@@ -1,0 +1,9 @@
+in: query
+required: true
+description: The org unit type.
+name: orgUnitType
+schema:
+  type: string
+  enum:
+    - department
+    - project

@@ -1,0 +1,4505 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Authorization",
+    "version": "1.0",
+    "description": "An API for managing RunAi authorization objects and perform as the RunAi authorization layer.",
+    "contact": {
+      "name": "Run.AI",
+      "url": "https://www.run.ai/",
+      "email": "support@run.ai"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://app.run.ai"
+    },
+    {
+      "url": "https://staging.run.ai"
+    },
+    {
+      "url": "https://test.run.ai"
+    },
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/": {
+      "x-internal": true,
+      "x-service": "authorization",
+      "get": {
+        "summary": "health check",
+        "x-no-authorization": true,
+        "x-test-coverage": "not-applicable",
+        "x-service": "authorization",
+        "operationId": "health",
+        "tags": [
+          "Health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully."
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/roles": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "summary": "Get a list of roles.",
+        "description": "Use to retrieve a list of roles. This endpoint is deprecated and will be removed in a future release. Use GET /api/v2/authorization/roles instead.",
+        "operationId": "get_roles_v1",
+        "deprecated": true,
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "e2e/src/test/suites/advancedSuite/permissions/applicationAggregatedApi.test.ts",
+          "e2e/src/test/suites/advancedSuite/permissions/accessRulesApi.test.ts"
+        ],
+        "x-authorize": {
+          "resource-type": "roles",
+          "action": "read"
+        },
+        "tags": [
+          "Roles"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IncludeInternal"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RolesV1"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/roles/{roleIdPath}": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "summary": "Get a role by id.",
+        "description": "Retrieve the details of a role by id. This endpoint is deprecated and will be removed in a future release. Use GET /api/v2/authorization/roles/{roleIdPath} instead.",
+        "operationId": "get_role_v1",
+        "deprecated": true,
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/role_api_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "roles",
+          "action": "read"
+        },
+        "tags": [
+          "Roles"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RoleIdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleV1"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v2/authorization/roles": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "post": {
+        "summary": "Create a role.",
+        "description": "Creates a custom role with the specified permission sets.",
+        "operationId": "create_role",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "e2e/src/test/suites/playwright/serial/sphinx/systemScopedCostumeRoles.test.ts"
+        ],
+        "x-authorize": {
+          "resource-type": "roles",
+          "action": "create"
+        },
+        "tags": [
+          "Roles"
+        ],
+        "requestBody": {
+          "description": "The role to create.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleCreationFieldsInternal"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Role"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get a list of roles.",
+        "description": "Retrieves a list of all available roles, including both NVIDIA Run:ai predefined roles and custom roles. Use this endpoint to review role configurations, permission sets and permissions.",
+        "operationId": "get_roles",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "e2e/src/test/suites/advancedSuite/permissions/applicationAggregatedApi.test.ts",
+          "e2e/src/test/suites/advancedSuite/permissions/accessRulesApi.test.ts",
+          "e2e/src/test/suites/playwright/serial/sphinx/systemScopedCostumeRoles.test.ts"
+        ],
+        "x-authorize": {
+          "resource-type": "roles",
+          "action": "read"
+        },
+        "tags": [
+          "Roles"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/SortOrder"
+          },
+          {
+            "$ref": "#/components/parameters/RolesSort"
+          },
+          {
+            "$ref": "#/components/parameters/RolesFilter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeInternal"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "roles"
+                  ],
+                  "properties": {
+                    "roles": {
+                      "$ref": "#/components/schemas/Roles"
+                    },
+                    "next": {
+                      "type": "integer",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v2/authorization/roles/{roleIdPath}": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "summary": "Get a role by id.",
+        "description": "Retrieves details for a specific role, including its name, description, scope, and associated permission sets.",
+        "operationId": "get_role",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/role_api_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "roles",
+          "action": "read"
+        },
+        "tags": [
+          "Roles"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RoleIdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Role"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a role by id.",
+        "description": "Deletes a custom role. Use this endpoint to permanently remove roles that are no longer needed. NVIDIA Run:ai predefined roles cannot be deleted.",
+        "operationId": "delete_role",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/role_api_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "roles",
+          "action": "delete"
+        },
+        "tags": [
+          "Roles"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RoleIdPath"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a role by id.",
+        "description": "Updates a custom role, including its name, description, or associated permission sets. NVIDIA Run:ai predefined roles cannot be updated.",
+        "operationId": "update_role",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/role_api_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "roles",
+          "action": "update"
+        },
+        "tags": [
+          "Roles"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RoleIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleCreationFieldsInternal"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Role"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v2/authorization/roles/{roleIdPath}/active": {
+      "post": {
+        "summary": "Enable or Disable a role by id.",
+        "operationId": "role_active",
+        "x-internal": true,
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/role_api_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "roles",
+          "action": "update"
+        },
+        "tags": [
+          "Roles"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RoleIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleActiveFields"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v2/authorization/roles/{roleIdPath}/enable": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "post": {
+        "summary": "Enable a role by id.",
+        "description": "Enables a specific role. Disabled roles cannot be assigned to users and do not grant any permissions.",
+        "operationId": "role_enable",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/role_api_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "roles",
+          "action": "update"
+        },
+        "tags": [
+          "Roles"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RoleIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleEnabledDisabledFields"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v2/authorization/roles/{roleIdPath}/disable": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "post": {
+        "summary": "Disable a role by id.",
+        "description": "Disables a specific role. Disabled roles cannot be assigned to users and do not grant any permissions.",
+        "operationId": "role_disable",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/role_api_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "roles",
+          "action": "update"
+        },
+        "tags": [
+          "Roles"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RoleIdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleEnabledDisabledFields"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/permission-sets": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "summary": "Get permission sets.",
+        "description": "Retrieve a list of all available permission sets. Each permission set defines a collection of permissions grouped by resource type and associated actions (such as create, read, update, or delete).",
+        "operationId": "get_permission_sets",
+        "x-service": "authorization",
+        "x-authorize": {
+          "resource-type": "roles",
+          "action": "read"
+        },
+        "tags": [
+          "Permissions"
+        ],
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/permissions_sets_api_test.go"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "permissionSets"
+                  ],
+                  "properties": {
+                    "permissionSets": {
+                      "$ref": "#/components/schemas/PermissionSets"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/permission-sets/{permissionSetId}": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "summary": "Get permission set by id.",
+        "description": "Returns information about a single permission set, including its name, description, and the list of permissions it contains.",
+        "operationId": "get_permission_set",
+        "x-service": "authorization",
+        "x-authorize": {
+          "resource-type": "roles",
+          "action": "read"
+        },
+        "tags": [
+          "Permissions"
+        ],
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/permissions_sets_api_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PermissionSetId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PermissionSet"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/access-rules": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "post": {
+        "summary": "Create an access rule.",
+        "description": "Use to bind a predefined role to a subject (user, group or application) in a scope.",
+        "operationId": "create_access_rule",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "e2e/src/test/suites/advancedSuite/permissions/applicationAggregatedApi.test.ts",
+          "e2e/src/test/suites/advancedSuite/permissions/accessRuleUserV2.test.ts",
+          "e2e/src/test/suites/advancedSuite/permissions/accessRulesApi.test.ts",
+          "e2e/src/test/suites/advancedSuite/authorization/authorizationUI.test.ts"
+        ],
+        "x-authorize": {
+          "resource-type": "access_rules",
+          "action": "create"
+        },
+        "x-audit": true,
+        "tags": [
+          "Access rules"
+        ],
+        "requestBody": {
+          "description": "The access rule to create.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessRuleCreationFields"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessRule"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "get": {
+        "summary": "List the access rules.",
+        "description": "Retrieve a list of access rules.",
+        "operationId": "get_access_rules",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "e2e/src/test/suites/advancedSuite/permissions/applicationAggregatedApi.test.ts",
+          "e2e/src/test/suites/advancedSuite/permissions/accessRuleUserV2.test.ts",
+          "e2e/src/test/suites/advancedSuite/permissions/accessRulesApi.test.ts",
+          "e2e/src/test/suites/advancedSuite/authorization/authorizationUI.test.ts"
+        ],
+        "x-authorize": {
+          "resource-type": "access_rules",
+          "action": "read"
+        },
+        "tags": [
+          "Access rules"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SubjectTypeOptional"
+          },
+          {
+            "$ref": "#/components/parameters/SubjectIds"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/LastUpdated"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeDeleted"
+          },
+          {
+            "$ref": "#/components/parameters/FilterByCluster"
+          },
+          {
+            "$ref": "#/components/parameters/ScopeIdOptional"
+          },
+          {
+            "$ref": "#/components/parameters/SortOrder"
+          },
+          {
+            "$ref": "#/components/parameters/AccessRulesSort"
+          },
+          {
+            "$ref": "#/components/parameters/AccessRulesFilter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "totalRecords",
+                    "displayRecords",
+                    "accessRules"
+                  ],
+                  "properties": {
+                    "totalRecords": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "displayRecords": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "accessRules": {
+                      "$ref": "#/components/schemas/AccessRules"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/access-rules/sync": {
+      "get": {
+        "summary": "List the access rules.",
+        "description": "Retrieve a list of access rules.",
+        "operationId": "get_access_rules_sync",
+        "x-service": "authorization",
+        "x-internal": true,
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/access_rules_api_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "access_rules",
+          "action": "sync"
+        },
+        "tags": [
+          "Access rules"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/LastUpdated"
+          },
+          {
+            "$ref": "#/components/parameters/FilterByCluster"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "accessRules"
+                  ],
+                  "properties": {
+                    "next": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "accessRules": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AccessRuleSync"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/access-rules/{accessRuleId}": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "summary": "Get an access rule.",
+        "description": "Use to retrieve the details of an access rule by id.",
+        "operationId": "get_access_rule",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "e2e/src/test/suites/advancedSuite/permissions/accessRulesApi.test.ts"
+        ],
+        "x-authorize": {
+          "resource-type": "access_rules",
+          "action": "read",
+          "resource-id": "accessRuleId"
+        },
+        "tags": [
+          "Access rules"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AccessRuleId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessRuleById"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an access rule.",
+        "description": "Use to delete the subject permissions assigned by access rule id.",
+        "operationId": "delete_access_rule",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "e2e/src/test/suites/advancedSuite/permissions/accessRulesApi.test.ts"
+        ],
+        "x-authorize": {
+          "resource-type": "access_rules",
+          "action": "delete",
+          "resource-id": "accessRuleId"
+        },
+        "x-audit": true,
+        "tags": [
+          "Access rules"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AccessRuleId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/access-rules/count": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "summary": "Count access rules.",
+        "description": "Use to retrieve the number of access rules.",
+        "operationId": "count_access_rules",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "e2e/src/test/suites/advancedSuite/authorization/authorizationUI.test.ts"
+        ],
+        "x-authorize": {
+          "resource-type": "access_rules",
+          "action": "read"
+        },
+        "tags": [
+          "Access rules"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IncludeDeleted"
+          },
+          {
+            "$ref": "#/components/parameters/AccessRulesFilter"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "count"
+                  ],
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/access-rules/{accessRuleId}/{clusterUuid}/status": {
+      "x-internal": true,
+      "put": {
+        "summary": "Update an access rule.",
+        "description": "Use to update the status of the access rule in the cluster by id.",
+        "operationId": "update_access_rule_status",
+        "x-service": "authorization",
+        "x-internal": true,
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/access_rules_batch_api_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "access_rules",
+          "action": "sync"
+        },
+        "tags": [
+          "Access rules"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AccessRuleId"
+          },
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          }
+        ],
+        "requestBody": {
+          "description": "The status of the access rule in the cluster.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessRuleStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/access-rules/{clusterUuid}/sync": {
+      "x-internal": true,
+      "post": {
+        "summary": "Sync access rules.",
+        "description": "Use to synchronize the statuses of the access rules in the cluster.",
+        "operationId": "sync_access_rules",
+        "x-service": "authorization",
+        "x-internal": true,
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/access_rules_api_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "access_rules",
+          "action": "sync"
+        },
+        "tags": [
+          "Access rules"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          }
+        ],
+        "requestBody": {
+          "description": "The statuses to sync.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessRulesSyncRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/access-rules/batch": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "post": {
+        "summary": "Delete Multiple Access Rules",
+        "operationId": "access_rules_batch",
+        "x-service": "authorization",
+        "x-audit": true,
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/access_rules_batch_api_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "access_rules",
+          "action": "delete"
+        },
+        "tags": [
+          "Access rules"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessRulesBatchFields"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessRuleDeletionBatchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/access-rules/batch-create": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "post": {
+        "summary": "Create Multiple Access Rules",
+        "description": "Creates a batch of access rules in a single operation. Requires a list of access rule objects, each specifying the subject, role, and scope. Returns the result of the operation, including which rules were successfully created and any that failed, along with error messages if applicable.",
+        "operationId": "access_rules_batch_create",
+        "x-service": "authorization",
+        "x-audit": true,
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/access_rules_batch_api_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "access_rules",
+          "action": "create"
+        },
+        "tags": [
+          "Access rules"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessRulesBatchCreateFields"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessRulesBatchCreateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/access-rules/authenticated-users": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "post": {
+        "summary": "Create an access rule for authenticated users/service accounts",
+        "description": "Creates an access rule bound to every authenticated user and service account for the given role and scope.",
+        "operationId": "create_authenticated_users_access_rule",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/access_rules_api_test.go"
+        ],
+        "x-audit": true,
+        "x-authorize": {
+          "resource-type": "access_rules",
+          "action": "create"
+        },
+        "tags": [
+          "Access rules"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthenticatedUsersAccessRuleCreationFields"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessRule"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/access-rules/migrate-deprecated": {
+      "x-internal": true,
+      "x-scope": [
+        "tenant"
+      ],
+      "post": {
+        "summary": "Migrate Access Rules From a Deprecated Role",
+        "description": "Migrates access rules from a deprecated role to a non-deprecated role within the current tenant.\nFor each access rule tied to the old (deprecated) role, a new rule is created under the new\nrole (copying the subject, scope, and cluster) and then the old rule is deleted. If a matching\nnew-role rule already exists for the same subject and scope, no new rule is created, but the\nold (deprecated-role) rule is still deleted and the pre-existing new rule is returned in the\n`succeeded.preExisting` bucket of the response. Each migration is performed in its own\ntransaction - if either the create/lookup or the delete fails, the transaction is rolled back\nand the old access rule remains in place. Up to 100 access rules are migrated per call; callers\nshould invoke repeatedly until all rules are migrated. The response lists the newly-created\nrules, the pre-existing rules that were reused, the IDs of old rules that were successfully\ndeleted, and per-rule failures.\n",
+        "operationId": "access_rules_migrate_deprecated",
+        "x-service": "authorization",
+        "x-audit": true,
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/access_rules_migrate_deprecated_api_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "access_rules",
+          "action": "create"
+        },
+        "tags": [
+          "Access rules"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessRulesMigrateDeprecatedFields"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessRulesMigrateDeprecatedResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/permissions": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "summary": "Get a summary of user permissions.",
+        "description": "Retrieve a summary of user permissions.",
+        "x-no-authorization": true,
+        "operationId": "get_permissions",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "e2e/src/test/suites/advancedSuite/authorization/authorizationUI.test.ts"
+        ],
+        "tags": [
+          "Permissions"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Permissions"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/permitted-scopes": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "post": {
+        "summary": "Calculate permitted scopes.",
+        "description": "Use to calculate user permitted scopes for an action on a resource.",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/role_api_test.go"
+        ],
+        "x-no-authorization": true,
+        "operationId": "get_permitted_scopes",
+        "tags": [
+          "Permissions"
+        ],
+        "requestBody": {
+          "description": "The request parameters.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "resourceType"
+                ],
+                "properties": {
+                  "resourceType": {
+                    "$ref": "#/components/schemas/ResourceType"
+                  },
+                  "action": {
+                    "nullable": true,
+                    "type": "string",
+                    "enum": [
+                      "create",
+                      "read",
+                      "update",
+                      "delete"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PermittedScopesActions"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/evaluate": {
+      "x-internal": true,
+      "post": {
+        "summary": "Evaluate user permission to the requested resource. The returned permitted scopes are the scopes that the action on the resource is permitted, with OR between the multiple scopes.",
+        "x-no-authorization": true,
+        "x-internal": true,
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/permissions_api_test.go"
+        ],
+        "operationId": "evaluate_permission",
+        "tags": [
+          "Permissions"
+        ],
+        "requestBody": {
+          "description": "The request parameters.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackendEvaluationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PermittedScopes"
+                }
+              }
+            }
+          },
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/me/access-rules": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "summary": "List the access rules assigned to the requesting user.",
+        "description": "Retrieve the access rules assigned to the requesting user.",
+        "x-no-authorization": true,
+        "operationId": "get_me_access_rules",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/me_api_test.go"
+        ],
+        "tags": [
+          "Me"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeAccessRulesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/me/access-rules/count": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "summary": "Count the access rules assigned to the requesting user.",
+        "description": "Use to retrieve the number of access rules assigned to the requesting user.",
+        "operationId": "count_me_access_rules",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/me_api_test.go"
+        ],
+        "x-no-authorization": true,
+        "tags": [
+          "Me"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Search"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "count"
+                  ],
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "format": "int64",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/internal/authorization/access-rules": {
+      "x-internal": true,
+      "post": {
+        "summary": "Create internal access rule with out privileged escalation validation.",
+        "x-no-authorization": true,
+        "x-service": "authorization",
+        "x-internal": true,
+        "x-test-coverage": "not-applicable",
+        "operationId": "create_internal_access_rule",
+        "tags": [
+          "Internal"
+        ],
+        "requestBody": {
+          "description": "The request parameters.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InternalCreateAccessRuleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessRule"
+                }
+              }
+            }
+          },
+          "409": {
+            "$ref": "#/components/responses/409Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/internal/authorization/subject-access-rules": {
+      "x-internal": true,
+      "delete": {
+        "summary": "Delete access rules that assigned to the requested subject.",
+        "operationId": "delete_subject_access_rules",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "e2e/src/test/suites/parallel/applicationsV1/applicationsDeprecated.test.ts",
+          "e2e/src/test/suites/defaultSuite/usersV1/usersDeprecated.test.ts"
+        ],
+        "x-no-authorization": true,
+        "tags": [
+          "Internal"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SubjectType"
+          },
+          {
+            "$ref": "#/components/parameters/SubjectId"
+          },
+          {
+            "$ref": "#/components/parameters/DryRun"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "get": {
+        "summary": "List specific subject access rules.",
+        "operationId": "get_subject_access_rules",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "e2e/src/test/suites/parallel/applicationsV1/applicationsDeprecated.test.ts",
+          "e2e/src/test/suites/defaultSuite/usersV1/usersDeprecated.test.ts"
+        ],
+        "x-no-authorization": true,
+        "tags": [
+          "Internal"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SubjectType"
+          },
+          {
+            "$ref": "#/components/parameters/SubjectIds"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessRules"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/internal/authorization/scope-access-rules": {
+      "x-internal": true,
+      "delete": {
+        "summary": "Delete access rules that assigned to the requested scope resource",
+        "operationId": "delete_scope_access_rules",
+        "x-service": "authorization",
+        "x-internal": true,
+        "x-test-coverage": "not-applicable",
+        "x-no-authorization": true,
+        "tags": [
+          "Internal"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ScopeType"
+          },
+          {
+            "$ref": "#/components/parameters/ScopeId"
+          },
+          {
+            "$ref": "#/components/parameters/LastUpdated"
+          },
+          {
+            "$ref": "#/components/parameters/Roles"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update access rules that assigned to the requested scope resource",
+        "operationId": "update_scope_access_rules",
+        "x-service": "authorization",
+        "x-test-coverage": "not-applicable",
+        "x-no-authorization": true,
+        "tags": [
+          "Internal"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ScopeType"
+          },
+          {
+            "$ref": "#/components/parameters/ScopeId"
+          }
+        ],
+        "requestBody": {
+          "description": "The access rule fields to update.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "scopeName"
+                ],
+                "properties": {
+                  "scopeName": {
+                    "type": "string",
+                    "example": "team-a"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get access rules that assigned to the requested scope resource",
+        "operationId": "get_scope_access_rules",
+        "x-service": "authorization",
+        "x-test-coverage": "not-applicable",
+        "x-no-authorization": true,
+        "tags": [
+          "Internal"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/FilterByCluster"
+          },
+          {
+            "$ref": "#/components/parameters/Roles"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentIds"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectIds"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "totalRecords",
+                    "displayRecords",
+                    "accessRules"
+                  ],
+                  "properties": {
+                    "totalRecords": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "displayRecords": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "accessRules": {
+                      "$ref": "#/components/schemas/AccessRules"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/internal/authorization/groups": {
+      "x-internal": true,
+      "get": {
+        "summary": "Get all group names of a tenant",
+        "x-no-authorization": true,
+        "x-service": "authorization",
+        "x-internal": true,
+        "x-test-coverage": "not-applicable",
+        "operationId": "get_groups",
+        "tags": [
+          "Internal"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "names"
+                  ],
+                  "properties": {
+                    "names": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "example": "group-1"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/internal/authorization/privilege-escalation/evaluate": {
+      "x-internal": true,
+      "post": {
+        "summary": "Evaluate privilege escalation.",
+        "operationId": "privilege_escalation_evaluate",
+        "x-service": "authorization",
+        "x-test-coverage": [
+          "control-plane/authorization/pkg/services/privilege_escalation_test.go"
+        ],
+        "x-no-authorization": true,
+        "tags": [
+          "Internal"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SubjectId"
+          },
+          {
+            "$ref": "#/components/parameters/GroupIds"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/settings": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "summary": "Get authorization settings",
+        "x-service": "authorization",
+        "x-test-coverage": "not-applicable",
+        "operationId": "get_authorization_settings",
+        "x-authorize": {
+          "resource-type": "settings",
+          "action": "read"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TenantId"
+          }
+        ],
+        "tags": [
+          "Settings"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthorizationSettingsGetResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/authorization/settings/{key}": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "put": {
+        "summary": "Update authorization setting by key",
+        "x-service": "authorization",
+        "x-test-coverage": "not-applicable",
+        "operationId": "update_authorization_setting_by_key",
+        "x-authorize": {
+          "resource-type": "settings",
+          "action": "update"
+        },
+        "tags": [
+          "Settings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationSettingsKey"
+          },
+          {
+            "$ref": "#/components/parameters/TenantId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAuthorizationSettingByKeyRequest"
+              },
+              "examples": {
+                "enableScopedAuthorization": {
+                  "value": {
+                    "enabled": false
+                  }
+                },
+                "tenantIsCspManaged": {
+                  "value": {
+                    "enabled": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Setting successfully updated"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get authorization setting by key",
+        "x-service": "authorization",
+        "x-test-coverage": "not-applicable",
+        "operationId": "get_authorization_setting_by_key",
+        "x-authorize": {
+          "resource-type": "settings",
+          "action": "read"
+        },
+        "tags": [
+          "Settings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthorizationSettingsKey"
+          },
+          {
+            "$ref": "#/components/parameters/TenantId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnableScopedAuthorizationSetting"
+                },
+                "examples": {
+                  "enableScopedAuthorization": {
+                    "value": {
+                      "enabled": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "IncludeInternal": {
+        "name": "includeInternal",
+        "in": "query",
+        "required": false,
+        "x-internal": true,
+        "schema": {
+          "type": "boolean",
+          "example": false,
+          "default": false
+        }
+      },
+      "RoleIdPath": {
+        "name": "roleIdPath",
+        "in": "path",
+        "required": true,
+        "description": "The ID of the role",
+        "example": 32,
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 0
+        }
+      },
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "The maximum number of entries to return.",
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "default": 50,
+          "minimum": 1,
+          "maximum": 500
+        }
+      },
+      "Offset": {
+        "name": "offset",
+        "in": "query",
+        "required": false,
+        "description": "The offset of the first item returned in the collection.",
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "example": 100
+        }
+      },
+      "SortOrder": {
+        "name": "sortOrder",
+        "in": "query",
+        "required": false,
+        "description": "Sort results in descending or ascending order.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "default": "asc"
+        }
+      },
+      "RolesSort": {
+        "name": "sortBy",
+        "in": "query",
+        "required": false,
+        "description": "Sort results by a parameter.",
+        "schema": {
+          "$ref": "#/components/schemas/RolesSortFilterFields"
+        }
+      },
+      "RolesFilter": {
+        "name": "filterBy",
+        "in": "query",
+        "required": false,
+        "description": "Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=.",
+        "schema": {
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "pattern": "^(name|createdAt|createdBy|custom|scopeType|enabled)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
+          }
+        },
+        "example": [
+          "name!=some-access-rule-name",
+          "createdAt>=2023-01-01T00:00:00Z"
+        ],
+        "explode": false
+      },
+      "Search": {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "description": "Filter results by a free text search.",
+        "schema": {
+          "type": "string",
+          "example": "test project"
+        }
+      },
+      "PermissionSetId": {
+        "name": "permissionSetId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "SubjectTypeOptional": {
+        "name": "subjectType",
+        "in": "query",
+        "required": false,
+        "description": "The type of resource we want to filter by.",
+        "schema": {
+          "type": "string",
+          "example": "user"
+        }
+      },
+      "SubjectIds": {
+        "name": "subjectIds",
+        "in": "query",
+        "required": false,
+        "description": "The ids of the subjects to filter the response for.",
+        "explode": false,
+        "schema": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "example": "some.user@run.ai"
+          }
+        }
+      },
+      "LastUpdated": {
+        "name": "lastUpdated",
+        "in": "query",
+        "required": false,
+        "description": "Filter by last update time.",
+        "schema": {
+          "type": "string",
+          "example": "2021-12-14T16:04:15.099Z"
+        }
+      },
+      "IncludeDeleted": {
+        "name": "includeDeleted",
+        "in": "query",
+        "required": false,
+        "description": "True to include deleted objects in the result.",
+        "schema": {
+          "type": "boolean",
+          "example": false,
+          "default": false
+        }
+      },
+      "FilterByCluster": {
+        "name": "clusterId",
+        "in": "query",
+        "description": "Filter using the Universally Unique Identifier (UUID) of the cluster.",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "d73a738f-fab3-430a-8fa3-5241493d7128"
+        }
+      },
+      "ScopeIdOptional": {
+        "name": "scopeId",
+        "in": "query",
+        "required": false,
+        "description": "The scope resource id that we want to filter by.",
+        "schema": {
+          "type": "string",
+          "example": "2"
+        }
+      },
+      "AccessRulesSort": {
+        "name": "sortBy",
+        "in": "query",
+        "required": false,
+        "description": "Sort results by a parameter.",
+        "schema": {
+          "$ref": "#/components/schemas/AccessRulesSortFilterFields"
+        }
+      },
+      "AccessRulesFilter": {
+        "name": "filterBy",
+        "in": "query",
+        "required": false,
+        "description": "Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=.",
+        "schema": {
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "pattern": "^(subjectId|subjectType|roleId|scopeId|scopeType|roleName|scopeName|createdAt|deletedAt|createdBy|phase)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
+          }
+        },
+        "example": [
+          "name!=some-access-rule-name",
+          "createdAt>=2023-01-01T00:00:00Z"
+        ],
+        "explode": false
+      },
+      "AccessRuleId": {
+        "name": "accessRuleId",
+        "in": "path",
+        "required": true,
+        "description": "The id of the access rule to retrieve",
+        "example": 32,
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 0
+        }
+      },
+      "ClusterUuid": {
+        "name": "clusterUuid",
+        "in": "path",
+        "required": true,
+        "description": "The Universally Unique Identifier (UUID) of the cluster.",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "minLength": 1,
+          "example": "9f55255e-11ed-47c7-acef-fc4054768dbc"
+        }
+      },
+      "SubjectType": {
+        "name": "subjectType",
+        "in": "query",
+        "required": true,
+        "description": "The type of resource we want to filter by.",
+        "schema": {
+          "type": "string",
+          "example": "user"
+        }
+      },
+      "SubjectId": {
+        "name": "subjectId",
+        "in": "query",
+        "required": true,
+        "description": "The subject id that we want to filter by.",
+        "schema": {
+          "type": "string",
+          "example": "some.user@run.ai"
+        }
+      },
+      "DryRun": {
+        "name": "dryRun",
+        "in": "query",
+        "required": false,
+        "description": "True to perform validations only, without side effects.",
+        "schema": {
+          "type": "boolean",
+          "example": false,
+          "default": false
+        }
+      },
+      "Roles": {
+        "name": "roles",
+        "in": "query",
+        "required": false,
+        "description": "The roles we want to filter by.",
+        "schema": {
+          "type": "string",
+          "example": "ML engineer,L1 researcher"
+        }
+      },
+      "DepartmentIds": {
+        "name": "departmentIds",
+        "in": "query",
+        "required": false,
+        "description": "The department scope resource ids that we want to filter by.",
+        "schema": {
+          "type": "string",
+          "example": "1,2"
+        }
+      },
+      "ProjectIds": {
+        "name": "projectIds",
+        "in": "query",
+        "required": false,
+        "description": "The project scope resource ids that we want to filter by.",
+        "schema": {
+          "type": "string",
+          "example": "1,2"
+        }
+      },
+      "ScopeType": {
+        "name": "scopeType",
+        "in": "query",
+        "required": true,
+        "description": "The resource scope type to filter by.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "tenant",
+            "cluster",
+            "department",
+            "project"
+          ]
+        }
+      },
+      "ScopeId": {
+        "name": "scopeId",
+        "in": "query",
+        "required": true,
+        "description": "The scope resource id that we want to filter by.",
+        "schema": {
+          "type": "string",
+          "example": "2"
+        }
+      },
+      "GroupIds": {
+        "name": "groupIds",
+        "in": "query",
+        "required": false,
+        "description": "The ids of the subject's groups.",
+        "explode": false,
+        "schema": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "TenantId": {
+        "name": "tenantId",
+        "in": "query",
+        "required": false,
+        "x-scope": [
+          "system"
+        ],
+        "description": "If exists will return the relevant resource for the tenant ID",
+        "example": "1008",
+        "schema": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "AuthorizationSettingsKey": {
+        "name": "key",
+        "in": "path",
+        "required": true,
+        "description": "The settings key",
+        "schema": {
+          "$ref": "#/components/schemas/AuthorizationSettingsKeyEnum"
+        }
+      }
+    },
+    "schemas": {
+      "ResourceType": {
+        "type": "string",
+        "description": "Resource type enum for authorization. \n\nNote: The 'apps' resource type is DEPRECATED. Please use 'service-account' instead for managing service accounts.\n",
+        "enum": [
+          "department",
+          "tenant",
+          "project",
+          "cluster",
+          "cluster-config",
+          "nodepools",
+          "nodes",
+          "settings",
+          "security-settings",
+          "notification-settings",
+          "branding-settings",
+          "users",
+          "apps",
+          "service-account",
+          "roles",
+          "access_rules",
+          "workloads",
+          "applications",
+          "workspaces",
+          "trainings",
+          "inferences",
+          "environments",
+          "pvc-assets",
+          "git-assets",
+          "host-path-assets",
+          "nfs-assets",
+          "s3-assets",
+          "compute-resources",
+          "templates",
+          "credentials",
+          "events-history",
+          "policies",
+          "cm-volume-assets",
+          "datavolumes",
+          "secret-volume-assets",
+          "storage-class-configuration",
+          "access-keys",
+          "workload-properties",
+          "network-topologies",
+          "registries",
+          "workload-integration-metrics",
+          "nodepools-minimal",
+          "clusters-minimal",
+          "users-minimal"
+        ]
+      },
+      "ResourceTypeGroupId": {
+        "type": "string",
+        "enum": [
+          "organization",
+          "physical-resource",
+          "iam",
+          "workload",
+          "workload-asset"
+        ]
+      },
+      "Action": {
+        "type": "string",
+        "enum": [
+          "create",
+          "read",
+          "update",
+          "delete",
+          "sync"
+        ]
+      },
+      "Permission": {
+        "type": "object",
+        "required": [
+          "resourceType",
+          "actions",
+          "groupId",
+          "displayName"
+        ],
+        "properties": {
+          "resourceType": {
+            "$ref": "#/components/schemas/ResourceType"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "Projects"
+          },
+          "groupId": {
+            "$ref": "#/components/schemas/ResourceTypeGroupId"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Action"
+            }
+          }
+        }
+      },
+      "Permissions": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Permission"
+        },
+        "x-schema-name": "Permissions"
+      },
+      "KubernetesPermissions": {
+        "type": "object",
+        "properties": {
+          "predefinedRole": {
+            "type": "string",
+            "description": "The ID of an NVIDIA Run:ai predefined role. The custom role will include the mapped Kubernetes ClusterRole and its permissions.",
+            "example": "12",
+            "nullable": true
+          }
+        }
+      },
+      "RoleV1": {
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "permissions",
+          "id",
+          "createdAt",
+          "updatedAt",
+          "createdBy",
+          "custom",
+          "effectiveEnabled"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "example": 32
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deletedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string",
+            "example": "user@run.ai"
+          },
+          "custom": {
+            "type": "boolean"
+          },
+          "effectiveEnabled": {
+            "type": "boolean",
+            "default": true
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/Permissions"
+          },
+          "name": {
+            "type": "string",
+            "example": "admin"
+          },
+          "description": {
+            "type": "string",
+            "example": "can manage all resources"
+          },
+          "scopeType": {
+            "type": "string",
+            "default": "tenant",
+            "x-internal": true,
+            "x-csp": true,
+            "enum": [
+              "system",
+              "tenant"
+            ]
+          },
+          "scopeId": {
+            "type": "string",
+            "x-internal": true,
+            "x-csp": true,
+            "nullable": true
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true,
+            "nullable": true
+          },
+          "kubernetesPermissions": {
+            "$ref": "#/components/schemas/KubernetesPermissions"
+          }
+        }
+      },
+      "RolesV1": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/RoleV1"
+        }
+      },
+      "Error": {
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "code": 400,
+          "message": "Bad request - Resource should have a name"
+        }
+      },
+      "RolesSortFilterFields": {
+        "type": "string",
+        "enum": [
+          "name",
+          "createdAt",
+          "createdBy",
+          "custom",
+          "scopeType",
+          "enabled"
+        ]
+      },
+      "RolePermissionSet": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The universally unique ID (UUID) of the permission set."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the permission set.",
+            "example": "test"
+          }
+        }
+      },
+      "RoleCreationFields": {
+        "type": "object",
+        "required": [
+          "name",
+          "description"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the role to create. Must be unique within the given scope.",
+            "example": "admin",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "description": "A description of the role.",
+            "example": "can manage all resources"
+          },
+          "scopeType": {
+            "type": "string",
+            "x-scope": [
+              "system"
+            ],
+            "default": "tenant",
+            "description": "The type of scope where the role applies. Valid values: system, tenant",
+            "enum": [
+              "system",
+              "tenant"
+            ]
+          },
+          "scopeId": {
+            "type": "string",
+            "x-scope": [
+              "system"
+            ],
+            "description": "The ID of the scope where this role is defined.",
+            "nullable": true
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Specifies whether the role is active. Default: true",
+            "nullable": true
+          },
+          "permissionSets": {
+            "type": "array",
+            "description": "The permission sets assigned to this role. Each item includes the UUID and name of the permission set.",
+            "items": {
+              "$ref": "#/components/schemas/RolePermissionSet"
+            }
+          },
+          "kubernetesPermissions": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/KubernetesPermissions"
+              }
+            ],
+            "description": "Defines the Kubernetes cluster permissions associated with this role."
+          }
+        }
+      },
+      "PermissionAction": {
+        "type": "string",
+        "enum": [
+          "create",
+          "read",
+          "update",
+          "delete"
+        ]
+      },
+      "RolePermission": {
+        "type": "object",
+        "required": [
+          "resourceType",
+          "actions"
+        ],
+        "properties": {
+          "resourceType": {
+            "description": "The type of resource the permission applies to.",
+            "$ref": "#/components/schemas/ResourceType"
+          },
+          "displayName": {
+            "x-internal": true,
+            "type": "string",
+            "example": "Projects"
+          },
+          "actions": {
+            "type": "array",
+            "description": "The list of allowed actions for this resource\n- create\n- read\n- update\n- delete\n",
+            "items": {
+              "$ref": "#/components/schemas/PermissionAction"
+            }
+          }
+        }
+      },
+      "RolePermissions": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/RolePermission"
+        }
+      },
+      "RoleCalculatedFields": {
+        "type": "object",
+        "required": [
+          "id",
+          "createdAt",
+          "updatedAt",
+          "createdBy",
+          "custom",
+          "effectiveEnabled",
+          "permissions"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The ID of the role.",
+            "example": 32
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "The timestamp for when the role was created.",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "The timestamp for the last time the role was updated.",
+            "format": "date-time"
+          },
+          "deletedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time",
+            "x-internal": true
+          },
+          "createdBy": {
+            "type": "string",
+            "description": "Identifier of the user who created the role.",
+            "example": "user@run.ai"
+          },
+          "custom": {
+            "type": "boolean",
+            "x-internal": true
+          },
+          "effectiveEnabled": {
+            "type": "boolean",
+            "description": "Indicates whether the role is effectively enabled in the tenant. This reflects the role’s operational state after considering tenant-level configuration or restrictions. Default: true",
+            "default": true
+          },
+          "deprecated": {
+            "type": "boolean",
+            "description": "Indicates whether the role is deprecated. When set to true, the role is considered deprecated and should not be used for new assignments."
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/RolePermissions"
+          }
+        }
+      },
+      "Role": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RoleCreationFields"
+          },
+          {
+            "$ref": "#/components/schemas/RoleCalculatedFields"
+          }
+        ]
+      },
+      "Roles": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Role"
+        },
+        "x-schema-name": "Roles"
+      },
+      "PostPermission": {
+        "type": "object",
+        "required": [
+          "resourceType",
+          "actions",
+          "displayName"
+        ],
+        "properties": {
+          "resourceType": {
+            "$ref": "#/components/schemas/ResourceType"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "Projects"
+          },
+          "groupId": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ResourceTypeGroupId"
+              }
+            ],
+            "nullable": true
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Action"
+            }
+          }
+        }
+      },
+      "RoleCreationFieldsInternal": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RoleCreationFields"
+          },
+          {
+            "type": "object",
+            "required": [
+              "name",
+              "description"
+            ],
+            "properties": {
+              "permissions": {
+                "x-internal": true,
+                "deprecated": true,
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PostPermission"
+                },
+                "x-schema-name": "Permissions"
+              }
+            }
+          }
+        ]
+      },
+      "RoleActiveFields": {
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "properties": {
+          "scopeType": {
+            "type": "string",
+            "default": "tenant",
+            "x-internal": true,
+            "x-csp": true,
+            "enum": [
+              "system",
+              "tenant"
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "RoleEnabledDisabledFields": {
+        "type": "object",
+        "properties": {
+          "scopeType": {
+            "type": "string",
+            "default": "tenant",
+            "x-scope": [
+              "system"
+            ],
+            "enum": [
+              "system",
+              "tenant"
+            ]
+          }
+        }
+      },
+      "PermissionSet": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RolePermissionSet"
+          },
+          {
+            "type": "object",
+            "required": [
+              "name",
+              "permissions"
+            ],
+            "properties": {
+              "description": {
+                "type": "string",
+                "description": "A description of the permission set."
+              },
+              "permissions": {
+                "$ref": "#/components/schemas/RolePermissions"
+              }
+            }
+          }
+        ]
+      },
+      "PermissionSets": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/PermissionSet"
+        }
+      },
+      "AccessRulesSortFilterFields": {
+        "type": "string",
+        "enum": [
+          "subjectId",
+          "subjectType",
+          "roleId",
+          "scopeId",
+          "scopeType",
+          "roleName",
+          "scopeName",
+          "createdAt",
+          "deletedAt",
+          "createdBy",
+          "phase"
+        ]
+      },
+      "ScopeType": {
+        "type": "string",
+        "enum": [
+          "system",
+          "tenant",
+          "cluster",
+          "department",
+          "project"
+        ]
+      },
+      "ClusterId": {
+        "description": "The id of the cluster.",
+        "type": "string",
+        "format": "uuid",
+        "example": "71f69d83-ba66-4822-adf5-55ce55efd210"
+      },
+      "AccessRuleCreationFieldsInternal": {
+        "type": "object",
+        "required": [
+          "subjectId",
+          "roleId",
+          "scopeId",
+          "scopeType"
+        ],
+        "properties": {
+          "subjectId": {
+            "type": "string",
+            "example": "user@run.ai",
+            "description": "The unique identifier of the subject (e.g., user, group, or app)."
+          },
+          "roleId": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The numeric ID of the assigned role.",
+            "example": 53142648
+          },
+          "scopeId": {
+            "type": "string",
+            "description": "The unique identifier of the scope.",
+            "example": "a418ed33-9399-48c0-a890-122cadd13bfd"
+          },
+          "scopeType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ScopeType"
+              },
+              {
+                "description": "The type of scope the access rule applies to. Valid values: system, tenant, cluster, department, project."
+              }
+            ]
+          },
+          "clusterId": {
+            "$ref": "#/components/schemas/ClusterId"
+          }
+        }
+      },
+      "SubjectTypeExtended": {
+        "type": "string",
+        "description": "Subject type enum for access rule responses. Extends SubjectType with the built-in\nall-authenticated-users subject, which applies to every authenticated user and service account.\n\nNote: The 'app' subject type is DEPRECATED. Please use 'service-account' instead for service accounts.\n",
+        "enum": [
+          "user",
+          "app",
+          "service-account",
+          "group",
+          "all-authenticated-users"
+        ]
+      },
+      "EnrichmentDataFields": {
+        "type": "object",
+        "required": [
+          "roleName",
+          "scopeName"
+        ],
+        "properties": {
+          "roleName": {
+            "type": "string",
+            "description": "The name of the assigned role (e.g., admin, viewer).",
+            "example": "admin"
+          },
+          "scopeName": {
+            "type": "string",
+            "description": "Human-readable name of the scope (e.g., tenant-x).",
+            "example": "tenant-x"
+          }
+        }
+      },
+      "TenantId": {
+        "description": "The id of the tenant.",
+        "type": "integer",
+        "format": "int32",
+        "example": 1001
+      },
+      "AccessRuleMetadataFields": {
+        "type": "object",
+        "required": [
+          "id",
+          "createdAt",
+          "updatedAt",
+          "createdBy"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The ID of the access rule entry.",
+            "example": 32
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp for when the access rule was created."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp for the last time the access rule was updated."
+          },
+          "deletedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time",
+            "description": "The timestamp indicating when the access rule was deleted."
+          },
+          "tenantId": {
+            "$ref": "#/components/schemas/TenantId"
+          },
+          "createdBy": {
+            "type": "string",
+            "example": "user@run.ai",
+            "description": "Identifier of the user who created the access rule."
+          }
+        }
+      },
+      "AccessRulePhase": {
+        "type": "string",
+        "enum": [
+          "Creating",
+          "Ready",
+          "NotReady",
+          "Deleting"
+        ],
+        "description": "Phase of the Access Rule in the cluster.",
+        "example": "Ready"
+      },
+      "AccessRuleStatusResponse": {
+        "type": "object",
+        "description": "Status of the Access Rule in the cluster. Available only for clusters of version 2.22.0 or above.",
+        "properties": {
+          "phase": {
+            "$ref": "#/components/schemas/AccessRulePhase"
+          },
+          "message": {
+            "type": "string",
+            "description": "Message for status of Access Rule in the cluster",
+            "example": "Failed to enforce department 'department-a'"
+          },
+          "details": {
+            "type": "string",
+            "description": "Details for status of Access Rule in the clusters",
+            "example": "NotReady: [cluster1-uuid]; Ready: [cluster2-uuid, cluster3-uuid]"
+          }
+        }
+      },
+      "AccessRule": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AccessRuleCreationFieldsInternal"
+          },
+          {
+            "type": "object",
+            "required": [
+              "subjectType"
+            ],
+            "properties": {
+              "subjectType": {
+                "$ref": "#/components/schemas/SubjectTypeExtended"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/EnrichmentDataFields"
+          },
+          {
+            "$ref": "#/components/schemas/AccessRuleMetadataFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "status": {
+                "$ref": "#/components/schemas/AccessRuleStatusResponse"
+              }
+            }
+          },
+          {
+            "required": [
+              "tenantId"
+            ]
+          }
+        ]
+      },
+      "AccessRules": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AccessRule"
+        },
+        "x-schema-name": "AccessRules"
+      },
+      "SubjectType": {
+        "type": "string",
+        "description": "Subject type enum for access rules.\n\nNote: The 'app' subject type is DEPRECATED. Please use 'service-account' instead for service accounts.\n",
+        "enum": [
+          "user",
+          "app",
+          "service-account",
+          "group"
+        ]
+      },
+      "AccessRuleCreationFields": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AccessRuleCreationFieldsInternal"
+          },
+          {
+            "type": "object",
+            "required": [
+              "subjectType"
+            ],
+            "properties": {
+              "subjectType": {
+                "$ref": "#/components/schemas/SubjectType"
+              }
+            }
+          }
+        ]
+      },
+      "AccessRuleSync": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AccessRuleCreationFieldsInternal"
+          },
+          {
+            "type": "object",
+            "required": [
+              "subjectType"
+            ],
+            "properties": {
+              "subjectType": {
+                "$ref": "#/components/schemas/SubjectTypeExtended"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/EnrichmentDataFields"
+          },
+          {
+            "$ref": "#/components/schemas/AccessRuleMetadataFields"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "predefinedRole": {
+                "type": "object",
+                "nullable": true,
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Id of the predefined role for cluster permissions",
+                    "example": "12"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Name of the predefined role for cluster permissions",
+                    "example": "admin"
+                  }
+                }
+              },
+              "isDeleting": {
+                "type": "boolean",
+                "default": false,
+                "description": "Indicates if the access rule is in 'Deleting' phase and should be deleted from the cluster",
+                "example": false
+              }
+            }
+          }
+        ]
+      },
+      "AccessRuleById": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AccessRule"
+          },
+          {
+            "properties": {
+              "scopePath": {
+                "type": "string",
+                "nullable": true,
+                "example": "runai/production-cluster/dep-42/prj-73"
+              }
+            }
+          }
+        ]
+      },
+      "AccessRuleClusterPhase": {
+        "type": "string",
+        "enum": [
+          "Ready",
+          "NotReady",
+          "Deleted"
+        ],
+        "description": "Phase of the Access Rule in the cluster",
+        "example": "Ready"
+      },
+      "AccessRuleStatusRequest": {
+        "type": "object",
+        "required": [
+          "phase",
+          "message"
+        ],
+        "properties": {
+          "phase": {
+            "$ref": "#/components/schemas/AccessRuleClusterPhase"
+          },
+          "message": {
+            "type": "string",
+            "description": "Message for status of Access Rule in the cluster",
+            "example": "Failed to enforce department 'department-a'"
+          }
+        }
+      },
+      "AccessRuleForSync": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AccessRuleStatusRequest"
+          },
+          {
+            "type": "object",
+            "required": [
+              "accessRuleId"
+            ],
+            "properties": {
+              "accessRuleId": {
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0,
+                "description": "The id of the access rule to retrieve",
+                "example": 32
+              }
+            }
+          }
+        ]
+      },
+      "AccessRulesSyncRequest": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 15000,
+        "items": {
+          "$ref": "#/components/schemas/AccessRuleForSync"
+        }
+      },
+      "AccessRulesBatchAction": {
+        "type": "string",
+        "description": "Specifies the operation to perform. Must be set to \"delete\".",
+        "enum": [
+          "delete",
+          "validate_delete"
+        ]
+      },
+      "AccessRulesBatchFields": {
+        "type": "object",
+        "description": "Deletes a batch of access rules in a single operation. It requires a list of rule IDs and an action flag explicitly set to \"delete\". It returns the result of the operation, including which items were successfully deleted and which failed.",
+        "required": [
+          "ids",
+          "action"
+        ],
+        "properties": {
+          "ids": {
+            "type": "array",
+            "description": "List of access rule IDs to delete.",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Access rule ID to delete."
+            }
+          },
+          "action": {
+            "$ref": "#/components/schemas/AccessRulesBatchAction"
+          }
+        }
+      },
+      "AccessRuleDeletionBatchId": {
+        "type": "string",
+        "format": "uuid",
+        "description": "The unique ID of the batch operation."
+      },
+      "AccessRuleDeletionBatchIdsList": {
+        "type": "array",
+        "description": "List of access rule IDs that were successfully deleted.",
+        "items": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "minLength": 1
+      },
+      "AccessRuleDeletionBatchErrorCode": {
+        "type": "integer",
+        "format": "int32",
+        "description": "A numeric code representing the error type."
+      },
+      "AccessRuleDeletionBatchErrorMessage": {
+        "type": "string",
+        "description": "A human-readable message describing the access rule IDs that failed to delete."
+      },
+      "AccessRuleDeletionBatchResponseFailureItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "$ref": "#/components/schemas/AccessRuleDeletionBatchErrorCode"
+          },
+          "message": {
+            "$ref": "#/components/schemas/AccessRuleDeletionBatchErrorMessage"
+          }
+        }
+      },
+      "AccessRuleDeletionBatchResponse": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/AccessRuleDeletionBatchId"
+          },
+          "succeeded": {
+            "$ref": "#/components/schemas/AccessRuleDeletionBatchIdsList"
+          },
+          "failed": {
+            "type": "array",
+            "description": "Details of the access rule IDs that failed to delete.",
+            "items": {
+              "$ref": "#/components/schemas/AccessRuleDeletionBatchResponseFailureItem"
+            }
+          }
+        }
+      },
+      "AccessRuleSubjects": {
+        "type": "array",
+        "description": "subjects for the access rules. must have at least one value",
+        "minItems": 1,
+        "maxItems": 100,
+        "items": {
+          "type": "object",
+          "required": [
+            "subjectId",
+            "subjectType"
+          ],
+          "properties": {
+            "subjectId": {
+              "type": "string",
+              "description": "The unique identifier of the subject e.g., user, group, or app).",
+              "example": "user@run.ai"
+            },
+            "subjectType": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/SubjectType"
+                },
+                {
+                  "description": "The subject assigned to the access rule. Valid values: user, group, app."
+                }
+              ]
+            }
+          }
+        }
+      },
+      "ScopeId": {
+        "type": "string",
+        "description": "The id of the cluster, department or project, depending on the scope type."
+      },
+      "AccessRuleScopes": {
+        "type": "array",
+        "description": "scopes for the access rules. must have at least one value",
+        "minItems": 1,
+        "maxItems": 50,
+        "items": {
+          "type": "object",
+          "required": [
+            "scopeId",
+            "scopeType"
+          ],
+          "properties": {
+            "scopeId": {
+              "$ref": "#/components/schemas/ScopeId"
+            },
+            "scopeType": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ScopeType"
+                },
+                {
+                  "description": "The scope to apply the access rule to. Valid values: system, tenant, cluster, department, project."
+                }
+              ]
+            }
+          }
+        }
+      },
+      "AccessRulesBatchCreateFields": {
+        "type": "object",
+        "required": [
+          "payload"
+        ],
+        "properties": {
+          "payload": {
+            "type": "object",
+            "description": "An array of access rule objects, each containing the role, subject, cluster, and scope to apply.",
+            "required": [
+              "subjects",
+              "roleId",
+              "scopes"
+            ],
+            "properties": {
+              "roleId": {
+                "type": "integer",
+                "format": "int32",
+                "description": "The numeric ID of the role to assign (e.g., admin, viewer).",
+                "example": 53142648
+              },
+              "clusterId": {
+                "$ref": "#/components/schemas/ClusterId"
+              },
+              "subjects": {
+                "$ref": "#/components/schemas/AccessRuleSubjects"
+              },
+              "scopes": {
+                "$ref": "#/components/schemas/AccessRuleScopes"
+              }
+            }
+          }
+        }
+      },
+      "ErrorCode": {
+        "type": "integer",
+        "format": "int32",
+        "description": "A numeric code representing the error type."
+      },
+      "AccessRulesBatchCreateResponse": {
+        "type": "object",
+        "properties": {
+          "succeeded": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccessRule"
+            }
+          },
+          "failed": {
+            "type": "array",
+            "items": {
+              "properties": {
+                "payload": {
+                  "$ref": "#/components/schemas/AccessRuleCreationFields"
+                },
+                "code": {
+                  "$ref": "#/components/schemas/ErrorCode"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "A human-readable message describing the access rule IDs that failed to create."
+                }
+              }
+            }
+          }
+        }
+      },
+      "AuthenticatedUsersAccessRuleCreationFields": {
+        "type": "object",
+        "description": "The role and scope to grant to all authenticated users and service accounts.",
+        "required": [
+          "roleId",
+          "scopeId",
+          "scopeType"
+        ],
+        "properties": {
+          "roleId": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The ID of the role to assign.",
+            "example": 53142648
+          },
+          "scopeId": {
+            "type": "string",
+            "description": "The unique identifier of the scope.",
+            "example": "a418ed33-9399-48c0-a890-122cadd13bfd"
+          },
+          "scopeType": {
+            "type": "string",
+            "description": "The type of scope the access rule applies to.",
+            "enum": [
+              "tenant",
+              "cluster",
+              "department",
+              "project"
+            ]
+          },
+          "clusterId": {
+            "$ref": "#/components/schemas/ClusterId"
+          }
+        }
+      },
+      "AccessRulesMigrateDeprecatedFields": {
+        "type": "object",
+        "description": "Specifies the old (deprecated) role and the new (non-deprecated) role for access-rule migration.",
+        "required": [
+          "oldRoleId",
+          "newRoleId"
+        ],
+        "properties": {
+          "oldRoleId": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The numeric ID of the deprecated role whose access rules should be migrated. Must be a deprecated role in the current tenant.",
+            "example": 53142648
+          },
+          "newRoleId": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The numeric ID of the non-deprecated role to migrate access rules to. Must not be a deprecated role, and must be enabled.",
+            "example": 12345678
+          }
+        }
+      },
+      "AccessRulesMigrateDeprecatedFailureItem": {
+        "type": "object",
+        "description": "A single access rule that failed to migrate. The old access rule remains in place (still tied to the deprecated role).",
+        "required": [
+          "oldAccessRuleId",
+          "step",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "oldAccessRuleId": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The ID of the access rule on the deprecated role that failed to migrate. This rule is still alive and should be handled separately."
+          },
+          "step": {
+            "type": "string",
+            "description": "Which step of the migration failed. \"create\" means the new access rule could not be created. \"delete\" means the new rule was created (or already existed) but the old rule could not be deleted, so the transaction was rolled back.",
+            "enum": [
+              "create",
+              "delete"
+            ]
+          },
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "description": "A numeric code representing the error type (typically an HTTP status code)."
+          },
+          "message": {
+            "type": "string",
+            "description": "A human-readable message describing why the migration failed for this access rule."
+          }
+        }
+      },
+      "AccessRulesMigrateDeprecatedResponse": {
+        "type": "object",
+        "description": "The result of a migrate-deprecated operation.",
+        "required": [
+          "succeeded",
+          "failed"
+        ],
+        "properties": {
+          "succeeded": {
+            "type": "object",
+            "description": "Access rules that were successfully migrated. `created` + `preExisting` together account for one entry per deleted old rule, so `len(deleted) == len(created) + len(preExisting)`.",
+            "required": [
+              "created",
+              "preExisting",
+              "deleted"
+            ],
+            "properties": {
+              "created": {
+                "type": "array",
+                "description": "New-role access rules that were freshly created as part of this migration.",
+                "items": {
+                  "$ref": "#/components/schemas/AccessRule"
+                }
+              },
+              "preExisting": {
+                "type": "array",
+                "description": "New-role access rules that already existed at the start of the call (same subject + scope + new role). No new rule was created for these, but the corresponding old (deprecated-role) rule was still deleted since the subject already has the new role on that scope.",
+                "items": {
+                  "$ref": "#/components/schemas/AccessRule"
+                }
+              },
+              "deleted": {
+                "$ref": "#/components/schemas/AccessRuleDeletionBatchIdsList"
+              }
+            }
+          },
+          "failed": {
+            "type": "array",
+            "description": "Access rules that failed to migrate. Each item identifies the old access rule (still alive) and the failure reason.",
+            "items": {
+              "$ref": "#/components/schemas/AccessRulesMigrateDeprecatedFailureItem"
+            }
+          }
+        }
+      },
+      "PermittedScopes": {
+        "type": "object",
+        "properties": {
+          "system": {
+            "type": "boolean",
+            "example": false
+          },
+          "tenants": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "1"
+            }
+          },
+          "clusters": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "a418ed33-9399-48c0-a890-122cadd13bfd"
+            }
+          },
+          "departments": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "7"
+            }
+          },
+          "projects": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PermittedScopesActions": {
+        "type": "object",
+        "required": [
+          "create",
+          "read",
+          "update",
+          "delete"
+        ],
+        "properties": {
+          "create": {
+            "$ref": "#/components/schemas/PermittedScopes"
+          },
+          "read": {
+            "$ref": "#/components/schemas/PermittedScopes"
+          },
+          "update": {
+            "$ref": "#/components/schemas/PermittedScopes"
+          },
+          "delete": {
+            "$ref": "#/components/schemas/PermittedScopes"
+          }
+        }
+      },
+      "BackendEvaluationRequest": {
+        "type": "object",
+        "properties": {
+          "resourceId": {
+            "type": "string",
+            "example": "a418ed33-9399-48c0-a890-122cadd13bfd",
+            "nullable": true
+          },
+          "resourceType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ResourceType"
+              }
+            ],
+            "nullable": true
+          },
+          "requestAction": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Action"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "MeAccessRule": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AccessRuleCreationFieldsInternal"
+          },
+          {
+            "type": "object",
+            "required": [
+              "subjectType"
+            ],
+            "properties": {
+              "subjectType": {
+                "$ref": "#/components/schemas/SubjectTypeExtended"
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/EnrichmentDataFields"
+          },
+          {
+            "required": [
+              "tenantId"
+            ]
+          },
+          {
+            "properties": {
+              "id": {
+                "type": "integer",
+                "format": "int32",
+                "example": 32
+              },
+              "tenantId": {
+                "$ref": "#/components/schemas/TenantId"
+              }
+            }
+          }
+        ]
+      },
+      "MeAccessRules": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/MeAccessRule"
+        },
+        "x-schema-name": "MeAccessRules"
+      },
+      "MeAccessRulesResponse": {
+        "type": "object",
+        "properties": {
+          "accessRules": {
+            "type": "object",
+            "required": [
+              "totalRecords",
+              "displayRecords",
+              "accessRules"
+            ],
+            "properties": {
+              "totalRecords": {
+                "type": "integer",
+                "example": 1
+              },
+              "displayRecords": {
+                "type": "integer",
+                "example": 1
+              },
+              "accessRules": {
+                "$ref": "#/components/schemas/MeAccessRules"
+              }
+            }
+          }
+        }
+      },
+      "AllowedInternalCreateRoles": {
+        "type": "string",
+        "enum": [
+          "System administrator",
+          "Cluster application",
+          "Installer application",
+          "Cloud operator"
+        ]
+      },
+      "InternalCreateAccessRuleRequest": {
+        "type": "object",
+        "required": [
+          "subjectId",
+          "subjectType",
+          "roleName"
+        ],
+        "properties": {
+          "subjectId": {
+            "type": "string",
+            "example": "user@run.ai"
+          },
+          "subjectType": {
+            "$ref": "#/components/schemas/SubjectType"
+          },
+          "roleName": {
+            "$ref": "#/components/schemas/AllowedInternalCreateRoles"
+          },
+          "scope": {
+            "required": [
+              "id",
+              "type"
+            ],
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "d290f1ee-6c54-4b01-90e6-d701748f0851"
+              },
+              "type": {
+                "$ref": "#/components/schemas/ScopeType"
+              },
+              "name": {
+                "type": "string",
+                "example": "my-scope"
+              }
+            }
+          }
+        }
+      },
+      "EnableScopedAuthorizationSetting": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "example": {
+          "enabled": false
+        }
+      },
+      "TenantIsCspManagedSetting": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "example": {
+          "enabled": false
+        }
+      },
+      "AuthorizationSettingsGetResponse": {
+        "type": "object",
+        "properties": {
+          "enableScopedAuthorization": {
+            "$ref": "#/components/schemas/EnableScopedAuthorizationSetting"
+          },
+          "tenantIsCspManaged": {
+            "$ref": "#/components/schemas/TenantIsCspManagedSetting"
+          }
+        }
+      },
+      "AuthorizationSettingsKeyEnum": {
+        "type": "string",
+        "enum": [
+          "enableScopedAuthorization",
+          "tenantIsCspManaged"
+        ]
+      },
+      "UpdateAuthorizationSettingByKeyRequest": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "example": {
+          "enabled": false
+        }
+      },
+      "BatchId": {
+        "type": "string",
+        "format": "uuid",
+        "description": "The ID of the batch operation."
+      },
+      "IdsList": {
+        "type": "array",
+        "description": "List of ids to perform the action on.",
+        "items": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Id to perform the action on."
+        },
+        "minLength": 1
+      },
+      "ErrorMessage": {
+        "type": "string",
+        "description": "The error message."
+      },
+      "BatchResponseFailureItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "$ref": "#/components/schemas/ErrorCode"
+          },
+          "message": {
+            "$ref": "#/components/schemas/ErrorMessage"
+          }
+        }
+      },
+      "BatchResponse": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/BatchId"
+          },
+          "succeeded": {
+            "$ref": "#/components/schemas/IdsList"
+          },
+          "failed": {
+            "type": "array",
+            "description": "The IDs that failed to update.",
+            "items": {
+              "$ref": "#/components/schemas/BatchResponseFailureItem"
+            }
+          }
+        }
+      },
+      "AccessRulesFilterFields": {
+        "$ref": "#/components/schemas/AccessRulesSortFilterFields"
+      },
+      "ComplianceIssues": {
+        "properties": {
+          "complianceIssues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "details",
+                "field"
+              ],
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "example": "compute.gpuDevicesRequest"
+                },
+                "details": {
+                  "type": "string",
+                  "example": "value must be no less than 3"
+                }
+              }
+            }
+          }
+        },
+        "nullable": true,
+        "type": "object"
+      },
+      "SubmissionError": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "$ref": "#/components/schemas/ComplianceIssues"
+          }
+        ]
+      }
+    },
+    "responses": {
+      "400BadRequest": {
+        "description": "Bad request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 400,
+              "message": "Required parameter is missing"
+            }
+          }
+        }
+      },
+      "401Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 401,
+              "message": "Issuer is not familiar."
+            }
+          }
+        }
+      },
+      "403Forbidden": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 403,
+              "message": "You do not have sufficient permissions."
+            }
+          }
+        }
+      },
+      "500InternalServerError": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 500,
+              "message": "Something went wrong."
+            }
+          }
+        }
+      },
+      "503ServiceUnavailable": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 503,
+              "message": "Please try again in few minutes."
+            }
+          }
+        }
+      },
+      "404NotFound": {
+        "description": "The specified resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 404,
+              "message": "Resource id not found."
+            }
+          }
+        }
+      },
+      "204NoContent": {
+        "description": "No Content."
+      },
+      "409Conflict": {
+        "description": "The specified resource already exists",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 409,
+              "message": "Resource with this name already exists"
+            }
+          }
+        }
+      },
+      "400BadSubmissionRequest": {
+        "description": "Bad submission request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SubmissionError"
+            },
+            "example": {
+              "code": 400,
+              "message": "The workload request does not comply with the policy set by the administrator"
+            }
+          }
+        }
+      },
+      "406NotAcceptable": {
+        "description": "Not acceptable request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "412PreconditionFailed": {
+        "description": "The specified resource was not found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 412,
+              "message": "Precondition failed"
+            }
+          }
+        }
+      },
+      "413RequestEntityTooLarge": {
+        "description": "Request entity too large",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "415UnsupportedMediaType": {
+        "description": "Unsupported media type",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "501NotImplemented": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 501,
+              "message": "Not implemented"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Bearer authentication"
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+type: object
+description: The full Kubernetes manifest for the workload in JSON form. Mutually exclusive with manifestEncodedBase64.
+additionalProperties: true
+example:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: my-app
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: my-app
+    template:
+      metadata:
+        labels:
+          app: my-app
+      spec:
+        containers:
+          - name: app
+            image: nginx:latest

@@ -1,0 +1,29 @@
+suite: Test Custom CA
+
+excludeTemplates:
+  # Excluding
+  - charts/kai-scheduler
+  - charts/karta
+
+tests:
+  - it: should render deployments with custom CA volume and mount when customCA is enabled
+    set:
+      global.customCA.enabled: true
+    documentSelector:
+      path: kind
+      value: Deployment
+      matchMany: true
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: Deployment
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: runai-ca-cert
+            secret:
+              items:
+                - key: runai-ca.pem
+                  path: runai-ca.pem
+              optional: true
+              secretName: runai-ca-cert

@@ -1,0 +1,5 @@
+value:
+  enabled: true
+  text: "PRODUCTION ENVIRONMENT"
+  backgroundColor: "#D32F2F"
+  fontColor: "#FFFFFF"

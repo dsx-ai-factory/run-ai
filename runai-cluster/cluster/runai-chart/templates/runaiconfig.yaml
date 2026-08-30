@@ -1,0 +1,28 @@
+{{- $runai_operator := index .Values "runai-operator" -}}
+{{- $createRunaiConfig := eq (include "createRunaiConfig" .) "true" -}}
+{{- if and $runai_operator.config $createRunaiConfig }}
+{{- $config := deepCopy $runai_operator.config -}}
+{{- $applyFreshInstallDefaults := and .Release.IsInstall (eq (include "shouldApplyFreshInstallLegacyDefaults" .) "true") -}}
+{{- if $applyFreshInstallDefaults -}}
+{{- range $controller := list "workload-controller" "inference-workload-controller" "job-controller" -}}
+{{- $controllerConfig := deepCopy (get $config $controller | default dict) -}}
+{{- $_ := set $controllerConfig "enabled" false -}}
+{{- $_ := set $config $controller $controllerConfig -}}
+{{- end -}}
+{{- $accessruleConfig := deepCopy (get $config "accessrule-controller" | default dict) -}}
+{{- $accessruleArgs := deepCopy (get $accessruleConfig "args" | default dict) -}}
+{{- $_ := set $accessruleArgs "legacyProjectPermissions" false -}}
+{{- $_ := set $accessruleConfig "args" $accessruleArgs -}}
+{{- $_ := set $config "accessrule-controller" $accessruleConfig -}}
+{{- end -}}
+apiVersion: run.ai/v1
+kind: RunaiConfig
+metadata:
+  name: runai
+{{- if .Release.IsInstall }}
+  annotations:
+    run.ai/legacy-workload-cleanup-fresh-install: "true"
+{{- end }}
+spec:
+{{- $config | toYaml | nindent 2 -}}
+{{- end }}

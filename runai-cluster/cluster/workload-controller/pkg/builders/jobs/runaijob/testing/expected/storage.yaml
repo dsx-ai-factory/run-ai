@@ -1,0 +1,58 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      template: storage-1
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      kai.scheduler/preemptibility: non-preemptible
+      priorityClassName: build
+      project: team-a
+      release: storage-1
+      workloadKind: InteractiveWorkload
+      workloadName: storage-1
+    name: job-3
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 0
+    completions: 1
+    maxIdleDurationSeconds: 1200
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          user: ""
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          kai.scheduler/preemptibility: non-preemptible
+          priorityClassName: build
+          project: team-a
+          release: storage-1
+          run.ai/top-owner-uid: ""
+          workloadKind: InteractiveWorkload
+          workloadName: storage-1
+      spec:
+        containers:
+        - image: ubuntu
+          imagePullPolicy: Always
+          name: job-3
+          resources: {}
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+          - mountPath: /dev/shm
+            name: dshm
+        restartPolicy: Never
+        schedulerName: runai-scheduler
+        volumes:
+        - emptyDir:
+            medium: Memory
+          name: dshm
+  status: {}

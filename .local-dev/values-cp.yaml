@@ -1,0 +1,59 @@
+# Migrator jobs default to image.pullPolicy: Always in chart values; override for
+# kind so they use the locally-loaded images instead of hitting a registry.
+keycloakx:
+  database:
+    hostname: runai-backend-postgresql
+    port: 5432
+    database: backend
+    username: user
+    existingSecret: runai-backend-gen-postgresql
+    existingSecretKey: password
+  extraEnv: |
+    - name: KEYCLOAK_ADMIN
+      value: admin
+    - name: KEYCLOAK_ADMIN_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: runai-backend-gen-keycloakx
+          key: KEYCLOAK_ADMIN_PASSWORD
+
+# Traefik: local plugin code doesn't exist and otelcollector isn't deployed in
+# Kind, so strip both args. Also give Traefik 30s before liveness probes fire
+# (startup on a loaded Kind node can be slow) and bump timeout from 1s to 5s.
+traefik:
+  args:
+    - '--global.checknewversion=false'
+    - '--entrypoints.metrics.address=:9100/tcp'
+    - '--entrypoints.traefik.address=:9000/tcp'
+    - '--entrypoints.web.address=:8080/tcp'
+    - '--entryPoints.web.forwardedHeaders.insecure'
+    - '--entrypoints.web.http.middlewares=content-security-policy@file'
+    - '--entrypoints.websecure.address=:8443/tcp'
+    - '--ping=true'
+    - '--metrics.prometheus=true'
+    - '--metrics.prometheus.buckets=0.1,0.3,1.2,2.0,5.0'
+    - '--metrics.prometheus.entrypoint=metrics'
+    - '--metrics.prometheus.addServicesLabels=true'
+    - '--metrics.prometheus.addRoutersLabels=true'
+    - '--metrics.prometheus.headerlabels.useragent=User-Agent'
+    - '--metrics.prometheus.headerlabels.xforwardedhost=X-Forwarded-Host'
+    - '--metrics.prometheus.headerlabels.xrequestpath=X-Replaced-Path'
+    - '--entrypoints.websecure.http.tls=true'
+    - '--log.format=json'
+    - '--log.level=DEBUG'
+    - '--accesslog=true'
+    - '--accesslog.format=json'
+    - '--accesslog.fields.defaultmode=keep'
+    - '--accesslog.fields.headers.defaultmode=keep'
+    - '--accesslog.fields.headers.names.Authorization=redact'
+    - '--accesslog.filters.statuscodes=400-499,500-599'
+    - '--providers.file.directory=/etc/traefik'
+    - '--providers.file.watch=false'
+    - '--api.dashboard=true'
+    - '--api.insecure=true'
+  livenessProbe:
+    initialDelaySeconds: 30
+    timeoutSeconds: 5
+  readinessProbe:
+    initialDelaySeconds: 15
+    timeoutSeconds: 5

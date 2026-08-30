@@ -1,0 +1,3 @@
+grantType: "app_token"
+appID: "appID"
+appSecret: "appSecret"

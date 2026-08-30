@@ -1,0 +1,170 @@
+DistributedTarget:
+  Config: {}
+  Framework: MPI
+  JaxJob: null
+  MasterSpec: null
+  MpiJob:
+    apiVersion: kubeflow.org/v2beta1
+    kind: MPIJob
+    metadata:
+      annotations:
+        run.ai/auto-delete-after-completion-sec: "864000"
+        run.ai/submitted-by: tester
+      labels:
+        app: mpijob
+        createdBy: MPIJob
+        project: test
+        release: basic
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: basic
+      name: basic
+      namespace: runai-test
+    spec:
+      mpiReplicaSpecs:
+        Launcher:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: mpijob
+                createdBy: MPIJob
+                project: test
+                release: basic
+                workloadKind: Distributed
+                workloadName: basic
+            spec:
+              containers:
+              - args:
+                - -x
+                - my-script.py
+                command:
+                - python-3.8
+                env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: basic
+                - name: HOME
+                  value: /home/my-folder
+                - name: RUNAI_MPI_NUM_WORKERS
+                  value: "1"
+                image: ubuntu
+                name: mpi
+                resources: {}
+                securityContext:
+                  runAsNonRoot: true
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /local/directory
+                  name: host-path-master
+                  readOnly: true
+                - mountPath: /local/nfs
+                  name: nfs-master
+                  readOnly: true
+                workingDir: /home/my-folder
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - hostPath:
+                  path: /container/directory
+                name: host-path-master
+              - name: nfs-master
+                nfs:
+                  path: /container/nfs
+                  server: my.nfs.com
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                gpu-fraction: "0.5"
+                gpu-fraction-num-devices: "1"
+                user: tester
+              labels:
+                app: mpijob
+                createdBy: MPIJob
+                project: test
+                release: basic
+                workloadKind: Distributed
+                workloadName: basic
+            spec:
+              containers:
+              - args:
+                - -x
+                - my-script.py
+                command:
+                - python-3.8
+                env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: basic
+                - name: HOME
+                  value: /home/my-folder
+                - name: RUNAI_MPI_NUM_WORKERS
+                  value: "1"
+                image: ubuntu
+                name: mpi
+                resources: {}
+                securityContext:
+                  runAsNonRoot: true
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /local/directory
+                  name: host-path-worker
+                  readOnly: true
+                - mountPath: /local/nfs
+                  name: nfs-worker
+                  readOnly: true
+                workingDir: /home/my-folder
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - hostPath:
+                  path: /container/directory
+                name: host-path-worker
+              - name: nfs-worker
+                nfs:
+                  path: /container/nfs
+                  server: my.nfs.com
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: Running
+        ttlSecondsAfterFinished: 864000
+      slotsPerWorker: 1
+    status: {}
+  ObjectMeta: null
+  PyTorchJob: null
+  RunPolicy: null
+  TFJob: null
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: MPIJob
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-basic/master_no_gpu, Framework: MPI'
+  images:
+  - ubuntu
+  name: 'basic/master_no_gpu, Framework: MPI'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

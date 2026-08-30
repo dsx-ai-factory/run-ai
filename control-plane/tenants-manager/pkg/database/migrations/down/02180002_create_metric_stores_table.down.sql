@@ -1,0 +1,1 @@
+drop table if exists metric_stores;

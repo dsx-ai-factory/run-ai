@@ -1,0 +1,33 @@
+type: object
+properties:
+  fullSync:
+    type: boolean
+    description: Upsert all items and delete all missing items
+  priorities:
+    type: array
+    items:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: string
+              example: d73a738f-fab3-430a-8fa3-5241493d7128
+              description: The unique identifier of the workload priority
+            name:
+              type: string
+              example: "train"
+              description: The name of the workload priority (e.g., Low, Medium High)
+            value:
+              type: integer
+              minimum: 0
+              example: 50
+              description: The scheduling value assigned to this priority
+            source:
+              type: string
+            status:
+              type: object
+              properties:
+                phase:
+                  type: string
+                  description: Current phase of the priority in the specified cluster
+                  example: "Ready"

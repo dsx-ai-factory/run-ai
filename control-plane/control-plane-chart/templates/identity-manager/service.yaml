@@ -1,0 +1,1 @@
+{{- include "common.service" (list . .Values.identityManager.service .Values.identityManager) }}

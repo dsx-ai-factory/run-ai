@@ -1,0 +1,9 @@
+type: object
+maxProperties: 100
+minProperties: 0
+additionalProperties:
+  type: array
+  maxItems: 100
+  minItems: 0
+  items:
+    type: string

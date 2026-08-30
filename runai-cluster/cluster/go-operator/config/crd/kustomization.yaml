@@ -1,0 +1,54 @@
+# This kustomization.yaml is not intended to be run by itself,
+# since it depends on service name and namespace that are out of this kustomize package.
+# It should be run by config/default
+resources:
+- bases/run.ai_runaiconfigs.yaml
+- bases/run.ai_projecttests.yaml
+- bases/run.ai_runaijobtests.yaml
+- bases/scheduling.run.ai_departmenttests.yaml
+- bases/run.ai_projects.yaml
+- bases/scheduling.run.ai_departments.yaml
+- bases/run.ai_nodepools.yaml
+- bases/installation.run.ai_clusters.yaml
+- bases/run.ai_accessrules.yaml
+- bases/run.ai_externalworkloads.yaml
+- bases/run.ai_datavolumes.yaml
+- bases/run.ai_remoteconfigs.yaml
+- bases/run.ai_remoteconfigsyncs.yaml
+- bases/run.ai_clusters.yaml
+#+kubebuilder:scaffold:crdkustomizeresource
+
+patchesStrategicMerge:
+# [WEBHOOK] To enable webhook, uncomment all the sections with [WEBHOOK] prefix.
+# patches here are for enabling the conversion webhook for each CRD
+#- patches/webhook_in_runaiconfigs.yaml
+#- patches/webhook_in_departments.yaml
+#- patches/webhook_in_projects.yaml
+#- patches/webhook_in_runaijobs.yaml
+#- patches/webhook_in_nodepools.yaml
+#- patches/webhook_in_clusters.yaml
+#- patches/webhook_in_accessrules.yaml
+#- patches/webhook_in_externalworkloads.yaml
+#- patches/webhook_in_datavolumes.yaml
+#- patches/webhook_in_remoteconfigs.yaml
+#- patches/webhook_in_remoteconfigsyncs.yaml
+#+kubebuilder:scaffold:crdkustomizewebhookpatch
+
+# [CERTMANAGER] To enable cert-manager, uncomment all the sections with [CERTMANAGER] prefix.
+# patches here are for enabling the CA injection for each CRD
+#- patches/cainjection_in_runaiconfigs.yaml
+#- patches/cainjection_in_departments.yaml
+#- patches/cainjection_in_projects.yaml
+#- patches/cainjection_in_runaijobs.yaml
+#- patches/cainjection_in_nodepools.yaml
+#- patches/cainjection_in_clusters.yaml
+#- patches/cainjection_in_accessrules.yaml
+#- patches/cainjection_in_externalworkloads.yaml
+#- patches/cainjection_in_datavolumes.yaml
+#- patches/cainjection_in_remoteconfigs.yaml
+#- patches/cainjection_in_remoteconfigsyncs.yaml
+#+kubebuilder:scaffold:crdkustomizecainjectionpatch
+
+# the following config is for teaching kustomize how to do kustomization for CRDs.
+configurations:
+- kustomizeconfig.yaml

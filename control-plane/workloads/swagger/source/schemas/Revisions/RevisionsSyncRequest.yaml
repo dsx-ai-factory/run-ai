@@ -1,0 +1,30 @@
+type: object
+required:
+  - revisions
+  - projectId
+properties:
+  projectId:
+    type: string
+    example: "1"
+  clusterId:
+    type: string
+    format: uuid
+    example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  revisions:
+    type: array
+    items:
+      $ref: './RevisionSyncFields.yaml'
+  from:
+    type: string
+    format: uuid
+    description: the first revision id to sync. if empty, all revisions before the first one sent will be deleted.
+  to:
+    type: string
+    format: uuid
+    description: the last revision to sync. if empty, all revisions after the last one sent will be deleted.
+  idsToIgnore:
+    type: array
+    description: revision ids to ignore when deleting.
+    items:
+      type: string
+      format: uuid

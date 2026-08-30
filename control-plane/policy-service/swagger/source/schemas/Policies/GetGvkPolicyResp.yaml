@@ -1,0 +1,7 @@
+description: >-
+  A policy together with an optional breakdown. The breakdown is included only
+  when the breakdown query parameter is set, and provides resolved fields and
+  spec selectors from the Mapping subsystem.
+allOf:
+  - $ref: "./Policy.yaml"
+  - $ref: "../Mapping/Breakdown.yaml"

@@ -1,0 +1,4 @@
+type: string
+description: The name of the application. The name must be unique within the organization and can only contain lowercase alphanumeric characters and hyphens. It must start with a letter.
+maxLength: 63
+pattern: "^[a-z]([a-z0-9-]*[a-z0-9])?$"

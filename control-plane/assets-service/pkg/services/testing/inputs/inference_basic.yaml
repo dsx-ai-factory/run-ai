@@ -1,0 +1,19 @@
+assets:
+  environment: inference
+  compute: fraction
+  datasources:
+    - kind: pvc
+      id: existing
+specificRunParams:
+  command: command-from-specific-run-params
+  environmentVariables:
+    - name: HOME
+      value: home-from-specific-run-params
+  nodePools:
+    - my-node-a
+    - my-node-b
+
+  autoScaling:
+    minReplicas: 0
+    maxReplicas: 5
+    scaleToZeroRetentionSeconds: 30

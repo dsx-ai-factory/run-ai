@@ -1,0 +1,36 @@
+# Minimal valid leaderworkerset.x-k8s.io/LeaderWorkerSet/v1 manifest used as
+# the starting point for every Layer 3+4 case under cases/.
+#
+# LeaderWorkerSet has two pod templates (leaderTemplate, workerTemplate) under
+# .spec.leaderWorkerTemplate. Each group has 1 leader and (size-1) workers.
+#
+# The empty stubs below are required:
+#   - leaderTemplate.metadata:{} and workerTemplate.metadata:{} — pod metadata
+#     spec selectors query these paths; if absent, SET actions won't execute.
+#   - initContainers with placeholder — required for initContainer SET actions.
+apiVersion: leaderworkerset.x-k8s.io/v1
+kind: LeaderWorkerSet
+metadata:
+  name: test
+spec:
+  replicas: 1
+  leaderWorkerTemplate:
+    size: 1
+    leaderTemplate:
+      metadata: {}
+      spec:
+        initContainers:
+          - name: init
+            image: placeholder-leader-init
+        containers:
+          - name: leader
+            image: placeholder-leader
+    workerTemplate:
+      metadata: {}
+      spec:
+        initContainers:
+          - name: init
+            image: placeholder-worker-init
+        containers:
+          - name: worker
+            image: placeholder-worker

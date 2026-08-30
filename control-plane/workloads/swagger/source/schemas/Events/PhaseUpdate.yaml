@@ -1,0 +1,12 @@
+type: object
+nullable: true
+example: null
+required:
+  - phase
+  - phaseMessage
+properties:
+  phase:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads/Phase.yaml'
+  phaseMessage:
+    type: string
+    example : 'Not enough resources in the requested nodepool'

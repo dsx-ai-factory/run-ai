@@ -1,0 +1,106 @@
+BatchJobTarget:
+  Config: {}
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: rich
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: rich
+      name: rich
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: rich
+            workloadKind: Workspace
+            workloadName: rich
+        spec:
+          containers:
+          - args:
+            - --log-dir
+            - xxx
+            command:
+            - start
+            env:
+            - name: HOME
+              value: /home/runai-home
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: rich
+            - name: LDAP_UID
+              value: "500"
+            - name: LDAP_GID
+              value: "30"
+            image: tensorboard:latest
+            imagePullPolicy: Always
+            name: rich
+            resources: {}
+            securityContext:
+              allowPrivilegeEscalation: true
+              capabilities:
+                add:
+                - KILL
+                - CHOWN
+              readOnlyRootFilesystem: true
+              runAsGroup: 30
+              runAsNonRoot: false
+              runAsUser: 500
+              seccompProfile:
+                type: RuntimeDefault
+            stdin: true
+            tty: true
+            volumeMounts:
+            - mountPath: /home/runai-home
+              name: user-data
+            workingDir: /my/home
+          dnsPolicy: ClusterFirstWithHostNet
+          hostIPC: true
+          hostNetwork: true
+          priorityClassName: build
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+          securityContext:
+            fsGroup: 30
+          terminationGracePeriodSeconds: 55
+          volumes:
+          - emptyDir: {}
+            name: user-data
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: rich, Rules: , Type: Workspace'
+  images:
+  - tensorboard:latest
+  name: 'Value: rich, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

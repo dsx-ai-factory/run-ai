@@ -1,0 +1,30 @@
+meta:
+  scope: project
+  projectId: 4500001
+  name: my-policy
+policy:
+  defaults:
+    compute:
+      extendedResources:
+        attributes:
+          quantity: '1'
+        instances:
+          - resource: hardware-vendor.example/foo
+            quantity: '2'
+          - resource: nvidia.com/mig-1g.5gb
+  rules:
+    compute:
+      extendedResources:
+        attributes:
+          quantity:
+            required: true
+            canEdit: true
+            options:
+              - value: '1'
+              - value: '2'
+              - value: '4'
+              - value: '8'
+        instances:
+          canAdd: false
+          locked:
+            - hardware-vendor.example/foo

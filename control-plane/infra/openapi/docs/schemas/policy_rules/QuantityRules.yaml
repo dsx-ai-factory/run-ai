@@ -1,0 +1,25 @@
+properties:
+  sourceOfRule:
+    $ref: "./SourceOfRule.yaml"
+  required:
+    description: Whether the field is mandatory, default to false.
+    type: boolean
+    nullable: true
+  canEdit:
+    description: Whether the value of the field is editable, default to true
+    type: boolean
+    nullable: true
+  min:
+    description: The minimum value that the field can be assigned to.
+    type: string
+    nullable: true
+    pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+  max:
+    description: The maximum value that the field can be assigned to.
+    type: string
+    nullable: true
+    pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+  defaultFrom:
+    $ref: "./DefaultFromRule.yaml"
+nullable: true
+type: object

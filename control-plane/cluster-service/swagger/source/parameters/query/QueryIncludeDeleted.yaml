@@ -1,0 +1,6 @@
+name: includeDeleted
+in: query
+required: false
+example: true
+schema:
+  type: boolean

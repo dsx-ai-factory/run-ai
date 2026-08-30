@@ -1,0 +1,12 @@
+{
+  "target": {
+    "path": {
+      "deployment": "runai-job-controller"
+    },
+    "namespace": "runai"
+  },
+  "feature": {
+    "env": true,
+    "fs": "read"
+  }
+}

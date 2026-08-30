@@ -1,0 +1,6 @@
+description: The protocol used to access the port.
+type: string
+enum:
+  - http
+nullable: true
+default: http

@@ -1,0 +1,8 @@
+type: string
+description: A direct dot-separated path into the workload spec, for example securityContext.privileged.
+  Examples that match are name configMapRef configMapRef.name secretRef.name foo-bar.baz
+  Examples that don't match are Name, config-map. (ends with dot), .name, foo-
+example: securityContext.privileged
+minLength: 1
+maxLength: 253
+pattern: ^(?:[a-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)(?:\.(?:[a-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?))*$

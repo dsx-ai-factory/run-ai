@@ -1,0 +1,9 @@
+properties:
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  policies:
+    type: array
+    items:
+      $ref: "../Policy/PolicyCreationFields.yaml"
+nullable: true
+type: object

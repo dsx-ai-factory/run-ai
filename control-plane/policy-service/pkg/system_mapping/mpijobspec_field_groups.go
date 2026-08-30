@@ -1,0 +1,31 @@
+package system_mapping
+
+import (
+	"github.com/run-ai/runai/control-plane/policy-service/generated/pkg/api"
+	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
+)
+
+// BuildSystemMPIJobSpecFg builds the field group for kubeflow.org/MPIJob/v1
+// workload-level fields. This includes:
+//   - slotsPerWorker (MPIJob-specific)
+//
+// Note: runPolicy fields are provided by the shared kubeflowRunPolicy field group.
+func BuildSystemMPIJobSpecFg() (map[string]api.FieldGroupField, map[string]api.ItemSelector) {
+	fields := BuildFieldGroupFieldMap(mpiJobSpecFgFields())
+	return fields, nil
+}
+
+func mpiJobSpecFgFields() []SystemFgField {
+	keyValue := dbmodel.BuiltinFormatterKeyValue
+
+	return []SystemFgField{
+		////////////////////////////////////////////////////////
+		// MPI-specific fields
+		////////////////////////////////////////////////////////
+		{
+			Name:      "slotsPerWorker",
+			Formatter: keyValue,
+			Type:      api.MAPPINGFIELDTYPE_INTEGER,
+		},
+	}
+}

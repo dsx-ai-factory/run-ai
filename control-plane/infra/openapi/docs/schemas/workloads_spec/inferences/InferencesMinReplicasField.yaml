@@ -1,0 +1,7 @@
+properties:
+  minReplicas:
+    description: The minimum number of replicas for autoscaling. Defaults to 1. Use 0 to allow scale-to-zero
+    type: integer
+    format: int32
+    minimum: 0
+    nullable: true

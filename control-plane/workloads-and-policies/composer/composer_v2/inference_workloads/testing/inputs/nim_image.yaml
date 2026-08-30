@@ -1,0 +1,4 @@
+image: nvcr.io/nim/meta/llama3:latest
+servingPort:
+  container: 8080
+  authorizationType: public

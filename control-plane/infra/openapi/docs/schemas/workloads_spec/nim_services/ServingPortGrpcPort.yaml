@@ -1,0 +1,7 @@
+description: The GRPC port that the container running the inference service exposes.
+type: integer
+format: int32
+minimum: 1
+maximum: 65535
+example: 8001
+nullable: true

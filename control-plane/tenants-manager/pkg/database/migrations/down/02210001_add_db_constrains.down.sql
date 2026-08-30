@@ -1,0 +1,1 @@
+create index if not exists tenants_name_key on tenants (name);

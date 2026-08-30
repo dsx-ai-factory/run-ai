@@ -1,0 +1,1 @@
+ALTER TABLE nodepools DROP COLUMN IF EXISTS time_based_fair_share;

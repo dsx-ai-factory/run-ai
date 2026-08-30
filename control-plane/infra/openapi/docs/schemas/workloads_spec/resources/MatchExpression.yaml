@@ -1,0 +1,26 @@
+type: object
+description: A selector that contains values, a key, and an operator that relates the key and values.
+properties:
+  key:
+    description: The label key that the selector applies to (mandatory).
+    type: string
+    pattern: .*
+    ##WAIT_FOR_35331## minLength: 1
+    maxLength: 63
+  operator:
+    $ref: "./MatchExpressionOperator.yaml"
+  values:
+    description: An array of string values. If the operator is In or NotIn,
+      the values array must be non-empty. If the operator is Exists or DoesNotExist,
+      the values array must be empty. If the operator is Gt or Lt, the values
+      array must have a single element, which will be interpreted as an integer.
+    type: array
+    items:
+      type: string
+      maxLength: 10000
+      pattern: .*
+    maxItems: 1000
+required:
+  - key
+  - operator
+nullable: true

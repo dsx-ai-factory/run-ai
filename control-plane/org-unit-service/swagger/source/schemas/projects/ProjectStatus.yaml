@@ -1,0 +1,29 @@
+type: object
+properties:
+  namespace:
+    type: string
+    description: the project's namespace
+    nullable: true
+    example: runai-proj1
+  phase:
+    $ref: './ProjectPhase.yaml'
+    description: the project's phase
+  phaseMessage:
+    type: string
+    description: the project's phase message
+    nullable: true
+    example: "Project is ready"
+  lastUpdatedTime:
+    type: string
+    format: date-time
+    nullable: true
+  nodePoolQuotaStatuses:
+    type: array
+    items:
+      $ref: '../QuotaStatusNodePool.yaml'
+  quotaStatus:
+    $ref: '../QuotaStatus.yaml'
+  additionalStatusData:
+    nullable: true
+    type: object
+    additionalProperties: true

@@ -1,0 +1,35 @@
+x-internal: true
+description: parameters for unified workload request
+  workloadType and projectId are always mandatory
+  assetId is needed for unifying asset info. it also mandates the caller to provide clusterId
+  workloadId is needed for unifying workload spec. 
+  workloadId and assetId are mutual exclusive.
+  templateId is needed for unifying template spec.
+type: object
+properties:
+  workloadType:
+    $ref: "../../../../../../infra/openapi/docs/schemas/workloads/WorkloadType.yaml"
+  projectId:
+    $ref: "../../../../../../infra/openapi/docs/schemas/scopes/ProjectId.yaml"
+  clusterId:
+    $ref: "../../../../../../infra/openapi/docs/schemas/scopes/ClusterIdOptional.yaml"
+  assetId:
+    $ref: "../../../../../../infra/openapi/docs/schemas/assets/AssetIdOptional.yaml"
+  assetIds:
+    type: array
+    items:
+      $ref: "../../../../../../infra/openapi/docs/schemas/assets/AssetId.yaml"
+  dataVolumeIds:
+    type: array
+    items:
+      type: string
+      format: uuid
+      minLength: 1
+  workloadId:
+    allOf:
+      - $ref: "../../../../../../infra/openapi/docs/schemas/workloads/WorkloadId.yaml"
+    nullable: true
+  templateId:
+    allOf:
+      - $ref: "../../../../../../infra/openapi/docs/schemas/templates/TemplateId.yaml"
+    nullable: true

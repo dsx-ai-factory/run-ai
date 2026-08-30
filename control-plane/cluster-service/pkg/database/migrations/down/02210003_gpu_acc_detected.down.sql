@@ -1,0 +1,1 @@
+ALTER TABLE nodepools DROP COLUMN IF EXISTS status_gpu_network_acceleration_detected;

@@ -1,0 +1,30 @@
+template: testify
+template-data:
+  unroll-variadic: true
+dir: "{{.InterfaceDir}}/mocks"
+pkgname: "mocks"
+structname: "Mock{{.InterfaceName}}"
+filename: "mock_{{.InterfaceName}}.go"
+packages:
+  github.com/run-ai/runai/runai-common-packages/metrics/runaimetrics:
+    interfaces:
+      MetricCounter:
+      MetricGauge:
+      MetricHistogram:
+      MetricSummary:
+      CounterVector:
+      GaugeVector:
+      HistogramVector:
+      SummaryVector:
+
+  github.com/run-ai/runai/runai-common-packages/metrics:
+    config:
+      all: true
+      dir: "{{.InterfaceDir}}/mocks"
+      pkgname: "mocks"
+
+  github.com/run-ai/runai/runai-common-packages/metrics/internal/registry:
+    config:
+      all: true
+      dir: "{{.InterfaceDir}}/mocks"
+      pkgname: "mocks"

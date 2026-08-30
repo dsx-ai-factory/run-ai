@@ -1,0 +1,5 @@
+spec:
+  path: /container/path
+  mountPath: /external/path
+  readOnly: true
+  mountPropagation: None

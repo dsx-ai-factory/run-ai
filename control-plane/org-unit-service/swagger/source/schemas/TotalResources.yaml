@@ -1,0 +1,17 @@
+type: object
+properties:
+  gpuQuota:
+    type: number
+    format: double
+    description: Total gpu quota of the org unit
+    nullable: true
+  cpuQuota:
+    type: number
+    format: double
+    description: Total cpu quota of the org unit in Millicores
+    nullable: true
+  memoryQuota:
+    type: number
+    format: double
+    description: Total memory quota of the org unit in MB
+    nullable: true

@@ -1,0 +1,5 @@
+name: deleted
+in: query
+description: Return only deleted resources when `true`.
+schema:
+  type: boolean

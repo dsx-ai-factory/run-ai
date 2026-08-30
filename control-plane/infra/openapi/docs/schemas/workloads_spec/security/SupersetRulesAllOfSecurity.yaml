@@ -1,0 +1,30 @@
+title: SupersetRulesAllOfSecurity
+nullable: true
+properties:
+  allowPrivilegeEscalation:
+    $ref: ../../policy_rules/BooleanRules.yaml
+  capabilities:
+    $ref: ../../policy_rules/ArrayRules.yaml
+  hostIpc:
+    $ref: ../../policy_rules/BooleanRules.yaml
+  hostNetwork:
+    $ref: ../../policy_rules/BooleanRules.yaml
+  privileged:
+    allOf:
+    - $ref: ../../policy_rules/BooleanRules.yaml
+    x-internal: true
+  readOnlyRootFilesystem:
+    $ref: ../../policy_rules/BooleanRules.yaml
+  runAsGid:
+    $ref: ../../policy_rules/IntegerRulesOptional.yaml
+  runAsNonRoot:
+    $ref: ../../policy_rules/BooleanRules.yaml
+  runAsUid:
+    $ref: ../../policy_rules/IntegerRulesOptional.yaml
+  seccompProfileType:
+    $ref: ./SeccompProfileTypeRules.yaml
+  supplementalGroups:
+    $ref: ../../policy_rules/StringRules.yaml
+  uidGidSource:
+    $ref: ./UidGidSourceRules.yaml
+type: object

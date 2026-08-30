@@ -1,0 +1,7 @@
+name: subjectType
+in: query
+required: true
+description: The type of resource we want to filter by.
+schema:
+  type: string
+  example: "user"

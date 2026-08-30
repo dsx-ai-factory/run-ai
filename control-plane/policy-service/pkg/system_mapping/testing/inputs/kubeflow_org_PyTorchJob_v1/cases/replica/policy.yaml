@@ -1,0 +1,40 @@
+description: |
+  Layer 3 case "replica" for kubeflow.org/PyTorchJob/v1. SETs replica-level
+  fields (replicas, restartPolicy) and pod metadata for each replica type.
+effectiveRules:
+  # ----- Master replica spec -----
+  - field: replicas
+    specSelector: masterReplicaSpec
+    enforcements: [{ set: { value: 2 } }]
+  - field: restartPolicy
+    specSelector: masterReplicaSpec
+    enforcements: [{ set: { value: OnFailure } }]
+
+  # ----- Master pod metadata -----
+  - field: labels
+    specSelector: masterPodMetadata
+    enforcements: [{ set: { key: "replica.type", value: "master" } }]
+  - field: annotations
+    specSelector: masterPodMetadata
+    enforcements: [{ set: { key: "replica.example.com/role", value: "master" } }]
+
+  # ----- Worker replica spec -----
+  - field: replicas
+    specSelector: workerReplicaSpec
+    enforcements: [{ set: { value: 3 } }]
+  - field: restartPolicy
+    specSelector: workerReplicaSpec
+    enforcements: [{ set: { value: OnFailure } }]
+
+  # ----- Worker pod metadata -----
+  - field: labels
+    specSelector: workerPodMetadata
+    enforcements: [{ set: { key: "replica.type", value: "worker" } }]
+  - field: annotations
+    specSelector: workerPodMetadata
+    enforcements: [{ set: { key: "replica.example.com/role", value: "worker" } }]
+
+  # ----- container image (verify policy modifies skeleton) -----
+  - field: image
+    specSelector: allContainers
+    enforcements: [{ set: { value: "pytorch/pytorch:2.0" } }]

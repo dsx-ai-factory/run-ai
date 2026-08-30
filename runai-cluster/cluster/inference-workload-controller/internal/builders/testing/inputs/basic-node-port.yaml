@@ -1,0 +1,55 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  name: basic-inference
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  image:
+    value: image
+  imagePullPolicy:
+    value: Always
+  name:
+    value: inference-0
+  gpu:
+    value: "1"
+  gpuMemory:
+    value: 120M
+  cpu:
+    value: "1"
+  cpuLimit:
+    value: "1"
+  memory:
+    value: "1"
+  nodePools:
+    value: default nodepoola
+  dropAllCapabilities:
+    value: true
+  memoryLimit:
+    value: "1"
+  username:
+    value: guy.shaibi
+  runAsNonRoot:
+    value: true
+  command:
+    value: "tritonserver"
+  arguments:
+    value: "--model-store=/mnt/models -v"
+  serviceType:
+    value: NodePort
+  ports:
+    items:
+      port-80:
+        value:
+          container: 80
+      port-81:
+        value:
+          serviceType: ServingPort
+          container: 81
+  tolerations:
+    items:
+      tol-a:
+        value:
+          tolerationKey: aaa
+
+status: {}

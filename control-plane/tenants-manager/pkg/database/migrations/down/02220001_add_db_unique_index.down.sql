@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS tenants_name_key;

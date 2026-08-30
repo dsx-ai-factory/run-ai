@@ -1,0 +1,15 @@
+allOf:
+  - $ref: "./AccessRuleCreationFieldsInternal.yaml"
+  - type: object
+    required:
+      - subjectType
+    properties:
+      subjectType:
+        $ref: './SubjectTypeExtended.yaml'
+  - $ref: "./EnrichmentDataFields.yaml"
+  - $ref: "./AccessRuleMetadataFields.yaml"
+  - type: object
+    properties:
+      status:
+        $ref: './AccessRuleStatusResponse.yaml'
+  - required: [ tenantId ]

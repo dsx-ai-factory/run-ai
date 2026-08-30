@@ -1,0 +1,1 @@
+ALTER TABLE assets_pvc ALTER COLUMN ephemeral DROP NOT NULL;

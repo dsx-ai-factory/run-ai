@@ -1,0 +1,3 @@
+properties:
+  s3:
+    $ref: "./S3sRules.yaml"

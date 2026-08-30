@@ -1,0 +1,53 @@
+package knative
+
+import (
+	"context"
+
+	"github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/run/operands/knative/resources"
+	kc "github.com/run-ai/runai/runai-cluster/cluster/go-operator/pkg/kube-client"
+	"github.com/run-ai/runai/runai-cluster/cluster/go-operator/pkg/operands"
+	"github.com/run-ai/runai/runai-cluster/cluster/go-operator/pkg/operands/utils"
+	runv1 "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1"
+)
+
+const (
+	name = "knative"
+)
+
+// RBAC permissions the operand requires for resource management
+//+kubebuilder:rbac:groups=monitoring.coreos.com,resources=servicemonitors,verbs=get;create;update;watch;patch;delete;list
+
+type operand struct {
+	k8sReader   kc.HybridClient
+	runaiConfig *runv1.RunaiConfig
+	resources   []operands.Resource
+}
+
+func (o *operand) Name() string {
+	return name
+}
+
+func (o *operand) Resources() []operands.Resource {
+	return o.resources
+}
+
+func (o *operand) Status(ctx context.Context) (operands.Status, error) {
+	return utils.Status(ctx, o.resources)
+}
+
+func (o *operand) Enabled() bool {
+	return true
+}
+
+func Operand(kbClient kc.HybridClient, runaiConfig *runv1.RunaiConfig) operands.Operand {
+	return &operand{
+		k8sReader:   kbClient,
+		runaiConfig: runaiConfig,
+		resources: []operands.Resource{
+			resources.NewServiceMonitorResource(name, kbClient, runaiConfig, "controller"),
+			resources.NewServiceMonitorResource(name, kbClient, runaiConfig, "autoscaler"),
+			resources.NewServiceMonitorResource(name, kbClient, runaiConfig, "activator"),
+			resources.NewServiceMonitorResource(name, kbClient, runaiConfig, "webhook"),
+		},
+	}
+}

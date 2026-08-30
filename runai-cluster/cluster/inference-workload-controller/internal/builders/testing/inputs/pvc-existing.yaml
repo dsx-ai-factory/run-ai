@@ -1,0 +1,30 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  name: existing-pvc-1
+  namespace: runai-team-a
+spec:
+  pvcs:
+    items:
+      pvc--0:
+        value:
+          path: /tmp/existing
+          readOnly: true
+          claimName: existing
+          existingPvc: true
+  ports:
+    items:
+      port-80:
+        value:
+          serviceType: ServingPort
+          container: 80
+  usage: Submit
+  image:
+    value: image
+  imagePullPolicy:
+    value: Always
+  gpu:
+    value: "1"
+  username:
+    value: user.name
+status: {}

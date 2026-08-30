@@ -1,0 +1,21 @@
+type: object
+required:
+  - key
+  - effect
+properties:
+  key:
+    type: string
+    description: The taint key to be applied to a node.
+    example: foo
+  value:
+    type: string
+    description: The taint value corresponding to the taint key.
+    example: bar
+  effect:
+    type: string
+    description: The effect of the taint on pods that do not tolerate the taint.
+    enum:
+      - NoSchedule
+      - PreferNoSchedule
+      - NoExecute
+x-schema-name: NodeTaint

@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS idx_pods_name;

@@ -1,0 +1,14 @@
+type: object
+required:
+  - timestamp
+  - data
+properties:
+  timestamp:
+    type: string
+    format: date-time
+    nullable: true
+  data:
+    type: object
+    additionalProperties:
+      type: string
+

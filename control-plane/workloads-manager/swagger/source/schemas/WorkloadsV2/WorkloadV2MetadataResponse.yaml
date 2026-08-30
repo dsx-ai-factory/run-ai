@@ -1,0 +1,17 @@
+type: object
+required:
+  - name
+  - projectId
+properties:
+  name:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads/WorkloadName.yaml'
+  projectId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/ProjectId.yaml'
+  priority:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads_spec/resources/PriorityClass.yaml'
+  category:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads_spec/resources/Category.yaml'
+  preemptibility:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/Preemptibility.yaml'
+  configuration:
+    $ref: './WorkloadV2Configuration.yaml'

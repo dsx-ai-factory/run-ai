@@ -1,0 +1,179 @@
+DistributedTarget:
+  Config: {}
+  Framework: PyTorch
+  JaxJob: null
+  MasterSpec: null
+  MpiJob: null
+  ObjectMeta: null
+  PyTorchJob:
+    apiVersion: kubeflow.org/v1
+    kind: PyTorchJob
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: pytorchjob
+        createdBy: PyTorchJob
+        project: test
+        release: s3_excluded
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: s3_excluded
+      name: s3_excluded
+      namespace: runai-test
+    spec:
+      pytorchReplicaSpecs:
+        Master:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: pytorchjob
+                createdBy: PyTorchJob
+                project: test
+                release: s3_excluded
+                workloadKind: Distributed
+                workloadName: s3_excluded
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: s3_excluded
+                image: ubuntu
+                name: pytorch
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /container/included
+                  mountPropagation: HostToContainer
+                  name: s3-0
+              initContainers:
+              - command:
+                - goofys
+                - -f
+                - --dir-mode
+                - "0777"
+                - --file-mode
+                - "0777"
+                - -o
+                - allow_other
+                - --debug_s3
+                - --endpoint
+                - https://s3.amazonaws.com
+                - included-bucket
+                - /container/included
+                image: nvcr.io/nvidia/runai/goofys:2.26.30
+                imagePullPolicy: IfNotPresent
+                name: s3-fs-0
+                resources: {}
+                restartPolicy: Always
+                securityContext:
+                  privileged: true
+                volumeMounts:
+                - mountPath: /container/included
+                  mountPropagation: Bidirectional
+                  name: s3-0
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - emptyDir: {}
+                name: s3-0
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: pytorchjob
+                createdBy: PyTorchJob
+                project: test
+                release: s3_excluded
+                workloadKind: Distributed
+                workloadName: s3_excluded
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: s3_excluded
+                image: ubuntu
+                name: pytorch
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /container/included
+                  mountPropagation: HostToContainer
+                  name: s3-0
+              initContainers:
+              - command:
+                - goofys
+                - -f
+                - --dir-mode
+                - "0777"
+                - --file-mode
+                - "0777"
+                - -o
+                - allow_other
+                - --debug_s3
+                - --endpoint
+                - https://s3.amazonaws.com
+                - included-bucket
+                - /container/included
+                image: nvcr.io/nvidia/runai/goofys:2.26.30
+                imagePullPolicy: IfNotPresent
+                name: s3-fs-0
+                resources: {}
+                restartPolicy: Always
+                securityContext:
+                  privileged: true
+                volumeMounts:
+                - mountPath: /container/included
+                  mountPropagation: Bidirectional
+                  name: s3-0
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - emptyDir: {}
+                name: s3-0
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: None
+    status: {}
+  RunPolicy: null
+  TFJob: null
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: PyTorchJob
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-s3_excluded/, Framework: PyTorch'
+  images:
+  - ubuntu
+  name: 's3_excluded/, Framework: PyTorch'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

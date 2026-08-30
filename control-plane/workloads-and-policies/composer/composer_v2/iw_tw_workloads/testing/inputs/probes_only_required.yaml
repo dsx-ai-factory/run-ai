@@ -1,0 +1,7 @@
+image: ubuntu
+
+probes:
+  readiness:
+    handler:
+      httpGet:
+        port: 8080

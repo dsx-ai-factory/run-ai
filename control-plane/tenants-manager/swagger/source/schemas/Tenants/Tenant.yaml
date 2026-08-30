@@ -1,0 +1,66 @@
+type: object
+required:
+- id
+- uuid
+- name
+- status
+- contractType
+- createdAt
+- updatedAt
+- smg
+properties:
+  id:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml'
+  mimirId:
+    type: string
+  uuid:
+    type: string
+    format: uuid
+    description: The universally unique identifier of the tenant.
+  name:
+    type: string
+    description: The internal system name of the tenant.
+  displayName:
+    type: string
+    description: The name of the tenant as shown to users within the tenant.
+  alias:
+    type: string
+    description: An optional alias for the tenant.
+  smg:
+    type: boolean
+  status:
+    type: string
+    enum: [ Creating, Failed, Updating, Deleted, Deleting, Ready ]
+    description: |
+      The current status of the tenant.
+      Possible values:
+      - Creating
+      - Failed
+      - Updating
+      - Deleted
+      - Deleting
+      - Ready
+  diagnostics:
+    type: string
+    description: Most recent provisioning failure message. Only populated by GET /tenants/{id} when status is Failed.
+  createdAt:
+    type: string
+    format: date-time
+    description: The date and time when the tenant was created.
+  updatedAt:
+    type: string
+    format: date-time
+    description: The date and time when the tenant was last updated.
+  contractType:
+    type: string
+    enum: [ normal, trial ]
+example:
+  id: 1
+  name: example
+  displayName: Example
+  alias: example-alias
+  status: Ready
+  tenantId: 123
+  createdAt: '2020-01-01T00:00:00Z'
+  updatedAt: '2020-01-02T00:00:00Z'
+  deletedAt: null

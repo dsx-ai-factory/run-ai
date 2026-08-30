@@ -1,0 +1,6 @@
+name: scopeId
+in: query
+description: filter by scope id
+schema:
+  type: string
+required: false

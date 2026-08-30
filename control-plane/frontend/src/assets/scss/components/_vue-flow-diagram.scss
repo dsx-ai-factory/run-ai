@@ -1,0 +1,39 @@
+@import "@vue-flow/core/dist/style.css";
+@import "@vue-flow/core/dist/theme-default.css";
+@import "@vue-flow/controls/dist/style.css";
+@import "@vue-flow/minimap/dist/style.css";
+
+.control-icon {
+  color: var(--icon-default, #707070);
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+}
+
+.vue-flow__controls {
+  box-shadow: -1px 0 7px 0 rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+
+.vue-flow__controls-button {
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+
+  &:first-child {
+    border-radius: 4px 4px 0 0;
+  }
+
+  &:last-child {
+    border-radius: 0 0 4px 4px;
+  }
+}
+
+.vue-flow__minimap {
+  box-shadow: -1px 0px 7px 0px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+
+  svg {
+    display: block;
+  }
+}

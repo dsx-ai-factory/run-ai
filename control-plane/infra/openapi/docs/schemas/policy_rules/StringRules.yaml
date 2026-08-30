@@ -1,0 +1,5 @@
+allOf:
+  - $ref: "./StringRulesCommon.yaml"
+  - $ref: "./StringRulesOptions.yaml"
+nullable: true
+type: object

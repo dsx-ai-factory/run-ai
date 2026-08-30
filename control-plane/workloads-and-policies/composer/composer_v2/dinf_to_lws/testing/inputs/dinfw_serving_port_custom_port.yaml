@@ -1,0 +1,6 @@
+leader:
+  image: python:3.8
+servingPort:
+  port: 9090
+  protocol: http
+  authorizationType: public

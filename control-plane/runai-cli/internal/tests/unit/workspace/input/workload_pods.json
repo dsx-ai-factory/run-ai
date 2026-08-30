@@ -1,0 +1,76 @@
+{
+  "pods": [
+    {
+      "name": "my-workspace-demo-123-0-0",
+      "priorityClassName": "high",
+      "id": "481e81be-add5-45d3-984f-6c140eb5eff9",
+      "workloadId": "eeaac0d9-db0b-4053-9839-86b808e4a7c5",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "projectId": "4500002",
+      "createdAt": "2025-12-15T08:58:34Z",
+      "containers": [
+        {
+          "name": "my-workspace-demo-123",
+          "image": "jupyter/scipy-notebook"
+        }
+      ],
+      "requestedNodePools": [
+        "default"
+      ],
+      "requestedResources": {
+        "gpuRequestType": "portion",
+        "gpu": {
+          "limit": 1,
+          "request": 1
+        },
+        "cpu": {
+          "limit": 0.1,
+          "request": 0.1
+        },
+        "cpuMemory": {
+          "limit": "100Mi",
+          "request": "104857600"
+        }
+      },
+      "allocatedResources": {},
+      "tolerations": [
+        {
+          "key": "nvidia.com/gpu",
+          "operator": "Equal",
+          "value": "true",
+          "effect": "NoSchedule"
+        },
+        {
+          "key": "node.kubernetes.io/not-ready",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        },
+        {
+          "key": "node.kubernetes.io/unreachable",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        }
+      ],
+      "k8sPhase": "Pending",
+      "nodeAffinity": {
+        "required": {
+          "nodeSelectorTerms": [
+            {
+              "matchExpressions": [
+                {
+                  "key": "runai/node-pool",
+                  "operator": "DoesNotExist"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "tenantId": 1001,
+      "k8sPhaseUpdatedAt": "2025-12-15T08:58:34.561125Z",
+      "updatedAt": "2025-12-15T08:58:44.655921Z"
+    }
+  ]
+}

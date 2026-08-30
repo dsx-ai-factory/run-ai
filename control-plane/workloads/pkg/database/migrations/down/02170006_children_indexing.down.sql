@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS idx_workloads_children_type;

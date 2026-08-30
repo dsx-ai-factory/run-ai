@@ -1,0 +1,11 @@
+image: ubuntu
+servingPort:
+  container: 8080
+  protocol: http
+  authorizationType: authorizedUsersOrGroups
+  authorizedUsers:
+    - user1
+    - user2
+  authorizedGroups:
+    - group1
+    - group2

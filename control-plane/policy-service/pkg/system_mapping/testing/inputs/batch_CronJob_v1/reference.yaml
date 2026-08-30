@@ -1,0 +1,312 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: test
+  labels:
+    app: test
+  annotations:
+    example.com/annotation: "test-value"
+spec:
+  # cronJobSpec field group --------------------------------------------
+  schedule: "*/5 * * * *"
+  timeZone: "Etc/UTC"
+  suspend: false
+  startingDeadlineSeconds: 60
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Allow
+
+  jobTemplate:
+    metadata:
+      labels:
+        app: test
+      annotations:
+        example.com/annotation: "test-value"
+    spec:
+      # jobSpec field group -------------------------------------------
+      parallelism: 1
+      completions: 1
+      manualSelector: false
+      managedBy: example.com/manager
+      suspend: false
+      activeDeadlineSeconds: 60
+      ttlSecondsAfterFinished: 60
+      backoffLimit: 1
+      backoffLimitPerIndex: 1
+      maxFailedIndexes: 1
+      completionMode: Indexed
+      podReplacementPolicy: Failed
+      podFailurePolicy:
+        rules:
+          - action: FailJob
+            onExitCodes:
+              containerName: test
+              operator: In
+              values: [1]
+            onPodConditions:
+              - type: Test
+                status: "True"
+      successPolicy:
+        rules:
+          - succeededCount: 1
+            succeededIndexes: "0-1"
+
+      # selector field group ------------------------------------------
+      selector:
+        matchLabels:
+          app: test
+        matchExpressions:
+          - key: test
+            operator: In
+            values: ["v1", "v2"]
+
+      template:
+        metadata:
+          labels:
+            app: test
+          annotations:
+            example.com/annotation: "test-value"
+        spec:
+          # podSpec field group -----------------------------------------
+          activeDeadlineSeconds: 60
+          automountServiceAccountToken: true
+          dnsConfig:
+            nameservers: ["1.1.1.1"]
+            searches: ["example.com"]
+            options:
+              - name: ndots
+                value: "5"
+          hostAliases:
+            - ip: "127.0.0.1"
+              hostnames: ["foo"]
+          dnsPolicy: ClusterFirst
+          enableServiceLinks: true
+          hostIPC: false
+          hostNetwork: false
+          hostPID: false
+          hostUsers: true
+          hostname: test
+          setHostnameAsFQDN: false
+          shareProcessNamespace: false
+          subdomain: test
+          terminationGracePeriodSeconds: 30
+          affinity:
+            nodeAffinity: {}
+            podAffinity: {}
+            podAntiAffinity: {}
+          tolerations:
+            - key: test
+              operator: Equal
+              value: somevalue
+              effect: NoSchedule
+              tolerationSeconds: 60
+          nodeSelector:
+            test: somevalue
+          overhead:
+            cpu: "100m"
+            memory: "256Mi"
+          imagePullSecrets:
+            - name: test
+          readinessGates:
+            - conditionType: ContainersReady
+          schedulingGates:
+            - name: example.com/gate
+          resourceClaims:
+            - name: claimRefByName
+              resourceClaimName: shared-claim
+            - name: claimRefByTemplate
+              resourceClaimTemplateName: shared-template
+          volumes:
+            - name: cm-vol
+              configMap:
+                name: cm
+                defaultMode: 420
+                items:
+                  - key: foo
+                    path: foo
+                optional: false
+            - name: empty-vol
+              emptyDir:
+                medium: Memory
+                sizeLimit: "1Gi"
+            - name: host-vol
+              hostPath:
+                path: /tmp
+                type: Directory
+            - name: nfs-vol
+              nfs:
+                server: "1.1.1.1"
+                path: /export
+                readOnly: false
+            - name: pvc-vol
+              persistentVolumeClaim:
+                claimName: pvc
+                readOnly: false
+            - name: secret-vol
+              secret:
+                secretName: secret
+                defaultMode: 420
+                items:
+                  - key: foo
+                    path: foo
+                optional: false
+          nodeName: test
+          preemptionPolicy: PreemptLowerPriority
+          priority: 1
+          priorityClassName: test
+          restartPolicy: OnFailure
+          runtimeClassName: test
+          serviceAccountName: test
+
+          # podSpecAndContainer (pod-scope security context) ------------
+          securityContext:
+            fsGroup: 1
+            fsGroupChangePolicy: OnRootMismatch
+            supplementalGroups: [1, 2]
+            supplementalGroupsPolicy: Strict
+            appArmorProfile:
+              type: Localhost
+              localhostProfile: foo
+            runAsGroup: 1
+            runAsNonRoot: true
+            runAsUser: 1
+            seccompProfile:
+              type: Localhost
+              localhostProfile: foo
+
+          containers:
+            - name: test
+              args: ["arg-1"]
+              command: ["cmd-1"]
+              env:
+                - name: AS_VALUE
+                  value: somevalue
+                - name: FROM_CM
+                  valueFrom:
+                    configMapKeyRef:
+                      name: cm
+                      key: key
+                      optional: false
+                - name: FROM_FIELD
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.name
+                - name: FROM_RESOURCE
+                  valueFrom:
+                    resourceFieldRef:
+                      containerName: test
+                      divisor: "1"
+                      resource: limits.cpu
+                - name: FROM_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: secret
+                      key: key
+                      optional: false
+              envFrom:
+                - prefix: cm_
+                  configMapRef:
+                    name: cm
+                    optional: false
+                - prefix: secret_
+                  secretRef:
+                    name: secret
+                    optional: false
+              image: test
+              imagePullPolicy: IfNotPresent
+              ports:
+                - name: http
+                  containerPort: 80
+                  protocol: TCP
+                  hostPort: 81
+                  hostIP: "127.0.0.1"
+              resources:
+                limits:
+                  cpu: "1"
+                  memory: "1Gi"
+                requests:
+                  cpu: "1"
+                  memory: "1Gi"
+                claims:
+                  - name: claim
+                    request: shared-request
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  add: ["NET_BIND_SERVICE"]
+                  drop: ["ALL"]
+                privileged: false
+                procMount: Default
+                readOnlyRootFilesystem: false
+                appArmorProfile:
+                  type: Localhost
+                  localhostProfile: foo
+                runAsGroup: 1
+                runAsNonRoot: true
+                runAsUser: 1
+                seccompProfile:
+                  type: Localhost
+                  localhostProfile: foo
+              stdin: false
+              stdinOnce: false
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              tty: false
+              workingDir: /tmp
+              volumeMounts:
+                - name: cm-vol
+                  mountPath: /etc/cm
+                  mountPropagation: None
+                  readOnly: true
+                  recursiveReadOnly: Disabled
+                  subPath: foo
+                  subPathExpr: foo
+
+          initContainers:
+            - name: test
+              args: ["init-arg"]
+              command: ["init-cmd"]
+              env:
+                - name: AS_VALUE
+                  value: somevalue
+              envFrom:
+                - prefix: cm_
+                  configMapRef:
+                    name: cm
+                    optional: false
+              image: test
+              imagePullPolicy: IfNotPresent
+              ports:
+                - name: http
+                  containerPort: 80
+                  protocol: TCP
+              resources:
+                limits:
+                  cpu: "1"
+                  memory: "1Gi"
+                requests:
+                  cpu: "1"
+                  memory: "1Gi"
+                claims:
+                  - name: claim
+                    request: shared-request
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsGroup: 1
+                runAsNonRoot: true
+                runAsUser: 1
+              stdin: false
+              stdinOnce: false
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              tty: false
+              workingDir: /tmp
+              volumeMounts:
+                - name: cm-vol
+                  mountPath: /etc/cm
+                  mountPropagation: None
+                  readOnly: true
+                  recursiveReadOnly: Disabled
+                  subPath: foo
+                  subPathExpr: foo

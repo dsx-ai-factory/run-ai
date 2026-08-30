@@ -1,0 +1,10 @@
+description: The actions support provided for the workload.
+type: object
+properties:
+  delete:
+    type: boolean
+    example: true
+  suspend:
+    description: This permission includes resume as well as suspend.
+    type: boolean
+    example: true

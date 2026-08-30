@@ -1,0 +1,24 @@
+# permissions for end users to edit departments.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: department-editor-role
+rules:
+- apiGroups:
+  - scheduling.run.ai
+  resources:
+  - departments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - scheduling.run.ai
+  resources:
+  - departments/status
+  verbs:
+  - get

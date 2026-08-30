@@ -1,0 +1,19 @@
+type: object
+required:
+  - datavolumes
+  - clusterId
+properties:
+  datavolumes:
+    type: array
+    items:
+      $ref: './DatavolumeStatusForSync.yaml'
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  from:
+    type: string
+    format: uuid
+    description: the first datavolume id to sync. if empty, all datavolumes before the first one sent will be deleted.
+  to:
+    type: string
+    format: uuid
+    description: the last datavolume to sync. if empty, all datavolumes after the last one sent will be deleted.

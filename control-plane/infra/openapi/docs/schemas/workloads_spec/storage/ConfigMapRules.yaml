@@ -1,0 +1,11 @@
+properties:
+  configMap:
+    $ref: "../../policy_rules/StringRules.yaml"
+  mountPath:
+    $ref: "../../policy_rules/StringRules.yaml"
+  subPath:
+    $ref: "../../policy_rules/StringRules.yaml"
+  defaultMode:
+    $ref: "../../policy_rules/StringRules.yaml"
+nullable: true
+type: object

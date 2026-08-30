@@ -1,0 +1,10 @@
+package apis
+
+import (
+	"github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/inferenceworkload/v2alpha1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+)
+
+func GetNewInferenceWorkloadFn() client.Object {
+	return &v2alpha1.InferenceWorkload{}
+}

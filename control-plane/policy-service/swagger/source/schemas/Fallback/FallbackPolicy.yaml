@@ -1,0 +1,11 @@
+properties:
+  meta:
+    $ref: "../Policy/PolicyMeta.yaml"
+  policy:
+    $ref: "./FallbackPolicyDefaultsAndRules.yaml"
+  effective:
+    $ref: "./FallbackPolicyDefaultsAndRules.yaml"
+  effectiveUpdatedAt:
+    $ref: "../General/Timestamp.yaml"
+nullable: true
+type: object

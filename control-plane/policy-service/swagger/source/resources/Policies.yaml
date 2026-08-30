@@ -1,0 +1,68 @@
+get:
+  summary: List policies. [experimental]
+  description: Retrieve a list of policies with their details, optionally filtered, sorted, and paginated.
+  operationId: list_gvk_policies
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/service_gvk_policies_test.go
+  x-authorize:
+    resource-type: policies
+    action: read
+  tags:
+    - Policy
+  parameters:
+    - $ref: "../parameters/query/optional/PoliciesFilter.yaml"
+    - $ref: "../parameters/query/optional/PoliciesSort.yaml"
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+  responses:
+    200:
+      description: The list of matching policies.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Policies/ListGvkPoliciesResp.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+
+post:
+  summary: Create a policy. [experimental]
+  description: Create a policy for a specific workload type based on the provided specification.
+  operationId: create_gvk_policy
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/service_gvk_policies_test.go
+  x-authorize:
+    resource-type: policies
+    action: update
+  x-audit: true
+  tags:
+    - Policy
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Policies/CreateGvkPolicyReq.yaml"
+  responses:
+    200:
+      description: The created policy.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Policies/Policy.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+

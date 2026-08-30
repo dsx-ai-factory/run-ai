@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS np_unique_name;

@@ -1,0 +1,349 @@
+{{- if .Values.operands.rbac.base.create }}
+{{- if eq (include "legacyControllerRBACEnabled" (list . "inference-workload-controller")) "true" }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-inference-workload-controller-project
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - persistentvolumeclaims
+      - services
+      - pods # for top-owner migration use only
+      - secrets
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - amlarc.azureml.com
+    resources:
+      - amljobs
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - run.ai
+    resources:
+      - inferencepolicies
+      - inferencepolicies/status
+      - inferenceworkloads
+      - inferenceworkloads/status
+      - inferenceworkloads/finalizers
+      - distributedinferencepolicies
+      - distributedinferencepolicies/status
+      - distributedinferenceworkloads
+      - distributedinferenceworkloads/status
+      - distributedinferenceworkloads/scale
+      - distributedinferenceworkloads/finalizers
+      - externalworkloads
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - scheduling.run.ai
+    resources:
+      - podgroups # for top-owner migration use only
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - gateway.networking.k8s.io
+    resources:
+      - httproutes
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - serving.knative.dev
+    resources:
+      - services
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - leaderworkerset.x-k8s.io
+    resources:
+      - leaderworkersets
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - resource.nvidia.com
+    resources:
+      - computedomains
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - route.openshift.io
+    resources:
+      - routes
+      - routes/custom-host
+    verbs:
+      - create
+      - delete
+      - watch
+      - list
+      - get
+      - update
+      - patch
+---
+# Run:AI InferenceWorkloadController
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-inference-workload-controller
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - secrets
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - persistentvolumeclaims
+      - serviceaccounts
+      - nodes
+      - services
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - authorization.k8s.io
+    resources:
+      - subjectaccessreviews
+    verbs:
+      - create
+    # Required for WorkloadOwnershipProtectionValidator.userPermittedForNamespace method
+    # to check if non-RunAI users have permission to perform operations
+  - apiGroups:
+      - serving.knative.dev
+    resources:
+      - services
+      - configurations
+      - revisions
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - serving.knative.dev
+    resources:
+      - revisions/status
+    verbs:
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - leaderworkerset.x-k8s.io
+    resources:
+      - leaderworkersets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - resource.nvidia.com
+    resources:
+      - computedomains
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - runaijobs
+      - projects
+      - accessrules
+      - inferencepolicies
+      - inferencepolicies/status
+      - inferenceworkloads
+      - inferenceworkloads/status
+      - inferenceworkloads/finalizers
+      - distributedinferencepolicies
+      - distributedinferencepolicies/status
+      - distributedinferenceworkloads
+      - distributedinferenceworkloads/status
+      - distributedinferenceworkloads/scale
+      - distributedinferenceworkloads/finalizers
+      - externalworkloads
+      - nodepools
+    verbs:
+      - get
+      - list
+      - watch
+      - patch
+  - apiGroups:
+      - kai.resources
+    resources:
+      - projects
+      - nodepools
+    verbs:
+      - get
+      - list
+      - watch
+      - patch
+  - apiGroups:
+      - scheduling.run.ai
+    resources:
+      - departments
+      - podgroups # for top-owner migration use only
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - kai.resources
+    resources:
+      - departments
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - gateway.networking.k8s.io
+    resources:
+      - httproutes
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - route.openshift.io
+    resources:
+      - routes
+    verbs:
+      - watch
+      - list
+      - get
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - create
+      - get
+      - list
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+      - update
+  - apiGroups:
+      - scheduling.k8s.io
+    resources:
+      - priorityclasses
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-inference-workload-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-inference-workload-controller
+subjects:
+  - kind: ServiceAccount
+    name: inference-workload-controller
+    namespace: runai
+{{- end }}
+{{- end }}

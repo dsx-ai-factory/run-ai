@@ -1,0 +1,32 @@
+package config
+
+import (
+	"sync"
+
+	"github.com/run-ai/runai/runai-common-packages/config"
+	"github.com/run-ai/runai/runai-common-packages/logging"
+)
+
+var once sync.Once
+
+func registerConfigurations() {
+	if err := config.Register[*Configuration](); err != nil {
+		logging.Fatalf("failed to register configuration %+v", err)
+	}
+	if err := config.Register[*Service](); err != nil {
+		logging.Fatalf("failed to register service configuration %+v", err)
+	}
+	if err := config.Register[*BootConfig](); err != nil {
+		logging.Fatalf("failed to register boot configuration %+v", err)
+	}
+	if err := config.Register[*Backend](); err != nil {
+		logging.Fatalf("failed to register backend configuration %+v", err)
+	}
+}
+
+func InitConfig() {
+	logging.Infof("initializing configuration")
+	once.Do(func() {
+		registerConfigurations()
+	})
+}

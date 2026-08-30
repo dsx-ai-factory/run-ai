@@ -1,0 +1,72 @@
+apiVersion: kubeflow.org/v1
+kind: XGBoostJob
+metadata:
+  annotations:
+    image: ubuntu
+    template: job-1
+    user: user.name
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: xgboostjob
+    createdBy: XGBoostJob
+    project: team-a
+    release: job-1
+    run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+    workloadKind: DistributedWorkload
+    workloadName: job-1
+  name: job-1
+  namespace: runai-team-a
+spec:
+  runPolicy:
+    backoffLimit: 6
+    cleanPodPolicy: None
+  xgbReplicaSpecs:
+    Master:
+      replicas: 1
+      template:
+        metadata:
+          annotations:
+            totalGPUs: "0"
+            totalGPUsMemory: "0"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-1
+        spec:
+          containers:
+          - imagePullPolicy: IfNotPresent
+            name: xgboost
+            resources: {}
+            securityContext:
+              privileged: false
+              seccompProfile:
+                type: RuntimeDefault
+          schedulerName: runai-scheduler
+    Worker:
+      replicas: 1
+      template:
+        metadata:
+          annotations:
+            totalGPUs: "0"
+            totalGPUsMemory: "0"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-1
+        spec:
+          containers:
+          - image: ubuntu
+            imagePullPolicy: IfNotPresent
+            name: xgboost
+            resources: {}
+            securityContext:
+              seccompProfile:
+                type: RuntimeDefault
+          schedulerName: runai-scheduler
+status: {}

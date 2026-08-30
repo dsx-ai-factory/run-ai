@@ -1,0 +1,109 @@
+# Realm
+ConfigSamlResponse:
+  $ref: "./Realms/ConfigSamlResponse.yaml"
+RealmReconcileRequest:
+  $ref: "./Realms/RealmReconcileRequest.yaml"
+RealmCreationRequest:
+  $ref: "./Realms/RealmCreationRequest.yaml"
+RealmCreationResponse:
+  $ref: "./Realms/RealmCreationResponse.yaml"
+AuthConfiguration:
+  $ref: "./Realms/AuthConfiguration.yaml"
+SettingsGetResponse:
+  $ref: "./Settings/SettingsGetResponse.yaml"
+
+# Idps
+Idp:
+  $ref: "./Idp/Idp.yaml"
+Idps:
+  $ref: "./Idp/Idps.yaml"
+Mappers:
+  $ref: "./Idp/Mappers.yaml"
+IdpCreationRequest:
+  $ref: "./Idp/IdpCreationRequest.yaml"
+IdpResourcdes:
+  $ref: "./Idp/IdpResources.yaml"
+IdpPostResponse:
+  $ref: "./Idp/IdpPostResponse.yaml"
+
+# Access Keys
+AccessKey:
+  $ref: "./AccessKeys/AccessKey.yaml"
+AccessKeys:
+  $ref: "./AccessKeys/AccessKeys.yaml"
+AccessKeyCreationRequest:
+  $ref: "./AccessKeys/AccessKeyCreationRequest.yaml"
+AccessKeyPostResponse:
+  $ref: "./AccessKeys/AccessKeyPostResponse.yaml"
+AccessKeyAdministration:
+  $ref: "./AccessKeys/Administration/AccessKeyAdministration.yaml"
+AccessKeysAdministration:
+  $ref: "./AccessKeys/Administration/AccessKeysAdministration.yaml"
+
+# Users
+User:
+  $ref: "./Users/User.yaml"
+Users:
+  $ref: "./Users/Users.yaml"
+UserCreationRequest:
+  $ref: "./Users/UserCreationRequest.yaml"
+UserPostResponse:
+  $ref: "./Users/UserPostResponse.yaml"
+InternalUserCreationRequest:
+  $ref: "./Users/InternalUserCreationRequest.yaml"
+UserGroups:
+  $ref: "./Users/Groups.yaml"
+BulkUserCreationRequest:
+  $ref: "./Users/BulkUserCreationRequest.yaml"
+BulkUserCreationResponse:
+  $ref: "./Users/BulkUserCreationResponse.yaml"
+UserCreationRequestBulk:
+  $ref: "./Users/UserCreationRequestBulk.yaml"
+UserMinimal:
+  $ref: "./Users/UserMinimal.yaml"
+UsersMinimal:
+  $ref: "./Users/UsersMinimal.yaml"
+
+# Clients
+Client:
+  $ref: "./Clients/Client.yaml"
+Clients:
+  $ref: "./Clients/Clients.yaml"
+ClientCreationRequest:
+  $ref: "./Clients/ClientCreationRequest.yaml#/ClientCreationRequest"
+ClientAttributeCreationRequest:
+  $ref: "./Clients/ClientAttributeCreationRequest.yaml"
+ClientRedirectUrisUpdateRequest:
+  $ref: "./Clients/ClientRedirectUrisUpdateRequest.yaml"
+
+# Token
+TokenRequest:
+  $ref: "./Tokens/TokenRequest.yaml"
+TokenResponse:
+  $ref: "./Tokens/TokenResponse.yaml"
+AppTokenRequest:
+  $ref: "./Tokens/AppTokenRequest.yaml"
+AppTokenResponse:
+  $ref: "./Tokens/AppTokenResponse.yaml"
+OAuth2TokenResponse:
+  $ref: "./Tokens/OAuth2TokenResponse.yaml"
+OAuth2Error:
+  $ref: "./Tokens/OAuth2Error.yaml"
+
+# PKCE
+CodeChallengeMethod:
+  $ref: "./Pkce/CodeChallengeMethod.yaml"
+
+# Settings
+GetAutoRedirectSsoSetting:
+  $ref: "./Settings/AutoRedirectSsoSetting/GetAutoRedirectSsoSetting.yaml"
+UpdateAutoRedirectSsoSettingValue:
+  $ref: "./Settings/AutoRedirectSsoSetting/UpdateAutoRedirectSsoSettingValue.yaml"
+GetBrowserSessionTimeoutSetting:
+  $ref: "./Settings/BrowserSessionTimeoutSetting/GetBrowserSessionTimeoutSetting.yaml"
+UpdateBrowserSessionTimeoutSettingValue:
+  $ref: "./Settings/BrowserSessionTimeoutSetting/UpdateBrowserSessionTimeoutSettingValue.yaml"
+GetLogoutRedirectUriSetting:
+  $ref: "./Settings/LogoutRedirectUriSetting/GetLogoutRedirectUriSetting.yaml"
+UpdateLogoutRedirectUriSettingValue:
+  $ref: "./Settings/LogoutRedirectUriSetting/UpdateLogoutRedirectUriSettingValue.yaml"

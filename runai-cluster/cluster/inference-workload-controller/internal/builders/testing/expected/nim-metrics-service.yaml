@@ -1,0 +1,81 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    project: team-a
+    workloadKind: InferenceWorkload
+    workloadName: nim-metrics-test
+  name: nim-metrics-test
+  namespace: runai-team-a
+spec:
+  template:
+    metadata:
+      annotations:
+        user: aviad.hayumi
+      labels:
+        project: team-a
+        release: nim-metrics-test
+        run.ai/inferenceworkload: nim-metrics-test
+        workloadKind: InferenceWorkload
+        workloadName: nim-metrics-test
+    spec:
+      containers:
+      - image: nvcr.io/nim/meta/llama-3.1-8b-instruct
+        name: ""
+        resources:
+          limits:
+            nvidia.com/gpu: "1"
+      - args:
+        - --provider=keycloak-oidc
+        - --upstream=http://localhost:8000
+        - --redirect-url=http://nim-metrics-test.runai-team-a.svc.cluster.local/oauth2/callback
+        - --oidc-issuer-url=/auth/realms/runai
+        - --scope=openid
+        - --http-address=0.0.0.0:4180
+        - --proxy-prefix=/oauth2
+        - --skip-provider-button=true
+        - --whitelist-domain=nim-metrics-test.runai-team-a.svc.cluster.local
+        - --cookie-domain=nim-metrics-test.runai-team-a.svc.cluster.local
+        - --cookie-httponly=true
+        - --cookie-secure=true
+        - --code-challenge-method=S256
+        - --cookie-refresh=10m
+        - --cookie-samesite=lax
+        - --skip-jwt-bearer-tokens=true
+        - --extra-jwt-issuers=/auth/realms/runai=runai
+        - --custom-templates-dir=/usr/share/oauth2-proxy
+        - --pass-authorization-header=false
+        - --cookie-name=InferenceWorkload-runai-team-a-nim-metrics-test-0
+        - --session-store-type=redis
+        - --redis-connection-url=redis://cluster-redis.runai.svc.cluster.local:6379
+        - --force-json-errors=true
+        - --email-domain=*
+        env:
+        - name: OAUTH2_PROXY_COOKIE_PATH
+          value: /
+        envFrom:
+        - secretRef: {}
+        imagePullPolicy: IfNotPresent
+        name: runai-oauth2-proxy-0
+        ports:
+        - containerPort: 4180
+        readinessProbe:
+          tcpSocket:
+            port: 8000
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+        volumeMounts:
+        - mountPath: /etc/runai/auth/users
+          name: runai-auth
+      enableServiceLinks: false
+      schedulerName: runai-scheduler
+      volumes:
+      - emptyDir: {}
+        name: runai-auth
+status: {}

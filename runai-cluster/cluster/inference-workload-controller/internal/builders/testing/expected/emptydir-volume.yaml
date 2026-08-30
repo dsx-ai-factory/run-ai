@@ -1,0 +1,56 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    project: team-a
+    workloadKind: InferenceWorkload
+    workloadName: inference
+  name: inference-0
+  namespace: runai-team-a
+spec:
+  template:
+    metadata:
+      annotations:
+        user: user.name
+      labels:
+        project: team-a
+        release: inference
+        run.ai/inferenceworkload: inference
+        workloadKind: InferenceWorkload
+        workloadName: inference
+    spec:
+      containers:
+      - image: gcr.io/knative-samples/helloworld-go
+        name: ""
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources: {}
+        volumeMounts:
+        - mountPath: /mnt/ed1
+          name: emptydir-volume-0
+        - mountPath: /mnt/ed2
+          name: emptydir-volume-1
+        - mountPath: /mnt/ed3
+          name: emptydir-volume-2
+        - mountPath: /mnt/ed4
+          name: emptydir-volume-3
+      enableServiceLinks: false
+      schedulerName: runai-scheduler
+      volumes:
+      - emptyDir: {}
+        name: emptydir-volume-0
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 256Mi
+        name: emptydir-volume-1
+      - emptyDir: {}
+        name: emptydir-volume-2
+      - emptyDir:
+          sizeLimit: 1Gi
+        name: emptydir-volume-3
+status: {}

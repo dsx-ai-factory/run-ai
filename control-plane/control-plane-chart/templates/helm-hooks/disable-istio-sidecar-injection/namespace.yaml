@@ -1,0 +1,6 @@
+{{- if .Values.disableIstioSidecarInjection.enabled }}
+{{- $ns := lookup "v1" "Namespace" "" .Release.Namespace }}
+{{- if and $ns (ne (index ($ns.metadata.labels | default dict) "istio-injection") "disabled") }}
+{{- fail (printf "namespace %s must be labeled istio-injection=disabled before enabling disableIstioSidecarInjection — run: kubectl label namespace %s istio-injection=disabled" .Release.Namespace .Release.Namespace) }}
+{{- end }}
+{{- end }}

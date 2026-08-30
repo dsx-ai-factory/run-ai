@@ -1,0 +1,49 @@
+package service
+
+import (
+	"context"
+
+	openapi "github.com/run-ai/runai/control-plane/cluster-service/pkg/client/generated"
+	"github.com/run-ai/runai/control-plane/runai-cli/internal/controlplane/cluster/list"
+	"github.com/run-ai/runai/control-plane/runai-cli/internal/controlplane/cluster/list/manipulate"
+)
+
+type ClusterClient interface {
+	GetClusterList(ctx context.Context) ([]openapi.ClustersMinimalData, error)
+	GetClusterByID(ctx context.Context, uuid string) (*openapi.ClustersMinimalData, error)
+	GetClusterByName(ctx context.Context, name string) (*openapi.ClustersMinimalData, error)
+}
+
+type BackendClusterService struct {
+	clusterClient ClusterClient
+}
+
+func NewBackendClusterService(clusterClient ClusterClient) *BackendClusterService {
+	return &BackendClusterService{clusterClient: clusterClient}
+}
+
+func (bcs *BackendClusterService) GetClusterList(ctx context.Context) (*list.Output, error) {
+	clusterList, err := bcs.clusterClient.GetClusterList(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return list.NewOutput(clusterList, nil)
+}
+
+func (bcs *BackendClusterService) GetClusterByUuid(ctx context.Context, uuid string) (*manipulate.BriefCluster, error) {
+	cluster, err := bcs.clusterClient.GetClusterByID(ctx, uuid)
+	if err != nil {
+		return nil, err
+	}
+	briefCluster := manipulate.ReduceStruct(*cluster)
+	return &briefCluster, nil
+}
+
+func (bcs *BackendClusterService) GetClusterByName(ctx context.Context, name string) (*manipulate.BriefCluster, error) {
+	cluster, err := bcs.clusterClient.GetClusterByName(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+	briefCluster := manipulate.ReduceStruct(*cluster)
+	return &briefCluster, nil
+}

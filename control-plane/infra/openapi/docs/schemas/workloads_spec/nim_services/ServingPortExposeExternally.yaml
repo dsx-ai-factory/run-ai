@@ -1,0 +1,5 @@
+description: Indicates whether the inference serving endpoint should be accessible outside the cluster.
+  If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference). section.
+type: boolean
+nullable: true
+default: true

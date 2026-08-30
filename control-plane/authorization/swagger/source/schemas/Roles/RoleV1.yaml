@@ -1,0 +1,61 @@
+type: object
+required:
+  - name
+  - description
+  - permissions
+  - id
+  - createdAt
+  - updatedAt
+  - createdBy
+  - custom
+  - effectiveEnabled
+properties:
+  id:
+    type: integer
+    format: int32
+    example: 32
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time
+  deletedAt:
+    type: string
+    nullable: true
+    format: date-time
+  createdBy:
+    type: string
+    example: "user@run.ai"
+  custom:
+    type: boolean
+  effectiveEnabled:
+    type: boolean
+    default: true
+  permissions:
+    $ref: './Permissions.yaml'
+  name:
+    type: string
+    example: "admin"
+  description:
+    type: string
+    example: "can manage all resources"
+  scopeType:
+    type: string
+    default: tenant
+    x-internal: true
+    x-csp: true
+    enum:
+      - system
+      - tenant
+  scopeId:
+    type: string
+    x-internal: true
+    x-csp: true
+    nullable: true
+  enabled:
+    type: boolean
+    default: true
+    nullable: true
+  kubernetesPermissions:
+    $ref: './KubernetesPermissions.yaml'

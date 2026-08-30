@@ -1,0 +1,5 @@
+description: "Maximum claim size allowed for PVCs created with this storage class. Mandatory when existingPvc = false. Recommended values: TB, GB, MB, TIB, GIB, MIB."
+type: string
+pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+example: 1G
+nullable: true

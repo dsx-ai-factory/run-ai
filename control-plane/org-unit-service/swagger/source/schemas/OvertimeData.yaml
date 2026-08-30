@@ -1,0 +1,17 @@
+type: object
+properties:
+  range24hData:
+    type: object
+    nullable: true
+    allOf:
+      - $ref: "./OvertimeRangeData.yaml"
+  range7dData:
+    type: object
+    nullable: true
+    allOf:
+      - $ref: "./OvertimeRangeData.yaml"
+  range30dData:
+    type: object
+    nullable: true
+    allOf:
+      - $ref: "./OvertimeRangeData.yaml"

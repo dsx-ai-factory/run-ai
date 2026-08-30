@@ -1,0 +1,98 @@
+apiVersion: run.ai/v2alpha1
+kind: DistributedWorkload
+metadata:
+  name: job-1
+  namespace: runai-team-a
+  uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+spec:
+  jobType: MPIJob
+  name:
+    value: job-1
+  pvcs:
+    items:
+      pvc--0:
+        value:
+          path: /tmp/ofer
+          readOnly: false
+          size: 10M
+          storageClass: storage
+  gitSync:
+    items:
+      git-public-repo:
+        value:
+          directory: /tmp/repoa
+          repository: http://github.com/repoa
+          branch: custom
+      git-secret-repo:
+        value:
+          directory: /tmp/repob
+          repository: http://github.com/repob
+          branch: custom
+          secretName: k8s-secret-b
+          password: pass-key
+          username: user-key
+      git-password-repo:
+        value:
+          directory: /tmp/repoc
+          repository: http://github.com/repoc
+          branch: custom
+          secretName: k8s-secret-c
+          authenticatingMethod: password
+          password: pass-key
+          username: user-key
+      git-ssh-repo:
+        value:
+          directory: /tmp/repod
+          repository: http://github.com/repod
+          branch: custom
+          secretName: k8s-secret-d
+          authenticatingMethod: ssh-key
+  configMapVolumes:
+    items:
+      configmap-volume-1:
+        value:
+          name: cm-db-setting
+          mountPath: /etc/db.conf
+      configmap-volume-2:
+        value:
+          name: cm-app-setting
+          mountPath: /etc/app.conf
+  secretVolumes:
+    items:
+      secret-volume-1:
+        value:
+          name: secret-account-key
+          mountPath: /etc/account
+      secret-volume-2:
+        value:
+          name: secret-another-key
+          mountPath: /etc/another
+  emptyDirVolumes:
+    items:
+      emptydir-1:
+        value:
+          path: /mnt/ed1
+      emptydir-2:
+        value:
+          path: /mnt/ed2
+          medium: Memory
+          sizeLimit: 256Mi
+      emptydir-3:
+        value:
+          path: /mnt/ed3
+          medium: ""
+      emptydir-4:
+        value:
+          path: /mnt/ed4
+          sizeLimit: 1Gi
+  workers:
+    value: 1
+  username:
+    value: user.name
+  volumes:
+    items:
+      vol--mypath:
+        value:
+          readOnly: true
+          sourcePath: /myvol
+          targetPath: /mypath

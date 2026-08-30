@@ -1,0 +1,1 @@
+ALTER TABLE assets_git DROP COLUMN IF EXISTS credential_id;

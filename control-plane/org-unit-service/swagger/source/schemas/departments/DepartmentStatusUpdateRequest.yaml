@@ -1,0 +1,9 @@
+type: object
+description: status update fields
+required:
+  - status
+properties:
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  status:
+    $ref: "./DepartmentStatus.yaml"

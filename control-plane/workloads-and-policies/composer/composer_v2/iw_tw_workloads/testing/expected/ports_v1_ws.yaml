@@ -1,0 +1,142 @@
+BatchJobTarget:
+  Config:
+    networking:
+    - services:
+      - spec:
+          name: job-ports_v1-lb
+          ports:
+          - name: port-8080
+            port: 8080
+            protocol: TCP
+            targetPort: 8080
+          - name: port-8081
+            port: 8081
+            protocol: TCP
+            targetPort: 8081
+          selector:
+            release: ports_v1
+          type: LoadBalancer
+    - services:
+      - spec:
+          name: job-ports_v1-np
+          ports:
+          - name: port-8888
+            port: 8888
+            protocol: TCP
+            targetPort: 8888
+          - name: port-6006
+            port: 6006
+            protocol: TCP
+            targetPort: 6006
+          selector:
+            release: ports_v1
+          type: NodePort
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: ports_v1
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: ports_v1
+      name: ports_v1
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: ports_v1
+            workloadKind: Workspace
+            workloadName: ports_v1
+        spec:
+          containers:
+          - args:
+            - -c
+            - tensorboard --logdir=/tmp/logs --bind_all --port 6006 & python -m http.server
+              8080 & python -m http.server 8081 & start-notebook.sh --NotebookApp.token=""
+            command:
+            - /bin/bash
+            env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: ports_v1
+            image: jupyter/tensorflow-notebook
+            imagePullPolicy: IfNotPresent
+            name: ports_v1
+            resources:
+              limits:
+                nvidia.com/gpu: "1"
+              requests:
+                nvidia.com/gpu: "1"
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections:
+    - connectionType: NodePort
+      containerPort: 8888
+      correlationName: port
+      name: Jupyter
+      portResourceName: port-8888
+      serviceResourceName: job-ports_v1-np
+      toolType: jupyter-notebook
+    - connectionType: NodePort
+      containerPort: 6006
+      correlationName: port-1
+      name: TensorBoard
+      portResourceName: port-6006
+      serviceResourceName: job-ports_v1-np
+      toolType: tensorboard
+    - connectionType: LoadBalancer
+      containerPort: 8080
+      correlationName: port-2
+      name: HTTP Server 1
+      portResourceName: port-8080
+      serviceResourceName: job-ports_v1-lb
+      toolType: custom
+    - connectionType: LoadBalancer
+      containerPort: 8081
+      correlationName: port-3
+      name: HTTP Server 2
+      portResourceName: port-8081
+      serviceResourceName: job-ports_v1-lb
+      toolType: custom
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: ports_v1, Rules: , Type: Workspace'
+  images:
+  - jupyter/tensorflow-notebook
+  name: 'Value: ports_v1, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedNodePools:
+  - default
+  requestedPods:
+    number: 1
+  requestedResources:
+    gpu:
+      request: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

@@ -1,0 +1,3 @@
+description: the upper limit for the number of worker pods that can be set by the autoscaler. Cannot be smaller than MinReplicas. (applicable only for PyTorch)
+type: integer
+nullable: true

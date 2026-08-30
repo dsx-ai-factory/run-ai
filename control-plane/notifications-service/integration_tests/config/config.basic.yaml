@@ -1,0 +1,29 @@
+app:
+  log_level: debug
+history:
+  enabled: true
+router:
+  concurrent_limit: 50
+  cached_events: 1000
+
+sinks:
+  history:
+    type: history
+  email1:
+    type: email
+    user: smtp_user
+    password: password
+    smtp_host: smtp.mail.com
+    smtp_port: 587
+    smtp_tls_enabled: true
+
+routes:
+  email_k8s_notifications:
+    listener_id: kube_listener_runai
+    notify:
+      - email1
+
+listeners:
+  http-runai:
+    http_listener:
+      port: 5000

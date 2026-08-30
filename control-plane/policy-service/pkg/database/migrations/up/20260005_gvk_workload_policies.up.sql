@@ -1,0 +1,2 @@
+ALTER TABLE policies ADD COLUMN IF NOT EXISTS gvk_workload BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE policies ADD COLUMN IF NOT EXISTS validation_issues JSONB;

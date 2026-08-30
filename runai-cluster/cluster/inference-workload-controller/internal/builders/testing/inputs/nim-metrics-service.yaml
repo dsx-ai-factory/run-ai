@@ -1,0 +1,25 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  name: nim-metrics-test
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  image:
+    value: nvcr.io/nim/meta/llama-3.1-8b-instruct
+  name:
+    value: nim-metrics-test
+  username:
+    value: aviad.hayumi
+  ports:
+    items:
+      port-8000:
+        value:
+          serviceType: ServingPort
+          container: 8000
+  servingPortAuthorizationType:
+    value: authenticatedUsers
+  gpu:
+    value: "1"
+status: {}
+

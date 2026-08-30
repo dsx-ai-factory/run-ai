@@ -1,0 +1,55 @@
+type: object
+required:
+  - createdAt
+  - updatedAt
+  - createdBy
+  - updatedBy
+  - scopeType
+  - id
+  - name
+  - url
+properties:
+  createdAt:
+    type: string
+    format: date-time
+    description: The date and time the registry integration was created.
+  updatedAt:
+    type: string
+    format: date-time
+    description: The date and time the registry integration was updated.
+  createdBy:
+    type: string
+    description: The user who created the registry integration.
+  updatedBy:
+    type: string
+    description: The user who updated the registry integration.
+  scopeType: 
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/ScopeType.yaml'
+  scopeId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/ScopeId.yaml'
+    nullable: true
+  tenantId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml'
+    nullable: true
+  clusterId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml'
+    nullable: true
+  departmentId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/DepartmentId.yaml'
+    nullable: true
+  projectId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/ProjectId.yaml'
+    nullable: true
+  id:
+    type: string
+    format: uuid
+    description: The ID of the registry integration.
+  name:
+    type: string
+    description: The name of the registry integration.
+  url:
+    type: string
+    description: The type of the registry integration.
+  description:
+    type: string
+    description: The description of the registry integration.

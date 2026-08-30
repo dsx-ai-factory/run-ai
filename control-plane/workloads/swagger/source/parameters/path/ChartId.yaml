@@ -1,0 +1,7 @@
+name: chartId
+in: path
+required: true
+description: The unique identifier of the uploaded Helm chart archive.
+schema:
+  type: string
+  format: uuid

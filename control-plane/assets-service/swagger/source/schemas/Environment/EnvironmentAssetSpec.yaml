@@ -1,0 +1,3 @@
+allOf:
+  - $ref: "./OverridableSpecFields.yaml"
+  - $ref: "./NonOverridableSpecFields.yaml"

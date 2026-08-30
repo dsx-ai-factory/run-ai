@@ -1,0 +1,10 @@
+type: object
+description: |
+  A map of the field group item selectors.
+  Map **keys** are item selector names. OpenAPI `additionalProperties` only constrains the **value** shape (`FieldGroupItemSelector`);
+  it does **not** validate keys. The API enforces each key to match `ItemSelectorName` (1–63 chars,
+  `^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?$` — alphanumeric with optional internal hyphens; no leading/trailing hyphen).
+additionalProperties:
+  allOf:
+    - $ref: "./ItemSelector.yaml"
+    - $ref: "./MappingScopeOfElement.yaml"

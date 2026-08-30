@@ -1,0 +1,37 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  annotations:
+      workloadId: "123456789"
+  name: basic-inference
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  image:
+    value: image
+  imagePullPolicy:
+    value: Always
+  name:
+    value: inference-0
+  cpu:
+    value: "1"
+  nodePools:
+    value: default nodepoola
+  memoryLimit:
+    value: "1"
+  username:
+    value: user.name
+  exposedUrls:
+    items:
+      a:
+        value:
+          containerPort: 3000
+          authorizedUsers: user.name@run.ai, user.name@run.ai2, user.name@run.ai3
+  ports:
+    items:
+      port-80:
+        name: port-80
+        value:
+          serviceType: ServingPort
+          container: 80
+status: {}

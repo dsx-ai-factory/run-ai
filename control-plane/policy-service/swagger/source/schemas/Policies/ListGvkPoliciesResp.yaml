@@ -1,0 +1,11 @@
+type: object
+description: A paginated list of policies.
+required:
+  - items
+properties:
+  items:
+    description: The policies matching the request, up to a maximum of 1000.
+    type: array
+    items:
+      $ref: "./Policy.yaml"
+    maxItems: 1000

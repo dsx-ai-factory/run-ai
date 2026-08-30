@@ -1,0 +1,73 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+description: The specifications of the inference to be updated.
+properties:
+  spec:
+    allOf:
+    - nullable: true
+      properties:
+        args:
+          $ref: ../workloads_spec/container/Args.yaml
+        category:
+          $ref: ../workloads_spec/resources/Category.yaml
+        command:
+          $ref: ../workloads_spec/container/Command.yaml
+        compute:
+          nullable: true
+          properties:
+            cpuCoreLimit:
+              $ref: ../workloads_spec/compute/CpuCoreLimit.yaml
+            cpuCoreRequest:
+              $ref: ../workloads_spec/compute/CpuCoreRequest.yaml
+            cpuMemoryLimit:
+              $ref: ../workloads_spec/compute/CpuMemoryLimit.yaml
+            cpuMemoryRequest:
+              $ref: ../workloads_spec/compute/CpuMemoryRequest.yaml
+            extendedResources:
+              $ref: ../workloads_spec/compute/ExtendedResources.yaml
+            gpuDevicesRequest:
+              $ref: ../workloads_spec/compute/GpuDevicesRequest.yaml
+            gpuMemoryLimit:
+              $ref: ../workloads_spec/compute/GpuMemoryLimit.yaml
+            gpuMemoryRequest:
+              $ref: ../workloads_spec/compute/GpuMemoryRequest.yaml
+            gpuPortionLimit:
+              $ref: ../workloads_spec/compute/GpuPortionLimit.yaml
+            gpuPortionRequest:
+              $ref: ../workloads_spec/compute/GpuPortionRequest.yaml
+            gpuRequestType:
+              $ref: ../workloads_spec/compute/GpuRequestType.yaml
+            largeShmRequest:
+              $ref: ../workloads_spec/compute/LargeShmRequest.yaml
+          type: object
+        createHomeDir:
+          $ref: ../workloads_spec/container/CreateHomeDir.yaml
+        environmentVariables:
+          $ref: ../workloads_spec/container/EnvironmentVariables.yaml
+        image:
+          $ref: ../workloads_spec/container/Image.yaml
+        imagePullPolicy:
+          $ref: ../workloads_spec/container/ImagePullPolicy.yaml
+        imagePullSecrets:
+          $ref: ../workloads_spec/advanced/ImagePullSecrets.yaml
+        nodeAffinityRequired:
+          $ref: ../workloads_spec/resources/NodeAffinityRequired.yaml
+        nodePools:
+          $ref: ../workloads_spec/resources/NodePools.yaml
+        nodeType:
+          $ref: ../workloads_spec/resources/NodeType.yaml
+        podAffinity:
+          $ref: ../workloads_spec/resources/PodAffinity.yaml
+        preemptibility:
+          $ref: ../workloads_spec/advanced/Preemptibility.yaml
+        priorityClass:
+          $ref: ../workloads_spec/resources/PriorityClass.yaml
+        probes:
+          $ref: ../workloads_spec/container/Probes.yaml
+        workingDir:
+          $ref: ../workloads_spec/container/WorkingDir.yaml
+      type: object
+    - $ref: ./InferenceUpdateSpecAutoscaling.yaml
+    - $ref: ./InferenceUpdateSpecServingConfiguration.yaml

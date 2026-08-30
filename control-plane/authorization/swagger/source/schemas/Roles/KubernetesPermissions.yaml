@@ -1,0 +1,7 @@
+type: object
+properties:
+  predefinedRole:
+    type: string
+    description: The ID of an NVIDIA Run:ai predefined role. The custom role will include the mapped Kubernetes ClusterRole and its permissions.
+    example: "12"
+    nullable: true

@@ -1,0 +1,1 @@
+ALTER TABLE nodepools ADD COLUMN IF NOT EXISTS time_based_fair_share JSONB;

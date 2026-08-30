@@ -1,0 +1,3 @@
+CREATE DATABASE runai WITH
+    OWNER runai
+    ENCODING = 'UTF8';

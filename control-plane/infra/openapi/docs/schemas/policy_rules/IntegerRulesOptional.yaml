@@ -1,0 +1,28 @@
+properties:
+  sourceOfRule:
+    $ref: "./SourceOfRule.yaml"
+  canEdit:
+    description: Whether the value of the field is editable. default to true
+    type: boolean
+    nullable: true
+  min:
+    description: The minimum value that the field can be assigned to.
+    type: integer
+    format: int32
+    nullable: true
+  max:
+    description: The maximum value that the field can be assigned to.
+    type: integer
+    format: int32
+    nullable: true
+  step:
+    description: The minimal difference between two values the field can be assigned to.
+      For example, min=2, max=10, step=2 implies that the values the field can hold
+      are 2, 4, 6, 8 and 10.
+    type: integer
+    format: int32
+    nullable: true
+  defaultFrom:
+    $ref: "./DefaultFromRule.yaml"
+nullable: true
+type: object

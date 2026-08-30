@@ -1,0 +1,18 @@
+package usage_info
+
+import (
+	"context"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	"github.com/run-ai/runai/control-plane/assets-service/generated/pkg/api"
+)
+
+var _ = Describe("Test usage info logic", func() {
+	Context("no patching info", func() {
+		It("should return with no errors", func() {
+			err := PatchUsageInfo(context.Background(), api.ASSETKIND_ENVIRONMENT, nil, nil)
+			Expect(err).To(BeNil())
+		})
+	})
+})

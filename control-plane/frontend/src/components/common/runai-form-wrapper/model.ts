@@ -1,0 +1,5 @@
+export enum LEAVE_REASON {
+  EXIT,
+  CHANGE_ROUTE,
+  LEAVE_PAGE,
+}

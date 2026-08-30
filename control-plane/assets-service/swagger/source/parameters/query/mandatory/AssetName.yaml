@@ -1,0 +1,7 @@
+name: assetName
+in: query
+required: true
+description: the name of the asset
+schema:
+  type: string
+  minLength: 1

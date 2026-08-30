@@ -1,0 +1,13 @@
+type: string
+description: |
+  Access mode for the PVC. Values follow `v1.PersistentVolumeAccessMode`.
+  - `ReadWriteOnce` mounts read/write by a single node.
+  - `ReadOnlyMany` mounts read-only by many nodes.
+  - `ReadWriteMany` mounts read/write by many nodes.
+  - `ReadWriteOncePod` mounts read/write by a single pod.
+enum:
+  - ReadWriteOnce
+  - ReadOnlyMany
+  - ReadWriteMany
+  - ReadWriteOncePod
+example: ReadWriteOnce

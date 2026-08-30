@@ -1,0 +1,20 @@
+defaults:
+  worker:
+    command: my-command-worker-1
+  master:
+    command: my-command-master-2
+rules:
+  worker:
+    command:
+      options:
+        - value: my-command-worker-1
+          displayed: command1
+        - value: my-command-worker-2
+          displayed: command2
+  master:
+    command:
+      options:
+        - value: my-command-master-1
+          displayed: command1
+        - value: my-command-master-2
+          displayed: command2

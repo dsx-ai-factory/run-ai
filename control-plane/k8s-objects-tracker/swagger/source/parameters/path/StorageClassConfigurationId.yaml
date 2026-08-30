@@ -1,0 +1,6 @@
+name: id
+in: path
+required: true
+schema:
+  type: string
+description: unique identifier of the storage class configuration

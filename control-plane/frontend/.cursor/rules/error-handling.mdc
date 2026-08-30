@@ -1,0 +1,31 @@
+---
+description: Error handling conventions for Run:ai frontend
+globs: ["**/*.ts", "**/*.vue"]
+alwaysApply: false
+---
+
+# Error Handling
+
+## Key Patterns
+
+**For validation/form errors**: Use `errorMessages` enum from `src/common/error-message.constant.ts`
+
+**For API/operation errors**: Use `ErrorAlert` class from `src/utils/error-alert.util/error-alert.util.ts`
+
+## ErrorAlert Static Helpers
+
+- `ErrorAlert.failedLoadingMessage(entity)` → "Failed to load {entity}"
+- `ErrorAlert.failedCreateMessage(entity)` → "Create {entity} failed"
+- `ErrorAlert.failedUpdateMessage(entity)` → "Update {entity} failed"
+- `ErrorAlert.failedDeleteMessage(entity)` → "Delete {entity} failed"
+- `ErrorAlert.conflictMessage(entity)` → "{entity} already exists"
+
+## Canonical Examples
+
+- **ErrorAlert class**: See `src/utils/error-alert.util/error-alert.util.ts`
+- **Error constants**: See `src/common/error-message.constant.ts`
+
+## Don't
+
+- Don't hardcode error strings - use constants or ErrorAlert helpers
+- Don't create new error message patterns - reuse existing ones

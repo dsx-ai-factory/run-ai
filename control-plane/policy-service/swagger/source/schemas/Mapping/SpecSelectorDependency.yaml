@@ -1,0 +1,29 @@
+type: object
+nullable: true
+description: |
+  Declares that this spec selector depends on a parent path existing.
+  The engine will ensure the element path exists before running SET/DEFAULT
+  actions that target this selector.
+properties:
+  specSelector:
+    allOf:
+      - $ref: "./SpecSelectorName.yaml"
+    nullable: true
+    type: string
+    description: |
+      Optional parent spec selector that provides iteration context.
+      When set, the element path is created relative to each result
+      of the parent selector. When omitted, element is relative to
+      the workload root.
+  path:
+    type: string
+    description: |
+      Dot-separated path to ensure exists below the parent.
+      Example: "template.metadata" creates both .template and
+      .template.metadata if missing.
+    minLength: 1
+    maxLength: 255
+    pattern: ^[a-zA-Z_][a-zA-Z0-9_-]*(\.[a-zA-Z_][a-zA-Z0-9_-]*)*$
+example:
+  specSelector: workloadSpec
+  path: template.metadata

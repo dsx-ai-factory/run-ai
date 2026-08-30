@@ -1,0 +1,33 @@
+description: |
+  Layer 3 case "container" for kubeflow.org/XGBoostJob/v1. SETs container-level
+  fields for all replica types (Master, Worker) including both app containers
+  and init containers.
+effectiveRules:
+  # ===== All containers (app + init, all replicas) =====
+  - field: image
+    specSelector: allContainers
+    enforcements: [{ set: { value: "xgboost/xgboost:1.7.0" } }]
+  - field: imagePullPolicy
+    specSelector: allContainers
+    enforcements: [{ set: { value: IfNotPresent } }]
+  - field: resourceLimits
+    specSelector: allContainers
+    enforcements: [{ set: { key: cpu, value: "4" } }]
+  - field: resourceLimits
+    specSelector: allContainers
+    enforcements: [{ set: { key: memory, value: "8Gi" } }]
+  - field: resourceRequests
+    specSelector: allContainers
+    enforcements: [{ set: { key: cpu, value: "2" } }]
+  - field: resourceRequests
+    specSelector: allContainers
+    enforcements: [{ set: { key: memory, value: "4Gi" } }]
+  - field: allowPrivilegeEscalation
+    specSelector: allContainers
+    enforcements: [{ set: { value: false } }]
+  - field: runAsNonRoot
+    specSelector: allContainers
+    enforcements: [{ set: { value: true } }]
+  - field: runAsUser
+    specSelector: allContainers
+    enforcements: [{ set: { value: 1000 } }]

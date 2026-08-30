@@ -1,0 +1,11 @@
+name: filterByPhases
+in: query
+required: false
+description: Filter workloads by specific phases. If not specified, all phases are included.
+explode: false
+schema:
+  type: array
+  maxItems: 10
+  items:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads/Phase.yaml'
+  example: ["Running", "Failed"]

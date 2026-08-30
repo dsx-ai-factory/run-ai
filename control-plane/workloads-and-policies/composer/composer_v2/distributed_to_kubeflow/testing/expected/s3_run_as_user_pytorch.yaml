@@ -1,0 +1,241 @@
+DistributedTarget:
+  Config: {}
+  Framework: PyTorch
+  JaxJob: null
+  MasterSpec: null
+  MpiJob: null
+  ObjectMeta: null
+  PyTorchJob:
+    apiVersion: kubeflow.org/v1
+    kind: PyTorchJob
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: pytorchjob
+        createdBy: PyTorchJob
+        project: test
+        release: s3_run_as_user
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: s3_run_as_user
+      name: s3_run_as_user
+      namespace: runai-test
+    spec:
+      pytorchReplicaSpecs:
+        Master:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: pytorchjob
+                createdBy: PyTorchJob
+                project: test
+                release: s3_run_as_user
+                workloadKind: Distributed
+                workloadName: s3_run_as_user
+            spec:
+              containers:
+              - env:
+                - name: HOME
+                  value: /home/runai-home
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: s3_run_as_user
+                - name: LDAP_UID
+                  value: "1000"
+                - name: LDAP_GID
+                  value: "2000"
+                image: ubuntu
+                name: pytorch
+                resources: {}
+                securityContext:
+                  runAsGroup: 2000
+                  runAsUser: 1000
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /container/my-very-secret-bucket
+                  mountPropagation: HostToContainer
+                  name: s3-0
+                - mountPath: /home/runai-home
+                  name: user-data
+              initContainers:
+              - command:
+                - goofys
+                - -f
+                - --dir-mode
+                - "0777"
+                - --file-mode
+                - "0777"
+                - -o
+                - allow_other
+                - --debug_s3
+                - --uid
+                - "1000"
+                - --gid
+                - "2000"
+                - --endpoint
+                - https://s3.amazonaws.com
+                - private-bucket-with-token
+                - /container/my-very-secret-bucket
+                env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      key: AccessKeyId
+                      name: my-access-key-secret
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      key: SecretKey
+                      name: my-access-key-secret
+                - name: AWS_SESSION_TOKEN
+                  value: my-session-token
+                image: nvcr.io/nvidia/runai/goofys:2.26.30
+                imagePullPolicy: IfNotPresent
+                name: s3-fs-0
+                resources: {}
+                restartPolicy: Always
+                securityContext:
+                  privileged: true
+                volumeMounts:
+                - mountPath: /container/my-very-secret-bucket
+                  mountPropagation: Bidirectional
+                  name: s3-0
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              securityContext:
+                fsGroup: 2000
+              volumes:
+              - emptyDir: {}
+                name: s3-0
+              - emptyDir: {}
+                name: user-data
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: pytorchjob
+                createdBy: PyTorchJob
+                project: test
+                release: s3_run_as_user
+                workloadKind: Distributed
+                workloadName: s3_run_as_user
+            spec:
+              containers:
+              - env:
+                - name: HOME
+                  value: /home/runai-home
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: s3_run_as_user
+                - name: LDAP_UID
+                  value: "1000"
+                - name: LDAP_GID
+                  value: "2000"
+                image: ubuntu
+                name: pytorch
+                resources: {}
+                securityContext:
+                  runAsGroup: 2000
+                  runAsUser: 1000
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /container/my-very-secret-bucket
+                  mountPropagation: HostToContainer
+                  name: s3-0
+                - mountPath: /home/runai-home
+                  name: user-data
+              initContainers:
+              - command:
+                - goofys
+                - -f
+                - --dir-mode
+                - "0777"
+                - --file-mode
+                - "0777"
+                - -o
+                - allow_other
+                - --debug_s3
+                - --uid
+                - "1000"
+                - --gid
+                - "2000"
+                - --endpoint
+                - https://s3.amazonaws.com
+                - private-bucket-with-token
+                - /container/my-very-secret-bucket
+                env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      key: AccessKeyId
+                      name: my-access-key-secret
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      key: SecretKey
+                      name: my-access-key-secret
+                - name: AWS_SESSION_TOKEN
+                  value: my-session-token
+                image: nvcr.io/nvidia/runai/goofys:2.26.30
+                imagePullPolicy: IfNotPresent
+                name: s3-fs-0
+                resources: {}
+                restartPolicy: Always
+                securityContext:
+                  privileged: true
+                volumeMounts:
+                - mountPath: /container/my-very-secret-bucket
+                  mountPropagation: Bidirectional
+                  name: s3-0
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              securityContext:
+                fsGroup: 2000
+              volumes:
+              - emptyDir: {}
+                name: s3-0
+              - emptyDir: {}
+                name: user-data
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: None
+    status: {}
+  RunPolicy: null
+  TFJob: null
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: PyTorchJob
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-s3_run_as_user/, Framework: PyTorch'
+  images:
+  - ubuntu
+  name: 's3_run_as_user/, Framework: PyTorch'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

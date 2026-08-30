@@ -1,0 +1,9 @@
+description: The list of configuration issues detected for the policy.
+type: array
+maxItems: 500
+items:
+  type: string
+  maxLength: 1024
+example:
+  - configuration-issue-1
+  - configuration-issue-2

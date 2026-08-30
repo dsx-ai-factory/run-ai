@@ -1,0 +1,145 @@
+// rename: "yourObject" to the name of your object
+// rename: "YourObject" to the name of your object (capital letter)
+// rename: "objectapiversion" to your object's api version (for example, v1alpha1)
+
+/***
+package handlers
+
+import (
+	"encoding/json"
+	"github.com/rs/zerolog/log"
+	"reflect"
+
+	runaiBackendClient "github.com/run-ai/runai/runai-cluster/cluster/agent/pkg/backend-client"
+	"github.com/run-ai/runai/runai-cluster/cluster/agent/pkg/common"
+	"github.com/run-ai/runai/runai-cluster/cluster/agent/pkg/config"
+	"github.com/run-ai/runai/runai-cluster/cluster/agent/pkg/generated/backend_openapi"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+)
+
+type YourObjectsHandler struct {
+	*CommonHandler
+}
+
+type YourObjectObjectInspector bool
+
+func NewYourObjectsHandler(runaiBackendClient *runaiBackendClient.BackendClient, runaiClient client.Client,
+) (ResourceHandler, error) {
+	commonHandler, err := NewCommonHandler(runaiBackendClient, runaiClient,
+		&objectapiversion.YourObject{}, YourObjectObjectInspector(true))
+	if err != nil {
+		return nil, err
+	}
+
+	return &YourObjectsHandler{
+		CommonHandler: commonHandler,
+	}, nil
+}
+
+func (h *YourObjectsHandler) Handle() {
+	log.Debug().Msgf("Starting to sync yourObjects")
+
+	backendYourObjects, err := h.getBackendYourObjects()
+	if err != nil {
+		return
+	}
+
+	clusterYourObjects := []client.Object{}
+	hasErrorOccurred := false
+
+	for _, backendYourObject := range backendYourObjects {
+		clusterYourObject := &objectapiversion.YourObject{}
+		clusterYourObject, err = convertBackendToClusterYourObject(&backendYourObject)
+		if err != nil {
+			hasErrorOccurred = true
+			continue
+		}
+
+		clusterYourObjects = append(clusterYourObjects, clusterYourObject)
+	}
+
+	_ = h.ReconcileObjects(clusterYourObjects, hasErrorOccurred)
+}
+
+func (h *YourObjectsHandler) getBackendYourObjects() ([]backend_openapi.YourObject, error) {
+	//TODO: replace with GET for you object
+	request := h.backendClient.YourObjectsClient.YourObjectsApi.YourObjectsGet(
+		h.backendClient.Context(),
+		config.Config().ClusterUuid)
+
+	backendYourObjects, res, err := h.backendClient.YourObjectsClient.YourObjectsApi.YourObjectsGetExecute(
+		request,
+	)
+	err = h.backendClient.HandleHttpResponse(res, err, "Get YourObjects")
+	if err != nil {
+		log.Error().Msgf("Had an error while getting yourObjects: %+v", err)
+		return []backend_openapi.YourObject{}, err
+	}
+
+	return backendYourObjects, nil
+}
+
+func convertBackendToClusterYourObject(backendYourObject *backend_openapi.YourObject) (*objectapiversion.YourObject, error) {
+	yourObject, err := convertJsonYourObjectFields(backendYourObject)
+	if err != nil {
+		return nil, err
+	}
+
+	yourObject.Name = common.GetStringVal(backendYourObject.Name)
+
+	// add more spec assignment here - everything that is not handled in "convertJsonYourObjectFields"
+
+	return yourObject, nil
+}
+
+/*
+convertJsonYourObjectFields converts backend yourObject to cluster yourObject, using json marshal/unmarshal.
+Not all fields are matching in both objects - so other fields needs to be handled manually.
+*/
+func convertJsonYourObjectFields(backendYourObject *backend_openapi.YourObject) (*objectapiversion.YourObject, error) {
+	jsonBytes, err := json.Marshal(backendYourObject)
+	if err != nil {
+		log.Error().Msgf("Failed to json marshal backend yourObject <%s>, error: %s",
+			common.GetStringVal(backendYourObject.Name), err.Error())
+		return nil, err
+	}
+
+	crdYourObject := &objectapiversion.YourObject{}
+	err = json.Unmarshal(jsonBytes, &crdYourObject.Spec)
+	if err != nil {
+		log.Error().Msgf("Failed to json un-marshal crd yourObject <%s>, error: %s",
+			common.GetStringVal(backendYourObject.Name), err.Error())
+		return nil, err
+	}
+
+	return crdYourObject, nil
+}
+
+func (i YourObjectObjectInspector) DeepCopySpec(from, to client.Object) {
+	fromYourObject, ok := from.(*objectapiversion.YourObject)
+	if !ok {
+		// shouldn't happen because we convert objects to the correct type
+		return
+	}
+	toYourObject, ok := to.(*objectapiversion.YourObject)
+	if !ok {
+		return
+	}
+
+	fromYourObject.Spec.DeepCopyInto(&toYourObject.Spec)
+}
+
+func (i YourObjectObjectInspector) IsUpToDate(left, right client.Object) bool {
+	leftYourObject, ok := left.(*objectapiversion.YourObject)
+	if !ok {
+		// shouldn't happen because we convert objects to the correct type
+		return false
+	}
+	rightYourObject, ok := right.(*objectapiversion.YourObject)
+	if !ok {
+		return false
+	}
+
+	return reflect.DeepEqual(leftYourObject.Spec, rightYourObject.Spec)
+}
+***/

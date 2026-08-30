@@ -1,0 +1,2210 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: support@run.ai
+  description: An API for managing datavolumes
+  title: datavolumes-service
+  version: 2.0.0
+servers:
+- url: https://app.run.ai
+- url: https://staging.run.ai
+- url: https://test.run.ai
+- url: http://localhost:8080
+security:
+- bearerAuth: []
+paths:
+  /:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: Executed successfully.
+      summary: health check
+      tags:
+      - Health
+      x-runai-team: Suricata
+      x-no-authorization: true
+    x-internal: true
+  /api/v1/datavolumes:
+    get:
+      description: Get requested datavolumes.
+      operationId: get_datavolumes
+      parameters:
+      - description: "Which datavolumes would be returned in the response. Originated\
+          \ - datavolumes that are originated in the permitted scopes of the caller.\
+          \ UsableInProject - datavolumes that can be used in a specific project;\
+          \ if you use this value, you must also provide the project ID in the \"\
+          usableInProjectId\" query param."
+        explode: true
+        in: query
+        name: requestType
+        required: true
+        schema:
+          $ref: '#/components/schemas/DatavolumeRequestType'
+        style: form
+      - description: Only when using "UsableInProject" requestType; Filter results
+          for only datavolumes that are shared with - or originated in - the project.
+        explode: true
+        in: query
+        name: usableInProjectId
+        required: false
+        schema:
+          example: "5"
+          type: string
+        style: form
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          type: integer
+        style: form
+      - description: The maximum number of entries to return.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          maximum: 500
+          minimum: 1
+          type: integer
+        style: form
+      - description: Sort results by a parameters.
+        explode: true
+        in: query
+        name: sortBy
+        required: false
+        schema:
+          enum:
+          - name
+          - projectId
+          - clusterId
+          - departmentId
+          - projectName
+          - createdAt
+          - createdBy
+          - phase
+          type: string
+        style: form
+      - description: Sort results in descending or ascending order.
+        explode: true
+        in: query
+        name: sortOrder
+        required: false
+        schema:
+          default: asc
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: "Filter results by a parameter. Use the format field-name operator\
+          \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
+          \ >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts\
+          \ with and =$ Ends with. Dates are in ISO 8601 timestamp format and available\
+          \ for operators ==, !=, <= and >=."
+        explode: false
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          example:
+          - name!=some-datavolume-name
+          items:
+            pattern: ^(name|projectId|clusterId|departmentId|projectName|createdAt|createdBy|phase)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            type: string
+          type: array
+        style: form
+      - description: Filter results by a free text search.
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          example: test project
+          type: string
+        style: form
+      - description: Whether the query should include data volumes that were created
+          internally
+        explode: true
+        in: query
+        name: includeInternal
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
+        x-internal: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_datavolumes_200_response'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List datavolumes in permitted scopes
+      tags:
+      - Datavolumes
+      x-runai-team: Suricata
+      x-test-coverage:
+      - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+      x-authorize:
+        resource-type: datavolumes
+        action: read
+    post:
+      operationId: create_datavolume
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatavolumeCreationFields'
+        description: The datavolume to create.
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Datavolume'
+          description: Created
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create a datavolume
+      tags:
+      - Datavolumes
+      x-runai-team: Suricata
+      x-test-coverage:
+      - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+      x-authorize:
+        resource-type: datavolumes
+        action: create
+      x-audit: true
+  /api/v1/datavolumes/{datavolumeId}:
+    delete:
+      operationId: delete_datavolume
+      parameters:
+      - description: The id of the datavolume to retrieve
+        example: 71f69d83-ba66-4822-adf5-55ce55efd210
+        explode: false
+        in: path
+        name: datavolumeId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "202":
+          content:
+            application/json:
+              example:
+                code: 202
+                message: Request has been accepted.
+              schema:
+                $ref: '#/components/schemas/HttpResponse'
+          description: Accepted.
+        "204":
+          description: No Content.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Delete datavolume
+      tags:
+      - Datavolumes
+      x-runai-team: Suricata
+      x-test-coverage:
+      - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+      x-authorize:
+        resource-type: datavolumes
+        action: delete
+        resource-id: datavolumeId
+      x-audit: true
+    get:
+      operationId: get_datavolume
+      parameters:
+      - description: The id of the datavolume to retrieve
+        example: 71f69d83-ba66-4822-adf5-55ce55efd210
+        explode: false
+        in: path
+        name: datavolumeId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Datavolume'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get datavolume
+      tags:
+      - Datavolumes
+      x-runai-team: Suricata
+      x-test-coverage:
+      - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+      x-authorize:
+        resource-type: datavolumes
+        action: read
+        resource-id: datavolumeId
+    patch:
+      operationId: patch_datavolume
+      parameters:
+      - description: The id of the datavolume to retrieve
+        example: 71f69d83-ba66-4822-adf5-55ce55efd210
+        explode: false
+        in: path
+        name: datavolumeId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatavolumePatchFields'
+        description: Datavolume to update.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatavolumeNoSharedScopes'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Patch datavolume
+      tags:
+      - Datavolumes
+      x-runai-team: Suricata
+      x-test-coverage:
+      - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+      x-authorize:
+        resource-type: datavolumes
+        action: update
+        resource-id: datavolumeId
+      x-audit: true
+  /api/v1/datavolumes/name-availability:
+    get:
+      description: "Check if a given data volume name creates naming conflicts under\
+        \ the given scope. Returns conflict (409) in case the name is not available,\
+        \ or 204 (no content) if it is ok."
+      operationId: datavolume_name_availability
+      parameters:
+      - description: the name of the datavolume
+        explode: true
+        in: query
+        name: dataName
+        required: true
+        schema:
+          minLength: 1
+          type: string
+        style: form
+      - description: The id of the cluster
+        explode: true
+        in: query
+        name: clusterId
+        required: true
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      responses:
+        "204":
+          description: The name is available to use
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "409":
+          content:
+            application/json:
+              example:
+                code: 409
+                message: Resource with this name already exists
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource already exists
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Data volumes name availability.
+      tags:
+      - Datavolumes
+      x-runai-team: Viper
+      x-test-coverage:
+      - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+      x-authorize:
+        resource-type: datavolumes
+        action: read
+  /api/v1/datavolumes/used-pvcs:
+    get:
+      description: Returns a list of PVCs that are currently referenced by at least
+        one DataVolume within the specified project scope.
+      operationId: get_used_pvcs_from_datavolumes
+      parameters:
+      - description: The id of the project
+        explode: true
+        in: query
+        name: projectId
+        required: true
+        schema:
+          example: "4500004"
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_used_pvcs_from_datavolumes_200_response'
+          description: List of PVC names used by DataVolumes in the specified project.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get list of PVC names used by DataVolumes in the specified project.
+      tags:
+      - Datavolumes
+      x-runai-team: Viper
+      x-test-coverage:
+      - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+      x-internal: true
+      x-authorize:
+        resource-type: pvc-assets
+        action: read
+  /api/v1/datavolumes/count:
+    get:
+      description: Retrieve the number of data volumes.
+      operationId: count_datavolumes
+      parameters:
+      - description: "Which datavolumes would be returned in the response. Originated\
+          \ - datavolumes that are originated in the permitted scopes of the caller.\
+          \ UsableInProject - datavolumes that can be used in a specific project;\
+          \ if you use this value, you must also provide the project ID in the \"\
+          usableInProjectId\" query param."
+        explode: true
+        in: query
+        name: requestType
+        required: true
+        schema:
+          $ref: '#/components/schemas/DatavolumeRequestType'
+        style: form
+      - description: Only when using "UsableInProject" requestType; Filter results
+          for only datavolumes that are shared with - or originated in - the project.
+        explode: true
+        in: query
+        name: usableInProjectId
+        required: false
+        schema:
+          example: "5"
+          type: string
+        style: form
+      - description: "Filter results by a parameter. Use the format field-name operator\
+          \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
+          \ >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts\
+          \ with and =$ Ends with. Dates are in ISO 8601 timestamp format and available\
+          \ for operators ==, !=, <= and >=."
+        explode: false
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          example:
+          - name!=some-datavolume-name
+          items:
+            pattern: ^(name|projectId|clusterId|departmentId|projectName|createdAt|createdBy|phase)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            type: string
+          type: array
+        style: form
+      - description: Filter results by a free text search.
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          example: test project
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/count_datavolumes_200_response'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Count data volumes.
+      tags:
+      - Datavolumes
+      x-runai-team: Viper
+      x-test-coverage:
+      - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+      x-authorize:
+        resource-type: datavolumes
+        action: read
+  /api/v1/datavolumes/{datavolumeId}/sharedScopes:
+    get:
+      operationId: get_datavolume_shared_scopes
+      parameters:
+      - description: The id of the datavolume to retrieve
+        example: 71f69d83-ba66-4822-adf5-55ce55efd210
+        explode: false
+        in: path
+        name: datavolumeId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SharedScopes'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get the datavolume's shared scopes
+      tags:
+      - Datavolumes
+      x-runai-team: Suricata
+      x-test-coverage:
+      - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+      x-authorize:
+        resource-type: datavolumes/sharedscopes
+        action: update
+        resource-id: datavolumeId
+    patch:
+      operationId: patch_datavolume_shared_scopes
+      parameters:
+      - description: The id of the datavolume to retrieve
+        example: 71f69d83-ba66-4822-adf5-55ce55efd210
+        explode: false
+        in: path
+        name: datavolumeId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SharedScopesPatchRequest'
+        description: Requested SharedScopes of the datavolume to patch.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SharedScopes'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Patch the datavolume's shared scopes
+      tags:
+      - Datavolumes
+      x-runai-team: Suricata
+      x-test-coverage:
+      - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+      x-authorize:
+        resource-type: datavolumes/sharedscopes
+        action: update
+        resource-id: datavolumeId
+      x-audit: true
+  /api/v1/datavolumes/{datavolumeId}/status:
+    put:
+      operationId: update_datavolume_status
+      parameters:
+      - description: The id of the datavolume to retrieve
+        example: 71f69d83-ba66-4822-adf5-55ce55efd210
+        explode: false
+        in: path
+        name: datavolumeId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatavolumeStatusInternal'
+        description: The status of the datavolume in the cluster.
+        required: true
+      responses:
+        "204":
+          description: No Content.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Update the status of the datavolume form the cluster
+      tags:
+      - Datavolumes
+      x-runai-team: Suricata
+      x-test-coverage:
+      - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+      x-authorize:
+        resource-type: datavolumes
+        action: sync
+    x-internal: true
+  /api/v1/datavolumes/sync:
+    get:
+      description: Get all datavolumes in cluster with all shared scopes - used by
+        the agent for the k8s cluster.
+      operationId: get_datavolumes_internal
+      parameters:
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          type: integer
+        style: form
+      - description: The maximum number of entries to return.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          maximum: 500
+          minimum: 1
+          type: integer
+        style: form
+      - description: The id of the cluster
+        explode: true
+        in: query
+        name: clusterId
+        required: true
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_datavolumes_internal_200_response'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List datavolumes in cluster.
+      tags:
+      - Datavolumes
+      x-runai-team: Suricata
+      x-test-coverage:
+      - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+      x-authorize:
+        resource-type: datavolumes
+        action: sync
+    post:
+      description: Sync all datavolumes statuses from k8s cluster to Run:AI control-plane.
+      operationId: sync_datavolumes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatavolumesSyncRequest'
+        description: The statuses to sync.
+      responses:
+        "204":
+          description: No Content.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Sync the statuses of the datavolumes in the cluster
+      tags:
+      - Datavolumes
+      x-runai-team: Suricata
+      x-test-coverage:
+      - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+      x-authorize:
+        resource-type: datavolumes
+        action: sync
+    x-internal: true
+  /internal/datavolumes/{datavolumeId}/ancestors:
+    get:
+      operationId: get_datavolume_ancestors
+      parameters:
+      - description: The id of the datavolume to retrieve
+        example: 71f69d83-ba66-4822-adf5-55ce55efd210
+        explode: false
+        in: path
+        name: datavolumeId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ancestors'
+          description: Executed successfully.
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get the datavolume ancestors
+      tags:
+      - Datavolumes
+      x-no-authorization: true
+      x-runai-team: Suricata
+      x-test-coverage:
+      - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+    x-internal: true
+  /internal/datavolumes:
+    post:
+      operationId: internal_create_datavolume
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalDatavolumeCreationFields'
+        description: The datavolume to create.
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalDatavolume'
+          description: Created
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create a datavolume
+      tags:
+      - Datavolumes
+      x-runai-team: Viper
+      x-test-coverage:
+      - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+      x-authorize:
+        resource-type: datavolumes
+        action: create
+      x-no-authorization: true
+      x-audit: true
+    x-internal: true
+components:
+  parameters:
+    DatavolumesRequestType:
+      description: "Which datavolumes would be returned in the response. Originated\
+        \ - datavolumes that are originated in the permitted scopes of the caller.\
+        \ UsableInProject - datavolumes that can be used in a specific project; if\
+        \ you use this value, you must also provide the project ID in the \"usableInProjectId\"\
+        \ query param."
+      explode: true
+      in: query
+      name: requestType
+      required: true
+      schema:
+        $ref: '#/components/schemas/DatavolumeRequestType'
+      style: form
+    DatavolumesUsableInProjectId:
+      description: Only when using "UsableInProject" requestType; Filter results for
+        only datavolumes that are shared with - or originated in - the project.
+      explode: true
+      in: query
+      name: usableInProjectId
+      required: false
+      schema:
+        example: "5"
+        type: string
+      style: form
+    Offset:
+      description: The offset of the first item returned in the collection.
+      explode: true
+      in: query
+      name: offset
+      required: false
+      schema:
+        example: 100
+        format: int32
+        type: integer
+      style: form
+    Limit:
+      description: The maximum number of entries to return.
+      explode: true
+      in: query
+      name: limit
+      required: false
+      schema:
+        default: 50
+        format: int32
+        maximum: 500
+        minimum: 1
+        type: integer
+      style: form
+    DatavolumesSortBy:
+      description: Sort results by a parameters.
+      explode: true
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        enum:
+        - name
+        - projectId
+        - clusterId
+        - departmentId
+        - projectName
+        - createdAt
+        - createdBy
+        - phase
+        type: string
+      style: form
+    SortOrder:
+      description: Sort results in descending or ascending order.
+      explode: true
+      in: query
+      name: sortOrder
+      required: false
+      schema:
+        default: asc
+        enum:
+        - asc
+        - desc
+        type: string
+      style: form
+    DatavolumesFilter:
+      description: "Filter results by a parameter. Use the format field-name operator\
+        \ value. Operators are == Equals, != Not equals, <= Less than or equal, >=\
+        \ Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with\
+        \ and =$ Ends with. Dates are in ISO 8601 timestamp format and available for\
+        \ operators ==, !=, <= and >=."
+      explode: false
+      in: query
+      name: filterBy
+      required: false
+      schema:
+        example:
+        - name!=some-datavolume-name
+        items:
+          pattern: ^(name|projectId|clusterId|departmentId|projectName|createdAt|createdBy|phase)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+          type: string
+        type: array
+      style: form
+    Search:
+      description: Filter results by a free text search.
+      explode: true
+      in: query
+      name: search
+      required: false
+      schema:
+        example: test project
+        type: string
+      style: form
+    IncludeInternal:
+      description: Whether the query should include data volumes that were created
+        internally
+      explode: true
+      in: query
+      name: includeInternal
+      required: false
+      schema:
+        default: false
+        type: boolean
+      style: form
+      x-internal: true
+    DatavolumeId:
+      description: The id of the datavolume to retrieve
+      example: 71f69d83-ba66-4822-adf5-55ce55efd210
+      explode: false
+      in: path
+      name: datavolumeId
+      required: true
+      schema:
+        format: uuid
+        type: string
+      style: simple
+    DataVolumeName:
+      description: the name of the datavolume
+      explode: true
+      in: query
+      name: dataName
+      required: true
+      schema:
+        minLength: 1
+        type: string
+      style: form
+    ClusterIdRequired:
+      description: The id of the cluster
+      explode: true
+      in: query
+      name: clusterId
+      required: true
+      schema:
+        example: d73a738f-fab3-430a-8fa3-5241493d7128
+        format: uuid
+        type: string
+      style: form
+    ProjectIdRequired:
+      description: The id of the project
+      explode: true
+      in: query
+      name: projectId
+      required: true
+      schema:
+        example: "4500004"
+        type: string
+      style: form
+  responses:
+    "400BadRequest":
+      content:
+        application/json:
+          example:
+            code: 400
+            message: Required parameter is missing
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Bad request.
+    "401Unauthorized":
+      content:
+        application/json:
+          example:
+            code: 401
+            message: Issuer is not familiar.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unauthorized
+    "403Forbidden":
+      content:
+        application/json:
+          example:
+            code: 403
+            message: You do not have sufficient permissions.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Forbidden
+    "500InternalServerError":
+      content:
+        application/json:
+          example:
+            code: 500
+            message: Something went wrong.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+    "503ServiceUnavailable":
+      content:
+        application/json:
+          example:
+            code: 503
+            message: Please try again in few minutes.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+    "404NotFound":
+      content:
+        application/json:
+          example:
+            code: 404
+            message: Resource id not found.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource was not found
+    "202Accepted":
+      content:
+        application/json:
+          example:
+            code: 202
+            message: Request has been accepted.
+          schema:
+            $ref: '#/components/schemas/HttpResponse'
+      description: Accepted.
+    "204NoContent":
+      description: No Content.
+    "409Conflict":
+      content:
+        application/json:
+          example:
+            code: 409
+            message: Resource with this name already exists
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource already exists
+    "400BadSubmissionRequest":
+      content:
+        application/json:
+          example:
+            code: 400
+            message: The workload request does not comply with the policy set by the
+              administrator
+          schema:
+            $ref: '#/components/schemas/SubmissionError'
+      description: Bad submission request.
+    "406NotAcceptable":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Not acceptable request
+    "412PreconditionFailed":
+      content:
+        application/json:
+          example:
+            code: 412
+            message: Precondition failed
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource was not found.
+    "413RequestEntityTooLarge":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Request entity too large
+    "415UnsupportedMediaType":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unsupported media type
+    "501NotImplemented":
+      content:
+        application/json:
+          example:
+            code: 501
+            message: Not implemented
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+  schemas:
+    DatavolumeRequestType:
+      description: "Which datavolumes to return in the GET datavolumes response. Originated\
+        \ - datavolumes that are originated in the permitted scopes of the caller.\
+        \ UsableInProject - datavolumes that can be used in a specific project; if\
+        \ you use this value, you must also provide the project ID in the \"usableInProjectId\"\
+        \ query param."
+      enum:
+      - Originated
+      - UsableInProject
+      example: Originated
+      type: string
+    BaseFields:
+      properties:
+        id:
+          example: 71f69d83-ba66-4822-adf5-55ce55efd210
+          format: uuid
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+        createdBy:
+          example: user@run.ai
+          type: string
+        updatedBy:
+          example: user@run.ai
+          type: string
+      required:
+      - id
+      type: object
+    DatavolumeCreationFields:
+      example:
+        name: datavolume-a
+        description: Results of experiment X
+        originPvcName: pvc-a
+        shouldDeleteOriginalVolume: false
+        useOriginalVolume: true
+        projectId: "5"
+      properties:
+        name:
+          description: The name of the new data volume.
+          example: datavolume-a
+          maxLength: 63
+          pattern: "^[a-z][-a-z0-9]{0,62}$"
+          type: string
+        description:
+          description: A brief description of the data volume and its purpose.
+          example: Results of experiment X
+          maxLength: 127
+          type: string
+        originPvcName:
+          description: The name of the existing PVC that the new data volume is based
+            on.
+          example: pvc-a
+          type: string
+        projectId:
+          description: The ID of the project whose namespace contains the origin PVC.
+          example: "5"
+          type: string
+        shouldDeleteOriginalVolume:
+          default: false
+          description: True is not supported. This parameter will be removed in a
+            future release.
+          example: false
+          type: boolean
+        useOriginalVolume:
+          default: true
+          description: "If true, the original storage volume will be used together\
+            \ with the data volume. Default true as long as \"shouldDeleteOriginalVolume\"\
+            \ is false."
+          example: true
+          nullable: true
+          type: boolean
+      required:
+      - name
+      - originPvcName
+      - projectId
+      type: object
+    ClusterId:
+      description: The id of the cluster.
+      example: 71f69d83-ba66-4822-adf5-55ce55efd210
+      format: uuid
+      type: string
+    EnrichmentDataFields:
+      properties:
+        projectName:
+          example: project-a
+          type: string
+        departmentId:
+          example: department-a
+          type: string
+        clusterId:
+          description: The id of the cluster.
+          example: 71f69d83-ba66-4822-adf5-55ce55efd210
+          format: uuid
+          type: string
+      required:
+      - projectName
+      type: object
+    DatavolumeInnerFields:
+      allOf:
+      - $ref: '#/components/schemas/BaseFields'
+      - $ref: '#/components/schemas/DatavolumeCreationFields'
+      - $ref: '#/components/schemas/EnrichmentDataFields'
+    DatavolumePhase:
+      description: Phase of the Datavolume in the cluster
+      enum:
+      - Ready
+      - NotReady
+      - Creating
+      - Deleting
+      - Unknown
+      example: Ready
+      type: string
+    Condition:
+      properties:
+        type:
+          description: "The type of the condition, such as Failed or Available. See\
+            \ Types of domain status conditions."
+          example: PvcsCreated
+          type: string
+        status:
+          description: "The status of the condition, such as True, False or Unknown."
+          example: "False"
+          type: string
+        message:
+          description: "An optional, human-readable message providing more details\
+            \ about the condition."
+          example: Failed to create pvc in namespace 'runai-proj1'
+          type: string
+        reason:
+          description: The reason for the Failed condition. Not applicable to other
+            types of condition.
+          example: ErrorCreatingPvc
+          type: string
+        lastTransitionTime:
+          description: A timestamp of when the condition was created or the last time
+            time the condition transitioned from one status to another.
+          example: 2022-01-01T03:49:52.531Z
+          format: date-time
+          nullable: true
+          type: string
+      required:
+      - status
+      - type
+      type: object
+    Conditions:
+      items:
+        $ref: '#/components/schemas/Condition'
+      type: array
+      x-schema-name: Conditions
+    DatavolumeStatus:
+      properties:
+        phase:
+          $ref: '#/components/schemas/DatavolumePhase'
+        phaseMessage:
+          description: Message explaining the phase of the Datavolume in the cluster
+          example: Failed to copy pvc to project 'project-a'
+          type: string
+        conditions:
+          items:
+            $ref: '#/components/schemas/Condition'
+          type: array
+          x-schema-name: Conditions
+        datavolumePvcName:
+          description: The name of the copied PVC that is created in the cluster in
+            the project namespace
+          example: datavolume-pvc-1
+          type: string
+        datavolumePvName:
+          description: The name of the PV that is created in the cluster - copied
+            from the one that was attached to the original pvc
+          example: datavolume-pv-1
+          type: string
+      required:
+      - phase
+      type: object
+    DatavolumeNoSharedScopes:
+      allOf:
+      - $ref: '#/components/schemas/DatavolumeInnerFields'
+      - $ref: '#/components/schemas/DatavolumeNoSharedScopes_allOf'
+    DatavolumesNoSharedScopes:
+      items:
+        $ref: '#/components/schemas/DatavolumeNoSharedScopes'
+      type: array
+      x-schema-name: DatavolumesNoSharedScopes
+    Error:
+      example:
+        code: 400
+        message: Bad request - Resource should have a name
+      properties:
+        code:
+          maximum: 599
+          minimum: 100
+          type: integer
+        message:
+          type: string
+        details:
+          type: string
+      required:
+      - code
+      - message
+    ScopeType:
+      enum:
+      - cluster
+      - department
+      - project
+      type: string
+    SharedScopeBase:
+      example:
+        scopeId: a418ed33-9399-48c0-a890-122cadd13bfd
+        scopeType: null
+      properties:
+        scopeType:
+          $ref: '#/components/schemas/ScopeType'
+        scopeId:
+          example: a418ed33-9399-48c0-a890-122cadd13bfd
+          type: string
+      required:
+      - scopeId
+      - scopeType
+      type: object
+    SharedScope:
+      allOf:
+      - $ref: '#/components/schemas/SharedScopeBase'
+      - $ref: '#/components/schemas/SharedScope_allOf'
+    Datavolume:
+      allOf:
+      - $ref: '#/components/schemas/DatavolumeInnerFields'
+      - $ref: '#/components/schemas/Datavolume_allOf'
+    HttpResponse:
+      example:
+        code: 139
+        message: message
+      properties:
+        code:
+          maximum: 599
+          minimum: 100
+          type: integer
+        message:
+          type: string
+      required:
+      - code
+      - message
+    DatavolumePatchFields:
+      example:
+        description: Results of experiment X
+      properties:
+        description:
+          example: Results of experiment X
+          maxLength: 127
+          type: string
+      type: object
+    SharedScopes:
+      items:
+        $ref: '#/components/schemas/SharedScope'
+      type: array
+      x-schema-name: SharedScopes
+    SharedScopesPatchRequest:
+      example:
+        add:
+        - scopeId: a418ed33-9399-48c0-a890-122cadd13bfd
+          scopeType: null
+        - scopeId: a418ed33-9399-48c0-a890-122cadd13bfd
+          scopeType: null
+        remove:
+        - scopeId: a418ed33-9399-48c0-a890-122cadd13bfd
+          scopeType: null
+        - scopeId: a418ed33-9399-48c0-a890-122cadd13bfd
+          scopeType: null
+      properties:
+        add:
+          items:
+            $ref: '#/components/schemas/SharedScopeBase'
+          maxLength: 50
+          type: array
+        remove:
+          items:
+            $ref: '#/components/schemas/SharedScopeBase'
+          maxLength: 50
+          type: array
+      type: object
+    DatavolumeStatusInternal:
+      allOf:
+      - $ref: '#/components/schemas/DatavolumeStatus'
+      - $ref: '#/components/schemas/DatavolumeStatusInternal_allOf'
+    DatavolumeInternal:
+      allOf:
+      - $ref: '#/components/schemas/DatavolumeInnerFields'
+      - $ref: '#/components/schemas/DatavolumeInternal_allOf'
+    DatavolumesInternal:
+      items:
+        $ref: '#/components/schemas/DatavolumeInternal'
+      type: array
+      x-schema-name: Datavolumes
+    DatavolumeStatusForSync:
+      allOf:
+      - $ref: '#/components/schemas/DatavolumeStatus'
+      - $ref: '#/components/schemas/DatavolumeStatusForSync_allOf'
+    DatavolumesSyncRequest:
+      example:
+        datavolumes:
+        - null
+        - null
+        from: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+        to: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        datavolumes:
+          items:
+            $ref: '#/components/schemas/DatavolumeStatusForSync'
+          type: array
+        clusterId:
+          description: The id of the cluster.
+          example: 71f69d83-ba66-4822-adf5-55ce55efd210
+          format: uuid
+          type: string
+        from:
+          description: "the first datavolume id to sync. if empty, all datavolumes\
+            \ before the first one sent will be deleted."
+          format: uuid
+          type: string
+        to:
+          description: "the last datavolume to sync. if empty, all datavolumes after\
+            \ the last one sent will be deleted."
+          format: uuid
+          type: string
+      required:
+      - clusterId
+      - datavolumes
+      type: object
+    ClusterIdOptional:
+      description: The id of the cluster.
+      example: 71f69d83-ba66-4822-adf5-55ce55efd210
+      format: uuid
+      minLength: 1
+      nullable: true
+      type: string
+    DepartmentIdOptional:
+      description: The id of the department.
+      example: "2"
+      minLength: 1
+      nullable: true
+      type: string
+    Ancestors:
+      description: The ancestors of an org unit.
+      example:
+        tenant_id: "1"
+        cluster_uuid: 71f69d83-ba66-4822-adf5-55ce55efd210
+        department_id: "2"
+        project_id: "1"
+      properties:
+        tenant_id:
+          example: "1"
+          type: string
+        cluster_uuid:
+          description: The id of the cluster.
+          example: 71f69d83-ba66-4822-adf5-55ce55efd210
+          format: uuid
+          minLength: 1
+          nullable: true
+          type: string
+        department_id:
+          description: The id of the department.
+          example: "2"
+          minLength: 1
+          nullable: true
+          type: string
+        project_id:
+          example: "1"
+          nullable: true
+          type: string
+      required:
+      - tenant_id
+      type: object
+    InternalDatavolumeCreationFields:
+      example:
+        scope: null
+        departmentId: "4500001"
+        name: datavolume-a
+        description: Results of experiment X
+        clusterId: cf8c8ea0-94e4-4177-a050-bbf9b10d9cc5
+        originPvcName: pvc-a
+      properties:
+        name:
+          example: datavolume-a
+          maxLength: 63
+          pattern: "^[a-z][-a-z0-9]{0,62}$"
+          type: string
+        scope:
+          $ref: '#/components/schemas/ScopeType'
+        departmentId:
+          description: The ID of the department that in its namespace the origin pvc
+            is located (mandatory if scope is department)
+          example: "4500001"
+          type: string
+        clusterId:
+          description: The ID of the cluster that in its namespace the origin pvc
+            is located (mandatory if scope is cluster)
+          example: cf8c8ea0-94e4-4177-a050-bbf9b10d9cc5
+          format: uuid
+          type: string
+        description:
+          example: Results of experiment X
+          maxLength: 127
+          type: string
+        originPvcName:
+          description: The name of the PVC that the datavolume is based on
+          example: pvc-a
+          type: string
+      required:
+      - name
+      - originPvcName
+      - scope
+      type: object
+    InternalEnrichmentDataFields:
+      properties:
+        departmentId:
+          example: "4500001"
+          type: string
+        clusterId:
+          description: The id of the cluster.
+          example: 71f69d83-ba66-4822-adf5-55ce55efd210
+          format: uuid
+          type: string
+      type: object
+    InternalDatavolume:
+      allOf:
+      - $ref: '#/components/schemas/BaseFields'
+      - $ref: '#/components/schemas/InternalDatavolumeCreationFields'
+      - $ref: '#/components/schemas/InternalEnrichmentDataFields'
+      - $ref: '#/components/schemas/Datavolume_allOf'
+    DatavolumeSortFilterFields:
+      enum:
+      - name
+      - projectId
+      - clusterId
+      - departmentId
+      - projectName
+      - createdAt
+      - createdBy
+      - phase
+      type: string
+    TenantId:
+      description: The id of the tenant.
+      example: 1001
+      format: int32
+      type: integer
+    ComplianceIssues:
+      nullable: true
+      properties:
+        complianceIssues:
+          items:
+            $ref: '#/components/schemas/ComplianceIssues_complianceIssues_inner'
+          type: array
+      type: object
+    SubmissionError:
+      allOf:
+      - $ref: '#/components/schemas/Error'
+      - $ref: '#/components/schemas/ComplianceIssues'
+    get_datavolumes_200_response:
+      example:
+        next: 1
+        datavolumes:
+        - null
+        - null
+      properties:
+        next:
+          example: 1
+          type: integer
+        datavolumes:
+          items:
+            $ref: '#/components/schemas/DatavolumeNoSharedScopes'
+          type: array
+          x-schema-name: DatavolumesNoSharedScopes
+      required:
+      - datavolumes
+      type: object
+    get_used_pvcs_from_datavolumes_200_response:
+      example:
+        boundPVCs:
+        - boundPVCs
+        - boundPVCs
+      properties:
+        boundPVCs:
+          items:
+            type: string
+          type: array
+      type: object
+    count_datavolumes_200_response:
+      example:
+        count: 1
+      properties:
+        count:
+          example: 1
+          format: int64
+          type: integer
+      required:
+      - count
+      type: object
+    get_datavolumes_internal_200_response:
+      example:
+        next: 1
+        datavolumes:
+        - null
+        - null
+      properties:
+        next:
+          example: 1
+          type: integer
+        datavolumes:
+          items:
+            $ref: '#/components/schemas/DatavolumeInternal'
+          type: array
+          x-schema-name: Datavolumes
+      required:
+      - datavolumes
+      type: object
+    DatavolumeNoSharedScopes_allOf:
+      properties:
+        status:
+          $ref: '#/components/schemas/DatavolumeStatus'
+      required:
+      - status
+      type: object
+    SharedScope_allOf:
+      properties:
+        scopeName:
+          description: The name of the scope
+          example: project-a
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        createdBy:
+          example: user@run.ai
+          type: string
+      required:
+      - scopeName
+      type: object
+    Datavolume_allOf:
+      properties:
+        sharedScopes:
+          description: Will be returned only if the user has the required permissions
+            to view those scopes
+          items:
+            $ref: '#/components/schemas/SharedScope'
+          type: array
+        status:
+          $ref: '#/components/schemas/DatavolumeStatus'
+      required:
+      - status
+      type: object
+    DatavolumeStatusInternal_allOf:
+      properties:
+        isDeleted:
+          description: "If true, the datavolume is deleted in the cluster and 'phase'\
+            \ field is irrelevant."
+          example: false
+          nullable: true
+          type: boolean
+      type: object
+    DatavolumeInternal_allOf:
+      properties:
+        sharedScopes:
+          description: Will be returned only if the user has the required permissions
+            to view those scopes
+          items:
+            $ref: '#/components/schemas/SharedScope'
+          type: array
+        phase:
+          $ref: '#/components/schemas/DatavolumePhase'
+      type: object
+    DatavolumeStatusForSync_allOf:
+      properties:
+        datavolumeId:
+          description: The id of the datavolume
+          example: 71f69d83-ba66-4822-adf5-55ce55efd210
+          format: uuid
+          type: string
+      required:
+      - datavolumeId
+      type: object
+    ComplianceIssues_complianceIssues_inner:
+      properties:
+        field:
+          example: compute.gpuDevicesRequest
+          type: string
+        details:
+          example: value must be no less than 3
+          type: string
+      required:
+      - details
+      - field
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      description: Bearer authentication
+      scheme: bearer
+      type: http

@@ -1,0 +1,3 @@
+#path
+WorkloadV2Id:
+  $ref: './path/WorkloadV2Id.yaml'

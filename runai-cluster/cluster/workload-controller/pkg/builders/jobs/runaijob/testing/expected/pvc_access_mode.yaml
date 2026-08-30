@@ -1,0 +1,144 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      template: job-33
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      kai.scheduler/preemptibility: non-preemptible
+      priorityClassName: build
+      project: team-a
+      release: job-33
+      workloadKind: InteractiveWorkload
+      workloadName: job-33
+    name: job-33
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 0
+    completions: 1
+    maxIdleDurationSeconds: 1200
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          user: ""
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          kai.scheduler/preemptibility: non-preemptible
+          priorityClassName: build
+          project: team-a
+          release: job-33
+          run.ai/top-owner-uid: ""
+          workloadKind: InteractiveWorkload
+          workloadName: job-33
+      spec:
+        containers:
+        - image: ubuntu
+          imagePullPolicy: IfNotPresent
+          name: job-33
+          resources: {}
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+          - mountPath: /tmp/existing
+            name: pvc-volume-0
+            readOnly: true
+          - mountPath: /tmp/claim1
+            name: pvc-volume-1
+            readOnly: true
+          - mountPath: /tmp/claim2
+            name: pvc-volume-2
+          - mountPath: /tmp/claim3
+            name: pvc-volume-3
+        restartPolicy: Never
+        schedulerName: runai-scheduler
+        volumes:
+        - name: pvc-volume-0
+          persistentVolumeClaim:
+            claimName: existing
+            readOnly: true
+        - name: pvc-volume-1
+          persistentVolumeClaim:
+            claimName: claim1
+            readOnly: true
+        - name: pvc-volume-2
+          persistentVolumeClaim:
+            claimName: claim2
+        - name: pvc-volume-3
+          persistentVolumeClaim:
+            claimName: claim3
+  status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    priorityClassName: build
+    project: team-a
+    release: job-33
+    workloadKind: InteractiveWorkload
+    workloadName: job-33
+  name: claim1
+  namespace: runai-team-a
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20M
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    priorityClassName: build
+    project: team-a
+    release: job-33
+    workloadKind: InteractiveWorkload
+    workloadName: job-33
+  name: claim2
+  namespace: runai-team-a
+spec:
+  accessModes:
+  - ReadOnlyMany
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20M
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    priorityClassName: build
+    project: team-a
+    release: job-33
+    workloadKind: InteractiveWorkload
+    workloadName: job-33
+  name: claim3
+  namespace: runai-team-a
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 10M
+status: {}

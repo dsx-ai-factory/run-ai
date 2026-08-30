@@ -1,0 +1,90 @@
+get:
+  summary: List workload type by id.
+  description: Retrieves a specific workload type by its ID.
+  operationId: get_workload_type
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/workloads_types_api_test.go
+  x-no-authorization: true # code implements validation - read on workloads or workload-properties
+  tags:
+    - Workload properties
+  parameters:
+    - $ref: '../parameters/path/WorkloadTypeId.yaml'
+  responses:
+    200:
+      description: Type retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/WorkloadProperties/WorkloadTypeConfig.yaml'
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+put:
+  summary: Update a workload type by id.
+  description: Update the default category or priority assigned to a workload type.
+  operationId: update_workload_type
+  x-service: workloads
+  x-test-coverage: not-applicable
+  x-authorize:
+    resource-type: workload-properties
+    action: update
+  tags:
+    - Workload properties
+  parameters:
+    - $ref: '../parameters/path/WorkloadTypeId.yaml'
+  requestBody:
+    description: Workload type to update.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/WorkloadProperties/WorkloadTypeUpdateFields.yaml"
+  responses:
+    200:
+      description: Updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/WorkloadProperties/WorkloadTypeConfig.yaml"
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+delete:
+  summary: Delete a workload type by id. [Experimental]
+  description: Deletes a specific workload type by its ID.
+  operationId: delete_workload_type
+  x-service: workloads
+  x-test-coverage: not-applicable
+  x-authorize:
+    resource-type: workload-properties
+    action: delete
+  tags:
+    - Workload properties
+  parameters:
+    - $ref: '../parameters/path/WorkloadTypeId.yaml'
+  responses:
+    204:
+      $ref: '../../../../infra/openapi/docs/responses/204NoContent.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,24 @@
+type: object
+properties:
+  gpu:
+    allOf:
+      - $ref: "./Resource.yaml"
+      - description: Defines the GPU quota assignment, maximum GPU device allocation, and weight assigned that determines the fairshare of over-quota resources.
+  cpu:
+    type: object
+    nullable: true
+    allOf:
+      - $ref: "./Resource.yaml"
+      - description: Defines the CPU quota assignment in millicores (1000 millicores = 1 CPU core), maximum CPU allocation, and weight.
+  memory:
+    type: object
+    nullable: true
+    allOf:
+      - $ref: "./Resource.yaml"
+      - type: object
+        description: Defines the CPU memory quota assignment, maximum allocation, and weight.
+        required:
+          - units
+        properties:
+          units:
+            $ref: "./units.yaml"

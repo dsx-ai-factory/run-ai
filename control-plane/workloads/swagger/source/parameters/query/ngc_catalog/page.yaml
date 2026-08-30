@@ -1,0 +1,10 @@
+name: page
+in: query
+description: >
+  Page number for pagination (0-based indexing).
+required: false
+schema:
+  type: integer
+  minimum: 0
+  default: 0
+  example: 0

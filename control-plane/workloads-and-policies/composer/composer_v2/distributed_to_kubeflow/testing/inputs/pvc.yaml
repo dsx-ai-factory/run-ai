@@ -1,0 +1,36 @@
+image: ubuntu
+
+storage:
+  pvc:
+    - existingPvc: true
+      claimName: claim-existing
+      path: "/path/ro"
+      readOnly: true
+
+    - existingPvc: false
+      claimName: claim-rw
+      path: "/path/rw"
+      readOnly: false
+      claimInfo:
+        size: 10M
+        storageClass: my-storage
+
+    - existingPvc: false
+      claimName: access-modes
+      path: "/path/access/modes"
+      claimInfo:
+        size: 1G
+        accessModes:
+          readWriteOnce: true
+          readWriteMany: true
+
+    - existingPvc: false
+      claimName: ephemeral-pvc
+      path: "/path/two"
+      claimInfo:
+        size: 1G
+        storageClass: my-storage
+      ephemeral: true
+
+    - name: pvc-x
+      exclude: true

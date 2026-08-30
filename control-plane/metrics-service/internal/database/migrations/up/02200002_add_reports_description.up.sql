@@ -1,0 +1,1 @@
+ALTER TABLE metrics.reports ADD COLUMN IF NOT EXISTS description TEXT;

@@ -1,0 +1,101 @@
+get:
+  summary: Get a role by id.
+  description: Retrieves details for a specific role, including its name, description, scope, and associated permission sets.
+  operationId: get_role
+  x-service: authorization
+  x-test-coverage:
+    - control-plane/authorization/pkg/services/role_api_test.go
+  x-authorize:
+    resource-type: roles
+    action: read
+  tags:
+    - Roles
+  parameters:
+    - $ref: "../parameters/path/RoleIdPath.yaml"
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Roles/Role.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+delete:
+  summary: Delete a role by id.
+  description: Deletes a custom role. Use this endpoint to permanently remove roles that are no longer needed. NVIDIA Run:ai predefined roles cannot be deleted.
+  operationId: delete_role
+  x-service: authorization
+  x-test-coverage:
+    - control-plane/authorization/pkg/services/role_api_test.go
+  x-authorize:
+    resource-type: roles
+    action: delete
+  tags:
+    - Roles
+  parameters:
+    - $ref: "../parameters/path/RoleIdPath.yaml"
+  responses:
+    204:
+      $ref: '../../../../infra/openapi/docs/responses/204NoContent.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+put:
+  summary: Update a role by id.
+  description: Updates a custom role, including its name, description, or associated permission sets. NVIDIA Run:ai predefined roles cannot be updated.
+  operationId: update_role
+  x-service: authorization
+  x-test-coverage:
+    - control-plane/authorization/pkg/services/role_api_test.go
+  x-authorize:
+    resource-type: roles
+    action: update
+  tags:
+    - Roles
+  parameters:
+    - $ref: "../parameters/path/RoleIdPath.yaml"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Roles/RoleCreationFieldsInternal.yaml'
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Roles/Role.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

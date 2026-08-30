@@ -1,0 +1,198 @@
+DataDepartmentFields:
+  $ref: "./departments/DataDepartmentFields.yaml"
+DataUpdatableFields:
+  $ref: "./DataUpdatableFields.yaml"
+DataUpdatableDepartmentFields:
+  $ref: "./departments/DataUpdatableDepartmentFields.yaml"
+Department:
+  $ref: "./departments/Department.yaml"
+DepartmentForList:
+  $ref: "./departments/DepartmentForList.yaml"
+DepartmentUpdateRequest:
+  $ref: "./departments/DepartmentUpdateRequest.yaml"
+HttpResponse:
+  $ref: "./HttpResponse.yaml"
+SchedulingRules:
+  $ref: "./SchedulingRules.yaml"
+Resources:
+  $ref: "./Resources.yaml"
+ResourcesNullable:
+  $ref: "./ResourcesNullable.yaml"
+ResourcesSync:
+  $ref: "./ResourcesSync.yaml"
+ResourcesUpdateRequest:
+  $ref: "./ResourcesUpdateRequest.yaml"
+BatchPatchNodePoolResourcesRequest:
+  $ref: "./batch/BatchPatchNodePoolResourcesRequest.yaml"
+NodePoolResourcesPatchRequest:
+  $ref: "./batch/NodePoolResourcesPatchRequest.yaml"
+BatchPatchProjectResourcesResponse:
+  $ref: "./batch/BatchPatchProjectResourcesResponse.yaml"
+BatchPatchDepartmentResourcesResponse:
+  $ref: "./batch/BatchPatchDepartmentResourcesResponse.yaml"
+ProjectCreationRequest:
+  $ref: "./projects/ProjectCreationRequest.yaml"
+Project:
+  $ref: "./projects/Project.yaml"
+ProjectEffective:
+  $ref: "./projects/ProjectEffective.yaml"
+ProjectStatus:
+  $ref: "./projects/ProjectStatus.yaml"
+ProjectMetadata:
+  $ref: "./projects/ProjectMetadata.yaml"
+DepartmentProjectChild:
+  $ref: "./departments/DepartmentProjectChild.yaml"
+DepartmentProjectParent:
+  $ref: "./DepartmentProjectParent.yaml"
+ProjectStatusUpdateRequest:
+  $ref: "./projects/ProjectStatusUpdateRequest.yaml"
+Resource:
+  $ref: "./Resource.yaml"
+NonNullResource:
+  $ref: "./NonNullResource.yaml"
+ResourcesPerNodePool:
+  $ref: "./ResourcesPerNodePool.yaml"
+NodeType:
+  $ref: "./nodetypes/NodeType.yaml"
+NodeTypesPerWorkload:
+  $ref: "./nodetypes/NodeTypesPerWorkload.yaml"
+NodeTypeCreateRequest:
+  $ref: "./nodetypes/NodeTypeCreateRequest.yaml"
+NodeTypeUpdateRequest:
+  $ref: "./nodetypes/NodeTypeUpdateRequest.yaml"
+OrgUnit:
+  $ref: "./OrgUnit.yaml"
+OrgUnitMetricType:
+  $ref: "./OrgUnitMetricType.yaml"
+QuotaStatus:
+  $ref: "./QuotaStatus.yaml"
+QuotaStatusNodePool:
+  $ref: "./QuotaStatusNodePool.yaml"
+QuotaStatusResource:
+  $ref: "./QuotaStatusResource.yaml"
+TotalResources:
+  $ref: "./TotalResources.yaml"
+DepartmentForGetV1:
+  $ref: "./v1/DepartmentForGetV1.yaml"
+ProjectV1:
+  $ref: "./v1/ProjectV1.yaml"
+ResourceV1:
+  $ref: "./v1/ResourceV1.yaml"
+ResourceV1Response:
+  $ref: "./v1/ResourceV1Response.yaml"
+NonNullResourceV1:
+  $ref: "./v1/NonNullResourceV1.yaml"
+AssignedResourcesV1:
+  $ref: "./v1/AssignedResourcesV1.yaml"
+AssignedResourcesV1Response:
+  $ref: "./v1/AssignedResourcesV1Response.yaml"
+NodePoolAssignedResourcesV1:
+  $ref: "./v1/NodePoolAssignedResourcesV1.yaml"
+NodePoolAssignedResourcesV1Response:
+  $ref: "./v1/NodePoolAssignedResourcesV1Response.yaml"
+QuotaStatusResourceListV1:
+  $ref: "./v1/QuotaStatusResourceListV1.yaml"
+NodeAffinityV1:
+  $ref: "./v1/NodeAffinityV1.yaml"
+QuotaStatusV1:
+  $ref: "./v1/QuotaStatusV1.yaml"
+ProjectAggregatedResourcesV1:
+  $ref: "./v1/ProjectAggregatedResourcesV1.yaml"
+DepartmentV1CreationRequest:
+  $ref: "./v1/DepartmentV1CreationRequest.yaml"
+DepartmentV1CommonFields:
+  $ref: "./v1/DepartmentV1CommonFields.yaml"
+DepartmentV1CommonFieldsResponse:
+  $ref: "./v1/DepartmentV1CommonFieldsResponse.yaml"
+DepartmentV1UpdateRequest:
+  $ref: "./v1/DepartmentV1UpdateRequest.yaml"
+ProjectV1CommonFields:
+  $ref: "./v1/ProjectV1CommonFields.yaml"
+ProjectV1ResponseCommonFields:
+  $ref: "./v1/ProjectV1ResponseCommonFields.yaml"
+ProjectV1NodeAffinity:
+  $ref: "./v1/ProjectV1NodeAffinity.yaml"
+ProjectV1NodeAffinityResponse:
+  $ref: "./v1/ProjectV1NodeAffinityResponse.yaml"
+ProjectV1CreationRequest:
+  $ref: "./v1/ProjectV1CreationRequest.yaml"
+ProjectV1UpdateRequest:
+  $ref: "./v1/ProjectV1UpdateRequest.yaml"
+NodeTypeV1:
+  $ref: "./v1/NodeTypeV1.yaml"
+DepartmentV1AccessControl:
+  $ref: "./v1/DepartmentV1AccessControl.yaml"
+ProjectV1StatusRequest:
+  $ref: "./v1/ProjectV1StatusRequest.yaml"
+DepartmentsMetricsV1Response:
+  $ref: "./v1/metrics/DepartmentsMetricsV1Response.yaml"
+DepartmentMetricsV1Response:
+  $ref: "./v1/metrics/DepartmentMetricsV1Response.yaml"
+ProjectsMetricsV1Response:
+  $ref: "./v1/metrics/ProjectsMetricsV1Response.yaml"
+ProjectMetricsV1Response:
+  $ref: "./v1/metrics/ProjectMetricsV1Response.yaml"
+DepartmentMetricsV1:
+  $ref: "./v1/metrics/DepartmentMetricsV1.yaml"
+MetricsResourcesDataV1:
+  $ref: "./v1/metrics/MetricsResourcesDataV1.yaml"
+MetricsResourceDataV1:
+  $ref: "./v1/metrics/MetricsResourceDataV1.yaml"
+TimeRangeV1:
+  $ref: "./v1/metrics/TimeRangeV1.yaml"
+ClusterIdV1:
+  $ref: "./v1/metrics/ClusterIdV1.yaml"
+DepartmentIdV1:
+  $ref: "./v1/metrics/DepartmentIdV1.yaml"
+ProjectIdV1:
+  $ref: "./v1/metrics/ProjectIdV1.yaml"
+Report:
+  $ref: "./reports/Report.yaml"
+ReportCalculatedFields:
+  $ref: "../../../../infra/openapi/docs/schemas/reports/ReportCalculatedFields.yaml"
+ReportGroupByOptions:
+  $ref: "./reports/ReportGroupByOptions.yaml"
+ReportRequestFields:
+  $ref: "./reports/ReportRequestFields.yaml"
+ReportStatus:
+  $ref: "../../../../infra/openapi/docs/schemas/reports/ReportStatus.yaml"
+Range:
+  $ref: "../../../../infra/openapi/docs/schemas/metrics/Range.yaml"
+Verbosity:
+  $ref: "./Verbosity.yaml"
+ProjectFilterSortFields:
+  $ref: "./projects/ProjectFilterSortFields.yaml"
+DepartmentFilterSortFields:
+  $ref: "./departments/DepartmentFilterSortFields.yaml"
+ProjectPhase:
+  $ref: "./projects/ProjectPhase.yaml"
+OvertimeData:
+  $ref: "./OvertimeData.yaml"
+OvertimeRangeData:
+  $ref: "./OvertimeRangeData.yaml"
+OrgUnitTelemetryType:
+  $ref: "./OrgUnitTelemetryType.yaml"
+DepartmentSync:
+  $ref: "./departments/DepartmentSync.yaml"
+ProjectSync:
+  $ref: "./projects/ProjectSync.yaml"
+SyncPatchRequest:
+  $ref: "./SyncPatchRequest.yaml"
+DepartmentStatusUpdateRequest:
+  $ref: "./departments/DepartmentStatusUpdateRequest.yaml"
+DepartmentStatus:
+  $ref: "./departments/DepartmentStatus.yaml"
+OrgUnitSingleSetting:
+  $ref: "./OrgUnitSingleSetting.yaml"
+DeletedOrgUnit:
+  $ref: "./DeletedOrgUnit.yaml"
+DepartmentNodePoolResources:
+  $ref: "./nodePoolResources/DepartmentNodePoolResources.yaml"
+DepartmentNodePoolResourcesFilterSortFields:
+  $ref: "./nodePoolResources/DepartmentNodePoolResourcesFilterSortFields.yaml"
+ProjectNodePoolResources:
+  $ref: "./nodePoolResources/ProjectNodePoolResources.yaml"
+ProjectNodePoolResourcesFilterSortFields:
+  $ref: "./nodePoolResources/ProjectNodePoolResourcesFilterSortFields.yaml"
+SumResponse:
+  $ref: "./nodePoolResources/SumResponse.yaml"

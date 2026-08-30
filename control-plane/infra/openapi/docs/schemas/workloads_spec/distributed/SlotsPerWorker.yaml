@@ -1,0 +1,5 @@
+description: Specifies the number of slots per worker used in hostfile. Defaults to 1. (applicable only for MPI)
+type: integer
+minimum: 1
+nullable: true
+default: 1

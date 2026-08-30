@@ -1,0 +1,2 @@
+ALTER TABLE registries DROP COLUMN IF EXISTS description;
+ALTER TABLE registries DROP COLUMN IF EXISTS version;

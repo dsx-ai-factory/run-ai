@@ -1,0 +1,46 @@
+package authz
+
+import (
+	"context"
+	"fmt"
+
+	authorizationclienttypes "github.com/run-ai/runai/control-plane/authorization/pkg/client/generated"
+	"k8s.io/utils/ptr"
+)
+
+func (a *AuthzManager) CreateAccessRule(ctx context.Context, clientID, clusterUuid, clusterName string) error {
+	req := a.authorizationClient.CreateInternalAccessRule(ctx).InternalCreateAccessRuleRequest(authorizationclienttypes.InternalCreateAccessRuleRequest{
+		SubjectId:   clientID,
+		SubjectType: authorizationclienttypes.SUBJECTTYPE_APP,
+		Scope: *authorizationclienttypes.NewNullableInternalCreateAccessRuleRequestScope(&authorizationclienttypes.InternalCreateAccessRuleRequestScope{
+			Id:   clusterUuid,
+			Type: authorizationclienttypes.SCOPETYPE_CLUSTER,
+			Name: ptr.To(clusterName),
+		}),
+		RoleName: authorizationclienttypes.ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION,
+	})
+
+	_, resp, err := a.authorizationClient.CreateInternalAccessRuleExecute(req)
+	if err != nil {
+
+		if resp != nil && resp.StatusCode == 409 {
+			return nil
+		}
+		return fmt.Errorf("failed to create access rule for client %s and cluster %s: %w", clientID, clusterUuid, err)
+	}
+
+	return nil
+}
+
+func (a *AuthzManager) DeleteAccessRules(ctx context.Context, clusterUuid string) error {
+	req := a.authorizationClient.DeleteScopeAccessRules(ctx)
+	req.ScopeType("cluster")
+	req.ScopeId(clusterUuid)
+
+	_, err := a.authorizationClient.DeleteScopeAccessRulesExecute(req)
+	if err != nil {
+		return fmt.Errorf("failed to delete access rules for cluster %s: %w", clusterUuid, err)
+	}
+
+	return nil
+}

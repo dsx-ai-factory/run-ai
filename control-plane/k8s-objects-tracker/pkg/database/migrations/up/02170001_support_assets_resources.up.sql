@@ -1,0 +1,4 @@
+
+ALTER TABLE pvcs    ADD COLUMN IF NOT EXISTS origin TEXT DEFAULT 'existing';
+ALTER TABLE secrets ADD COLUMN IF NOT EXISTS origin TEXT DEFAULT 'existing';
+

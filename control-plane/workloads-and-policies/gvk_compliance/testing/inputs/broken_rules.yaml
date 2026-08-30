@@ -1,0 +1,296 @@
+policy:
+  id: test-policy
+  effectiveRules:
+    # -------- resolveRules broken paths --------
+
+    # Rule 1: field not declared in breakdown at all.
+    - field: ghost
+      specSelector: self
+      enforcements: [{ range: { max: 5 } }]
+
+    # Rule 2: field exists but no variation matches this spec selector.
+    - field: known
+      specSelector: unknownSelector
+      enforcements: [{ range: { max: 5 } }]
+
+    # Rule 3: variation has no itemSelectors map at all, rule requests one.
+    - field: known
+      specSelector: self
+      itemSelector: whatever
+      enforcements: [{ range: { max: 5 } }]
+
+    # Rule 4: variation has an itemSelectors map but this specific name is not in it.
+    - field: withItemSelectors
+      specSelector: self
+      itemSelector: missingOne
+      enforcements: [{ range: { max: 5 } }]
+
+    # Rule 5: spec selector referenced by the variation is not declared under
+    # breakdown.specSelectors.
+    - field: orphan
+      specSelector: orphan
+      enforcements: [{ range: { max: 5 } }]
+
+    # NOTE: the "unknown enforcement variant" branch in newEnforcement (factory returns
+    # nil) cannot be triggered from a YAML input — the generated
+    # PolicyRuleEnforcement.UnmarshalJSON rejects any enforcement that does not land on
+    # exactly one known variant. The branch remains defensively in the code
+    # as a forward-compat guard for new policy-service enforcement types.
+
+    # -------- NewRuntimeFormatter broken paths --------
+
+    # Rule 7: variation has no formatter block.
+    - field: noFormatter
+      specSelector: self
+      enforcements: [{ range: { max: 5 } }]
+
+    # Rule 8: unknown builtin formatter.
+    - field: weird
+      specSelector: self
+      enforcements: [{ range: { max: 5 } }]
+
+    # Rule 9: formatter has neither get nor set expression.
+    - field: emptyFormatter
+      specSelector: self
+      enforcements: [{ range: { max: 5 } }]
+
+    # Rule 10: formatter only has setExpr — but the enforcement needs GetExpr.
+    - field: setOnly
+      specSelector: self
+      enforcements: [{ range: { max: 5 } }]
+
+    # Rule 10b: formatter only has getExpr — but the set enforcement needs SetExpr.
+    - field: getOnly
+      specSelector: self
+      enforcements:
+        - set: { value: whatever }
+
+    # Rule 11: invalid JQ in the formatter's get expression.
+    - field: invalidGetExpr
+      specSelector: self
+      enforcements: [{ range: { max: 5 } }]
+
+    # -------- per-enforcement broken paths --------
+
+    # Rule 12: invalid regex pattern in match.
+    - field: known
+      specSelector: self
+      enforcements:
+        - match: "[unterminated"
+
+    # Rule 13: invalid quantityRange.max limit value.
+    - field: known
+      specSelector: self
+      enforcements:
+        - quantityRange: { max: "not-a-quantity" }
+
+    # Rule 14: invalid quantityRange.min limit value.
+    - field: known
+      specSelector: self
+      enforcements:
+        - quantityRange: { min: "also-not-a-quantity" }
+
+    # Rule 15: invalid quantityRange.step limit value.
+    - field: known
+      specSelector: self
+      enforcements:
+        - quantityRange: { step: "still-not-a-quantity" }
+
+    # Rule 16: elements(max) applied to a non-slice value.
+    - field: known
+      specSelector: self
+      enforcements:
+        - elements: { max: 3 }
+
+    # Rule 17: elements(min) applied to a non-slice value.
+    - field: known
+      specSelector: self
+      enforcements:
+        - elements: { min: 3 }
+
+    # Rule 18: required enforcement on a field whose formatter has no get expression.
+    - field: setOnly
+      specSelector: self
+      enforcements:
+        - required: true
+
+    # Rule 19: match on a field whose value is not a string.
+    - field: intField
+      specSelector: self
+      enforcements:
+        - match: "^[0-9]+$"
+
+    # Rule 20: KeyValueMap set on a non-map target. The item selector emits
+    # the scalar "known" value so v is a string — CopyTargetKeys logs broken.
+    - field: kvmapOnScalar
+      specSelector: self
+      itemSelector: scalarValue
+      enforcements:
+        - set: { value: whatever }
+
+    # Rule 20b: KeyValueMap with a get enforcement (options). KeyValueMap has no get
+    # expression — validation of map values requires a separate field with an
+    # itemSelector that iterates the map entries.
+    - field: kvmapWithGet
+      specSelector: self
+      enforcements:
+        - options: ["a", "b"]
+
+    # -------- min/max/step consistency broken paths --------
+    #
+    # These rules mirror the policy-service validator but are evaluated
+    # again by the runtime as a defense-in-depth guard. Each one targets a
+    # specific branch of the bounds-consistency helpers.
+
+    # Rule 21: range with min > max.
+    - field: known
+      specSelector: self
+      enforcements:
+        - range: { min: 10, max: 5 }
+
+    # Rule 22: range with non-positive step.
+    - field: known
+      specSelector: self
+      enforcements:
+        - range: { step: 0 }
+
+    # Rule 23: range with step > max - min.
+    - field: known
+      specSelector: self
+      enforcements:
+        - range: { min: 1, max: 10, step: 20 }
+
+    # Rule 24: quantityRange with min > max.
+    - field: known
+      specSelector: self
+      enforcements:
+        - quantityRange: { min: "2Gi", max: "1Gi" }
+
+    # Rule 25: quantityRange with non-positive step.
+    - field: known
+      specSelector: self
+      enforcements:
+        - quantityRange: { step: "0" }
+
+    # Rule 26: quantityRange with step > max - min.
+    - field: known
+      specSelector: self
+      enforcements:
+        - quantityRange: { min: "100Mi", max: "1Gi", step: "2Gi" }
+
+    # Rule 27: length with min > max.
+    - field: known
+      specSelector: self
+      enforcements:
+        - length: { min: 20, max: 5 }
+
+    # Rule 28: elements with min > max.
+    - field: known
+      specSelector: self
+      enforcements:
+        - elements: { min: 20, max: 5 }
+
+    # Rule 29: items with min > max — guarded by checkBounds once.
+    - field: withItemSelectors
+      specSelector: self
+      itemSelector: onlyKnown
+      enforcements:
+        - items: { min: 20, max: 5 }
+
+  breakdown:
+    fields:
+      known:
+        - specSelectors: [self]
+          specRef: known
+          formatter:
+            builtin: KeyValue
+
+      # Variation with a single item selector — exercises the "name not found
+      # in the map" branch (rule 4) without hitting the "no map at all"
+      # branch (rule 3).
+      withItemSelectors:
+        - specSelectors: [self]
+          specRef: withItemSelectors
+          formatter:
+            builtin: KeyValue
+          itemSelectors:
+            onlyKnown:
+              query: "."
+
+      weird:
+        - specSelectors: [self]
+          specRef: weird
+          formatter:
+            builtin: Gibberish
+
+      noFormatter:
+        - specSelectors: [self]
+          specRef: noFormatter
+          # no formatter block at all
+
+      emptyFormatter:
+        - specSelectors: [self]
+          specRef: emptyFormatter
+          formatter: {}
+
+      setOnly:
+        - specSelectors: [self]
+          specRef: setOnly
+          formatter:
+            setExpr: '{"setOnly": $ARGS.named.value}'
+
+      getOnly:
+        - specSelectors: [self]
+          specRef: getOnly
+          formatter:
+            getExpr: '.getOnly'
+
+      invalidGetExpr:
+        - specSelectors: [self]
+          specRef: invalidGetExpr
+          formatter:
+            getExpr: "..this is not jq"
+            setExpr: '{"invalidGetExpr": $ARGS.named.value}'
+
+      orphan:
+        - specSelectors: [orphan]
+          specRef: orphan
+          formatter:
+            builtin: KeyValue
+
+      intField:
+        - specSelectors: [self]
+          specRef: intField
+          formatter:
+            builtin: KeyValue
+
+      # Reaches the scalar "known" via an item selector, so the set enforcement's
+      # target is a string, not a map — exercises the KeyValueMap CopyTargetKeys guard.
+      kvmapOnScalar:
+        - specSelectors: [self]
+          formatter:
+            builtin: KeyValueMap
+          itemSelectors:
+            scalarValue:
+              query: ".known"
+
+      # KeyValueMap field — has no get expression, so get enforcements (options, match, etc.)
+      # should fail with "formatter has no get expression".
+      kvmapWithGet:
+        - specSelectors: [self]
+          formatter:
+            builtin: KeyValueMap
+          specRef: someMap
+
+    specSelectors:
+      self:
+        query: "."
+
+workload:
+  apiVersion: test/v1
+  kind: Synthetic
+  # known holds a scalar — used to trip maxElements/minElements (not a
+  # slice), KeyValueMap set (not a map), and a few quantity/pattern enforcements
+  # that treat it as a plain string.
+  known: notAQuantity
+  intField: 42

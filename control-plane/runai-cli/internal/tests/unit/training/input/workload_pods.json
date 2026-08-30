@@ -1,0 +1,144 @@
+{
+  "pods": [
+    {
+      "name": "my-training-demo-123-0-0",
+      "priorityClassName": "low",
+      "id": "0261a663-48d6-4d26-ac71-6ae7d883f531",
+      "workloadId": "0586e34b-6c17-419b-9cc6-c091cb4d72f5",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "projectId": "4500002",
+      "createdAt": "2025-12-15T08:58:34Z",
+      "containers": [
+        {
+          "name": "my-training-demo-123",
+          "image": "gcr.io/knative-samples/helloworld-go"
+        }
+      ],
+      "requestedNodePools": [
+        "default"
+      ],
+      "requestedResources": {
+        "gpuRequestType": "portion",
+        "gpu": {
+          "limit": 1,
+          "request": 1
+        },
+        "cpu": {
+          "request": 0.1
+        },
+        "cpuMemory": {
+          "request": "104857600"
+        }
+      },
+      "allocatedResources": {},
+      "tolerations": [
+        {
+          "key": "nvidia.com/gpu",
+          "operator": "Equal",
+          "value": "true",
+          "effect": "NoSchedule"
+        },
+        {
+          "key": "node.kubernetes.io/not-ready",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        },
+        {
+          "key": "node.kubernetes.io/unreachable",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        }
+      ],
+      "k8sPhase": "Pending",
+      "nodeAffinity": {
+        "required": {
+          "nodeSelectorTerms": [
+            {
+              "matchExpressions": [
+                {
+                  "key": "runai/node-pool",
+                  "operator": "DoesNotExist"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "tenantId": 1001,
+      "k8sPhaseUpdatedAt": "2025-12-15T08:58:34.578224Z",
+      "updatedAt": "2025-12-15T08:58:44.747245Z"
+    },
+    {
+      "name": "my-training-demo-123-1-0",
+      "priorityClassName": "low",
+      "id": "8715fb16-1ed4-4046-a8da-a2881e623d06",
+      "workloadId": "0586e34b-6c17-419b-9cc6-c091cb4d72f5",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "projectId": "4500002",
+      "createdAt": "2025-12-15T08:58:34Z",
+      "containers": [
+        {
+          "name": "my-training-demo-123",
+          "image": "gcr.io/knative-samples/helloworld-go"
+        }
+      ],
+      "requestedNodePools": [
+        "default"
+      ],
+      "requestedResources": {
+        "gpuRequestType": "portion",
+        "gpu": {
+          "limit": 1,
+          "request": 1
+        },
+        "cpu": {
+          "request": 0.1
+        },
+        "cpuMemory": {
+          "request": "104857600"
+        }
+      },
+      "allocatedResources": {},
+      "tolerations": [
+        {
+          "key": "nvidia.com/gpu",
+          "operator": "Equal",
+          "value": "true",
+          "effect": "NoSchedule"
+        },
+        {
+          "key": "node.kubernetes.io/not-ready",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        },
+        {
+          "key": "node.kubernetes.io/unreachable",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        }
+      ],
+      "k8sPhase": "Pending",
+      "nodeAffinity": {
+        "required": {
+          "nodeSelectorTerms": [
+            {
+              "matchExpressions": [
+                {
+                  "key": "runai/node-pool",
+                  "operator": "DoesNotExist"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "tenantId": 1001,
+      "k8sPhaseUpdatedAt": "2025-12-15T08:58:35.08324Z",
+      "updatedAt": "2025-12-15T08:58:45.450815Z"
+    }
+  ]
+}

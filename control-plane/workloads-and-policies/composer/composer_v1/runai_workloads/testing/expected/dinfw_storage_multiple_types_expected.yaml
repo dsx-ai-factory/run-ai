@@ -1,0 +1,129 @@
+Dinfw:
+  leaderSpec:
+    configMapVolumes:
+      items:
+        config-map-leader-app-config:
+          value:
+            mountPath: /config/app/1
+            name: my-config
+    emptyDirVolumes:
+      items:
+        empty-dir-leader:
+          value:
+            path: /mount/empty/1
+    environment:
+      items:
+        RUNAI_JOB_NAME:
+          value: ${RUNAI_JOB_NAME}
+        RUNAI_PROJECT:
+          value: ${RUNAI_PROJECT}
+    image:
+      value: python:3.8
+    labels:
+      items:
+        run.ai/control-plane-managed:
+          value: "true"
+    pvcs:
+      items:
+        pvc-leader:
+          value:
+            claimName: dinfw_storage_multiple_types-project-ppppp
+            existingPvc: false
+            path: /data/pvc
+            readOnly: false
+            size: 1Gi
+            storageClass: fast-ssd
+    secretVolumes:
+      items:
+        secret-leader-credentials:
+          value:
+            mountPath: /secrets/creds/1
+            name: my-secret
+  metadata: {}
+  spec:
+    priorityClassName:
+      value: very-high
+    servingPorts:
+      items:
+        serving-port:
+          value:
+            port: 8081
+    username:
+      value: test
+    workers:
+      value: 1
+  status: {}
+  workerSpec:
+    configMapVolumes:
+      items:
+        config-map-worker-app-config:
+          value:
+            mountPath: /config/app/2
+            name: my-config
+    emptyDirVolumes:
+      items:
+        empty-dir-worker:
+          value:
+            path: /mount/empty/2
+    environment:
+      items:
+        RUNAI_JOB_NAME:
+          value: ${RUNAI_JOB_NAME}
+        RUNAI_PROJECT:
+          value: ${RUNAI_PROJECT}
+    image:
+      value: python:3.8
+    labels:
+      items:
+        run.ai/control-plane-managed:
+          value: "true"
+    pvcs:
+      items:
+        pvc-worker:
+          value:
+            claimName: dinfw_storage_multiple_types-project-ppppp
+            existingPvc: false
+            path: /data/pvc
+            readOnly: false
+            size: 1Gi
+            storageClass: fast-ssd
+    secretVolumes:
+      items:
+        secret-worker-credentials:
+          value:
+            mountPath: /secrets/creds/2
+            name: my-secret
+JobSpec: {}
+MasterSpec: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections:
+    - authorizationType: public
+      connectionType: ServingPort
+      containerPort: 8081
+      correlationName: serving-port
+      name: ServingPort
+      toolType: custom
+    id: ""
+    name: Leader
+    replicaType: Leader
+  - connections: []
+    id: ""
+    name: Worker
+    replicaType: Worker
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: dinfw_storage_multiple_types, Rules: , Type: DistributedInference'
+  images:
+  - python:3.8
+  - python:3.8
+  name: 'Value: dinfw_storage_multiple_types, Rules: , Type: DistributedInference'
+  projectId: project-654-321
+  requestedPods:
+    number: 2
+  submittedBy: test
+  type: DistributedInference
+  version: v1alpha1

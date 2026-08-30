@@ -1,0 +1,8 @@
+description: a list of datasource assets to import into the policy.
+  these datasources will be included in any workload that will be created
+  in the scope of the policy.
+type: array
+items:
+  type: string
+  format: uuid
+nullable: true

@@ -1,0 +1,41 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-legacy-workload-cleanup
+  labels:
+    app: runai-legacy-workload-cleanup
+rules:
+  - apiGroups: ["authorization.k8s.io"]
+    resources: ["selfsubjectaccessreviews"]
+    verbs: ["create"]
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    resourceNames:
+      - trainingworkloads.run.ai
+      - interactiveworkloads.run.ai
+      - distributedworkloads.run.ai
+      - inferenceworkloads.run.ai
+      - distributedinferenceworkloads.run.ai
+      - runaijobs.run.ai
+    verbs: ["get"]
+  - apiGroups: ["admissionregistration.k8s.io"]
+    resources: ["validatingwebhookconfigurations", "mutatingwebhookconfigurations"]
+    verbs: ["list"]
+  - apiGroups: ["run.ai"]
+    resources: ["trainingworkloads", "interactiveworkloads", "distributedworkloads"]
+    verbs: ["get", "list", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-legacy-workload-cleanup
+  labels:
+    app: runai-legacy-workload-cleanup
+subjects:
+  - kind: ServiceAccount
+    name: runai-legacy-workload-cleanup
+    namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-legacy-workload-cleanup

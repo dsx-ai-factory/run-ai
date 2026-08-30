@@ -1,0 +1,2 @@
+ALTER TABLE realms
+ADD COLUMN IF NOT EXISTS exclude_groups_from_tokens BOOLEAN DEFAULT FALSE;

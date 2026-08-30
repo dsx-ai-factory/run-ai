@@ -1,0 +1,78 @@
+put:
+  summary: Update system notification
+  x-service: bff-service
+  x-test-coverage: not-applicable
+  operationId: update_system_notification
+  x-authorize: 
+    resource-type: notification-settings
+    action: update
+  tags:
+  - System Notification
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/system-notification/UpdateSystemNotification.yaml'
+        example:
+          systemMessage:
+            $ref: '../examples/notifications_setting_examples.yaml'
+  responses:
+    '200':
+      description: System setting successfully updated
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+get:
+  summary: Get system notification
+  x-service: bff-service
+  x-test-coverage: not-applicable
+  operationId: get_system_notification
+  x-no-authorization: true
+  tags:
+  - System Notification
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/system-notification/GetSystemNotification.yaml'
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+delete:
+  summary: Delete system notification
+  x-service: bff-service
+  x-test-coverage: not-applicable
+  operationId: delete_system_notification
+  x-authorize: 
+    resource-type: notification-settings
+    action: update
+  tags:
+  - System Notification
+  responses:
+    '200':
+      description: Executed successfully.
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

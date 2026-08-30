@@ -1,0 +1,7 @@
+type: string
+description: the origin of the resource. if not specified, customer existing resource is assumed.
+  resource with origin 'assets' is originated from an asset in the control plane
+enum:
+  - assets
+  - existing
+nullable: true

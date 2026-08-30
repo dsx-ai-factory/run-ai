@@ -1,0 +1,13 @@
+package pod_mutators
+
+import (
+	"k8s.io/api/admission/v1beta1"
+	v1 "k8s.io/api/core/v1"
+
+	"github.com/run-ai/runai/runai-cluster/cluster/admission-controller/pkg/types"
+)
+
+func (pm *PodMutator) mutateSchedulerName(pod *v1.Pod, _ *v1beta1.AdmissionRequest) error {
+	pod.Spec.SchedulerName = types.RunaiScheduler
+	return nil
+}

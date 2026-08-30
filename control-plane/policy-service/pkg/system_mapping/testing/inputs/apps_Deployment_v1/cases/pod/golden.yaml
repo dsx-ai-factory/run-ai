@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test
+spec:
+  selector: {}
+  template:
+    metadata:
+      labels:
+        test-case: pod
+    spec:
+      activeDeadlineSeconds: 60
+      automountServiceAccountToken: true
+      containers:
+      - image: placeholder
+        name: test
+      dnsConfig:
+        nameservers:
+        - 1.1.1.1
+        options:
+        - name: ndots
+          value: "5"
+        searches:
+        - example.com
+      dnsPolicy: ClusterFirst
+      enableServiceLinks: true
+      hostAliases:
+      - hostnames:
+        - foo
+        ip: 127.0.0.1
+      hostIPC: false
+      hostNetwork: false
+      hostPID: false
+      hostUsers: true
+      hostname: test
+      imagePullSecrets:
+      - name: test
+      initContainers:
+      - image: placeholder
+        name: test
+      nodeName: test
+      nodeSelector:
+        test: somevalue
+      overhead:
+        cpu: 100m
+        memory: 256Mi
+      preemptionPolicy: PreemptLowerPriority
+      priority: 1
+      priorityClassName: test
+      readinessGates:
+      - conditionType: ContainersReady
+      resourceClaims:
+      - name: claimRefByName
+        resourceClaimName: shared-claim
+      - name: claimRefByTemplate
+        resourceClaimTemplateName: shared-template
+      restartPolicy: Always
+      runtimeClassName: test
+      schedulingGates:
+      - name: example.com/gate
+      securityContext:
+        appArmorProfile:
+          localhostProfile: foo
+          type: Localhost
+        fsGroup: 1
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 1
+        runAsNonRoot: true
+        runAsUser: 1
+        seccompProfile:
+          localhostProfile: foo
+          type: Localhost
+        supplementalGroups:
+        - 1
+        - 2
+        supplementalGroupsPolicy: Strict
+      serviceAccountName: test
+      setHostnameAsFQDN: false
+      shareProcessNamespace: false
+      subdomain: test
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: test
+        operator: Equal
+        tolerationSeconds: 60
+        value: somevalue
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: foo
+            path: foo
+          name: cm
+          optional: false
+        name: cm-vol
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 1Gi
+        name: empty-vol
+      - hostPath:
+          path: /tmp
+          type: Directory
+        name: host-vol
+      - name: nfs-vol
+        nfs:
+          path: /export
+          readOnly: false
+          server: 1.1.1.1
+      - name: pvc-vol
+        persistentVolumeClaim:
+          claimName: pvc
+          readOnly: false
+      - name: secret-vol
+        secret:
+          defaultMode: 420
+          items:
+          - key: foo
+            path: foo
+          optional: false
+          secretName: secret

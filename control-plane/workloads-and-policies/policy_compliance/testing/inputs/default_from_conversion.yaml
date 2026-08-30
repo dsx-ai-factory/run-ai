@@ -1,0 +1,25 @@
+defaults:
+  compute:
+    gpuMemoryRequest: 1G
+    gpuPortionRequest: 0.8
+  security:
+    runAsUid: 35000000
+rules:
+  compute:
+    ## quantity to quantity
+    gpuMemoryLimit:
+      defaultFrom:
+        field: compute.gpuMemoryRequest
+        factor: 0.5
+
+    ## integer to quantity
+    cpuMemoryLimit:
+      defaultFrom:
+        field: security.runAsUid
+        factor: 0.5
+
+    ## number to quantity
+    cpuMemoryRequest:
+      defaultFrom:
+        field: compute.gpuPortionRequest
+        factor: 0.5

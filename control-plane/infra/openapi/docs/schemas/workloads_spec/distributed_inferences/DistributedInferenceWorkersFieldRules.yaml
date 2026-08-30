@@ -1,0 +1,3 @@
+properties:
+  workers:
+    $ref: "../../policy_rules/IntegerRules.yaml"

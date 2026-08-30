@@ -1,0 +1,18 @@
+nullable: true
+type: object
+properties:
+  type:
+    nullable: true
+    type: string
+    enum:
+      - vanilla
+      - openshift
+      - rke
+      - gke
+      - aks
+      - eks
+    description: the cluster platform type
+  kubeVersion:
+    nullable: true
+    type: string
+    description: the cluster kubernetes version

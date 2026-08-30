@@ -1,0 +1,108 @@
+{
+    "inputs": [
+      {
+        "inputFile": "../swagger/rootApi.yaml"
+      },
+      {
+        "inputFile": "../swagger/rootApiTags.yaml"
+      },
+      {
+        "inputFile": "../../specs/cluster-service.yaml",
+        "operationSelection": {
+          "excludeTags": ["Health"]
+        }
+      },
+      {
+        "inputFile": "../../specs/org-unit-service.yaml",
+        "operationSelection": {
+          "excludeTags": ["Health", "Notifications", "Projects v1", "Departments v1", "Node types v1", "Node types"]
+        }
+      },
+      {
+        "inputFile": "../../specs/assets-service.yaml",
+        "operationSelection": {
+          "includeTags": ["PVC", "Compute", "Credentials", "Registry", "Environment", "Datasources", "Git", "HostPath", "NFS", "S3", "ConfigMap", "Secret" ,"Template", "Workspaces", "Trainings", "Inferences"]
+        }
+      },
+      {
+        "inputFile": "../../specs/policy-service.yaml",
+        "operationSelection": {
+          "includeTags": ["Policy"]
+        }
+      },
+      {
+        "inputFile": "../../specs/k8s-objects-tracker.yaml",
+        "operationSelection": {
+          "includeTags": ["PVCs", "Secrets", "Storage Classes", "Storage Class Configuration"]
+        }
+      },
+      {
+        "inputFile": "../../specs/authorization.yaml",
+        "operationSelection": {
+          "excludeTags": ["Health"]
+        }
+      },
+      {
+        "inputFile": "../../specs/identity-manager.yaml",
+        "operationSelection": {
+          "excludeTags": ["Health"]
+        }
+      },
+      {
+        "inputFile": "../../specs/workloads.yaml",
+        "operationSelection": {
+          "excludeTags": ["Health" ]
+        }
+      },
+      {
+        "inputFile": "../../specs/workloads-manager.yaml",
+        "operationSelection": {
+          "excludeTags": ["Health" ]
+        }
+      },
+      {
+        "inputFile": "../../specs/tenants-manager.yaml",
+        "operationSelection": {
+          "includeTags": ["Tenant", "Logo"]
+        }
+      },
+      {
+        "inputFile": "../../specs/datavolumes-service.yaml",
+        "operationSelection": {
+          "excludeTags": ["Health" ]
+        }
+      },
+      {
+        "inputFile": "../../specs/metrics-service.yaml",
+        "operationSelection": {
+          "excludeTags": ["Health" ]
+        }
+      },
+      {
+        "inputFile": "../../specs/cli-exposer.yaml",
+        "operationSelection": {
+          "excludeTags": ["Health"]
+        }
+      },
+      {
+        "inputFile": "../../specs/audit-service.yaml",
+        "operationSelection": {
+          "excludeTags": ["Health"]
+        }
+      },
+      {
+        "inputFile": "../../specs/notifications-proxy.yaml",
+        "operationSelection": {
+          "excludeTags": ["Health"]
+        }
+      },
+      {
+        "inputFile": "../../specs/bff-service.yaml",
+        "operationSelection": {
+          "excludeTags": ["Health", "Version"]
+        }
+      }
+    ],
+    "output": "../_build/runaiApi.swagger.yaml"
+  }
+

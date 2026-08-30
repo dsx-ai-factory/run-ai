@@ -1,0 +1,9 @@
+name: metricType
+in: query
+required: true
+description: "specifies what data to request"
+explode: false
+schema:
+  type: array
+  items:
+    $ref: '../../../schemas/metrics/MetricsType.yaml'

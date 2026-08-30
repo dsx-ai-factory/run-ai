@@ -1,0 +1,62 @@
+allOf:
+  - $ref: './LegacyNodePoolCreateRequest.yaml'
+  - properties:
+      id:
+        type: number
+        description: Node Pool unique id
+        readOnly: true
+        example: 5
+      clusterId:
+        type: string
+        format: uuid
+        description: Node Pool cluster id
+        example: 71f69d83-ba66-4822-adf5-55ce55efd210
+      createdAt:
+        type: string
+        description: Node Pool creation time
+        format: date-time
+        example: '2021-12-14T16:04:15.099Z'
+      updatedAt:
+        type: string
+        description: Node Pool update time
+        format: date-time
+        example: '2021-12-14T16:04:15.099Z'
+      deletedAt:
+        type: string
+        description: Node Pool delete time
+        format: date-time
+        example: '2021-12-14T16:04:15.099Z'
+      status:
+        type: string
+        enum:
+          - Creating
+          - Updating
+          - Deleting
+          - Empty
+          - Unschedulable
+          - Ready
+          - Deleted
+        description: Node Pool status
+        example: Creating
+      statusMessage:
+        type: string
+        description: Node Pool status details
+        example: all nodes are down
+      nodes:
+        type: string
+        description: List of Nodes that are assigned to this nodepool - as json string
+        example:
+          - node-a
+          - node-b
+      createdBy:
+        type: string
+        description: Node Pool creator
+        example: user@example.com
+      updatedBy:
+        type: string
+        description: Node Pool updater
+        example: user@example.com
+      isDefault:
+        type: boolean
+        description: Is the Node Pool the default Node Pool for all nodes not assigned to any other Node Pool
+        example: false

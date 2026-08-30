@@ -1,0 +1,13 @@
+# InferencePodMetricType
+
+## Enum
+
+
+* `THROUGHPUT` (value: `"THROUGHPUT"`)
+
+* `LATENCY` (value: `"LATENCY"`)
+
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

@@ -1,0 +1,36 @@
+delete:
+  summary: Delete spec selectors from a mapping. [experimental]
+  description: Delete one or more spec selectors from an existing mapping.
+  operationId: delete_mapping_spec_selectors
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/service_mapping_spec_selectors_test.go
+  x-authorize:
+    resource-type: policies
+    action: update
+  x-audit: true
+  tags:
+    - Spec mapping
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Mapping/MappingDeleteSpecSelectorsReq.yaml"
+  responses:
+    200:
+      description: Spec selector(s) removed from the mapping.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Mapping/Mapping.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+

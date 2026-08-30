@@ -1,0 +1,1 @@
+ALTER TABLE workload_type_resource_interfaces DROP COLUMN IF EXISTS updated_at;

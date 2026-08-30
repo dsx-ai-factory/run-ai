@@ -1,0 +1,19 @@
+name: groupBy
+in: query
+description: Group workloads by field.
+explode: false
+required: false
+schema:
+  type: array
+  maxItems: 2
+  items:
+    type: string
+    enum:
+      - ClusterId
+      - DepartmentId
+      - ProjectId
+      - Type
+      - CurrentNodepools
+      - RequestedNodepools
+      - Phase
+      - Category

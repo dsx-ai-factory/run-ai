@@ -1,0 +1,72 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    project: team-a
+    workloadKind: InferenceWorkload
+    workloadName: capabilities-inference
+  name: inference-0
+  namespace: runai-team-a
+spec:
+  template:
+    metadata:
+      labels:
+        project: team-a
+        release: capabilities-inference
+        run.ai/inferenceworkload: capabilities-inference
+        workloadKind: InferenceWorkload
+        workloadName: capabilities-inference
+    spec:
+      containers:
+      - env:
+        - name: HOME
+          value: /home/runai-home
+        image: image
+        name: ""
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources: {}
+        securityContext:
+          capabilities:
+            add:
+            - AUDIT_CONTROL
+            - IPC_LOCK
+            drop:
+            - all
+          runAsGroup: 20
+          runAsUser: 501
+          seccompProfile:
+            type: RuntimeDefault
+        volumeMounts:
+        - mountPath: /home/runai-home
+          name: user-data
+      enableServiceLinks: false
+      schedulerName: runai-scheduler
+      securityContext:
+        fsGroup: 20
+        supplementalGroups:
+        - 20
+        - 12
+        - 61
+        - 79
+        - 80
+        - 81
+        - 98
+        - 33
+        - 100
+        - 204
+        - 250
+        - 395
+        - 101
+        - 399
+        - 400
+        - 701
+      volumes:
+      - emptyDir: {}
+        name: user-data
+status: {}

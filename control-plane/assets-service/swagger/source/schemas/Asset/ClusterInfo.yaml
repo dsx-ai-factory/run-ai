@@ -1,0 +1,8 @@
+description: Cluster related information of the asset.
+properties:
+  resources:
+    type: array
+    items:
+      $ref: "./ClusterResourceInfo.yaml"
+nullable: true
+type: object

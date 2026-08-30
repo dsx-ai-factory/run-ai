@@ -1,0 +1,33 @@
+package static_permission_sets
+
+import (
+	"github.com/run-ai/runai/control-plane/authorization/generated/pkg/api"
+	"github.com/run-ai/runai/control-plane/authorization/pkg/database/models"
+)
+
+var QuotaManagementDashboardRead = models.PermissionSet{
+	Name:        "Quota management dashboard read",
+	Description: "Grants permissions to view the quota management dashboard, including all related data and resources associated with them.",
+	Permissions: []models.RolePermission{
+		{
+			ResourceType: api.RESOURCETYPE_PROJECT,
+			Read:         true,
+		},
+		{
+			ResourceType: api.RESOURCETYPE_DEPARTMENT,
+			Read:         true,
+		},
+		{
+			ResourceType: api.RESOURCETYPE_WORKLOADS,
+			Read:         true,
+		},
+		{
+			ResourceType: api.RESOURCETYPE_NODES,
+			Read:         true,
+		},
+		{
+			ResourceType: api.RESOURCETYPE_NODEPOOLS_MINIMAL,
+			Read:         true,
+		},
+	},
+}

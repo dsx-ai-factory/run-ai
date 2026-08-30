@@ -1,0 +1,8 @@
+allOf:
+  - $ref: "./DatavolumeInnerFields.yaml"
+  - type: object
+    required:
+      - status
+    properties:
+      status:
+        $ref: "./DatavolumeStatus.yaml"

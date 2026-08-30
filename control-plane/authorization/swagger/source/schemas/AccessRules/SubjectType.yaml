@@ -1,0 +1,10 @@
+type: string
+description: |
+  Subject type enum for access rules.
+  
+  Note: The 'app' subject type is DEPRECATED. Please use 'service-account' instead for service accounts.
+enum:
+  - user
+  - app
+  - service-account
+  - group

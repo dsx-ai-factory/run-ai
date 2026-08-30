@@ -1,0 +1,18 @@
+type: object
+required:
+  - name
+  - value
+properties:
+  name:
+    type: string
+    description: The display name of the rank
+    example: Low
+  value:
+    type: integer
+    format: int
+    description: The numeric value of the rank
+    example: 100
+  isDefault:
+    type: boolean
+    description: The field determines if the current rank value is default
+    example: false

@@ -1,0 +1,71 @@
+get:
+  tags:
+    - Credentials
+  summary: List ngc-api-keys.
+  description: Retrieve a list of ngcApiKey assets.
+  operationId: list_ngc_api_key
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_credentials_service_test.go
+    - control-plane/assets-service/pkg/services/api_credentials_service_ngc_api_keys_test.go
+  x-no-authorization: true
+  parameters:
+    - $ref: "../parameters/query/optional/AssetNameFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetScopeFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetProjectFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetDepartmentFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetClusterFilter.yaml"
+    - $ref: "../parameters/query/optional/IncludeUsageInfo.yaml"
+    - $ref: "../parameters/query/optional/IncludeStatus.yaml"
+    - $ref: "../parameters/query/optional/PrivateOnly.yaml"
+    - $ref: "../parameters/query/optional/IncludePrivate.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/NgcApiKey/NgcApiKeyListResponse.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+post:
+  tags:
+    - Credentials
+  summary: Create a ngc-api-key.
+  description: Use to create a ngc-api-key asset.
+  operationId: create_ngc_api_key
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_credentials_service_test.go
+    - control-plane/assets-service/pkg/services/api_credentials_service_ngc_api_keys_test.go
+  x-no-authorization: true
+  x-audit: true
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/NgcApiKey/NgcApiKeyCreationRequest.yaml"
+  responses:
+    202:
+      description: Request accepted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/NgcApiKey/NgcApiKey.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    409:
+      $ref: "../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml" 

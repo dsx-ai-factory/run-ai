@@ -1,0 +1,19 @@
+description: Default access mode(s) applied to newly created PVCs unless explicitly overridden.
+properties:
+  readWriteOnce:
+    description: 'Mount the volume as read/write by a single node.'
+    type: boolean
+    default: true
+    nullable: true
+  readOnlyMany:
+    description: 'Mount the volume as read-only by many nodes.'
+    type: boolean
+    default: false
+    nullable: true
+  readWriteMany:
+    description: 'Mount the volume as read/write by many nodes.'
+    type: boolean
+    default: false
+    nullable: true
+nullable: true
+type: object

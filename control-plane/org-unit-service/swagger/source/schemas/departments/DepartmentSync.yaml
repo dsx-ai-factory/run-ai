@@ -1,0 +1,29 @@
+type: object
+required:
+  - id
+  - createdAt
+  - updatedAt
+properties:
+  id:
+    type: string
+    example: 50
+  name:
+    type: string
+    example: organization1
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time
+  deletedAt:
+    type: string
+    format: date-time
+    nullable: true
+  resources:
+    type: array
+    items:
+      $ref: "../ResourcesSync.yaml"
+    description: Resources assigned to this Organization per Node Pool

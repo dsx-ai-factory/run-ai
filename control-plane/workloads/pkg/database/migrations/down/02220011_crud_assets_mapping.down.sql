@@ -1,0 +1,1 @@
+ALTER TABLE crud_workloads DROP COLUMN IF EXISTS assets_mapping;

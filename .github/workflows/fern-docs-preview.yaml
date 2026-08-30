@@ -1,0 +1,68 @@
+# Thin public stub for Fern docs previews.
+#
+# Building a preview requires DOCS_FERN_TOKEN. This repo is going public, so the
+# token lives in the private run-ai/saas-configuration instead and we only
+# dispatch there — the same split already used by pr-trigger.yaml.
+# saas-configuration/fern-docs-preview.yml checks out this PR by SHA, builds the
+# preview, and posts the link back as a sticky PR comment.
+#
+# Fork PRs are blocked here: secrets are unavailable to them, so the dispatch
+# would fail anyway. That matches pr-trigger.yaml's contract. Fork PRs reach the
+# privileged lanes only via /ok-to-test in dispatch-on-comment.yaml.
+
+name: Fern Docs Preview (trigger)
+run-name: "Docs preview: ${{ github.event.pull_request.title || github.workflow }}"
+
+on:
+  pull_request:
+    branches: [master, main, "v*.*", "release-*.*"]
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'docs/**'
+      - 'fern/**'
+      - '.github/workflows/fern-docs-preview.yaml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fern-docs-preview-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dispatch:
+    name: Dispatch preview to saas-configuration
+    # Block fork PRs — secrets are not available to them.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      # Every string goes through toJSON(). Branch names may legally contain
+      # double quotes and commas, and duplicate JSON keys resolve last-wins, so
+      # naive interpolation would let a branch name rewrite later inputs.
+      # toJSON() emits its own surrounding quotes — do not add more.
+      #
+      # pr-number is wrapped in format() first: it is a NUMBER in the event
+      # payload, so bare toJSON() would emit `25374` unquoted, and the
+      # workflow-dispatch API rejects a non-string for an input declared
+      # `type: string` ("Invalid value for input 'pr-number'").
+      - name: Cross-repo dispatch to saas-configuration/fern-docs-preview.yml
+        uses: benc-uk/workflow-dispatch@31e2b3319479a63f0ab15bf800eff9e913504e26 # v1
+        with:
+          workflow: fern-docs-preview.yml
+          repo: run-ai/saas-configuration
+          # the ref should be the branch name of the same branch in the caller repo,
+          # except that saas-configuration has no `main` — map it to `master`.
+          ref: ${{ (github.event.pull_request.base.ref == 'main' || github.event.pull_request.base.ref == 'master') && 'master' || github.event.pull_request.base.ref }}
+          token: ${{ secrets.GIT_HUB_OSS }}
+          inputs: |
+            {
+              "pr-number":   ${{ toJSON(format('{0}', github.event.pull_request.number)) }},
+              "pr-sha":      ${{ toJSON(github.event.pull_request.head.sha) }},
+              "caller_repo": ${{ toJSON(github.repository) }}
+            }

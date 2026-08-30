@@ -1,0 +1,47 @@
+post:
+  summary: Sync Node Pools.
+  operationId: legacy_sync_nodepools
+  x-service: cluster-service
+  description: |
+    Sync all Node Pools statuses from Kubernetes cluster to Run:AI backend.
+  deprecated: true
+  x-test-coverage:
+    - cluster-service/pkg/services/api_nodepools_service_test.go
+  x-authorize:
+    resource-type: nodepools
+    action: sync
+  x-internal: true
+  tags:
+    - NodePools
+  parameters:
+    - name: clusterId
+      in: path
+      description: Unique identifier of the cluster
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        format: uuid
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../schemas/Nodepools/LegacyNodePoolStatusRequest.yaml"
+  responses:
+    200:
+      description: Successful operation
+    400:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyError.yaml'
+    default:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyError.yaml'

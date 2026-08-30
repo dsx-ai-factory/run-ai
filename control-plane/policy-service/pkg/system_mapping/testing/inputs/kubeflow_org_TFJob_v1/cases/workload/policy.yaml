@@ -1,0 +1,34 @@
+description: |
+  Layer 3 case "workload" for kubeflow.org/TFJob/v1. SETs workload-level
+  fields (runPolicy) and workloadMetadata (labels, annotations on the
+  TFJob resource itself).
+effectiveRules:
+  # ----- workloadMetadata (TFJob labels/annotations) -----
+  - field: labels
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "app", value: "tf-test" } }]
+  - field: annotations
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "example.com/annotation", value: "test-value" } }]
+
+  # ----- runPolicy fields -----
+  - field: runPolicy-CleanPodPolicy
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: Running } }]
+  - field: runPolicy-TTLSecondsAfterFinished
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 3600 } }]
+  - field: runPolicy-ActiveDeadlineSeconds
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 86400 } }]
+  - field: runPolicy-BackoffLimit
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 3 } }]
+  - field: runPolicy-Suspend
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: false } }]
+
+  # ----- container image (verify policy modifies skeleton) -----
+  - field: image
+    specSelector: allContainers
+    enforcements: [{ set: { value: "tensorflow/tensorflow:2.12.0" } }]

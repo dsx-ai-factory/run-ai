@@ -1,0 +1,3 @@
+{{- if .Values.authorization.enabled }}
+{{- include "common.service" (list . .Values.authorization.service .Values.authorization) }}
+{{- end }}

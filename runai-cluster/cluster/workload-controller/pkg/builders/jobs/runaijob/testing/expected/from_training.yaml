@@ -1,0 +1,65 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      clusterId: e8fe73e3-1dab-428a-9ae5-9933c47c0c3b
+      template: tools4
+      workloadApiVersion: run.ai/v2alpha1
+      workloadId: b5efa366-77be-4da3-ac9b-b59483d02a99
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      priorityClassName: low
+      project: team-a
+      release: tools4
+      workloadKind: TrainingWorkload
+      workloadName: tools4
+    name: tools4
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 6
+    completions: 1
+    maxIdleDurationSeconds: 2400
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          clusterId: e8fe73e3-1dab-428a-9ae5-9933c47c0c3b
+          user: ofer
+          workloadId: b5efa366-77be-4da3-ac9b-b59483d02a99
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          priorityClassName: low
+          project: team-a
+          release: tools4
+          run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+          workloadKind: TrainingWorkload
+          workloadName: tools4
+      spec:
+        containers:
+        - command:
+          - hello
+          env:
+          - name: RUNAI_JOB_NAME
+            value: tools4
+          - name: RUNAI_PROJECT
+            value: team-a
+          - name: WANDB_PROJECT
+            value: my-wandb-proj
+          - name: WANDB_NOTES
+            value: https://cluster-domain.mock/trainings?columnFilter=[{"term":"tools4","name":"name"}]&clusterId=e8fe73e3-1dab-428a-9ae5-9933c47c0c3b
+          image: ubuntu
+          imagePullPolicy: IfNotPresent
+          name: tools4
+          resources: {}
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+        priorityClassName: low
+        restartPolicy: Never
+        schedulerName: runai-scheduler
+  status: {}

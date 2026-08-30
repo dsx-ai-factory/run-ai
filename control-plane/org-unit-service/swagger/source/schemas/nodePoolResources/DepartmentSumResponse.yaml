@@ -1,0 +1,11 @@
+type: object
+required:
+  - weightsSum
+  - deservedSum
+properties:
+  weightsSum:
+    type: number
+    format: double
+  deservedSum:
+    type: number
+    format: double

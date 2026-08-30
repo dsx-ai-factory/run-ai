@@ -1,0 +1,242 @@
+apiVersion: kubeflow.org/v1
+kind: TFJob
+metadata:
+  annotations:
+    image: ""
+    template: job-1
+    user: user.name
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: tfjob
+    createdBy: TFJob
+    project: team-a
+    release: job-1
+    run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+    workloadKind: DistributedWorkload
+    workloadName: job-1
+  name: job-1
+  namespace: runai-team-a
+spec:
+  runPolicy:
+    backoffLimit: 6
+    cleanPodPolicy: Running
+  tfReplicaSpecs:
+    Chief:
+      replicas: 1
+      template:
+        metadata:
+          annotations:
+            totalGPUs: "0"
+            totalGPUsMemory: "0"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-1
+        spec:
+          containers:
+          - imagePullPolicy: IfNotPresent
+            name: tensorflow
+            resources: {}
+            securityContext:
+              seccompProfile:
+                type: RuntimeDefault
+            volumeMounts:
+            - mountPath: /home/mydata1
+              mountPropagation: HostToContainer
+              name: s3-0
+            - mountPath: /home/mydata2
+              mountPropagation: HostToContainer
+              name: s3-1
+          - command:
+            - goofys
+            - -f
+            - --dir-mode
+            - "0777"
+            - --file-mode
+            - "0777"
+            - -o
+            - allow_other
+            - --debug_s3
+            - --uid
+            - "501"
+            - --gid
+            - "20"
+            - yona-bucket-1
+            - /home/mydata1
+            env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  key: liza-key
+                  name: k8s-secret-a
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: liza-secret
+                  name: k8s-secret-a
+            image: runai.jfrog.io/op-containers-prod/goofys
+            imagePullPolicy: IfNotPresent
+            name: s3-fs-0
+            resources: {}
+            securityContext:
+              privileged: true
+            volumeMounts:
+            - mountPath: /home/mydata1
+              mountPropagation: Bidirectional
+              name: s3-0
+          - command:
+            - goofys
+            - -f
+            - --dir-mode
+            - "0777"
+            - --file-mode
+            - "0777"
+            - -o
+            - allow_other
+            - --debug_s3
+            - --uid
+            - "501"
+            - --gid
+            - "20"
+            - yosef-bucket-1
+            - /home/mydata2
+            env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  key: henry-key
+                  name: k8s-secret-b
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: henry-secret
+                  name: k8s-secret-b
+            image: runai.jfrog.io/op-containers-prod/goofys
+            imagePullPolicy: IfNotPresent
+            name: s3-fs-1
+            resources: {}
+            securityContext:
+              privileged: true
+            volumeMounts:
+            - mountPath: /home/mydata2
+              mountPropagation: Bidirectional
+              name: s3-1
+          schedulerName: runai-scheduler
+          volumes:
+          - emptyDir: {}
+            name: s3-0
+          - emptyDir: {}
+            name: s3-1
+    Worker:
+      replicas: 1
+      template:
+        metadata:
+          annotations:
+            totalGPUs: "0"
+            totalGPUsMemory: "0"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-1
+        spec:
+          containers:
+          - imagePullPolicy: IfNotPresent
+            name: tensorflow
+            resources: {}
+            securityContext:
+              seccompProfile:
+                type: RuntimeDefault
+            volumeMounts:
+            - mountPath: /home/mydata1
+              mountPropagation: HostToContainer
+              name: s3-0
+            - mountPath: /home/mydata2
+              mountPropagation: HostToContainer
+              name: s3-1
+          - command:
+            - goofys
+            - -f
+            - --dir-mode
+            - "0777"
+            - --file-mode
+            - "0777"
+            - -o
+            - allow_other
+            - --debug_s3
+            - --uid
+            - "501"
+            - --gid
+            - "20"
+            - yona-bucket-1
+            - /home/mydata1
+            env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  key: liza-key
+                  name: k8s-secret-a
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: liza-secret
+                  name: k8s-secret-a
+            image: runai.jfrog.io/op-containers-prod/goofys
+            imagePullPolicy: IfNotPresent
+            name: s3-fs-0
+            resources: {}
+            securityContext:
+              privileged: true
+            volumeMounts:
+            - mountPath: /home/mydata1
+              mountPropagation: Bidirectional
+              name: s3-0
+          - command:
+            - goofys
+            - -f
+            - --dir-mode
+            - "0777"
+            - --file-mode
+            - "0777"
+            - -o
+            - allow_other
+            - --debug_s3
+            - --uid
+            - "501"
+            - --gid
+            - "20"
+            - yosef-bucket-1
+            - /home/mydata2
+            env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  key: henry-key
+                  name: k8s-secret-b
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: henry-secret
+                  name: k8s-secret-b
+            image: runai.jfrog.io/op-containers-prod/goofys
+            imagePullPolicy: IfNotPresent
+            name: s3-fs-1
+            resources: {}
+            securityContext:
+              privileged: true
+            volumeMounts:
+            - mountPath: /home/mydata2
+              mountPropagation: Bidirectional
+              name: s3-1
+          schedulerName: runai-scheduler
+          volumes:
+          - emptyDir: {}
+            name: s3-0
+          - emptyDir: {}
+            name: s3-1
+status: {}

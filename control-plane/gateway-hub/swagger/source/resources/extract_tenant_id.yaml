@@ -1,0 +1,29 @@
+get:
+  summary: Resolve tenant ID from the request hostname
+  description: >
+    ForwardAuth endpoint called by Traefik for hostname-scoped routes.
+    Resolves the tenant name from the forwarded hostname via tenants-manager
+    and returns the X-Runai-Tenant-Id header that Traefik copies onto the
+    upstream request. Always returns 200 — when the tenant cannot be resolved
+    the request passes through without the header.
+  x-service: gateway-hub
+  x-test-coverage: not-applicable
+  operationId: extract_tenant_id
+  x-no-authorization: true
+  tags:
+  - Tenant
+  parameters:
+  - name: X-Forwarded-Host
+    in: header
+    description: Hostname of the original client request, set by Traefik.
+    schema:
+      type: string
+      maxLength: 253
+      pattern: '^[a-zA-Z0-9.-]+(:[0-9]+)?$'
+  responses:
+    200:
+      description: Request processed. X-Runai-Tenant-Id is set when the tenant was resolved.
+      headers:
+        X-Runai-Tenant-Id:
+          schema:
+            type: string

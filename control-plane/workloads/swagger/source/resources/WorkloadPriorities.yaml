@@ -1,0 +1,73 @@
+get:
+  summary: Get workload priorities.
+  description: Retrieve the list of all workload priorities available in the system
+  operationId: get_workload_priorities
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/workloads_types_api_test.go
+  x-service: workloads
+  x-authorize:
+    resource-type: workload-properties
+    action: read
+  tags:
+    - Workload properties
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+    - $ref: '../parameters/query/WorkloadsPrioritiesSort.yaml'
+    - $ref: '../parameters/query/WorkloadsPrioritiesFilter.yaml'
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - priorities
+            properties:
+              priorities:
+                $ref: '../schemas/Priorities/Priorities.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+post:
+  summary: Create workload priorities.
+  operationId: create_workload_priorities
+  description: Create a new workload priority. These priorities can be assigned to workloads to control scheduling behavior within a project
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/workloads_types_api_test.go
+  x-internal: true
+  x-authorize:
+    resource-type: workload-properties
+    action: create
+  tags:
+    - Workload properties
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Priorities/PriorityForCreate.yaml'
+  responses:
+    201:
+      description: Created.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Priorities/WorkloadPriority.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

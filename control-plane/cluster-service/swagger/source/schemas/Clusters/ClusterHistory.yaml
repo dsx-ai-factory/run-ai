@@ -1,0 +1,21 @@
+type: object
+required:
+- update_timestamp
+- version
+- cluster_id
+properties:
+  cluster_id:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  version:
+    type: string
+    description: the cluster version
+    example: "2.11"
+    minLength: 1  # Must have a value
+    maxLength: 50  # Supports semantic version + metadata
+  update_timestamp:
+    type: integer
+    format: int64
+    description: the cluster version update timestamp in unix format
+    example: 1706521178
+    minimum: 0  # Unix timestamps are non-negative
+    maximum: 9223372036854775000  # Slightly below int64 max to avoid code generator overflow

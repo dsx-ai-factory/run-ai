@@ -1,0 +1,11 @@
+description:  information about a model-inference created based on assets.
+required:
+  - meta
+  - assets
+properties:
+  meta:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads/WorkloadMeta.yaml"
+  assets:
+    $ref: "../Asset/AssetsRef.yaml"
+  specificRunParams:
+    $ref: "../Inference/InferenceSpecificRunParams.yaml"

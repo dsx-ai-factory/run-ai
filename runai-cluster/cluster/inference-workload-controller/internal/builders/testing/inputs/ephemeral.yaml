@@ -1,0 +1,46 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  name: basic-inference
+  namespace: runai-team-a
+spec:
+  pvcs:
+    items:
+      pvc--0:
+        value:
+          path: /tmp/ofer
+          readOnly: false
+          size: 10M
+          storageClass: storage
+      pvc--1:
+        value:
+          path: this/will/be/ignored
+          claimName: scratch-volume
+          size: 10M
+          readWriteMany: true
+          storageClass: scratch-storage-class
+          ephemeral: true
+  usage: Submit
+  image:
+    value: image
+  imagePullPolicy:
+    value: Always
+  name:
+    value: inference-0
+  gpu:
+    value: "1"
+  username:
+    value: user.name
+  tolerations:
+    items:
+      tol-a:
+        value:
+          tolerationKey: aaa
+  ports:
+    items:
+      port-80:
+        name: port-80
+        value:
+          serviceType: ServingPort
+          container: 80
+status: {}

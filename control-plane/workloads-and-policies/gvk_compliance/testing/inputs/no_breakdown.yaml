@@ -1,0 +1,15 @@
+policy:
+  id: test-policy
+  # Rules exist, but the breakdown is absent — resolveRules emits a warning
+  # and returns no resolved rules, so nothing executes. Expected result: no
+  # errors, no broken-rule events, workload unchanged.
+  effectiveRules:
+    - field: foo
+      specSelector: self
+      enforcements: [{ range: { max: 5 } }]
+  # no breakdown block
+
+workload:
+  apiVersion: test/v1
+  kind: Synthetic
+  foo: 10

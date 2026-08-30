@@ -1,0 +1,58 @@
+type: object
+required:
+  - id
+  - totalRequested
+  - totalSuccessful
+  - totalFailed
+properties:
+  id:
+    type: string
+    format: uuid
+    description: The unique ID of the batch operation.
+  succeeded:
+    type: array
+    description: Successfully patched department node pool resources results.
+    items:
+      $ref: "../nodePoolResources/DepartmentNodePoolResources.yaml"
+  failed:
+    type: array
+    description: Failed patch operations with the original payload and error details.
+    items:
+      $ref: "./FailedNodePoolResourcesPatchRequest.yaml"
+  totalRequested:
+    type: integer
+    description: Total number of items requested in the batch.
+  totalSuccessful:
+    type: integer
+    description: Number of items successfully processed.
+  totalFailed:
+    type: integer
+    description: Number of items that failed.
+example:
+  id: "497f6eca-6276-4993-bfeb-53cbbbba6f08"
+  succeeded:
+    - orgUnitId: "435"
+      orgUnitName: "proj1"
+      nodePoolId: "12"
+      nodePoolName: "default"
+      resources:
+        - gpu:
+            deserved: 2
+            limit: 2
+            overQuotaWeight: 2
+  failed:
+    - payload:
+        orgUnitId: "577"
+        nodePoolId: "12"
+        resources:
+          - gpu:
+              deserved: 2
+              limit: 2
+              overQuotaWeight: 2
+      code: 404
+      message: "department not found"
+  totalRequested: 2
+  totalSuccessful: 1
+  totalFailed: 1
+
+

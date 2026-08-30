@@ -1,0 +1,11 @@
+type: object
+required:
+  - category
+  - types
+properties:
+  category:
+    type: string
+  types:
+    type: array
+    items:
+      type: string

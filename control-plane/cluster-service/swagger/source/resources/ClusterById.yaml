@@ -1,0 +1,107 @@
+get:
+  summary: Get cluster by id.
+  description: Retrieve cluster details by Universally Unique Identifier (UUID).
+  x-service: cluster-service
+  x-test-coverage:
+    - src/test/suites/advancedSuite/clusterService/clusterServiceApi.test.ts
+    - cluster-service/pkg/services/api_clusters_service_test.go
+  operationId: get_cluster_by_uuid
+  x-authorize:
+    resource-type: cluster
+    action: read
+    resource-id: clusterUuid
+  tags:
+    - Clusters
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+    - $ref: '../parameters/query/QueryVerbosity.yaml'
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Clusters/DisplayedCluster.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+delete:
+  summary: Delete a cluster by id.
+  x-service: cluster-service
+  x-test-coverage:
+    - src/test/suites/advancedSuite/clusterService/clusterServiceApi.test.ts
+    - cluster-service/pkg/services/api_clusters_service_test.go
+    - cluster-service/pkg/services/delete_cluster_actions_test.go
+  description: |
+    Use to delete a cluster by Universally Unique Identifier (UUID). 
+    Will return 202 for success if this api was called on a cluster that its version is >=2.20, 
+    and force query param is false or not provided.
+    Will return 204 for success if force query param is true, or if cluster is in a version < 2.20
+  operationId: delete_cluster
+  x-authorize:
+    resource-type: cluster
+    action: delete
+    resource-id: clusterUuid
+  x-audit: true
+  tags:
+    - Clusters
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+    - $ref: '../parameters/query/QueryForceDelete.yaml'
+  responses:
+    202:
+      $ref: '../../../../infra/openapi/docs/responses/202Accepted.yaml'
+    204:
+      $ref: '../../../../infra/openapi/docs/responses/204NoContent.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+put:
+  summary: Update a cluster by id.
+  x-service: cluster-service
+  x-test-coverage:
+    - src/test/suites/advancedSuite/clusterService/clusterServiceApi.test.ts
+    - cluster-service/pkg/services/api_clusters_service_test.go
+  description: Use to update the details of a Kubernetes cluster by Universally Unique Identifier (UUID).
+  operationId: updateCluster
+  x-authorize:
+    resource-type: cluster
+    action: update
+    resource-id: clusterUuid
+  x-audit: true
+  tags:
+    - Clusters
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+  requestBody:
+    description: The cluster details to update
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Clusters/ClusterUpdateRequest.yaml'
+  responses:
+    204:
+      $ref: '../../../../infra/openapi/docs/responses/204NoContent.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,18 @@
+defaults:
+  worker:
+    image: ubuntu-worker
+    nodeType: node-type-1-policy-worker
+  master:
+    image: ubuntu-master
+    nodePools:
+      - node-pool-1-policy-master
+      - node-pool-2-policy-master
+rules:
+  worker:
+    nodeType:
+      options:
+        - value: node-type-1-policy-worker
+        - value: node-type-2-policy-worker
+  master:
+    nodePools:
+      required: true

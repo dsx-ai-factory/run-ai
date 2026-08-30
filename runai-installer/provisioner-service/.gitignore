@@ -1,0 +1,5 @@
+cover.out
+*.test
+*.out
+bin
+bin/*

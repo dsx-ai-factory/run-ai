@@ -1,0 +1,3 @@
+properties:
+  metric:
+    $ref: "./AutoScalingMetric.yaml"

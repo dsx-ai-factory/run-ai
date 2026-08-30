@@ -1,0 +1,1 @@
+ALTER TABLE assets_environment ADD COLUMN if not exists probes jsonb;

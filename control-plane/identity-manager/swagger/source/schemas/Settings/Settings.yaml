@@ -1,0 +1,4 @@
+type: object
+additionalProperties: true
+minProperties: 0
+maxProperties: 50

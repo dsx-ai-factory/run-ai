@@ -1,0 +1,12 @@
+type: object
+nullable: true
+required:
+  - gpuType
+  - gpuCount
+properties:
+  gpuType:
+    type: string
+    example: Tesla-V100
+  gpuCount:
+    type: integer
+x-schema-name: GpuInfo

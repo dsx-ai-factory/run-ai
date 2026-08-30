@@ -1,0 +1,44 @@
+apiVersion: ray.io/v1
+kind: RayService
+metadata:
+  annotations:
+    example.com/annotation: test-value
+  labels:
+    app: ray-service-test
+  name: test
+spec:
+  deploymentUnhealthySecondThreshold: 300
+  excludeHeadPodFromServeSvc: false
+  rayClusterConfig:
+    enableInTreeAutoscaling: true
+    headGroupSpec:
+      template:
+        spec:
+          containers:
+          - image: placeholder-head
+            name: test
+          initContainers:
+          - image: placeholder-head-init
+            name: test
+    rayVersion: 2.11.0
+    workerGroupSpecs:
+    - groupName: test
+      maxReplicas: 1
+      minReplicas: 0
+      rayStartParams: {}
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - image: placeholder-worker
+            name: test
+          initContainers:
+          - image: placeholder-worker-init
+            name: test
+  serveConfigV2: |
+    applications:
+      - name: app
+        import_path: app:main
+  serviceUnhealthySecondThreshold: 300
+  upgradeStrategy:
+    type: NewCluster

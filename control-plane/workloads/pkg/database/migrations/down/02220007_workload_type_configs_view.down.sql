@@ -1,0 +1,1 @@
+DROP VIEW IF EXISTS external_workloads_type_config_view;

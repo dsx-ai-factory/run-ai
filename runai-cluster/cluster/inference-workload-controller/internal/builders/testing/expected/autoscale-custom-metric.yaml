@@ -1,0 +1,42 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    project: team-a
+    workloadKind: InferenceWorkload
+    workloadName: autoscale
+  name: autoscale-0
+  namespace: runai-team-a
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/class: hpa.autoscaling.knative.dev
+        autoscaling.knative.dev/max-scale: "1"
+        autoscaling.knative.dev/metric: my_custom_metric
+        autoscaling.knative.dev/min-scale: "1"
+        autoscaling.knative.dev/target: "1"
+        user: user.name
+      labels:
+        project: team-a
+        release: autoscale
+        run.ai/inferenceworkload: autoscale
+        workloadKind: InferenceWorkload
+        workloadName: autoscale
+    spec:
+      containers:
+      - image: ubuntu
+        name: ""
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources:
+          limits:
+            memory: "1"
+      enableServiceLinks: false
+      schedulerName: runai-scheduler
+status: {}

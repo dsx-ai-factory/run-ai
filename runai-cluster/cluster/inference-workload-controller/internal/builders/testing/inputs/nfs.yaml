@@ -1,0 +1,32 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  name: nfs
+  namespace: runai-team-a
+spec:
+  nfs:
+    items:
+      nfs-1:
+        value:
+          nfsServer: hostname
+          readOnly: false
+          sourcePath: /source
+          targetPath: /target
+  usage: Submit
+  image:
+    value: image
+  imagePullPolicy:
+    value: Always
+  name:
+    value: nfs
+  gpu:
+    value: "1"
+  username:
+    value: user.name
+  ports:
+    items:
+      port-80:
+        value:
+          serviceType: ServingPort
+          container: 80
+status: {}

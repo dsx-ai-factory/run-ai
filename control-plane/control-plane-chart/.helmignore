@@ -1,0 +1,16 @@
+.idea/
+.git/
+env/
+.gitignore
+.env*
+*.topology
+stable-sync/
+build/
+stable-index/
+Makefile
+artifact-metadata.json
+*.tgz/
+opa-policies
+manifests.yaml
+bin/
+tests/

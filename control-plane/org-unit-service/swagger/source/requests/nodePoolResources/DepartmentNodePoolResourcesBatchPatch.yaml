@@ -1,0 +1,37 @@
+post:
+  summary: Patch multiple departments node pool resources in batch.
+  operationId: batch_patch_department_node_pool_resources
+  x-service: org-unit-service
+  description: Partially updates node pool resource quotas for multiple departments in a single request.
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/batch_api_test.go
+  x-authorize:
+    resource-type: department
+    action: update
+  x-audit: true
+  tags:
+    - Departments
+  requestBody:
+    description: Batch of department resources patch requests.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/batch/BatchPatchNodePoolResourcesRequest.yaml"
+  responses:
+    200:
+      description: Batch patch processed. Returns succeeded and failed items with totals and a batch id.
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/batch/BatchPatchDepartmentResourcesResponse.yaml"
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

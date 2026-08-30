@@ -1,0 +1,15 @@
+type: object
+required:
+  - clusterId
+  - projectId
+  - name
+  - spec
+properties: 
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  projectId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ProjectId.yaml"
+  name:
+    $ref: "./AIApplicationName.yaml"
+  spec:
+    $ref: "./AIApplicationSpec.yaml"

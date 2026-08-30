@@ -1,0 +1,3 @@
+description: the lower limit for the number of worker pods to which the training job can scale down. (applicable only for PyTorch)
+type: integer
+nullable: true

@@ -1,0 +1,16 @@
+description: One of the values that the field can be assigned to, when options police is applied on the field.
+required:
+  - value
+properties:
+  value:
+    description: The value that the field should hold
+    type: string
+    pattern: .*
+  displayed:
+    description: Textual description of the value. to be used by user interface applications.
+    type: string
+    nullable: true
+    pattern: .*
+example:
+  value: value
+  displayed: A description of the value.

@@ -1,0 +1,41 @@
+package models
+
+import (
+	"github.com/google/uuid"
+	"github.com/run-ai/runai/control-plane/cluster-service/internal/generated/pkg/api"
+	"gorm.io/gorm"
+)
+
+const (
+	ClusterConfigTable = "cluster_configs"
+)
+
+type ClusterSystemConfigData = api.ClusterSystemConfigData
+
+type ClusterUserConfigData = api.ClusterUserConfigData
+
+type ClusterConfigData = api.ClusterFullConfigData
+
+type ClusterConfig struct {
+	Common    `gorm:"embedded"`
+	DeletedAt gorm.DeletedAt
+	ID        uuid.UUID           `gorm:"primaryKey"`
+	ClusterID uuid.UUID           `gorm:"not null"`
+	TenantID  int32               `gorm:"not null"`
+	Config    ClusterConfigData   `gorm:"serializer:json; type:jsonb;not null;"`
+	Status    ClusterConfigStatus `gorm:"serializer:json; type:jsonb;not null;"`
+}
+
+func (ClusterConfig) TableName() string {
+	return ClusterConfigTable
+}
+
+func NewClusterConfig(tenantId int32, clusterId string) *ClusterConfig {
+	uuidClusterId := uuid.MustParse(clusterId)
+	cc := &ClusterConfig{
+		ID:        uuidClusterId,
+		TenantID:  tenantId,
+		ClusterID: uuidClusterId,
+	}
+	return cc
+}

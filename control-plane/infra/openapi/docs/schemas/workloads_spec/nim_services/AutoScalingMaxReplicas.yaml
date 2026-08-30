@@ -1,0 +1,5 @@
+description: The maximum number of replicas for autoscaling. Defaults to minReplicas. Must be no less than minReplicas.
+type: integer
+format: int32
+minimum: 1
+nullable: true

@@ -1,0 +1,7 @@
+name: verbosity
+in: query
+required: false
+description: Departments verbosity. If it is set to "verbose", status will be returned. If it is not defined or set to "brief" only unit specific data will be returned.
+example: verbose
+schema:
+  $ref: "../schemas/Verbosity.yaml"

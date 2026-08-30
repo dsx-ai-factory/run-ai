@@ -1,0 +1,3 @@
+allOf:
+  - $ref: "./AccessKeyCreationSpec.yaml"
+  - $ref: "../Credentials/EncryptionKeyId.yaml"

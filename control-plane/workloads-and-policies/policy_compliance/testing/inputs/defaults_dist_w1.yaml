@@ -1,0 +1,29 @@
+worker:
+  image: worker-image
+  storage:
+    hostPath:
+      - name: hp1
+        path: /path/worker/hp1/from-workload
+        mountPath: /mount/path/worker/hp1/from-workload
+      - path: /path/worker/noname/from-workload
+        mountPath: /mount/path/worker/noname/from-workload
+    s3:
+      - name: s3a
+        path: /path/worker/s3a/from-workload
+        url: https://s3a.worker.from-workload.amazonaws.com
+      - path: /path/worker/noname/from-workload
+        url: https://noname.worker.from-workload.amazonaws.com
+master:
+  storage:
+    hostPath:
+      - name: hp1
+        path: /path/master/hp1/from-workload
+        mountPath: /mount/path/master/hp1/from-workload
+      - path: /path/master/noname/from-workload
+        mountPath: /mount/path/master/noname/from-workload
+    s3:
+      - name: s3a
+        path: /path/master/s3a/from-workload
+        url: https://s3a.master.from-workload.master.amazonaws.com
+      - path: /path/master/noname/from-workload
+        url: https://noname.master.from-workload.master.amazonaws.com

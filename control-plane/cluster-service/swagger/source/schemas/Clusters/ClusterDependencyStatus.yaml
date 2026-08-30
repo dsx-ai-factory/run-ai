@@ -1,0 +1,14 @@
+type: object
+required:
+  - available
+properties:
+  available:
+    type: boolean
+    description: whether the dependency is available
+  reason:
+    type: string
+    description: the reason for the dependency status
+  components:
+    type: object
+    additionalProperties:
+      $ref: './ClusterDependencyStatus.yaml'

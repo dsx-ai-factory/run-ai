@@ -1,0 +1,24 @@
+# default values takes from masterSpec policy, not from worker spec
+apiVersion: run.ai/v2alpha1
+kind: DistributedWorkload
+metadata:
+  name: dist-0
+  namespace: runai-team-a
+  uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+spec:
+  environment:
+    items:
+      ENV_WORKER:
+        value: env1
+  gpu:
+    value: "2"
+  jobType: XGBoostJob
+  name:
+    value: dist-0
+  username:
+    value: shay.asoolin
+  workers:
+    value: 2
+masterSpec:
+  image:
+    value: ubuntu

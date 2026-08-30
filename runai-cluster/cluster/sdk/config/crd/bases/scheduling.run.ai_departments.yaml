@@ -1,0 +1,267 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: departments.scheduling.run.ai
+spec:
+  group: scheduling.run.ai
+  names:
+    kind: Department
+    listKind: DepartmentList
+    plural: departments
+    singular: department
+  scope: Cluster
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: Department is a department of Queue.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DepartmentSpec represents the template of Department.
+            properties:
+              deservedGpus:
+                type: number
+              maxAllowedGpus:
+                type: number
+            type: object
+        type: object
+    served: true
+    storage: false
+    subresources:
+      status: {}
+  - name: v2alpha1
+    schema:
+      openAPIV3Schema:
+        description: Department is a department of Queue.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DepartmentSpec represents the template of Department.
+            properties:
+              deservedGpus:
+                type: number
+              maxAllowedGpus:
+                type: number
+              resources:
+                properties:
+                  cpu:
+                    properties:
+                      deserved:
+                        type: integer
+                        x-kubernetes-int-or-string: true
+                    type: object
+                  gpu:
+                    properties:
+                      deserved:
+                        type: number
+                      limit:
+                        type: number
+                      overQuotaWeight:
+                        type: number
+                    type: object
+                  memory:
+                    properties:
+                      deserved:
+                        type: integer
+                        x-kubernetes-int-or-string: true
+                    type: object
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: false
+    subresources:
+      status: {}
+  - name: v2alpha2
+    schema:
+      openAPIV3Schema:
+        description: Department is the Schema for the departments API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DepartmentSpec defines the desired state of Department
+            properties:
+              departmentAdmins:
+                items:
+                  type: string
+                type: array
+              deservedGpus:
+                type: number
+              maxAllowedGpus:
+                type: number
+              queues:
+                items:
+                  properties:
+                    interactiveJobTimeLimitSecs:
+                      format: int64
+                      type: integer
+                    name:
+                      type: string
+                    nodeAffinityInteractive:
+                      items:
+                        type: string
+                      type: array
+                    nodeAffinityTrain:
+                      items:
+                        type: string
+                      type: array
+                    nodepool:
+                      type: string
+                    priority:
+                      format: int32
+                      type: integer
+                    resources:
+                      description: QueueResources defines resource allocations for
+                        GPU, CPU, and Memory
+                      properties:
+                        cpu:
+                          description: SystemResource defines resource limits and
+                            quotas
+                          properties:
+                            deserved:
+                              type: number
+                            limit:
+                              type: number
+                            overQuotaWeight:
+                              type: number
+                          type: object
+                        gpu:
+                          description: SystemResource defines resource limits and
+                            quotas
+                          properties:
+                            deserved:
+                              type: number
+                            limit:
+                              type: number
+                            overQuotaWeight:
+                              type: number
+                          type: object
+                        memory:
+                          description: SystemResource defines resource limits and
+                            quotas
+                          properties:
+                            deserved:
+                              type: number
+                            limit:
+                              type: number
+                            overQuotaWeight:
+                              type: number
+                          type: object
+                      type: object
+                    swapEnabled:
+                      type: boolean
+                  required:
+                  - name
+                  - nodepool
+                  type: object
+                type: array
+              resources:
+                description: QueueResources defines resource allocations for GPU,
+                  CPU, and Memory
+                properties:
+                  cpu:
+                    description: SystemResource defines resource limits and quotas
+                    properties:
+                      deserved:
+                        type: number
+                      limit:
+                        type: number
+                      overQuotaWeight:
+                        type: number
+                    type: object
+                  gpu:
+                    description: SystemResource defines resource limits and quotas
+                    properties:
+                      deserved:
+                        type: number
+                      limit:
+                        type: number
+                      overQuotaWeight:
+                        type: number
+                    type: object
+                  memory:
+                    description: SystemResource defines resource limits and quotas
+                    properties:
+                      deserved:
+                        type: number
+                      limit:
+                        type: number
+                      overQuotaWeight:
+                        type: number
+                    type: object
+                type: object
+              updatedAt:
+                format: date-time
+                type: string
+            required:
+            - queues
+            type: object
+          status:
+            description: DepartmentStatus defines the observed state of Department
+            properties:
+              syncStatus:
+                properties:
+                  lastSyncTimestamp:
+                    description: cluster-sync will set this value when syncing the
+                      object to control-plane
+                    format: date-time
+                    type: string
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

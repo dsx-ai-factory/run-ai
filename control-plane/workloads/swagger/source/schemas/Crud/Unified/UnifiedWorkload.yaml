@@ -1,0 +1,12 @@
+x-internal: true
+type: object
+nullable: true
+properties:
+  meta:
+    $ref: "../../../../../../infra/openapi/docs/schemas/workloads/WorkloadMeta.yaml"
+  spec:
+    $ref: "./UnifiedSpec.yaml"
+  policyInfo:
+    $ref: "./UnifiedPolicyInfo.yaml"
+  projectInfo:
+    $ref: "./UnifiedProjectInfo.yaml"

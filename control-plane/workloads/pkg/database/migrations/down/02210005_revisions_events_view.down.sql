@@ -1,0 +1,1 @@
+DROP VIEW IF EXISTS revisions_events_view;

@@ -1,0 +1,9 @@
+properties:
+  templateId:
+    description: The unique identifier of the template to use for submitting this workload.
+      The combined values provided in the spec, template and assets will be used to create the workload.
+    type: string
+    format:  uuid
+    example: 550e8400-e29b-41d4-a716-446655440000
+    nullable: true
+

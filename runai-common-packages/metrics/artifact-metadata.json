@@ -1,0 +1,4 @@
+{
+  "service_name": "metrics",
+  "artifact_type": "go"
+}

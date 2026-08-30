@@ -1,0 +1,16 @@
+type: object
+description: |
+  Specifies the origin of the Helm chart. Provide exactly one source: a connected Helm repository
+  (`repo` + `chartName` + `chartVersion`), a direct chart URL (`chartURL`), or the identifier of a
+  previously uploaded chart archive (`chartId`).
+properties:
+  repo:
+    $ref: "./AIApplicationChartRepo.yaml"
+  chartName:
+    $ref: "./AIApplicationChartName.yaml"
+  chartVersion:
+    $ref: "./AIApplicationChartVersion.yaml"
+  chartURL:
+    $ref: "./AIApplicationChartUrl.yaml"
+  chartId:
+    $ref: "./AIApplicationChartId.yaml"

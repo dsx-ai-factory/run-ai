@@ -1,0 +1,19 @@
+post:
+  summary: Evaluate privilege escalation.
+  operationId: privilege_escalation_evaluate
+  x-service: authorization
+  x-test-coverage:
+    - control-plane/authorization/pkg/services/privilege_escalation_test.go
+  x-no-authorization: true
+  tags:
+    - Internal
+  parameters:
+    - $ref: "../parameters/query/SubjectId.yaml"
+    - $ref: "../parameters/query/GroupIds.yaml"
+  responses:
+    204:
+      $ref: '../../../../infra/openapi/docs/responses/204NoContent.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

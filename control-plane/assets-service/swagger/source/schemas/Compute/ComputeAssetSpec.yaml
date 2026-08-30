@@ -1,0 +1,30 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+properties:
+  cpuCoreLimit:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/CpuCoreLimit.yaml
+  cpuCoreRequest:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/CpuCoreRequest.yaml
+  cpuMemoryLimit:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/CpuMemoryLimit.yaml
+  cpuMemoryRequest:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/CpuMemoryRequest.yaml
+  extendedResources:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/ExtendedResources.yaml
+  gpuDevicesRequest:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuDevicesRequest.yaml
+  gpuMemoryLimit:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuMemoryLimit.yaml
+  gpuMemoryRequest:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuMemoryRequest.yaml
+  gpuPortionLimit:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuPortionLimit.yaml
+  gpuPortionRequest:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuPortionRequest.yaml
+  gpuRequestType:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuRequestType.yaml
+  largeShmRequest:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/LargeShmRequest.yaml
+type: object

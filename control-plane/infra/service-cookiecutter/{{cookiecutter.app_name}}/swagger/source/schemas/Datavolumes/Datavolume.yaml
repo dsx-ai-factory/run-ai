@@ -1,0 +1,15 @@
+allOf:
+  - $ref: "../Common/BaseFields.yaml"
+  - $ref: "./DatavolumeCreationFields.yaml"
+  - $ref: "./EnrichmentDataFields.yaml"
+  - type: object
+    required:
+      - status
+    properties:
+      sharedScopes:
+        description: Will be returned only if the user has the required permissions to view those scopes
+        type: array
+        items:
+          $ref: '../SharedScopes/SharedScope.yaml'
+      status:
+        $ref: "./DatavolumeStatus.yaml"

@@ -1,0 +1,11 @@
+type: object
+required:
+  - timestamp
+  - value
+properties:
+  timestamp:
+    type: string
+    format: date-time
+    example: '2023-06-06 12:09:18.211'
+  value:
+    type: string

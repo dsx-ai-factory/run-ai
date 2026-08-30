@@ -1,0 +1,158 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: test
+spec:
+  jobTemplate:
+    metadata:
+      labels:
+        managed-by: policy
+    spec:
+      template:
+        metadata:
+          labels:
+            test-case: container
+        spec:
+          containers:
+          - args:
+            - arg-1
+            command:
+            - cmd-1
+            env:
+            - name: AS_VALUE
+              value: somevalue
+            - name: FROM_CM
+              valueFrom:
+                configMapKeyRef:
+                  key: key
+                  name: cm
+                  optional: false
+            - name: FROM_FIELD
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: FROM_RESOURCE
+              valueFrom:
+                resourceFieldRef:
+                  containerName: test
+                  divisor: "1"
+                  resource: limits.cpu
+            - name: FROM_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: key
+                  name: secret
+                  optional: false
+            envFrom:
+            - configMapRef:
+                name: cm
+                optional: false
+              prefix: cm_
+            - prefix: secret_
+              secretRef:
+                name: secret
+                optional: false
+            image: test
+            imagePullPolicy: IfNotPresent
+            name: test
+            ports:
+            - containerPort: 80
+              hostIP: 127.0.0.1
+              hostPort: 81
+              name: http
+              protocol: TCP
+            resources:
+              claims:
+              - name: claim
+                request: shared-request
+              limits:
+                cpu: "1"
+                memory: 1Gi
+              requests:
+                cpu: "1"
+                memory: 1Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              appArmorProfile:
+                localhostProfile: foo
+                type: Localhost
+              capabilities:
+                add:
+                - NET_BIND_SERVICE
+                drop:
+                - ALL
+              privileged: false
+              procMount: Default
+              readOnlyRootFilesystem: false
+              runAsGroup: 1
+              runAsNonRoot: true
+              runAsUser: 1
+              seccompProfile:
+                localhostProfile: foo
+                type: Localhost
+            stdin: false
+            stdinOnce: false
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            tty: false
+            volumeMounts:
+            - mountPath: /etc/cm
+              mountPropagation: None
+              name: cm-vol
+              readOnly: true
+              recursiveReadOnly: Disabled
+              subPath: foo
+              subPathExpr: foo
+            workingDir: /tmp
+          initContainers:
+          - args:
+            - init-arg
+            command:
+            - init-cmd
+            env:
+            - name: AS_VALUE
+              value: somevalue
+            envFrom:
+            - configMapRef:
+                name: cm
+                optional: false
+              prefix: cm_
+            image: test
+            imagePullPolicy: IfNotPresent
+            name: test
+            ports:
+            - containerPort: 80
+              name: http
+              protocol: TCP
+            resources:
+              claims:
+              - name: claim
+                request: shared-request
+              limits:
+                cpu: "1"
+                memory: 1Gi
+              requests:
+                cpu: "1"
+                memory: 1Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsGroup: 1
+              runAsNonRoot: true
+              runAsUser: 1
+            stdin: false
+            stdinOnce: false
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            tty: false
+            volumeMounts:
+            - mountPath: /etc/cm
+              mountPropagation: None
+              name: cm-vol
+              readOnly: true
+              recursiveReadOnly: Disabled
+              subPath: foo
+              subPathExpr: foo
+            workingDir: /tmp
+          restartPolicy: Never
+  schedule: '*/5 * * * *'

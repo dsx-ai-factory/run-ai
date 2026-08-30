@@ -1,0 +1,8 @@
+type: object
+properties:
+  projectName:
+    type: string
+    example: "my-project"
+  workloadName:
+    type: string
+    example: "my-workload"

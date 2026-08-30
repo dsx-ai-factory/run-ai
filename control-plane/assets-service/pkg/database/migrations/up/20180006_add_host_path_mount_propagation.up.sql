@@ -1,0 +1,1 @@
+ALTER TABLE assets_host_path ADD COLUMN if not exists mount_propagation text;

@@ -1,0 +1,17 @@
+type: string
+enum:
+  - Creating
+  - Initializing
+  - Resuming
+  - Pending
+  - Deleting
+  - Running
+  - Updating
+  - Stopped
+  - Stopping
+  - Degraded
+  - Failed
+  - Completed
+  - Terminating
+  - Unknown
+

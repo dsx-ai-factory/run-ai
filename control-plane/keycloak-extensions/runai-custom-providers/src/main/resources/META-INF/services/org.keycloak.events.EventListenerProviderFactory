@@ -1,0 +1,2 @@
+com.runai.keycloak.events.logging.LastLoginEventListenerProviderFactory
+com.runai.keycloak.events.audit.PasswordAuditEventListenerProviderFactory

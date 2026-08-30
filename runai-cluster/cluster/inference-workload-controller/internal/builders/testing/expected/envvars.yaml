@@ -1,0 +1,77 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    project: team-a
+    workloadKind: InferenceWorkload
+    workloadName: fractional-inference
+  name: inference-0
+  namespace: runai-team-a
+spec:
+  template:
+    metadata:
+      annotations:
+        user: guy.shaibi
+      labels:
+        project: team-a
+        release: fractional-inference
+        run.ai/inferenceworkload: fractional-inference
+        workloadKind: InferenceWorkload
+        workloadName: fractional-inference
+    spec:
+      containers:
+      - env:
+        - name: env-1
+          value: user.name
+        - name: env-2
+          valueFrom:
+            secretKeyRef:
+              key: ""
+              name: xxx
+        - name: env-3
+          valueFrom:
+            secretKeyRef:
+              key: yyy
+              name: xxx
+        - name: env-4
+          valueFrom:
+            configMapKeyRef:
+              key: bbb
+              name: aaa
+        - name: env-5
+          valueFrom:
+            fieldRef:
+              fieldPath: cccc
+        - name: env-6
+          valueFrom:
+            secretKeyRef:
+              key: my-user-key
+              name: infw-inference-0-my-user-credential
+        image: image
+        name: ""
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources: {}
+      enableServiceLinks: false
+      schedulerName: runai-scheduler
+status: {}
+---
+data:
+  my-user-key: cHJpdmF0ZS12YWx1ZS0x
+kind: Secret
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: service
+    createdBy: Service
+    project: team-a
+    release: inference-0
+    workloadKind: InferenceWorkload
+    workloadName: inference-0
+  name: infw-inference-0-my-user-credential
+  namespace: runai-team-a

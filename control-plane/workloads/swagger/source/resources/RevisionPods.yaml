@@ -1,0 +1,38 @@
+get:
+  summary: Get revision pods by id.
+  description: Retrieve the details of revision pods by revision id. Supported for clusters v2.21+.
+  operationId: get_revision_pods
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/pods_api_test.go
+  x-authorize:
+    resource-type: inferences
+    action: read
+    resource-id: revisionId
+  tags:
+    - Pods
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/RevisionId.yaml"
+    - $ref: '../parameters/query/Deleted.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - pods
+            properties:
+              pods:
+                $ref: '../schemas/Pods/Pods.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,7 @@
+type: object
+description: Update payload for event read status
+properties:
+  read:
+    type: boolean
+    description: true to mark the event as read, false to mark it as unread
+    nullable: true

@@ -1,0 +1,33 @@
+patch:
+  summary: update sync configuration for a given cluster
+  operationId: update_sync_config
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/service_sync_test.go
+  x-authorize:
+    resource-type: policies
+    action: update
+  x-internal: true
+  x-audit: true
+  tags:
+    - Policy
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Sync/SyncConfig.yaml"
+  responses:
+    200:
+      description: Policy applied.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Sync/SyncConfig.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

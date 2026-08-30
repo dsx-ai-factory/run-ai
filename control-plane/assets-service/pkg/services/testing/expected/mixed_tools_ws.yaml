@@ -1,0 +1,54 @@
+flatWorkloads:
+  Distributed: null
+  Inferences: null
+  Trainings: null
+  Workspaces:
+  - actualPhase: Creating
+    clusterId: ""
+    createdAt: "0001-01-01T00:00:00Z"
+    createdBy: ""
+    desiredPhase: Running
+    name: mixed_tools_ws
+    projectId: ""
+    requestedName: mixed_tools_ws
+    spec:
+      annotations:
+      - name: run.ai/assets-info
+        value: ""
+      compute:
+        cpuCoreLimit: 2
+        cpuCoreRequest: 0.5
+        cpuMemoryLimit: 30M
+        cpuMemoryRequest: 20M
+        gpuDevicesRequest: 0
+      exposedUrls:
+      - container: 8001
+        toolName: exposed-url-auto
+        toolType: jupyter-notebook
+      - authorizedUsers:
+        - user-a
+        - user-b
+        container: 8002
+        toolName: exposed-url-custom
+        toolType: tensorboard
+        url: https://custom-url.com
+      image: gcr.io/run-ai-demo/jupyter-tensorboard-new
+      imagePullPolicy: IfNotPresent
+      ports:
+      - container: 8003
+        serviceType: NodePort
+        toolName: exposed-port-auto
+        toolType: visual-studio-code
+      - container: 8004
+        external: 1234
+        serviceType: NodePort
+        toolName: exposed-port-custom
+        toolType: rstudio
+      relatedUrls:
+      - name: related-url
+        type: wandb
+        url: https://wandb.com
+      security:
+        uidGidSource: fromTheImage
+      storage: {}
+    workloadId: ""

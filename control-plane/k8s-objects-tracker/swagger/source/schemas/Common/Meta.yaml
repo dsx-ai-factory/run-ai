@@ -1,0 +1,26 @@
+description: The metadata for object tracker API requests
+required:
+    - name
+    - scope
+    - clusterId
+properties:
+    name:
+        type: string
+        description: the name of the object
+        example: my-pvc
+    namespace:
+        type: string
+        description: the namespace of the resource (translated into project ID)
+        nullable: true
+    scope:
+        $ref: "../../../../../infra/openapi/docs/schemas/scopes/ScopeType.yaml"
+    departmentId:
+        $ref: "../../../../../infra/openapi/docs/schemas/scopes/DepartmentIdOptional.yaml"
+    clusterId:
+        $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+example:
+    name: my-pvc
+    scope: cluster
+    clusterId: 3
+nullable: true
+type: object

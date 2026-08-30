@@ -1,0 +1,14 @@
+type: object
+nullable: true
+description: Defines the access permissions and behavioral rules for this storage class.
+properties:
+  allowedForAssets:
+    $ref: "AllowedForAssets.yaml"
+  allowedForWorkloads:
+    $ref: "AllowedForWorkloads.yaml"
+  allowedForEphemeralVolumes:
+    $ref: "AllowedForEphemeralVolumes.yaml"
+  allowedForPersistentVolumes:
+    $ref: "AllowedForPersistentVolumes.yaml"
+  allowDataSharing:
+    $ref: "AllowDataSharing.yaml"

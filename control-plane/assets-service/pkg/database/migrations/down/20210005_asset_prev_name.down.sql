@@ -1,0 +1,1 @@
+ALTER TABLE assets_metadata DROP COLUMN IF EXISTS prev_name;

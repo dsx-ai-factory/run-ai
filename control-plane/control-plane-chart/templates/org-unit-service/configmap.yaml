@@ -1,0 +1,67 @@
+{{- if .Values.orgUnitService.enabled }}
+{{- include "common.configMap" (list . .Values.orgUnitService "control-plane.orgUnitService.configmap") }}
+{{- end }}
+
+{{- define "control-plane.orgUnitService.configmap" -}}
+{{- $top := first . }}
+data:
+  LOG_LEVEL: {{ $top.Values.orgUnitService.config.logLevel | quote }}
+  SERVICE_PORT: {{ $top.Values.orgUnitService.service.port | quote }}
+  SERVICE_NAME: {{ $top.Values.orgUnitService.name | quote }}
+  SERVER_WRITE_TIMEOUT: {{ $top.Values.orgUnitService.config.server.writeTimeout | quote }}
+  SERVER_READ_TIMEOUT: {{ $top.Values.orgUnitService.config.server.readTimeout | quote }}
+  SERVER_IDLE_TIMEOUT: {{ $top.Values.orgUnitService.config.server.idleTimeout | quote }}
+  TRACING_ENABLED: {{ if hasKey $top.Values.orgUnitService.config "tracingEnabled" }}{{ $top.Values.orgUnitService.config.tracingEnabled | quote }}{{ else }}{{ $top.Values.global.config.tracingEnabled | quote }}{{ end }}
+  AUDIT_ENABLED: {{ if hasKey $top.Values.orgUnitService.config "auditEnabled" }}{{ $top.Values.orgUnitService.config.auditEnabled | quote }}{{ else }}{{ $top.Values.global.config.auditEnabled | quote }}{{ end }}
+  AUDIT_ENABLE_PRINT_TO_STDOUT: {{ if hasKey $top.Values.orgUnitService.config "auditEnablePrintToStdout" }}{{ $top.Values.orgUnitService.config.auditEnablePrintToStdout | quote }}{{ else }}{{ $top.Values.global.config.auditEnablePrintToStdout | quote }}{{ end }}
+  AUDIT_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.auditService.name ($top.Values.auditService.service.port | toString) | quote }}
+  DB_NAME: {{ $top.Values.orgUnitService.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_VERBOSE_LOGGING: {{ $top.Values.orgUnitService.config.dbVerboseLogging | default $top.Values.global.postgresql.dbVerboseLogging | quote }}
+  DB_HOST: {{ $top.Values.orgUnitService.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SSL_MODE: {{ $top.Values.orgUnitService.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_PORT: {{ $top.Values.orgUnitService.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  {{- if or ($top.Values.global.postgresql.auth.readHost) ($top.Values.orgUnitService.config.dbReadHost) }}
+  DB_READ_HOST: {{ $top.Values.orgUnitService.config.dbReadHost | default $top.Values.global.postgresql.auth.readHost | quote }}
+  {{- end }}
+  {{- if or ($top.Values.global.postgresql.auth.dbReadPort) ($top.Values.orgUnitService.config.dbReadPort) }}
+  DB_READ_PORT: {{ $top.Values.orgUnitService.config.dbReadPort | default $top.Values.global.postgresql.auth.readPort | quote }}
+  {{- end }}
+  DB_SCHEMA: {{ $top.Values.orgUnitService.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  {{- $cacheEnabled := $top.Values.orgUnitService.config.cacheEnabled | default false }}
+  CACHE_ENABLED: {{ $cacheEnabled | quote }}
+  {{- if eq (toString $cacheEnabled) "true" }}
+  CACHE_URL: {{ $top.Values.orgUnitService.config.cacheUrl | default $top.Values.global.cache.url | quote }}
+  CACHE_READ_URL: {{ $top.Values.orgUnitService.config.cacheReadUrl | default $top.Values.global.cache.readUrl | quote }}
+  CACHE_TYPE: {{ $top.Values.orgUnitService.config.cacheType | default $top.Values.global.cache.type | quote }}
+  CACHE_MAX_RECORD_SIZE_KB: {{ $top.Values.orgUnitService.config.cacheMaxRecordSizeKb | default 20000 | quote }}
+  CACHE_MAX_STORE_SIZE_MB: {{ $top.Values.orgUnitService.config.cacheMaxStoreSizeMb | default 1000 | quote }}
+  CACHE_TTL_SECONDS: {{ $top.Values.orgUnitService.config.cacheTTLSeconds| default 3600 | quote }}
+  {{- end }}
+  MIGRATION_FILES: {{ $top.Values.orgUnitService.config.migrationFiles | quote }}
+  SKIP_DEFAULT_TRANSACTION: {{ $top.Values.orgUnitService.config.skipDefaultTransaction | quote }}
+  FULL_SAVE_ASSOCIATIONS: {{ $top.Values.orgUnitService.config.fullSaveAssociations | quote }}
+  TEMP_BACKEND_SETTINGS_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.tempBackendSettings.name ($top.Values.tempBackendSettings.service.port | toString) | quote }}
+  CLUSTER_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.clusterService.name ($top.Values.clusterService.service.port | toString) | quote }}
+  WORKLOADS_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.workloads.name ($top.Values.workloads.service.port | toString) | quote }}
+  DATAVOLUMES_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.datavolumes.name (toString $top.Values.datavolumes.service.port) }}
+  TENANTS_MANAGER_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.tenantsManager.name ($top.Values.tenantsManager.service.port | toString ) }}
+  CLUSTER_CACHE_EXPIRATION_SEC: {{ $top.Values.orgUnitService.config.clusterCacheExpirationSeconds | quote }}
+  CLUSTER_CACHE_CLEANUP_SEC: {{ $top.Values.orgUnitService.config.clusterCacheCleanupSeconds | quote }}
+  PUBSUB_URL: {{ $top.Values.global.pubsub.url | quote }}
+  PUBSUB_TYPE: {{ $top.Values.global.pubsub.type | quote }}
+  PUBSUB_ENABLE_ADDITIONAL_SUBSCRIBER: {{ $top.Values.global.pubsub.additionalSubscriber.enabled | quote }}
+  {{- if $top.Values.global.pubsub.additionalSubscriber.enabled }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_TYPE: {{ $top.Values.global.pubsub.additionalSubscriber.type | quote }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_URL: {{ $top.Values.global.pubsub.additionalSubscriber.url | quote }}
+  {{- end }}
+  {{- if or ($top.Values.global.blobStorage.s3.enabled) ($top.Values.orgUnitService.config.s3Enabled) }}
+  S3_ENDPOINT: {{ $top.Values.orgUnitService.config.s3Endpoint | default $top.Values.global.blobStorage.s3.endpoint | quote }}
+  S3_BUCKET: {{ $top.Values.metricsService.config.reportsBucket | quote }}
+  {{- if or ($top.Values.orgUnitService.config.s3UseSSL) ($top.Values.global.blobStorage.s3.useSSL) }}
+  S3_USE_SSL: {{ $top.Values.orgUnitService.config.s3UseSSL | default $top.Values.global.blobStorage.s3.useSSL | quote }}
+  {{- end }}
+  {{- if or ($top.Values.orgUnitService.config.s3AccessKeyId) ($top.Values.global.blobStorage.s3.accessKeyId) }}
+  S3_ACCESS_KEY_ID: {{ $top.Values.orgUnitService.config.s3AccessKeyId | default $top.Values.global.blobStorage.s3.accessKeyId | quote }}
+  {{- end }}
+  {{- end }}
+{{- end }}

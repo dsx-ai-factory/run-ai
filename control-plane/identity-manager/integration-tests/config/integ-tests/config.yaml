@@ -1,0 +1,19 @@
+IDM_HOST: "identity-manager"
+IDM_PORT: "8080"
+
+IAM_URL: "http://keycloak:8080"
+IAM_USERNAME: "admin"
+IAM_PASSWORD: "admin"
+
+REDIS_HOST: "redis"
+REDIS_PORT: "6379"
+
+DB_HOST: "postgres"
+DB_PORT: "5432"
+DB_USER: "runai"
+DB_PASSWORD: "password"
+DB_NAME: "runai"
+DB_SCHEMA: "identity_manager"
+DB_SSL_MODE: "disable"
+DB_MIGRATION_COMMAND: "None"
+HOST_HEADER: "FakeHostHeader"

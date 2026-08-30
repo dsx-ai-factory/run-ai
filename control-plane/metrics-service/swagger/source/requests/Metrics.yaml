@@ -1,0 +1,54 @@
+post:
+  x-service: metrics-service
+  x-test-coverage:
+    - metrics-service/integration-tests/tests/metric_test.go
+  x-internal: true
+  summary: Get metrics.
+  operationId: getMetrics
+  x-no-authorization: true
+  tags:
+    - Metrics
+  parameters:
+    - $ref: "../parameters/query/override_tenant_id.yaml"
+  requestBody:
+    description: Requested Metric Information
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/MetricInformation.yaml'
+  responses:
+    '200':
+      description: Metric data.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - status
+              - query
+              - isRange
+              - data
+            properties:
+              status:
+                type: string
+              query:
+                type: string
+              isRange:
+                type: boolean
+              data:
+                type: array
+                items:
+                  $ref: '../schemas/Result.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    501:
+      $ref: '../../../../infra/openapi/docs/responses/501NotImplemented.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

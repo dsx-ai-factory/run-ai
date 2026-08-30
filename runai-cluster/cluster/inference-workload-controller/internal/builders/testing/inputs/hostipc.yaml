@@ -1,0 +1,20 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  name: hostipc
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  image:
+    value: image
+  imagePullPolicy:
+    value: Always
+  name:
+    value: hostipc
+  gpu:
+    value: "1"
+  username:
+    value: user.name
+  hostIpc:
+    value: true
+status: {}

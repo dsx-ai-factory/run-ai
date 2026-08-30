@@ -1,0 +1,7 @@
+name: projectId
+in: query
+description: The id of the project
+required: false
+schema:
+  type: string
+  example: 4500001

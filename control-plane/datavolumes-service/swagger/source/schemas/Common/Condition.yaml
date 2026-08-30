@@ -1,0 +1,27 @@
+type: object
+required:
+  - type
+  - status
+properties:
+  type:
+    description: "The type of the condition, such as Failed or Available. See Types of domain status conditions."
+    type: string
+    example: "PvcsCreated"
+  status:
+    type: string
+    description: "The status of the condition, such as True, False or Unknown."
+    example: "False"
+  message:
+    type: string
+    description: "An optional, human-readable message providing more details about the condition."
+    example: "Failed to create pvc in namespace 'runai-proj1'"
+  reason:
+    type: string
+    description: "The reason for the Failed condition. Not applicable to other types of condition."
+    example: "ErrorCreatingPvc"
+  lastTransitionTime:
+    description: "A timestamp of when the condition was created or the last time time the condition transitioned from one status to another."
+    type: string
+    nullable: true
+    format: date-time
+    example: 2022-01-01T03:49:52.531Z

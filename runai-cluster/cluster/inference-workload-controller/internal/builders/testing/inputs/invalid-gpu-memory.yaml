@@ -1,0 +1,18 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  name: gpu-memory
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  image:
+    value: image
+  name:
+    value: inference-0
+  gpu:
+    value: "1"
+  gpuMemory:
+    value: 12aaaaa0M
+  username:
+    value: guy.shaibi
+status: {}

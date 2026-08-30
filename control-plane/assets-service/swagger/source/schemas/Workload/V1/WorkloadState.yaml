@@ -1,0 +1,5 @@
+description: Reflects the status of the workload created for a workspace or a training.
+  It does not reflect the status of the job created from the workload.
+type: string
+minLength: 1
+enum: ["", Submitted, Failed]

@@ -1,0 +1,13 @@
+allOf:
+  - $ref: './NumaInfo.yaml'
+  - type: object
+    required:
+      - nodes
+    properties:
+      nodes:
+        type: array
+        description: NUMA nodes reported in the node's NodeResourceTopology object.
+        items:
+          $ref: './NumaNodeDetails.yaml'
+x-internal: true
+x-schema-name: NumaInfoExtended

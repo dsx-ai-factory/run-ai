@@ -1,0 +1,42 @@
+get:
+  summary: Get available priorities and categories.
+  operationId: get_available_priorities_and_categories
+  description: Retrieve the workload priorities defined at the cluster level
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/workloads_types_api_test.go
+  x-service: workloads
+  x-authorize:
+    resource-type: workload-properties
+    action: read
+  tags:
+    - Workload properties
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+    - $ref: '../parameters/query/WorkloadsClusterPrioritiesSort.yaml'
+    - $ref: '../parameters/query/WorkloadsClusterPrioritiesFilter.yaml'
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - priorities
+              - categories
+            properties:
+              priorities:
+                $ref: '../schemas/Priorities/ClusterPriorities.yaml'
+              categories:
+                $ref: '../schemas/WorkloadProperties/WorkloadCategories.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

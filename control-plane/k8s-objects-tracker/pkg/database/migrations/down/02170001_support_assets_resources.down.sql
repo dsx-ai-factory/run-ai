@@ -1,0 +1,4 @@
+
+ALTER TABLE pvcs    DROP COLUMN IF EXISTS origin;
+ALTER TABLE secrets DROP COLUMN IF EXISTS origin;
+
