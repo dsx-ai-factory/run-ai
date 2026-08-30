@@ -1,0 +1,13 @@
+type: object
+properties:
+  enabled:
+    type: boolean
+    nullable: true
+  idpAlias:
+    type: string
+    pattern: ^[a-z0-9_-]*$
+    nullable: true
+    maxLength: 255
+example:
+  enabled: false
+  idpAlias: oidc

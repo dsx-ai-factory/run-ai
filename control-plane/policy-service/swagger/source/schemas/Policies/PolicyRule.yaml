@@ -1,0 +1,21 @@
+type: object
+description: >-
+  A single policy rule. It combines the rule's identity (the field it targets,
+  along with the spec selector, optional item selector, and selector
+  parameters) with its enforcements (the behavior that constrains the field's
+  allowed values).
+allOf:
+  - $ref: "./PolicyRuleRef.yaml"
+  - $ref: "./AllowOverride.yaml"
+  - $ref: "./PolicyRuleEnforcements.yaml"
+example:
+  field: "environmentVariables-ConfigMapName"
+  specSelector: "appContainerByName"
+  itemSelector: "environmentVariables-FromConfigMap"
+  selectorParams:
+    name: "worker-1"
+  enforcements:
+    - set:
+        containerPort: 1234
+        protocol: TCP
+    - required: true

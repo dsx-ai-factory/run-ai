@@ -1,0 +1,53 @@
+FROM registry.access.redhat.com/ubi9/ubi-minimal AS base
+
+# Wrap /tmp inside /temp so /tmp lands as a *child* during COPY. Docker BuildKit resets the
+# mode of any destination directory it creates to 0755, but preserves modes on children
+RUN mkdir -p /temp/tmp && \
+    chown 65532:0 /temp/tmp && \
+    chmod 770 /temp/tmp
+
+# ---- Integration target ----
+FROM registry.access.redhat.com/ubi9/ubi-minimal AS integration
+
+ARG TARGETARCH
+ENV TARGETARCH=$TARGETARCH
+
+USER 65532:65532
+
+WORKDIR /app
+COPY bin/notifications-service-$TARGETARCH ./notifications-service
+COPY internal/config/advanced/http_listener/openapi/docs/* /swagger/
+COPY sinks_templates ./sinks_templates
+COPY NOTICE .
+
+ENTRYPOINT ["./notifications-service"]
+
+# ---- Production target ----
+FROM scratch AS prod
+
+ARG TARGETARCH
+ENV TARGETARCH=$TARGETARCH
+
+# Identity & Permissions
+COPY --from=base /etc/passwd /etc/passwd
+COPY --from=base /etc/group /etc/group
+
+# Networking & SSL
+COPY --from=base /etc/ssl/certs/ /etc/ssl/certs/
+COPY --from=base /etc/pki/ /etc/pki/
+
+# DNS resolution config
+COPY --from=base /etc/nsswitch.conf /etc/nsswitch.conf
+
+# Writable Filesystem: Copy /temp's contents into / so /tmp lands at /tmp as a child (mode preserved)
+COPY --from=base /temp /
+
+USER 65532:65532
+
+WORKDIR /app
+COPY bin/notifications-service-$TARGETARCH ./notifications-service
+COPY internal/config/advanced/http_listener/openapi/docs/* /swagger/
+COPY sinks_templates ./sinks_templates
+COPY NOTICE .
+
+ENTRYPOINT ["./notifications-service"]

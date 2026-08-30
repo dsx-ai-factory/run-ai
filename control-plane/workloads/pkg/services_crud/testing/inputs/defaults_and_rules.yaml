@@ -1,0 +1,32 @@
+defaults:
+  image: ubuntu
+  compute:
+    cpuCoreLimit: 5
+    extendedResources:
+      instances:
+        - resource: aaa/bbb
+        - resource: ccc/ddd
+          quantity: 10M
+      attributes:
+        quantity: 20M
+  storage:
+    pvc:
+      attributes:
+        claimInfo:
+          storageClass: standard
+          size: 1M
+      instances:
+        - path: "/aaa/bbb"
+rules:
+  image:
+    required: true
+  workingDir:
+    required: true
+  storage:
+    pvc:
+      attributes:
+        claimInfo:
+          storageClass:
+            canEdit: false
+      instances:
+        canAdd: false

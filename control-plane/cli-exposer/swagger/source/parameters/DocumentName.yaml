@@ -1,0 +1,10 @@
+name: documentName
+in: path
+required: true
+description: The manual document name.
+schema:
+  type: string
+  maxLength: 255
+  minLength: 4
+  pattern: '^[A-Za-z0-9_]+\.md$'
+  example: runai.md

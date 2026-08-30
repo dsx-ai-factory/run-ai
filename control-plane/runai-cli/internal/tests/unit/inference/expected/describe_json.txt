@@ -1,0 +1,187 @@
+{
+  "general": {
+    "name": "my-inference-full-123",
+    "id": "a22ecd44-f863-444d-b69d-0cc0d26bbc54",
+    "type": "Inference",
+    "phase": "Failed",
+    "phaseMessage": "Failed to create workload: [Service:my-inference-full-123] admission webhook \"validation.webhook.serving.knative.dev\" denied the request: validation failed: must not set the field(s): spec.template.spec.containers[0].securityContext.capabilities.add. Check the inference prerequisites in the Run:ai documentation",
+    "project": "team-b",
+    "department": "default",
+    "createdAt": "2025-12-15T08:58:24.919632Z",
+    "updatedAt": "2025-12-15T09:07:57.791339Z",
+    "submittedBy": "test@run.ai",
+    "priority": "very-high (150)",
+    "category": "Deploy",
+    "environmentVariables": {
+      "MODEL_NAME": "llama-2-7b",
+      "RUNAI_JOB_NAME": "${RUNAI_JOB_NAME}",
+      "RUNAI_PROJECT": "${RUNAI_PROJECT}",
+      "VLLM_HOST": "0.0.0.0"
+    },
+    "command": "python -m vllm.entrypoints.openai.api_server --model meta-llama/Llama-2-7b --port 8080 --tensor-parallel-size 1",
+    "cliCommand": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai inference submit my-inference-full-123 --project team-b --image vllm/vllm-openai:latest --image-pull-policy Always --working-dir /app -g 1 --gpu-memory-request 20G --serving-port=container=8080,authorization-type=authenticatedUsers,authorized-users=user1:user2:demo-user,protocol=http --environment-variable MODEL_NAME=llama-2-7b --environment-variable VLLM_HOST=0.0.0.0 --label app=inference-full --label version=v2.0 --label framework=vllm --annotation 'description=Comprehensive inference with all fields' --existing-pvc claimname=my-simple-pvc,path=/models --node-type gpu-nodes --min-replicas 0 --max-replicas 5 --initial-replicas 1 --activation-replicas 2 --metric concurrency --metric-threshold 50 --metric-threshold-percentage 70 --concurrency-hard-limit 100 --initialization-timeout-seconds 300 --request-timeout-seconds 60 --scale-down-delay-seconds 30 --scale-to-zero-retention-seconds 300 --run-as-uid 1000 --run-as-gid 1000 --supplemental-groups 2000,3000 --capability SYS_ADMIN --capability NET_ADMIN --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --toleration operator=Equal,key=high-priority,value=true,effect=NoSchedule --command -- python -m vllm.entrypoints.openai.api_server --model meta-llama/Llama-2-7b --port 8080 --tensor-parallel-size 1"
+  },
+  "workloadDetails": {
+    "preemptible": false,
+    "images": [
+      "vllm/vllm-openai:latest"
+    ],
+    "imagePullPolicy": "Always",
+    "workingDir": "/app",
+    "nodeType": "gpu-nodes",
+    "runAsUser": 1000,
+    "runAsGroup": 1000,
+    "capabilities": [
+      "SYS_ADMIN",
+      "NET_ADMIN"
+    ],
+    "tolerations": [
+      "nvidia.com/gpu=true:NoSchedule",
+      "high-priority=true:NoSchedule"
+    ]
+  },
+  "compute": {
+    "requestedResources": {
+      "gpuCompute": {
+        "requested": 0
+      },
+      "cpuCores": {
+        "requested": 0
+      },
+      "gpuMemory": {
+        "request": "20G",
+        "limit": "20G"
+      },
+      "cpuMemory": {
+        "request": "",
+        "limit": ""
+      }
+    },
+    "allocatedResources": {
+      "gpuCompute": 0,
+      "cpuCores": 0,
+      "gpuMemory": "",
+      "cpuMemory": ""
+    },
+    "requestedNodePools": [
+      "default"
+    ]
+  },
+  "storage": {
+    "pvcs": [
+      {
+        "name": "my-simple-pvc",
+        "mountPath": "/local/pvc",
+        "readOnly": false
+      },
+      {
+        "name": "claim-24mqhfjj7j",
+        "mountPath": "/local/vol",
+        "size": "1G",
+        "ephemeral": false,
+        "storageClass": "standard"
+      }
+    ],
+    "gits": [
+      {
+        "name": "https://github.com/run-ai",
+        "mountPath": "/git"
+      }
+    ],
+    "hostPaths": [
+      {
+        "name": "/host/path",
+        "mountPath": "/hostpath"
+      }
+    ]
+  },
+  "networks": [
+    {
+      "name": "ServingPort",
+      "toolType": "custom",
+      "connectionType": "ServingPort",
+      "authorizationType": "authenticatedUsers",
+      "authorizedUsers": [
+        "user1",
+        "user2",
+        "demo-user"
+      ],
+      "port": 8080
+    }
+  ],
+  "podsInfo": {
+    "pods": [],
+    "runningPods": 0
+  },
+  "spec": {
+    "podLabels": [
+      {
+        "name": "app",
+        "value": "inference-full"
+      },
+      {
+        "name": "version",
+        "value": "v2.0"
+      },
+      {
+        "name": "framework",
+        "value": "vllm"
+      }
+    ],
+    "annotations": [
+      {
+        "name": "description",
+        "value": "Comprehensive inference with all fields"
+      },
+      {
+        "name": "runai-submit-command",
+        "value": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai inference submit my-inference-full-123 --project team-b --image vllm/vllm-openai:latest --image-pull-policy Always --working-dir /app -g 1 --gpu-memory-request 20G --serving-port=container=8080,authorization-type=authenticatedUsers,authorized-users=user1:user2:demo-user,protocol=http --environment-variable MODEL_NAME=llama-2-7b --environment-variable VLLM_HOST=0.0.0.0 --label app=inference-full --label version=v2.0 --label framework=vllm --annotation 'description=Comprehensive inference with all fields' --existing-pvc claimname=my-simple-pvc,path=/models --node-type gpu-nodes --min-replicas 0 --max-replicas 5 --initial-replicas 1 --activation-replicas 2 --metric concurrency --metric-threshold 50 --metric-threshold-percentage 70 --concurrency-hard-limit 100 --initialization-timeout-seconds 300 --request-timeout-seconds 60 --scale-down-delay-seconds 30 --scale-to-zero-retention-seconds 300 --run-as-uid 1000 --run-as-gid 1000 --supplemental-groups 2000,3000 --capability SYS_ADMIN --capability NET_ADMIN --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --toleration operator=Equal,key=high-priority,value=true,effect=NoSchedule --command -- python -m vllm.entrypoints.openai.api_server --model meta-llama/Llama-2-7b --port 8080 --tensor-parallel-size 1"
+      }
+    ],
+    "autoScaling": {
+      "activationReplicas": 2,
+      "concurrencyHardLimit": 100,
+      "initialReplicas": 1,
+      "initializationTimeoutSeconds": 300,
+      "maxReplicas": 5,
+      "metric": "concurrency",
+      "metricThreshold": 50,
+      "metricThresholdPercentage": 70,
+      "minReplicas": 0,
+      "scaleDownDelaySeconds": 30,
+      "scaleToZeroRetentionSeconds": 300
+    },
+    "runaiCliCommand": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai inference submit my-inference-full-123 --project team-b --image vllm/vllm-openai:latest --image-pull-policy Always --working-dir /app -g 1 --gpu-memory-request 20G --serving-port=container=8080,authorization-type=authenticatedUsers,authorized-users=user1:user2:demo-user,protocol=http --environment-variable MODEL_NAME=llama-2-7b --environment-variable VLLM_HOST=0.0.0.0 --label app=inference-full --label version=v2.0 --label framework=vllm --annotation 'description=Comprehensive inference with all fields' --existing-pvc claimname=my-simple-pvc,path=/models --node-type gpu-nodes --min-replicas 0 --max-replicas 5 --initial-replicas 1 --activation-replicas 2 --metric concurrency --metric-threshold 50 --metric-threshold-percentage 70 --concurrency-hard-limit 100 --initialization-timeout-seconds 300 --request-timeout-seconds 60 --scale-down-delay-seconds 30 --scale-to-zero-retention-seconds 300 --run-as-uid 1000 --run-as-gid 1000 --supplemental-groups 2000,3000 --capability SYS_ADMIN --capability NET_ADMIN --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --toleration operator=Equal,key=high-priority,value=true,effect=NoSchedule --command -- python -m vllm.entrypoints.openai.api_server --model meta-llama/Llama-2-7b --port 8080 --tensor-parallel-size 1",
+    "servingConfiguration": {
+      "initializationTimeoutSeconds": 300,
+      "requestTimeoutSeconds": 60
+    },
+    "servingPort": {
+      "authorizationType": "authenticatedUsers",
+      "authorizedUsers": [
+        "user1",
+        "user2",
+        "demo-user"
+      ],
+      "container": 8080,
+      "protocol": "http"
+    }
+  },
+  "GPUAcceleration": null,
+  "inference": {
+    "latestCreatedRevisionName": null,
+    "latestReadyRevisionName": null,
+    "minReplicas": 0,
+    "maxReplicas": 5,
+    "initialReplicas": 1,
+    "initializationTimeoutSeconds": 300,
+    "requestTimeoutSeconds": 60,
+    "activationReplicas": 2,
+    "metric": "concurrency",
+    "metricThresholdPercentage": 70,
+    "metricThreshold": 50,
+    "scaleDownDelaySeconds": 30,
+    "scaleToZeroRetentionSeconds": 300,
+    "concurrencyHardLimit": 100
+  }
+}

@@ -1,0 +1,34 @@
+apiVersion: run.ai/v1alpha1
+kind: DistributedInferenceWorkload
+metadata:
+  name: test-lws
+  namespace: runai-team-a
+spec:
+  workers:
+    value: 1
+  replicas: 
+    value: 1
+leaderSpec:
+  image: 
+    value: leader-image:latest
+  capabilities:
+    items:
+      "cap-1":
+        value:
+          capability: AUDIT_CONTROL
+      "cap-2":
+        value:
+          capability: IPC_LOCK
+  dropAllCapabilities:
+    value: true
+  runAsGid:
+    value: 20
+  runAsUid:
+    value: 501
+  runAsUser:
+    value: true
+  supplementalGroups:
+    value: 100;200;300
+workerSpec:
+  image:
+    value: worker-image:latest

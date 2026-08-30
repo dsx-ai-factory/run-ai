@@ -1,0 +1,69 @@
+BatchJobTarget:
+  Config: {}
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: preemptibility
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: preemptibility
+      name: preemptibility
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            kai.scheduler/preemptibility: preemptible
+            project: test
+            release: preemptibility
+            workloadKind: Workspace
+            workloadName: preemptibility
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: preemptibility
+            image: ubuntu
+            name: preemptibility
+            resources: {}
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: preemptibility, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: preemptibility, Rules: , Type: Workspace'
+  preemptibility: preemptible
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

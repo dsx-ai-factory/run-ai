@@ -1,0 +1,78 @@
+apiVersion: kubeflow.org/v2beta1, Kind=MPIJob
+kind: MPIJob
+metadata:
+  annotations:
+    image: ubuntu
+    template: job-1
+    user: user.name
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: mpijob
+    createdBy: MPIJob
+    project: team-a
+    release: job-1
+    run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+    workloadKind: DistributedWorkload
+    workloadName: job-1
+  name: job-1
+  namespace: runai-team-a
+spec:
+  mpiReplicaSpecs:
+    Launcher:
+      replicas: 1
+      template:
+        metadata:
+          annotations:
+            totalGPUs: "0"
+            totalGPUsMemory: "0"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-1
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_MPI_NUM_WORKERS
+              value: "1"
+            imagePullPolicy: IfNotPresent
+            name: mpi
+            resources: {}
+            securityContext:
+              privileged: false
+              seccompProfile:
+                type: RuntimeDefault
+          schedulerName: runai-scheduler
+    Worker:
+      replicas: 1
+      template:
+        metadata:
+          annotations:
+            totalGPUs: "0"
+            totalGPUsMemory: "0"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-1
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_MPI_NUM_WORKERS
+              value: "1"
+            image: ubuntu
+            imagePullPolicy: IfNotPresent
+            name: mpi
+            resources: {}
+            securityContext:
+              seccompProfile:
+                type: RuntimeDefault
+          schedulerName: runai-scheduler
+  runPolicy:
+    backoffLimit: 6
+    cleanPodPolicy: Running
+status: {}

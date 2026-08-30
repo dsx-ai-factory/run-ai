@@ -1,0 +1,38 @@
+name: "Delete PR-Env on merge or close - to master or a release branch"
+
+on:
+  pull_request:
+    branches:
+      - 'master'
+      - 'main'
+      - 'v*.*'
+      - 'release-*.*'
+    types: [closed]
+    paths:
+      - 'runai-cluster/cluster/**'
+      - 'control-plane/**'
+
+permissions:
+  contents: read
+
+jobs:
+  dispatch:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.merged == true &&
+      github.repository == 'run-ai/runai'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - name: Dispatch delete-env to runai-actions
+        uses: benc-uk/workflow-dispatch@31e2b3319479a63f0ab15bf800eff9e913504e26 # v1
+        with:
+          workflow: delete-env-pr-merge.yml
+          repo: run-ai/runai-actions
+          ref: main
+          token: ${{ secrets.GIT_HUB_OSS }}
+          inputs: '{ "head_ref": ${{ toJSON(github.head_ref) }} }'

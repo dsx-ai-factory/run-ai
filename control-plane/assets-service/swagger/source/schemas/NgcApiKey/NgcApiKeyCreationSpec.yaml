@@ -1,0 +1,6 @@
+properties:
+  ngc_api_key:
+    description: The NGC API key value.
+    type: string
+    minLength: 1
+    pattern: ^[-._A-Za-z0-9]+$

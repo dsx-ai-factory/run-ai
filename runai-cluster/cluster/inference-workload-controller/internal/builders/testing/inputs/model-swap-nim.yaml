@@ -1,0 +1,28 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  name: model-swap
+  namespace: runai-team-a
+spec:
+  annotations:
+    items:
+      run.ai/inference-workload-model-swap:
+        value: '{"models": ["vendor/model-1", "vendor/model-2"], "server-type": "nim"}'
+  image:
+    value: nvcr.io/nim/nvidia/llama-3.1-nemotron-70b-instruct:latest
+  gpu:
+    value: "2"
+  ports:
+    items:
+      port-4000:
+        value:
+          serviceType: ServingPort
+          container: 4000
+  largeShm:
+    value: true
+  runAsGid:
+    value: 1000
+  runAsUid:
+    value: 1000
+  runAsUser:
+    value: true

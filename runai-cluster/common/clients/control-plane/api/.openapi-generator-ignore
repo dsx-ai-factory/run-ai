@@ -1,0 +1,3 @@
+# outputAsLibrary seem to not work well
+**/go.mod
+**/go.sum

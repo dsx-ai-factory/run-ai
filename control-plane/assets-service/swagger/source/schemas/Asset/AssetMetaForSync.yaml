@@ -1,0 +1,19 @@
+allOf:
+  - $ref: "./AssetCreationFields.yaml"
+  - $ref: "./AssetUpdatableFields.yaml"
+  - type: object
+    required:
+      - id
+    properties:
+      id:
+        $ref: "../../../../../infra/openapi/docs/schemas/assets/AssetId.yaml"
+  - type: object
+    required:
+      - kind
+    properties:
+      kind:
+        $ref: "../../../../../infra/openapi/docs/schemas/assets/AssetKind.yaml"
+  - type: object
+    properties:
+      prevName:
+        $ref: "../Asset/AssetName.yaml"

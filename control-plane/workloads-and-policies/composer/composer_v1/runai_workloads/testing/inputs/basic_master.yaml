@@ -1,0 +1,26 @@
+image: redhat
+command: run-master
+args: "-x master-script.py"
+environmentVariables:
+  - name: HOME
+    value: "/home/master-folder"
+workingDir: /home/master-folder
+nodePools:
+  - master-node-pool-a
+  - master-node-pool-b
+
+compute:
+  gpuDevicesRequest: 1
+  gpuRequestType: memory
+  gpuMemoryRequest: 100M
+
+storage:
+  hostPath:
+    - path: "/container/directory/master"
+      readOnly: true
+      mountPath: "/local/directory/master"
+  nfs:
+    - path: "/container/nfs/master"
+      readOnly: true
+      server: master.nfs.com
+      mountPath: "/local/nfs/master"

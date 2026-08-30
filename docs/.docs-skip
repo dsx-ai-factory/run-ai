@@ -1,0 +1,11 @@
+# .docs-skip
+#
+# Pages listed here are excluded from agent-assisted doc updates.
+# Do not create, edit, or delete these files directly.
+# Changes must originate in the source engineering repositories.
+#
+# Format: one path per line, relative to the repo root.
+# Paths ending in / match the directory and all files under it.
+
+# CLI reference — auto-generated from control-plane/runai-cli/docs
+docs/reference/cli/

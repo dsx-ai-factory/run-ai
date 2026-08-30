@@ -1,0 +1,34 @@
+description: The action taken to determine the health of the container. (mandatory)
+type: object
+properties:
+  httpGet:
+    description: An action based on HTTP Get requests.
+    type: object
+    properties:
+      path:
+        description: Path to access on the HTTP server, defaults to /.
+        type: string
+        pattern: '^(\x2F[a-zA-Z0-9\-_.\x2F]*)?$'
+        example: /
+        nullable: true
+        ##WAIT_FOR_35331## minLength: 1
+        maxLength: 2048
+      port:
+        description: Number of the port to access on the container.
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 65535
+        nullable: true
+      host:
+        description: Host name to connect to, defaults to the pod IP.
+        type: string
+        format: hostname
+        example: example.com
+        nullable: true
+        pattern: .*
+        ##WAIT_FOR_35331## minLength: 1
+        maxLength: 253
+      scheme:
+        $ref: "./ProbeHandlerScheme.yaml"
+nullable: true

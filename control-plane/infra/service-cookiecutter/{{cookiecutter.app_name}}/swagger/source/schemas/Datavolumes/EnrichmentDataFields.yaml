@@ -1,0 +1,12 @@
+type: object
+required:
+  - projectName
+properties:
+  projectName:
+    type: string
+    example: "project-a"
+  departmentId:
+    type: string
+    example: "department-a"
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"

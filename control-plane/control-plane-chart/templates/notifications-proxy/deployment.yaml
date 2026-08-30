@@ -1,0 +1,14 @@
+{{- if .Values.notificationsProxy.enabled }}
+{{- include "common.deployment" (list . .Values.notificationsProxy .Values.notificationsProxy.autoscaling .Values.notificationsProxy.serviceAccount "control-plane.notificationsProxy.deployment" ) }}
+{{- end }}
+
+{{- define "control-plane.notificationsProxy.deployment" -}}
+spec:
+  template:
+    spec:
+      initContainers:
+        {{- include "awaitingPostgresReadinessContainer" . | nindent 8 }}
+        {{- include "common.initContainer" . | nindent 8 }}
+      containers:
+      - {{- include "common.container" . | nindent 8 }}
+{{- end }}

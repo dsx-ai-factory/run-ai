@@ -1,0 +1,9 @@
+properties:
+  labelKey:
+    type: string
+    description: key of node label for pool
+    example: node-type
+  labelValue:
+    type: string
+    description: value of node label for pool
+    example: type-x

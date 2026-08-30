@@ -1,0 +1,23 @@
+type: object
+required:
+- alias
+- type
+- redirectUri
+
+properties:
+  alias:
+    type: string
+    pattern: ^[a-z0-9_-]+$
+  type:
+    type: string
+    enum: [ saml, oidc, openshift-v4 ]
+  redirectUri:
+    type: string
+  samlData:
+    $ref: './SamlData.yaml'
+  oidcData:
+    $ref: './OidcData.yaml'
+  ocpData:
+    $ref: './OcpData.yaml'
+  mappers:
+    $ref: './Mappers.yaml'

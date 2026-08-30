@@ -1,0 +1,432 @@
+{
+  "pods": [
+    {
+      "name": "my-dist-inference-full-123-c0a3-1-2",
+      "priorityClassName": "very-high",
+      "id": "219eaedd-a3ca-4c88-88eb-31d687f60f80",
+      "workloadId": "78c1c79e-81fa-484e-961c-b2168ec5c0a3",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "projectId": "4500002",
+      "createdAt": "2025-12-15T08:58:38Z",
+      "containers": [
+        {
+          "name": "worker",
+          "image": "vllm/vllm-openai:latest"
+        }
+      ],
+      "requestedNodePools": [
+        "default"
+      ],
+      "requestedResources": {
+        "gpuRequestType": "memory",
+        "gpuMemory": {
+          "limit": "20G",
+          "request": "20G"
+        },
+        "cpu": {
+          "request": 0.1
+        },
+        "cpuMemory": {
+          "request": "104857600"
+        }
+      },
+      "allocatedResources": {},
+      "tolerations": [
+        {
+          "key": "nvidia.com/gpu",
+          "operator": "Equal",
+          "value": "true",
+          "effect": "NoSchedule"
+        },
+        {
+          "key": "node.kubernetes.io/not-ready",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        },
+        {
+          "key": "node.kubernetes.io/unreachable",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        }
+      ],
+      "k8sPhase": "Pending",
+      "nodeAffinity": {
+        "required": {
+          "nodeSelectorTerms": [
+            {
+              "matchExpressions": [
+                {
+                  "key": "runai/node-pool",
+                  "operator": "DoesNotExist"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "tenantId": 1001,
+      "k8sPhaseUpdatedAt": "2025-12-15T08:58:38.562932Z",
+      "updatedAt": "2025-12-15T08:58:49.096579Z"
+    },
+    {
+      "name": "my-dist-inference-full-123-c0a3-1-1",
+      "priorityClassName": "very-high",
+      "id": "eb54831c-f830-40c7-9952-b52b9dcb50f4",
+      "workloadId": "78c1c79e-81fa-484e-961c-b2168ec5c0a3",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "projectId": "4500002",
+      "createdAt": "2025-12-15T08:58:37Z",
+      "containers": [
+        {
+          "name": "worker",
+          "image": "vllm/vllm-openai:latest"
+        }
+      ],
+      "requestedNodePools": [
+        "default"
+      ],
+      "requestedResources": {
+        "gpuRequestType": "memory",
+        "gpuMemory": {
+          "limit": "20G",
+          "request": "20G"
+        },
+        "cpu": {
+          "request": 0.1
+        },
+        "cpuMemory": {
+          "request": "104857600"
+        }
+      },
+      "allocatedResources": {},
+      "tolerations": [
+        {
+          "key": "nvidia.com/gpu",
+          "operator": "Equal",
+          "value": "true",
+          "effect": "NoSchedule"
+        },
+        {
+          "key": "node.kubernetes.io/not-ready",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        },
+        {
+          "key": "node.kubernetes.io/unreachable",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        }
+      ],
+      "k8sPhase": "Pending",
+      "nodeAffinity": {
+        "required": {
+          "nodeSelectorTerms": [
+            {
+              "matchExpressions": [
+                {
+                  "key": "runai/node-pool",
+                  "operator": "DoesNotExist"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "tenantId": 1001,
+      "k8sPhaseUpdatedAt": "2025-12-15T08:58:37.739254Z",
+      "updatedAt": "2025-12-15T08:58:48.744986Z"
+    },
+    {
+      "name": "my-dist-inference-full-123-c0a3-0-2",
+      "priorityClassName": "very-high",
+      "id": "c0e0d263-c846-4b37-9cc7-1e2359a4b09e",
+      "workloadId": "78c1c79e-81fa-484e-961c-b2168ec5c0a3",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "projectId": "4500002",
+      "createdAt": "2025-12-15T08:58:37Z",
+      "containers": [
+        {
+          "name": "worker",
+          "image": "vllm/vllm-openai:latest"
+        }
+      ],
+      "requestedNodePools": [
+        "default"
+      ],
+      "requestedResources": {
+        "gpuRequestType": "memory",
+        "gpuMemory": {
+          "limit": "20G",
+          "request": "20G"
+        },
+        "cpu": {
+          "request": 0.1
+        },
+        "cpuMemory": {
+          "request": "104857600"
+        }
+      },
+      "allocatedResources": {},
+      "tolerations": [
+        {
+          "key": "nvidia.com/gpu",
+          "operator": "Equal",
+          "value": "true",
+          "effect": "NoSchedule"
+        },
+        {
+          "key": "node.kubernetes.io/not-ready",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        },
+        {
+          "key": "node.kubernetes.io/unreachable",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        }
+      ],
+      "k8sPhase": "Pending",
+      "nodeAffinity": {
+        "required": {
+          "nodeSelectorTerms": [
+            {
+              "matchExpressions": [
+                {
+                  "key": "runai/node-pool",
+                  "operator": "DoesNotExist"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "tenantId": 1001,
+      "k8sPhaseUpdatedAt": "2025-12-15T08:58:37.841456Z",
+      "updatedAt": "2025-12-15T08:58:48.838339Z"
+    },
+    {
+      "name": "my-dist-inference-full-123-c0a3-0",
+      "priorityClassName": "very-high",
+      "id": "06846ff7-11cd-40a8-8950-124403277b99",
+      "workloadId": "78c1c79e-81fa-484e-961c-b2168ec5c0a3",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "projectId": "4500002",
+      "createdAt": "2025-12-15T08:58:35Z",
+      "containers": [
+        {
+          "name": "runai-oauth2-proxy-0",
+          "image": "runai.jfrog.io/op-containers-test-virt/oauth2-proxy:0.0.0-20000585.master-e840618"
+        },
+        {
+          "name": "leader",
+          "image": "vllm/vllm-openai:latest"
+        }
+      ],
+      "requestedNodePools": [
+        "default"
+      ],
+      "requestedResources": {
+        "gpuRequestType": "memory",
+        "gpuMemory": {
+          "limit": "20G",
+          "request": "20G"
+        },
+        "cpu": {
+          "request": 0.1
+        },
+        "cpuMemory": {
+          "request": "104857600"
+        }
+      },
+      "allocatedResources": {},
+      "tolerations": [
+        {
+          "key": "nvidia.com/gpu",
+          "operator": "Equal",
+          "value": "true",
+          "effect": "NoSchedule"
+        },
+        {
+          "key": "node.kubernetes.io/not-ready",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        },
+        {
+          "key": "node.kubernetes.io/unreachable",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        }
+      ],
+      "k8sPhase": "Pending",
+      "nodeAffinity": {
+        "required": {
+          "nodeSelectorTerms": [
+            {
+              "matchExpressions": [
+                {
+                  "key": "runai/node-pool",
+                  "operator": "DoesNotExist"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "tenantId": 1001,
+      "k8sPhaseUpdatedAt": "2025-12-15T08:58:35.634431Z",
+      "updatedAt": "2025-12-15T08:58:46.853202Z"
+    },
+    {
+      "name": "my-dist-inference-full-123-c0a3-1",
+      "priorityClassName": "very-high",
+      "id": "d8abbc2e-d2cc-4831-9375-2bf6292ca0f7",
+      "workloadId": "78c1c79e-81fa-484e-961c-b2168ec5c0a3",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "projectId": "4500002",
+      "createdAt": "2025-12-15T08:58:36Z",
+      "containers": [
+        {
+          "name": "runai-oauth2-proxy-0",
+          "image": "runai.jfrog.io/op-containers-test-virt/oauth2-proxy:0.0.0-20000585.master-e840618"
+        },
+        {
+          "name": "leader",
+          "image": "vllm/vllm-openai:latest"
+        }
+      ],
+      "requestedNodePools": [
+        "default"
+      ],
+      "requestedResources": {
+        "gpuRequestType": "memory",
+        "gpuMemory": {
+          "limit": "20G",
+          "request": "20G"
+        },
+        "cpu": {
+          "request": 0.1
+        },
+        "cpuMemory": {
+          "request": "104857600"
+        }
+      },
+      "allocatedResources": {},
+      "tolerations": [
+        {
+          "key": "nvidia.com/gpu",
+          "operator": "Equal",
+          "value": "true",
+          "effect": "NoSchedule"
+        },
+        {
+          "key": "node.kubernetes.io/not-ready",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        },
+        {
+          "key": "node.kubernetes.io/unreachable",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        }
+      ],
+      "k8sPhase": "Pending",
+      "nodeAffinity": {
+        "required": {
+          "nodeSelectorTerms": [
+            {
+              "matchExpressions": [
+                {
+                  "key": "runai/node-pool",
+                  "operator": "DoesNotExist"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "tenantId": 1001,
+      "k8sPhaseUpdatedAt": "2025-12-15T08:58:36.345698Z",
+      "updatedAt": "2025-12-15T08:58:47.535205Z"
+    },
+    {
+      "name": "my-dist-inference-full-123-c0a3-0-1",
+      "priorityClassName": "very-high",
+      "id": "9b6cb737-a968-4cb5-9548-86bede306ff5",
+      "workloadId": "78c1c79e-81fa-484e-961c-b2168ec5c0a3",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "projectId": "4500002",
+      "createdAt": "2025-12-15T08:58:36Z",
+      "containers": [
+        {
+          "name": "worker",
+          "image": "vllm/vllm-openai:latest"
+        }
+      ],
+      "requestedNodePools": [
+        "default"
+      ],
+      "requestedResources": {
+        "gpuRequestType": "memory",
+        "gpuMemory": {
+          "limit": "20G",
+          "request": "20G"
+        },
+        "cpu": {
+          "request": 0.1
+        },
+        "cpuMemory": {
+          "request": "104857600"
+        }
+      },
+      "allocatedResources": {},
+      "tolerations": [
+        {
+          "key": "nvidia.com/gpu",
+          "operator": "Equal",
+          "value": "true",
+          "effect": "NoSchedule"
+        },
+        {
+          "key": "node.kubernetes.io/not-ready",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        },
+        {
+          "key": "node.kubernetes.io/unreachable",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        }
+      ],
+      "k8sPhase": "Pending",
+      "nodeAffinity": {
+        "required": {
+          "nodeSelectorTerms": [
+            {
+              "matchExpressions": [
+                {
+                  "key": "runai/node-pool",
+                  "operator": "DoesNotExist"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "tenantId": 1001,
+      "k8sPhaseUpdatedAt": "2025-12-15T08:58:36.649143Z",
+      "updatedAt": "2025-12-15T08:58:48.144164Z"
+    }
+  ]
+}

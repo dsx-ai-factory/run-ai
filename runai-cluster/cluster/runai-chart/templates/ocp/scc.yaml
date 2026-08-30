@@ -1,0 +1,344 @@
+{{- if eq (include "isOpenShift" .) "true" }}
+{{- if .Values.openShift.securityContextConstraints.create }}
+kind: SecurityContextConstraints
+apiVersion: security.openshift.io/v1
+metadata:
+  name: runai-user-job
+allowHostDirVolumePlugin: true
+allowHostIPC: true
+allowHostNetwork: false
+allowHostPID: false
+allowHostPorts: false
+allowPrivilegeEscalation: false
+allowPrivilegedContainer: false
+allowedCapabilities: null
+readOnlyRootFilesystem: false
+runAsUser:
+  type: MustRunAsRange
+seLinuxContext:
+  type: MustRunAs	
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-user-job
+rules:
+- apiGroups:
+  - security.openshift.io
+  resourceNames:
+  - runai-user-job
+  resources:
+  - securitycontextconstraints
+  verbs:
+  - use
+---
+{{- if .Values.openShift.securityContextConstraints.create }}
+kind: SecurityContextConstraints
+apiVersion: security.openshift.io/v1
+metadata:
+  name: runai-mps-server
+allowHostIPC: true
+allowHostDirVolumePlugin: true
+allowHostNetwork: false
+allowHostPID: false
+allowHostPorts: false
+allowPrivilegeEscalation: false
+allowPrivilegedContainer: false
+allowedCapabilities: null
+defaultAddCapabilities: null
+readOnlyRootFilesystem: false
+requiredDropCapabilities: null
+runAsUser:
+  type: RunAsAny
+seLinuxContext:
+  type: MustRunAs
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: runai-mps-server
+  namespace: runai
+rules:
+  - apiGroups:
+      - security.openshift.io
+    resourceNames:
+      - runai-mps-server
+    resources:
+      - securitycontextconstraints
+    verbs:
+      - use
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: runai-mps-server
+  namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: runai-mps-server
+subjects:
+  - kind: ServiceAccount
+    name: runai-mps
+    namespace: runai
+---
+
+# jupyter-notebook
+
+{{- if .Values.openShift.securityContextConstraints.create }}
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: runai-jupyter-notebook
+allowHostDirVolumePlugin: true
+allowHostIPC: true
+allowHostNetwork: false
+allowHostPID: false
+allowHostPorts: false
+allowPrivilegeEscalation: false
+allowPrivilegedContainer: false
+readOnlyRootFilesystem: false
+priority: 1
+seccompProfiles:
+  - '*'
+runAsUser:
+  type: MustRunAs
+  uid: 1000
+seLinuxContext:
+  type: MustRunAs
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-jupyter-notebook-scc
+rules:
+  - apiGroups:
+      - security.openshift.io
+    resourceNames:
+      - runai-jupyter-notebook
+    resources:
+      - securitycontextconstraints
+    verbs:
+      - use
+---
+
+# s3
+
+{{- if .Values.openShift.securityContextConstraints.create }}
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: runai-openshift-s3
+allowHostPID: false
+allowHostPorts: false
+allowPrivilegedContainer: true
+allowHostDirVolumePlugin: false
+allowHostNetwork: false
+allowPrivilegeEscalation: true
+allowHostIPC: false
+readOnlyRootFilesystem: false
+seccompProfiles:
+  - '*'
+allowedCapabilities:
+  - '*'
+groups: []
+users: []
+volumes:
+  - '*'
+seLinuxContext:
+  type: MustRunAs
+fsGroup:
+  type: MustRunAs
+runAsUser:
+  type: RunAsAny
+supplementalGroups:
+  type: RunAsAny
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-openshift-s3-scc
+rules:
+  - apiGroups:
+      - security.openshift.io
+    resourceNames:
+      - runai-openshift-s3
+    resources:
+      - securitycontextconstraints
+    verbs:
+      - use
+
+---
+
+# dedicated prometheus
+
+{{- if .Values.openShift.securityContextConstraints.create }}
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: runai-prometheus
+allowPrivilegedContainer: false
+allowHostNetwork: false
+allowHostPorts: false
+allowHostPID: false
+allowHostIPC: false
+allowHostDirVolumePlugin: false
+allowPrivilegeEscalation: false
+defaultAllowPrivilegeEscalation: false
+allowedCapabilities: null
+requiredDropCapabilities:
+  - ALL
+volumes:
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - persistentVolumeClaim
+  - projected
+  - secret
+  - nfs
+  - pvc
+seLinuxContext:
+  type: MustRunAs
+runAsUser:
+  type: MustRunAs
+  uid: 10000
+fsGroup:
+  type: MustRunAs
+  ranges:
+    - min: 10000
+      max: 10000
+readOnlyRootFilesystem: false
+seccompProfiles:
+  - runtime/default
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: runai-prometheus-scc
+  namespace: runai
+rules:
+  - apiGroups:
+      - security.openshift.io
+    resourceNames:
+      - runai-prometheus
+    resources:
+      - securitycontextconstraints
+    verbs:
+      - use
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: runai-prometheus-scc
+  namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: runai-prometheus-scc
+subjects:
+  - kind: ServiceAccount
+    name: runai-prometheus
+    namespace: runai
+---
+
+# karta operator
+#
+# The karta subchart pins runAsUser 65532 in its pod securityContext, which
+# restricted-v2 rejects because the UID falls outside the project's allocated
+# range. The UID cannot be unset from this chart: Helm discards null values when
+# coalescing a parent chart's values.yaml into a subchart, so the subchart
+# default always wins (RUN-41722). Grant the SA its own SCC instead, the same way
+# kai-system and the runai-backend components are handled.
+
+{{- if .Values.karta.enabled }}
+{{- if .Values.openShift.securityContextConstraints.create }}
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: runai-karta-operator
+allowPrivilegedContainer: false
+allowHostNetwork: false
+allowHostPorts: false
+allowHostPID: false
+allowHostIPC: false
+allowHostDirVolumePlugin: false
+allowPrivilegeEscalation: false
+defaultAllowPrivilegeEscalation: false
+allowedCapabilities: null
+requiredDropCapabilities:
+  - ALL
+volumes:
+  - configMap
+  - csi
+  - downwardAPI
+  - emptyDir
+  - ephemeral
+  - persistentVolumeClaim
+  - projected
+  - secret
+seLinuxContext:
+  type: MustRunAs
+runAsUser:
+  type: MustRunAs
+  uid: 65532
+fsGroup:
+  type: RunAsAny
+supplementalGroups:
+  type: RunAsAny
+readOnlyRootFilesystem: false
+seccompProfiles:
+  - runtime/default
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: runai-karta-operator-scc
+  namespace: runai
+rules:
+  - apiGroups:
+      - security.openshift.io
+    resourceNames:
+      - runai-karta-operator
+    resources:
+      - securitycontextconstraints
+    verbs:
+      - use
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: runai-karta-operator-scc
+  namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: runai-karta-operator-scc
+subjects:
+  # Tracks the karta subchart's default SA name (chart name + "-operator").
+  - kind: ServiceAccount
+    name: karta-operator
+    namespace: runai
+{{- end }}
+---
+# runtime-rules needs cluster-monitoring-view to query the OpenShift
+# Thanos-querier (https) for metric-based scheduling rules (e.g. idle timeout).
+# Replaces the removed runai-job-controller-monitoring-view binding (PR #2466).
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-runtime-rules-monitoring-view
+subjects:
+  - kind: ServiceAccount
+    name: runtime-rules
+    namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-monitoring-view
+{{- end }}

@@ -1,0 +1,4 @@
+type: string
+description: The HTTP or HTTPS URL of the Helm repository that hosts the chart. This must match a repository that is accessible. Used together with `name` and `version`.
+maxLength: 250
+example: https://charts.bitnami.com/bitnami

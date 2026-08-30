@@ -1,0 +1,177 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+# Inherit organization settings and override only what we need.
+# This merges our repo config on top of the org defaults.
+inheritance: true
+tone_instructions: >-
+  Be concise. Flag OWASP Top 10 findings as critical, cite category. SQLi always
+  critical. Skip nitpicks. A01 access control, A02 crypto, A03 injection, A04
+  insecure design, A05 misconfig, A06 vuln deps, A07 auth, A08 integrity, A09
+  logging, A10 SSRF.
+
+reviews:
+  poem: false
+  in_progress_fortune: false
+  tools:
+    # OWASP-relevant built-in scanners.
+    gitleaks:        # A02 Cryptographic Failures — hardcoded secrets/keys.
+      enabled: true
+    semgrep:         # A03 Injection, A01, A10 — general SAST ruleset.
+      enabled: true
+    checkov:         # A05 Security Misconfiguration — IaC (k8s/helm/terraform).
+      enabled: true
+    hadolint:        # A05 — Dockerfile misconfiguration.
+      enabled: true
+    osvScanner:      # A06 Vulnerable & Outdated Components — dependency CVEs.
+      enabled: true
+  path_filters:
+    - "!**/swagger/_build/**"
+    - "!**/generated/**"
+    - "!**/vendor/**"
+    - "!**/node_modules/**"
+    - "!**/*.generated.go"
+    - "!**/*.gen.go"
+    - "!**/redoc/_build/**"
+    - "!control-plane/infra/openapi/specs/**"
+    - "!control-plane/frontend/src/swagger-models/**"
+  path_instructions:
+    - path: "control-plane/**/*.go"
+      instructions: &owasp_go |
+        OWASP Top 10 (2021) review for backend Go services. Flag as critical:
+        A01 BROKEN ACCESS CONTROL: handlers/endpoints that read/write resources without
+        verifying the caller's authorization (role/permission/ownership). Missing tenant_id
+        scoping on data access. IDOR — resource IDs taken from the request without an
+        ownership/authorization check. Default-allow authz logic.
+        A04 INSECURE DESIGN: missing rate limiting on auth/expensive endpoints, no input-size
+        bounds on user-controlled loops/allocations, trust boundaries crossed without validation.
+        A06 VULNERABLE COMPONENTS: use of deprecated/known-vulnerable packages or crypto
+        (md5/sha1 for security, des, rc4); pinned-to-vulnerable dependency versions.
+        A07 AUTH FAILURES: weak/missing session expiry, JWT verified without signature/exp/aud
+        checks, credentials compared with == instead of constant-time, password handling without
+        a strong KDF (bcrypt/argon2/scrypt).
+        A08 INTEGRITY FAILURES: deserialization of untrusted data (gob/yaml.Unmarshal into
+        interface{}/unchecked types), unverified downloads or auto-update payloads, unsigned
+        artifacts trusted.
+        A09 LOGGING/MONITORING FAILURES: logging secrets/tokens/PII in plaintext, OR security-
+        relevant events (auth failure, access denied, tenant violation) with no log at all.
+        A10 SSRF: outbound HTTP/URL/host built from user input without allowlist validation;
+        flag http.Get/http.NewRequest/url.Parse fed unvalidated request data.
+    - path: "runai-cluster/**/*.go"
+      instructions: *owasp_go
+    - path: "**/*.{yaml,yml,tf,tpl}"
+      instructions: |
+        A05 / K01 INSECURE WORKLOAD CONFIGURATIONS: Flag any container spec missing all of:
+        securityContext.runAsNonRoot, readOnlyRootFilesystem, allowPrivilegeEscalation: false,
+        capabilities.drop including ALL, and seccompProfile.type: RuntimeDefault. Each missing
+        field is a separate finding. privileged: true is always critical. hostNetwork, hostPID,
+        hostIPC require explicit justification.
+        K03 OVERLY PERMISSIVE RBAC: Flag verbs: ['*'] or verbs: ["*"] on any resource — always
+        suggest the minimum required verb set. Flag resources: ['*'] or resources: ["*"]. Flag
+        ClusterRole grants on high-risk resources (secrets, pods/exec, nodes) without
+        resourceNames scoping. Flag new ClusterRoleBinding where a RoleBinding in a specific
+        namespace would suffice. pods/exec access is critical — flag with explanation of risk.
+        K06 SERVICE ACCOUNT TOKEN AUTO-MOUNT: Flag any ServiceAccount or Pod/Deployment spec
+        that does not explicitly set automountServiceAccountToken: false. Controllers that need
+        the API should set it to true with a comment; everything else should default to false.
+        K07 MISSING NETWORK POLICY: Flag any new Deployment or StatefulSet added without a
+        corresponding NetworkPolicy in the same PR that restricts ingress and egress. Note which
+        ports the policy should cover based on the container ports defined.
+        K08 SECRETS VIA ENV VARS: Flag any use of envFrom.secretRef or env[*].valueFrom.secretKeyRef
+        that injects a Kubernetes Secret as an environment variable. Prefer mounting the Secret as a
+        volume (volumeMounts + volumes.secret) so the value is not exposed in process listings,
+        kubectl describe pod output, or crash dumps. Note the secret name and suggest the volume
+        mount equivalent. Exception: secrets consumed only at process startup where a restart on
+        rotation is acceptable may use secretKeyRef, but this must be explicitly justified.
+    - path: "runai-cluster/**/resources/*.go"
+      instructions: |
+        K01 INSECURE WORKLOAD CONFIGURATIONS: When building a PodSpec or ContainerSpec in Go,
+        flag if SecurityContext is nil or missing any of: RunAsNonRoot, ReadOnlyRootFilesystem,
+        AllowPrivilegeEscalation set to false, Capabilities.Drop containing "ALL", SeccompProfile
+        set to RuntimeDefault. Each omission is a finding. These must be explicit — nil means
+        the field is unset and the cluster default applies, which may not be hardened.
+        K06 SERVICE ACCOUNT TOKEN AUTO-MOUNT: Flag Deployment/Pod specs that do not set
+        AutomountServiceAccountToken to a pointer-to-false (ptr.To(false)). If the service
+        legitimately needs API access, it must set it to ptr.To(true) with an inline comment
+        naming the API resources it accesses.
+        K08 SECRETS VIA ENV VARS: Flag any EnvVar built with ValueFrom.SecretKeyRef. Prefer a
+        volume mount (corev1.VolumeSource.Secret + VolumeMount). Only allow SecretKeyRef when
+        the consuming process cannot read files — require an inline comment explaining why.
+    - path: "runai-cluster/**/clusterroles/**/*.yaml"
+      instructions: |
+        K03 RBAC REVIEW — this file defines cluster-level permissions. Apply strict scrutiny:
+        CRITICAL: verbs containing '*' on secrets, pods/exec, nodes, or rolebindings. These
+        grant lateral movement or privilege escalation paths — always suggest the minimum verb
+        list (get, list, watch, create, update, patch, delete) needed for the actual controller.
+        CRITICAL: pods/exec access (seen in cluster-api.yaml) enables interactive shell in any
+        pod — flag every occurrence and ask whether it is still required.
+        HIGH: ClusterRole grants on 'nodes' without resourceNames — nodes is cluster-wide
+        infrastructure; prefer read-only (get/list/watch) unless write is strictly necessary.
+        HIGH: New rules added to an existing ClusterRole that expand scope beyond what the
+        controller's name implies (e.g., an inference controller getting secrets access).
+        MEDIUM: Missing 'namespace' scoping — ask whether a Role + RoleBinding in a specific
+        namespace would satisfy the requirement instead of a cluster-wide grant.
+    - path: "runai-cluster/**/cluster-api/**/*.go"
+      instructions: |
+        K06 AUTHENTICATION: This service handles inbound auth tokens. Flag:
+        JWT validated without checking exp, aud, or iss claims explicitly.
+        Token extracted from request but error path logs the raw token value.
+        Bearer token passed downstream to another service via context without
+        scrubbing on error paths — risk of token leakage in logs.
+        Missing authentication check on any new HTTP handler registered in this package.
+    - path: "control-plane/**/dao/**/*.go"
+      instructions: |
+        CRITICAL: Check for SQL injection in GORM queries.
+        UNSAFE (reject): fmt.Sprintf("%s > %s", column, userValue) -- value interpolated directly.
+        UNSAFE (reject): db.Raw(query) or db.Exec(query) where query is built via fmt.Sprintf
+        with values embedded using %s/%v/%d instead of ? placeholders.
+        UNSAFE (reject): string concatenation (+) to build WHERE clauses with data values.
+        SAFE: fmt.Sprintf("%s > ?", column), value -- column from constant, value as bind param.
+        SAFE: db.Raw(sql, params...) -- values passed as separate arguments.
+        Using fmt.Sprintf for column/table NAMES from constants is acceptable,
+        but all DATA VALUES must use ? placeholders passed as arguments to GORM.
+        TENANT ISOLATION: This is a multi-tenant system. Verify that queries filtering
+        data always include a tenant_id condition. Queries that return data without
+        filtering by tenant_id risk leaking one customer's data to another.
+    - path: "control-plane/**/database/**/*.go"
+      instructions: |
+        Check for SQL injection in GORM queries. All user-supplied or dynamic values
+        must use ? placeholders, never fmt.Sprintf with %s/%v for data values.
+        db.Raw() and db.Exec() calls must pass values as additional arguments, not inline.
+        String concatenation to build SQL with data values is not acceptable.
+        TENANT ISOLATION: Verify queries include tenant_id filtering to prevent
+        cross-tenant data leaks in this multi-tenant system.
+    - path: "**/Dockerfile"
+      instructions: |
+        Ensure a non-root USER is set in the final stage.
+        Base images should use pinned versions or digests, not :latest.
+    - path: "control-plane/**/swagger/source/**"
+      instructions: |
+        Review OpenAPI specs for proper authentication requirements on endpoints,
+        input validation schemas (maxLength, pattern, enum), and sensitive data exposure.
+    - path: "**/*_test.go"
+      instructions: |
+        Even in tests, use parameterized queries (? placeholders) with GORM to maintain
+        consistent safe patterns and prevent copy-paste of unsafe SQL into production code.
+    - path: "control-plane/frontend/**/*.{vue,ts,tsx}"
+      instructions: |
+        SECURITY — flag these as critical issues:
+        XSS: v-html used with any non-static string is unsafe unless the value is explicitly
+        sanitized with DOMPurify or equivalent before being set. Flag every v-html binding
+        that receives a variable, prop, or computed value.
+        EVAL: eval(), new Function(), setTimeout(string), setInterval(string) execute
+        arbitrary code — reject all uses.
+        HARDCODED SECRETS: flag any string that looks like a token, API key, password, or
+        private key assigned to a variable or object literal outside of test fixtures.
+        SENSITIVE DATA IN STORAGE: localStorage.setItem / sessionStorage.setItem storing
+        tokens, passwords, or PII should be flagged — prefer httpOnly cookies or in-memory state.
+        OPEN REDIRECT: window.location assignments or router.push() calls that use
+        unvalidated external input should be flagged.
+        PROTOTYPE POLLUTION: lodash merge/set/assign with user-controlled keys, or direct
+        bracket-notation assignment on objects with user-controlled keys, should be flagged.
+        DEPENDENCY INJECTION: dynamic import() with a user-controlled path should be flagged.
+        INFORMATIONAL — note but do not block:
+        Object injection: bracket-notation property access on plain objects with external
+        keys (already caught by eslint-plugin-security, note only if pattern is high-risk).
+
+chat:
+  art: false

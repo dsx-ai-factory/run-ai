@@ -1,0 +1,54 @@
+package controllers
+
+import (
+	"github.com/run-ai/runai/runai-cluster/cluster/cluster-sync/pkg/constants"
+	"go.uber.org/zap"
+
+	backendclient "github.com/run-ai/runai/runai-cluster/cluster/cluster-sync/pkg/backend-client"
+	"github.com/run-ai/runai/runai-cluster/cluster/cluster-sync/pkg/cachedclient"
+	"github.com/run-ai/runai/runai-cluster/cluster/cluster-sync/pkg/handlers"
+	"github.com/run-ai/runai/runai-cluster/cluster/cluster-sync/pkg/util"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/tools/cache"
+)
+
+func AddSecretHandlerToCache(backendClient *backendclient.BackendClient, cachedClient cachedclient.CachedClient) {
+	secretHandler := handlers.NewSecretHandler(cachedClient, backendClient)
+	backendClient.RegisterSyncHandler(secretHandler)
+
+	rateLimitedController := cachedClient.NewRateLimitedController(cachedclient.SecretRL, secretHandler)
+
+	secretInformer := cachedClient.GetInformer(cachedclient.SecretType)
+	_, err := secretInformer.AddEventHandler(cache.FilteringResourceEventHandler{
+		FilterFunc: func(obj any) bool {
+			switch secret := obj.(type) {
+			case *corev1.Secret:
+				return backendClient.IsRunaiBackendAvailable() &&
+					(util.IsUserExposedCredentialsForRunai(secret) || util.IsAssetRelatedResource(&secret.ObjectMeta)) &&
+					(isRelevantResourceScope(cachedClient, &secret.ObjectMeta) || isUserCredential(secret.ObjectMeta))
+			default:
+				return false
+			}
+		},
+		Handler: cache.ResourceEventHandlerFuncs{
+			AddFunc: func(obj any) {
+				object := obj.(*corev1.Secret)
+				genericControllerErrorHandler(secretHandler.HandleSecretAdd(object), constants.AddOperation, "secret", object)
+			},
+			DeleteFunc: func(obj any) {
+				object := obj.(*corev1.Secret)
+				rateLimitedController.MarkItemDeleted(objectKeyFromObject(object))
+				genericControllerErrorHandler(secretHandler.HandleSecretDelete(object), constants.DeleteOperation, "secret", object)
+			},
+			UpdateFunc: func(oldObj any, newObj any) {
+				rateLimitedController.AddRateLimited(objectKeyFromObject(newObj.(*corev1.Secret)))
+			},
+		},
+	})
+
+	if err != nil {
+		zap.S().Fatalf("Failed to add event handler to secret informer, error: %s", err.Error())
+	}
+
+	zap.S().Debug("Secret handling has started")
+}

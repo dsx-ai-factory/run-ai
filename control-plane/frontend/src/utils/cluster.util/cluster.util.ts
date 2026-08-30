@@ -1,0 +1,185 @@
+import type { IStatusColOptions } from "@/models/table.model";
+import { CLUSTER_STATUS_TOOLTIP } from "@/models/cluster.model";
+import { splitCamelCaseAndCapitalize } from "@/utils/string.util/string.util";
+import type {
+  ClusterDependenciesStatus,
+  ClusterDisplayedStatus,
+  ClustersMinimalData,
+} from "@/swagger-models/cluster-service-client";
+import { ClusterState, ClusterReportedStatusPlatformTypeEnum } from "@/swagger-models/cluster-service-client";
+import type { ClusterReportedStatusOperandsValue } from "@/swagger-models/cluster-service-client";
+import { DOCS } from "@/constants/docs";
+import { docsUtil } from "@/utils/docs.util/docs.util";
+
+export const clusterUtil = {
+  getStatusColOptions,
+  addSessionCreatedCluster,
+  removeSessionCreatedCluster,
+  getNonFunctioningServices,
+  getMissingPrerequisites,
+  getDistribution,
+  isKnativeInstalledInCluster,
+  isLwsInstalledInCluster,
+  findClusterById,
+  formatClusterNameWithVersion,
+};
+
+function isKnativeInstalledInCluster(cluster: ClustersMinimalData): boolean {
+  return cluster.dependenciesStatus?.optional?.knative?.available || false;
+}
+
+function isLwsInstalledInCluster(cluster: ClustersMinimalData): boolean {
+  return cluster.dependenciesStatus?.optional?.lws?.available || false;
+}
+
+function getStatusColOptions(status?: ClusterDisplayedStatus): IStatusColOptions {
+  if (!status) {
+    return {
+      filterKey: "status",
+      status: "-",
+      displayAnimation: false,
+      colStyle: { "min-width": "150px" },
+    };
+  }
+  return {
+    status: _getStatus(status.state as ClusterState),
+    tooltipText: _getTooltipText(status),
+    color: _statusColor(status.state as ClusterState),
+    displayAnimation: false,
+    filterKey: "status",
+    colStyle: { "min-width": "150px" },
+  };
+}
+
+function _getStatus(status: ClusterState): string {
+  if (!Object.keys(ClusterState).includes(status)) return "-";
+  return splitCamelCaseAndCapitalize(status).trim();
+}
+
+function getClusterTooltipSupportLinks(): string {
+  const supportListItem = DOCS.SUPPORT.URL ? `<li style="list-style: disc;">${docsUtil.getSupportHTMLLink()}</li>` : "";
+  return (
+    "<br>" +
+    "<div style='padding-left: 20px'>" +
+    '<ul style="list-style: disc;">' +
+    `<li style="list-style: disc;">${docsUtil.getTroubleshootingHTMLLink(DOCS.TROUBLESHOOTING.CLUSTERS)}</li>` +
+    supportListItem +
+    "</ul>" +
+    "</div>"
+  );
+}
+
+function _getTooltipText(status: ClusterDisplayedStatus): string {
+  switch (status.state) {
+    case ClusterState.WaitingToConnect:
+      return CLUSTER_STATUS_TOOLTIP.WaitingToConnect + getClusterTooltipSupportLinks();
+    case ClusterState.Connected:
+      return CLUSTER_STATUS_TOOLTIP.Connected;
+    case ClusterState.Disconnected:
+      return CLUSTER_STATUS_TOOLTIP.Disconnected + getClusterTooltipSupportLinks();
+    case ClusterState.ServiceIssues:
+      return CLUSTER_STATUS_TOOLTIP.ServiceIssues + getClusterTooltipSupportLinks();
+    case ClusterState.MissingPrerequisites:
+      return getMissingPrerequisitesText(status);
+    case ClusterState.Unknown:
+      return DOCS.SUPPORT.URL
+        ? CLUSTER_STATUS_TOOLTIP.Unknown + docsUtil.getSupportHTMLLink()
+        : "The cluster status couldn't be determined.";
+    default:
+      return "-";
+  }
+}
+
+function _statusColor(status: ClusterState): string {
+  switch (status) {
+    case ClusterState.Connected:
+      return "success";
+    case ClusterState.Unknown:
+    case ClusterState.WaitingToConnect:
+      return "normal";
+    default:
+      return "warning";
+  }
+}
+
+const storageKey = "sessionCreatedClustersIds";
+
+function _setSessionCreatedClusters(newClustersUuidList: string[]): void {
+  sessionStorage.setItem(storageKey, JSON.stringify(newClustersUuidList));
+}
+
+function getSessionCreatedClusters(): string[] {
+  const storageInfo: string | null = sessionStorage.getItem(storageKey);
+  if (!storageInfo) return [];
+  return JSON.parse(storageInfo);
+}
+
+function addSessionCreatedCluster(newClusterCreatedUuid: string): void {
+  const createdClustersUuids: string[] = getSessionCreatedClusters();
+  const newList: string[] = [...createdClustersUuids, newClusterCreatedUuid];
+  _setSessionCreatedClusters(newList);
+}
+
+function removeSessionCreatedCluster(clusterUuid: string): void {
+  const createdClustersUuids: string[] = getSessionCreatedClusters();
+  const updatedList: string[] = createdClustersUuids.filter((uuid) => uuid !== clusterUuid);
+  _setSessionCreatedClusters(updatedList);
+}
+
+function getNonFunctioningServices(operands: { [key: string]: ClusterReportedStatusOperandsValue }): string[] {
+  return (
+    Object.entries(operands)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .filter(([_, operand]) => operand.unreadyThresholdCrossed)
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .map(([key, _]) => key)
+  );
+}
+
+function getMissingPrerequisites(dependencies: ClusterDependenciesStatus): string[] {
+  return (
+    Object.entries(dependencies.required)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .filter(([_, dependency]) => !dependency.available)
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      .map(([key, _]) => key)
+  );
+}
+
+function getMissingPrerequisitesText(status: ClusterDisplayedStatus): string {
+  const missingPrerequisites = clusterUtil.getMissingPrerequisites(status.dependencies as ClusterDependenciesStatus);
+  if (missingPrerequisites.length) {
+    return CLUSTER_STATUS_TOOLTIP.MissingPrerequisites.replace(
+      "{{missing_prerequisit}}",
+      missingPrerequisites.join(", "),
+    );
+  } else {
+    return CLUSTER_STATUS_TOOLTIP.MissingPrerequisites.replace("{{missing_prerequisit}}", "none");
+  }
+}
+
+function getDistribution(distribution: ClusterReportedStatusPlatformTypeEnum): string {
+  switch (distribution) {
+    case ClusterReportedStatusPlatformTypeEnum.Aks:
+    case ClusterReportedStatusPlatformTypeEnum.Eks:
+    case ClusterReportedStatusPlatformTypeEnum.Gke:
+      return distribution.toUpperCase();
+    case ClusterReportedStatusPlatformTypeEnum.Vanilla:
+      return "Vanilla";
+    case ClusterReportedStatusPlatformTypeEnum.Openshift:
+      return "OpenShift";
+    default:
+      return "-";
+  }
+}
+
+function findClusterById(clusters: ClustersMinimalData[], clusterId: string): ClustersMinimalData | undefined {
+  return clusters.find((cluster) => cluster.uuid === clusterId);
+}
+
+function formatClusterNameWithVersion(cluster: ClustersMinimalData | undefined | null): string {
+  if (!cluster) return "";
+  return cluster.version && cluster.version.trim() ? `${cluster.name} (v${cluster.version})` : cluster.name;
+}

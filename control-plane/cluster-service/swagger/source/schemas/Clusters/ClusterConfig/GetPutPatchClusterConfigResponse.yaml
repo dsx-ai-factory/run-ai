@@ -1,0 +1,11 @@
+x-internal: true
+required:
+- config
+type: object
+description: GET/PUT/PATCH Cluster Configuration Response
+allOf:
+  - $ref: "ClusterUserConfig.yaml"
+  - type: object
+    properties:
+      status:
+        $ref: "ClusterConfigStatus.yaml"

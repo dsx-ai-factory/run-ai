@@ -1,0 +1,62 @@
+get:
+  summary: Get tenant by id
+  x-service: tenants-manager
+  x-test-coverage: not-applicable
+  operationId: get_tenant_by_id_internal
+  x-no-authorization: true
+  tags:
+  - tenants
+  parameters:
+  - $ref: "../../parameters/path/tenantId.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Tenants/Tenant.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+delete:
+  summary: soft/hard delete tenant
+  x-service: tenants-manager
+  x-test-coverage: not-applicable
+  operationId: delete_tenant_by_id_internal
+  x-no-authorization: true
+  tags:
+  - tenants
+  parameters:
+  - $ref: "../../parameters/path/tenantId.yaml"
+  - $ref: "../../parameters/query/isHardDelete.yaml"
+  responses:
+    200:
+      description: tenant uid that was deleted.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - uid
+            properties:
+              uid:
+                type: string
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

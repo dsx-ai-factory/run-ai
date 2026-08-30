@@ -1,0 +1,2 @@
+DROP INDEX IF EXISTS pods_revision_idx;
+ALTER TABLE IF EXISTS pods DROP COLUMN IF EXISTS revision_id;

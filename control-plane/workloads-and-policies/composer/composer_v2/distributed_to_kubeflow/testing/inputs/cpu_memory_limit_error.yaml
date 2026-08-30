@@ -1,0 +1,5 @@
+image: ubuntu
+
+compute:
+  cpuMemoryRequest:  11M
+  cpuMemoryLimit:    10M

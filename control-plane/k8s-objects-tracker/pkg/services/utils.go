@@ -1,0 +1,21 @@
+package services
+
+import (
+	"net/http"
+
+	"github.com/run-ai/runai/control-plane/k8s-objects-tracker/internal/generated/pkg/api"
+)
+
+func NoContentResponse() api.ImplResponse {
+	return api.ImplResponse{
+		Code: http.StatusNoContent,
+	}
+}
+
+func NewErrorResponse(apiError *api.Error) api.ImplResponse {
+	apiError.Details = ""
+	return api.ImplResponse{
+		Code: int(apiError.Code),
+		Body: *apiError,
+	}
+}

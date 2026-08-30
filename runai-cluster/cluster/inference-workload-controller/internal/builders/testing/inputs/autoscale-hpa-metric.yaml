@@ -1,0 +1,30 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  name: autoscale
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  image:
+    value: ubuntu
+  name:
+    value: autoscale-0
+  memoryLimit:
+    value: "1"
+  username:
+    value: user.name
+  minScale:
+    value: 1
+  maxScale:
+    value: 1
+  metric:
+    value: latency
+  target:
+    value: 1
+  ports:
+    items:
+      port-80:
+        value:
+          serviceType: ServingPort
+          container: 80
+status: {}

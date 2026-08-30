@@ -1,0 +1,44 @@
+apiVersion: ray.io/v1
+kind: RayCluster
+metadata:
+  annotations:
+    example.com/annotation: test-value
+  labels:
+    app: ray-test
+  name: test
+spec:
+  autoscalerOptions:
+    idleTimeoutSeconds: 60
+    image: gcr.io/test/autoscaler:v1
+    imagePullPolicy: IfNotPresent
+    upscalingMode: Default
+    version: v2
+  enableInTreeAutoscaling: true
+  headGroupSpec:
+    template:
+      spec:
+        containers:
+        - image: placeholder-head
+          name: test
+        initContainers:
+        - image: placeholder-head-init
+          name: test
+  headServiceAnnotations:
+    example.com/head-ann: head-value
+  managedBy: ray.io/raycluster-controller
+  rayVersion: 2.11.0
+  suspend: false
+  workerGroupSpecs:
+  - groupName: test
+    maxReplicas: 1
+    minReplicas: 0
+    rayStartParams: {}
+    template:
+      metadata: {}
+      spec:
+        containers:
+        - image: placeholder-worker
+          name: test
+        initContainers:
+        - image: placeholder-worker-init
+          name: test

@@ -1,0 +1,31 @@
+post:
+  summary: Sync workload type statuses from cluster.
+  operationId: sync_workload_types
+  x-service: workloads
+  x-authorize:
+    resource-type: workload-properties
+    action: sync
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/workload_properties_api_test.go
+  tags:
+    - Workload properties
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/WorkloadProperties/WorkloadTypesForSync.yaml'
+  responses:
+    204:
+      $ref: "../../../../infra/openapi/docs/responses/204NoContent.yaml"
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

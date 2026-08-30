@@ -1,0 +1,7 @@
+type: object
+required:
+  - ids
+properties:
+  ids:
+    $ref: '../../../../infra/openapi/docs/schemas/batch/IdsList.yaml'
+    maxItems: 100

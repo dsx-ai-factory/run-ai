@@ -1,0 +1,39 @@
+type: object
+description: Service specification to create for a workload endpoint.
+nullable: true
+properties:
+  name:
+    description: The Kubernetes Service name.
+    type: string
+    minLength: 1
+    maxLength: 253
+    example: workload-service
+  type:
+    description: Kubernetes service type that determines how the service is exposed.
+    $ref: "./ServiceType.yaml"
+  selector:
+    description: Label selector to identify the pods that this service routes traffic to.
+    type: object
+    additionalProperties:
+      type: string
+    example:
+      app: my-app
+    nullable: true
+  labels:
+    description: Labels to apply to the Kubernetes Service.
+    type: object
+    additionalProperties:
+      type: string
+    example:
+      app: my-app
+  ports:
+    description: Ports exposed by the service.
+    type: array
+    minItems: 1
+    maxItems: 1000
+    items:
+      $ref: "./ServicePort.yaml"
+required:
+  - name
+  - selector
+  - ports

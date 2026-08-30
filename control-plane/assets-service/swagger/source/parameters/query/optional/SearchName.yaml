@@ -1,0 +1,7 @@
+name: searchName
+in: query
+required: false
+description: Filter results that contains searchName.
+schema:
+  type: string
+allowReserved: true

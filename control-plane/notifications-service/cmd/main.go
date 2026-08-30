@@ -1,0 +1,61 @@
+package main
+
+import (
+	"os"
+	"os/signal"
+	"strings"
+
+	"github.com/rs/zerolog/log"
+	"github.com/run-ai/runai/control-plane/notifications-service/internal/app"
+	"github.com/run-ai/runai/control-plane/notifications-service/internal/config/basic"
+	runaimetrics "github.com/run-ai/runai/runai-common-packages/metrics"
+
+	"github.com/run-ai/runai/control-plane/notifications-service/internal/config/advanced"
+)
+
+const (
+	envConfPath       = "CONF_PATH"
+	envConfigProvider = "ENV_CONFIG_PROVIDER"
+)
+
+func main() {
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, os.Interrupt)
+
+	app := initApp()
+	app.Start()
+
+	<-signalCh
+	log.Info().Msg("service received stop signal")
+
+	app.Stop()
+}
+
+func initApp() *app.App {
+	log.Info().Msg("service initializing")
+	runaimetrics.Init(nil)
+	configFactory := GetConfigFactory()
+	appInstance := app.NewApp(configFactory)
+	appInstance.InitializeEventRouters()
+
+	return appInstance
+}
+
+func GetConfigFactory() app.ConfigFactory {
+	path := getEnv(envConfPath)
+	providerType := getEnv(envConfigProvider)
+	log.Info().Msgf("requested config provider is: %s", providerType)
+
+	switch providerType {
+	case "advanced":
+		log.Info().Msg("using advanced config provider")
+		return advanced.NewFactory(path)
+	default:
+		log.Info().Msg("using basic config provider")
+		return basic.NewFactory(path)
+	}
+}
+
+func getEnv(envVar string) string {
+	return strings.Trim(os.Getenv(envVar), " ")
+}

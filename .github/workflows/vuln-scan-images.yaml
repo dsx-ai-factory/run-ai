@@ -1,0 +1,230 @@
+# Base-image vulnerability scan (Grype).
+#
+# Covers the one class of vulnerability nothing else in this repo sees: OS
+# packages inside our container base images (RPMs in ubi9-minimal, apk in
+# alpine, deb in the node/playwright images). Dependabot, govulncheck,
+# pip-audit and npm-audit all read dependency manifests and are blind to it.
+#
+# Scanning the base images directly rather than our built images is deliberate:
+# our layers on top are Go/Node/Python artifacts already covered by the tools
+# above, and this needs no build, no registry credentials, and no private Go
+# module access — so it runs green today.
+#
+# Results go to the job summary and a downloadable artifact, NOT to the
+# Security tab: code-scanning SARIF upload requires GitHub Advanced Security on
+# private repositories, and this repo has `advanced_security: disabled`. Once
+# the repo is public (code scanning is free for public repos), add a
+# github/codeql-action/upload-sarif step and drop the artifact.
+name: Vuln scan (base images)
+
+# Called from pr-fast.yaml, which runs on fork PRs only. Internal PRs are
+# covered by NVIDIA NSPECT and deliberately do not run this. The schedule below
+# is a repo-wide nightly sweep, not a PR check — it is what tells us the day a
+# fix becomes available for a base image we ship.
+on:
+  schedule:
+    # 07:30 UTC daily.
+    - cron: '30 7 * * *'
+  workflow_dispatch: {}
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vuln-scan-images-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Derive the image list from the Dockerfiles rather than hardcoding it, so the
+  # matrix cannot silently go stale as base images are added, bumped or removed.
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      images: ${{ steps.images.outputs.images }}
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6
+        with:
+          persist-credentials: false
+
+      - id: images
+        name: Resolve base images from Dockerfiles
+        run: |
+          set -euo pipefail
+          # git ls-files, not `grep -r`: a recursive grep also walks node_modules
+          # and other vendored trees, which carry their own test Dockerfiles
+          # (debian:7.3, ubuntu:13.10, fedora:20 ...) that we do not ship.
+          python3 - >> "$GITHUB_OUTPUT" <<'PY'
+          import json, re, subprocess, sys
+
+          # GitHub caps a matrix at 256 jobs. Stay well under it, and say out
+          # loud what was dropped rather than silently scanning a subset.
+          MAX = 60
+
+          files = [f for f in subprocess.run(
+              ["git", "ls-files", "-z", "*Dockerfile"],
+              capture_output=True, text=True, check=True).stdout.split("\0") if f]
+
+          images = set()
+          for path in files:
+              try:
+                  lines = open(path, encoding="utf-8", errors="replace").read().splitlines()
+              except OSError:
+                  continue
+              aliases, refs = set(), []
+              for line in lines:
+                  m = re.match(r"\s*FROM\s+(.+)", line, re.I)
+                  if not m:
+                      continue
+                  # Drop FROM flags such as --platform=linux/amd64 before
+                  # taking the image reference.
+                  toks = [t for t in m.group(1).split() if not t.startswith("--")]
+                  if not toks:
+                      continue
+                  refs.append(toks[0].lower())
+                  # `FROM <img> AS <alias>` defines a build stage name, which a
+                  # later FROM may reference. Those are not images.
+                  if len(toks) >= 3 and toks[1].lower() == "as":
+                      aliases.add(toks[2].lower())
+              for ref in refs:
+                  if ref in aliases or ref == "scratch" or "$" in ref:
+                      continue
+                  if "@" in ref:            # already digest-pinned
+                      images.add(ref)
+                      continue
+                  # A tag is only a tag if it is on the last path segment;
+                  # a registry host may carry a :port.
+                  if ":" not in ref.rsplit("/", 1)[-1]:
+                      ref += ":latest"
+                  images.add(ref)
+
+          out = sorted(images)
+          if len(out) > MAX:
+              print(f"::warning::base-image matrix capped at {MAX}; "
+                    f"{len(out) - MAX} image(s) not scanned: {', '.join(out[MAX:])}",
+                    file=sys.stderr)
+              out = out[:MAX]
+          print(f"Resolved {len(out)} base image(s): {out}", file=sys.stderr)
+          print("images=" + json.dumps(out))
+          PY
+
+  scan:
+    needs: discover
+    if: needs.discover.outputs.images != '[]' && needs.discover.outputs.images != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.discover.outputs.images) }}
+    name: ${{ matrix.image }}
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      # Grype is installed directly from a pinned release asset, verified
+      # against the upstream checksums file, rather than via
+      # anchore/scan-action. Pinning that action by SHA is not sufficient: its
+      # bundled dist/index.js fetches
+      # https://raw.githubusercontent.com/anchore/grype/main/install.sh at run
+      # time, so the binary it installs is not pinned by the action SHA and a
+      # compromise of anchore/grype@main would execute on this runner.
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Install grype
+        env:
+          GRYPE_VERSION: '0.116.0'
+        run: |
+          set -euo pipefail
+          BASE="https://github.com/anchore/grype/releases/download/v${GRYPE_VERSION}"
+          TAR="grype_${GRYPE_VERSION}_linux_amd64.tar.gz"
+          SUMS="grype_${GRYPE_VERSION}_checksums.txt"
+          TMP="$(mktemp -d)"
+          curl -fsSL -o "${TMP}/${TAR}" "${BASE}/${TAR}"
+          curl -fsSL -o "${TMP}/checksums.txt" "${BASE}/${SUMS}"
+          curl -fsSL -o "${TMP}/checksums.txt.sig" "${BASE}/${SUMS}.sig"
+          curl -fsSL -o "${TMP}/checksums.txt.pem" "${BASE}/${SUMS}.pem"
+
+          # The tarball and its checksum manifest share the same mutable release
+          # boundary, so verifying one against the other proves nothing on its
+          # own. Establish trust in the manifest first via its sigstore
+          # signature, then check the tarball against it.
+          cosign verify-blob \
+            --certificate "${TMP}/checksums.txt.pem" \
+            --signature "${TMP}/checksums.txt.sig" \
+            --certificate-identity-regexp '^https://github\.com/anchore/grype/\.github/workflows/.+' \
+            --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+            "${TMP}/checksums.txt"
+
+          EXPECTED=$(awk -v t="${TAR}" '$2 == t {print $1}' "${TMP}/checksums.txt")
+          if [ -z "${EXPECTED}" ]; then
+            echo "::error::no checksum entry for ${TAR} in upstream checksums.txt"
+            exit 1
+          fi
+          ACTUAL=$(sha256sum "${TMP}/${TAR}" | awk '{print $1}')
+          if [ "${ACTUAL}" != "${EXPECTED}" ]; then
+            echo "::error::grype checksum mismatch: expected ${EXPECTED}, got ${ACTUAL}"
+            exit 1
+          fi
+          tar -xzf "${TMP}/${TAR}" -C "${TMP}" grype
+          mv "${TMP}/grype" "${PWD}/grype"
+          rm -rf "${TMP}"
+          echo "${PWD}" >> "$GITHUB_PATH"
+
+      # --only-fixed filters the report to vulnerabilities that have a fix.
+      # Severity is NOT filtered here: grype's --fail-on (which the action
+      # exposed as severity-cutoff) only affects exit status, it leaves every
+      # severity in the JSON. The severity filter is applied when rendering.
+      - name: Scan
+        env:
+          IMAGE: ${{ matrix.image }}
+        run: |
+          set -euo pipefail
+          grype "${IMAGE}" --only-fixed -o json > grype.json
+
+      - name: Publish results
+        if: always()
+        env:
+          IMAGE: ${{ matrix.image }}
+        run: |
+          set -euo pipefail
+          if [ ! -s grype.json ]; then
+            echo "::error::grype produced no JSON report — the scan did not run"
+            exit 1
+          fi
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, os
+          KEEP = {"High", "Critical"}
+          img = os.environ["IMAGE"]
+          all_m = json.load(open("grype.json"))["matches"]
+          m = [x for x in all_m if x["vulnerability"]["severity"] in KEEP]
+          print(f"## Grype — `{img}`\n")
+          print("_Fixable vulnerabilities at High or Critical. Informational — does not gate merge._\n")
+          if not m:
+              print(f"No fixable High/Critical vulnerabilities found "
+                    f"({len(all_m)} fixable at any severity).")
+          else:
+              print("| Package | Version | Severity | CVE | Fixed in |")
+              print("|---|---|---|---|---|")
+              for x in m:
+                  v, a = x["vulnerability"], x["artifact"]
+                  fixed = ", ".join(v.get("fix", {}).get("versions") or []) or "—"
+                  print(f"| {a['name']} | {a['version']} | {v['severity']} | {v['id']} | {fixed} |")
+              print(f"\n**{len(m)} fixable High/Critical finding(s)** "
+                    f"of {len(all_m)} fixable at any severity.")
+          PY
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: grype-${{ strategy.job-index }}
+          path: grype.json
+          if-no-files-found: warn
+          retention-days: 14

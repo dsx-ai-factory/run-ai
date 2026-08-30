@@ -1,0 +1,94 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+allOf:
+- nullable: true
+  properties:
+    annotations:
+      $ref: ../workloads_spec/advanced/Annotations.yaml
+    autoscaling:
+      nullable: true
+      properties:
+        maxReplicas:
+          $ref: ../workloads_spec/nim_services/AutoScalingMaxReplicas.yaml
+        metric:
+          $ref: ../workloads_spec/nim_services/AutoScalingMetricNim.yaml
+        metricThreshold:
+          $ref: ../workloads_spec/nim_services/AutoScalingMetricThreshold.yaml
+        minReplicas:
+          $ref: ../workloads_spec/nim_services/AutoScalingMinReplicas.yaml
+        scaleWindowSeconds:
+          $ref: ../workloads_spec/nim_services/AutoScalingScaleWindowSeconds.yaml
+      type: object
+    category:
+      $ref: ../workloads_spec/resources/Category.yaml
+    compute:
+      nullable: true
+      properties:
+        cpuCoreLimit:
+          $ref: ../workloads_spec/compute/CpuCoreLimit.yaml
+        cpuCoreRequest:
+          $ref: ../workloads_spec/compute/CpuCoreRequest.yaml
+        cpuMemoryLimit:
+          $ref: ../workloads_spec/compute/CpuMemoryLimit.yaml
+        cpuMemoryRequest:
+          $ref: ../workloads_spec/compute/CpuMemoryRequest.yaml
+        gpuDevicesRequest:
+          $ref: ../workloads_spec/compute/GpuDevicesRequest.yaml
+        gpuMemoryLimit:
+          $ref: ../workloads_spec/compute/GpuMemoryLimit.yaml
+        gpuMemoryRequest:
+          $ref: ../workloads_spec/compute/GpuMemoryRequest.yaml
+        gpuPortionLimit:
+          $ref: ../workloads_spec/compute/GpuPortionLimit.yaml
+        gpuPortionRequest:
+          $ref: ../workloads_spec/compute/GpuPortionRequest.yaml
+        gpuRequestType:
+          $ref: ../workloads_spec/compute/GpuRequestType.yaml
+      type: object
+    environmentVariables:
+      $ref: ../workloads_spec/container/EnvironmentVariables.yaml
+    image:
+      $ref: ../workloads_spec/container/Image.yaml
+    imagePullPolicy:
+      $ref: ../workloads_spec/container/ImagePullPolicy.yaml
+    imagePullSecrets:
+      $ref: ../workloads_spec/advanced/ImagePullSecrets.yaml
+    labels:
+      $ref: ../workloads_spec/advanced/Labels.yaml
+    modelStore:
+      nullable: true
+      properties:
+        nimCache:
+          $ref: ../workloads_spec/nim_services/NimCache.yaml
+        pvc:
+          $ref: ../workloads_spec/nim_services/NimServicePvc.yaml
+      type: object
+    multiNode:
+      $ref: ../workloads_spec/nim_services/NimServiceMultiNode.yaml
+    ngcAuthSecret:
+      $ref: ../workloads_spec/nim_services/NimServiceNgcAuthSecret.yaml
+    nodePools:
+      $ref: ../workloads_spec/resources/NodePools.yaml
+    preemptibility:
+      $ref: ../workloads_spec/advanced/Preemptibility.yaml
+    priorityClass:
+      $ref: ../workloads_spec/resources/PriorityClass.yaml
+    probes:
+      $ref: ../workloads_spec/container/Probes.yaml
+    replicas:
+      $ref: ../workloads_spec/nim_services/NimServiceReplicas.yaml
+    security:
+      nullable: true
+      properties:
+        runAsGid:
+          $ref: ../workloads_spec/security/RunAsGid.yaml
+        runAsUid:
+          $ref: ../workloads_spec/security/RunAsUid.yaml
+      type: object
+    servingPort:
+      $ref: ../workloads_spec/nim_services/NimServiceServingPort.yaml
+    tolerations:
+      $ref: ../workloads_spec/advanced/Tolerations.yaml
+  type: object

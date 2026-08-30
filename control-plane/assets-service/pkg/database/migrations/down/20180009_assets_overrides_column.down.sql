@@ -1,0 +1,1 @@
+ALTER TABLE workloads_assets DROP COLUMN IF EXISTS overrides;

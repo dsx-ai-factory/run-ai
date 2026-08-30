@@ -1,0 +1,14 @@
+export const ONBOARDING_MODAL_SHOWN = "onboarding-modal-shown";
+export const ADMIN_ONBOARDING_MODAL_SHOWN = "admin-onboarding-modal-shown";
+export const ACCESS_TOKEN = "access-token";
+export const ID_TOKEN = "id-token";
+export const REFRESH_TOKEN = "refresh-token";
+export const HAD_SESSION = "had-session";
+export const OVERVIEW_FILTERS = "overview-filters";
+export const QUOTA_MANAGEMENT_FILTERS = "quota-management-filters";
+export const OVERVIEW_DATE_FILTERS = "overview-date-filters";
+export const CLUSTER_ID_FILTER = "cluster-id-filter-v2";
+export const PROJECT_CREATION_WARNING_DIALOG_DONT_SHOW = "project-creation-warning-dialog-dont-show";
+export const DEPARTMENT_CREATION_WARNING_DIALOG_DONT_SHOW = "department-creation-warning-dialog-dont-show";
+export const OAUTH_STATE = "oauth-state";
+export const PKCE_CODE_VERIFIER = "pkce-code-verifier";

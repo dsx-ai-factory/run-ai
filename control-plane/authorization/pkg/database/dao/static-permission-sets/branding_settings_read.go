@@ -1,0 +1,17 @@
+package static_permission_sets
+
+import (
+	"github.com/run-ai/runai/control-plane/authorization/generated/pkg/api"
+	"github.com/run-ai/runai/control-plane/authorization/pkg/database/models"
+)
+
+var BrandingSettingsRead = models.PermissionSet{
+	Name:        "Branding settings read",
+	Description: "Grants permissions to view branding settings.",
+	Permissions: []models.RolePermission{
+		{
+			ResourceType: api.RESOURCETYPE_BRANDING_SETTINGS,
+			Read:         true,
+		},
+	},
+}

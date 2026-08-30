@@ -1,0 +1,25 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  name: hello-world-server
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  name:
+    value: triton-server
+  image:
+    value: runai/example-triton-server
+  username:
+    value: guy.shaibi
+  metric: 
+    value: cpu-utilization
+  target:
+    value: 80
+  ports:
+    items:
+      port-8080:
+        value:
+          container: 8000
+          protocol: "grpc"
+  isPrivateServiceUrl:
+    value: true

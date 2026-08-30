@@ -1,0 +1,3 @@
+{{- if .Values.k8sObjectsTracker.enabled }}
+{{- include "common.service" (list . .Values.k8sObjectsTracker.service .Values.k8sObjectsTracker) }}
+{{- end }}

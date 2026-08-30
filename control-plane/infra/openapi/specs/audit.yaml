@@ -1,0 +1,310 @@
+openapi: 3.0.3
+info:
+  title: Audit Log API
+  description: A public API for fetching audit-log-service
+  version: 0.0.1
+  contact:
+    name: Run.AI
+    url: https://www.run.ai/
+    email: support@run.ai
+servers:
+  - url: /audit/v1
+security:
+  - bearerAuth: []
+tags:
+  - description: Audit Log
+    name: audit
+paths:
+  /audit-log:
+    get:
+      description: Get audit logs based on query params filter
+      summary: Get audit logs
+      operationId: getAuditLogs
+      x-authorize:
+        resource-type: audit_log
+        action: read
+      tags:
+        - AuditLogs
+      parameters:
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/SortOrder'
+        - $ref: '#/components/parameters/AuditLogSort'
+        - $ref: '#/components/parameters/AuditLogFilter'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - logs
+                properties:
+                  next:
+                    type: integer
+                    example: 100
+                  audit_logs:
+                    $ref: '#/components/schemas/AuditLogs'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /audit-log/download:
+    get:
+      description: Download audit logs as a file, based on query params filter
+      summary: Download audit logs
+      operationId: downloadAuditLogs
+      x-authorize:
+        resource-type: audit_log
+        action: read
+      tags:
+        - AuditLogs
+      parameters:
+        - in: query
+          name: file_type
+          schema:
+            type: string
+            enum:
+              - CSV
+              - JSON
+            default: CSV
+          required: false
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/AuditLogFilter'
+      responses:
+        '200':
+          description: File downloaded
+          content:
+            application/x-compressed-tar:
+              schema:
+                type: string
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+components:
+  parameters:
+    AuditLogSort:
+      name: sortBy
+      in: query
+      required: false
+      description: Sort results by a parameters.
+      schema:
+        type: string
+        enum:
+          - timestamp
+          - subject
+          - subject_type
+          - source_ip
+          - action
+          - http_method
+          - result
+          - url
+          - entity_type
+          - entity_name
+          - entity_id
+    AuditLogFilter:
+      name: filterBy
+      in: query
+      required: false
+      description: Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=.
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: ^(timestamp|subject|subject_type|source_ip|action|result|url|entity_type|entity_name|cluster_name)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+        example:
+          - cluster_name==my-cluster_name
+    Offset:
+      name: offset
+      in: query
+      required: false
+      description: The offset of the first item returned in the collection.
+      schema:
+        type: integer
+        format: int32
+        example: 100
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: The maximum number of entries to return.
+      schema:
+        type: integer
+        format: int32
+        default: 50
+        minimum: 1
+        maximum: 500
+    SortOrder:
+      name: sortOrder
+      in: query
+      required: false
+      description: Sort results by a descending or ascending order.
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: asc
+  schemas:
+    AuditLog:
+      type: object
+      required:
+        - id
+        - timestamp
+        - tenant_id
+        - subject
+        - subject_id
+        - subject_type
+        - source_ip
+        - action
+        - http_method
+        - result
+        - url
+        - entity_type
+        - entity_name
+        - entity_id
+        - http_status_code
+        - reqeust_id
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 0000-000000-00000-00000
+        tenant_id:
+          type: string
+          example: '55'
+        timestamp:
+          type: string
+          format: date-time
+          example: '2022-01-01T03:49:52.531Z'
+        subject:
+          type: string
+          description: the user/app which triggered this API
+          example: researcher@run.ai
+        subject_id:
+          type: string
+          description: application or authenticated user id, or email/credentials for auth actions
+          example: 6d0ed314-025c-4941-891d-ba0f1f466666
+        subject_type:
+          type: string
+          enum:
+            - User
+            - App
+          default: User
+        source_ip:
+          type: string
+          format: ipv4
+        action:
+          type: string
+          enum:
+            - create
+            - update
+            - delete
+            - sign-in
+            - sign-out
+            - reset-password
+        http_method:
+          type: string
+          enum:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - CREATE
+        url:
+          type: string
+          format: uri
+        entity_type:
+          type: string
+          example: project
+        entity_name:
+          type: string
+          example: project-1
+        entity_id:
+          type: string
+          example: '1234'
+        result:
+          type: string
+          enum:
+            - Success
+            - Failure
+        http_status_code:
+          type: int
+          example: 200
+        cluster_name:
+          type: string
+          example: my favorite cluster
+        cluster_id:
+          type: string
+          format: uuid
+        request_id:
+          type: string
+          format: uuid
+          example: bb0c4742-e52f-4d5e-bfee-2c4ff57c339c
+    AuditLogs:
+      type: array
+      items:
+        $ref: '#/components/schemas/AuditLog'
+      x-schema-name: AuditLog
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          minimum: 100
+          maximum: 599
+        message:
+          type: string
+      example:
+        code: 400
+        message: Bad request - Resource should have a name
+  responses:
+    401Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 401
+            message: Issuer is not familiar.
+    403Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 403
+            message: You do not have sufficient permissions.
+    500InternalServerError:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 500
+            message: Something went wrong.
+    503ServiceUnavailable:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 503
+            message: Please try again in few minutes.

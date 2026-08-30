@@ -1,0 +1,17 @@
+{
+  "service_name": "runai-crd-upgrader",
+  "artifact_type": "container",
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "notifications": {
+    "slack": {
+      "mention": "@griffin"
+    }
+  },
+  "jira": {
+    "team_name": "Griffin Team"
+  },
+  "ngc": {
+    "guest_access": true
+  }
+}

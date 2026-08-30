@@ -1,0 +1,30 @@
+get:
+  summary: Download Mac installer script
+  description: |
+    This endpoint returns a Mac script that can be used to install the Run:AI CLI.
+  operationId: get_installer_mac
+  x-service: cli-exposer
+  x-test-coverage:
+    - cli-exposer/pkg/services/api_cli_service_test.go
+  x-no-authorization: true
+  tags:
+    - Researcher Command Line Interface
+  responses:
+    '200':
+      description: File download successful
+      content:
+        text/plain:
+          x-default: true
+          schema:
+            type: string
+          example: "Contents of the file"
+    400:
+        $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,5 @@
+properties:
+  s3:
+    $ref: "./S3sDefaults.yaml"
+nullable: true
+type: object

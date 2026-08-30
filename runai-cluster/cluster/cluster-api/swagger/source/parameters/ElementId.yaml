@@ -1,0 +1,7 @@
+name: elementId
+in: path
+required: true
+description: The unique identifier (UUID) of the element within the workload.
+schema:
+  type: string
+  format: uuid

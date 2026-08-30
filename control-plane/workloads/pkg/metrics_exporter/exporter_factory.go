@@ -1,0 +1,32 @@
+package metrics_exporter
+
+import (
+	"context"
+
+	"github.com/run-ai/runai/control-plane/workloads/pkg/metrics_exporter/models"
+	metrics_pkg "github.com/run-ai/runai/runai-common-packages/metrics"
+)
+
+//go:generate mockery --name MetricsExporterer
+type MetricsExporterer interface {
+	Export(ctx context.Context, tenantIds []int32)
+}
+
+//go:generate mockery --name ExporterFactoryer --inpackage --filename mock_exporter_factory.go --structname MockExporterFactoryer
+type ExporterFactoryer interface {
+	CreateExporter(metric *models.ExportableMetric) MetricsExporterer
+}
+
+type ExporterFactory struct {
+	registry metrics_pkg.MetricsRegistrar
+}
+
+func NewExporterFactory(registry metrics_pkg.MetricsRegistrar) *ExporterFactory {
+	return &ExporterFactory{
+		registry: registry,
+	}
+}
+
+func (e *ExporterFactory) CreateExporter(metric *models.ExportableMetric) MetricsExporterer {
+	return NewGaugeExporter(e.registry, metric)
+}

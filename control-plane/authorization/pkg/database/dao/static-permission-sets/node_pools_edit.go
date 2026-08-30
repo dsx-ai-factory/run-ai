@@ -1,0 +1,32 @@
+package static_permission_sets
+
+import (
+	"github.com/run-ai/runai/control-plane/authorization/generated/pkg/api"
+	"github.com/run-ai/runai/control-plane/authorization/pkg/database/models"
+)
+
+var NodePoolsEdit = models.PermissionSet{
+	Name:        "Node pools edit",
+	Description: "Grants full permissions to create, read, update, and delete node pools, and to access all related data and resources required for their management.",
+	Permissions: []models.RolePermission{
+		{
+			ResourceType: api.RESOURCETYPE_NODEPOOLS,
+			Create:       true,
+			Read:         true,
+			Update:       true,
+			Delete:       true,
+		},
+		{
+			ResourceType: api.RESOURCETYPE_NODEPOOLS_MINIMAL,
+			Read:         true,
+		},
+		{
+			ResourceType: api.RESOURCETYPE_NODES,
+			Read:         true,
+		},
+		{
+			ResourceType: api.RESOURCETYPE_CLUSTERS_MINIMAL,
+			Read:         true,
+		},
+	},
+}

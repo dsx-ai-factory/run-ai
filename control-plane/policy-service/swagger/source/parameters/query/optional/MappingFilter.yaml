@@ -1,0 +1,19 @@
+name: filterBy
+in: query
+required: false
+description: >-
+  Filter mappings by workload type. Each expression uses the format
+  field-name operator value, where field-name is one of `group`, `kind`, or
+  `version`. Operators are `==` Equals, `!=` Not equals, `<=` Less than or
+  equal, `>=` Greater than or equal, `=@` Contains, `!@` Does not contain, `=^`
+  Starts with, and `=$` Ends with. Up to 10 expressions may be supplied, and up
+  to 1000 mappings are returned. For example,
+  ["kind==dynamoGraphDeployment","version==v1alpha1"].
+schema:
+  type: array
+  maxItems: 10
+  items:
+    type: string
+    pattern: "^(group|kind|version)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
+  example: ["kind==dynamoGraphDeployment", "version==v1alpha1"]
+explode: false

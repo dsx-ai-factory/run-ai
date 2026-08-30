@@ -1,0 +1,13 @@
+type: object
+properties:
+  tenant_id:
+    type: string
+    example: 12345
+  event_type:
+    type: string
+  properties:
+    type: object
+required:
+  - tenant_id
+  - event_type
+  - properties

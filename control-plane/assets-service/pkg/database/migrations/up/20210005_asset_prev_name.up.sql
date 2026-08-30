@@ -1,0 +1,1 @@
+ALTER TABLE assets_metadata ADD COLUMN IF NOT EXISTS prev_name TEXT;

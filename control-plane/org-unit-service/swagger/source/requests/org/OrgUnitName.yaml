@@ -1,0 +1,29 @@
+get:
+  operationId: getOrgUnitsNames
+  tags:
+    - Org unit
+  summary: Get the names of requested org units.
+  x-no-authorization: true
+  x-service: org-unit-service
+  x-internal: true
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/org_tree_internal_api_test.go
+  description: Get the names of requested org units.
+  parameters:
+    - $ref: "../../parameters/OrgUnitType.yaml"
+    - $ref: "../../parameters/OrgUnitIds.yaml"
+  responses:
+    200:
+      description: The resource name.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../../schemas/OrgUnit.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

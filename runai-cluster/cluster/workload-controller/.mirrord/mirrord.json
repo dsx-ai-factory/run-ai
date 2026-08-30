@@ -1,0 +1,27 @@
+{
+
+  "target": {
+    "path": {
+      "deployment": "workload-controller"
+    },
+    "namespace": "runai"
+  },
+  "feature": {
+    "env": true,
+    "fs": {
+      "mode": "read",
+      "read_only": [
+        "/etc.*"
+      ]
+    },
+    "network": {
+      "incoming": {
+        "mode": "steal"
+      },
+      "outgoing": {
+        "tcp": true,
+        "udp": true
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+type: object
+required:
+  - clusterId
+  - scopeType
+  - scopeId
+  - name
+properties:
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  scopeType:
+    $ref: "../Scopes/ScopeType.yaml"
+  scopeId:
+    $ref: "../Scopes/ScopeId.yaml"
+  name:
+    $ref: "./ConfigMapName.yaml"

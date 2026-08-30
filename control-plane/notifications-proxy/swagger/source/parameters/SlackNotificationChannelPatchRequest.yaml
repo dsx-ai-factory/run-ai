@@ -1,0 +1,20 @@
+type: object
+required:
+  - config
+properties:
+  name:
+    type: string
+    readOnly: true
+  config:
+    type: object
+    properties:
+      recipients:
+        type: array
+        items:
+          type: string
+        default: []
+        minItems: 0
+        maxItems: 100
+      directNotifications:
+        type: boolean
+        nullable: true

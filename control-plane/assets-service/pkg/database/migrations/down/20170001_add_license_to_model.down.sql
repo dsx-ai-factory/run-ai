@@ -1,0 +1,1 @@
+ALTER TABLE assets_model DROP COLUMN IF EXISTS license;

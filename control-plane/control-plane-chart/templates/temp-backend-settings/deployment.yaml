@@ -1,0 +1,13 @@
+{{- if .Values.tempBackendSettings.enabled }}
+{{- include "common.deployment" (list . .Values.tempBackendSettings .Values.tempBackendSettings.autoscaling .Values.tempBackendSettings.serviceAccount "control-plane.tempBackendSettings.deployment" ) }}
+{{- end }}
+
+{{- define "control-plane.tempBackendSettings.deployment" -}}
+spec:
+  template:
+    spec:
+      initContainers:
+        {{- include "awaitingPostgresReadinessContainer" . | nindent 8 }}
+      containers:
+      - {{- include "common.container" . | nindent 8 }}
+{{- end }}

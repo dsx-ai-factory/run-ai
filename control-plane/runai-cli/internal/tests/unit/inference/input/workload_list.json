@@ -1,0 +1,81 @@
+{
+  "workloads": [
+    {
+      "tenantId": 1001,
+      "runningPods": 0,
+      "phaseUpdatedAt": "2025-12-15T08:58:34.351084Z",
+      "k8sPhaseUpdatedAt": "2025-12-15T08:58:24.983624Z",
+      "updatedAt": "2025-12-15T09:07:57.791339Z",
+      "source": "CLI",
+      "deletedAt": null,
+      "type": "Inference",
+      "name": "my-inference-full-123",
+      "id": "a22ecd44-f863-444d-b69d-0cc0d26bbc54",
+      "priority": 150,
+      "priorityClassName": "very-high",
+      "submittedBy": "test@run.ai",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "projectName": "team-b",
+      "projectId": "4500002",
+      "departmentName": "default",
+      "departmentId": "4500000",
+      "namespace": "runai-team-b",
+      "createdAt": "2025-12-15T08:58:24.919632Z",
+      "workloadRequestedResources": {
+        "gpuRequestType": "memory",
+        "gpuMemory": {
+          "limit": "20G",
+          "request": "20G"
+        }
+      },
+      "podsRequestedResources": {},
+      "allocatedResources": {},
+      "actionsSupport": {
+        "delete": true
+      },
+      "phase": "Failed",
+      "conditions": null,
+      "phaseMessage": "Failed to create workload: [Service:my-inference-full-123] admission webhook \"validation.webhook.serving.knative.dev\" denied the request: validation failed: must not set the field(s): spec.template.spec.containers[0].securityContext.capabilities.add. Check the inference prerequisites in the Run:ai documentation",
+      "k8sPhase": "",
+      "requestedPods": {
+        "min": 0,
+        "max": 5
+      },
+      "requestedNodePools": [
+        "default"
+      ],
+      "images": [
+        "vllm/vllm-openai:latest"
+      ],
+      "environments": [
+        {
+          "connections": [
+            {
+              "name": "ServingPort",
+              "toolType": "custom",
+              "connectionType": "ServingPort",
+              "authorizationType": "authenticatedUsers",
+              "containerPort": 8080,
+              "correlationName": "serving-port"
+            }
+          ],
+          "name": "",
+          "id": ""
+        }
+      ],
+      "additionalFields": {
+        "cliCommand": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai inference submit my-inference-full-123 --project team-b --image vllm/vllm-openai:latest --image-pull-policy Always --working-dir /app -g 1 --gpu-memory-request 20G --serving-port=container=8080,authorization-type=authenticatedUsers,authorized-users=user1:user2:demo-user,protocol=http --environment-variable MODEL_NAME=llama-2-7b --environment-variable VLLM_HOST=0.0.0.0 --label app=inference-full --label version=v2.0 --label framework=vllm --annotation 'description=Comprehensive inference with all fields' --existing-pvc claimname=my-simple-pvc,path=/models --node-type gpu-nodes --min-replicas 0 --max-replicas 5 --initial-replicas 1 --activation-replicas 2 --metric concurrency --metric-threshold 50 --metric-threshold-percentage 70 --concurrency-hard-limit 100 --initialization-timeout-seconds 300 --request-timeout-seconds 60 --scale-down-delay-seconds 30 --scale-to-zero-retention-seconds 300 --run-as-uid 1000 --run-as-gid 1000 --supplemental-groups 2000,3000 --capability SYS_ADMIN --capability NET_ADMIN --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --toleration operator=Equal,key=high-priority,value=true,effect=NoSchedule --command -- python -m vllm.entrypoints.openai.api_server --model meta-llama/Llama-2-7b --port 8080 --tensor-parallel-size 1"
+      },
+      "preemptible": false,
+      "fullySaasWorkload": true,
+      "environmentVariables": {
+        "MODEL_NAME": "llama-2-7b",
+        "RUNAI_JOB_NAME": "${RUNAI_JOB_NAME}",
+        "RUNAI_PROJECT": "${RUNAI_PROJECT}",
+        "VLLM_HOST": "0.0.0.0"
+      },
+      "command": "python -m vllm.entrypoints.openai.api_server --model meta-llama/Llama-2-7b --port 8080 --tensor-parallel-size 1",
+      "category": "Deploy"
+    }
+  ]
+}

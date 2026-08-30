@@ -1,0 +1,5 @@
+allOf:
+  - $ref: "./AutoScalingMetricField.yaml"
+  - $ref: "./MetricThresholdField.yaml"
+nullable: true
+type: object

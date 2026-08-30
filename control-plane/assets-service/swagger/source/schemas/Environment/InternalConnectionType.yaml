@@ -1,0 +1,4 @@
+description: The type of connection that exposes the container port.
+type: string
+minLength: 1
+enum: [LoadBalancer, NodePort, ExternalUrl, ServingPort]

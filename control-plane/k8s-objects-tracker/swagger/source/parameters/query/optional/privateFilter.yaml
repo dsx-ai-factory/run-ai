@@ -1,0 +1,7 @@
+name: includePrivate
+in: query
+description: include private secrets in the response.
+  if not provided, we list only public secrets.
+schema:
+  type: boolean
+required: false

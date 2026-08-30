@@ -1,0 +1,4 @@
+type: array
+description: list of issues that was found while syncing the resource to the cluster
+items:
+  $ref: "./Issue.yaml"

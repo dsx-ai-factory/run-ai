@@ -1,0 +1,4 @@
+description: Whether to enable host networking. Default to false.
+type: boolean
+example: false
+nullable: true

@@ -1,0 +1,12 @@
+description: Details about times the asset has been used by workloads, etc.
+properties:
+  lastUsedByWorkload:
+    description: The time at which the asset were last used by a workload of given type and project.
+      This field requires complyToProject and complyToWorkload types flags of the API, to specify
+      the workload type and project id.
+    type: string
+    minLength: 1
+    format: date-time
+    nullable: true
+nullable: true
+type: object

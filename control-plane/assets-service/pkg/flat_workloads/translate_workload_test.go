@@ -1,0 +1,26 @@
+package flat_workloads
+
+import (
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	"github.com/run-ai/runai/control-plane/workloads-and-policies/auth"
+	"github.com/run-ai/runai/runai-application-packages/convutils"
+	policyconstants "github.com/run-ai/runai/runai-clients/policy-service-client/constants"
+)
+
+var _ = Describe("uid/gid derivation tests", func() {
+	Context("translate preemptible to priority class", func() {
+		It("should translate correctly", func() {
+			payloadMap := make(map[string]interface{})
+
+			handleOverQuota(nil, auth.WorkloadTypeWorkspace, payloadMap)
+			Expect(payloadMap["priorityClass"]).To(BeNil())
+
+			handleOverQuota(convutils.Ref(false), auth.WorkloadTypeWorkspace, payloadMap)
+			Expect(payloadMap["priorityClass"]).To(Equal(policyconstants.PriorityClassBuild))
+
+			handleOverQuota(convutils.Ref(true), auth.WorkloadTypeWorkspace, payloadMap)
+			Expect(payloadMap["priorityClass"]).To(Equal(policyconstants.PriorityClassInteractivePreemptible))
+		})
+	})
+})

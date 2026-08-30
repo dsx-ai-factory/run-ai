@@ -1,0 +1,74 @@
+{{- if .Values.helmHooksHandler.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: validate-cluster-config-params
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-3"
+    "helm.sh/hook-delete-policy": before-hook-creation, hook-succeeded
+data:
+  params.json: |
+    {
+      "clusterConfig" : {{- .Values.clusterConfig | toJson }}
+    }
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: validate-cluster-config
+  namespace: runai
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-2"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- include "jobAnnotations" . | nindent 4 }}
+  labels:
+    run.ai/hook: validate-cluster-config
+    {{- include "jobLabels" . | nindent 4 }}
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      annotations:
+        {{- include "jobAnnotations" . | nindent 8 }}
+      labels:
+        {{- include "jobLabels" . | nindent 8 }}
+        run.ai/hook: validate-cluster-config
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: validate-cluster-config
+          image: {{ include "helmHooksHandler.image" . }}
+          imagePullPolicy: {{ .Values.helmHooksHandler.image.pullPolicy }}
+          args:
+            - --validate-cluster-config
+            - --requires-kubernetes-access=false
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            {{- toYaml .Values.helmHooksHandler.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /runai/config
+      automountServiceAccountToken: false
+      imagePullSecrets:{{ include "imagePullSecretList" .| nindent 8 }}
+      volumes:
+        - name: config
+          projected:
+            sources:
+            - configMap:
+                name: validate-cluster-config-params
+      affinity: {{- include "deploymentAffinity" .| nindent 8 }}
+      tolerations: {{- include "deploymentTolerations" .| nindent 8 }}
+{{- end }}
+
+

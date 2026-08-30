@@ -1,0 +1,71 @@
+dir: '{{.InterfaceDir}}/mocks'
+structname: '{{.InterfaceName}}'
+filename: "{{.InterfaceName}}.go" 
+pkgname: mocks
+template: testify
+packages:
+  github.com/run-ai/runai/control-plane/notifications-proxy/internal/channel:
+    interfaces:
+      Clienter: {}
+  github.com/run-ai/runai/control-plane/notifications-proxy/internal/clients/channel:
+    interfaces:
+      SinksClienter: {}
+  github.com/run-ai/runai/control-plane/notifications-proxy/internal/clients/notification_types:
+    interfaces:
+      NotificationKindsClienter: {}
+  github.com/run-ai/runai/control-plane/notifications-proxy/internal/clients/notify:
+    interfaces:
+      UserRoutesClienter: {}
+  github.com/run-ai/runai/control-plane/notifications-proxy/internal/clients/state:
+    interfaces:
+      SlackCredentialsGetter: {}
+      TenantRoutesClienter: {}
+  github.com/run-ai/runai/control-plane/notifications-proxy/internal/clients/subscription:
+    interfaces:
+      UserRoutesClienter: {}
+  github.com/run-ai/runai/control-plane/notifications-proxy/internal/clients/tenant_delete:
+    interfaces:
+      SinksClienter: {}
+      TenantRoutesClienter: {}
+      UserRoutesClienter: {}
+  github.com/run-ai/runai/control-plane/notifications-proxy/internal/clients/tenant_migration:
+    interfaces:
+      TenantRoutesClienter: {}
+  github.com/run-ai/runai/control-plane/notifications-proxy/internal/email:
+    interfaces:
+      SinkClienter: {}
+  github.com/run-ai/runai/control-plane/notifications-proxy/internal/events_listeners:
+    interfaces:
+      TenantDeleteClienter: {}
+  github.com/run-ai/runai/control-plane/notifications-proxy/internal/notification_state:
+    interfaces:
+      ChannelClienter: {}
+      StateClienter: {}
+      StateMigrationClient: {}
+      SubUserClienter: {}
+  github.com/run-ai/runai/control-plane/notifications-proxy/internal/notification_types:
+    interfaces:
+      NotificationKindsClienter: {}
+  github.com/run-ai/runai/control-plane/notifications-proxy/internal/services:
+    interfaces:
+      Authorizer: {}
+      ChannelsManager: {}
+      EmailManager: {}
+      EmailNotificationStateManager: {}
+      NotificationStateManager: {}
+      NotificationTypesManager: {}
+      SlackManager: {}
+      SlackNotificationStateManager: {}
+      SubscriptionsManager: {}
+  github.com/run-ai/runai/control-plane/notifications-proxy/internal/slack:
+    interfaces:
+      ChannelClienter: {}
+      NotificationStateClienter: {}
+      Notifier: {}
+      SlackAuthSessionHandlerer: {}
+      SlackClienter: {}
+      SlackCredentialsDaoer: {}
+      UserSubscriptionsClienter: {}
+  github.com/run-ai/runai/control-plane/notifications-proxy/internal/subscription:
+    interfaces:
+      UserRoutesClienter: {}

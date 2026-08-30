@@ -1,0 +1,14 @@
+.openapi-generator-ignore
+README.md
+api/openapi.yaml
+pkg/api/api.go
+pkg/api/api_provision.go
+pkg/api/api_provision_service.go
+pkg/api/error.go
+pkg/api/helpers.go
+pkg/api/impl.go
+pkg/api/logger.go
+pkg/api/model_create_environment_request.go
+pkg/api/model_environment_accepted.go
+pkg/api/model_environment_status.go
+pkg/api/routers.go

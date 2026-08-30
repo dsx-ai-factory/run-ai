@@ -1,0 +1,2 @@
+description: An interactive workload ready for submission at the cluster. Further details at https://github.com/run-ai/runai/runai-cluster/tree/master/workload-controller/config/crd"
+type: object

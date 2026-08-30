@@ -1,0 +1,6 @@
+servingPort:
+  port: 8081
+  protocol: http
+restartPolicy: RecreateGroupOnPodRestart
+leader:
+  image: python:3.8

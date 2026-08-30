@@ -1,0 +1,21 @@
+type: object
+additionalProperties: false
+description: Resource requirements for the PVC. Only `requests.storage` is supported.
+required:
+  - requests
+properties:
+  requests:
+    type: object
+    additionalProperties: false
+    required:
+      - storage
+    properties:
+      storage:
+        type: string
+        description: |
+          Requested storage size as a Kubernetes quantity string
+          (e.g. `1Gi`, `500Mi`, `10Ti`).
+        pattern: '^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$'
+        minLength: 1
+        maxLength: 63
+        example: 1Gi

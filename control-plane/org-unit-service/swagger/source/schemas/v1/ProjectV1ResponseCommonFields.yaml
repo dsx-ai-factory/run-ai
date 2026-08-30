@@ -1,0 +1,84 @@
+required:
+  - deservedGpus
+  - maxAllowedGpus
+  - gpuOverQuotaWeight
+properties:
+  nodePoolsResources:
+    type: array
+    items:
+      $ref: "./NodePoolAssignedResourcesV1Response.yaml"
+    description: Resources assigned to this Project per Node Pool.
+  deservedGpus:
+    type: number
+    description: Deprecated. Use 'deserved' for the relevant resource type under `NodePoolResources`. The project's deserved GPU allocation in case the cluster has those resources.
+    example: 3
+    deprecated: true
+  maxAllowedGpus:
+    type: number
+    description: Deprecated. Instead, use `maxAllowed` for the relevant resource type under `NodePoolResources`. An upper limit for the amount of GPUs the project can get (Even if over quota is allowed and resources are available).
+    example: 5
+    deprecated: true
+  gpuOverQuotaWeight:
+    type: number
+    description: Deprecated. Instead, use `overQuotaWeight` for the relevant resource type under `NodePoolResources`. The priority the project gets for over quota resources.
+    maximum: 3
+    minimum: 0
+    example: 1
+    deprecated: true
+  defaultNodePools:
+    type: array
+    description: Default node pools list for workload submission for this project if a workload doesn't specify a node pools list.
+    items:
+      type: string
+    example: [ "default" ]
+  interactiveJobTimeLimitSecs:
+    type: number
+    description: A limit (in seconds) for the duration of interactive jobs from this project.
+    example: 3600
+  interactiveJobMaxIdleDurationSecs:
+    type: number
+    description: Maximum duration (in seconds) that an interactive job can be idle before being terminated.
+    example: 3000
+  interactivePreemptibleJobMaxIdleDurationSecs:
+    type: number
+    description: Maximum duration (in seconds) that an interactive preemptible job can be idle before being terminated.
+    example: 3000
+  trainingJobTimeLimitSecs:
+    type: number
+    description: A limit (in seconds) for the duration of training jobs from this project. Available only from cluster version 2.12
+    example: 3600
+  trainingJobMaxIdleDurationSecs:
+    type: number
+    description: Maximum duration (in seconds) that a training job can be idle before being terminated.
+    example: 3000
+  nodeAffinity:
+    $ref: './ProjectV1NodeAffinityResponse.yaml'
+  permissions:
+    required:
+      - users
+      - groups
+    properties:
+      users:
+        type: array
+        items:
+          type: string
+        description: Names of users that have permissions to the project.
+        nullable: true
+      groups:
+        type: array
+        items:
+          type: string
+        description: Names of groups that have permissions to the project.
+        nullable: true
+      applications:
+        type: array
+        items:
+          type: string
+        description: Names of applications that have permissions to the project.
+    description: Deprecated. Instead, use the `accessRules` API to add permissions to a specific subject in the project scope.
+    deprecated: true
+  resources:
+    allOf:
+      - $ref: "./AssignedResourcesV1Response.yaml"
+    deprecated: true
+    description: Deprecated. Instead, use `nodePoolsResources`. Total resources assigned to the Project. Can only be used in PUT/POST when there is a single Node Pool in the system. The resources returned in `GET` are the sum of all Node Pool Resources.

@@ -1,0 +1,59 @@
+name: Create release branch (OSS)
+
+on:
+  create:
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  create-branch-in-target-repo:
+    runs-on: ubuntu-latest
+    if: ${{ startsWith(github.ref, 'refs/heads/v') || startsWith(github.ref, 'refs/heads/release-') }}
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@4d991eb9b905ef189e4c376166672c3f2f230481
+        with:
+          egress-policy: audit
+
+      - name: Extract branch name and validate pattern
+        id: check_branch
+        run: |
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          if [[ ! "$BRANCH_NAME" =~ ^(v|release-)[0-9]+\.[0-9]+$ ]]; then
+            echo "Branch name $BRANCH_NAME does not match pattern. Skipping."
+            echo "branch_name=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "Branch name $BRANCH_NAME matches pattern."
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+      - name: Dispatch initial release run to saas-configuration
+        if: steps.check_branch.outputs.branch_name != ''
+        uses: benc-uk/workflow-dispatch@31e2b3319479a63f0ab15bf800eff9e913504e26
+        with:
+          workflow: release.yaml
+          repo: run-ai/saas-configuration
+          ref: master
+          token: ${{ secrets.GIT_HUB_OSS }}
+          inputs: |
+            {
+              "sha": "${{ github.sha }}",
+              "ref": "${{ github.ref }}",
+              "commit_message": "Create release branch ${{ steps.check_branch.outputs.branch_name }}",
+              "caller_repo": "${{ github.repository }}"
+            }
+
+      - name: Dispatch branch creation to env-in-a-click
+        if: steps.check_branch.outputs.branch_name != ''
+        uses: benc-uk/workflow-dispatch@31e2b3319479a63f0ab15bf800eff9e913504e26
+        with:
+          workflow: mirror-from-runai.yml
+          repo: run-ai/env-in-a-click
+          ref: master
+          token: ${{ secrets.GIT_HUB_OSS }}
+          inputs: |
+            {
+              "branch_name": "${{ steps.check_branch.outputs.branch_name }}"
+            }

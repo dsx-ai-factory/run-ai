@@ -1,0 +1,6 @@
+name: nodeName
+in: path
+description: The node name where the pods are running.
+schema:
+  type: string
+required: true

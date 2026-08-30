@@ -1,0 +1,16 @@
+description: Request to get info of a Hugging Face model.
+required:
+  - modelName
+properties:
+  modelName:
+    description: the model name
+    type: string
+    example: "meta-llama/Llama-2-7b-chat-hf"
+    pattern: ^[a-zA-Z0-9-_]+(\x2F[a-zA-Z0-9-_.]+)?$ # \x2F is the '/' character (openapi doesn't support / in regex)
+  hfToken:
+    description: the Hugging Face token, required only for gated models
+    type: string
+    pattern: "^hf_[a-zA-Z0-9]+$"
+    example: "hf_aabbccDDEEFFgghhiiKKLLMMnnooPP1234"
+    nullable: true
+

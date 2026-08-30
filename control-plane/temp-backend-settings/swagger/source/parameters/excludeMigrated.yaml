@@ -1,0 +1,7 @@
+name: excludeMigrated
+in: query
+required: false
+description: When true, excludes settings that have been migrated to external services (e.g., Identity Manager).
+schema:
+  type: boolean
+  default: false

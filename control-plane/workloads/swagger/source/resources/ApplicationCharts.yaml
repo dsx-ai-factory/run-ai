@@ -1,0 +1,41 @@
+post:
+  summary: Upload a Helm chart archive.
+  description: |
+    Upload a packaged Helm chart archive (.tgz) so it can be referenced by `chartId` when creating an
+    AI application. The uploaded chart is stored transiently and removed after the application is
+    deployed or after it expires.
+  operationId: upload_application_chart
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/ai_applications_service_test.go
+  x-authorize:
+    resource-type: applications
+    action: create
+  tags:
+    - AI Applications
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          required:
+            - chart
+          properties:
+            chart:
+              type: string
+              format: binary
+              description: The packaged Helm chart archive (.tgz), up to 10 MB.
+  responses:
+    200:
+      description: Chart uploaded successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Applications/AIApplicationChartUploadResponse.yaml'
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"

@@ -1,0 +1,132 @@
+patch:
+  summary: Update NVIDIA NIM service policy.
+  description: Use to apply changes to NVIDIA NIM service policy for a given organizational unit.
+  operationId: update_nim_service_policy
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/apply_test.go
+  x-no-authorization: true
+  x-audit: true
+  tags:
+    - Policy
+  parameters:
+    - $ref: "../parameters/query/optional/ValidateOnly.yaml"
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/NimService/NimServicePolicyChangeRequest.yaml"
+  responses:
+    200:
+      description: Policy applied.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/NimService/NimServicePolicy.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+
+put:
+  summary: Overwrite NVIDIA NIM service policy.
+  description: Use to apply NVIDIA NIM service policy for a given organizational unit.
+  operationId: overwrite_nim_service_policy
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/apply_test.go
+  x-no-authorization: true
+  x-audit: true
+  tags:
+    - Policy
+  parameters:
+    - $ref: "../parameters/query/optional/ValidateOnly.yaml"
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/NimService/NimServicePolicyOverwriteRequest.yaml"
+  responses:
+    200:
+      description: Policy applied.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/NimService/NimServicePolicy.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+
+get:
+  summary: Get NVIDIA NIM service policy.
+  description: Retrieve the details of NVIDIA NIM service policy for a given organizational unit.
+  operationId: get_nim_service_policy
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/apply_test.go
+    - control-plane/policy-service/pkg/services/get_test.go
+  x-no-authorization: true
+  tags:
+    - Policy
+  parameters:
+    - $ref: "../parameters/query/mandatory/PolicyScope.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByDepartment.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByProject.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml"
+    - $ref: "../parameters/query/optional/NoCreationMode.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/NimService/NimServicePolicy.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+
+delete:
+  summary: Delete NVIDIA NIM service policy.
+  description: Use to delete NVIDIA NIM service policy for a given organizational unit.
+  operationId: delete_nim_service_policy
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/delete_test.go
+  x-no-authorization: true
+  x-audit: true
+  tags:
+    - Policy
+  parameters:
+    - $ref: "../parameters/query/mandatory/PolicyScope.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByDepartment.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByProject.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml"
+  responses:
+    204:
+      description: The policy was deleted successfully.
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

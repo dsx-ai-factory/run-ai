@@ -1,0 +1,216 @@
+.runai-table {
+  box-shadow: $runai-table-shadow;
+
+  &.no-shadow {
+    .q-table__middle.runai-table {
+      box-shadow: none;
+    }
+  }
+
+  &::-webkit-scrollbar {
+    -webkit-appearance: none;
+    height: 7px;
+    width: 7px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: $black-54;
+  }
+
+  color: $black-87;
+  .q-checkbox {
+    .q-checkbox__inner--truthy,
+    .q-checkbox__inner--indet {
+      .q-checkbox__bg {
+        color: $primary;
+      }
+    }
+
+    &:not(.disabled):focus,
+    &:not(.disabled):hover {
+      .q-checkbox__inner--truthy.q-checkbox__inner:before {
+        color: $primary;
+      }
+    }
+  }
+
+  .q-table__progress {
+    .q-linear-progress {
+      color: $primary !important;
+    }
+  }
+
+  .q-table__sort-icon.q-icon {
+    font-size: var(--icon-size-small) !important;
+  }
+
+  + .q-table__bottom {
+    background-color: var(--bg-primary-default);
+    border-top: 1px solid var(--border-subtle);
+    padding-left: var(--space-l);
+    padding-right: var(--space-l);
+    gap: var(--space-s);
+
+    .q-table__separator {
+      min-width: var(--space-s);
+    }
+
+    .q-table__control {
+      .q-table__bottom-item {
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 16.8px;
+        color: var(--b-text-sub);
+      }
+
+      .q-field__native span,
+      .q-field__native {
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 19.5px;
+        color: var(--b-text-main);
+      }
+
+      .q-select__dropdown-icon.q-icon {
+        font-size: 16px;
+        color: var(--icon-default);
+      }
+
+      .q-btn {
+        .q-icon {
+          font-size: 16px;
+          color: var(--icon-default);
+        }
+
+        &.disabled .q-icon {
+          color: var(--text-disabled);
+        }
+      }
+    }
+  }
+
+  .icon-cell {
+    padding: 5px 0 0;
+    width: 34px;
+
+    &:first-child {
+      padding-left: 16px;
+    }
+  }
+}
+.runai-table-wrapper {
+  .runai-sticky {
+    /* max height is important */
+    .q-table__middle {
+      max-height: calc(100vh - 188px);
+    }
+
+    .q-table__top,
+    .q-table__bottom,
+    thead tr:first-child {
+      background-color: var(--bg-primary-default);
+      z-index: 1000;
+    }
+
+    thead tr:first-child {
+      position: sticky;
+      top: 0;
+    }
+
+    .q-table__progress {
+      height: 1px !important;
+    }
+  }
+}
+
+.sticky-column-table {
+  thead {
+    tr:first-child th:first-child,
+    tr:first-child .q-table--col-auto-width + th {
+      /* bg color is important for th; just specify one */
+      background-color: $white;
+    }
+  }
+
+  td:first-child,
+  .q-table--col-auto-width + td {
+    background-color: $white;
+  }
+
+  th:first-child,
+  td:first-child {
+    min-width: 72px; // checkbox column width
+    position: sticky;
+    left: 0;
+    z-index: 1;
+  }
+
+  .q-table--col-auto-width + td,
+  .q-table--col-auto-width + th {
+    position: sticky;
+    left: 72px;
+    z-index: 1;
+  }
+
+  $border-color: $black-12;
+  thead {
+    tr:first-child th:first-child {
+      border-right: 1px solid $border-color;
+    }
+
+    // when we have checkbox at the fist column
+    tr:first-child th:first-child.q-table--col-auto-width {
+      border-right: none;
+      box-shadow: none;
+
+      + th {
+        border-right: 1px solid $border-color;
+      }
+    }
+  }
+
+  td:first-child {
+    border-right: 1px solid $border-color;
+  }
+
+  // when we have checkbox at the fist column
+  td:first-child.q-table--col-auto-width {
+    border-right: none;
+    box-shadow: none;
+
+    + td {
+      border-right: 1px solid $border-color;
+    }
+  }
+}
+
+// When using sticky header, height/max-height must be provided as well in the style prop
+.sticky-header {
+  .q-table__top,
+  .q-table__bottom,
+  thead tr:first-child th {
+    /* bg color is important for th; just specify one */
+    background-color: var(--bg-primary-default);
+  }
+
+  thead tr th {
+    position: sticky;
+    z-index: 1;
+  }
+  thead tr:first-child th {
+    top: 0;
+  }
+
+  /* this is when the loading indicator appears */
+  &.q-table--loading thead tr:last-child th {
+    /* height of all previous header rows */
+    top: 48px;
+  }
+
+  /* prevent scrolling behind sticky top row on focus */
+  tbody {
+    /* height of all previous header rows */
+    scroll-margin-top: 48px;
+  }
+}

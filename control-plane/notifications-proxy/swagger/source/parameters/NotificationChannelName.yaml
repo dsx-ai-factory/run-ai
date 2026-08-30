@@ -1,0 +1,8 @@
+name: name
+in: path
+description: Notification Channel name
+required: true
+schema:
+  type: string
+  minLength: 1
+  maxLength: 250

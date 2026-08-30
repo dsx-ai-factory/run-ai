@@ -1,0 +1,10 @@
+type: object
+required:
+  - specName
+properties:
+  specName:
+    type: string
+    description: The name of which spec this node affinity is referring to.
+    example: worker
+  nodeAffinity:
+    $ref: "./PodNodeAffinity.yaml"

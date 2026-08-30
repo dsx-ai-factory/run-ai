@@ -1,0 +1,42 @@
+apiVersion: run.ai/v2alpha1
+kind: InteractiveWorkload
+metadata:
+  creationTimestamp: null
+  name: job-3-20220126-040310
+  namespace: runai-team-a
+spec:
+  completions:
+    value: 1
+  gpu:
+    value: "0"
+  image:
+    value: jupyter/scipy-notebook
+  imagePullPolicy:
+    value: Always
+  jupyter:
+    value: true
+  name:
+    value: job-3
+  ingressUrl:
+    value: https://dev-ofer0.azure.com/_PROJECT_NAME_/_JOB_NAME_
+  runAsGid:
+    value: 20
+  runAsUid:
+    value: 501
+  supplementalGroups:
+    value: 20;12;61;79;80;81;98;33;100;204;250;395;101;399;400;701
+  username:
+    value: user.name
+  exposedUrls:
+    items:
+      a:
+        value:
+          containerPort: 443
+  gitSync:
+    items:
+      git-a:
+        value:
+          directory: /tmp/repoa
+          password: mypassword
+          repository: http://github.com/repoa
+          username: myuser

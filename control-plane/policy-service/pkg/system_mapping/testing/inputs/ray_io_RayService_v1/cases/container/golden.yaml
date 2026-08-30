@@ -1,0 +1,65 @@
+apiVersion: ray.io/v1
+kind: RayService
+metadata:
+  name: test
+spec:
+  rayClusterConfig:
+    headGroupSpec:
+      template:
+        spec:
+          containers:
+          - image: rayproject/ray:2.11.0
+            imagePullPolicy: IfNotPresent
+            name: test
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+            securityContext:
+              runAsNonRoot: true
+          initContainers:
+          - image: rayproject/ray:2.11.0
+            imagePullPolicy: IfNotPresent
+            name: test
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+            securityContext:
+              runAsNonRoot: true
+    workerGroupSpecs:
+    - groupName: test
+      maxReplicas: 1
+      minReplicas: 0
+      rayStartParams: {}
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - image: rayproject/ray:2.11.0
+            imagePullPolicy: IfNotPresent
+            name: test
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+            securityContext:
+              runAsNonRoot: true
+          initContainers:
+          - image: rayproject/ray:2.11.0
+            imagePullPolicy: IfNotPresent
+            name: test
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+            securityContext:
+              runAsNonRoot: true

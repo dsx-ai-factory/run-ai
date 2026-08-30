@@ -1,0 +1,26 @@
+type: object
+properties:
+  value:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        nullable: true
+        description: Whether to allow GPT-2 model.
+  displayName:
+    type: string
+    description: Human-readable name for this setting
+    readOnly: true
+  description:
+    type: string
+    description: Short explanation of what this setting controls, shown alongside the setting
+    readOnly: true
+  stage:
+    type: string
+    readOnly: true
+example:
+  value:
+    enabled: true
+  displayName: Allow GPT-2 model
+  description: Enable to allow GPT-2 model.
+  stage: Alpha

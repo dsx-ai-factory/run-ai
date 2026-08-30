@@ -1,0 +1,14 @@
+assets:
+  environment: inference
+  compute: many-gpus
+  datasources:
+    - kind: nfs
+      id: basic
+specificRunParams:
+  command: command-from-specific-run-params
+  environmentVariables:
+    - name: HOME
+      value: home-from-specific-run-params
+  nodePools:
+    - my-node-a
+    - my-node-b

@@ -1,0 +1,1 @@
+DROP VIEW IF EXISTS priorities_cluster_view;

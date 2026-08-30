@@ -1,0 +1,7 @@
+description: Specifies the duration after which a finished workload (completed or failed) will be automatically deleted.
+  The default is 30 days. Log retention is managed separately.
+format: int64
+type: integer
+example: 15
+nullable: true
+deprecated: true

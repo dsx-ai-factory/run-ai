@@ -1,0 +1,4 @@
+description: The specifications of the training to be created.
+properties:
+  spec:
+    $ref: "TrainingSpecSpec.yaml"

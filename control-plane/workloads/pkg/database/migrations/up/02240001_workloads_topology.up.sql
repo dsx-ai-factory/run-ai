@@ -1,0 +1,1 @@
+ALTER TABLE workloads ADD COLUMN IF NOT EXISTS topology JSONB; 

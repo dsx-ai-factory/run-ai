@@ -1,0 +1,69 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    project: team-a
+    workloadKind: InferenceWorkload
+    workloadName: gitsync
+  name: gitsync
+  namespace: runai-team-a
+spec:
+  template:
+    metadata:
+      annotations:
+        user: user.name
+      labels:
+        project: team-a
+        release: gitsync
+        run.ai/inferenceworkload: gitsync
+        workloadKind: InferenceWorkload
+        workloadName: gitsync
+    spec:
+      containers:
+      - image: image
+        imagePullPolicy: Always
+        name: ""
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources:
+          limits:
+            nvidia.com/gpu: "1"
+        volumeMounts:
+        - mountPath: /tmp/repo
+          name: code-sync-0
+      enableServiceLinks: false
+      initContainers:
+      - env:
+        - name: GITSYNC_REPO
+          value: http://github.com/repo
+        - name: GITSYNC_ROOT
+          value: /code-git--tmp-repo
+        - name: GITSYNC_ONE_TIME
+          value: "true"
+        - name: HOME
+          value: /tmp
+        - name: GITSYNC_SSH
+          value: "true"
+        - name: GITSYNC_SSH_KNOWN_HOSTS
+          value: "false"
+        image: registry.k8s.io/git-sync/git-sync:v4.7.0
+        name: git-sync-git--tmp-repo
+        resources: {}
+        volumeMounts:
+        - mountPath: /etc/git-secret
+          name: git-ssh-secret-0
+        - mountPath: /code-git--tmp-repo
+          name: code-sync-0
+      schedulerName: runai-scheduler
+      volumes:
+      - emptyDir: {}
+        name: code-sync-0
+      - name: git-ssh-secret-0
+        secret:
+          secretName: mysecret
+status: {}

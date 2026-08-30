@@ -1,0 +1,6 @@
+type: string
+description: "The role assigned to the tenant's admin user. Possible value: System administrator."
+nullable: true
+enum:
+- System administrator
+- Cloud operator

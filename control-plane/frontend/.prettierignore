@@ -1,0 +1,7 @@
+src/swagger-models
+src/swagger-models-cluster-api
+src/swagger-models-policy-api
+src/api/
+src/assets/icons
+src/components/common/runai-app-loader/animation-data.json
+src/components/common/guided-tour-popup/README.md

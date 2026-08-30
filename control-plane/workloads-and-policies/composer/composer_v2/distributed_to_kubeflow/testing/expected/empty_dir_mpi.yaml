@@ -1,0 +1,129 @@
+DistributedTarget:
+  Config: {}
+  Framework: MPI
+  JaxJob: null
+  MasterSpec: null
+  MpiJob:
+    apiVersion: kubeflow.org/v2beta1
+    kind: MPIJob
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: mpijob
+        createdBy: MPIJob
+        project: test
+        release: empty_dir
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: empty_dir
+      name: empty_dir
+      namespace: runai-test
+    spec:
+      mpiReplicaSpecs:
+        Launcher:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: mpijob
+                createdBy: MPIJob
+                project: test
+                release: empty_dir
+                workloadKind: Distributed
+                workloadName: empty_dir
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: empty_dir
+                - name: RUNAI_MPI_NUM_WORKERS
+                  value: "1"
+                image: ubuntu
+                name: mpi
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /mount/empty/1
+                  name: empty-dir-master
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - emptyDir: {}
+                name: empty-dir-master
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: mpijob
+                createdBy: MPIJob
+                project: test
+                release: empty_dir
+                workloadKind: Distributed
+                workloadName: empty_dir
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: empty_dir
+                - name: RUNAI_MPI_NUM_WORKERS
+                  value: "1"
+                image: ubuntu
+                name: mpi
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /mount/empty/1
+                  name: empty-dir-worker
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - emptyDir: {}
+                name: empty-dir-worker
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: Running
+    status: {}
+  ObjectMeta: null
+  PyTorchJob: null
+  RunPolicy: null
+  TFJob: null
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: MPIJob
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-empty_dir/, Framework: MPI'
+  images:
+  - ubuntu
+  name: 'empty_dir/, Framework: MPI'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "openapi-scanner"
+version = "0.1.0"
+description = "A Python tool to parse and analyze OpenAPI YAML files and extract all paths"
+authors = ["Developer"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pyyaml = "^6.0.2"
+click = "^8.2.1"
+rich = "^14.0.0"
+pydantic = "^2.11.7"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.4.1"
+black = "^25.1.0"
+isort = "^6.0.1"
+mypy = "^1.16.1"
+
+[tool.poetry.scripts]
+openapi-scanner = "src.openapi_scanner:main"
+pattern-analyzer = "src.pattern_analyzer:main"
+string-pattern-scanner = "src.string_pattern_scanner:main"
+report-comparator = "src.report_comparator:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

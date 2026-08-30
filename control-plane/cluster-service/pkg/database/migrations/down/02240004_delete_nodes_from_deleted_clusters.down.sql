@@ -1,0 +1,1 @@
+-- irrelevant down migration - up fixing a bug where nodes were not deleted when clusters were deleted

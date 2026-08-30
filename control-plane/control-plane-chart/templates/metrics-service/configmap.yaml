@@ -1,0 +1,1243 @@
+{{- if .Values.metricsService.enabled }}
+{{- include "common.configMap" (list . .Values.metricsService "control-plane.metricsService.configmap") }}
+{{- end }}
+
+{{- define "control-plane.metricsService.configmap" -}}
+{{- $top := first . }}
+data:
+  SERVICE_NAME: {{ $top.Values.metricsService.name | quote }}
+  SERVER_WRITE_TIMEOUT: {{ $top.Values.metricsService.config.server.writeTimeout | quote }}
+  SERVER_READ_TIMEOUT: {{ $top.Values.metricsService.config.server.readTimeout | quote }}
+  SERVER_IDLE_TIMEOUT: {{ $top.Values.metricsService.config.server.idleTimeout | quote }}
+  TRACING_ENABLED: {{ if hasKey $top.Values.metricsService.config "tracingEnabled" }}{{ $top.Values.metricsService.config.tracingEnabled | quote }}{{ else }}{{ $top.Values.global.config.tracingEnabled | quote }}{{ end }}
+  AUDIT_ENABLED: {{ if hasKey $top.Values.metricsService.config "auditEnabled" }}{{ $top.Values.metricsService.config.auditEnabled | quote }}{{ else }}{{ $top.Values.global.config.auditEnabled | quote }}{{ end }}
+  AUDIT_ENABLE_PRINT_TO_STDOUT: {{ if hasKey $top.Values.metricsService.config "auditEnablePrintToStdout" }}{{ $top.Values.metricsService.config.auditEnablePrintToStdout | quote }}{{ else }}{{ $top.Values.global.config.auditEnablePrintToStdout | quote }}{{ end }}
+  AUDIT_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.auditService.name ($top.Values.auditService.service.port | toString) | quote }}
+  DB_MIGRATION_FILES: {{ $top.Values.metricsService.config.migrationFiles | quote }}
+  DB_SCHEMA: {{ $top.Values.metricsService.config.dbScheme | default "metrics" | quote }}
+  DB_NAME: {{ $top.Values.metricsService.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_HOST: {{ $top.Values.metricsService.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SSL_MODE: {{ $top.Values.metricsService.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_PORT: {{ $top.Values.metricsService.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  PUBSUB_URL: {{ $top.Values.global.pubsub.url | quote }}
+  PUBSUB_TYPE: {{ $top.Values.global.pubsub.type | quote }}
+  PUBSUB_ENABLE_ADDITIONAL_SUBSCRIBER: {{ $top.Values.global.pubsub.additionalSubscriber.enabled | quote }}
+  {{- if $top.Values.global.pubsub.additionalSubscriber.enabled }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_TYPE: {{ $top.Values.global.pubsub.additionalSubscriber.type | quote }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_URL: {{ $top.Values.global.pubsub.additionalSubscriber.url | quote }}
+  {{- end }}
+  CONFIG_KEY_DELIMITER: {{ $top.Values.metricsService.config.configKeyDelimiter | quote }}
+  {{- if or ($top.Values.global.blobStorage.s3.enabled) ($top.Values.metricsService.config.s3Enabled) }}
+  S3_ENDPOINT: {{ $top.Values.metricsService.config.s3Endpoint | default $top.Values.global.blobStorage.s3.endpoint | quote }}
+  {{- if or ($top.Values.metricsService.config.s3UseSSL) ($top.Values.global.blobStorage.s3.useSSL) }}
+  S3_USE_SSL: {{ $top.Values.metricsService.config.s3UseSSL | default $top.Values.global.blobStorage.s3.useSSL | quote }}
+  {{- end }}
+  {{- if or ($top.Values.metricsService.config.s3AccessKeyId) ($top.Values.global.blobStorage.s3.accessKeyId) }}
+  S3_ACCESS_KEY_ID: {{ $top.Values.metricsService.config.s3AccessKeyId | default $top.Values.global.blobStorage.s3.accessKeyId | quote }}
+  {{- end }}
+  {{- end }}
+  config.yaml: |-
+    log_level: {{ $top.Values.metricsService.config.logLevel | quote }}
+    release: {{ $top.Release.Name | quote }}
+    env: {{ $top.Values.global.config.environment | default "" | quote }}
+    service_port: {{ $top.Values.metricsService.service.port | quote }}
+    {{- if or ($top.Values.global.blobStorage.s3.enabled) ($top.Values.metricsService.config.s3Enabled) }}
+    reports:
+      s3_config:
+        bucket: {{ $top.Values.metricsService.config.reportsBucket | quote }}
+    {{- end }}
+    datasources:
+      datasource_url: {{ $top.Values.metricsService.config.datasourceUrl | quote }}
+    datasource_provider:
+      datasource_type: {{ $top.Values.metricsService.config.datasourceProvider.type | quote }}
+      static_datasource:
+        type: {{ $top.Values.metricsService.config.datasourceProvider.staticDatasource.type | quote }}
+        {{- with $top.Values.metricsService.config.datasourceProvider.staticDatasource }}
+        read:
+          url: {{ .read.url | quote }}
+          {{- with .read.auth.type }}
+          auth:
+            type: {{ . | quote }}
+          {{- end }}
+        write:
+          url: {{ .write.url | default (printf "https://%s/api/v1/receive" $top.Values.global.domain) | quote }}
+          {{- with .write.auth.type }}
+          auth:
+            type: {{ . | quote }}
+          {{- end }}
+        {{- end }}
+    cleaner:
+      is_cleanup_enabled: {{ $top.Values.metricsService.config.cleaner.isCleanupEnabled | quote }}
+      cleaner_interval_hours: {{ $top.Values.metricsService.config.cleaner.cleanerIntervalHours | quote }}
+      delete_report_ttl_days: {{ $top.Values.metricsService.config.cleaner.deleteReportsTTLDays | quote }}
+    cron_jobs:
+      reports:
+        interval_seconds: {{ $top.Values.metricsService.config.dbCronJobs.reports.intervalSeconds | quote }}
+        max_retry_count: {{ $top.Values.metricsService.config.dbCronJobs.reports.maxRetryCount | quote }}
+        retry_failed_reports_min_age_minutes: {{ $top.Values.metricsService.config.dbCronJobs.reports.retryFailedReportsMinAgeMinutes | quote }}
+        retry_failed_reports_max_age_minutes: {{ $top.Values.metricsService.config.dbCronJobs.reports.retryFailedReportsMaxAgeMinutes | quote }}
+        fail_stuck_processing_reports_min_age_minutes: {{ $top.Values.metricsService.config.dbCronJobs.reports.failStuckProcessingReportsMinAgeMinutes | quote }}
+    metrics:
+      runai_workload_count_per_category:
+        cross_version_query: sum(runai_workload_count_per_category{FILTERS}) by (workload_category, clusterId) or on(workload_category, clusterId) count(runai_workload_info_enriched{FILTERS}) by (workload_category, clusterId)
+        queries:
+              2.23.0: sum(runai_workload_count_per_category{FILTERS}) by (workload_category, clusterId)
+              2.22.0: count(runai_workload_info_enriched{FILTERS}) by (workload_category, clusterId)
+      runai_workload_count_per_nodepool:
+        cross_version_query: sum(runai_workload_count_per_nodepool{FILTERS}) by(nodepool, clusterId) or on (nodepool, clusterId) count(runai_workload_info_enriched{FILTERS}) by (nodepool, clusterId)
+        queries:
+            2.23.0: sum(runai_workload_count_per_nodepool{FILTERS}) by(nodepool, clusterId)
+            2.16.0: count(runai_workload_info_enriched{FILTERS}) by (nodepool, clusterId)
+      runai_workload_count_per_project:
+          cross_version_query: sum(runai_workload_count_per_project{FILTERS}) by(project, clusterId) or on (project, clusterId) count(runai_workload_info_enriched{FILTERS}) by (project, clusterId)
+          queries:
+              2.23.0: sum(runai_workload_count_per_project{FILTERS}) by(project, clusterId)
+              2.16.0: count(runai_workload_info_enriched{FILTERS}) by (project, clusterId)
+      runai_workload_count_per_department:
+        cross_version_query: sum(runai_workload_count_per_department{FILTERS}) by(department, clusterId) or on (department, clusterId) count(runai_workload_info_enriched{FILTERS}) by (department, clusterId)
+        queries:
+            2.23.0: sum(runai_workload_count_per_department{FILTERS}) by(department, clusterId)
+            2.16.0: count(runai_workload_info_enriched{FILTERS}) by (department, clusterId)
+      runai_workload_count_per_tenant:
+        cross_version_query: sum(runai_workload_count_per_cluster{FILTERS}) or count(runai_workload_info_enriched{FILTERS})
+        queries:
+            2.23.0: sum(runai_workload_count_per_cluster{FILTERS})
+            2.16.0: count(runai_workload_info_enriched{FILTERS})
+      runai_gpu_utilization_per_cluster:
+        cross_version_query: runai_gpu_utilization_per_cluster{FILTERS}
+        queries:
+            2.11.0: runai_gpu_utilization_per_cluster{FILTERS}
+      runai_gpu_memory_utilization_per_cluster:
+        cross_version_query: runai_gpu_memory_utilization_per_cluster{FILTERS}
+        queries:
+            2.11.0: runai_gpu_memory_utilization_per_cluster{FILTERS}
+      runai_cpu_utilization_per_cluster:
+        cross_version_query: runai_cpu_utilization_per_cluster{FILTERS}
+        queries:
+            2.11.0: runai_cpu_utilization_per_cluster{FILTERS}
+      runai_memory_utilization_per_cluster:
+        cross_version_query: runai_memory_utilization_per_cluster{FILTERS}
+        queries:
+            2.11.0: runai_memory_utilization_per_cluster{FILTERS}
+      runai_allocated_gpu_count_per_cluster:
+        cross_version_query: runai_allocated_gpu_count_per_cluster{FILTERS}
+        queries:
+            2.11.0: runai_allocated_gpu_count_per_cluster{FILTERS}
+      runai_gpu_count_per_cluster:
+        cross_version_query: runai_gpu_count_per_cluster{FILTERS}
+        queries:
+            2.11.0: runai_gpu_count_per_cluster{FILTERS}
+
+
+      runai_in_quota_gpu_hours_per_cluster:
+        cross_version_query: sum_over_time((sum(runai_allocated_gpu_count_per_cluster{FILTERS}) by (clusterId) - clamp_min(sum(runai_allocated_gpu_count_per_cluster{FILTERS}) by (clusterId) - sum(runai_deserved_gpu_count_per_project{FILTERS}) by (clusterId),0))[RANGE:30s]) / 120
+        queries:
+            2.24.0: sum(sum_over_time(runai_allocated_gpu_count_per_cluster:hourly{FILTERS}[RANGE]) - clamp_min((sum_over_time(runai_allocated_gpu_count_per_cluster:hourly{FILTERS}[RANGE]) - sum(sum_over_time(runai_deserved_gpu_count_per_project:hourly{FILTERS}[RANGE])) by(clusterId)), 0)) / 3600
+            2.18.0: sum_over_time((sum(runai_allocated_gpu_count_per_cluster{FILTERS}) by (clusterId) - clamp_min(sum(runai_allocated_gpu_count_per_cluster{FILTERS}) by (clusterId) - sum(runai_deserved_gpu_count_per_project{FILTERS}) by (clusterId),0))[RANGE:30s]) / 120
+      runai_in_quota_gpu_hours_per_nodepool:
+        cross_version_query: sum_over_time((sum(runai_allocated_gpu_count_per_nodepool{FILTERS}) by (clusterId, nodepool) - clamp_min(sum(runai_allocated_gpu_count_per_nodepool{FILTERS}) by (clusterId, nodepool) - sum(runai_deserved_gpu_count_per_queue{FILTERS} > 0) by (clusterId, nodepool),0))[RANGE:30s]) / 120
+        queries:
+            2.24.0: sum(sum_over_time(runai_allocated_gpu_count_per_nodepool:hourly{FILTERS}[RANGE]) - clamp_min((sum_over_time(runai_allocated_gpu_count_per_nodepool:hourly{FILTERS}[RANGE]) - sum(sum_over_time(runai_deserved_gpu_count_per_queue:hourly{FILTERS}[RANGE]) > 0) by (clusterId, nodepool)), 0)) by (clusterId, nodepool) / 3600
+            2.18.0: sum_over_time((sum(runai_allocated_gpu_count_per_nodepool{FILTERS}) by (clusterId, nodepool) - clamp_min(sum(runai_allocated_gpu_count_per_nodepool{FILTERS}) by (clusterId, nodepool) - sum(runai_deserved_gpu_count_per_queue{FILTERS} > 0) by (clusterId, nodepool),0))[RANGE:30s]) / 120
+      runai_in_quota_gpu_hours_per_department:
+        cross_version_query: sum_over_time((sum(runai_allocated_gpu_count_per_department{FILTERS}) by (clusterId, department) - clamp_min(sum(runai_allocated_gpu_count_per_department{FILTERS}) by (clusterId, department) - sum(runai_deserved_gpu_count_per_department{FILTERS}) by (clusterId, department),0))[RANGE:30s]) / 120
+        queries:
+            2.24.0: sum(sum_over_time(runai_allocated_gpu_count_per_department:hourly{FILTERS}[RANGE]) - clamp_min((sum_over_time(runai_allocated_gpu_count_per_department:hourly{FILTERS}[RANGE]) - sum(sum_over_time(runai_deserved_gpu_count_per_department:hourly{FILTERS}[RANGE])) by (clusterId, department)), 0)) by (clusterId, department) / 3600
+            2.18.0: sum_over_time((sum(runai_allocated_gpu_count_per_department{FILTERS}) by (clusterId, department) - clamp_min(sum(runai_allocated_gpu_count_per_department{FILTERS}) by (clusterId, department) - sum(runai_deserved_gpu_count_per_department{FILTERS}) by (clusterId, department),0))[RANGE:30s]) / 120
+      runai_in_quota_gpu_hours_per_project:
+        cross_version_query: sum_over_time((sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - clamp_min(sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - sum(runai_deserved_gpu_count_per_project{FILTERS}) by (clusterId, department, project),0))[RANGE:30s]) / 120
+        queries:
+            2.24.0: sum(sum_over_time(runai_allocated_gpu_count_per_project:hourly{project!="", FILTERS}[RANGE]) - clamp_min((sum_over_time(runai_allocated_gpu_count_per_project:hourly{project!="", FILTERS}[RANGE]) - sum(sum_over_time(runai_deserved_gpu_count_per_project:hourly{FILTERS}[RANGE])) by (clusterId, department, project)), 0)) by (clusterId, department, project) / 3600
+            2.18.0: sum_over_time((sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - clamp_min(sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - sum(runai_deserved_gpu_count_per_project{FILTERS}) by (clusterId, department, project),0))[RANGE:30s]) / 120
+
+
+      runai_over_quota_gpu_hours_per_cluster:
+        cross_version_query: sum_over_time(clamp_min(runai_allocated_gpu_count_per_cluster{FILTERS} - sum by (clusterId)(runai_deserved_gpu_count_per_department{FILTERS}), 0)[RANGE:30s]) / 120
+        queries:
+            2.24.0: sum(clamp_min((sum_over_time(runai_allocated_gpu_count_per_cluster:hourly{FILTERS}[RANGE]) - sum(sum_over_time(runai_deserved_gpu_count_per_project:hourly{FILTERS}[RANGE])) by(clusterId)), 0)) / 3600
+            2.18.0: sum_over_time(clamp_min(runai_allocated_gpu_count_per_cluster{FILTERS} - sum by (clusterId)(runai_deserved_gpu_count_per_department{FILTERS}), 0)[RANGE:30s]) / 120
+      runai_over_quota_gpu_hours_per_nodepool:
+        cross_version_query: sum_over_time(clamp_min(sum by (clusterId, nodepool)(runai_allocated_gpu_count_per_nodepool{FILTERS}) - sum by (clusterId, nodepool)(runai_deserved_gpu_count_per_queue{project!="",FILTERS} > -1),0)[RANGE:30s]) / 120
+        queries:
+            2.24.0: sum(clamp_min((sum(sum_over_time(runai_allocated_gpu_count_per_nodepool:hourly{FILTERS}[RANGE])) by (clusterId, nodepool) - sum(sum_over_time(runai_deserved_gpu_count_per_queue:hourly{project!="",FILTERS}[RANGE]) > -1) by (clusterId, nodepool)), 0)) by (clusterId, nodepool) / 3600
+            2.18.0: sum_over_time(clamp_min(sum by (clusterId, nodepool)(runai_allocated_gpu_count_per_nodepool{FILTERS}) - sum by (clusterId, nodepool)(runai_deserved_gpu_count_per_queue{project!="",FILTERS} > -1),0)[RANGE:30s]) / 120
+      runai_over_quota_gpu_hours_per_department:
+        cross_version_query: sum_over_time((sum by (department)(runai_allocated_gpu_count_per_department{FILTERS})-clamp_min(sum by (department)(runai_allocated_gpu_count_per_department{FILTERS})-sum by (department)(runai_deserved_gpu_count_per_department > 0),0))[RANGE:30s]) / 120
+        queries:
+            2.24.0: sum(clamp_min((sum(sum_over_time(runai_allocated_gpu_count_per_department:hourly{FILTERS}[RANGE])) by (clusterId, department) - sum(sum_over_time(runai_deserved_gpu_count_per_department:hourly{FILTERS}[RANGE]) > 0) by (clusterId, department)), 0)) by (clusterId, department) / 3600
+            2.18.0: sum_over_time((sum by (department)(runai_allocated_gpu_count_per_department{FILTERS})-clamp_min(sum by (department)(runai_allocated_gpu_count_per_department{FILTERS})-sum by (department)(runai_deserved_gpu_count_per_department > 0),0))[RANGE:30s]) / 120
+      runai_over_quota_gpu_hours_per_project:
+        cross_version_query: sum_over_time(sum(((sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - sum(runai_deserved_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project)) > 0)) by (clusterId, department, project)[RANGE:30s]) / 120
+        queries:
+            2.24.0: sum(clamp_min((sum(sum_over_time(runai_allocated_gpu_count_per_project:hourly{FILTERS}[RANGE])) by (clusterId, department, project) - sum(sum_over_time(runai_deserved_gpu_count_per_project:hourly{project!="", FILTERS}[RANGE])) by (clusterId, department, project)), 0)) by (clusterId, department, project) / 3600
+            2.18.0: sum_over_time(sum(((sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - sum(runai_deserved_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project)) > 0)) by (clusterId, department, project)[RANGE:30s]) / 120
+
+      runai_departments_gpu_quota_per_cluster:
+        cross_version_query: min(runai_deserved_gpu_count_per_department{FILTERS}<0) by(clusterId) or on(clusterId) sum(runai_deserved_gpu_count_per_department{FILTERS}>=0) by(clusterId)
+        queries:
+            2.16.0: min(runai_deserved_gpu_count_per_department{FILTERS}<0) by(clusterId) or on(clusterId) sum(runai_deserved_gpu_count_per_department{FILTERS}>=0) by(clusterId)
+      runai_projects_gpu_quota_per_cluster:
+        cross_version_query: min(runai_deserved_gpu_count_per_project{FILTERS}<0) by(clusterId) or on(clusterId) sum(runai_deserved_gpu_count_per_project{FILTERS}>=0) by(clusterId)
+        queries:
+            2.13.0: min(runai_deserved_gpu_count_per_project{FILTERS}<0) by(clusterId) or on(clusterId) sum(runai_deserved_gpu_count_per_project{FILTERS}>=0) by(clusterId)
+      runai_departments_gpu_quota_per_nodepool:
+        cross_version_query: min(runai_deserved_gpu_count_per_queue{project="",FILTERS}<0) by(clusterId, nodepool) or on(clusterId, nodepool) sum(runai_deserved_gpu_count_per_queue{project="",FILTERS}>=0) by(clusterId, nodepool)
+        queries:
+            2.16.0: min(runai_deserved_gpu_count_per_queue{project="",FILTERS}<0) by(clusterId, nodepool) or on(clusterId, nodepool) sum(runai_deserved_gpu_count_per_queue{project="",FILTERS}>=0) by(clusterId, nodepool)
+      runai_projects_gpu_quota_per_nodepool:
+        cross_version_query: min(runai_deserved_gpu_count_per_queue{project!="",FILTERS}<0) by(clusterId, nodepool) or on(clusterId, nodepool) sum(runai_deserved_gpu_count_per_queue{project!="",FILTERS}>=0) by(clusterId, nodepool)
+        queries:
+            2.16.0: min(runai_deserved_gpu_count_per_queue{project!="",FILTERS}<0) by(clusterId, nodepool) or on(clusterId, nodepool) sum(runai_deserved_gpu_count_per_queue{project!="",FILTERS}>=0) by(clusterId, nodepool)
+      runai_gpu_count_per_node:
+        cross_version_query: runai_gpu_count_per_node{FILTERS}
+        queries:
+            2.9.0: runai_gpu_count_per_node{FILTERS}
+      runai_gpu_utilization_per_tenant:
+        cross_version_query: sum(avg(runai_gpu_utilization_per_cluster{FILTERS}) by (clusterId) * on(clusterId) runai_gpu_count_per_cluster{FILTERS}) / sum(runai_gpu_count_per_cluster{FILTERS})
+        queries:
+            2.11.0: sum(avg(runai_gpu_utilization_per_cluster{FILTERS}) by (clusterId) * on(clusterId) runai_gpu_count_per_cluster{FILTERS}) / sum(runai_gpu_count_per_cluster{FILTERS})
+      runai_gpu_memory_utilization_per_tenant:
+        cross_version_query: (100 * sum(runai_gpu_memory_used_mebibytes_per_cluster{FILTERS}) / sum(runai_gpu_memory_total_mebibytes_per_cluster{FILTERS}))
+        queries:
+            2.11.0: (100 * sum(runai_gpu_memory_used_mebibytes_per_cluster{FILTERS}) / sum(runai_gpu_memory_total_mebibytes_per_cluster{FILTERS}))
+      runai_cpu_utilization_per_tenant:
+        cross_version_query: (100 * (sum(runai_used_cpu_cores_per_cluster{FILTERS}) / sum(runai_cpu_cores_count_per_cluster{FILTERS})))
+        queries:
+            2.11.0: 100 * (sum(runai_used_cpu_cores_per_cluster{FILTERS}) / sum(runai_cpu_cores_count_per_cluster{FILTERS}))
+      runai_memory_utilization_per_tenant:
+        cross_version_query: (100 * (sum(runai_used_memory_bytes_per_cluster{FILTERS}) / sum(runai_total_memory_bytes_per_cluster{FILTERS})))
+        queries:
+            2.11.0: 100 * (sum(runai_used_memory_bytes_per_cluster{FILTERS}) / sum(runai_total_memory_bytes_per_cluster{FILTERS}))
+      runai_allocated_gpu_count_per_tenant:
+        cross_version_query: sum(runai_allocated_gpu_count_per_cluster{FILTERS})
+        queries:
+            2.11.0: sum(runai_allocated_gpu_count_per_cluster{FILTERS})
+      runai_gpu_count_per_tenant:
+        cross_version_query: sum(sum(runai_gpu_count_per_cluster{FILTERS}))
+        queries:
+            2.11.0: sum(runai_gpu_count_per_cluster{FILTERS})
+      runai_free_gpu_count_per_node:
+        cross_version_query: sum(runai_free_gpu_count_per_node{FILTERS}) by (clusterId, node, nodepool) or on (node, clusterId) ((count((sum(((sum(runai_allocated_gpu_count_per_pod{gpu!="",FILTERS}) by(gpu, node) or count(runai_gpu_memory_used_mebibytes_per_pod_per_gpu{FILTERS}) by(node, gpu)) * on(gpu, node) group_right() group(runai_gpu_memory_total_mebibytes_per_gpu{FILTERS}) by(UUID, gpu, node, nodepool, modelName, clusterId)) or on(UUID) runai_gpu_memory_total_mebibytes_per_gpu{FILTERS}*0) by(UUID, gpu, node, nodepool, modelName, clusterId))==0) by (clusterId, node, nodepool)) * on(node) group_left(nodepool) (runai_node_nodepool==1 or on(node) kube_node_info))
+        queries:
+            2.20.0: sum(runai_free_gpu_count_per_node{FILTERS}) by (clusterId, node, nodepool)
+            2.11.0: count(runai_allocated_gpu_count_per_gpu{FILTERS} == 0) by (clusterId, node, nodepool) or on (clusterId, node, nodepool) 0*group(runai_allocated_gpu_count_per_node{FILTERS} > 0) by (clusterId, node, nodepool)
+      runai_free_gpu_count_per_nodepool:
+        cross_version_query: sum(runai_free_gpu_count_per_node{FILTERS}) by (clusterId, nodepool) or (count(runai_allocated_gpu_count_per_gpu{FILTERS} == 0) by (clusterId, nodepool) or on (clusterId, nodepool) 0*group(runai_allocated_gpu_count_per_nodepool{FILTERS} > 0) by (clusterId, nodepool))
+        queries:
+            2.20.0: sum(runai_free_gpu_count_per_node{FILTERS}) by (clusterId, nodepool)
+            2.11.0: count(runai_allocated_gpu_count_per_gpu{FILTERS} == 0) by (clusterId, nodepool) or on (clusterId, nodepool) 0*group(runai_allocated_gpu_count_per_nodepool{FILTERS} > 0) by (clusterId, nodepool)
+      runai_free_gpu_count_per_cluster:
+        cross_version_query: sum(runai_free_gpu_count_per_node{FILTERS}) by (clusterId) or (sum((count(runai_allocated_gpu_count_per_gpu{FILTERS} == 0) by (clusterId) or on (clusterId) 0*group(runai_allocated_gpu_count_per_cluster{FILTERS} > 0) by (clusterId)) or on (clusterId) (count((sum(((sum(runai_allocated_gpu_count_per_pod{gpu!="",FILTERS}) by(gpu, node) or count(runai_gpu_memory_used_mebibytes_per_pod_per_gpu{FILTERS}) by(node, gpu)) * on(gpu, node) group_right() group(runai_gpu_memory_total_mebibytes_per_gpu{FILTERS}) by(UUID, gpu, node, nodepool, modelName, clusterId)) or on(UUID) runai_gpu_memory_total_mebibytes_per_gpu{FILTERS}*0) by(UUID, gpu, node, nodepool, modelName, clusterId))==0) by (clusterId))) by (clusterId))
+        queries:
+            2.20.0: sum(runai_free_gpu_count_per_node{FILTERS}) by (clusterId)
+            2.11.0: count(runai_allocated_gpu_count_per_gpu{FILTERS} == 0) by (clusterId) or on (clusterId) 0*group(runai_allocated_gpu_count_per_cluster{FILTERS} > 0) by (clusterId)
+      runai_free_gpu_count_per_tenant:
+        cross_version_query: sum(runai_free_gpu_count_per_node{FILTERS}) or (sum(count(runai_allocated_gpu_count_per_gpu{FILTERS} == 0) or count((sum(((sum(runai_allocated_gpu_count_per_pod{gpu!="",FILTERS}) by(gpu, node) or count(runai_gpu_memory_used_mebibytes_per_pod_per_gpu{FILTERS}) by(node, gpu)) * on(gpu, node) group_right() group(runai_gpu_memory_total_mebibytes_per_gpu{FILTERS}) by(UUID, gpu, node, nodepool, modelName, clusterId)) or on(UUID) runai_gpu_memory_total_mebibytes_per_gpu{FILTERS}*0) by(UUID, gpu, node, nodepool, modelName, clusterId))==0)))
+        queries:
+            2.20.0: sum(runai_free_gpu_count_per_node{FILTERS})
+            2.11.0: count(runai_allocated_gpu_count_per_gpu{FILTERS} == 0)
+      runai_allocated_gpu_count_per_gpu:
+        cross_version_query: runai_allocated_gpu_count_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_allocated_gpu_count_per_gpu{FILTERS}
+      runai_idle_allocated_gpu_count_per_node:
+        cross_version_query: runai_idle_allocated_gpu_count_per_node{FILTERS}
+        queries:
+            2.19.0: runai_idle_allocated_gpu_count_per_node{FILTERS}
+      runai_idle_allocated_gpu_count_per_nodepool:
+        cross_version_query: runai_idle_allocated_gpu_count_per_nodepool{FILTERS} or on (nodepool, clusterId) sum((runai_gpu_idle_seconds_per_workload{FILTERS} > 300)*0 + on(job_uuid, workload_id) group_left() (runai_allocated_gpu_count_per_workload{FILTERS} > 0)) by(clusterId, nodepool)
+        queries:
+            2.16.0: runai_idle_allocated_gpu_count_per_nodepool{FILTERS}
+            2.13.0: sum((runai_gpu_idle_seconds_per_workload{FILTERS} > 300)*0 + on(job_uuid) group_left() (runai_allocated_gpu_count_per_workload{FILTERS} > 0)) by (clusterId, nodepool)
+      runai_idle_allocated_gpu_count_per_cluster:
+        cross_version_query: sum(runai_idle_allocated_gpu_count_per_nodepool{FILTERS}) by (clusterId)
+        queries:
+            2.16.0: sum(runai_idle_allocated_gpu_count_per_nodepool{FILTERS}) by (clusterId)
+      runai_idle_allocated_gpu_count_per_tenant:
+        cross_version_query: sum(runai_idle_allocated_gpu_count_per_nodepool{FILTERS})
+        queries:
+            2.16.0: sum(runai_idle_allocated_gpu_count_per_nodepool{FILTERS})
+      runai_gpu_nodes_count_per_tenant:
+        cross_version_query: sum(sum(runai_gpu_nodes_count_per_cluster{FILTERS}))
+        queries:
+            2.11.0: sum(runai_gpu_nodes_count_per_cluster{FILTERS})
+      runai_gpu_nodes_count_per_cluster:
+        cross_version_query: sum(sum(runai_gpu_nodes_count_per_cluster{FILTERS}) by (clusterId)) by (clusterId)
+        queries:
+            2.11.0: sum(runai_gpu_nodes_count_per_cluster{FILTERS}) by (clusterId)
+      runai_gpu_nodes_count_per_nodepool:
+        cross_version_query: sum(runai_gpu_nodes_count_per_nodepool{FILTERS}) by (clusterId, nodepool)
+        queries:
+            2.11.0: sum(runai_gpu_nodes_count_per_nodepool{FILTERS}) by (clusterId, nodepool)
+      runai_gpu_nodes_count_per_node:
+        cross_version_query: sum((count(runai_gpu_count_per_node{FILTERS}>0) by (clusterId, nodepool, node))) by (clusterId, nodepool, node)
+        queries:
+            2.11.0: count(runai_gpu_count_per_node{FILTERS}>0) by (clusterId, nodepool, node)
+      runai_avg_workload_wait_time_seconds_per_cluster:
+        cross_version_query: avg(runai_wait_time_seconds_per_workload{FILTERS}) by(clusterId) or on(clusterId) avg(runai_pod_group_total_wait_time{FILTERS}) by(clusterId)
+        queries:
+            2.18.0: avg(runai_wait_time_seconds_per_workload{FILTERS}) by(clusterId)
+            2.9.0: avg(runai_pod_group_total_wait_time{FILTERS}) by(clusterId)
+      runai_gpu_utilization_per_nodepool:
+        cross_version_query: runai_gpu_utilization_per_nodepool{FILTERS}
+        queries:
+            2.11.0: runai_gpu_utilization_per_nodepool{FILTERS}
+      runai_gpu_utilization_per_node:
+        cross_version_query: runai_gpu_utilization_per_node{FILTERS}
+        queries:
+            2.13.0: runai_gpu_utilization_per_node{FILTERS}
+      runai_gpu_utilization_per_gpu:
+        cross_version_query: runai_gpu_utilization_per_gpu{FILTERS}
+        queries:
+            2.13.0: runai_gpu_utilization_per_gpu{FILTERS}
+      runai_gpu_utilization_avg_per_project:
+        cross_version_query: sum(avg_over_time(runai_gpu_utilization_per_project{FILTERS}[RANGE])) by (clusterId, department, project)
+        queries:
+            2.19.0: sum(avg_over_time(runai_gpu_utilization_per_project:hourly{FILTERS}[RANGE])) by (clusterId, department, project) / 3600
+            2.9.0: sum(avg_over_time(runai_gpu_utilization_per_project{FILTERS}[RANGE])) by (clusterId, department, project)
+      runai_gpu_utilization_avg_per_department:
+        cross_version_query: sum(avg_over_time(runai_gpu_utilization_per_department{FILTERS}[RANGE])) by (clusterId, department)
+        queries:
+            2.19.0: sum(avg_over_time(runai_gpu_utilization_per_department:hourly{FILTERS}[RANGE])) by (clusterId, department) / 3600
+            2.9.0: sum(avg_over_time(runai_gpu_utilization_per_department{FILTERS}[RANGE])) by (clusterId, department)
+      runai_gpu_memory_utilization_avg_per_project:
+        cross_version_query: clamp_max((100 * sum(sum_over_time(runai_gpu_memory_used_mebibytes_per_workload{FILTERS}[RANGE]) * 1024 * 1024) by (clusterId, project, department) / sum(sum_over_time(runai_allocated_gpu_memory_mb_per_workload{FILTERS}[RANGE]) * 1000 * 1000) by (clusterId, project, department)) and on(clusterId, project, department) (sum(sum_over_time(runai_allocated_gpu_memory_mb_per_workload{FILTERS}[RANGE]) * 1000 * 1000) by (clusterId, project, department) > 0) or on() vector(0), 100)
+        queries:
+            2.22.0: sum(avg_over_time(runai_gpu_memory_utilization_per_project:hourly{FILTERS}[RANGE])) by (clusterId, department, project) / 3600
+            2.21.0: clamp_max((100 * sum(sum_over_time(runai_gpu_memory_used_mebibytes_per_workload{FILTERS}[RANGE]) * 1024 * 1024) by (clusterId, project, department) / sum(sum_over_time(runai_allocated_gpu_memory_mb_per_workload{FILTERS}[RANGE]) * 1000 * 1000) by (clusterId, project, department)) and on(clusterId, project, department) (sum(sum_over_time(runai_allocated_gpu_memory_mb_per_workload{FILTERS}[RANGE]) * 1000 * 1000) by (clusterId, project, department) > 0) or on() vector(0), 100)
+      runai_gpu_memory_utilization_avg_per_department:
+        cross_version_query: clamp_max((100 * sum(sum_over_time(runai_gpu_memory_used_mebibytes_per_workload{FILTERS}[RANGE]) * 1024 * 1024) by (clusterId, department) / sum(sum_over_time(runai_allocated_gpu_memory_mb_per_workload{FILTERS}[RANGE]) * 1000 * 1000) by (clusterId, department)) and on(clusterId, department) (sum(sum_over_time(runai_allocated_gpu_memory_mb_per_workload{FILTERS}[RANGE]) * 1000 * 1000) by (clusterId, department) > 0) or on() vector(0), 100)
+        queries:
+            2.22.0: sum(avg_over_time(runai_gpu_memory_utilization_per_department:hourly{FILTERS}[RANGE])) by (clusterId, department) / 3600
+            2.21.0: clamp_max((100 * sum(sum_over_time(runai_gpu_memory_used_mebibytes_per_workload{FILTERS}[RANGE]) * 1024 * 1024) by (clusterId, department) / sum(sum_over_time(runai_allocated_gpu_memory_mb_per_workload{FILTERS}[RANGE]) * 1000 * 1000) by (clusterId, department)) and on(clusterId, department) (sum(sum_over_time(runai_allocated_gpu_memory_mb_per_workload{FILTERS}[RANGE]) * 1000 * 1000) by (clusterId, department) > 0) or on() vector(0), 100)
+      runai_gpu_memory_utilization_per_nodepool:
+        cross_version_query: runai_gpu_memory_utilization_per_nodepool{FILTERS}
+        queries:
+            2.11.0: runai_gpu_memory_utilization_per_nodepool{FILTERS}
+      runai_gpu_memory_utilization_per_node:
+        cross_version_query: runai_gpu_memory_utilization_per_node{FILTERS}
+        queries:
+            2.13.0: runai_gpu_memory_utilization_per_node{FILTERS}
+      runai_gpu_memory_utilization_per_gpu:
+        cross_version_query: 100*(runai_gpu_memory_used_mebibytes_per_gpu{FILTERS} / runai_gpu_memory_total_mebibytes_per_gpu{FILTERS})
+        queries:
+            2.13.0: 100*(runai_gpu_memory_used_mebibytes_per_gpu{FILTERS} / runai_gpu_memory_total_mebibytes_per_gpu{FILTERS})
+      runai_allocated_gpu_memory_bytes_per_gpu:
+        cross_version_query: sum(runai_allocated_gpu_count_per_gpu{FILTERS}) by (gpu, node, nodepool, clusterId) * sum(runai_gpu_memory_total_mebibytes_per_gpu{FILTERS}) by (gpu, node, nodepool, clusterId) * 1024 * 1024
+        queries:
+            2.11.0: sum(runai_allocated_gpu_count_per_gpu{FILTERS}) by (gpu, node, nodepool, clusterId) * sum(runai_gpu_memory_total_mebibytes_per_gpu{FILTERS}) by (gpu, node, nodepool, clusterId) * 1024 * 1024
+      runai_gpu_utilization_distribution_per_nodepool:
+        cross_version_query: count_values("range", floor(4 * clamp_max((runai_gpu_utilization_per_gpu{FILTERS}), 99.99) / 100)) or (count_values("range", vector(0)) or count_values("range", vector(1)) or count_values("range", vector(2)) or count_values("range", vector(3))) * 0
+        queries:
+            2.11.0: count_values("range", floor(4 * clamp_max((runai_gpu_utilization_per_gpu{FILTERS}), 99.99) / 100)) or (count_values("range", vector(0)) or count_values("range", vector(1)) or count_values("range", vector(2)) or count_values("range", vector(3))) * 0
+      runai_cpu_utilization_per_nodepool:
+        cross_version_query: runai_cpu_utilization_per_nodepool{FILTERS}
+        queries:
+            2.11.0: runai_cpu_utilization_per_nodepool{FILTERS}
+      runai_cpu_utilization_per_node:
+        cross_version_query: runai_cpu_utilization_per_node{FILTERS}
+        queries:
+            2.13.0: runai_cpu_utilization_per_node{FILTERS}
+      runai_memory_utilization_per_nodepool:
+        cross_version_query: runai_memory_utilization_per_nodepool{FILTERS}
+        queries:
+            2.11.0: runai_memory_utilization_per_nodepool{FILTERS}
+      runai_memory_utilization_per_node:
+        cross_version_query: runai_memory_utilization_per_node{FILTERS}
+        queries:
+            2.13.0: runai_memory_utilization_per_node{FILTERS}
+      runai_allocated_gpu_count_per_nodepool:
+        cross_version_query: runai_allocated_gpu_count_per_nodepool{FILTERS}
+        queries:
+            2.11.0: runai_allocated_gpu_count_per_nodepool{FILTERS}
+      runai_unallocated_gpu_count_per_nodepool:
+        cross_version_query: runai_gpu_count_per_nodepool{FILTERS} - on(clusterId,nodepool) runai_allocated_gpu_count_per_nodepool{FILTERS}
+        queries:
+            2.11.0: runai_gpu_count_per_nodepool{FILTERS} - on(clusterId,nodepool) runai_allocated_gpu_count_per_nodepool{FILTERS}
+      runai_gpu_count_per_nodepool:
+        cross_version_query: runai_gpu_count_per_nodepool{FILTERS}
+        queries:
+            2.11.0: runai_gpu_count_per_nodepool{FILTERS}
+      runai_allocated_gpu_count_per_workload:
+        cross_version_query: sum(runai_allocated_gpu_count_per_workload{FILTER::workload_id::FILTER}) by(workload_id, nodepool, clusterId)
+        queries:
+            2.16.0: sum(runai_allocated_gpu_count_per_workload{FILTER::workload_id::FILTER}) by(workload_id, nodepool, clusterId)
+      runai_gpu_utilization_per_workload:
+        cross_version_query: avg(runai_gpu_utilization_per_workload{FILTER::workload_id::FILTER}) by(workload_id)
+        queries:
+            2.16.0: avg(runai_gpu_utilization_per_workload{FILTER::workload_id::FILTER}) by(workload_id)
+      runai_gpu_utilization_per_pod_per_gpu:
+        cross_version_query: runai_gpu_utilization_per_pod_per_gpu{FILTERS}
+        queries:
+            2.9.0: runai_gpu_utilization_per_pod_per_gpu{FILTERS}
+      runai_gpu_utilization_per_pod:
+        cross_version_query: avg(runai_gpu_utilization_per_pod_per_gpu{FILTERS}) by(pod_uuid)
+        queries:
+            2.9.0: avg(runai_gpu_utilization_per_pod_per_gpu{FILTERS}) by(pod_uuid)
+      runai_swap_memory_bytes_per_pod_per_gpu:
+        cross_version_query: runai_swap_memory_bytes_per_pod_per_gpu{FILTERS}
+        queries:
+            2.20.0: runai_swap_memory_bytes_per_pod_per_gpu{FILTERS}
+      runai_gpu_oomkill_burst_count_per_gpu:
+        cross_version_query: runai_gpu_oomkill_burst_count_per_gpu{FILTERS}
+        queries:
+            2.16.0: runai_gpu_oomkill_burst_count_per_gpu{FILTERS}
+      runai_gpu_oomkill_idle_count_per_gpu:
+        cross_version_query: runai_gpu_oomkill_idle_count_per_gpu{FILTERS}
+        queries:
+            2.16.0: runai_gpu_oomkill_idle_count_per_gpu{FILTERS}
+      runai_gpu_oomkill_swap_out_of_ram_count_per_gpu:
+        cross_version_query: runai_gpu_oomkill_swap_out_of_ram_count_per_gpu{FILTERS}
+        queries:
+            2.20.0: runai_gpu_oomkill_swap_out_of_ram_count_per_gpu{FILTERS}
+      runai_cpu_used_cores_per_workload:
+        cross_version_query: sum(runai_used_cpu_cores_per_pod{FILTER::workload_id::FILTER}) by(workload_id)
+        queries:
+            2.26.0: sum(runai_used_cpu_cores_per_workload{FILTER::workload_id::FILTER}) by(workload_id)
+            2.16.0: sum(runai_used_cpu_cores_per_pod{FILTER::workload_id::FILTER}) by(workload_id)
+      runai_cpu_used_cores_per_pod:
+        cross_version_query: sum(runai_used_cpu_cores_per_pod{FILTERS}) by (pod_uuid)
+        queries:
+            2.16.0: sum(runai_used_cpu_cores_per_pod{FILTERS}) by (pod_uuid)
+      runai_cpu_requested_cores_per_workload:
+        cross_version_query: sum(runai_active_job_cpu_requested_cores{FILTER::workload_id::FILTER}) by(workload_id)
+        queries:
+            2.16.0: sum(runai_active_job_cpu_requested_cores{FILTER::workload_id::FILTER}) by(workload_id)
+      runai_cpu_limit_cores_per_workload:
+        cross_version_query: sum(runai_cpu_limits_per_active_workload{FILTER::workload_id::FILTER} or on(workload_id) runai_active_job_cpu_limits{FILTER::workload_id::FILTER}) by(workload_id)
+        queries:
+            2.17.0: sum(runai_cpu_limits_per_active_workload{FILTER::workload_id::FILTER}) by(workload_id)
+            2.16.0: sum(runai_active_job_cpu_limits{FILTER::workload_id::FILTER}) by(workload_id)
+      runai_memory_used_bytes_per_workload:
+        cross_version_query: sum(runai_used_memory_bytes_per_pod{FILTER::workload_id::FILTER}) by(workload_id)
+        queries:
+            2.26.0: sum(runai_used_memory_bytes_per_workload{FILTER::workload_id::FILTER}) by(workload_id)
+            2.16.0: sum(runai_used_memory_bytes_per_pod{FILTER::workload_id::FILTER}) by(workload_id)
+      runai_memory_used_bytes_per_pod:
+        cross_version_query: sum(runai_used_memory_bytes_per_pod{FILTERS}) by (pod_uuid)
+        queries:
+            2.16.0: sum(runai_used_memory_bytes_per_pod{FILTERS}) by (pod_uuid)
+      runai_memory_requested_bytes_per_workload:
+        cross_version_query: sum(runai_active_job_memory_requested_bytes{FILTER::workload_id::FILTER}) by(workload_id)
+        queries:
+            2.16.0: sum(runai_active_job_memory_requested_bytes{FILTER::workload_id::FILTER}) by(workload_id)
+      runai_memory_limit_bytes_per_workload:
+        cross_version_query: sum(runai_memory_limits_per_active_workload{FILTER::workload_id::FILTER} or on(workload_id) runai_active_job_memory_limits{FILTER::workload_id::FILTER}) by(workload_id)
+        queries:
+            2.17.0: sum(runai_memory_limits_per_active_workload{FILTER::workload_id::FILTER}) by(workload_id)
+            2.16.0: sum(runai_active_job_memory_limits{FILTER::workload_id::FILTER}) by(workload_id)
+      runai_gpu_memory_used_bytes_per_workload:
+        cross_version_query: sum(runai_gpu_memory_used_mebibytes_per_workload{FILTER::workload_id::FILTER} * 1024 * 1024) by(workload_id)
+        queries:
+            2.16.0: sum(runai_gpu_memory_used_mebibytes_per_workload{FILTER::workload_id::FILTER} * 1024 * 1024) by(workload_id)
+      runai_gpu_memory_used_bytes_per_pod_per_gpu:
+        cross_version_query: runai_gpu_memory_used_mebibytes_per_pod_per_gpu{FILTERS} * 1024 * 1024
+        queries:
+            2.9.0: runai_gpu_memory_used_mebibytes_per_pod_per_gpu{FILTERS} * 1024 * 1024
+      runai_gpu_memory_used_bytes_per_pod:
+        cross_version_query: (sum(runai_gpu_memory_used_mebibytes_per_pod_per_gpu{FILTERS}) by (pod_uuid)) * 1024 * 1024
+        queries:
+            2.9.0: (sum(runai_gpu_memory_used_mebibytes_per_pod_per_gpu{FILTERS}) by (pod_uuid)) * 1024 * 1024
+      runai_gpu_memory_used_bytes_per_gpu:
+        cross_version_query: runai_gpu_memory_used_mebibytes_per_gpu{FILTERS} * 1024 * 1024
+        queries:
+            2.13.0: runai_gpu_memory_used_mebibytes_per_gpu{FILTERS} * 1024 * 1024
+      runai_gpu_memory_requested_bytes_per_workload:
+        cross_version_query: sum(runai_requested_gpu_memory_mb_per_workload{FILTER::workload_id::FILTER} * 1000000 or on(workload_id) runai_job_requested_gpu_memory{FILTER::workload_id::FILTER} * 1000000) by(workload_id)
+        queries:
+            2.17.0: sum(runai_requested_gpu_memory_mb_per_workload{FILTER::workload_id::FILTER} * 1000000) by(workload_id)
+            2.16.0: sum(runai_job_requested_gpu_memory{FILTER::workload_id::FILTER} * 1000000) by(workload_id)
+      runai_gpu_memory_limit_bytes_per_workload:
+        cross_version_query: sum(runai_gpu_memory_mb_limit_per_workload{FILTER::workload_id::FILTER} * 1000000 or on(workload_id) runai_requested_gpu_memory_mb_per_workload{FILTER::workload_id::FILTER} * 1000000 or on(workload_id) runai_job_requested_gpu_memory{FILTER::workload_id::FILTER} * 1000000) by(workload_id)
+        queries:
+            2.18.0: sum(runai_gpu_memory_mb_limit_per_workload{FILTER::workload_id::FILTER} * 1000000 or on(workload_id) runai_requested_gpu_memory_mb_per_workload{FILTER::workload_id::FILTER} * 1000000) by(workload_id)
+            2.17.0: sum(runai_requested_gpu_memory_mb_per_workload{FILTER::workload_id::FILTER} * 1000000) by(workload_id)
+            2.16.0: sum(runai_job_requested_gpu_memory{FILTER::workload_id::FILTER} * 1000000) by(workload_id)
+      runai_gpu_gr_engine_active_per_pod_per_gpu:
+        cross_version_query: runai_gpu_gr_engine_active_per_pod_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_gr_engine_active_per_pod_per_gpu{FILTERS}
+      runai_gpu_sm_active_per_pod_per_gpu:
+        cross_version_query: runai_gpu_sm_active_per_pod_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_sm_active_per_pod_per_gpu{FILTERS}
+      runai_gpu_sm_occupancy_per_pod_per_gpu:
+        cross_version_query: runai_gpu_sm_occupancy_per_pod_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_sm_occupancy_per_pod_per_gpu{FILTERS}
+      runai_gpu_pipe_tensor_active_per_pod_per_gpu:
+        cross_version_query: runai_gpu_pipe_tensor_active_per_pod_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_pipe_tensor_active_per_pod_per_gpu{FILTERS}
+      runai_gpu_pipe_fp64_active_per_pod_per_gpu:
+        cross_version_query: runai_gpu_pipe_fp64_active_per_pod_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_pipe_fp64_active_per_pod_per_gpu{FILTERS}
+      runai_gpu_pipe_fp32_active_per_pod_per_gpu:
+        cross_version_query: runai_gpu_pipe_fp32_active_per_pod_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_pipe_fp32_active_per_pod_per_gpu{FILTERS}
+      runai_gpu_pipe_fp16_active_per_pod_per_gpu:
+        cross_version_query: runai_gpu_pipe_fp16_active_per_pod_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_pipe_fp16_active_per_pod_per_gpu{FILTERS}
+      runai_gpu_dram_active_per_pod_per_gpu:
+        cross_version_query: runai_gpu_dram_active_per_pod_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_dram_active_per_pod_per_gpu{FILTERS}
+      runai_gpu_nvlink_tx_bytes_per_pod_per_gpu:
+        cross_version_query: runai_gpu_nvlink_tx_bytes_per_pod_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_nvlink_tx_bytes_per_pod_per_gpu{FILTERS}
+      runai_gpu_nvlink_rx_bytes_per_pod_per_gpu:
+        cross_version_query: runai_gpu_nvlink_rx_bytes_per_pod_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_nvlink_rx_bytes_per_pod_per_gpu{FILTERS}
+      runai_gpu_pcie_tx_bytes_per_pod_per_gpu:
+        cross_version_query: runai_gpu_pcie_tx_bytes_per_pod_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_pcie_tx_bytes_per_pod_per_gpu{FILTERS}
+      runai_gpu_pcie_rx_bytes_per_pod_per_gpu:
+        cross_version_query: runai_gpu_pcie_rx_bytes_per_pod_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_pcie_rx_bytes_per_pod_per_gpu{FILTERS}
+      runai_gpu_gr_engine_active_per_gpu:
+        cross_version_query: runai_gpu_gr_engine_active_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_gr_engine_active_per_gpu{FILTERS}
+      runai_gpu_sm_active_per_gpu:
+        cross_version_query: runai_gpu_sm_active_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_sm_active_per_gpu{FILTERS}
+      runai_gpu_sm_occupancy_per_gpu:
+        cross_version_query: runai_gpu_sm_occupancy_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_sm_occupancy_per_gpu{FILTERS}
+      runai_gpu_pipe_tensor_active_per_gpu:
+        cross_version_query: runai_gpu_pipe_tensor_active_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_pipe_tensor_active_per_gpu{FILTERS}
+      runai_gpu_pipe_fp64_active_per_gpu:
+        cross_version_query: runai_gpu_pipe_fp64_active_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_pipe_fp64_active_per_gpu{FILTERS}
+      runai_gpu_pipe_fp32_active_per_gpu:
+        cross_version_query: runai_gpu_pipe_fp32_active_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_pipe_fp32_active_per_gpu{FILTERS}
+      runai_gpu_pipe_fp16_active_per_gpu:
+        cross_version_query: runai_gpu_pipe_fp16_active_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_pipe_fp16_active_per_gpu{FILTERS}
+      runai_gpu_dram_active_per_gpu:
+        cross_version_query: runai_gpu_dram_active_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_dram_active_per_gpu{FILTERS}
+      runai_gpu_nvlink_tx_bytes_per_gpu:
+        cross_version_query: runai_gpu_nvlink_tx_bytes_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_nvlink_tx_bytes_per_gpu{FILTERS}
+      runai_gpu_nvlink_rx_bytes_per_gpu:
+        cross_version_query: runai_gpu_nvlink_rx_bytes_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_nvlink_rx_bytes_per_gpu{FILTERS}
+      runai_dcgm_nvlink_bandwidth_total_bytes_per_workload:
+        cross_version_query: runai_dcgm_nvlink_bandwidth_total_bytes_per_workload{FILTERS}
+        queries:
+            2.23.0: runai_dcgm_nvlink_bandwidth_total_bytes_per_workload{FILTERS}
+      runai_dcgm_nvlink_bandwidth_total_bytes_per_node:
+        cross_version_query: runai_dcgm_nvlink_bandwidth_total_bytes_per_node{FILTERS}
+        queries:
+            2.23.0: runai_dcgm_nvlink_bandwidth_total_bytes_per_node{FILTERS}
+      runai_dcgm_nvlink_bandwidth_total_bytes_per_pod_per_gpu:
+        cross_version_query: runai_dcgm_nvlink_bandwidth_total_bytes_per_pod_per_gpu{FILTERS}
+        queries:
+            2.23.0: runai_dcgm_nvlink_bandwidth_total_bytes_per_pod_per_gpu{FILTERS}
+      runai_dcgm_nvlink_bandwidth_total_bytes_per_gpu:
+        cross_version_query: runai_dcgm_nvlink_bandwidth_total_bytes_per_gpu{FILTERS}
+        queries:
+            2.23.0: runai_dcgm_nvlink_bandwidth_total_bytes_per_gpu{FILTERS}
+      runai_dcgm_nvlink_bandwidth_total_bytes_per_pod:
+        cross_version_query: runai_dcgm_nvlink_bandwidth_total_bytes_per_pod{FILTERS}
+        queries:
+            2.23.0: runai_dcgm_nvlink_bandwidth_total_bytes_per_pod{FILTERS}
+      runai_gpu_pcie_tx_bytes_per_gpu:
+        cross_version_query: runai_gpu_pcie_tx_bytes_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_pcie_tx_bytes_per_gpu{FILTERS}
+      runai_gpu_pcie_rx_bytes_per_gpu:
+        cross_version_query: runai_gpu_pcie_rx_bytes_per_gpu{FILTERS}
+        queries:
+            2.11.0: runai_gpu_pcie_rx_bytes_per_gpu{FILTERS}
+      runai_nim_time_to_first_token_seconds_bucket_per_pod:
+        cross_version_query: sum by (le, pod_uuid) (runai_nim_time_to_first_token_seconds_bucket_per_pod{FILTERS})
+        queries:
+            2.23.0: sum by (le, pod_uuid) (runai_nim_time_to_first_token_seconds_bucket_per_pod{FILTERS})
+      runai_nim_time_to_first_token_seconds_bucket_per_workload:
+        cross_version_query: sum by (le, workload_id) (runai_nim_time_to_first_token_seconds_bucket_per_pod{FILTERS})
+        queries:
+            2.23.0: sum by (le, workload_id) (runai_nim_time_to_first_token_seconds_bucket_per_pod{FILTERS})
+      runai_nim_time_to_first_token_seconds_bucket_percentile_per_pod:
+        cross_version_query: label_replace(histogram_quantile(0.50, sum by (le, pod_uuid) (increase(runai_nim_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.90, sum by (le, pod_uuid) (increase(runai_nim_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "90", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, pod_uuid) (increase(runai_nim_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+        queries:
+            2.23.0: label_replace(histogram_quantile(0.50, sum by (le, pod_uuid) (increase(runai_nim_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.90, sum by (le, pod_uuid) (increase(runai_nim_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "90", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, pod_uuid) (increase(runai_nim_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+      runai_nim_time_to_first_token_seconds_bucket_percentile_per_workload:
+        cross_version_query: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_nim_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.90, sum by (le, workload_id) (increase(runai_nim_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "90", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_nim_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+        queries:
+            2.23.0: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_nim_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.90, sum by (le, workload_id) (increase(runai_nim_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "90", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_nim_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+      runai_nim_e2e_request_latency_seconds_bucket_per_pod:
+        cross_version_query: sum by (le, pod_uuid) (runai_nim_e2e_request_latency_seconds_bucket_per_pod{FILTERS})
+        queries:
+            2.23.0: sum by (le, pod_uuid) (runai_nim_e2e_request_latency_seconds_bucket_per_pod{FILTERS})
+      runai_nim_e2e_request_latency_seconds_bucket_per_workload:
+        cross_version_query: sum by (le, workload_id) (runai_nim_e2e_request_latency_seconds_bucket_per_pod{FILTERS})
+        queries:
+            2.23.0: sum by (le, workload_id) (runai_nim_e2e_request_latency_seconds_bucket_per_pod{FILTERS})
+      runai_nim_e2e_request_latency_seconds_bucket_percentile_per_pod:
+        cross_version_query: label_replace(histogram_quantile(0.50, sum by (le, pod_uuid) (increase(runai_nim_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.90, sum by (le, pod_uuid) (increase(runai_nim_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "90", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, pod_uuid) (increase(runai_nim_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+        queries:
+            2.23.0: label_replace(histogram_quantile(0.50, sum by (le, pod_uuid) (increase(runai_nim_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.90, sum by (le, pod_uuid) (increase(runai_nim_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "90", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, pod_uuid) (increase(runai_nim_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+      runai_nim_e2e_request_latency_seconds_bucket_percentile_per_workload:
+        cross_version_query: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_nim_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.90, sum by (le, workload_id) (increase(runai_nim_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "90", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_nim_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+        queries:
+            2.23.0: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_nim_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.90, sum by (le, workload_id) (increase(runai_nim_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "90", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_nim_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+      runai_nim_gpu_cache_usage_perc_per_pod:
+        cross_version_query: runai_nim_gpu_cache_usage_perc_per_pod{FILTERS}
+        queries:
+            2.23.0: runai_nim_gpu_cache_usage_perc_per_pod{FILTERS}
+      runai_nim_gpu_cache_usage_perc_per_workload:
+        cross_version_query: runai_nim_gpu_cache_usage_perc_per_workload{FILTERS}
+        queries:
+            2.23.0: runai_nim_gpu_cache_usage_perc_per_workload{FILTERS}
+      runai_nim_num_requests_running_per_workload:
+        cross_version_query: runai_nim_num_requests_running_per_workload{FILTERS}
+        queries:
+            2.23.0: runai_nim_num_requests_running_per_workload{FILTERS}
+      runai_nim_num_requests_running_per_pod:
+        cross_version_query: runai_nim_num_requests_running_per_pod{FILTERS}
+        queries:
+            2.23.0: runai_nim_num_requests_running_per_pod{FILTERS}
+      runai_nim_num_requests_waiting_per_workload:
+        cross_version_query: runai_nim_num_requests_waiting_per_workload{FILTERS}
+        queries:
+            2.23.0: runai_nim_num_requests_waiting_per_workload{FILTERS}
+      runai_nim_num_requests_waiting_per_pod:
+        cross_version_query: runai_nim_num_requests_waiting_per_pod{FILTERS}
+        queries:
+            2.23.0: runai_nim_num_requests_waiting_per_pod{FILTERS}
+      runai_nim_num_request_max_per_pod:
+        cross_version_query: runai_nim_num_request_max_per_pod{FILTERS}
+        queries:
+            2.23.0: runai_nim_num_request_max_per_pod{FILTERS}
+      runai_nim_num_request_max_per_workload:
+        cross_version_query: runai_nim_num_request_max_per_workload{FILTERS}
+        queries:
+              2.23.0: runai_nim_num_request_max_per_workload{FILTERS}
+      runai_nim_request_success_total_per_workload:
+        cross_version_query: runai_nim_request_success_total_per_workload{FILTERS}
+        queries:
+            2.23.0: runai_nim_request_success_total_per_workload{FILTERS}
+      runai_nim_request_success_total_per_pod:
+        cross_version_query: runai_nim_request_success_total_per_pod{FILTERS}
+        queries:
+            2.23.0: runai_nim_request_success_total_per_pod{FILTERS}
+      runai_nim_request_failure_total_per_workload:
+        cross_version_query: runai_nim_request_failure_total_per_workload{FILTERS}
+        queries:
+            2.23.0: runai_nim_request_failure_total_per_workload{FILTERS}
+      runai_nim_request_failure_total_per_pod:
+        cross_version_query: runai_nim_request_failure_total_per_pod{FILTERS}
+        queries:
+            2.23.0: runai_nim_request_failure_total_per_pod{FILTERS}
+      runai_vllm_num_requests_running_per_pod:
+        cross_version_query: runai_vllm_num_requests_running_per_pod{FILTERS}
+        queries:
+            3.0.0: runai_vllm_num_requests_running_per_pod{FILTERS}
+      runai_vllm_num_requests_running_per_workload:
+        cross_version_query: runai_vllm_num_requests_running_per_workload{FILTERS}
+        queries:
+            3.0.0: runai_vllm_num_requests_running_per_workload{FILTERS}
+      runai_vllm_num_requests_waiting_per_pod:
+        cross_version_query: runai_vllm_num_requests_waiting_per_pod{FILTERS}
+        queries:
+            3.0.0: runai_vllm_num_requests_waiting_per_pod{FILTERS}
+      runai_vllm_num_requests_waiting_per_workload:
+        cross_version_query: runai_vllm_num_requests_waiting_per_workload{FILTERS}
+        queries:
+            3.0.0: runai_vllm_num_requests_waiting_per_workload{FILTERS}
+      runai_vllm_request_success_per_second_per_pod:
+        cross_version_query: runai_vllm_request_success_per_second_per_pod{FILTERS}
+        queries:
+            3.0.0: runai_vllm_request_success_per_second_per_pod{FILTERS}
+      runai_vllm_request_success_per_second_per_workload:
+        cross_version_query: runai_vllm_request_success_per_second_per_workload{FILTERS}
+        queries:
+            3.0.0: runai_vllm_request_success_per_second_per_workload{FILTERS}
+      runai_vllm_request_success_rate_per_pod:
+        cross_version_query: runai_vllm_request_success_rate_per_pod{FILTERS}
+        queries:
+            3.0.0: runai_vllm_request_success_rate_per_pod{FILTERS}
+      runai_vllm_request_success_rate_per_workload:
+        cross_version_query: runai_vllm_request_success_rate_per_workload{FILTERS}
+        queries:
+            3.0.0: runai_vllm_request_success_rate_per_workload{FILTERS}
+      runai_vllm_kv_cache_usage_perc_per_pod:
+        cross_version_query: runai_vllm_kv_cache_usage_perc_per_pod{FILTERS}
+        queries:
+            3.0.0: runai_vllm_kv_cache_usage_perc_per_pod{FILTERS}
+      runai_vllm_kv_cache_usage_perc_per_workload:
+        cross_version_query: runai_vllm_kv_cache_usage_perc_per_workload{FILTERS}
+        queries:
+            3.0.0: runai_vllm_kv_cache_usage_perc_per_workload{FILTERS}
+      runai_vllm_prompt_tokens_per_second_per_pod:
+        cross_version_query: runai_vllm_prompt_tokens_per_second_per_pod{FILTERS}
+        queries:
+            3.0.0: runai_vllm_prompt_tokens_per_second_per_pod{FILTERS}
+      runai_vllm_prompt_tokens_per_second_per_workload:
+        cross_version_query: runai_vllm_prompt_tokens_per_second_per_workload{FILTERS}
+        queries:
+            3.0.0: runai_vllm_prompt_tokens_per_second_per_workload{FILTERS}
+      runai_vllm_generation_tokens_per_second_per_pod:
+        cross_version_query: runai_vllm_generation_tokens_per_second_per_pod{FILTERS}
+        queries:
+            3.0.0: runai_vllm_generation_tokens_per_second_per_pod{FILTERS}
+      runai_vllm_generation_tokens_per_second_per_workload:
+        cross_version_query: runai_vllm_generation_tokens_per_second_per_workload{FILTERS}
+        queries:
+            3.0.0: runai_vllm_generation_tokens_per_second_per_workload{FILTERS}
+      runai_vllm_time_to_first_token_seconds_bucket_per_pod:
+        cross_version_query: sum by (le, pod_uuid) (runai_vllm_time_to_first_token_seconds_bucket_per_pod{FILTERS})
+        queries:
+            3.0.0: sum by (le, pod_uuid) (runai_vllm_time_to_first_token_seconds_bucket_per_pod{FILTERS})
+      runai_vllm_time_to_first_token_seconds_bucket_per_workload:
+        cross_version_query: sum by (le, workload_id) (runai_vllm_time_to_first_token_seconds_bucket_per_pod{FILTERS})
+        queries:
+            3.0.0: sum by (le, workload_id) (runai_vllm_time_to_first_token_seconds_bucket_per_pod{FILTERS})
+      runai_vllm_e2e_request_latency_seconds_bucket_per_pod:
+        cross_version_query: sum by (le, pod_uuid) (runai_vllm_e2e_request_latency_seconds_bucket_per_pod{FILTERS})
+        queries:
+            3.0.0: sum by (le, pod_uuid) (runai_vllm_e2e_request_latency_seconds_bucket_per_pod{FILTERS})
+      runai_vllm_e2e_request_latency_seconds_bucket_per_workload:
+        cross_version_query: sum by (le, workload_id) (runai_vllm_e2e_request_latency_seconds_bucket_per_pod{FILTERS})
+        queries:
+            3.0.0: sum by (le, workload_id) (runai_vllm_e2e_request_latency_seconds_bucket_per_pod{FILTERS})
+      runai_vllm_time_to_first_token_seconds_bucket_percentile_per_pod:
+        cross_version_query: label_replace(histogram_quantile(0.50, sum by (le, pod_uuid) (increase(runai_vllm_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, pod_uuid) (increase(runai_vllm_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, pod_uuid) (increase(runai_vllm_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+        queries:
+            3.0.0: label_replace(histogram_quantile(0.50, sum by (le, pod_uuid) (increase(runai_vllm_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, pod_uuid) (increase(runai_vllm_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, pod_uuid) (increase(runai_vllm_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+      runai_vllm_time_to_first_token_seconds_bucket_percentile_per_workload:
+        cross_version_query: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+        queries:
+            3.0.0: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_time_to_first_token_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+      runai_vllm_e2e_request_latency_seconds_bucket_percentile_per_pod:
+        cross_version_query: label_replace(histogram_quantile(0.50, sum by (le, pod_uuid) (increase(runai_vllm_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, pod_uuid) (increase(runai_vllm_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, pod_uuid) (increase(runai_vllm_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+        queries:
+            3.0.0: label_replace(histogram_quantile(0.50, sum by (le, pod_uuid) (increase(runai_vllm_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, pod_uuid) (increase(runai_vllm_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, pod_uuid) (increase(runai_vllm_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+      runai_vllm_e2e_request_latency_seconds_bucket_percentile_per_workload:
+        cross_version_query: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+        queries:
+            3.0.0: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_e2e_request_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+      runai_vllm_request_queue_time_seconds_bucket_percentile_per_pod:
+        cross_version_query: label_replace(histogram_quantile(0.50, sum by (le, pod_uuid) (increase(runai_vllm_request_queue_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, pod_uuid) (increase(runai_vllm_request_queue_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, pod_uuid) (increase(runai_vllm_request_queue_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+        queries:
+            3.0.0: label_replace(histogram_quantile(0.50, sum by (le, pod_uuid) (increase(runai_vllm_request_queue_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, pod_uuid) (increase(runai_vllm_request_queue_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, pod_uuid) (increase(runai_vllm_request_queue_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+      runai_vllm_request_queue_time_seconds_bucket_percentile_per_workload:
+        cross_version_query: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_request_queue_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_request_queue_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_request_queue_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+        queries:
+            3.0.0: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_request_queue_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_request_queue_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_request_queue_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+      runai_vllm_request_prefill_time_seconds_bucket_percentile_per_pod:
+        cross_version_query: label_replace(histogram_quantile(0.50, sum by (le, pod_uuid) (increase(runai_vllm_request_prefill_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, pod_uuid) (increase(runai_vllm_request_prefill_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, pod_uuid) (increase(runai_vllm_request_prefill_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+        queries:
+            3.0.0: label_replace(histogram_quantile(0.50, sum by (le, pod_uuid) (increase(runai_vllm_request_prefill_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, pod_uuid) (increase(runai_vllm_request_prefill_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, pod_uuid) (increase(runai_vllm_request_prefill_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+      runai_vllm_request_prefill_time_seconds_bucket_percentile_per_workload:
+        cross_version_query: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_request_prefill_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_request_prefill_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_request_prefill_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+        queries:
+            3.0.0: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_request_prefill_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_request_prefill_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_request_prefill_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+      runai_vllm_request_decode_time_seconds_bucket_percentile_per_pod:
+        cross_version_query: label_replace(histogram_quantile(0.50, sum by (le, pod_uuid) (increase(runai_vllm_request_decode_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, pod_uuid) (increase(runai_vllm_request_decode_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, pod_uuid) (increase(runai_vllm_request_decode_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+        queries:
+            3.0.0: label_replace(histogram_quantile(0.50, sum by (le, pod_uuid) (increase(runai_vllm_request_decode_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, pod_uuid) (increase(runai_vllm_request_decode_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, pod_uuid) (increase(runai_vllm_request_decode_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+      runai_vllm_request_decode_time_seconds_bucket_percentile_per_workload:
+        cross_version_query: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_request_decode_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_request_decode_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_request_decode_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+        queries:
+            3.0.0: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_request_decode_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_request_decode_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_request_decode_time_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+      runai_vllm_inter_token_latency_seconds_bucket_percentile_per_pod:
+        cross_version_query: label_replace(histogram_quantile(0.50, sum by (le, pod_uuid) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, pod_uuid) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, pod_uuid) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+        queries:
+            3.0.0: label_replace(histogram_quantile(0.50, sum by (le, pod_uuid) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, pod_uuid) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, pod_uuid) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+      runai_vllm_inter_token_latency_seconds_bucket_percentile_per_workload:
+        cross_version_query: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+        queries:
+            3.0.0: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
+      runai_pod_count_per_workload:
+        cross_version_query: count by (workload_id) (runai_pod_phase_with_info{phase=~"Running|Pending",detailed_status!="Terminating",FILTER::workload_id::FILTER} == 1) 
+        queries:
+            2.16.0: count by (workload_id) (runai_pod_phase_with_info{phase=~"Running|Pending",detailed_status!="Terminating",FILTER::workload_id::FILTER} == 1)
+      runai_running_pod_count_per_workload:
+        cross_version_query: count by (workload_id) (runai_pod_phase_with_info{phase="Running",detailed_status!="Terminating",FILTER::workload_id::FILTER} == 1)
+        queries:
+            2.16.0: count by (workload_id) (runai_pod_phase_with_info{phase="Running",detailed_status!="Terminating",FILTER::workload_id::FILTER} == 1)
+      runai_inference_throughput_per_pod:
+        cross_version_query: sum(runai_inference_throughput_per_pod{FILTERS}) by (pod_uuid)
+        queries:
+            2.18.0: sum(runai_inference_throughput_per_pod{FILTERS}) by (pod_uuid)
+      runai_inference_throughput_per_workload:
+        cross_version_query: sum(runai_inference_throughput_per_pod{FILTERS}) by (workload_id)
+        queries:
+            2.18.0: sum(runai_inference_throughput_per_pod{FILTERS}) by (workload_id)
+      runai_inference_latency_per_pod:
+        cross_version_query: sum(runai_inference_latency_per_pod{FILTERS}) by (pod_uuid)
+        queries:
+            2.18.0: sum(runai_inference_latency_per_pod{FILTERS}) by (pod_uuid)
+      runai_inference_latency_per_workload:
+        cross_version_query: avg(runai_inference_latency_per_pod{FILTERS}) by (workload_id)
+        queries:
+            2.18.0: avg(runai_inference_latency_per_pod{FILTERS}) by (workload_id)
+      runai_pending_workloads_per_queue:
+        cross_version_query: (sum(runai_workload_info_enriched{FILTERS,phase="Pending"}) by (clusterId,department,project,nodepool,queue_name)) or on (queue_name) (sum(runai_pod_group_phase_with_info{FILTER::clusterId::FILTER,phase="Pending"} * on(project,nodepool) group_left(department) runai_queue_info{project!="",FILTERS}) by (clusterId,department,project,nodepool,queue_name))
+        queries:
+            2.16.0: sum(runai_workload_info_enriched{FILTERS,phase="Pending"}) by (clusterId,department,project,nodepool,queue_name)
+            2.11.0: sum(runai_pod_group_phase_with_info{FILTER::clusterId::FILTER,phase="Pending"} * on(project,nodepool) group_left(department) runai_queue_info{project!="",FILTERS}) by (clusterId,department,project,nodepool,queue_name)
+      runai_allocated_gpu_per_queue:
+        cross_version_query: sum(runai_allocated_gpu_count_per_queue{project!='',FILTERS}) by (clusterId,department,project,nodepool)
+        queries:
+            2.11.0: sum(runai_allocated_gpu_count_per_queue{project!='',FILTERS}) by (clusterId,department,project,nodepool)
+      runai_allocated_cpu_per_queue:
+        cross_version_query: sum(runai_allocated_millicpus_per_pod{FILTERS}) by (clusterId,department,project,nodepool)
+        queries:
+            2.11.0: sum(runai_allocated_millicpus_per_pod{FILTERS}) by (clusterId,department,project,nodepool)
+      runai_allocated_memory_mb_per_queue:
+        cross_version_query: sum(runai_allocated_memory_per_pod{FILTERS}/1000000) by (clusterId,department,project,nodepool)
+        queries:
+            2.11.0: sum(runai_allocated_memory_per_pod{FILTERS}/1000000) by (clusterId,department,project,nodepool,queue_name)
+      runai_pending_workloads_count_per_queues:
+        cross_version_query: sum(runai_workload_info_enriched{FILTER::clusterId::FILTER,FILTER::nodepool::FILTER,FILTER::department::FILTER,FILTER::project::FILTER,phase="Pending"}) by (clusterId,department,project,nodepool,queue_name) or on (queue_name) sum(runai_pod_group_phase_with_info{FILTER::clusterId::FILTER,FILTER::project::FILTER,phase="Pending"} * on(queue_name) group_left(department_name) runai_queue_info{project!="",FILTER::clusterId::FILTER,FILTER::nodepool::FILTER,FILTER::department_name::FILTER}) by (clusterId,department_name,project,nodepool,queue_name)
+        queries:
+            2.16.0: sum(runai_workload_info_enriched{FILTER::clusterId::FILTER,FILTER::nodepool::FILTER,FILTER::department::FILTER,FILTER::project::FILTER,phase="Pending"}) by (clusterId,department,project,nodepool,queue_name)
+            2.11.0: sum(runai_pod_group_phase_with_info{FILTER::clusterId::FILTER,FILTER::project::FILTER,phase="Pending"} * on(queue_name) group_left(department_name) runai_queue_info{project!="",FILTER::clusterId::FILTER,FILTER::nodepool::FILTER,FILTER::department_name::FILTER}) by (clusterId,department_name,project,nodepool,queue_name)
+      runai_deserved_gpu_count_per_queues:
+        cross_version_query: sum(runai_deserved_gpu_count_per_queue{FILTER::clusterId::FILTER,FILTER::nodepool::FILTER,FILTER::department::FILTER,FILTER::project::FILTER})
+        queries:
+            2.16.0: sum(runai_deserved_gpu_count_per_queue{FILTER::clusterId::FILTER,FILTER::nodepool::FILTER,FILTER::department::FILTER,FILTER::project::FILTER})
+      runai_allocated_gpu_count_per_queues:
+        cross_version_query: sum(runai_allocated_gpu_count_per_queue{project!='',FILTERS})
+        queries:
+            2.11.0: sum(runai_allocated_gpu_count_per_queue{project!='',FILTERS})
+      runai_deserved_cpu_per_queues:
+        cross_version_query: sum((runai_queue_quota_cpu_cores{FILTER::clusterId::FILTER,FILTER::nodepool::FILTER,FILTER::department::FILTER,FILTER::project::FILTER})) or on (queue_name) sum((runai_queue_quota_cpu_cores{project!="",FILTER::clusterId::FILTER,FILTER::project::FILTER}) * on(queue_name) group_left(department_name) runai_queue_info{project!="",FILTER::clusterId::FILTER,FILTER::nodepool::FILTER,FILTER::department_name::FILTER})
+        queries:
+            2.16.0: sum((runai_queue_quota_cpu_cores{FILTER::clusterId::FILTER,FILTER::nodepool::FILTER,FILTER::department::FILTER,FILTER::project::FILTER}))
+            2.11.0: sum((runai_queue_quota_cpu_cores{project!="",FILTER::clusterId::FILTER,FILTER::project::FILTER}) * on(queue_name) group_left(department_name) runai_queue_info{project!="",FILTER::clusterId::FILTER,FILTER::nodepool::FILTER,FILTER::department_name::FILTER})
+      runai_deserved_cpu_millicores_per_queues:
+        cross_version_query: sum(runai_queue_quota_cpu_cores{FILTER::clusterId::FILTER,FILTER::nodepool::FILTER,FILTER::department::FILTER,FILTER::project::FILTER}) * 1000 or on (queue_name) sum((runai_queue_quota_cpu_cores{project!="",FILTER::clusterId::FILTER,FILTER::project::FILTER}) * on(queue_name) group_left(department_name) runai_queue_info{project!="",FILTER::clusterId::FILTER,FILTER::nodepool::FILTER,FILTER::department_name::FILTER}) * 1000
+        queries:
+            2.16.0: sum(runai_queue_quota_cpu_cores{FILTER::clusterId::FILTER,FILTER::nodepool::FILTER,FILTER::department::FILTER,FILTER::project::FILTER}) * 1000
+            2.11.0: sum((runai_queue_quota_cpu_cores{project!="",FILTER::clusterId::FILTER,FILTER::project::FILTER}) * on(queue_name) group_left(department_name) runai_queue_info{project!="",FILTER::clusterId::FILTER,FILTER::nodepool::FILTER,FILTER::department_name::FILTER}) * 1000
+      runai_allocated_cpu_per_queues:
+        cross_version_query: sum(runai_allocated_millicpus_per_pod{FILTERS})
+        queries:
+            2.11.0: sum(runai_allocated_millicpus_per_pod{FILTERS})
+      runai_deserved_memory_mb_per_queues:
+        cross_version_query: sum((runai_queue_quota_memory_bytes{FILTER::clusterId::FILTER,FILTER::nodepool::FILTER,FILTER::department::FILTER,FILTER::project::FILTER}/1000000)) or on (queue_name) sum((runai_queue_quota_memory_bytes{project!="",FILTER::clusterId::FILTER,FILTER::project::FILTER}/1000000) * on(queue_name) group_left(department_name) runai_queue_info{project!="",FILTER::clusterId::FILTER,FILTER::nodepool::FILTER,FILTER::department::FILTER})
+        queries:
+            2.16.0: sum((runai_queue_quota_memory_bytes{FILTER::clusterId::FILTER,FILTER::nodepool::FILTER,FILTER::department::FILTER,FILTER::project::FILTER}/1000000))
+            2.11.0: sum((runai_queue_quota_memory_bytes{project!="",FILTER::clusterId::FILTER,FILTER::project::FILTER}/1000000) * on(queue_name) group_left(department_name) runai_queue_info{project!="",FILTER::clusterId::FILTER,FILTER::nodepool::FILTER,FILTER::department::FILTER})
+      runai_allocated_memory_mb_per_queues:
+        cross_version_query: sum(runai_allocated_memory_per_pod{FILTERS}/1000000)
+        queries:
+            2.11.0: sum(runai_allocated_memory_per_pod{FILTERS}/1000000)
+      runai_gpu_memory_utilization_per_queues:
+        cross_version_query: clamp_max(100 * sum(runai_gpu_memory_used_mebibytes_per_workload{FILTERS} * 1024 * 1024) / sum(runai_allocated_gpu_memory_mb_per_workload{FILTERS} * 1000 * 1000), 100)
+        queries:
+            2.22.0: sum(runai_gpu_memory_utilization_per_queue{FILTERS})
+            2.21.0: clamp_max(100 * sum(runai_gpu_memory_used_mebibytes_per_workload{FILTERS} * 1024 * 1024) / sum(runai_allocated_gpu_memory_mb_per_workload{FILTERS} * 1000 * 1000), 100)
+      runai_gpu_utilization_per_queues:
+        cross_version_query: sum(runai_allocated_gpu_count_per_queue{FILTERS} * runai_gpu_utilization_per_queue{FILTERS}) / sum(runai_allocated_gpu_count_per_queue{FILTERS})
+        queries:
+            2.11.0: sum(runai_allocated_gpu_count_per_queue{FILTERS} * runai_gpu_utilization_per_queue{FILTERS}) / sum(runai_allocated_gpu_count_per_queue{FILTERS})
+      runai_cpu_utilization_per_queues:
+        cross_version_query: clamp_max(100 * sum(runai_used_cpu_cores_per_pod{FILTERS}) / sum(runai_allocated_cpu_cores_per_queue{FILTERS} > 0), 100)
+        queries:
+            2.26.0: clamp_max(100 * sum(runai_used_cpu_cores_per_queue{FILTERS}) / sum(runai_allocated_cpu_cores_per_queue{FILTERS} > 0), 100)
+            2.11.0: clamp_max(100 * sum(runai_used_cpu_cores_per_pod{FILTERS}) / sum(runai_allocated_cpu_cores_per_queue{FILTERS} > 0), 100)
+      runai_memory_utilization_per_queues:
+        cross_version_query: clamp_max(100 * sum(runai_used_memory_bytes_per_pod{FILTERS}) / sum(runai_allocated_memory_per_pod{FILTERS} > 0), 100)
+        queries:
+            2.26.0: clamp_max(100 * sum(runai_used_memory_bytes_per_queue{FILTERS}) / sum(runai_allocated_memory_bytes_per_queue{FILTERS} > 0), 100)
+            2.23.0: clamp_max(100 * sum(runai_used_memory_bytes_per_pod{FILTERS}) / sum(runai_allocated_memory_bytes_per_queue{FILTERS} > 0), 100)
+            2.11.0: clamp_max(100 * sum(runai_used_memory_bytes_per_pod{FILTERS}) / sum(runai_allocated_memory_per_pod{FILTERS} > 0), 100)
+      runai_gpu_utilization_per_nodepools:
+        cross_version_query: avg(runai_gpu_utilization_per_node{FILTERS})
+        queries:
+            2.11.0: avg(runai_gpu_utilization_per_node{FILTERS})
+      runai_cpu_utilization_per_nodepools:
+        cross_version_query: avg(runai_cpu_utilization_per_nodepool{FILTERS}) / 100 
+        queries:
+            2.16.0: avg(runai_cpu_utilization_per_nodepool{FILTERS}) / 100 
+      runai_memory_utilization_per_nodepools:
+        cross_version_query: avg(runai_memory_utilization_per_nodepool{FILTERS}) / 100
+        queries:
+            2.16.0: avg(runai_memory_utilization_per_nodepool{FILTERS}) / 100
+      runai_allocated_gpu_count_per_project:
+        cross_version_query: sum(runai_allocated_gpu_count_per_project{FILTERS}) by (project)
+        queries:
+            2.11.0: sum(runai_allocated_gpu_count_per_project{FILTERS}) by (project)
+      runai_allocated_gpu_count_per_node:
+        cross_version_query: (runai_allocated_gpu_count_per_node{FILTERS})
+        queries:
+            2.9.0: (runai_allocated_gpu_count_per_node{FILTERS})
+      runai_fully_free_gpu_node_count_per_node:
+        cross_version_query: count(runai_allocated_gpu_count_per_node{modelName!="",FILTERS}==0) by (node, nodepool, clusterId) or on(node, nodepool, clusterId) sum(runai_allocated_gpu_count_per_node{modelName!="",FILTERS}*0) by (node, nodepool, clusterId)
+        queries:
+            2.9.0: (count(runai_allocated_gpu_count_per_node{modelName!="",FILTERS}==0) by (node, nodepool, clusterId) or on(node, nodepool, clusterId) sum(runai_allocated_gpu_count_per_node{modelName!="",FILTERS}*0) by (node, nodepool, clusterId))
+      runai_fully_free_gpu_node_count_per_nodepool:
+        cross_version_query: count(runai_allocated_gpu_count_per_node{modelName!="",FILTERS}==0) by (nodepool, clusterId) or on(nodepool, clusterId) sum(runai_allocated_gpu_count_per_node{modelName!="",FILTERS}*0) by (nodepool, clusterId)
+        queries:
+            2.9.0: count(runai_allocated_gpu_count_per_node{modelName!="",FILTERS}==0) by (nodepool, clusterId) or on(nodepool, clusterId) sum(runai_allocated_gpu_count_per_node{modelName!="",FILTERS}*0) by (nodepool, clusterId)
+      runai_fully_free_gpu_node_count_per_cluster:
+        cross_version_query: count(runai_allocated_gpu_count_per_node{modelName!="",FILTERS}==0) by (clusterId) or on(clusterId) sum(runai_allocated_gpu_count_per_node{modelName!="",FILTERS}*0) by (clusterId)
+        queries:
+            2.9.0: count(runai_allocated_gpu_count_per_node{modelName!="",FILTERS}==0) by (clusterId) or on(clusterId) sum(runai_allocated_gpu_count_per_node{modelName!="",FILTERS}*0) by (clusterId)
+      runai_fully_free_gpu_node_count_per_tenant:
+        cross_version_query: count(runai_allocated_gpu_count_per_node{modelName!="",FILTERS}==0) or vector(0)
+        queries:
+            2.9.0: count(runai_allocated_gpu_count_per_node{modelName!="",FILTERS}==0) or vector(0)
+      runai_total_cpu_cores_per_node:
+        cross_version_query: (runai_cpu_cores_count_per_node{FILTERS})
+        queries:
+            2.13.0: (runai_cpu_cores_count_per_node{FILTERS})
+      runai_used_cpu_cores_per_node:
+        cross_version_query: (runai_used_cpu_cores_per_node{FILTERS})
+        queries:
+            2.13.0: (runai_used_cpu_cores_per_node{FILTERS})
+      runai_allocated_cpu_cores_per_node:
+        cross_version_query: (runai_allocated_cpu_cores_per_node{FILTERS})
+        queries:
+            2.13.0: (runai_allocated_cpu_cores_per_node{FILTERS})
+      runai_total_gpu_memory_byte_per_node:
+        cross_version_query: (runai_gpu_memory_total_mebibytes_per_node{FILTERS} * 1024 * 1024)
+        queries:
+            2.13.0: (runai_gpu_memory_total_mebibytes_per_node{FILTERS} * 1024 * 1024)
+      runai_used_gpu_memory_bytes_per_node:
+        cross_version_query: (runai_gpu_memory_used_mebibytes_per_node{FILTERS} * 1024 * 1024)
+        queries:
+            2.13.0: (runai_gpu_memory_used_mebibytes_per_node{FILTERS} * 1024 * 1024)
+      runai_total_memory_bytes_per_node:
+        cross_version_query: (runai_total_memory_bytes_per_node{FILTERS})
+        queries:
+            2.13.0: (runai_total_memory_bytes_per_node{FILTERS})
+      runai_used_memory_bytes_per_node:
+        cross_version_query: (runai_used_memory_bytes_per_node{FILTERS})
+        queries:
+            2.13.0: (runai_used_memory_bytes_per_node{FILTERS})
+      runai_allocated_memory_bytes_per_node:
+        cross_version_query: (runai_allocated_memory_bytes_per_node{FILTERS})
+        queries:
+            2.13.0: (runai_allocated_memory_bytes_per_node{FILTERS})
+      runai_total_cpu_cores_per_nodepool:
+        cross_version_query: (runai_cpu_cores_count_per_nodepool{FILTERS})
+        queries:
+            2.13.0: (runai_cpu_cores_count_per_nodepool{FILTERS})
+      runai_used_cpu_cores_per_nodepool:
+        cross_version_query: (runai_used_cpu_cores_per_nodepool{FILTERS})
+        queries:
+            2.13.0: (runai_used_cpu_cores_per_nodepool{FILTERS})
+      runai_allocated_cpu_cores_per_nodepool:
+        cross_version_query: (runai_allocated_cpu_cores_per_nodepool{FILTERS})
+        queries:
+            2.13.0: (runai_allocated_cpu_cores_per_nodepool{FILTERS})
+      runai_total_gpu_memory_byte_per_nodepool:
+        cross_version_query: (runai_gpu_memory_total_mebibytes_per_nodepool{FILTERS} * 1024 * 1024)
+        queries:
+            2.13.0: (runai_gpu_memory_total_mebibytes_per_nodepool{FILTERS} * 1024 * 1024)
+      runai_used_gpu_memory_bytes_per_nodepool:
+        cross_version_query: (runai_gpu_memory_used_mebibytes_per_nodepool{FILTERS} * 1024 * 1024)
+        queries:
+            2.13.0: (runai_gpu_memory_used_mebibytes_per_nodepool{FILTERS} * 1024 * 1024)
+      runai_total_memory_bytes_per_nodepool:
+        cross_version_query: (runai_total_memory_bytes_per_nodepool{FILTERS})
+        queries:
+            2.13.0: (runai_total_memory_bytes_per_nodepool{FILTERS})
+      runai_used_memory_bytes_per_nodepool:
+        cross_version_query: (runai_used_memory_bytes_per_nodepool{FILTERS})
+        queries:
+            2.13.0: (runai_used_memory_bytes_per_nodepool{FILTERS})
+      runai_allocated_memory_bytes_per_nodepool:
+        cross_version_query: (runai_allocated_memory_bytes_per_nodepool{FILTERS})
+        queries:
+            2.13.0: (runai_allocated_memory_bytes_per_nodepool{FILTERS})
+      runai_total_cpu_cores_per_cluster:
+        cross_version_query: (runai_cpu_cores_count_per_cluster{FILTERS})
+        queries:
+            2.13.0: (runai_cpu_cores_count_per_cluster{FILTERS})
+      runai_used_cpu_cores_per_cluster:
+        cross_version_query: (runai_used_cpu_cores_per_cluster{FILTERS})
+        queries:
+            2.13.0: (runai_used_cpu_cores_per_cluster{FILTERS})
+      runai_allocated_cpu_cores_per_cluster:
+        cross_version_query: (runai_allocated_cpu_cores_per_cluster{FILTERS})
+        queries:
+            2.13.0: (runai_allocated_cpu_cores_per_cluster{FILTERS})
+      runai_total_gpu_memory_byte_per_cluster:
+        cross_version_query: (runai_gpu_memory_total_mebibytes_per_cluster{FILTERS} * 1024 * 1024)
+        queries:
+            2.13.0: (runai_gpu_memory_total_mebibytes_per_cluster{FILTERS} * 1024 * 1024)
+      runai_used_gpu_memory_bytes_per_cluster:
+        cross_version_query: (runai_gpu_memory_used_mebibytes_per_cluster{FILTERS} * 1024 * 1024)
+        queries:
+            2.13.0: (runai_gpu_memory_used_mebibytes_per_cluster{FILTERS} * 1024 * 1024)
+      runai_total_memory_bytes_per_cluster:
+        cross_version_query: (runai_total_memory_bytes_per_cluster{FILTERS})
+        queries:
+            2.13.0: (runai_total_memory_bytes_per_cluster{FILTERS})
+      runai_used_memory_bytes_per_cluster:
+        cross_version_query: (sum(runai_used_memory_bytes_per_cluster{FILTERS}) by (clusterId))
+        queries:
+            2.16.0: (sum(runai_used_memory_bytes_per_cluster{FILTERS}) by (clusterId))
+      runai_allocated_memory_bytes_per_cluster:
+        cross_version_query: (sum(runai_allocated_memory_bytes_per_cluster{FILTERS}) by (clusterId))
+        queries:
+            2.16.0: (sum(runai_allocated_memory_bytes_per_cluster{FILTERS}) by (clusterId))
+      runai_total_cpu_cores_per_tenant:
+        cross_version_query: (sum(runai_cpu_cores_count_per_cluster{FILTERS}))
+        queries:
+            2.13.0: (sum(runai_cpu_cores_count_per_cluster{FILTERS}))
+      runai_used_cpu_cores_per_tenant:
+        cross_version_query: (sum(runai_used_cpu_cores_per_cluster{FILTERS}))
+        queries:
+            2.13.0: (sum(runai_used_cpu_cores_per_cluster{FILTERS}))
+      runai_allocated_cpu_cores_per_tenant:
+        cross_version_query: (sum(runai_allocated_cpu_cores_per_cluster{FILTERS}))
+        queries:
+            2.13.0: (sum(runai_allocated_cpu_cores_per_cluster{FILTERS}))
+      runai_total_gpu_memory_byte_per_tenant:
+        cross_version_query: (sum(runai_gpu_memory_total_mebibytes_per_cluster{FILTERS}) * 1024 * 1024)
+        queries:
+            2.13.0: (sum(runai_gpu_memory_total_mebibytes_per_cluster{FILTERS}) * 1024 * 1024)
+      runai_used_gpu_memory_bytes_per_tenant:
+        cross_version_query: (sum(runai_gpu_memory_used_mebibytes_per_cluster{FILTERS}) * 1024 * 1024)
+        queries:
+            2.13.0: (sum(runai_gpu_memory_used_mebibytes_per_cluster{FILTERS}) * 1024 * 1024)
+      runai_total_memory_bytes_per_tenant:
+        cross_version_query: (sum(runai_total_memory_bytes_per_cluster{FILTERS}))
+        queries:
+            2.13.0: (sum(runai_total_memory_bytes_per_cluster{FILTERS}))
+      runai_used_memory_bytes_per_tenant:
+        cross_version_query: (sum(runai_used_memory_bytes_per_cluster{FILTERS}))
+        queries:
+            2.16.0: (sum(runai_used_memory_bytes_per_cluster{FILTERS}))
+      runai_allocated_memory_bytes_per_tenant:
+        cross_version_query: (sum(runai_allocated_memory_bytes_per_cluster{FILTERS}))
+        queries:
+            2.16.0: (sum(runai_allocated_memory_bytes_per_cluster{FILTERS}))
+      runai_allocated_gpu_hours_per_cluster:
+        cross_version_query: sum(sum_over_time(runai_allocated_gpu_count_per_pod:hourly{FILTERS}[RANGE])) by (clusterId) / 3600
+        queries:
+            2.9.0: sum(sum_over_time(runai_allocated_gpu_count_per_pod:hourly{FILTERS}[RANGE])) by (clusterId) / 3600
+      runai_allocated_gpu_hours_per_department:
+        cross_version_query: sum(sum_over_time(runai_allocated_gpu_count_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department) / 3600
+        queries:
+            2.9.0: sum(sum_over_time(runai_allocated_gpu_count_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department) / 3600
+      runai_allocated_gpu_hours_per_project:
+        cross_version_query: sum(sum_over_time(runai_allocated_gpu_count_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project) / 3600
+        queries:
+            2.9.0: sum(sum_over_time(runai_allocated_gpu_count_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project) / 3600
+      runai_allocated_gpu_hours_per_queue:
+        cross_version_query: sum(sum_over_time(runai_allocated_gpu_count_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project, nodepool) / 3600
+        queries:
+            2.9.0: sum(sum_over_time(runai_allocated_gpu_count_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project, nodepool) / 3600
+      runai_allocated_gpu_count_avg_per_project:
+        cross_version_query: sum(avg_over_time(runai_allocated_gpu_count_per_project{FILTERS}[RANGE])) by (clusterId, department, project)
+        queries:
+            2.19.0: sum(avg_over_time(runai_allocated_gpu_count_per_project:hourly{FILTERS}[RANGE])) by (clusterId, department, project) / 3600
+            2.9.0: sum(avg_over_time(runai_allocated_gpu_count_per_project{FILTERS}[RANGE])) by (clusterId, department, project)
+      runai_allocated_gpu_count_avg_per_department:
+        cross_version_query: sum(avg_over_time(runai_allocated_gpu_count_per_department{FILTERS}[RANGE])) by (clusterId, department)
+        queries:
+            2.19.0: sum(avg_over_time(runai_allocated_gpu_count_per_department:hourly{FILTERS}[RANGE])) by (clusterId, department) / 3600
+            2.9.0: sum(avg_over_time(runai_allocated_gpu_count_per_department{FILTERS}[RANGE])) by (clusterId, department)
+      runai_allocated_cpu_cores_hours_per_cluster:
+        cross_version_query: sum(sum_over_time(runai_allocated_millicpus_per_pod:hourly{FILTERS}[RANGE])) by (clusterId) / 3600 / 1000
+        queries:
+            2.9.0: sum(sum_over_time(runai_allocated_millicpus_per_pod:hourly{FILTERS}[RANGE])) by (clusterId) / 3600 / 1000
+      runai_allocated_cpu_cores_hours_per_department:
+        cross_version_query: sum(sum_over_time(runai_allocated_millicpus_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department) / 3600 / 1000
+        queries:
+            2.9.0: sum(sum_over_time(runai_allocated_millicpus_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department) / 3600 / 1000
+      runai_allocated_cpu_cores_hours_per_project:
+        cross_version_query: sum(sum_over_time(runai_allocated_millicpus_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project) / 3600 / 1000
+        queries:
+            2.9.0: sum(sum_over_time(runai_allocated_millicpus_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project) / 3600 / 1000
+      runai_allocated_cpu_cores_hours_per_queue:
+        cross_version_query: sum(sum_over_time(runai_allocated_millicpus_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project, nodepool) / 3600 / 1000
+        queries:
+            2.9.0: sum(sum_over_time(runai_allocated_millicpus_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project, nodepool) / 3600 / 1000
+      runai_allocated_memory_bytes_hours_per_cluster:
+        cross_version_query: sum(sum_over_time(runai_allocated_memory_per_pod:hourly{FILTERS}[RANGE])) by (clusterId) / 3600
+        queries:
+            2.9.0: sum(sum_over_time(runai_allocated_memory_per_pod:hourly{FILTERS}[RANGE])) by (clusterId) / 3600
+      runai_allocated_memory_bytes_hours_per_department:
+        cross_version_query: sum(sum_over_time(runai_allocated_memory_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department) / 3600
+        queries:
+            2.9.0: sum(sum_over_time(runai_allocated_memory_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department) / 3600
+      runai_allocated_memory_bytes_hours_per_project:
+        cross_version_query: sum(sum_over_time(runai_allocated_memory_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project) / 3600
+        queries:
+            2.9.0: sum(sum_over_time(runai_allocated_memory_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project) / 3600
+      runai_allocated_memory_bytes_hours_per_queue:
+        cross_version_query: sum(sum_over_time(runai_allocated_memory_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project, nodepool) / 3600
+        queries:
+            2.9.0: sum(sum_over_time(runai_allocated_memory_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project, nodepool) / 3600
+
+      runai_used_cpu_cores_hours_per_cluster:
+        cross_version_query: sum(sum_over_time(runai_used_cpu_cores_per_pod:hourly{FILTERS}[RANGE])) by (clusterId) / 3600
+        queries:
+            2.16.0: sum(sum_over_time(runai_used_cpu_cores_per_pod:hourly{FILTERS}[RANGE])) by (clusterId) / 3600
+      runai_used_cpu_cores_hours_per_department:
+        cross_version_query: sum(sum_over_time(runai_used_cpu_cores_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department) / 3600
+        queries:
+            2.16.0: sum(sum_over_time(runai_used_cpu_cores_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department) / 3600
+      runai_used_cpu_cores_hours_per_project:
+        cross_version_query: sum(sum_over_time(runai_used_cpu_cores_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project) / 3600
+        queries:
+            2.16.0: sum(sum_over_time(runai_used_cpu_cores_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project) / 3600
+      runai_used_cpu_cores_hours_per_queue:
+        cross_version_query: sum(sum_over_time(runai_used_cpu_cores_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project, nodepool) / 3600
+        queries:
+            2.16.0: sum(sum_over_time(runai_used_cpu_cores_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project, nodepool) / 3600
+
+      runai_used_memory_bytes_hours_per_cluster:
+        cross_version_query: sum(sum_over_time(runai_used_memory_bytes_per_pod:hourly{FILTERS}[RANGE])) by (clusterId) / 3600
+        queries:
+            2.16.0: sum(sum_over_time(runai_used_memory_bytes_per_pod:hourly{FILTERS}[RANGE])) by (clusterId) / 3600
+      runai_used_memory_bytes_hours_per_department:
+        cross_version_query: sum(sum_over_time(runai_used_memory_bytes_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department) / 3600
+        queries:
+            2.16.0: sum(sum_over_time(runai_used_memory_bytes_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department) / 3600
+      runai_used_memory_bytes_hours_per_project:
+        cross_version_query: sum(sum_over_time(runai_used_memory_bytes_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project) / 3600
+        queries:
+            2.16.0: sum(sum_over_time(runai_used_memory_bytes_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project) / 3600
+      runai_used_memory_bytes_hours_per_queue:
+        cross_version_query: sum(sum_over_time(runai_used_memory_bytes_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project, nodepool) / 3600
+        queries:
+            2.16.0: sum(sum_over_time(runai_used_memory_bytes_per_pod:hourly{FILTERS}[RANGE])) by (clusterId, department, project, nodepool) / 3600
+
+      runai_idle_gpu_hours_per_cluster:
+        cross_version_query: sum(sum_over_time(runai_gpu_idle_hours_per_queue:hourly{FILTERS}[RANGE])) by (clusterId) / 3600
+        queries:
+            2.16.0: sum(sum_over_time(runai_gpu_idle_hours_per_queue:hourly{FILTERS}[RANGE])) by (clusterId) / 3600
+      runai_idle_gpu_hours_per_department:
+        cross_version_query: sum(sum_over_time(runai_gpu_idle_hours_per_queue:hourly{FILTERS}[RANGE])) by (clusterId, department) / 3600
+        queries:
+            2.16.0: sum(sum_over_time(runai_gpu_idle_hours_per_queue:hourly{FILTERS}[RANGE])) by (clusterId, department) / 3600
+      runai_idle_gpu_hours_per_project:
+        cross_version_query: sum(sum_over_time(runai_gpu_idle_hours_per_queue:hourly{FILTERS}[RANGE])) by (clusterId, department, project) / 3600
+        queries:
+            2.16.0: sum(sum_over_time(runai_gpu_idle_hours_per_queue:hourly{FILTERS}[RANGE])) by (clusterId, department, project) / 3600
+      runai_idle_gpu_hours_per_queue:
+        cross_version_query: sum(sum_over_time(runai_gpu_idle_hours_per_queue:hourly{FILTERS}[RANGE])) by (clusterId, department, project, nodepool) / 3600
+        queries:
+            2.16.0: sum(sum_over_time(runai_gpu_idle_hours_per_queue:hourly{FILTERS}[RANGE])) by (clusterId, department, project, nodepool) / 3600
+      runai_idle_gpu_count_per_workload:
+        cross_version_query: sum(runai_idle_allocated_gpu_count_per_workload{FILTERS}) by(workload_id)
+        queries:
+            2.16.0: sum(runai_idle_allocated_gpu_count_per_workload{FILTERS}) by(workload_id)
+      runai_idle_seconds_per_gpu:
+        cross_version_query: runai_gpu_idle_seconds_per_gpu{FILTERS}
+        queries:
+            2.9.0: runai_gpu_idle_seconds_per_gpu{FILTERS}
+      runai_avg_allocated_gpu_count_per_project_nodepool_top15:
+        cross_version_query: topk(15, sum(avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE])) by (clusterId, project) and on(clusterId, project) runai_queue_info{FILTERS})
+        queries:
+            2.11.0: topk(15, sum(avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE])) by (clusterId, project) and on(clusterId, project) runai_queue_info{FILTERS})
+      runai_avg_allocated_gpu_count_per_project_nodepool_bottom15:
+        cross_version_query: bottomk(15, sum(avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE])) by (clusterId, project) and on(clusterId, project) runai_queue_info{FILTERS})
+        queries:
+            2.11.0: bottomk(15, sum(avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE])) by (clusterId, project) and on(clusterId, project) runai_queue_info{FILTERS})
+      runai_avg_allocated_gpu_count_per_department_nodepool_top15:
+        cross_version_query: topk(15, sum(avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE])) by (clusterId, department) and on(clusterId, department) runai_queue_info{FILTERS})
+        queries:
+            2.11.0: topk(15, sum(avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE])) by (clusterId, department) and on(clusterId, department) runai_queue_info{FILTERS})
+      runai_avg_allocated_gpu_count_per_department_nodepool_bottom15:
+        cross_version_query: bottomk(15, sum(avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE])) by (clusterId, department) and on(clusterId, department) runai_queue_info{FILTERS})
+        queries:
+            2.11.0: bottomk(15, sum(avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE])) by (clusterId, department) and on(clusterId, department) runai_queue_info{FILTERS})
+      runai_avg_gpu_utilization_per_department_nodepool_top15:
+        cross_version_query: topk(15, (sum((avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE]) * avg_over_time(runai_gpu_utilization_per_queue{FILTERS}[RANGE]))) by(department, clusterId) / sum(avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE])) by(department, clusterId)) and on(clusterId, department) runai_queue_info{FILTERS})
+        queries:
+            2.11.0: topk(15, (sum((avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE]) * avg_over_time(runai_gpu_utilization_per_queue{FILTERS}[RANGE]))) by(department, clusterId) / sum(avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE])) by(department, clusterId)) and on(clusterId, department) runai_queue_info{FILTERS})
+      runai_avg_gpu_utilization_per_department_nodepool_bottom15:
+        cross_version_query: bottomk(15, (sum((avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE]) * avg_over_time(runai_gpu_utilization_per_queue{FILTERS}[RANGE]))) by(department, clusterId) / sum(avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE])) by(department, clusterId)) and on(clusterId, department) runai_queue_info{FILTERS})
+        queries:
+            2.11.0: bottomk(15, (sum((avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE]) * avg_over_time(runai_gpu_utilization_per_queue{FILTERS}[RANGE]))) by(department, clusterId) / sum(avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE])) by(department, clusterId)) and on(clusterId, department) runai_queue_info{FILTERS})
+      runai_avg_gpu_utilization_per_project_nodepool_top15:
+        cross_version_query: topk(15, (sum((avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE]) * avg_over_time(runai_gpu_utilization_per_queue{FILTERS}[RANGE]))) by(project, clusterId) / sum(avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE])) by(project, clusterId)) and on(clusterId, project) runai_queue_info{FILTERS})
+        queries:
+            2.11.0: topk(15, (sum((avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE]) * avg_over_time(runai_gpu_utilization_per_queue{FILTERS}[RANGE]))) by(project, clusterId) / sum(avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE])) by(project, clusterId)) and on(clusterId, project) runai_queue_info{FILTERS})
+      runai_avg_gpu_utilization_per_project_nodepool_bottom15:
+        cross_version_query: bottomk(15, (sum((avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE]) * avg_over_time(runai_gpu_utilization_per_queue{FILTERS}[RANGE]))) by(project, clusterId) / sum(avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE])) by(project, clusterId)) and on(clusterId, project) runai_queue_info{FILTERS})
+        queries:
+            2.11.0: bottomk(15, (sum((avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE]) * avg_over_time(runai_gpu_utilization_per_queue{FILTERS}[RANGE]))) by(project, clusterId) / sum(avg_over_time(runai_allocated_gpu_count_per_queue{FILTERS}[RANGE])) by(project, clusterId)) and on(clusterId, project) runai_queue_info{FILTERS})
+      runai_avg_gpu_memory_utilization_per_department_nodepool_top15:
+        cross_version_query: topk(15, sum(avg_over_time(runai_gpu_memory_utilization_per_department:hourly{FILTERS}[RANGE])) by (clusterId, department) / 3600 and on(clusterId, department) runai_queue_info{FILTERS})
+        queries:
+            2.22.0: topk(15, sum(avg_over_time(runai_gpu_memory_utilization_per_department:hourly{FILTERS}[RANGE])) by (clusterId, department) / 3600 and on(clusterId, department) runai_queue_info{FILTERS})
+      runai_avg_gpu_memory_utilization_per_department_nodepool_bottom15:
+        cross_version_query: bottomk(15, sum(avg_over_time(runai_gpu_memory_utilization_per_department:hourly{FILTERS}[RANGE])) by (clusterId, department) / 3600 and on(clusterId, department) runai_queue_info{FILTERS})
+        queries:
+            2.22.0: bottomk(15, sum(avg_over_time(runai_gpu_memory_utilization_per_department:hourly{FILTERS}[RANGE])) by (clusterId, department) / 3600 and on(clusterId, department) runai_queue_info{FILTERS})
+      runai_avg_gpu_memory_utilization_per_project_nodepool_top15:
+        cross_version_query: topk(15, sum(avg_over_time(runai_gpu_memory_utilization_per_project:hourly{FILTERS}[RANGE])) by (clusterId, department, project) / 3600 and on(clusterId, project) runai_queue_info{FILTERS})
+        queries:
+            2.22.0: topk(15, sum(avg_over_time(runai_gpu_memory_utilization_per_project:hourly{FILTERS}[RANGE])) by (clusterId, department, project) / 3600 and on(clusterId, project) runai_queue_info{FILTERS})
+      runai_avg_gpu_memory_utilization_per_project_nodepool_bottom15:
+        cross_version_query: bottomk(15, sum(avg_over_time(runai_gpu_memory_utilization_per_project:hourly{FILTERS}[RANGE])) by (clusterId, department, project) / 3600 and on(clusterId, project) runai_queue_info{FILTERS})
+        queries:
+            2.22.0: bottomk(15, sum(avg_over_time(runai_gpu_memory_utilization_per_project:hourly{FILTERS}[RANGE])) by (clusterId, department, project) / 3600 and on(clusterId, project) runai_queue_info{FILTERS})
+      runai_external_pod_info:
+        cross_version_query: group(runai_pod_phase_with_info{FILTERS} * on(pod_uuid) group_right(detailed_status) last_over_time(runai_gpu_utilization_per_pod_per_gpu[10m]) or on(pod_uuid) runai_pod_phase_with_info{FILTERS}) by(clusterId, pod_uuid, workload_id, detailed_status, node, gpu) and on(pod_uuid) (runai_pod_phase_with_info{phase="Running"} or (time() - runai_pod_completion_time < 300))
+        queries:
+          2.24.15: group(runai_pod_phase_with_info{FILTERS} * on(pod_uuid) group_right(detailed_status) last_over_time(runai_gpu_utilization_per_pod_per_gpu[10m]) or on(pod_uuid) runai_pod_phase_with_info{FILTERS}) by(clusterId, pod_uuid, workload_id, detailed_status, node, gpu) and on(pod_uuid) (runai_pod_phase_with_info{phase="Running"} or (time() - runai_pod_completion_time < 300))
+          2.21.0: group(runai_pod_phase_with_info{FILTERS} * on(pod_uuid) group_right(detailed_status) last_over_time(runai_gpu_utilization_per_pod_per_gpu[10m]) or on(pod_uuid) runai_pod_phase_with_info{FILTERS}) by(clusterId, pod_uuid, workload_id, detailed_status, node, gpu) and on(pod_uuid) (runai_pod_phase_with_info{phase="Running"} or (count_over_time(runai_pod_phase_with_info{phase=""}[1d:1m]) <= 5))
+      runai_gpu_utilization_per_element:
+        cross_version_query: avg(runai_gpu_utilization_per_pod_per_gpu{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
+        queries:
+          2.25.0: avg(runai_gpu_utilization_per_pod_per_gpu{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
+      runai_gpu_allocation_per_element:
+        cross_version_query: sum(runai_allocated_gpu_count_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
+        queries:
+          2.25.0: sum(runai_allocated_gpu_count_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
+      runai_gpu_memory_used_bytes_per_element:
+        cross_version_query: sum(runai_gpu_memory_used_mebibytes_per_pod_per_gpu{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId) * 1024 * 1024
+        queries:
+          2.25.0: sum(runai_gpu_memory_used_mebibytes_per_pod_per_gpu{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId) * 1024 * 1024
+      runai_gpu_memory_requested_bytes_per_element:
+        cross_version_query: sum(runai_requested_gpu_memory_mb_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId) * 1000000
+        queries:
+          2.25.0: sum(runai_requested_gpu_memory_mb_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId) * 1000000
+      runai_cpu_used_cores_per_element:
+        cross_version_query: sum(runai_used_cpu_cores_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
+        queries:
+          2.25.0: sum(runai_used_cpu_cores_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
+      runai_cpu_requested_cores_per_element:
+        cross_version_query: sum(runai_cpu_requested_cores_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
+        queries:
+          2.25.0: sum(runai_cpu_requested_cores_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
+      runai_cpu_limit_cores_per_element:
+        cross_version_query: sum(runai_cpu_limit_cores_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
+        queries:
+          2.25.0: sum(runai_cpu_limit_cores_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
+      runai_memory_requested_bytes_per_element:
+        cross_version_query: sum(runai_memory_requested_bytes_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
+        queries:
+          2.25.0: sum(runai_memory_requested_bytes_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
+      runai_memory_limit_bytes_per_element:
+        cross_version_query: sum(runai_memory_limit_bytes_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
+        queries:
+          2.25.0: sum(runai_memory_limit_bytes_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
+      runai_memory_used_bytes_per_element:
+        cross_version_query: sum(runai_used_memory_bytes_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
+        queries:
+          2.25.0: sum(runai_used_memory_bytes_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
+  {{- end }}

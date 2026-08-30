@@ -1,0 +1,24 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  name: serving-configuration
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  image:
+    value: ubuntu
+  name:
+    value: serving-configuration-0
+  initializationTimeoutSeconds:
+    value: 400
+  requestTimeoutSeconds:
+    value: 500
+  concurrencyHardLimit:
+    value: 3
+  ports:
+    items:
+      port-80:
+        value:
+          serviceType: ServingPort
+          container: 80
+status: {}

@@ -1,0 +1,27 @@
+package mappers
+
+import (
+	iamModels "github.com/run-ai/runai/control-plane/identity-manager/internal/iam/models"
+	"github.com/run-ai/runai/control-plane/identity-manager/pkg/models"
+	"k8s.io/utils/ptr"
+)
+
+func NewOidcIdpMapperMapper() UserAttributeMapper {
+	return OidcIdpMapperMapper{}
+}
+
+type OidcIdpMapperMapper struct{}
+
+func (o OidcIdpMapperMapper) GenerateUserAttributeMapper(alias string, mapper models.IdpAttributeMapper, value *string) *iamModels.IdpMapper {
+	if value == nil || *value == "" {
+		value = &mapper.Value
+	}
+	config := oidcUserAttributeConfig(mapper.Attribute, *value)
+
+	return &iamModels.IdpMapper{
+		Name:                   &mapper.Name,
+		IdentityProviderAlias:  &alias,
+		IdentityProviderMapper: ptr.To(oidcMapper),
+		Config:                 config,
+	}
+}

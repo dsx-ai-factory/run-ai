@@ -1,0 +1,6 @@
+type: object
+properties:
+  resources:
+    type: array
+    items:
+      $ref: "./HuggingFaceModelItem.yaml"

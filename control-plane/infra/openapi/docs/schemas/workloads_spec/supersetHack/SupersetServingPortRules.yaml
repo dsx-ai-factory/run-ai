@@ -1,0 +1,21 @@
+properties:
+  port:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  container:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  protocol:
+    $ref: "../../policy_rules/StringRules.yaml"
+  authorizationType:
+    $ref: "../../policy_rules/StringRules.yaml"
+  authorizedUsers:
+    $ref: "../../policy_rules/ArrayRules.yaml"
+  authorizedGroups:
+    $ref: "../../policy_rules/ArrayRules.yaml"
+  clusterLocalAccessOnly:
+    $ref: "../../policy_rules/BooleanRules.yaml"
+  exposeExternally:
+    $ref: "../../policy_rules/BooleanRules.yaml"
+  exposedUrl:
+    $ref: "../../policy_rules/StringRules.yaml"
+type: object
+nullable: true

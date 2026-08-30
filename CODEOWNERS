@@ -1,0 +1,311 @@
+# Required for GitHub to recognize this file as the codeowners file
+# https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners
+# Every new service require every team to approve PRs by default.
+
+# Default codeowners every team
+/* @dsx-ai-factory/resource-mgmt @dsx-ai-factory/dev-team-leads @dsx-ai-factory/workloads @dsx-ai-factory/observability @dsx-ai-factory/auth @dsx-ai-factory/ops
+
+# Team Leaders
+/.nspect-vuln-allowlist.toml @dsx-ai-factory/dev-team-leads
+/CODEOWNERS @dsx-ai-factory/dev-team-leads
+/renovate.json @dsx-ai-factory/dev-team-leads
+/.gitignore @dsx-ai-factory/dev-team-leads
+
+# DevOps GitHub-Actions
+/.github/ @dsx-ai-factory/ops
+/runai-cluster/cluster/runai-dgxc-chart/ @dsx-ai-factory/ops
+/**/artifact-metadata.json @dsx-ai-factory/ops
+
+# Code Rabbit
+.coderabbit.yaml @dsx-ai-factory/workloads
+code-rabbit/ @dsx-ai-factory/workloads
+
+### Control-Plane: ###
+
+# Suricata
+/control-plane/authorization/ @dsx-ai-factory/resource-mgmt
+/control-plane/authorization-migrator/ @dsx-ai-factory/resource-mgmt
+/control-plane/org-unit-service/ @dsx-ai-factory/resource-mgmt
+/control-plane/org-units-migrator/ @dsx-ai-factory/resource-mgmt
+
+# Viper
+/control-plane/assets-service/ @dsx-ai-factory/workloads
+/control-plane/k8s-objects-tracker/ @dsx-ai-factory/workloads
+/control-plane/policy-service/ @dsx-ai-factory/workloads
+/control-plane/datavolumes-service/ @dsx-ai-factory/workloads
+/control-plane/infra/openapi/docs/schemas/workloads_spec @dsx-ai-factory/workloads
+/control-plane/fielder/ @dsx-ai-factory/workloads
+/control-plane/workloads-manager/ @dsx-ai-factory/workloads
+/control-plane/runai-cli/ @dsx-ai-factory/workloads
+/control-plane/cli-exposer/ @dsx-ai-factory/workloads
+/.github/instructions/runai-cli @dsx-ai-factory/workloads
+/plugins/viper-design-docs/ @dsx-ai-factory/workloads
+/plugins/viper-dev/ @dsx-ai-factory/workloads
+/plugins/viper-e2e/ @dsx-ai-factory/workloads
+/plugins/viper-refresh/ @dsx-ai-factory/workloads
+/plugins/viper-setup/ @dsx-ai-factory/workloads
+
+# Phoenix
+/control-plane/grafana/ @dsx-ai-factory/observability
+/control-plane/metrics-service/ @dsx-ai-factory/observability
+/control-plane/metric-stores-migrator/ @dsx-ai-factory/observability
+/control-plane/audit-service/ @dsx-ai-factory/observability
+/control-plane/postgresql-client/ @dsx-ai-factory/observability
+/control-plane/notifications-proxy/ @dsx-ai-factory/observability
+/control-plane/notifications-service/ @dsx-ai-factory/observability
+/control-plane/*/pkg/runaimetrics/ @dsx-ai-factory/observability
+
+# Sphinx
+/control-plane/tenants-manager/ @dsx-ai-factory/auth
+/control-plane/identity-manager/ @dsx-ai-factory/auth
+/control-plane/grafana-proxy/ @dsx-ai-factory/auth
+/control-plane/keycloak-extensions/ @dsx-ai-factory/auth
+/control-plane/gateway-hub/ @dsx-ai-factory/auth
+/control-plane/traefik/ @dsx-ai-factory/auth
+/control-plane/bff-service/ @dsx-ai-factory/auth
+/control-plane/temp-backend-settings/ @dsx-ai-factory/auth
+/runai-mcp-server/ @dsx-ai-factory/auth
+
+# Settings - Sphinx
+/control-plane/frontend/src/views/settings/ @dsx-ai-factory/auth
+/control-plane/frontend/src/components/settings/ @dsx-ai-factory/auth
+/control-plane/backend/js/backend/service/SettingsService @dsx-ai-factory/auth
+/control-plane/backend/js/backend/service/SettingService.ts @dsx-ai-factory/auth
+/control-plane/backend/ @dsx-ai-factory/auth
+
+# DevOps
+/common/opa-policies/ @dsx-ai-factory/ops
+
+# Tech Docs
+/docs/** @dsx-ai-factory/tech-docs
+/fern/** @dsx-ai-factory/tech-docs
+
+
+
+### Groups
+
+# Backend Guild
+/control-plane/infra/ @dsx-ai-factory/backend-devs
+/control-plane/test-service/ @dsx-ai-factory/backend-devs
+/runai-clients/Makefile @dsx-ai-factory/backend-devs
+
+# Sphinx - infra override (must be after the /control-plane/infra/ rule above — last match wins)
+/control-plane/infra/openapi/build/ @dsx-ai-factory/auth
+
+# Frontend Guild
+/control-plane/frontend/ @dsx-ai-factory/frontend-devs
+/control-plane/frontend/src/swagger-models/
+
+# Appsec Guild
+control-plane/infra/openapi/scripts/openapi-scanner @dsx-ai-factory/appsec-guild-members
+
+# Cluster Teams
+/control-plane/cluster-migrator/ @dsx-ai-factory/installer
+/control-plane/cluster-service/ @dsx-ai-factory/installer
+/control-plane/control-plane-chart/ @dsx-ai-factory/installer
+/control-plane/control-plane-chart/Chart.yaml @dsx-ai-factory/installer @dsx-ai-factory/observability
+
+# DB Furom
+/control-plane/**/*.sql @dsx-ai-factory/db
+
+# Workloads Service
+/control-plane/workloads/ @dsx-ai-factory/resource-mgmt
+/control-plane/workloads/pkg/clients  @dsx-ai-factory/workloads
+/control-plane/workloads/pkg/clients/backend  @dsx-ai-factory/resource-mgmt
+/control-plane/workloads/pkg/database/dao_crud  @dsx-ai-factory/workloads
+/control-plane/workloads/pkg/database/models_crud  @dsx-ai-factory/workloads
+/control-plane/workloads/pkg/services_crud  @dsx-ai-factory/workloads
+/control-plane/workloads/pkg/testing_crud  @dsx-ai-factory/workloads
+/control-plane/workloads/pkg/services/ai_applications_service_test.go  @dsx-ai-factory/workloads
+/control-plane/workloads/pkg/services/ai_applications_service.go  @dsx-ai-factory/workloads
+
+# Workloads and policies
+/control-plane/workloads-and-policies/ @dsx-ai-factory/workloads
+
+# Everyone
+/control-plane/ubi/
+/control-plane/**/generated/
+/control-plane/infra/openapi/build/_build/
+/.gitattributes
+
+### Runai-Cluster: ###
+
+# Suricata
+/runai-cluster/cluster/cluster-sync/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/project-controller/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/agent/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/pod-group-assigner/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/nodepool-controller/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/accessrule-controller/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/external-workload-integrator/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/workload-exporter/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/cluster-api/internal/k8sobject/ @dsx-ai-factory/resource-mgmt
+
+# Viper
+/runai-cluster/cluster/application-controller/ @dsx-ai-factory/workloads
+/runai-cluster/cluster/assets-sync/ @dsx-ai-factory/workloads
+/runai-cluster/cluster/oauth2-proxy/ @dsx-ai-factory/workloads
+/runai-cluster/cluster/workload-controller/pkg/builders/ @dsx-ai-factory/workloads
+/runai-cluster/cluster/application-controller/pkg/deployers/ @dsx-ai-factory/workloads
+/runai-cluster/common/flat-workloads/ @dsx-ai-factory/workloads
+/runai-cluster/cluster/inference-workload-controller/ @dsx-ai-factory/workloads
+/runai-cluster/cluster/workload-common/ @dsx-ai-factory/workload-runtime @dsx-ai-factory/workloads
+/runai-cluster/cluster/workload-controller/ @dsx-ai-factory/workloads
+/runai-cluster/cluster/runaijob-controller/ @dsx-ai-factory/workloads
+/runai-cluster/cluster/shared-objects-controller/ @dsx-ai-factory/workloads
+/runai-cluster/cluster/anyworkload-controller/ @dsx-ai-factory/workloads
+/runai-cluster/cluster/cluster-api/ @dsx-ai-factory/workloads
+
+# Fox
+/runai-cluster/cluster/runtime-rules/ @dsx-ai-factory/workload-runtime
+/runai-cluster/cluster/advice-restart-controller/ @dsx-ai-factory/workload-runtime
+/runai-cluster/cluster/dromos/ @dsx-ai-factory/workload-runtime
+
+# Phoenix
+
+# Griffin
+/runai-cluster/cluster/cluster-installer/ @dsx-ai-factory/installer
+/runai-cluster/cluster/cluster-installer-helm/ @dsx-ai-factory/installer
+/runai-cluster/cluster/ocp-cluster-installer/ @dsx-ai-factory/installer
+/runai-cluster/cluster/runai-chart @dsx-ai-factory/installer
+/runai-cluster/cluster/runai-crd-upgrader/ @dsx-ai-factory/installer
+/runai-installer/ @dsx-ai-factory/installer
+
+# KAI Dependency Updaters
+/runai-cluster/cluster/runai-chart/Chart.yaml @dsx-ai-factory/ops @dsx-ai-factory/dev-team-leads @dsx-ai-factory/scheduler @dsx-ai-factory/core
+
+### Groups
+
+
+# Everyone
+/runai-cluster/common/
+/runai-cluster/redoc/
+/runai-cluster/cluster/go-operator/
+/runai-cluster/cluster/init-ca/
+/runai-cluster/cluster/common/
+/runai-cluster/cluster/admission-controller/
+/runai-cluster/cluster/new-service-template/
+/runai-cluster/cluster/status-updater/
+
+# Suricata - go-operator operands
+/runai-cluster/cluster/go-operator/internal/run/operands/accessrule-controller/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/go-operator/internal/run/operands/agent/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/go-operator/internal/run/operands/cluster-sync/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/go-operator/internal/run/operands/external-workload-integrator/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/go-operator/internal/run/operands/managed-nodes-config/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/go-operator/internal/run/operands/nodepool-controller/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/go-operator/internal/run/operands/pod-group-assigner/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/go-operator/internal/run/operands/project-controller/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/go-operator/internal/run/operands/workload-exporter/ @dsx-ai-factory/resource-mgmt
+
+# Suricata - SDK CRD types for Suricata services
+/runai-cluster/cluster/sdk/apis/run/v1/accessrule-controller/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1/agent/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1/cluster-sync/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1/external-workload-integrator/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1/nodepool-controller/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1/pod-group-assigner/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1/project-controller/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1/workload-exporter/ @dsx-ai-factory/resource-mgmt
+
+# Suricata - SDK run.ai CRD type source.
+/runai-cluster/cluster/sdk/apis/run/v1alpha1/accessrule_types.go @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1alpha1/externalworkload_types.go @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1alpha1/managed_nodes_config_types.go @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1alpha1/nodepool_types.go @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1alpha1/nodepool_types_test.go @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1/project_types.go @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1/project_types_test.go @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v2/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v2alpha1/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v2alpha2/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/apis/scheduling/ @dsx-ai-factory/resource-mgmt
+
+# Suricata - generated run.ai CRD manifests for Suricata services.
+/runai-cluster/cluster/sdk/config/crd/bases/run.ai_accessrules.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/config/crd/bases/run.ai_externalworkloads.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/config/crd/bases/run.ai_managednodesconfigs.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/config/crd/bases/run.ai_nodepools.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/config/crd/bases/run.ai_projects.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/config/crd/bases/scheduling.run.ai_departments.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-crd-upgrader/crds/run_ai_accessrule.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-crd-upgrader/crds/run_ai_externalworkload.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-crd-upgrader/crds/run.ai_managednodesconfigs.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-crd-upgrader/crds/run_ai_nodepool.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-chart/charts/crds/crds/run_ai_accessrule.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-chart/charts/crds/crds/run_ai_externalworkload.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-chart/charts/crds/crds/run.ai_managednodesconfigs.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-chart/charts/crds/crds/run_ai_nodepool.yaml @dsx-ai-factory/resource-mgmt
+
+# Suricata - SDK KAI CRDs
+/runai-cluster/cluster/sdk/apis/kai/ @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/config/crd/bases/kai.resources_departments.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/config/crd/bases/kai.resources_managednodesconfigs.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/config/crd/bases/kai.resources_nodepools.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/sdk/config/crd/bases/kai.resources_projects.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-crd-upgrader/crds/kai.resources_departments.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-crd-upgrader/crds/kai.resources_managednodesconfigs.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-crd-upgrader/crds/kai.resources_nodepools.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-crd-upgrader/crds/kai.resources_projects.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-chart/charts/crds/crds/kai.resources_departments.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-chart/charts/crds/crds/kai.resources_managednodesconfigs.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-chart/charts/crds/crds/kai.resources_nodepools.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-chart/charts/crds/crds/kai.resources_projects.yaml @dsx-ai-factory/resource-mgmt
+
+# Suricata - runai-chart ClusterRoles for Suricata services
+/runai-cluster/cluster/runai-chart/templates/clusterroles/accessrule-controller.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/agent.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/cluster-sync.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/external-workload-integrator.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/nodepool-controller.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/pod-group-assigner.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/project-controller-cluster-wide-resources.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/project-controller-limit-range.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/project-controller-ns-creation.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/project-controller-rb-creation.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/project-controller-resources-patcher.yaml @dsx-ai-factory/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/workload-exporter.yaml @dsx-ai-factory/resource-mgmt
+
+
+# runai-common-chart
+/runai-common-chart/** @dsx-ai-factory/ops
+
+# runai-application-packages
+/runai-application-packages/async-events @dsx-ai-factory/observability
+/runai-application-packages/concurrency @dsx-ai-factory/observability
+/runai-application-packages/convutils @dsx-ai-factory/workloads
+/runai-application-packages/client-utils @dsx-ai-factory/observability
+/runai-application-packages/datastructs @dsx-ai-factory/workloads
+/runai-application-packages/dbmodels @dsx-ai-factory/observability
+/runai-application-packages/jsonutils @dsx-ai-factory/workloads
+/runai-application-packages/patching @dsx-ai-factory/workloads
+/runai-application-packages/old-auth-token-middleware @dsx-ai-factory/auth
+/runai-application-packages/testutils @dsx-ai-factory/workloads
+/runai-application-packages/telemetry @dsx-ai-factory/resource-mgmt
+/runai-application-packages/versions @dsx-ai-factory/observability
+/runai-application-packages/scopeinfo @dsx-ai-factory/workloads
+/runai-application-packages/validation @dsx-ai-factory/workloads
+
+# runai-common-packages
+/runai-common-packages/** @dsx-ai-factory/observability
+
+### E2E: ###
+
+/.github/workflows/e2e* @dsx-ai-factory/e2e
+
+/scale-tests/unified_tests/ @dsx-ai-factory/e2e
+/scale-tests/sdk/** @dsx-ai-factory/e2e
+
+## Exclude pkgs folders for renovate
+**/dockerfile 
+**/Dockerfile
+**/go.mod
+**/go.sum
+**/package.json
+**/package-lock.json
+**/docker-compose.yaml
+**/docker-compose.yml
+
+# Build folders
+/build @dsx-ai-factory/backend-devs
+**/Makefile  @dsx-ai-factory/backend-devs 

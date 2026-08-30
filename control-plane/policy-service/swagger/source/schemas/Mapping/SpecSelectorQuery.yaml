@@ -1,0 +1,12 @@
+type: string
+description: The JQ query used to select a subtree of the workload spec. Consult https://jqlang.org/manual/ for further info.
+example: |
+  (
+     .spec.template.spec.containers[]?,
+     .spec.template.spec.initContainers[]?
+   )
+   | select(.)
+minLength: 1
+maxLength: 4095
+pattern: .*
+

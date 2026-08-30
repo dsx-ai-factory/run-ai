@@ -1,0 +1,3 @@
+{{- if .Values.tenantsManager.enabled }}
+{{- include "common.serviceMonitor" (list . .Values.tenantsManager.serviceMonitor .Values.tenantsManager) }}
+{{- end }}

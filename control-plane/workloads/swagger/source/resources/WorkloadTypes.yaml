@@ -1,0 +1,69 @@
+get:
+  summary: List workload types.
+  description: Retrieves a list of workload types with their configurations - their corresponding workload categories and priorities.
+  operationId: list_workload_types
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/workloads_types_api_test.go
+  x-no-authorization: true # code implements validation - read on workloads or workload-properties
+  tags:
+    - Workload properties
+  parameters:
+    - $ref: '../parameters/query/ExternalTypesOnly.yaml'
+    - $ref: '../parameters/query/WorkloadTypesFilter.yaml'
+    - $ref: '../parameters/query/NoStatus.yaml'
+  responses:
+    200:
+      description: List of types retrieved successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - types
+            properties:
+              types:
+                $ref: "../schemas/WorkloadProperties/WorkloadTypeConfigs.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+post:
+  summary: Create a workload type. [Experimental]
+  description: Create a new workload type in the system by providing its identification details and configuration, making it available for use and management within the platform.
+  operationId: create_workload_type
+  x-service: workloads
+  x-test-coverage: not-applicable
+  x-authorize:
+      resource-type: workload-properties
+      action: create
+  tags:
+      - Workload properties
+  requestBody:
+    description: Workload type to create.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/WorkloadProperties/WorkloadTypeCreateFields.yaml"
+  responses:
+    201:
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/WorkloadProperties/WorkloadTypeConfig.yaml"
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    409:
+      $ref: "../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

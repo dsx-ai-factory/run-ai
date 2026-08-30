@@ -1,0 +1,15 @@
+image: ubuntu
+
+probes:
+  readiness:
+    handler:
+      httpGet:
+        path: /ready
+        port: 8080
+        host: localhost
+        scheme: HTTPS
+    initialDelaySeconds: 2
+    periodSeconds: 3
+    timeoutSeconds: 4
+    successThreshold: 5
+    failureThreshold: 6

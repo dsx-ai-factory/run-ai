@@ -1,0 +1,14 @@
+type: object
+required:
+  - data
+properties:
+  data:
+    type: array
+    items:
+      allOf:
+        - $ref: "./DepartmentMetricsV1.yaml"
+        - properties:
+            timeRange:
+              example: null
+  timeRange:
+    $ref: './TimeRangeV1.yaml'

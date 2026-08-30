@@ -1,0 +1,142 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: departments.kai.resources
+spec:
+  group: kai.resources
+  names:
+    kind: Department
+    listKind: DepartmentList
+    plural: departments
+    singular: department
+  scope: Cluster
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Department is the Schema for the departments API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: DepartmentSpec defines the desired state of Department
+            properties:
+              queues:
+                description: Department's queues
+                items:
+                  properties:
+                    name:
+                      description: Queue name
+                      type: string
+                    nodepool:
+                      description: Nodepool associated with the queue
+                      type: string
+                    priority:
+                      description: Queue priority
+                      format: int32
+                      type: integer
+                    resources:
+                      description: Queue resources definition
+                      properties:
+                        cpu:
+                          description: CPU resources in millicpus (e.g. 1000 = 1 CPU)
+                          properties:
+                            deserved:
+                              type: number
+                            limit:
+                              type: number
+                            overQuotaWeight:
+                              type: number
+                          type: object
+                        gpu:
+                          description: GPU resources in fractions (e.g. 0.7 = 70%
+                            of a GPU)
+                          properties:
+                            deserved:
+                              type: number
+                            limit:
+                              type: number
+                            overQuotaWeight:
+                              type: number
+                          type: object
+                        memory:
+                          description: Memory resources in megabytes (1 MB = 10^6
+                            bytes)
+                          properties:
+                            deserved:
+                              type: number
+                            limit:
+                              type: number
+                            overQuotaWeight:
+                              type: number
+                          type: object
+                      type: object
+                  required:
+                  - name
+                  - nodepool
+                  type: object
+                type: array
+            required:
+            - queues
+            type: object
+          status:
+            description: DepartmentStatus defines the observed state of Department
+            properties:
+              conditions:
+                description: Current conditions of the department
+                items:
+                  properties:
+                    lastProbeTime:
+                      description: Last time we probed the condition.
+                      format: date-time
+                      nullable: true
+                      type: string
+                    lastTransitionTime:
+                      description: Last time the condition transitioned from one status
+                        to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: Human-readable message indicating details about
+                        last transition.
+                      type: string
+                    reason:
+                      description: Unique, one-word, CamelCase reason for the condition's
+                        last transition.
+                      type: string
+                    status:
+                      description: |-
+                        Status is the status of the condition.
+                        Can be True, False, Unknown.
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

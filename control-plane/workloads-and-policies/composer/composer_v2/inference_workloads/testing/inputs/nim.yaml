@@ -1,0 +1,7 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+labels:
+  - name: runai.nim/workload
+    value: "true"

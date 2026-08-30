@@ -1,0 +1,38 @@
+package metrics
+
+import (
+	"github.com/google/uuid"
+	"github.com/run-ai/runai/control-plane/cluster-service/pkg/runaimetrics"
+	metrics_client "github.com/run-ai/runai/control-plane/metrics-service/pkg/client"
+)
+
+func GetAllocatedCpuMemoryMetric(clusterIdsFilter []uuid.UUID, nodePoolFilter []string, metricGroupBy MetricGroupBy) metrics_client.Metric {
+	switch metricGroupBy {
+	case GroupByNode:
+		return runaimetrics.RunaiAllocatedMemoryBytesPerNodeMetric{
+			Filters: runaimetrics.RunaiAllocatedMemoryBytesPerNodeFilters{
+				ClusterId: clusterIdsFilter,
+				Nodepool:  nodePoolFilter,
+			},
+		}
+	case GroupByNodePool:
+		return runaimetrics.RunaiAllocatedMemoryBytesPerNodepoolMetric{
+			Filters: runaimetrics.RunaiAllocatedMemoryBytesPerNodepoolFilters{
+				ClusterId: clusterIdsFilter,
+				Nodepool:  nodePoolFilter,
+			},
+		}
+	case GroupByCluster:
+		return runaimetrics.RunaiAllocatedMemoryBytesPerClusterMetric{
+			Filters: runaimetrics.RunaiAllocatedMemoryBytesPerClusterFilters{
+				ClusterId: clusterIdsFilter,
+			},
+		}
+	default: // GroupByTenant
+		return runaimetrics.RunaiAllocatedMemoryBytesPerTenantMetric{
+			Filters: runaimetrics.RunaiAllocatedMemoryBytesPerTenantFilters{
+				ClusterId: clusterIdsFilter,
+			},
+		}
+	}
+}

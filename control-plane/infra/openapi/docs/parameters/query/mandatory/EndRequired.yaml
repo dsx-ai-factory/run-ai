@@ -1,0 +1,8 @@
+name: end
+in: query
+description: End date of time range to fetch data in ISO 8601 timestamp format.
+required: true
+schema:
+  type: string
+  format: date-time
+  example: '2023-06-07T12:09:18.211Z'

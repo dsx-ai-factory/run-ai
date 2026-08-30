@@ -1,0 +1,5 @@
+{
+    "service_name": "clients",
+    "artifact_type": "none",
+    "cache_artifacts": false
+  }

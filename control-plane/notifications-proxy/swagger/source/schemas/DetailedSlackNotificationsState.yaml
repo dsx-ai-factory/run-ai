@@ -1,0 +1,9 @@
+type: object
+allOf:
+  - $ref: "./NotificationStateStatus.yaml"
+  - $ref: "./SlackDetails.yaml"
+example:
+  enabled: true
+  settings:
+    workspaceName: "<your_workspace_name>"
+    appCredentialsConfigured: true

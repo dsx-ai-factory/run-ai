@@ -1,0 +1,5 @@
+description: Set of extended resources with their quantity
+type: array
+items:
+  $ref: "./WorkloadsExtendedResource.yaml"
+nullable: true

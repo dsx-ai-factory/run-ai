@@ -1,0 +1,24 @@
+type: object
+properties:
+  system:
+    type: boolean
+    example: false
+  tenants:
+    type: array
+    items:
+      type: string
+      example: "1"
+  clusters:
+    type: array
+    items:
+      type: string
+      example: "a418ed33-9399-48c0-a890-122cadd13bfd"
+  departments:
+    type: array
+    items:
+      type: string
+      example: "7"
+  projects:
+    type: array
+    items:
+      type: string

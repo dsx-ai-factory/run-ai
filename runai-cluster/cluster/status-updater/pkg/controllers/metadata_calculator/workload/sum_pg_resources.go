@@ -1,0 +1,43 @@
+package workload
+
+import (
+	kaiv2alpha2 "github.com/kai-scheduler/KAI-scheduler/pkg/apis/scheduling/v2alpha2"
+	clustercommonconstants "github.com/run-ai/runai/runai-cluster/cluster/common/constants"
+	"github.com/run-ai/runai/runai-cluster/cluster/status-updater/pkg/controllers/metadata"
+)
+
+const (
+	PgRunningPodsAnnotationName  = "runai-running-pods"
+	PgPendingPodsAnnotationName  = "runai-pending-pods"
+	PgUsedNodes                  = "runai-used-nodes"
+	PgRequestedGPUs              = "runai-podgroup-requested-gpus"
+	PgRequestedGPUsMemory        = "runai-podgroup-requested-gpus-memory"
+	PgTotalRequestedGPUs         = "runai-total-requested-gpus"
+	PgTotalRequestedGPUsMemory   = "runai-total-requested-gpus-memory"
+	PgCurrentRequestedGPUs       = "runai-current-requested-gpus"
+	PgCurrentRequestedGPUsMemory = "runai-current-requested-gpus-memory"
+	PgAllocatedGPUs              = "runai-current-allocated-gpus"
+	PgAllocatedGPUsMemory        = "runai-current-allocated-gpus-memory"
+)
+
+func SumOwnedPodGroupResources(workloadMetadata *metadata.WorkloadMetadata, ownedPodGroups []kaiv2alpha2.PodGroup) {
+	for _, podGroup := range ownedPodGroups {
+		calcPodCounters(workloadMetadata, podGroup)
+		if resource, exists := podGroup.Status.ResourcesStatus.Requested[clustercommonconstants.NvidiaGpuResourceName]; exists {
+			workloadMetadata.RequestedGPUs += resource.AsApproximateFloat64()
+			workloadMetadata.CurrentRequestedGPUs += resource.AsApproximateFloat64()
+		}
+		if resource, exists := podGroup.Status.ResourcesStatus.Allocated[clustercommonconstants.NvidiaGpuResourceName]; exists {
+			workloadMetadata.AllocatedGpus += resource.AsApproximateFloat64()
+		}
+	}
+}
+
+func calcPodCounters(workloadMetadata *metadata.WorkloadMetadata, podGroup kaiv2alpha2.PodGroup) {
+	if podGroup.Status.Running > 0 {
+		workloadMetadata.RunningPods += int64(podGroup.Status.Running)
+	}
+	if podGroup.Status.Pending > 0 {
+		workloadMetadata.PendingPods += int64(podGroup.Status.Pending)
+	}
+}

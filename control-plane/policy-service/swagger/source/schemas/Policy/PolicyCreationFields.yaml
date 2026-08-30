@@ -1,0 +1,14 @@
+required:
+  - name
+  - scope
+properties:
+  scope:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ScopeType.yaml"
+  projectId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ProjectIdOptional.yaml"
+  departmentId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/DepartmentIdOptional.yaml"
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterIdOptional.yaml"
+  name:
+    $ref: "./PolicyName.yaml"

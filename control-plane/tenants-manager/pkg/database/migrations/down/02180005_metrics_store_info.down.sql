@@ -1,0 +1,1 @@
+ALTER TABLE metric_stores DROP COLUMN IF EXISTS "info";

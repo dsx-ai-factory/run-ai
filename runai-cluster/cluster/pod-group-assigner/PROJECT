@@ -1,0 +1,18 @@
+domain: run.ai
+layout:
+- go.kubebuilder.io/v3
+projectName: pod-group-assigner
+repo: github.com/run-ai/runai/runai-cluster/cluster/pod-group-assigner
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: run.ai
+  group: scheduling
+  kind: PodGroup
+  version: v2alpha2
+  webhooks:
+    defaulting: true
+    webhookVersion: v1
+version: "3"

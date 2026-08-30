@@ -1,0 +1,4 @@
+description: used for distributed workloads to indicate that the master spec should be
+  the same as the worker spec. in this case, masterSpec should not be specified.
+type: boolean
+nullable: true

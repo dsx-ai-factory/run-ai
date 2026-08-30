@@ -1,0 +1,8 @@
+# Created by .ignore support plugin (hsz.mobi)
+!/runai-job-controller
+
+cover.out
+runai-job-controller
+*.iml
+/vendor/
+bin/

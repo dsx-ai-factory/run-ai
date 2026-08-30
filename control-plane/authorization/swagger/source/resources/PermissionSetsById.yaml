@@ -1,0 +1,31 @@
+get:
+  summary: Get permission set by id.
+  description: Returns information about a single permission set, including its name, description, and the list of permissions it contains.
+  operationId: get_permission_set
+  x-service: authorization
+  x-authorize:
+    resource-type: roles
+    action: read
+  tags:
+    - Permissions
+  x-test-coverage:
+    - control-plane/authorization/pkg/services/permissions_sets_api_test.go
+  parameters:
+    - $ref: "../parameters/path/PermissionSetId.yaml"
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Roles/PermissionSet.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

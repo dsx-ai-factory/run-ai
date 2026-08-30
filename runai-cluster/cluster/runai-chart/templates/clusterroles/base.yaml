@@ -1,0 +1,1716 @@
+{{- if and (not .Values.global.serviceAccountName) (index .Values "runai-operator" "enabled") -}}
+# Installs and maintains Run:AI installation
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-operator
+rules:
+  - apiGroups:
+      - config.openshift.io
+    resources:
+      - clusterversions
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - "apps"
+    resources:
+      - deployments
+      - daemonsets
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - services
+      - serviceaccounts
+      - configmaps
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - apiextensions.k8s.io
+    resourceNames:
+      - queues.scheduling.run.ai
+    resources:
+      - customresourcedefinitions
+    verbs:
+      - get
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - watch
+      - list
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - watch
+      - list
+  - apiGroups:
+      - kai.scheduler
+    resources:
+      - configs
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - kai.scheduler
+    resources:
+      - configs/status
+    verbs:
+      - get
+  - apiGroups:
+    - node.k8s.io
+    resources:
+      - runtimeclasses
+    verbs:
+      - get
+      - list
+      - create
+      - update
+      - watch
+      - patch
+      - delete
+  - apiGroups:
+    - cert-manager.io
+    resources:
+      - issuers
+      - certificates
+    verbs:
+      - get
+      - list
+      - create
+      - delete
+      - update
+      - watch
+      - patch
+      - update
+  - apiGroups:
+    - run.ai
+    resources:
+      - nodepools
+      - accessrules
+    verbs:
+      - delete
+      - get
+      - list
+      - watch
+      - deletecollection
+      - update
+  - apiGroups:
+      - run.ai
+    resources:
+      - runaiconfigs
+      - managednodesconfigs
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - kai.resources
+    resources:
+      - managednodesconfigs
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - runaiconfigs/finalizers
+    verbs:
+      - update
+  - apiGroups:
+      - run.ai
+    resources:
+      - runaiconfigs/status
+    verbs:
+      - get
+      - patch
+      - update
+  - apiGroups:
+      - run.ai
+    resources:
+      - remoteconfigsyncs
+    verbs:
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - remoteconfigs
+      - clusters
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - remoteconfigs/status
+      - remoteconfigsyncs/status
+      - clusters/status
+    verbs:
+      - get
+      - patch
+      - update
+  - apiGroups:
+      - run.ai
+    resources:
+      - remoteconfigs/finalizers
+      - remoteconfigsyncs/finalizers
+    verbs:
+      - update
+  - apiGroups:
+      - admissionregistration.k8s.io
+    resources:
+      - validatingadmissionpolicies
+      - validatingadmissionpolicybindings
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - create
+      - get
+      - update
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+      - update
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - roles
+      - rolebindings
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - clusterroles
+      - clusterrolebindings
+    verbs:
+      - delete
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - batch
+    resources:
+      - jobs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - servicemonitors
+      - podmonitors
+      - prometheusrules
+      - prometheuses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - route.openshift.io
+    resources:
+      - routes
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - gateway.networking.k8s.io
+    resources:
+      - gateways
+    verbs:
+      - get
+      - list
+      - watch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-operator
+  namespace: runai
+subjects:
+  - kind: ServiceAccount
+    name: runai-operator
+    namespace: runai
+roleRef:
+  kind: ClusterRole
+  name: runai-operator
+  apiGroup: rbac.authorization.k8s.io
+---
+{{- end }}
+{{- if .Values.operands.rbac.researcherService.create }}
+# Researcher User interface used to create Jobs and view Projects.
+# Read-only cluster role
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: researcher-service-ro
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - namespaces
+      - nodes
+      - persistentvolumeclaims
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - amlarc.azureml.com
+    resources:
+      - amljob
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - apps
+    resources:
+      - statefulsets
+      - deployments
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - run.ai
+    resources:
+      - projects
+      - runaijobs
+      - nodepools
+      - trainingworkloads
+      - interactiveworkloads
+      - inferenceworkloads
+      - distributedworkloads
+      - trainingpolicies
+      - interactivepolicies
+      - inferencepolicies
+      - distributedpolicies
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - scheduling.run.ai
+    resources:
+      - departments
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - kubeflow.org
+    resources:
+      - mpijobs
+      - pytorchjobs
+      - tfjobs
+      - xgboostjobs
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - authorization.k8s.io
+    resources:
+      - subjectaccessreviews
+    verbs:
+      - create
+  - apiGroups:
+      - run.ai
+    resources:
+      - accessrules
+      - projects
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - scheduling.k8s.io
+    resources:
+      - priorityclasses
+    verbs:
+      - get
+      - list
+      - watch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: researcher-service-ro
+subjects:
+  - kind: ServiceAccount
+    name: researcher-service
+    namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: researcher-service-ro
+---
+# Researcher User interface used to create Jobs and view Projects
+# This ClusterRole has no associated ClusterRoleBinding (only RoleBinding at the project level)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: researcher-service-rw
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - namespaces
+      - pods
+      - pods/log
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+  - apiGroups:
+      - amlarc.azureml.com
+    resources:
+      - amljobs
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+  - apiGroups:
+      - apps
+    resources:
+      - statefulsets
+      - deployments
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+  - apiGroups:
+      - batch
+    resources:
+      - jobs
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+  - apiGroups:
+      - batch.volcano.sh
+    resources:
+      - jobs
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+  - apiGroups:
+      - run.ai
+    resources:
+      - projects
+      - runaijobs
+      - trainingworkloads
+      - trainingpolicies
+      - interactiveworkloads
+      - interactivepolicies
+      - inferenceworkloads
+      - inferencepolicies
+      - distributedworkloads
+      - distributedpolicies
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+  - apiGroups:
+      - kubeflow.org
+    resources:
+      - mpijobs
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+  - apiGroups:
+      - serving.knative.dev
+    resources:
+      - services
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+  - apiGroups:
+      - route.openshift.io
+    resources:
+      - routes
+      - routes/custom-host
+    verbs:
+      - create
+      - delete
+---
+{{- end }}
+{{- if .Values.operands.rbac.base.create }}
+{{- if eq (include "legacyControllerRBACEnabled" (list . "workload-controller")) "true" }}
+# workload-controller is used to create runaijobs based on workloads and policies.
+# This ClusterRole has no associated ClusterRoleBinding (only RoleBinding at the project level)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: workload-controller-rw
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - persistentvolumeclaims
+      - services
+      - secrets
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - amlarc.azureml.com
+    resources:
+      - amljobs
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - run.ai
+    resources:
+      - runaijobs
+      - interactivepolicies
+      - interactivepolicies/status
+      - interactiveworkloads
+      - interactiveworkloads/status
+      - interactiveworkloads/finalizers
+      - trainingpolicies
+      - trainingpolicies/status
+      - trainingworkloads
+      - trainingworkloads/status
+      - trainingworkloads/finalizers
+      - inferencepolicies
+      - inferencepolicies/status
+      - inferenceworkloads
+      - inferenceworkloads/status
+      - inferenceworkloads/finalizers
+      - distributedpolicies
+      - distributedpolicies/status
+      - distributedworkloads
+      - distributedworkloads/status
+      - distributedworkloads/finalizers
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - kubeflow.org
+    resources:
+      - mpijobs
+      - pytorchjobs
+      - tfjobs
+      - jaxjobs
+      - xgboostjobs
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - gateway.networking.k8s.io
+    resources:
+      - httproutes
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - serving.knative.dev
+    resources:
+      - services
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+  - apiGroups:
+      - route.openshift.io
+    resources:
+      - routes
+      - routes/custom-host
+    verbs:
+      - create
+      - delete
+      - watch
+      - list
+      - get
+      - update
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+  - apiGroups:
+      - "resource.nvidia.com"
+    resources:
+      - computedomains
+    verbs:
+      - create
+      - delete
+      - watch
+      - list
+      - get
+      - update
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: workload-controller-ro
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - namespaces
+      - persistentvolumeclaims
+      - serviceaccounts
+      - nodes
+      - services
+      - pods
+      - secrets
+      - events
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - authorization.k8s.io
+    resources:
+      - subjectaccessreviews
+    verbs:
+      - create
+    # Required for WorkloadOwnershipProtectionValidator.userPermittedForNamespace method
+    # to check if non-RunAI users have permission to perform operations
+  - apiGroups:
+      - run.ai
+    resources:
+      - runaijobs
+      - projects
+      - accessrules
+      - interactivepolicies
+      - interactivepolicies/status
+      - interactivepolicies/finalizers
+      - interactiveworkloads
+      - interactiveworkloads/status
+      - interactiveworkloads/finalizers
+      - trainingpolicies
+      - trainingpolicies/status
+      - trainingpolicies/finalizers
+      - trainingworkloads
+      - trainingworkloads/status
+      - trainingworkloads/finalizers
+      - inferencepolicies
+      - inferencepolicies/status
+      - inferenceworkloads
+      - inferenceworkloads/status
+      - inferenceworkloads/finalizers
+      - distributedpolicies
+      - distributedpolicies/status
+      - distributedworkloads
+      - distributedworkloads/status
+      - distributedworkloads/finalizers
+      - nodepools
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - kai.resources
+    resources:
+      - projects
+      - departments
+      - nodepools
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - scheduling.run.ai
+    resources:
+      - departments
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - gateway.networking.k8s.io
+    resources:
+      - httproutes
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - kubeflow.org
+    resources:
+      - mpijobs
+      - pytorchjobs
+      - jaxjobs
+      - tfjobs
+      - xgboostjobs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+     - route.openshift.io
+    resources:
+      - routes
+      - routes/custom-host
+    verbs:
+      - create
+      - delete
+      - watch
+      - list
+      - get
+      - update
+      - patch
+  - apiGroups:
+     - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - create
+      - get
+      - update
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+      - update
+  - apiGroups:
+      - "resource.nvidia.com"
+    resources:
+      - computedomains
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - scheduling.k8s.io
+    resources:
+      - priorityclasses
+    verbs:
+      - get
+      - list
+      - watch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: workload-controller-ro
+subjects:
+  - kind: ServiceAccount
+    name: workload-controller
+    namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: workload-controller-ro
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: workload-controller-migration
+  namespace: runai
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - create
+      - delete
+      - watch
+      - list
+      - get
+      - update
+      - patch
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: workload-controller-migration
+  namespace: runai
+subjects:
+  - kind: ServiceAccount
+    name: workload-controller
+    namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: workload-controller-migration
+---
+{{- end }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runtime-rules
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - run.ai
+    resources:
+      - trainingworkloads
+      - interactiveworkloads
+      - distributedworkloads
+    verbs:
+      - get
+      - list
+      - update
+      - watch
+      - delete
+  - apiGroups:
+      - run.ai
+    resources:
+      - workloadrunners
+    verbs:
+      - get
+      - list
+      - watch
+      - patch
+      - delete
+  - apiGroups:
+      - run.ai
+    resources:
+      - projects
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - kai.resources
+    resources:
+      - projects
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - create
+      - get
+      - update
+      - patch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runtime-rules
+subjects:
+  - kind: ServiceAccount
+    name: runtime-rules
+    namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runtime-rules
+---
+
+# A Kubernetes Admission Controller
+# Responsible for the management of Job submission policies and the validation of the input provided to submit the Job
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-admission-controller-ro
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - pods/finalizers
+    verbs:
+      - get
+  - apiGroups:
+      - scheduling.k8s.io
+    resources:
+      - priorityclasses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - deployments/finalizers
+      - statefulsets/finalizers
+      - replicasets/finalizers
+    verbs:
+      - get
+  - apiGroups:
+      - batch
+    resources:
+      - jobs/finalizers
+    verbs:
+      - get
+  - apiGroups:
+      - kubeflow.org
+    resources:
+      - mpijobs/finalizers
+      - pytorchjobs/finalizers
+      - tfjobs/finalizers
+      - xgboostjobs/finalizers
+    verbs:
+      - get
+  - apiGroups:
+      - run.ai
+    resources:
+      - runaijobs/finalizers
+    verbs:
+      - get
+  - apiGroups:
+      - run.ai
+    resources:
+      - nodepools
+      - projects
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - kai.resources
+    resources:
+      - nodepools
+      - projects
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - resource.k8s.io
+    resources:
+      - resourceclaims
+      - resourceclaimtemplates
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-admission-controller-ro
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: runai-admission-controller-ro
+subjects:
+  - kind: ServiceAccount
+    name: runai-admission-controller
+    namespace: runai
+---
+
+# A Kubernetes Admission Controller
+# Responsible for the management of Job submission policies and the validation of the input provided to submit the Job
+# This ClusterRole has no associated ClusterRoleBinding (only RoleBinding at the project level)
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-admission-controller-project
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - pods/finalizers
+    verbs:
+      - create
+      - update
+  - apiGroups:
+      - apps
+    resources:
+      - statefulsets/finalizers
+      - deployments/finalizers
+      - replicasets/finalizers
+    verbs:
+      - create
+      - update
+  - apiGroups:
+      - batch
+    resources:
+      - jobs/finalizers
+    verbs:
+      - create
+      - update
+  - apiGroups:
+      - kubeflow.org
+    resources:
+      - mpijobs/finalizers
+      - pytorchjobs/finalizers
+      - tfjobs/finalizers
+      - xgboostjobs/finalizers
+    verbs:
+      - create
+      - update
+  - apiGroups:
+      - run.ai
+    resources:
+      - runaijobs/finalizers
+    verbs:
+      - create
+      - update
+---
+
+## Creation of custom certificates
+## Relevant for regular Kubernetes. Not relevant for Openshift installations.
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-init-ca
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - create
+      - get
+      - update
+      - patch
+  - apiGroups:
+      - admissionregistration.k8s.io
+    resources:
+      - mutatingwebhookconfigurations
+      - validatingwebhookconfigurations
+    verbs:
+      - get
+      - watch
+      - list
+      - create
+  - apiGroups:
+      - admissionregistration.k8s.io
+    resources:
+      - mutatingwebhookconfigurations
+      - validatingwebhookconfigurations
+    verbs:
+      - update
+      - patch
+      - delete
+    # Keep legacy webhook names so init-ca can remove them during upgrades.
+    resourceNames: ["assets-sync", "application-validation", "runai-assets-sync-validation", "runai-secret-pvc-validation", "runai-pod", "runai-pod-controller-mutation", "runai-interactive-workload-mutation", "runai-training-workload-mutation", "runai-distributed-workload-mutation", "runai-inference-workload-mutation", "runai-inference-workload-mutation-old", "runai-distributed-inference-workload-mutation", "runai-pod-group-mutation", "runai-workload-ownership-mutation", "inference-workload-ownership-mutation", "runai-anyworkload-mutation", "runai-pod-controller-validation", "runai-interactive-policy-validation", "runai-interactive-workload-validation", "runai-training-policy-validation", "runai-training-workload-validation", "runai-distributed-policy-validation", "runai-distributed-workload-validation", "runai-inference-policy-validation-old", "runai-inference-policy-validation", "runai-inference-workload-validation-old", "runai-inference-workload-validation", "runai-distributed-inference-workload-validation", "runai-accessrule-validation", "runai-workload-ownership-protection-validation","runai-inference-workload-ownership-mutation", "runai-inference-workload-ownership-protection-validation", "runai-queue-validation", "runai-queue-validation-v2", "runai-queue-validation-v2alpha1", "runai-queue-validation-v2alpha2", "runai-project-validation", "runai-anyworkload-validation", "runai-restartrequest-validation", "runai-advice-restart-dw-mutation"]
+
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames: ["anyworkload-controller"]
+    verbs: ["get"]
+  - apiGroups: ["certificates.k8s.io"]
+    resources: ["certificatesigningrequests"]
+    verbs: ["get", "watch", "list", "create", "update", "patch", "delete"]
+  - apiGroups: ["certificates.k8s.io"]
+    resources: ["certificatesigningrequests/approval", "certificatesigningrequests/status"]
+    verbs: ["update"]
+  - apiGroups: ["certificates.k8s.io"]
+    resources: ["signers"]
+    resourceNames: ["kubernetes.io/legacy-unknown", "kubernetes.io/kubelet-serving"]
+    verbs: ["approve"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-init-ca
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: runai-init-ca
+subjects:
+  - kind: ServiceAccount
+    namespace: runai
+    name: init-ca
+---
+
+# Used for an extension of the Kubernetes Job to the "runaijob" CRD
+{{- if eq (include "legacyControllerRBACEnabled" (list . "job-controller")) "true" }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-job-controller
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - pods/exec
+    verbs:
+      - create
+  - apiGroups:
+      - run.ai
+    resources:
+      - runaijobs
+      - runaijobs/status
+      - runaijobs/finalizers
+    verbs:
+      - get
+      - list
+      - watch
+      - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-job-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-job-controller
+subjects:
+  - kind: ServiceAccount
+    name: runai-job-controller
+    namespace: runai
+---
+
+# Job Controller Writer.
+# This ClusterRole has no associated ClusterRoleBinding (only RoleBinding at the project level)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-job-controller-project
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - events
+      - configmaps
+    verbs:
+      - create
+      - delete
+      - patch
+      - update
+---
+{{- end }}
+
+# Run:AI Projects
+# Alows the reading of project-related data and editing of Run:AI specific CRDs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-project-controller
+rules:
+  - apiGroups:
+      - run.ai
+    resources:
+      - projects
+      - projects/finalizers
+      - projects/status
+    verbs:
+      - '*'
+  - apiGroups:
+      - kai.resources
+    resources:
+      - projects
+      - projects/finalizers
+      - projects/status
+      - departments
+      - departments/finalizers
+      - departments/status
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - run.ai
+    resources:
+      - trainingworkloads
+      - interactiveworkloads
+      - inferenceworkloads
+      - distributedworkloads
+      - externalworkloads
+      - datavolumes
+      - workloadrunners
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - distributedinferenceworkloads
+      - runaijobs
+    verbs:
+      - list
+  - apiGroups:
+      - scheduling.run.ai
+    resources:
+      - queues
+      - departments
+      - departments/finalizers
+    verbs:
+      - '*'
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - namespaces
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - rolebindings
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - servicemonitors
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-project-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-project-controller
+subjects:
+  - kind: ServiceAccount
+    name: runai-project-controller
+    namespace: runai
+---
+{{- end }}
+
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: runai
+  name: runai-public-config-viewer
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames:
+      - runai-public
+    verbs: ["get", "watch", "list"]
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: runai-public-config-viewer
+  namespace: runai
+roleRef:
+  kind: Role
+  name: runai-public-config-viewer
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+  - kind: Group
+    name: system:authenticated
+    apiGroup: rbac.authorization.k8s.io
+
+# The following ClusterRole and ClusterRoleBinding are used
+# by our private Prometheus instance
+---
+{{- if .Values.operands.rbac.prometheus.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-prometheus
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+      - nodes/metrics
+      - pods
+      - endpoints
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+  - nonResourceURLs:
+      - /metrics
+      - /metrics/cadvisor
+    verbs:
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-prometheus
+subjects:
+  - kind: ServiceAccount
+    name: runai-prometheus
+    namespace: runai
+---
+{{- end }}
+# permissions for end users to edit remoteconfigsync.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: remoteconfigsync-editor-role
+rules:
+  - apiGroups:
+      - run.ai
+    resources:
+      - remoteconfigsyncs
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - remoteconfigsyncs/status
+    verbs:
+      - get
+      - update
+      - patch
+---
+# permissions for end users to view remoteconfigsyncs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: remoteconfigsync-viewer-role
+rules:
+  - apiGroups:
+      - run.ai
+    resources:
+      - remoteconfigsyncs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - remoteconfigsyncs/status
+    verbs:
+      - get
+      - update
+      - patch
+---
+# permissions for end users to edit remoteconfigs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: remoteconfig-editor-role
+rules:
+  - apiGroups:
+      - run.ai
+    resources:
+      - remoteconfigs
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - remoteconfigs/status
+    verbs:
+      - get
+---
+# permissions for end users to view remoteconfigs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: remoteconfig-viewer-role
+rules:
+  - apiGroups:
+      - run.ai
+    resources:
+      - remoteconfigs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - remoteconfigs/status
+    verbs:
+      - get
+---
+# permissions for end users to edit clusters.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-editor-role
+rules:
+  - apiGroups:
+      - run.ai
+    resources:
+      - clusters
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - clusters/status
+    verbs:
+      - get
+---
+# permissions for end users to view clusters.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-viewer-role
+rules:
+  - apiGroups:
+      - run.ai
+    resources:
+      - clusters
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - clusters/status
+    verbs:
+      - get
+---
+{{- if and (not .Values.global.serviceAccountName) (index .Values "runai-operator" "enabled") }}
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-operator-remoteconfigsync
+subjects:
+  - kind: ServiceAccount
+    name: runai-operator
+    namespace: runai
+roleRef:
+  kind: ClusterRole
+  name: remoteconfigsync-editor-role
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-operator-remoteconfigs
+subjects:
+  - kind: ServiceAccount
+    name: runai-operator
+    namespace: runai
+roleRef:
+  kind: ClusterRole
+  name: remoteconfig-editor-role
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-operator-cluster
+subjects:
+  - kind: ServiceAccount
+    name: runai-operator
+    namespace: runai
+roleRef:
+  kind: ClusterRole
+  name: cluster-editor-role
+  apiGroup: rbac.authorization.k8s.io
+---
+{{- end }}
+{{- if eq (include "isOpenShift" .) "true" }}
+{{- if .Values.operands.rbac.prometheus.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-prometheus-openshift
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-prometheus
+subjects:
+  - kind: ServiceAccount
+    name: prometheus-k8s
+    namespace: openshift-monitoring
+---
+{{- end }}
+{{- if and (not .Values.global.serviceAccountName) (index .Values "runai-operator" "enabled") }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: runai-operator
+  namespace: openshift-monitoring
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - update
+      - watch
+      - list
+      - create
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    resourceNames:
+      - runai-prometheus
+    verbs:
+      - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: runai-operator
+  namespace: openshift-monitoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: runai-operator
+subjects:
+  - kind: ServiceAccount
+    name: runai-operator
+    namespace: runai
+{{- end }}
+{{- end }}

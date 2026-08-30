@@ -1,0 +1,10 @@
+type: object
+x-internal: true
+properties:
+  force:
+    type: boolean
+  reconcilerType:
+    $ref: '../../parameters/reconcilerType.yaml'
+example:
+  force: true
+  reconcilerType: clients

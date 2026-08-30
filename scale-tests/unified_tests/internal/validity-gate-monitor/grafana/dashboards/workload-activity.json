@@ -1,0 +1,95 @@
+{
+  "uid": "workload-activity",
+  "title": "Workload Activity",
+  "description": "Workload counts and throughput rates during burst / rate load tests.",
+  "tags": [
+    "scale-test",
+    "workloads"
+  ],
+  "timezone": "browser",
+  "refresh": "10s",
+  "schemaVersion": 36,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Workload States",
+      "description": "Running, pending and completed workload counts. During burst: pending rises as submissions land, then falls as KWOK stages complete workloads and the scheduler backfills from the queue.",
+      "type": "timeseries",
+      "gridPos": {"x": 0, "y": 0, "w": 24, "h": 10},
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {"lineWidth": 2, "fillOpacity": 6}
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "running"},
+            "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}]
+          },
+          {
+            "matcher": {"id": "byName", "options": "pending"},
+            "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "orange"}}]
+          },
+          {
+            "matcher": {"id": "byName", "options": "completed"},
+            "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}}]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "expr": "sum(kube_pod_status_phase{phase=\"Running\", namespace=~\"runai-.*-project.*|runai-burst.*\"} == 1)",
+          "legendFormat": "running",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(kube_pod_status_phase{phase=\"Pending\", namespace=~\"runai-.*-project.*|runai-burst.*\"} == 1)",
+          "legendFormat": "pending",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(kube_pod_status_phase{phase=\"Succeeded\", namespace=~\"runai-.*-project.*|runai-burst.*\"} == 1)",
+          "legendFormat": "completed",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Submission & Completion Rate (workloads/min)",
+      "description": "Submission rate: deriv of (active + succeeded) — spikes during the burst window then drops to 0. Completion rate: deriv of succeeded — rises as KWOK stage timers fire after WorkloadDuration, then drops to 0 once the queue drains.",
+      "type": "timeseries",
+      "gridPos": {"x": 0, "y": 10, "w": 24, "h": 10},
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {"lineWidth": 2, "fillOpacity": 8}
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "submitted/min"},
+            "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "purple"}}]
+          },
+          {
+            "matcher": {"id": "byName", "options": "completed/min"},
+            "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "teal"}}]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "expr": "clamp_min(deriv(sum(kube_job_status_active{namespace=~\"runai-.*-project.*|runai-burst.*\"} + kube_job_status_succeeded{namespace=~\"runai-.*-project.*|runai-burst.*\"})[2m:15s]) * 60, 0)",
+          "legendFormat": "submitted/min",
+          "refId": "A"
+        },
+        {
+          "expr": "clamp_min(deriv(sum(kube_job_status_succeeded{namespace=~\"runai-.*-project.*|runai-burst.*\"})[2m:15s]) * 60, 0)",
+          "legendFormat": "completed/min",
+          "refId": "B"
+        }
+      ]
+    }
+  ]
+}

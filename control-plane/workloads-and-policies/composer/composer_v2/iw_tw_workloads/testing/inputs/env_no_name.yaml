@@ -1,0 +1,6 @@
+image: ubuntu
+environmentVariables:
+  - name: HOME
+    value: "/home/my-folder"
+  - name:
+    value: "omg"

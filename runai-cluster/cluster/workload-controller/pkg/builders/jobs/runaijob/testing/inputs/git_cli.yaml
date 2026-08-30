@@ -1,0 +1,37 @@
+apiVersion: run.ai/v2alpha1
+kind: TrainingWorkload
+metadata:
+  name: job-0-2022-04-03t05-22-11
+  namespace: runai-team-a
+spec:
+  command:
+    value: sleep infinity
+  gitSync:
+    items:
+      git-gitmount:
+        value:
+          branch: master
+          directory: gitmount
+          password: mypassword2
+          repository: https://github.com/reo2.git
+          username: myuser2
+  image:
+    value: ubuntu
+  imagePullPolicy:
+    value: Always
+  labels:
+    items:
+      runai/job-index:
+        value: "24"
+  name:
+    value: job-0
+  runAsGid:
+    value: 20
+  runAsUid:
+    value: 501
+  serviceType:
+    value: ClusterIP
+  supplementalGroups:
+    value: 20;12;61;79;80;81;98;33;100;204;250;395;101;399;400;701
+  username:
+    value: user.name

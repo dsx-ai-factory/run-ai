@@ -1,0 +1,6 @@
+external-workload-integrator
+workload-controller
+inference-workload-controller
+project-controller
+nodepool-controller
+pod-group-assigner

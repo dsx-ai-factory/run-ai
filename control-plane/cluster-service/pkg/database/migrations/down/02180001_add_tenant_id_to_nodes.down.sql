@@ -1,0 +1,1 @@
+ALTER TABLE node DROP COLUMN IF EXISTS tenant_id;

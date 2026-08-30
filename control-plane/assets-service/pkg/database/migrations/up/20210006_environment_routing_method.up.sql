@@ -1,0 +1,1 @@
+ALTER TABLE assets_environment ADD COLUMN IF NOT EXISTS routing_method VARCHAR(20) NOT NULL DEFAULT 'agnostic';

@@ -1,0 +1,32 @@
+get:
+  summary: Get nodepools internal
+  operationId: get_nodepools_internal
+  x-service: cluster-service
+  description: Get nodepools internal
+  x-no-authorization: true
+  x-test-coverage:
+    - e2e/src/test/suites/playwright/serial/regression/node-pools/advancedNodePoolsApi.test.ts
+  tags:
+    - NodePools
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
+  responses:
+    200:
+      description: ok
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              nodepools:
+                type: array
+                items:
+                  $ref: "../schemas/Nodepools/Nodepool.yaml"
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

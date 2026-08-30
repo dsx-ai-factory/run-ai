@@ -1,0 +1,51 @@
+clusterService:
+    config:
+        clusterInstallation:
+            helmRegistryUrl: ""
+global:
+    image:
+        registry: registry.local:5000/runai/runai-control-plane
+        tag: 2.26.13
+    installationType: airgap
+    waitImage:
+        registry: registry.local:5000/runai/runai-cluster
+        repository: wait-ubi-minimal
+        tag: "9.8"
+keycloakx:
+    image:
+        repository: registry.local:5000/runai/runai-control-plane/keycloak
+        tag: "26.6"
+nats:
+    global:
+        security:
+            allowInsecureImages: true
+    image:
+        registry: registry.local:5000/runai/runai-control-plane
+        repository: nats
+        tag: 2.11.8-debian-12-r0
+postgresql:
+    global:
+        security:
+            allowInsecureImages: true
+    image:
+        registry: registry.local:5000/runai/runai-control-plane
+        repository: postgresql
+        tag: "16"
+postgresqlUserInit:
+    image:
+        registry: registry.local:5000/runai/runai-control-plane
+        repository: postgres
+        tag: 16-alpine
+thanos:
+    global:
+        security:
+            allowInsecureImages: true
+    image:
+        registry: registry.local:5000/runai/runai-control-plane
+        repository: thanos
+        tag: 0.38.0-debian-12-r3
+traefik:
+    image:
+        registry: registry.local:5000/runai/runai-control-plane
+        repository: traefik
+        tag: v3.7

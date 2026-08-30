@@ -1,0 +1,46 @@
+apiVersion: run.ai/v2alpha1
+kind: TrainingWorkload
+metadata:
+  annotations:
+  creationTimestamp: "2023-12-05T08:35:39Z"
+  generation: 1
+  labels:
+    project: p-st-c0a7ab13da6b-ec1587
+  name: job-2-services
+  namespace: runai-team-a
+  resourceVersion: "190487"
+  uid: 7931f014-4404-4a14-b151-e4bd921e294a
+spec:
+  exposedUrls:
+    items:
+      url-0:
+        value:
+          containerPort: 3002
+          customUrl: true
+          url: http://my.customurl.com/somepath2
+  image:
+    value: gcr.io/run-ai-lab/ubuntu:loop
+  imagePullPolicy:
+    value: Always
+  labels:
+    items: {}
+  name:
+    value: job-2-services
+  ports:
+    items:
+      port-3001:
+        value:
+          autoGenerate: false
+          container: 3001
+          external: 30005
+  runAsGid:
+    value: 20
+  runAsUid:
+    value: 501
+  serviceType:
+    value: NodePort
+  supplementalGroups:
+    value: 20;12;61;79;80;81;98;701;33;100;204;250;395;398;399;400
+  usage: Submit
+  username:
+    value: tal.kattan

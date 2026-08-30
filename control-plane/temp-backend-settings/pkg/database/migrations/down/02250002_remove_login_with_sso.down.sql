@@ -1,0 +1,1 @@
+-- No rollback: deleted rows cannot be restored

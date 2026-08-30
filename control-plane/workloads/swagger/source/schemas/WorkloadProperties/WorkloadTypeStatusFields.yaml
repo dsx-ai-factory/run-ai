@@ -1,0 +1,12 @@
+type: object
+properties:
+  phase:
+    type: string
+    description: The current phase of the workload type in the cluster.
+    example: "Ready"
+  conditions:
+    $ref: "../Common/Conditions.yaml"
+  version:
+    type: string
+    description: The version of the resource definition's Kubernetes CRD.
+    example: "v1"

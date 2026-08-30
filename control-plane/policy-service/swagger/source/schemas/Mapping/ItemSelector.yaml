@@ -1,0 +1,13 @@
+type: object
+description: >-
+  An item selector: a JQ query that filters specific items of an itemized field,
+  plus the type and enum information for any arguments referenced by the query.
+properties:
+  description:
+    $ref: "./MappingDescriptionOptional.yaml"
+  query:
+    $ref: "./ItemSelectorQuery.yaml"
+  argsInfo:
+    $ref: "./MappingArgsInfo.yaml"
+  argsEnum:
+    $ref: "./MappingArgsEnum.yaml"

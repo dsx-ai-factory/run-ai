@@ -1,0 +1,9 @@
+description: The information needed for creating az template - 
+  a set of assets and an optional set of specific environment parameters.
+required:
+  - assets
+properties:
+  assets:
+    $ref: "../../../../../infra/openapi/docs/schemas/assets/AssetsIds.yaml"
+  specificEnv:
+    $ref: "./SpecificRunParams.yaml"

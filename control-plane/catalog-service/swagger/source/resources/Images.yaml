@@ -1,0 +1,33 @@
+parameters:
+  - $ref: '../parameters/path/RegistryIntegrationId.yaml'
+get:
+  summary: List images by registry-integration id
+  description: List requested images.
+  operationId: list_images
+  x-service: catalog-service
+  x-internal: true
+  x-authorize:
+    resource-type: registries
+    action: read
+  tags:
+    - Images
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Search.yaml"
+    - $ref: "../parameters/query/optional/AssetIdOptional.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/images/ImagesListResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

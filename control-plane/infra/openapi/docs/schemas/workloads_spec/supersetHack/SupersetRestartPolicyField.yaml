@@ -1,0 +1,5 @@
+properties:
+  restartPolicy:
+    $ref: SupersetRestartPolicy.yaml
+nullable: true
+type: object

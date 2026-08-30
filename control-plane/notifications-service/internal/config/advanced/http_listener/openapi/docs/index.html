@@ -1,0 +1,2185 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Notifications Service Config API</title>
+    <style type="text/css">
+      body {
+	font-family: Trebuchet MS, sans-serif;
+	font-size: 15px;
+	color: #444;
+	margin-right: 24px;
+}
+
+h1	{
+	font-size: 25px;
+}
+h2	{
+	font-size: 20px;
+}
+h3	{
+	font-size: 16px;
+	font-weight: bold;
+}
+hr	{
+	height: 1px;
+	border: 0;
+	color: #ddd;
+	background-color: #ddd;
+}
+
+.app-desc {
+  clear: both;
+  margin-left: 20px;
+}
+.param-name {
+  width: 100%;
+}
+.license-info {
+  margin-left: 20px;
+}
+
+.license-url {
+  margin-left: 20px;
+}
+
+.model {
+  margin: 0 0 0px 20px;
+}
+
+.method {
+  margin-left: 20px;
+}
+
+.method-notes	{
+	margin: 10px 0 20px 0;
+	font-size: 90%;
+	color: #555;
+}
+
+pre {
+  padding: 10px;
+  margin-bottom: 2px;
+}
+
+.http-method {
+ text-transform: uppercase;
+}
+
+pre.get {
+  background-color: #0f6ab4;
+}
+
+pre.post {
+  background-color: #10a54a;
+}
+
+pre.put {
+  background-color: #c5862b;
+}
+
+pre.delete {
+  background-color: #a41e22;
+}
+
+.huge	{
+	color: #fff;
+}
+
+pre.example {
+  background-color: #f3f3f3;
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+code {
+  white-space: pre;
+}
+
+.nickname {
+  font-weight: bold;
+}
+
+.method-path {
+  font-size: 1.5em;
+  background-color: #0f6ab4;
+}
+
+.up {
+  float:right;
+}
+
+.parameter {
+  width: 500px;
+}
+
+.param {
+  width: 500px;
+  padding: 10px 0 0 20px;
+  font-weight: bold;
+}
+
+.param-desc {
+  width: 700px;
+  padding: 0 0 0 20px;
+  color: #777;
+}
+
+.param-type {
+  font-style: italic;
+}
+
+.param-enum-header {
+width: 700px;
+padding: 0 0 0 60px;
+color: #777;
+font-weight: bold;
+}
+
+.param-enum {
+width: 700px;
+padding: 0 0 0 80px;
+color: #777;
+font-style: italic;
+}
+
+.field-label {
+  padding: 0;
+  margin: 0;
+  clear: both;
+}
+
+.field-items	{
+	padding: 0 0 15px 0;
+	margin-bottom: 15px;
+}
+
+.return-type {
+  clear: both;
+  padding-bottom: 10px;
+}
+
+.param-header {
+  font-weight: bold;
+}
+
+.method-tags {
+  text-align: right;
+}
+
+.method-tag {
+  background: none repeat scroll 0% 0% #24A600;
+  border-radius: 3px;
+  padding: 2px 10px;
+  margin: 2px;
+  color: #FFF;
+  display: inline-block;
+  text-decoration: none;
+}
+
+    </style>
+  </head>
+  <body>
+  <h1>Notifications Service Config API</h1>
+    <div class="app-desc">API for notifications-service config endpoint</div>
+    <div class="app-desc">More information: <a href="https://openapi-generator.tech">https://openapi-generator.tech</a></div>
+    <div class="app-desc">Contact Info: <a href="team@openapitools.org">team@openapitools.org</a></div>
+    <div class="app-desc">Version: 1.0.0</div>
+    <div class="app-desc">BasePath:</div>
+    <div class="license-info">All rights reserved</div>
+    <div class="license-url">http://apache.org/licenses/LICENSE-2.0.html</div>
+  <h2>Access</h2>
+
+  <h2><a name="__Methods">Methods</a></h2>
+  [ Jump to <a href="#__Models">Models</a> ]
+
+  <h3>Table of Contents </h3>
+  <div class="method-summary"></div>
+  <h4><a href="#Health">Health</a></h4>
+  <ul>
+  <li><a href="#health"><code><span class="http-method">get</span> /api/v1/config/health</code></a></li>
+  </ul>
+  <h4><a href="#Listener">Listener</a></h4>
+  <ul>
+  <li><a href="#createListener"><code><span class="http-method">post</span> /api/v1/listeners</code></a></li>
+  <li><a href="#deleteListener"><code><span class="http-method">delete</span> /api/v1/listeners/{listenerId}</code></a></li>
+  <li><a href="#getListener"><code><span class="http-method">get</span> /api/v1/listeners/{listenerId}</code></a></li>
+  <li><a href="#updateListener"><code><span class="http-method">put</span> /api/v1/listeners/{listenerId}</code></a></li>
+  </ul>
+  <h4><a href="#RegisterNotification">RegisterNotification</a></h4>
+  <ul>
+  <li><a href="#createNotificationKind"><code><span class="http-method">post</span> /api/v1/notification-kinds</code></a></li>
+  <li><a href="#deleteNotificationKind"><code><span class="http-method">delete</span> /api/v1/notification-kinds</code></a></li>
+  <li><a href="#getNotificationKinds"><code><span class="http-method">get</span> /api/v1/notification-kinds</code></a></li>
+  <li><a href="#updateNotificationKind"><code><span class="http-method">put</span> /api/v1/notification-kinds</code></a></li>
+  </ul>
+  <h4><a href="#Sinks">Sinks</a></h4>
+  <ul>
+  <li><a href="#createSink"><code><span class="http-method">post</span> /api/v1/sinks</code></a></li>
+  <li><a href="#deleteSink"><code><span class="http-method">delete</span> /api/v1/sinks/{sinkId}</code></a></li>
+  <li><a href="#getSink"><code><span class="http-method">get</span> /api/v1/sinks/{sinkId}</code></a></li>
+  <li><a href="#getSinks"><code><span class="http-method">get</span> /api/v1/sinks</code></a></li>
+  <li><a href="#updateSink"><code><span class="http-method">put</span> /api/v1/sinks/{sinkId}</code></a></li>
+  <li><a href="#validateSink"><code><span class="http-method">post</span> /api/v1/sinks/validate</code></a></li>
+  </ul>
+  <h4><a href="#TenantRoute">TenantRoute</a></h4>
+  <ul>
+  <li><a href="#createRoute"><code><span class="http-method">post</span> /api/v1/tenants/{tenantId}/routes</code></a></li>
+  <li><a href="#deleteRoute"><code><span class="http-method">delete</span> /api/v1/tenants/{tenantId}/routes/{routeId}</code></a></li>
+  <li><a href="#getAllTenantsWithRoutes"><code><span class="http-method">get</span> /api/v1/tenants</code></a></li>
+  <li><a href="#getRoute"><code><span class="http-method">get</span> /api/v1/tenants/{tenantId}/routes/{routeId}</code></a></li>
+  <li><a href="#getRoutes"><code><span class="http-method">get</span> /api/v1/tenants/{tenantId}/routes</code></a></li>
+  <li><a href="#updateRoute"><code><span class="http-method">put</span> /api/v1/tenants/{tenantId}/routes/{routeId}</code></a></li>
+  </ul>
+  <h4><a href="#UserRoute">UserRoute</a></h4>
+  <ul>
+  <li><a href="#createUserRoute"><code><span class="http-method">post</span> /api/v1/tenants/{tenantId}/users/{userId}/routes</code></a></li>
+  <li><a href="#deleteAllUserRoutes"><code><span class="http-method">delete</span> /api/v1/tenants/{tenantId}/users/routes</code></a></li>
+  <li><a href="#deleteNotifyIdFromAllUserRoutes"><code><span class="http-method">delete</span> /api/v1/tenants/{tenantId}/users/routes/notify/{notifyId}</code></a></li>
+  <li><a href="#deleteUserRoute"><code><span class="http-method">delete</span> /api/v1/tenants/{tenantId}/users/{userId}/routes/{routeId}</code></a></li>
+  <li><a href="#getUserRoutes"><code><span class="http-method">get</span> /api/v1/tenants/{tenantId}/users/{userId}/routes</code></a></li>
+  <li><a href="#updateUserRoute"><code><span class="http-method">put</span> /api/v1/tenants/{tenantId}/users/{userId}/routes/{routeId}</code></a></li>
+  </ul>
+
+  <h1><a name="Health">Health</a></h1>
+  <div class="method"><a name="health"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /api/v1/config/health</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">health</span>)</div>
+    <div class="method-notes">Get health state</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>"OK"</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#String">String</a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="Listener">Listener</a></h1>
+  <div class="method"><a name="createListener"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /api/v1/listeners</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">createListener</span>)</div>
+    <div class="method-notes">Creates a listener config</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">ListenerData <a href="#ListenerData">ListenerData</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>"OK"</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#String">String</a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">409</h4>
+    The specified resource already exists
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deleteListener"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /api/v1/listeners/{listenerId}</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">deleteListener</span>)</div>
+    <div class="method-notes">Deletes a listener</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">listenerId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of relevant listener to delete default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>"OK"</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#String">String</a>
+    <h4 class="field-label">404</h4>
+    The specified resource was not found
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getListener"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /api/v1/listeners/{listenerId}</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">getListener</span>)</div>
+    <div class="method-notes">Get a listener</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">listenerId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of relevant listener to retrieve default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#ListenerData">ListenerData</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "listener_type" : "listener_type",
+  "listener_id" : "listener_id",
+  "listener_config" : "{}"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#ListenerData">ListenerData</a>
+    <h4 class="field-label">404</h4>
+    The specified resource was not found
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="updateListener"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /api/v1/listeners/{listenerId}</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">updateListener</span>)</div>
+    <div class="method-notes">Updates a listener config</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">listenerId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of relevant listener to update default: null </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">ListenerDataForUpdate <a href="#ListenerDataForUpdate">ListenerDataForUpdate</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>"OK"</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#String">String</a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">404</h4>
+    The specified resource was not found
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="RegisterNotification">RegisterNotification</a></h1>
+  <div class="method"><a name="createNotificationKind"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /api/v1/notification-kinds</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">createNotificationKind</span>)</div>
+    <div class="method-notes">create a new notification kind</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">NotificationKind <a href="#NotificationKind">NotificationKind</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>"OK"</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#String">String</a>
+    <h4 class="field-label">409</h4>
+    The specified resource already exists
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deleteNotificationKind"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /api/v1/notification-kinds</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">deleteNotificationKind</span>)</div>
+    <div class="method-notes">delete a notification kind</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">category (required)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash;  default: null </div><div class="param">type (required)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash;  default: null </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>"OK"</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#String">String</a>
+    <h4 class="field-label">404</h4>
+    The specified resource was not found
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getNotificationKinds"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /api/v1/notification-kinds</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">getNotificationKinds</span>)</div>
+    <div class="method-notes">get notification kinds</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">origin (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash;  default: null </div><div class="param">category (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash;  default: null </div><div class="param">type (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash;  default: null </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#NotificationKind">NotificationKind</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>[ {
+  "template" : "template",
+  "origin" : "origin",
+  "description" : "description",
+  "category" : "category",
+  "type" : "type"
+}, {
+  "template" : "template",
+  "origin" : "origin",
+  "description" : "description",
+  "category" : "category",
+  "type" : "type"
+} ]</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="updateNotificationKind"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /api/v1/notification-kinds</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">updateNotificationKind</span>)</div>
+    <div class="method-notes">update a notification kind</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">NotificationKind <a href="#NotificationKind">NotificationKind</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>"OK"</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#String">String</a>
+    <h4 class="field-label">409</h4>
+    The specified resource already exists
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="Sinks">Sinks</a></h1>
+  <div class="method"><a name="createSink"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /api/v1/sinks</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">createSink</span>)</div>
+    <div class="method-notes">Creates a sink</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">SinkData <a href="#SinkData">SinkData</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>"OK"</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#String">String</a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">409</h4>
+    The specified resource already exists
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deleteSink"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /api/v1/sinks/{sinkId}</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">deleteSink</span>)</div>
+    <div class="method-notes">Deletes a sink</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">sinkId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of the sink default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>"OK"</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#String">String</a>
+    <h4 class="field-label">404</h4>
+    The specified resource was not found
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getSink"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /api/v1/sinks/{sinkId}</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">getSink</span>)</div>
+    <div class="method-notes">Get a sink configuration</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">sinkId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of the sink default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#SinkData">SinkData</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "id" : "id",
+  "type" : "email",
+  "config" : {
+    "key" : ""
+  }
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#SinkData">SinkData</a>
+    <h4 class="field-label">404</h4>
+    The specified resource was not found
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getSinks"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /api/v1/sinks</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">getSinks</span>)</div>
+    <div class="method-notes">Get all sinks</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#SinkData">SinkData</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>[ {
+  "id" : "id",
+  "type" : "email",
+  "config" : {
+    "key" : ""
+  }
+}, {
+  "id" : "id",
+  "type" : "email",
+  "config" : {
+    "key" : ""
+  }
+} ]</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="updateSink"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /api/v1/sinks/{sinkId}</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">updateSink</span>)</div>
+    <div class="method-notes">Updates a sink</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">sinkId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of the sink default: null </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">SinkDataForUpdate <a href="#SinkDataForUpdate">SinkDataForUpdate</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>"OK"</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#String">String</a>
+    <h4 class="field-label">404</h4>
+    The specified resource was not found
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="validateSink"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /api/v1/sinks/validate</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">validateSink</span>)</div>
+    <div class="method-notes">Verify that the provided sink settings are correct</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">SinkData <a href="#SinkData">SinkData</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#ValidateSink_200_response">ValidateSink_200_response</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "error_message" : "error_message",
+  "error_code" : 0
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    
+        <a href="#ValidateSink_200_response">ValidateSink_200_response</a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="TenantRoute">TenantRoute</a></h1>
+  <div class="method"><a name="createRoute"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /api/v1/tenants/{tenantId}/routes</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">createRoute</span>)</div>
+    <div class="method-notes">Creates a tenant route</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">tenantId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of relevant tenant default: null </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">RouteData <a href="#RouteData">RouteData</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>"OK"</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#String">String</a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">409</h4>
+    The specified resource already exists
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deleteRoute"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /api/v1/tenants/{tenantId}/routes/{routeId}</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">deleteRoute</span>)</div>
+    <div class="method-notes">Deletes a tenant route</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">tenantId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of relevant tenant default: null </div><div class="param">routeId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of relevant tenant route default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>"OK"</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#String">String</a>
+    <h4 class="field-label">404</h4>
+    The specified resource was not found
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getAllTenantsWithRoutes"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /api/v1/tenants</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">getAllTenantsWithRoutes</span>)</div>
+    <div class="method-notes">Get a list of tenants with routes in the system</div>
+
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      array[String]
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>[ "", "" ]</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Distinct list of tenant ids with routes
+        
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getRoute"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /api/v1/tenants/{tenantId}/routes/{routeId}</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">getRoute</span>)</div>
+    <div class="method-notes">Get a single tenant route config</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">tenantId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of relevant tenant default: null </div><div class="param">routeId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of relevant tenant route default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#RouteData">RouteData</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "tenant_id" : "12345",
+  "route_id" : "route_id",
+  "route_config" : "{}"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Route data for a given tenant and route id
+        <a href="#RouteData">RouteData</a>
+    <h4 class="field-label">404</h4>
+    The specified resource was not found
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getRoutes"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /api/v1/tenants/{tenantId}/routes</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">getRoutes</span>)</div>
+    <div class="method-notes">Get list of tenant routes</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">tenantId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of relevant tenant default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#RouteData">RouteData</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>[ {
+  "tenant_id" : "12345",
+  "route_id" : "route_id",
+  "route_config" : "{}"
+}, {
+  "tenant_id" : "12345",
+  "route_id" : "route_id",
+  "route_config" : "{}"
+} ]</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="updateRoute"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /api/v1/tenants/{tenantId}/routes/{routeId}</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">updateRoute</span>)</div>
+    <div class="method-notes">Updates a tenant route</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">tenantId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of relevant tenant default: null </div><div class="param">routeId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of relevant tenant route default: null </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">RouteDataForUpdate <a href="#RouteDataForUpdate">RouteDataForUpdate</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>"OK"</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#String">String</a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">404</h4>
+    The specified resource was not found
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="UserRoute">UserRoute</a></h1>
+  <div class="method"><a name="createUserRoute"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /api/v1/tenants/{tenantId}/users/{userId}/routes</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">createUserRoute</span>)</div>
+    <div class="method-notes">Creates a user route for a user</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">tenantId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of the relevant tenant default: null </div><div class="param">userId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of the relevant user default: null </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">UserRouteData <a href="#UserRouteData">UserRouteData</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>"OK"</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#String">String</a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">409</h4>
+    The specified resource already exists
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deleteAllUserRoutes"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /api/v1/tenants/{tenantId}/users/routes</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">deleteAllUserRoutes</span>)</div>
+    <div class="method-notes">Deletes all user routes of a tenant</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">tenantId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of relevant tenant default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>"OK"</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#String">String</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deleteNotifyIdFromAllUserRoutes"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /api/v1/tenants/{tenantId}/users/routes/notify/{notifyId}</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">deleteNotifyIdFromAllUserRoutes</span>)</div>
+    <div class="method-notes">Deletes a notifyId from all user routes of a tenant</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">tenantId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of the relevant tenant default: null </div><div class="param">notifyId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of the relevant notify/sink default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>"OK"</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#String">String</a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="deleteUserRoute"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /api/v1/tenants/{tenantId}/users/{userId}/routes/{routeId}</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">deleteUserRoute</span>)</div>
+    <div class="method-notes">Deletes a user route</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">tenantId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of the relevant tenant default: null </div><div class="param">userId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of the relevant user default: null </div><div class="param">routeId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of the relevant route default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>"OK"</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#String">String</a>
+    <h4 class="field-label">404</h4>
+    The specified resource was not found
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getUserRoutes"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /api/v1/tenants/{tenantId}/users/{userId}/routes</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">getUserRoutes</span>)</div>
+    <div class="method-notes">Get current user routes of a user</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">tenantId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of the relevant tenant default: null </div><div class="param">userId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of the relevant user default: null </div>
+    </div>  <!-- field-items -->
+
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#RouteData">RouteData</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>[ {
+  "tenant_id" : "12345",
+  "route_id" : "route_id",
+  "route_config" : "{}"
+}, {
+  "tenant_id" : "12345",
+  "route_id" : "route_id",
+  "route_config" : "{}"
+} ]</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="updateUserRoute"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /api/v1/tenants/{tenantId}/users/{userId}/routes/{routeId}</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">updateUserRoute</span>)</div>
+    <div class="method-notes">Updates a user route for a user</div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">tenantId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of the relevant tenant default: null </div><div class="param">userId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of the relevant user default: null </div><div class="param">routeId (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash; ID of the relevant route default: null </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">UserRouteDataForUpdate <a href="#UserRouteDataForUpdate">UserRouteDataForUpdate</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      
+      String
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>"OK"</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "code" : 400,
+  "message" : "Bad request - Resource should have a name"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    OK
+        <a href="#String">String</a>
+    <h4 class="field-label">400</h4>
+    Bad request
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">404</h4>
+    The specified resource was not found
+        <a href="#APIError">APIError</a>
+    <h4 class="field-label">500</h4>
+    Internal server error
+        <a href="#APIError">APIError</a>
+  </div> <!-- method -->
+  <hr/>
+
+  <h2><a name="__Models">Models</a></h2>
+  [ Jump to <a href="#__Methods">Methods</a> ]
+
+  <h3>Table of Contents</h3>
+  <ol>
+    <li><a href="#APIError"><code>APIError</code> - </a></li>
+    <li><a href="#ListenerData"><code>ListenerData</code> - </a></li>
+    <li><a href="#ListenerDataForUpdate"><code>ListenerDataForUpdate</code> - </a></li>
+    <li><a href="#NotificationKind"><code>NotificationKind</code> - </a></li>
+    <li><a href="#RouteData"><code>RouteData</code> - </a></li>
+    <li><a href="#RouteDataForUpdate"><code>RouteDataForUpdate</code> - </a></li>
+    <li><a href="#SinkData"><code>SinkData</code> - </a></li>
+    <li><a href="#SinkDataForUpdate"><code>SinkDataForUpdate</code> - </a></li>
+    <li><a href="#UserRouteData"><code>UserRouteData</code> - </a></li>
+    <li><a href="#UserRouteDataForUpdate"><code>UserRouteDataForUpdate</code> - </a></li>
+    <li><a href="#ValidateSink_200_response"><code>ValidateSink_200_response</code> - </a></li>
+  </ol>
+
+  <div class="model">
+    <h3><a name="APIError"><code>APIError</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">code </div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">message </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">details (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="ListenerData"><code>ListenerData</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">listener_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">listener_type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">listener_config </div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="ListenerDataForUpdate"><code>ListenerDataForUpdate</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">listener_type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">listener_config </div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="NotificationKind"><code>NotificationKind</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">origin </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">category </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">description </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">template </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="RouteData"><code>RouteData</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">tenant_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">route_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">route_config </div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="RouteDataForUpdate"><code>RouteDataForUpdate</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">tenant_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">route_config </div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="SinkData"><code>SinkData</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">email</div><div class="param-enum">slack</div><div class="param-enum">postgres</div>
+<div class="param">config (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="SinkDataForUpdate"><code>SinkDataForUpdate</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">email</div><div class="param-enum">slack</div><div class="param-enum">postgres</div>
+<div class="param">config (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="UserRouteData"><code>UserRouteData</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">tenant_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">user_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">route_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">route_config </div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="UserRouteDataForUpdate"><code>UserRouteDataForUpdate</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">tenant_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">user_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">route_config </div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="ValidateSink_200_response"><code>ValidateSink_200_response</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">error_code (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
+<div class="param">error_message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  </body>
+</html>

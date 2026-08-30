@@ -1,0 +1,3 @@
+type: object
+description: Empty stub for future cluster user configuration data, this is needed for openapi to generate the correct schema, When we will have the actual data, we will replace this with the actual data it can be deleted
+properties: {}

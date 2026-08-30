@@ -1,0 +1,5 @@
+in: query
+name: command
+description: Command to execute in the container. Overrides the container's ENTRYPOINT.
+schema:
+  type: string

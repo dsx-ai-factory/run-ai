@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS applications ADD COLUMN IF NOT EXISTS department_id VARCHAR;

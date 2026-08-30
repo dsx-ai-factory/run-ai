@@ -1,0 +1,4 @@
+type: array
+items:
+  $ref: './Condition.yaml'
+x-schema-name: Conditions

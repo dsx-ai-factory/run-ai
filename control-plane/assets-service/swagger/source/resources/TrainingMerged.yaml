@@ -1,0 +1,33 @@
+get:
+  summary: Get merged training
+  description: Get combined policy and workload data for training creation form
+  operationId: get_training_merged
+  x-service: assets-service
+  x-internal: true
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_workloads_merge_test.go
+    - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
+  x-no-authorization: true
+  tags:
+    - Trainings
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ProjectIdOptional.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/WorkloadIdOptional.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/TemplateIdOptional.yaml"
+    - $ref: "../parameters/query/optional/IsDistributedQuery.yaml"
+    - $ref: "../parameters/query/optional/IsDistributedInferenceQuery.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Training/TrainingV2.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

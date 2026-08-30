@@ -1,0 +1,30 @@
+# Minimal valid batch/CronJob/v1 manifest used as the starting point for every
+# Layer 3+4 case.
+#
+# Why the skeleton has these fields:
+#   - spec.schedule is required by K8s API; set to a valid cron expression.
+#   - restartPolicy is set to Never because K8s requires a Job's pod template
+#     restart policy be Never or OnFailure.
+#   - Containers and initContainers have minimal entries for the "container"
+#     test case to target.
+#
+# Note: jobTemplate.metadata and template.metadata are created automatically
+# by the dependency mechanism when policies target workloadMetadata or
+# podMetadata with SET actions.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: test
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: test
+              image: placeholder
+          initContainers:
+            - name: test
+              image: placeholder

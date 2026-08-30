@@ -1,0 +1,17 @@
+type: object
+properties:
+  accessRules:
+    type: object
+    required:
+      - totalRecords
+      - displayRecords
+      - accessRules
+    properties:
+      totalRecords:
+        type: integer
+        example: 1
+      displayRecords:
+        type: integer
+        example: 1
+      accessRules:
+        $ref: './MeAccessRules.yaml'

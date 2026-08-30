@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: runai
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: provisioner-sa
+  namespace: runai
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: provisioner-role
+rules:
+  - apiGroups: ["", "apps", "batch", "rbac.authorization.k8s.io"]
+    resources: ["namespaces", "deployments", "statefulsets", "services", "configmaps", "secrets", "jobs", "roles", "rolebindings", "serviceaccounts"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: provisioner-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: provisioner-role
+subjects:
+  - kind: ServiceAccount
+    name: provisioner-sa
+    namespace: runai
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: runai-provisioner
+  namespace: runai
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      serviceAccountName: provisioner-sa
+      restartPolicy: Never
+      containers:
+        - name: provisioner
+          image: your-repo/provisioner-service:tag
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PORT
+              value: "8080"
+            - name: SECRETS_MOUNT_PATH
+              value: /etc/secrets
+            - name: RUNAI_TLS_CERT_PATH
+              value: /var/runai/tls/tls.crt
+            - name: RUNAI_TLS_KEY_PATH
+              value: /var/runai/tls/tls.key
+            - name: RUNAI_WILDCARD_TLS_CERT_PATH
+              value: /var/runai/wildcard/tls.crt
+            - name: RUNAI_WILDCARD_TLS_KEY_PATH
+              value: /var/runai/wildcard/tls.key
+          ports:
+            - containerPort: 8080
+              name: http
+          volumeMounts:
+            - name: tls-cert
+              mountPath: /var/runai/tls
+              readOnly: true
+            - name: wildcard-tls-cert
+              mountPath: /var/runai/wildcard
+              readOnly: true
+            - name: jfrog-token
+              mountPath: /var/runai/jfrog
+              readOnly: true
+            - name: runai-service-config
+              mountPath: /etc/secrets
+              readOnly: true
+      volumes:
+        - name: tls-cert
+          secret:
+            secretName: runai-tls-cert
+        - name: wildcard-tls-cert
+          secret:
+            secretName: runai-wildcard-tls-cert
+        - name: jfrog-token
+          secret:
+            secretName: runai-jfrog-credentials
+        - name: runai-service-config
+          secret:
+            secretName: runai-provisioner-service
+            items:
+              - key: RUNAI_JFROG_TOKEN
+                path: runai_jfrog_token
+
+

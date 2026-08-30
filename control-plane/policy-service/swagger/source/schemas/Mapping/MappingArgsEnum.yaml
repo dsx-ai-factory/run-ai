@@ -1,0 +1,12 @@
+type: object
+description: The allowed values for each string-typed argument referenced by the JQ expression as $ARGS.named.<argName>. Up to 100 values per argument.
+additionalProperties:
+  type: array
+  maxItems: 100
+  items:
+    type: string
+    pattern: .*
+example:
+  protocol:
+    - TCP
+    - UDP

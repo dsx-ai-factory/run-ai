@@ -1,0 +1,30 @@
+runner:
+  name: route-enabled-workload
+  namespace: runai-test
+
+networking:
+  services:
+  - create:
+      metadata:
+        name: secure-service
+      spec:
+        type: ClusterIP
+        ports:
+          - port: 8080
+            targetPort: 8080
+        selector:
+          app: secure-app
+    auth:
+      authorizationType: authenticatedUsers
+  externalAccess:
+    route:
+      metadata:
+        name: secure-route
+        annotations:
+          haproxy.router.openshift.io/timeout: 60s
+      spec:
+        host: secure.apps.cluster.example.com
+        path: /
+        tls:
+          termination: edge
+          insecureEdgeTerminationPolicy: Redirect

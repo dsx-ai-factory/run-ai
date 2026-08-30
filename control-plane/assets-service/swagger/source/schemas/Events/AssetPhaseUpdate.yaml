@@ -1,0 +1,12 @@
+type: object
+nullable: true
+required:
+  - phase
+  - phaseMessage
+properties:
+  phase:
+    type: string
+    example: 'Creating'
+  phaseMessage:
+    type: string
+    example : 'Creating PVC asset pvc-123'

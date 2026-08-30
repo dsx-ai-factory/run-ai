@@ -1,0 +1,9 @@
+x-internal: true
+type: object
+description: Internal cluster configuration
+allOf:
+  - properties:
+      systemConfig:
+        $ref: "ClusterSystemConfigData.yaml"
+      userConfig:
+        $ref: "ClusterUserConfigData.yaml"

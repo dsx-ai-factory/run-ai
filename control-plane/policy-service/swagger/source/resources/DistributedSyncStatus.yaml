@@ -1,0 +1,31 @@
+put:
+  summary: Update the sync status of a distributed policy
+  description: This API intended for the cluster sync to update the sync status of a given distributed policy
+  operationId: update_sync_status_distributed
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/sync_test.go
+  x-internal: true
+  x-authorize:
+    resource-type: policies
+    action: sync
+  tags:
+    - Synchronization
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Sync/SyncStatusUpdate.yaml"
+  responses:
+    204:
+      description: No content.
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

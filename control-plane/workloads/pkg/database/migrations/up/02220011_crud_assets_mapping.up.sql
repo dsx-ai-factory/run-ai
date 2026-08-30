@@ -1,0 +1,1 @@
+ALTER TABLE crud_workloads ADD COLUMN IF NOT EXISTS assets_mapping JSONB;

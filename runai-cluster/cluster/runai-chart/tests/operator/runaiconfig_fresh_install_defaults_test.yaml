@@ -1,0 +1,189 @@
+suite: Test RunaiConfig fresh install legacy controller defaults
+
+templates:
+  - templates/runaiconfig.yaml
+
+tests:
+  - it: disables only legacy controllers on install
+    set:
+      runai-operator.config.global.replicaCount: 1
+    asserts:
+      - equal:
+          path: metadata.annotations["run.ai/legacy-workload-cleanup-fresh-install"]
+          value: "true"
+      - equal:
+          path: spec.workload-controller.enabled
+          value: false
+      - equal:
+          path: spec.inference-workload-controller.enabled
+          value: false
+      - equal:
+          path: spec.job-controller.enabled
+          value: false
+      - equal:
+          path: spec.accessrule-controller.args.legacyProjectPermissions
+          value: false
+      - notExists:
+          path: spec.mpi-operator
+      - notExists:
+          path: spec.training-operator
+
+  - it: overrides enabled legacy controllers on install
+    set:
+      runai-operator.config.workload-controller.enabled: true
+      runai-operator.config.inference-workload-controller.enabled: true
+      runai-operator.config.job-controller.enabled: true
+    asserts:
+      - equal:
+          path: spec.workload-controller.enabled
+          value: false
+      - equal:
+          path: spec.inference-workload-controller.enabled
+          value: false
+      - equal:
+          path: spec.job-controller.enabled
+          value: false
+      - equal:
+          path: spec.accessrule-controller.args.legacyProjectPermissions
+          value: false
+
+  - it: disables legacy defaults on development branch installs
+    chart:
+      appVersion: 0.0.0-30002282.master-f4c46b2
+    set:
+      runai-operator.config.workload-controller.enabled: true
+    asserts:
+      - equal:
+          path: spec.workload-controller.enabled
+          value: false
+      - equal:
+          path: spec.accessrule-controller.args.legacyProjectPermissions
+          value: false
+
+  - it: preserves legacy defaults on 2.26 installs
+    chart:
+      appVersion: 2.26.0
+    set:
+      runai-operator.config.workload-controller.enabled: true
+    asserts:
+      - equal:
+          path: spec.workload-controller.enabled
+          value: true
+      - notExists:
+          path: spec.accessrule-controller.args.legacyProjectPermissions
+
+  - it: preserves controller values exactly on upgrade
+    release:
+      upgrade: true
+    set:
+      runai-operator.config.workload-controller.enabled: true
+      runai-operator.config.inference-workload-controller.enabled: false
+      runai-operator.config.job-controller.enabled: true
+    asserts:
+      - equal:
+          path: spec.workload-controller.enabled
+          value: true
+      - equal:
+          path: spec.inference-workload-controller.enabled
+          value: false
+      - equal:
+          path: spec.job-controller.enabled
+          value: true
+
+  - it: does not inject missing controller values on upgrade
+    release:
+      upgrade: true
+    set:
+      runai-operator.config.global.replicaCount: 1
+    asserts:
+      - notExists:
+          path: spec.workload-controller
+      - notExists:
+          path: spec.inference-workload-controller
+      - notExists:
+          path: spec.job-controller
+      - notExists:
+          path: spec.mpi-operator
+      - notExists:
+          path: spec.training-operator
+
+  - it: does not override upgrade values from the live controller state
+    release:
+      upgrade: true
+      namespace: runai
+    kubernetesProvider:
+      scheme:
+        "run.ai/v1/RunaiConfig":
+          gvr:
+            group: run.ai
+            version: v1
+            resource: runaiconfigs
+          namespaced: true
+      objects:
+        - apiVersion: run.ai/v1
+          kind: RunaiConfig
+          metadata:
+            name: runai
+            namespace: runai
+            annotations:
+              run.ai/legacy-workload-cleanup-fresh-install: "true"
+          spec:
+            workload-controller:
+              enabled: false
+            inference-workload-controller:
+              enabled: false
+            job-controller:
+              enabled: false
+    set:
+      runai-operator.config.workload-controller.enabled: true
+      runai-operator.config.inference-workload-controller.enabled: true
+      runai-operator.config.job-controller.enabled: true
+    asserts:
+      - notExists:
+          path: metadata.annotations["run.ai/legacy-workload-cleanup-fresh-install"]
+      - equal:
+          path: spec.workload-controller.enabled
+          value: true
+      - equal:
+          path: spec.inference-workload-controller.enabled
+          value: true
+      - equal:
+          path: spec.job-controller.enabled
+          value: true
+
+  - it: does not inject upgrade values from a partially disabled live controller state
+    chart:
+      appVersion: 3.0.0
+    release:
+      upgrade: true
+      namespace: runai
+    kubernetesProvider:
+      scheme:
+        "run.ai/v1/RunaiConfig":
+          gvr:
+            group: run.ai
+            version: v1
+            resource: runaiconfigs
+          namespaced: true
+      objects:
+        - apiVersion: run.ai/v1
+          kind: RunaiConfig
+          metadata:
+            name: runai
+            namespace: runai
+          spec:
+            workload-controller:
+              enabled: true
+            inference-workload-controller:
+              enabled: false
+            job-controller:
+              enabled: false
+    set:
+      runai-operator.config.global.replicaCount: 1
+    asserts:
+      - notExists:
+          path: spec.workload-controller
+      - notExists:
+          path: spec.inference-workload-controller
+      - notExists:
+          path: spec.job-controller

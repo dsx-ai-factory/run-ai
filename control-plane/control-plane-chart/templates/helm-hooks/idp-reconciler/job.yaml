@@ -1,0 +1,18 @@
+{{- if .Values.identityProviderReconciler.enabled }}
+{{- if not .Values.tenantsManager.enabled }}
+{{- fail "identityProviderReconciler requires tenantsManager.enabled=true" }}
+{{- end }}
+{{- include "common.job" (list . .Values.identityProviderReconciler .Values.identityProviderReconciler.serviceAccount "control-plane.identityProviderReconciler.job") }}
+{{- end }}
+
+{{- define "control-plane.identityProviderReconciler.job" -}}
+spec:
+  template:
+    spec:
+      containers:
+      - {{- include "common.container" . | nindent 12 }}
+      restartPolicy: OnFailure
+      initContainers:
+        {{- include "awaitingTenantsManagerReadiness" . | nindent 12 }}
+  backoffLimit: 2
+{{- end }}

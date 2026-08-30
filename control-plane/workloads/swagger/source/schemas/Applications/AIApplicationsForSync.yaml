@@ -1,0 +1,9 @@
+type: object
+properties:
+  fullSync:
+    type: boolean
+    description: Upsert all items and delete all missing items
+  applications:
+    type: array
+    items:
+      $ref: "./AIApplicationForSync.yaml"

@@ -1,0 +1,18 @@
+type: object
+description: Deletes a batch of access rules in a single operation. It requires a list of rule IDs and an action flag explicitly set to "delete".
+  It returns the result of the operation, including which items were successfully deleted and which failed.
+required:
+  - ids
+  - action
+properties:
+  ids:
+    type: array
+    description: List of access rule IDs to delete.
+    minItems: 1
+    maxItems: 100
+    items:
+      type: string
+      format: uuid
+      description: Access rule ID to delete.
+  action:
+    $ref: "./AccessRulesBatchAction.yaml"

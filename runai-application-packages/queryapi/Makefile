@@ -1,0 +1,24 @@
+include ../../build/makefile/index.mk
+
+SERVICE_NAME=queryapi
+TAG_FORMAT=runai-application-packages/$(SERVICE_NAME)
+DOCKER_WORK_DIR=/local/runai-application-packages/${SERVICE_NAME}
+DOCKER_COMMAND=${DOCKER_COMMAND_WORK_DIR}
+
+test: test-go integration-tests
+.PHONY: test
+
+integration-tests:
+	cd integration-tests && go test -v ./...
+.PHONY: integration-tests
+
+lint: lint-go ## Run linter.
+.PHONY: lint
+
+validate:
+	# no op
+.PHONY: validate
+
+build:
+	# no op
+.PHONY: build

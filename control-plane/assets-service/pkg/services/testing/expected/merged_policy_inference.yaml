@@ -1,0 +1,73 @@
+inference:
+  assets:
+    compute:
+      id: compute
+      name: many-gpus
+    datasources:
+    - id: datasource
+      kind: nfs
+      name: basic
+    environment:
+      id: environment
+      name: inference
+  meta:
+    clusterId: ""
+    createdAt: "0001-01-01T00:00:00Z"
+    createdBy: ""
+    desiredPhase: ""
+    name: ""
+    projectId: ""
+    requestedName: ""
+    workloadId: ""
+  policyInfo:
+    attributeDefaults:
+      assets:
+        datasources:
+          nfs:
+            server: nfs-server-from-policy
+          pvc:
+            claimName: bucket1
+          secretVolume: {}
+      specificRunParams:
+        tolerations:
+          effect: NoSchedule
+          key: key1
+          operator: Exists
+    rules:
+      assets:
+        datasources:
+          hostPath:
+            instances:
+              canAdd: false
+      specificRunParams:
+        command:
+          options:
+          - displayed: command1
+            value: my-command-1
+          - displayed: command2
+            value: my-command-2
+        runAsUid:
+          min: 1
+        tolerations:
+          instances:
+            locked:
+            - tolerations2
+  specificRunParams:
+    command: command-from-specific-run-params
+    environmentVariables:
+    - name: LOG_DIR
+      value: will-be-ignored
+    - name: ADDED_VAR
+      value: from-defaults
+    - name: HOME
+      value: home-from-specific-run-params
+    nodePools:
+    - my-node-a
+    - my-node-b
+    priorityClass: interactive-preemptible
+    runAsUid: 500
+    tolerations:
+    - effect: NoSchedule
+      key: key2
+      name: tolerations2
+      operator: Exists

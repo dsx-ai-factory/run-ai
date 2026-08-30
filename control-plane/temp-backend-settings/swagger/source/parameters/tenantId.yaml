@@ -1,0 +1,6 @@
+name: tenantId
+in: query
+x-internal: true
+required: false
+schema:
+  type: string

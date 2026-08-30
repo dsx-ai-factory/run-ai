@@ -1,0 +1,34 @@
+get:
+  summary: Get permission sets.
+  description: Retrieve a list of all available permission sets. Each permission set defines a collection of permissions grouped by resource type and associated actions (such as create, read, update, or delete).
+  operationId: get_permission_sets
+  x-service: authorization
+  x-authorize:
+    resource-type: roles
+    action: read
+  tags:
+    - Permissions
+  x-test-coverage:
+    - control-plane/authorization/pkg/services/permissions_sets_api_test.go
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - permissionSets
+            properties:
+              permissionSets:
+                $ref: '../schemas/Roles/PermissionSets.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

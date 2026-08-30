@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS project_phase_idx ON project (phase);

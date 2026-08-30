@@ -1,0 +1,12 @@
+type: object
+properties:
+  options:
+    description: Restricts the value of the field to one of the listed options.
+    type: array
+    items:
+      type: string
+    nullable: true
+example:
+  options:
+    - value1
+    - value2

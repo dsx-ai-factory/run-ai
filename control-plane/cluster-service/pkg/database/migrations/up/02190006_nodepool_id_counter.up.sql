@@ -1,0 +1,1 @@
+SELECT setval(pg_get_serial_sequence('nodepools', 'id'), 100000, false);

@@ -1,0 +1,42 @@
+get:
+  summary: Get the revision history.
+  description: Retrieve revision history details, including events, using a revision id. Supported for clusters v2.21+.
+  operationId: get_revision_history
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/events_api_test.go
+  x-authorize:
+    resource-type: inferences
+    action: read
+    resource-id: revisionId
+  tags:
+    - Events
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/RevisionId.yaml"
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - records
+            properties:
+              next:
+                type: integer
+                example: 1
+              records:
+                $ref: '../schemas/Events/HistoryRecords.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

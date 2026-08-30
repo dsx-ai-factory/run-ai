@@ -1,0 +1,8 @@
+type: object
+required:
+  - display
+properties:
+  display:
+    type: string
+    description: Deployment-resolved version text shown in the UI.
+    example: "2.25.9"

@@ -1,0 +1,100 @@
+meta:
+  clusterId: cluster-id
+  createdAt: "2020-07-01T00:00:00Z"
+  createdBy: user@run.ai
+  departmentId: department-id
+  desiredPhase: Running
+  name: ds-same-1
+  projectId: project-id
+  requestedName: ds-same-1
+  workloadId: ""
+policyInfo:
+  master:
+    defaults:
+      compute:
+        cpuCoreLimit: 11
+        extendedResources:
+          attributes:
+            quantity: 121M
+          instances:
+          - resource: master/bbb
+          - quantity: 111M
+            resource: master/ddd
+      image: ubuntu-master
+      storage:
+        pvc:
+          attributes:
+            claimInfo:
+              size: 2M
+              storageClass: standard-master
+          instances:
+          - path: /master/bbb
+  worker:
+    defaults:
+      compute:
+        cpuCoreLimit: 10
+        extendedResources:
+          attributes:
+            quantity: 120M
+          instances:
+          - resource: worker/bbb
+          - quantity: 110M
+            resource: worker/ddd
+      image: ubuntu-worker
+      storage:
+        pvc:
+          attributes:
+            claimInfo:
+              size: 1M
+              storageClass: standard-worker
+          instances:
+          - path: /worker/bbb
+projectInfo:
+  name: project-1
+spec:
+  master:
+    category: Train
+    compute:
+      cpuCoreLimit: 10
+      extendedResources:
+      - quantity: 120M
+        resource: worker/bbb
+      - quantity: 110M
+        resource: worker/ddd
+    environmentVariables:
+    - name: env-name-from-spec-worker
+      value: env-value-from-spec-worker
+    image: image-from-spec-worker
+    nodePools:
+    - default
+    storage:
+      pvc:
+      - claimInfo:
+          size: 1M
+          storageClass: standard-worker
+        name: pol-0
+        path: /worker/bbb
+  masterSpecSameAsWorker: true
+  worker:
+    category: Train
+    compute:
+      cpuCoreLimit: 10
+      extendedResources:
+      - quantity: 120M
+        resource: worker/bbb
+      - quantity: 110M
+        resource: worker/ddd
+    distributedFramework: TF
+    environmentVariables:
+    - name: env-name-from-spec-worker
+      value: env-value-from-spec-worker
+    image: image-from-spec-worker
+    nodePools:
+    - default
+    storage:
+      pvc:
+      - claimInfo:
+          size: 1M
+          storageClass: standard-worker
+        name: pol-0
+        path: /worker/bbb

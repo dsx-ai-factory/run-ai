@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS resources_org_unit_data_id ON resources (org_unit_data_id);

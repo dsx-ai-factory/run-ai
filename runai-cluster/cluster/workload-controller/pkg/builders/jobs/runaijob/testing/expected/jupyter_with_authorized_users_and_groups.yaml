@@ -1,0 +1,277 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      JobUrl: https://cluster-domain.mock/team-a/job-3/a, https://cluster-domain.mock/team-a/job-3
+      template: job-3-20220126-040310
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      jupyter: "true"
+      kai.scheduler/preemptibility: non-preemptible
+      priorityClassName: build
+      project: team-a
+      release: job-3-20220126-040310
+      workloadKind: InteractiveWorkload
+      workloadName: job-3-20220126-040310
+    name: job-3
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 0
+    completions: 1
+    maxIdleDurationSeconds: 1200
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          user: user.name@run.ai
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          kai.scheduler/preemptibility: non-preemptible
+          priorityClassName: build
+          project: team-a
+          release: job-3-20220126-040310
+          run.ai/top-owner-uid: ""
+          workloadKind: InteractiveWorkload
+          workloadName: job-3-20220126-040310
+      spec:
+        containers:
+        - args:
+          - --NotebookApp.base_url=/team-a/job-3
+          - --NotebookApp.token=''
+          - --NotebookApp.password=''
+          command:
+          - start-notebook.sh
+          image: jupyter/scipy-notebook
+          imagePullPolicy: Always
+          name: job-3
+          ports:
+          - containerPort: 443
+            name: port-443
+            protocol: TCP
+          resources: {}
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+          - mountPath: /tmp/repoa
+            name: code-sync-0
+        - args:
+          - --provider=keycloak-oidc
+          - --upstream=http://localhost:443
+          - --redirect-url=https://cluster-domain.mock/team-a/job-3/a/oauth2/callback
+          - --oidc-issuer-url=/auth/realms/runai
+          - --scope=openid
+          - --http-address=0.0.0.0:4180
+          - --proxy-prefix=/team-a/job-3/a/oauth2
+          - --skip-provider-button=true
+          - --whitelist-domain=cluster-domain.mock
+          - --cookie-domain=cluster-domain.mock
+          - --cookie-httponly=true
+          - --cookie-secure=true
+          - --code-challenge-method=S256
+          - --cookie-refresh=10m
+          - --cookie-samesite=lax
+          - --skip-jwt-bearer-tokens=true
+          - --extra-jwt-issuers=/auth/realms/runai=runai
+          - --custom-templates-dir=/usr/share/oauth2-proxy
+          - --pass-authorization-header=false
+          - --cookie-name=InteractiveWorkload-runai-team-a-job-3-a
+          - --session-store-type=redis
+          - --redis-connection-url=redis://cluster-redis.runai.svc.cluster.local:6379
+          - --authenticated-emails-file=/etc/runai/auth/users/YQ==
+          - --allowed-group=group-a
+          - --email-domain=*
+          env:
+          - name: OAUTH2_PROXY_COOKIE_PATH
+            value: /team-a/job-3/a
+          envFrom:
+          - secretRef: {}
+          imagePullPolicy: IfNotPresent
+          name: runai-oauth2-proxy-0
+          ports:
+          - containerPort: 4180
+            name: port-4180
+            protocol: TCP
+          resources: {}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+          volumeMounts:
+          - mountPath: /etc/runai/auth/users
+            name: runai-auth
+        initContainers:
+        - env:
+          - name: GITSYNC_REPO
+            value: http://github.com/repoa
+          - name: GITSYNC_USERNAME
+            value: myuser
+          - name: GITSYNC_PASSWORD
+            value: mypassword
+          - name: GITSYNC_ROOT
+            value: /code-git-a
+          - name: GITSYNC_ONE_TIME
+            value: "true"
+          - name: HOME
+            value: /tmp
+          image: registry.k8s.io/git-sync/git-sync:v4.7.0
+          name: git-sync-git-a
+          resources: {}
+          securityContext:
+            runAsGroup: 100
+            runAsUser: 1000
+          volumeMounts:
+          - mountPath: /code-git-a
+            name: code-sync-0
+        - command:
+          - sh
+          - -c
+          - echo -e "dXNlci5uYW1lQHJ1bi5haQ==" | base64 -d > /etc/runai/auth/users/YQ==
+          image: registry.access.redhat.com/ubi9/ubi-minimal:9.8
+          imagePullPolicy: IfNotPresent
+          name: runai-auth-user-loader
+          resources:
+            limits:
+              cpu: 100m
+              memory: 100Mi
+            requests:
+              cpu: 50m
+              memory: 50Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 65534
+          volumeMounts:
+          - mountPath: /etc/runai/auth/users
+            name: runai-auth
+        restartPolicy: OnFailure
+        schedulerName: runai-scheduler
+        volumes:
+        - emptyDir: {}
+          name: code-sync-0
+        - emptyDir: {}
+          name: runai-auth
+  status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    jupyter: "true"
+    priorityClassName: build
+    project: team-a
+    release: job-3-20220126-040310
+    workloadKind: InteractiveWorkload
+    workloadName: job-3-20220126-040310
+  name: iw-job-3-0
+  namespace: runai-team-a
+spec:
+  ports:
+  - name: port-job-3-4180-0
+    port: 80
+    protocol: TCP
+    targetPort: 4180
+  selector:
+    release: job-3-20220126-040310
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    jupyter: "true"
+    priorityClassName: build
+    project: team-a
+    release: job-3-20220126-040310
+    workloadKind: InteractiveWorkload
+    workloadName: job-3-20220126-040310
+  name: iw-job-3-jupyter
+  namespace: runai-team-a
+spec:
+  ports:
+  - name: port-job-3-8888-0
+    port: 80
+    protocol: TCP
+    targetPort: 8888
+  selector:
+    release: job-3-20220126-040310
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 8g
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    jupyter: "true"
+    priorityClassName: build
+    project: team-a
+    release: job-3-20220126-040310
+    workloadKind: InteractiveWorkload
+    workloadName: job-3-20220126-040310
+  name: iw-job-3-0
+  namespace: runai-team-a
+spec:
+  rules:
+  - host: cluster-domain.mock
+    http:
+      paths:
+      - backend:
+          service:
+            name: iw-job-3-0
+            port:
+              number: 80
+        path: /team-a/job-3/a
+        pathType: Prefix
+status:
+  loadBalancer: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 8g
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    jupyter: "true"
+    priorityClassName: build
+    project: team-a
+    release: job-3-20220126-040310
+    workloadKind: InteractiveWorkload
+    workloadName: job-3-20220126-040310
+  name: iw-job-3-jupyter
+  namespace: runai-team-a
+spec:
+  rules:
+  - host: cluster-domain.mock
+    http:
+      paths:
+      - backend:
+          service:
+            name: iw-job-3-jupyter
+            port:
+              number: 80
+        path: /team-a/job-3
+        pathType: Prefix
+status:
+  loadBalancer: {}

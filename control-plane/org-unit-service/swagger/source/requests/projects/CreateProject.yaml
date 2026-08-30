@@ -1,0 +1,36 @@
+summary: Create project
+operationId: create_project
+description: Create a project
+x-service: org-unit-service
+x-test-coverage:
+  - control-plane/org-unit-service/pkg/test/project_api_test.go
+x-authorize:
+  resource-type: project
+  action: create
+x-audit: true
+tags:
+  - Projects
+requestBody:
+  description: Project to create.
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: "../../schemas/projects/ProjectCreationRequest.yaml"
+responses:
+  201:
+    description: Created
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/projects/Project.yaml"
+  400:
+    $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+  401:
+    $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+  403:
+    $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+  409:
+    $ref: "../../../../../infra/openapi/docs/responses/409Conflict.yaml"
+  503:
+    $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

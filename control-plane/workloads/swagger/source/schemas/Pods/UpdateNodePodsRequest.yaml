@@ -1,0 +1,5 @@
+type: object
+properties:
+  networkTopologyLabelValues:
+    $ref: '../../../../../infra/openapi/docs/schemas/resources/NetworkTopologyLabelValuesOptional.yaml'
+description: Request to update pods on a specific node in a cluster

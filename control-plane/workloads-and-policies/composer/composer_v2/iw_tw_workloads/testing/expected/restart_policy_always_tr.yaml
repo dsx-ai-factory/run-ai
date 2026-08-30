@@ -1,0 +1,67 @@
+BatchJobTarget:
+  Config: {}
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: restart_policy_always
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Training
+        workloadName: restart_policy_always
+      name: restart_policy_always
+      namespace: runai-test
+    spec:
+      backoffLimit: 6
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: restart_policy_always
+            workloadKind: Training
+            workloadName: restart_policy_always
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: restart_policy_always
+            image: ubuntu
+            name: restart_policy_always
+            resources: {}
+          priorityClassName: low
+          restartPolicy: OnFailure
+          schedulerName: runai-scheduler
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: restart_policy_always, Rules: , Type: Training'
+  images:
+  - ubuntu
+  name: 'Value: restart_policy_always, Rules: , Type: Training'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Training
+  version: v2alpha1

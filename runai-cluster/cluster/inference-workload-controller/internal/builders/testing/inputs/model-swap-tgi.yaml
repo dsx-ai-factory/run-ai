@@ -1,0 +1,22 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  name: model-swap
+  namespace: runai-team-a
+spec:
+  annotations:
+    items:
+      run.ai/inference-workload-model-swap:
+        value: '{"models": ["vendor/model-1", "vendor/model-2"], "server-type": "tgi"}'
+  image:
+    value: ghcr.io/huggingface/text-generation-inference:3.0.0
+  gpu:
+    value: "1"
+  cpu:
+    value: "0.2"
+  ports:
+    items:
+      port-4000:
+        value:
+          serviceType: ServingPort
+          container: 4000

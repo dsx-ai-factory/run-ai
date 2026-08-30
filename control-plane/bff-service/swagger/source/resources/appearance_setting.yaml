@@ -1,0 +1,80 @@
+put:
+  summary: Update appearance setting by key
+  x-service: bff-service
+  x-test-coverage: not-applicable
+  operationId: update_appearance_setting_by_key
+  x-authorize:
+    resource-type: settings
+    action: update
+  tags:
+  - Settings
+  parameters:
+  - $ref: '../parameters/appearanceSettingsKey.yaml'
+  - $ref: '../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          anyOf:
+          - $ref: '../schemas/settings/BannerConfig/UpdateBannerConfig.yaml'
+        examples:
+          bannerConfig:
+            $ref: '../examples/appearance_setting_examples.yaml'
+  responses:
+    '200':
+      description: Setting successfully updated
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+get:
+  summary: Get appearance setting by key
+  x-service: bff-service
+  x-test-coverage: not-applicable
+  operationId: get_appearance_setting_by_key
+  x-authorize:
+    resource-type: settings
+    action: read
+  tags:
+  - Settings
+  parameters:
+  - $ref: '../parameters/appearanceSettingsKey.yaml'
+  - $ref: "../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/settings/GetSettingResponse.yaml'
+          examples:
+            bannerConfig:
+              value:
+                value:
+                  enabled: true
+                  text: "PRODUCTION ENVIRONMENT"
+                  backgroundColor: "#D32F2F"
+                  fontColor: "#FFFFFF"
+                displayName: Banner configuration
+                description: Configure a persistent banner displayed at the top of the Run:AI UI for all authenticated users.
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

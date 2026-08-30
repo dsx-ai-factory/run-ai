@@ -1,0 +1,8 @@
+description: Accepted.
+content:
+  application/json:
+    schema:
+      $ref: './HttpResponse.yaml'
+    example:
+      code: 202
+      message: "Request has been accepted."

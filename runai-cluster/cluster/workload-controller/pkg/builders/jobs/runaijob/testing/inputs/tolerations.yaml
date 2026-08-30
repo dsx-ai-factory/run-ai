@@ -1,0 +1,36 @@
+apiVersion: run.ai/v2alpha1
+kind: InteractiveWorkload
+metadata:
+  name: taints1
+  namespace: runai-team-a
+spec:
+  image:
+    value: ubuntu
+  name:
+    value: test1
+  tolerations:
+    items:
+      tol-a:
+        value:
+          operator: Equal
+          tolerationKey: key1
+          tolerationValue: aaa
+          effect: NoSchedule
+      tot-b:
+        value:
+          operator: Exists
+          tolerationKey: key2
+          effect: NoExecute
+      tot-c:
+        value:
+          operator: Equal
+          tolerationKey: key3
+          effect: PreferNoSchedule
+      tot-d:
+        value:
+          tolerationKey: key4
+          seconds: 5
+  usage: Submit
+  username:
+    value: user.name
+

@@ -1,0 +1,2 @@
+DROP INDEX IF EXISTS roles_tenant_idx;
+ALTER TABLE IF EXISTS roles DROP COLUMN IF EXISTS tenant_id;

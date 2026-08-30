@@ -1,0 +1,38 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  name: inference
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  image:
+    value: gcr.io/knative-samples/helloworld-go
+  name:
+    value: inference-0
+  username:
+    value: user.name
+  ports:
+    items:
+      port-80:
+        value:
+          serviceType: ServingPort
+          container: 80
+  emptyDirVolumes:
+    items:
+      emptydir-1:
+        value:
+          path: /mnt/ed1
+      emptydir-2:
+        value:
+          path: /mnt/ed2
+          medium: Memory
+          sizeLimit: 256Mi
+      emptydir-3:
+        value:
+          path: /mnt/ed3
+          medium: ""
+      emptydir-4:
+        value:
+          path: /mnt/ed4
+          sizeLimit: 1Gi
+status: {}

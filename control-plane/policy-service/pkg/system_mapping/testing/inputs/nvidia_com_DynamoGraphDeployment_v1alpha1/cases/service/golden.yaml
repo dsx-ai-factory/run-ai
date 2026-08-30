@@ -1,0 +1,91 @@
+apiVersion: nvidia.com/v1alpha1
+kind: DynamoGraphDeployment
+metadata:
+  name: test-dynamo
+  namespace: default
+spec:
+  backendFramework: vllm
+  services:
+    service-a:
+      checkpoint:
+        checkpointRef: my-checkpoint
+        enabled: true
+      componentType: inference
+      dynamoNamespace: test-namespace
+      extraPodSpec:
+        containers:
+        - image: dynamo/service:v1
+          name: main
+        initContainers:
+        - image: dynamo/service:v1
+          name: init
+      globalDynamoNamespace: true
+      ingress:
+        enabled: true
+        host: api.example.com
+        ingressClassName: nginx
+        path: /v1
+      modelRef:
+        name: llama-model
+        namespace: models
+      multinode:
+        nodeCount: 4
+      replicas: 5
+      serviceName: my-service
+      sharedMemory:
+        disabled: false
+        size: 4Gi
+      subComponentType: model
+    service-b:
+      checkpoint:
+        checkpointRef: my-checkpoint
+        enabled: true
+      componentType: inference
+      dynamoNamespace: test-namespace
+      extraPodSpec:
+        containers:
+        - image: dynamo/service:v1
+          name: main
+        initContainers:
+        - image: dynamo/service:v1
+          name: init
+      globalDynamoNamespace: true
+      ingress:
+        enabled: true
+        host: api.example.com
+        ingressClassName: nginx
+        path: /v1
+      modelRef:
+        name: llama-model
+        namespace: models
+      multinode:
+        nodeCount: 4
+      replicas: 5
+      serviceName: my-service
+      sharedMemory:
+        disabled: false
+        size: 4Gi
+      subComponentType: model
+    service-c:
+      checkpoint:
+        checkpointRef: my-checkpoint
+        enabled: true
+      componentType: inference
+      dynamoNamespace: test-namespace
+      globalDynamoNamespace: true
+      ingress:
+        enabled: true
+        host: api.example.com
+        ingressClassName: nginx
+        path: /v1
+      modelRef:
+        name: llama-model
+        namespace: models
+      multinode:
+        nodeCount: 4
+      replicas: 5
+      serviceName: my-service
+      sharedMemory:
+        disabled: false
+        size: 4Gi
+      subComponentType: model

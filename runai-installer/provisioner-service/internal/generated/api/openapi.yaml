@@ -1,0 +1,146 @@
+openapi: 3.0.3
+info:
+  license:
+    name: Proprietary
+    url: https://www.run.ai
+  title: Run:AI Provisioner Service
+  version: 0.1.0
+servers:
+- url: /
+paths:
+  /environments:
+    post:
+      operationId: createEnvironment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEnvironmentRequest'
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentAccepted'
+          description: Accepted
+        "400":
+          description: Bad Request
+      security: []
+      summary: Create environment provisioning job
+      tags:
+      - Provision
+      x-no-authorization: true
+  /environments/{id}:
+    get:
+      operationId: getEnvironment
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentStatus'
+          description: OK
+        "404":
+          description: Not Found
+      security: []
+      summary: Get environment provisioning status
+      tags:
+      - Provision
+      x-no-authorization: true
+components:
+  schemas:
+    CreateEnvironmentRequest:
+      example:
+        wildcarddomain: wildcarddomain
+        domain: domain
+        userEmail: userEmail
+        kubernetesDistribution: openshift
+        projectName: my-project
+        provisioningMode: control-plane-only
+      properties:
+        provisioningMode:
+          enum:
+          - control-plane-only
+          - full
+          type: string
+        domain:
+          type: string
+        wildcarddomain:
+          type: string
+        kubernetesDistribution:
+          description: Optional Kubernetes distribution type
+          enum:
+          - openshift
+          type: string
+        userEmail:
+          description: "Email for the local user to create. Required when provisioningMode\
+            \ is 'full', ignored for 'control-plane-only'."
+          type: string
+        projectName:
+          description: "Name of the project to create. Required when provisioningMode\
+            \ is 'full', ignored for 'control-plane-only'."
+          example: my-project
+          type: string
+      required:
+      - domain
+      - provisioningMode
+      - wildcarddomain
+      type: object
+    EnvironmentAccepted:
+      example:
+        phase: pending
+        mode: control-plane-only
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        id: id
+      properties:
+        id:
+          type: string
+        phase:
+          example: pending
+          type: string
+        mode:
+          enum:
+          - control-plane-only
+          - full
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+      type: object
+    EnvironmentStatus:
+      example:
+        phase: pending
+        mode: control-plane-only
+        id: id
+        message: message
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: string
+        phase:
+          enum:
+          - pending
+          - in_progress
+          - succeeded
+          - failed
+          type: string
+        message:
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+        mode:
+          enum:
+          - control-plane-only
+          - full
+          type: string
+      type: object

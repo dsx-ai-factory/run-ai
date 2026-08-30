@@ -1,0 +1,30 @@
+get:
+  summary: Get CLI latest version
+  description: |
+    This endpoint compares the latest version of the CLI with the current local version. 
+    If the local version is outdated, the endpoint returns the latest version.
+  operationId: get_version
+  x-service: cli-exposer
+  x-internal: true
+  x-test-coverage:
+    - cli-exposer/pkg/services/api_cli_service_test.go
+  x-no-authorization: true
+  tags:
+    - Researcher Command Line Interface
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Version.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,13 @@
+allOf:
+  - $ref: './QuotaStatus.yaml'
+  - type: object
+    required:
+      - nodePoolName
+      - nodePoolId
+    properties:
+      nodePoolName:
+        type: string
+        description: The node pool name which the current quota status refers to
+      nodePoolId:
+        type: string
+        description: The node pool id which the current quota status refers to

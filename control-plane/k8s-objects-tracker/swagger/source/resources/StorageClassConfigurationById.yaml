@@ -1,0 +1,157 @@
+get:
+    summary: Get storage class configuration by id
+    description: |
+      Retrieves a specific storage class configuration by its unique identifier. Use this endpoint to view detailed information about the configuration, including its permissions and customization options.
+    operationId: get_storage_class_configuration_by_id
+    x-csp: true
+    x-service: k8s-objects-tracker
+    x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_storage_class_configuration_service_test.go
+    x-authorize:
+      resource-type: storage-class-configuration
+      action: read
+    tags:
+        - Storage Class Configuration
+    parameters:
+      - $ref: '../parameters/path/StorageClassConfigurationId.yaml'
+      - name: tenantId
+        in: query
+        required: false
+        schema:
+          type: integer
+    responses:
+        '200':
+          description: Storage class configuration
+          content:
+            application/json:
+              schema:
+                  $ref: '../schemas/StorageClassConfiguration/StorageClassConfiguration.yaml'
+        '401':
+            $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+        '403':
+            $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+        '404':
+            $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+        '500':
+            $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+        '503':
+            $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+patch:
+    summary: Patch storage class configuration by id
+    description: Partially updates an existing storage class configuration by its unique identifier. Use this endpoint to modify specific fields, such as permissions, customization values, or attributes, without replacing the entire configuration.
+    operationId: patch_storage_class_configuration_by_id
+    x-csp: true
+    x-service: k8s-objects-tracker
+    x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_storage_class_configuration_service_test.go
+    x-authorize:
+      resource-type: storage-class-configuration
+      action: update
+    tags:
+        - Storage Class Configuration
+    parameters:
+      - $ref: '../parameters/path/StorageClassConfigurationId.yaml'
+      - name: tenantId
+        in: query
+        required: false
+        schema:
+          type: integer
+    requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/StorageClassConfiguration/StorageClassConfigurationPatchRequest.yaml'
+    responses:
+        '200':
+          description: Storage class configuration
+          content:
+            application/json:
+              schema:
+                  $ref: '../schemas/StorageClassConfiguration/StorageClassConfiguration.yaml'
+        '401':
+            $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+        '403':
+            $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+        '404':
+            $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+        '500':
+            $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+        '503':
+            $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+put:
+  summary: Update storage class configuration by id
+  description: Updates an existing storage class configuration by its unique identifier. Use this endpoint to fully replace an existing configuration, including permissions and customization settings.
+  operationId: update_storage_class_configuration_by_id
+  x-csp: true
+  x-service: k8s-objects-tracker
+  x-test-coverage:
+    - k8s-objects-tracker/pkg/services/api_storage_class_configuration_service_test.go
+  x-authorize:
+    resource-type: storage-class-configuration
+    action: update
+  tags:
+    - Storage Class Configuration
+  parameters:
+    - $ref: '../parameters/path/StorageClassConfigurationId.yaml'
+    - name: tenantId
+      in: query
+      required: false
+      schema:
+        type: integer
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/StorageClassConfiguration/StorageClassConfigurationUpdateRequest.yaml'
+  responses:
+    '200':
+      description: Storage class configuration
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/StorageClassConfiguration/StorageClassConfiguration.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+delete:
+    summary: Delete storage class configuration by id
+    description: Deletes a specific storage class configuration by its unique identifier. Use this endpoint to permanently remove configurations that are no longer needed.
+    operationId: delete_storage_class_configuration_by_id
+    x-csp: true
+    x-service: k8s-objects-tracker
+    x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_storage_class_configuration_service_test.go
+    x-authorize:
+      resource-type: storage-class-configuration
+      action: delete
+    tags:
+        - Storage Class Configuration
+    parameters:
+      - $ref: '../parameters/path/StorageClassConfigurationId.yaml'
+      - name: tenantId
+        in: query
+        required: false
+        schema:
+          type: integer
+    responses:
+        '204':
+          description: Storage class configuration deleted
+        '401':
+            $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+        '403':
+            $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+        '404':
+            $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+        '500':
+            $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+        '503':
+            $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

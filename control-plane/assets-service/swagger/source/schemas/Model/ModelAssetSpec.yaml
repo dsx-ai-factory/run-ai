@@ -1,0 +1,27 @@
+properties:
+  title:
+    description: the title of the model that will be displayed in the UI
+    type: string
+    nullable: false
+    example: "LLaMA-2 Chat (7B)"
+  description:
+    description: the description of the model that will be displayed in the UI
+    type: string
+    nullable: true
+    example: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+  thumbnail:
+    description: the thumbnail of the model that will be displayed in the UI
+    type: string
+    nullable: true
+  huggingfaceId:
+    description: the huggingface id of the model
+    type: string
+    nullable: true
+    example: "meta-llama/Llama-2-7b-chat-hf"
+  assets:
+    $ref: "../../../../..//infra/openapi/docs/schemas/assets/AssetsIds.yaml"
+  license:
+    description: the license of the model
+    type: string
+    nullable: true
+    example: "Example of<div><br></div><div>the license of the model<br></div>"

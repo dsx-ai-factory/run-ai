@@ -1,0 +1,1638 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: support@run.ai
+    name: Run.AI
+    url: https://www.run.ai/
+  description: An API for managing RunAI Researcher Command Line Interface
+  title: cli-exposer
+  version: 2.0.0
+servers:
+- url: https://app.run.ai
+- url: https://staging.run.ai
+- url: https://test.run.ai
+- url: http://localhost:8080
+security:
+- bearerAuth: []
+paths:
+  /:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: Executed successfully.
+      summary: health check
+      tags:
+      - Health
+      x-no-authorization: true
+      x-runai-team: fox
+    x-internal: true
+  /api/v1/cli-exposer/installer/unix:
+    get:
+      description: |
+        This endpoint returns a unix script that can be used to install the Run:AI CLI.
+      operationId: get_installer_unix
+      responses:
+        "200":
+          content:
+            text/plain:
+              example: Contents of the file
+              schema:
+                type: string
+              x-default: true
+          description: File download successful
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Download Unix installer script
+      tags:
+      - Researcher Command Line Interface
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+  /api/v1/cli-exposer/installer/unix/commands:
+    get:
+      description: |
+        This endpoint returns a unix script commands that can be used to install the Run:AI CLI.
+      operationId: get_installer_unix_commands
+      responses:
+        "200":
+          content:
+            application/json:
+              example: Contents of the commands to install the CLI on Unix
+              schema:
+                $ref: '#/components/schemas/Command'
+          description: A text commands to install the CLI on Unix
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get Unix installer script commands
+      tags:
+      - Researcher Command Line Interface
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+  /api/v1/cli-exposer/installer/mac:
+    get:
+      description: |
+        This endpoint returns a Mac script that can be used to install the Run:AI CLI.
+      operationId: get_installer_mac
+      responses:
+        "200":
+          content:
+            text/plain:
+              example: Contents of the file
+              schema:
+                type: string
+              x-default: true
+          description: File download successful
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Download Mac installer script
+      tags:
+      - Researcher Command Line Interface
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+  /api/v1/cli-exposer/installer/mac/commands:
+    get:
+      description: |
+        This endpoint returns a Mac script commands that can be used to install the Run:AI CLI.
+      operationId: get_installer_mac_commands
+      responses:
+        "200":
+          content:
+            application/json:
+              example: Contents of the commands to install the CLI on Mac
+              schema:
+                $ref: '#/components/schemas/Command'
+          description: A text commands to install the CLI on Mac
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get Mac installer script commands
+      tags:
+      - Researcher Command Line Interface
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+  /api/v1/cli-exposer/installer/linux:
+    get:
+      description: |
+        This endpoint returns a Linux script that can be used to install the Run:AI CLI.
+      operationId: get_installer_linux
+      responses:
+        "200":
+          content:
+            text/plain:
+              example: Contents of the file
+              schema:
+                type: string
+              x-default: true
+          description: File download successful
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Download Linux installer script
+      tags:
+      - Researcher Command Line Interface
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+  /api/v1/cli-exposer/installer/linux/commands:
+    get:
+      description: |
+        This endpoint returns a linux script commands that can be used to install the Run:AI CLI.
+      operationId: get_installer_linux_commands
+      responses:
+        "200":
+          content:
+            application/json:
+              example: Contents of the commands to install the CLI on Linux
+              schema:
+                $ref: '#/components/schemas/Command'
+          description: A text commands to install the CLI on Linux
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get Linux installer script commands
+      tags:
+      - Researcher Command Line Interface
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+  /api/v1/cli-exposer/installer/windows/commands:
+    get:
+      description: |
+        This endpoint returns a windows script commands that can be used to install the Run:AI CLI.
+      operationId: get_installer_windows_commands
+      responses:
+        "200":
+          content:
+            application/json:
+              example: Contents of the commands to install the CLI on Windows
+              schema:
+                $ref: '#/components/schemas/Command'
+          description: A text commands to install the CLI on Windows
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get Windows MSI installer script commands
+      tags:
+      - Researcher Command Line Interface
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+  /api/v1/cli-exposer/version:
+    get:
+      description: "This endpoint compares the latest version of the CLI with the\
+        \ current local version. \nIf the local version is outdated, the endpoint\
+        \ returns the latest version.\n"
+      operationId: get_version
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get CLI latest version
+      tags:
+      - Researcher Command Line Interface
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+  /api/v1/cli-exposer/dist/{operatingSystem}/{architecture}/runai:
+    get:
+      description: |
+        This endpoint returns a binary file that run the Run:AI CLI.
+      operationId: get_binary
+      parameters:
+      - description: The operating system name.
+        explode: false
+        in: path
+        name: operatingSystem
+        required: true
+        schema:
+          enum:
+          - linux
+          - windows
+          - darwin
+          example: linux
+          maxLength: 7
+          minLength: 4
+          type: string
+        style: simple
+      - description: The architecture type.
+        explode: false
+        in: path
+        name: architecture
+        required: true
+        schema:
+          example: arm64
+          maxLength: 10
+          minLength: 4
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/octet-stream:
+              example: !!binary |-
+                Q29udGVudHMgb2YgdGhlIGZpbGU=
+              schema:
+                format: binary
+                type: string
+              x-default: true
+          description: File download successful
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Download RunAI Researcher command line binary
+      tags:
+      - Researcher Command Line Interface
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+  /api/v1/cli-exposer/docs/{documentName}:
+    get:
+      description: |
+        This endpoint returns a document of help for the Run:AI CLI.
+      operationId: get_manual_document
+      parameters:
+      - description: The manual document name.
+        explode: false
+        in: path
+        name: documentName
+        required: true
+        schema:
+          example: runai.md
+          maxLength: 255
+          minLength: 4
+          pattern: "^[A-Za-z0-9_]+\\.md$"
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            text/html:
+              schema:
+                type: string
+              x-default: true
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get CLI document by name
+      tags:
+      - Researcher Command Line Interface
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+  /api/v1/cli/installer/unix:
+    get:
+      deprecated: true
+      description: |
+        This endpoint returns a unix script that can be used to install the Run:AI CLI.
+      operationId: get_installer_unix_deprecated
+      responses:
+        "200":
+          content:
+            text/plain:
+              example: Contents of the file
+              schema:
+                type: string
+              x-default: true
+          description: File download successful
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Download Unix installer script
+      tags:
+      - Researcher Command Line Interface Deprecated
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+  /api/v1/cli/installer/unix/commands:
+    get:
+      deprecated: true
+      description: |
+        This endpoint returns a unix script commands that can be used to install the Run:AI CLI.
+      operationId: get_installer_unix_commands_deprecated
+      responses:
+        "200":
+          content:
+            application/json:
+              example: Contents of the commands to install the CLI on Unix
+              schema:
+                $ref: '#/components/schemas/Command'
+          description: A text commands to install the CLI on Unix
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get Unix installer script commands
+      tags:
+      - Researcher Command Line Interface Deprecated
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+  /api/v1/cli/installer/mac:
+    get:
+      deprecated: true
+      description: |
+        This endpoint returns a Mac script that can be used to install the Run:AI CLI.
+      operationId: get_installer_mac_deprecated
+      responses:
+        "200":
+          content:
+            text/plain:
+              example: Contents of the file
+              schema:
+                type: string
+              x-default: true
+          description: File download successful
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Download Mac installer script
+      tags:
+      - Researcher Command Line Interface Deprecated
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+  /api/v1/cli/installer/mac/commands:
+    get:
+      deprecated: true
+      description: |
+        This endpoint returns a Mac script commands that can be used to install the Run:AI CLI.
+      operationId: get_installer_mac_commands_deprecated
+      responses:
+        "200":
+          content:
+            application/json:
+              example: Contents of the commands to install the CLI on Mac
+              schema:
+                $ref: '#/components/schemas/Command'
+          description: A text commands to install the CLI on Mac
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get Mac installer script commands
+      tags:
+      - Researcher Command Line Interface Deprecated
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+  /api/v1/cli/installer/linux:
+    get:
+      deprecated: true
+      description: |
+        This endpoint returns a Linux script that can be used to install the Run:AI CLI.
+      operationId: get_installer_linux_deprecated
+      responses:
+        "200":
+          content:
+            text/plain:
+              example: Contents of the file
+              schema:
+                type: string
+              x-default: true
+          description: File download successful
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Download Linux installer script
+      tags:
+      - Researcher Command Line Interface Deprecated
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+  /api/v1/cli/installer/linux/commands:
+    get:
+      deprecated: true
+      description: |
+        This endpoint returns a linux script commands that can be used to install the Run:AI CLI.
+      operationId: get_installer_linux_commands_deprecated
+      responses:
+        "200":
+          content:
+            application/json:
+              example: Contents of the commands to install the CLI on Linux
+              schema:
+                $ref: '#/components/schemas/Command'
+          description: A text commands to install the CLI on Linux
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get Linux installer script commands
+      tags:
+      - Researcher Command Line Interface Deprecated
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+  /api/v1/cli/installer/windows/commands:
+    get:
+      deprecated: true
+      description: |
+        This endpoint returns a windows script commands that can be used to install the Run:AI CLI.
+      operationId: get_installer_windows_commands_deprecated
+      responses:
+        "200":
+          content:
+            application/json:
+              example: Contents of the commands to install the CLI on Windows
+              schema:
+                $ref: '#/components/schemas/Command'
+          description: A text commands to install the CLI on Windows
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get Windows MSI installer script commands
+      tags:
+      - Researcher Command Line Interface Deprecated
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+  /api/v1/cli/version:
+    get:
+      deprecated: true
+      description: "This endpoint compares the latest version of the CLI with the\
+        \ current local version. \nIf the local version is outdated, the endpoint\
+        \ returns the latest version.\n"
+      operationId: get_version_deprecated
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get CLI latest version
+      tags:
+      - Researcher Command Line Interface Deprecated
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+  /api/v1/cli/dist/{operatingSystem}/{architecture}/runai:
+    get:
+      deprecated: true
+      description: |
+        This endpoint returns a binary file that run the Run:AI CLI.
+      operationId: get_binary_deprecated
+      parameters:
+      - description: The operating system name.
+        explode: false
+        in: path
+        name: operatingSystem
+        required: true
+        schema:
+          enum:
+          - linux
+          - windows
+          - darwin
+          example: linux
+          maxLength: 7
+          minLength: 4
+          type: string
+        style: simple
+      - description: The architecture type.
+        explode: false
+        in: path
+        name: architecture
+        required: true
+        schema:
+          example: arm64
+          maxLength: 10
+          minLength: 4
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/octet-stream:
+              example: !!binary |-
+                Q29udGVudHMgb2YgdGhlIGZpbGU=
+              schema:
+                format: binary
+                type: string
+              x-default: true
+          description: File download successful
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Download RunAI Researcher command line binary
+      tags:
+      - Researcher Command Line Interface Deprecated
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+  /api/v1/cli/docs/{documentName}:
+    get:
+      deprecated: true
+      description: |
+        This endpoint returns a document of help for the Run:AI CLI.
+      operationId: get_manual_document_deprecated
+      parameters:
+      - description: The manual document name.
+        explode: false
+        in: path
+        name: documentName
+        required: true
+        schema:
+          example: runai.md
+          maxLength: 255
+          minLength: 4
+          pattern: "^[A-Za-z0-9_]+\\.md$"
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            text/html:
+              schema:
+                type: string
+              x-default: true
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get CLI document by name
+      tags:
+      - Researcher Command Line Interface Deprecated
+      x-runai-team: fox
+      x-test-coverage:
+      - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+components:
+  parameters:
+    OperatingSystem:
+      description: The operating system name.
+      explode: false
+      in: path
+      name: operatingSystem
+      required: true
+      schema:
+        enum:
+        - linux
+        - windows
+        - darwin
+        example: linux
+        maxLength: 7
+        minLength: 4
+        type: string
+      style: simple
+    Architecture:
+      description: The architecture type.
+      explode: false
+      in: path
+      name: architecture
+      required: true
+      schema:
+        example: arm64
+        maxLength: 10
+        minLength: 4
+        type: string
+      style: simple
+    DocumentName:
+      description: The manual document name.
+      explode: false
+      in: path
+      name: documentName
+      required: true
+      schema:
+        example: runai.md
+        maxLength: 255
+        minLength: 4
+        pattern: "^[A-Za-z0-9_]+\\.md$"
+        type: string
+      style: simple
+  responses:
+    "400BadRequest":
+      content:
+        application/json:
+          example:
+            code: 400
+            message: Required parameter is missing
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Bad request.
+    "401Unauthorized":
+      content:
+        application/json:
+          example:
+            code: 401
+            message: Issuer is not familiar.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unauthorized
+    "404NotFound":
+      content:
+        application/json:
+          example:
+            code: 404
+            message: Resource id not found.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource was not found
+    "500InternalServerError":
+      content:
+        application/json:
+          example:
+            code: 500
+            message: Something went wrong.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+    "503ServiceUnavailable":
+      content:
+        application/json:
+          example:
+            code: 503
+            message: Please try again in few minutes.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+    "204NoContent":
+      description: No Content.
+    "400BadSubmissionRequest":
+      content:
+        application/json:
+          example:
+            code: 400
+            message: The workload request does not comply with the policy set by the
+              administrator
+          schema:
+            $ref: '#/components/schemas/SubmissionError'
+      description: Bad submission request.
+    "403Forbidden":
+      content:
+        application/json:
+          example:
+            code: 403
+            message: You do not have sufficient permissions.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Forbidden
+    "406NotAcceptable":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Not acceptable request
+    "409Conflict":
+      content:
+        application/json:
+          example:
+            code: 409
+            message: Resource with this name already exists
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource already exists
+    "412PreconditionFailed":
+      content:
+        application/json:
+          example:
+            code: 412
+            message: Precondition failed
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource was not found.
+    "413RequestEntityTooLarge":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Request entity too large
+    "415UnsupportedMediaType":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unsupported media type
+    "501NotImplemented":
+      content:
+        application/json:
+          example:
+            code: 501
+            message: Not implemented
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+  schemas:
+    Error:
+      example:
+        code: 400
+        message: Bad request - Resource should have a name
+      properties:
+        code:
+          maximum: 599
+          minimum: 100
+          type: integer
+        message:
+          type: string
+        details:
+          type: string
+      required:
+      - code
+      - message
+    Command:
+      example:
+        command: runai version
+      properties:
+        command:
+          description: The commands that can be used to install the Run:AI CLI.
+          example: runai version
+          maxLength: 200
+          minLength: 1
+          type: string
+      required:
+      - command
+      type: object
+    Version:
+      example:
+        needUpgrade: false
+        cpVersion: 2.50.0
+        sdkVersion: 2.0.0
+      properties:
+        sdkVersion:
+          description: The version of the CLI SDK
+          example: 2.0.0
+          maxLength: 100
+          minLength: 1
+          type: string
+        cpVersion:
+          description: The version of the CP
+          example: 2.50.0
+          maxLength: 100
+          minLength: 1
+          type: string
+        needUpgrade:
+          default: false
+          description: Whether the CLI needs to be upgraded
+          example: false
+          type: boolean
+      required:
+      - cpVersion
+      - needUpgrade
+      - sdkVersion
+      type: object
+    ComplianceIssues:
+      nullable: true
+      properties:
+        complianceIssues:
+          items:
+            $ref: '#/components/schemas/ComplianceIssues_complianceIssues_inner'
+          type: array
+      type: object
+    SubmissionError:
+      allOf:
+      - $ref: '#/components/schemas/Error'
+      - $ref: '#/components/schemas/ComplianceIssues'
+    ComplianceIssues_complianceIssues_inner:
+      properties:
+        field:
+          example: compute.gpuDevicesRequest
+          type: string
+        details:
+          example: value must be no less than 3
+          type: string
+      required:
+      - details
+      - field
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      description: Bearer authentication
+      scheme: bearer
+      type: http

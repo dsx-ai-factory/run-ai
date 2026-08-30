@@ -1,0 +1,23 @@
+type: object
+required:
+  - payload
+properties:
+  payload:
+    type: object
+    description: An array of access rule objects, each containing the role, subject, cluster, and scope to apply.
+    required:
+      - subjects
+      - roleId
+      - scopes
+    properties:
+      roleId:
+        type: integer
+        format: int32
+        description: The numeric ID of the role to assign (e.g., admin, viewer).
+        example: 53142648
+      clusterId:
+        $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+      subjects:
+        $ref: './AccessRuleSubjects.yaml'
+      scopes:
+        $ref: './AccessRuleScopes.yaml'

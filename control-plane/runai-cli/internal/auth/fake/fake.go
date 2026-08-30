@@ -1,0 +1,25 @@
+package fake
+
+import (
+	"context"
+
+	"github.com/run-ai/runai/control-plane/runai-cli/internal/auth"
+)
+
+// FakeValidToken is a synthetic JWT: fake issuer/subject, no real signature ("mock").
+const FakeValidToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjk5OTk5OTk5OTksImlhdCI6MTYwMDAwMDAwMCwiaXNzIjoiaHR0cHM6Ly9mYWtlLWlzc3Vlci5leGFtcGxlLmNvbS9hdXRoL3JlYWxtcy9ydW5haSIsImF1ZCI6WyJydW5haSIsImJyb2tlciIsImFjY291bnQiXSwic3ViIjoidGVzdEBydW4uYWkiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJjbGkiLCJhbGxvd2VkX29yaWdpbnMiOlsiaHR0cHM6Ly9mYWtlLWlzc3Vlci5leGFtcGxlLmNvbSJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiIsImRlZmF1bHQtcm9sZXMtcnVuYWkiXX0sInJlc291cmNlX2FjY2VzcyI6eyJicm9rZXIiOnsicm9sZXMiOlsicmVhZC10b2tlbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJvcGVuaWQgb2ZmbGluZV9hY2Nlc3MgcHJvZmlsZSBlbWFpbCIsInRlbmFudF9pZCI6MTAwMSwiZW1haWxfdmVyaWZpZWQiOnRydWUsInN1YmplY3RfdXVpZCI6IjU4YmJmNDZhLTEyNDUtNDg2Mi1hMmZkLTI3YTVlNTIwMjhiNyIsInByZWZlcnJlZF91c2VybmFtZSI6InRlc3RAcnVuLmFpIiwiZW1haWwiOiJ0ZXN0QHJ1bi5haSJ9.mock" //nolint:gosec,lll // no security hazard
+
+type AlwaysValidToken struct {
+}
+
+func NewValidTokenBackend(getter auth.ConfigGetter) (auth.TokenService, error) {
+	return NewAlwaysValidTokenManagerBackend(), nil
+}
+
+func NewAlwaysValidTokenManagerBackend() *AlwaysValidToken {
+	return &AlwaysValidToken{}
+}
+
+func (a *AlwaysValidToken) GetAccessToken(_ context.Context) (string, error) {
+	return FakeValidToken, nil
+}

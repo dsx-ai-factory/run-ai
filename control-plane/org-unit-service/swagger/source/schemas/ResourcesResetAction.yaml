@@ -1,0 +1,7 @@
+type: string
+description: The action to apply
+enum:
+  - QUOTAS_TO_DEFAULT
+  - RANKS_TO_DEFAULT
+  - WEIGHTS_TO_DEFAULT
+  - WEIGHTS_TO_DESERVED

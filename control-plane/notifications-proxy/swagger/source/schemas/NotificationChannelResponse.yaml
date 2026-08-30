@@ -1,0 +1,12 @@
+type: object
+required:
+    - type
+    - config
+    - name
+allOf: 
+    - $ref: "./NotificationChannel.yaml"
+    - type: object
+      properties:
+        name:
+            type: string
+

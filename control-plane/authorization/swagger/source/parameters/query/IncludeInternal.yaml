@@ -1,0 +1,8 @@
+name: includeInternal
+in: query
+required: false
+x-internal: true
+schema:
+  type: boolean
+  example: false
+  default: false

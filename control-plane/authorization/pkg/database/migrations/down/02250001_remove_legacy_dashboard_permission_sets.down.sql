@@ -1,0 +1,1 @@
+-- No rollback: deleted legacy dashboard permission sets cannot be restored automatically.

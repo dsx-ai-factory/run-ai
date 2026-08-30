@@ -1,0 +1,140 @@
+BatchJobTarget:
+  Config:
+    pvcs:
+    - metadata:
+        name: static
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 800M
+        storageClassName: ""
+        volumeMode: Filesystem
+    - metadata:
+        name: small-volume
+      spec:
+        accessModes:
+        - ReadOnlyMany
+        - ReadWriteMany
+        resources:
+          requests:
+            storage: 10M
+        storageClassName: small
+        volumeMode: Block
+    - metadata:
+        name: persistent-volume
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        - ReadWriteMany
+        resources:
+          requests:
+            storage: 1G
+        storageClassName: persistent
+        volumeMode: Block
+    pvcsConfig:
+      cleanupOnCompletion: true
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: pvc_combo
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: pvc_combo
+      name: pvc_combo
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: pvc_combo
+            workloadKind: Workspace
+            workloadName: pvc_combo
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: pvc_combo
+            image: ubuntu
+            name: pvc_combo
+            resources: {}
+            volumeMounts:
+            - mountPath: /path/ro
+              name: pvc
+              readOnly: true
+            - mountPath: /path/access/modes
+              name: pvc-1
+            - mountPath: /path/rw
+              name: pvc-2
+            - mountPath: /path/access/modes
+              name: pvc-3
+            - mountPath: /path/two
+              name: pvc-4
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+          volumes:
+          - name: pvc
+            persistentVolumeClaim:
+              claimName: claim-existing
+              readOnly: true
+          - name: pvc-1
+            persistentVolumeClaim:
+              claimName: static
+          - name: pvc-2
+            persistentVolumeClaim:
+              claimName: small-volume
+          - name: pvc-3
+            persistentVolumeClaim:
+              claimName: persistent-volume
+          - ephemeral:
+              volumeClaimTemplate:
+                metadata: {}
+                spec:
+                  accessModes:
+                  - ReadWriteOnce
+                  resources:
+                    requests:
+                      storage: 2T
+                  storageClassName: ephemeral
+                  volumeMode: Filesystem
+            name: pvc-4
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: pvc_combo, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: pvc_combo, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

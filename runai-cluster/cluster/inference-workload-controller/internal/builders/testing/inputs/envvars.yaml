@@ -1,0 +1,35 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  name: fractional-inference
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  image:
+    value: image
+  name:
+    value: inference-0
+  username:
+    value: guy.shaibi
+  environment:
+    items:
+      env-1:
+        value: user.name
+      env-2:
+        value: "SECRET:xxx"
+      env-3:
+        value: "SECRET:xxx,yyy"
+      env-4:
+        value: "CONFIGMAP:aaa,bbb"
+      env-5:
+        value: "PODFIELDREF:cccc"
+      env-6:
+        value: "USERCREDENTIAL:my-user-credential,my-user-key"
+  ports:
+    items:
+      port-80:
+        name: port-80
+        value:
+          serviceType: ServingPort
+          container: 80
+status: {}

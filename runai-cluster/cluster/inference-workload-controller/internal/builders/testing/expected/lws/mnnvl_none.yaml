@@ -1,0 +1,81 @@
+apiVersion: leaderworkerset.x-k8s.io/v1
+kind: LeaderWorkerSet
+metadata:
+  annotations:
+    workloadApiVersion: run.ai/v1alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    project: team-a
+    release: test-lws
+    run.ai/top-owner-uid: ""
+    workloadKind: DistributedInferenceWorkload
+    workloadName: test-lws
+  name: test-lws
+  namespace: runai-team-a
+spec:
+  leaderWorkerTemplate:
+    leaderTemplate:
+      metadata:
+        annotations:
+          runai-nodepools: mnnvl-node-1 mnnvl-node-2
+        labels:
+          run.ai/MNNVL: None
+          run.ai/top-owner-uid: ""
+      spec:
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: nodepool-key-1
+                  operator: In
+                  values:
+                  - nodepool-value-1
+              - matchExpressions:
+                - key: nodepool-key-2
+                  operator: In
+                  values:
+                  - nodepool-value-2
+        containers:
+        - image: leader-image:latest
+          name: leader
+          resources:
+            limits:
+              nvidia.com/gpu: "1"
+        schedulerName: runai-scheduler
+    size: 2
+    workerTemplate:
+      metadata:
+        annotations:
+          runai-nodepools: mnnvl-node-1 mnnvl-node-2
+        labels:
+          run.ai/MNNVL: None
+          run.ai/top-owner-uid: ""
+      spec:
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: nodepool-key-1
+                  operator: In
+                  values:
+                  - nodepool-value-1
+              - matchExpressions:
+                - key: nodepool-key-2
+                  operator: In
+                  values:
+                  - nodepool-value-2
+        containers:
+        - image: worker-image:latest
+          name: worker
+          resources:
+            limits:
+              nvidia.com/gpu: "1"
+        schedulerName: runai-scheduler
+  replicas: 1
+  rolloutStrategy:
+    type: RollingUpdate
+  startupPolicy: LeaderCreated
+status: {}

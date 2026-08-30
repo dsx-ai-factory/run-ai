@@ -1,0 +1,7 @@
+type: object
+description: The names of the item selectors to delete from the field group.
+required:
+  - itemSelectors
+properties:
+  itemSelectors:
+    $ref: "./ItemSelectorsToDelete.yaml"

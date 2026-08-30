@@ -1,0 +1,7 @@
+name: dvUsageInfo
+x-internal: true
+in: query
+required: false
+description: Whether the query should include data volume usage information as part of the response.
+schema:
+  type: boolean

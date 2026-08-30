@@ -1,0 +1,70 @@
+get:
+  operationId: getTenantSettings
+  tags:
+  - Tenant
+  summary: Get all tenant settings.
+  deprecated: true
+  x-no-authorization: true
+  x-service: temp-backend-settings
+  x-test-coverage:
+  - src/test/suites/tenantSuite/tenantUserApi/tenantSystemApi.test.ts
+  description: Retrieve all tenant settings. This endpoint is deprecated and will be removed in a future release. Migrated settings are available under [/api/docs#tag/Settings](/api/docs#tag/Settings).
+  parameters:
+  - $ref: '../../parameters/excludeMigrated.yaml'
+  - $ref: '../../parameters/tenantId.yaml'
+  responses:
+    200:
+      description: The complete set of tenant settings.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../../schemas/Tenant/Setting.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+put:
+  operationId: updateTenantSetting
+  tags:
+  - Tenant
+  summary: Update a tenant setting.
+  deprecated: true
+  x-authorize:
+    resource-type: settings
+    action: update
+  x-service: temp-backend-settings
+  x-test-coverage:
+  - src/test/suites/tenantSuite/tenantUserApi/tenantSystemApi.test.ts
+  description: Use to update tenant settings. This endpoint is deprecated and will be removed in a future release. Migrated settings are available under [/api/docs#tag/Settings](/api/docs#tag/Settings).
+  parameters:
+  - $ref: '../../parameters/tenantId.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/TenantSetting/TenantSettingCreationRequest.yaml'
+  responses:
+    200:
+      description: The updated tenant setting.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/TenantSetting/TenantSettingCreationResponse.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

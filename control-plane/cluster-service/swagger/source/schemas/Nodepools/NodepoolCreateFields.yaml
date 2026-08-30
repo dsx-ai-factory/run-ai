@@ -1,0 +1,38 @@
+type: object
+required:
+  - name
+  - labelKey
+  - labelValue
+  - clusterId
+properties:
+  name:
+    type: string
+    example: "v100"
+    minLength: 1
+    maxLength: 63
+  labelKey:
+    description: Label key for associated nodes to the Node Pool (with value as in labelValue)
+    example: node-type
+    allOf:
+      - $ref: '../../../../../infra/openapi/docs/schemas/common/LabelKey.yaml'
+  labelValue:
+    description: Label value for associated nodes to the Node Pool (with key as in labelKey)
+    example: type-x
+    allOf:
+      - $ref: '../../../../../infra/openapi/docs/schemas/common/LabelValue.yaml'
+  clusterId:
+    type: string
+    format: uuid
+    example: d73a738f-fab3-430a-8fa3-5241493d7128
+  schedulingCapabilities:
+    $ref: "./SchedulingCapabilitiesNullable.yaml"
+  gpuNetworkAccelerationLabelKey:
+    description: Label key by which to determine GPUNetworkAccelerationDetection nodes
+    type: string
+    nullable: true
+  gpuNetworkAccelerationDetection:
+    $ref: "./NodepoolGPUNetworkAccelerationDetection.yaml"
+  schedulingConfiguration:
+    $ref: "./SchedulingConfiguration.yaml"
+  networkTopologyId:
+    $ref: '../NetworkTopologies/NetworkTopologyIdOptional.yaml'

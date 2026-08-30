@@ -1,0 +1,11 @@
+type: object
+required:
+  - label
+properties:
+  url:
+    type: string
+    description: Support destination. Omitted when the deployment does not provide a support link.
+    example: https://www.nvidia.com/en-eu/support/enterprise/#contact-us
+  label:
+    type: string
+    example: NVIDIA Run:ai support

@@ -1,0 +1,46 @@
+apiVersion: v2
+type: application
+name: control-plane
+version: 0.0.0
+appVersion: 0.0.0
+description: Run:ai Control Plane
+kubeVersion: '>=1.29.0-0'
+dependencies:
+  - name: runai-common-chart
+    repository: file://../../runai-common-chart
+    version: 1.0.62
+  - name: postgresql
+    repository: https://charts.bitnami.com/bitnami
+    version: 15.5.38
+    condition: postgresql.enabled
+  - name: keycloakx
+    repository: https://codecentric.github.io/helm-charts
+    version: 7.2.0
+    condition: keycloakx.enabled
+  - name: thanos
+    repository: https://charts.bitnami.com/bitnami
+    version: 16.0.7
+    condition: thanos.enabled
+  - name: runai-telemetry
+    alias: telemetryService
+    repository: https://runai.jfrog.io/artifactory/api/helm/diagnostics
+    version: 1.1.2
+    condition: telemetryService.enabled,isEnterprise
+  - name: nats
+    repository: https://charts.bitnami.com/bitnami
+    version: 9.0.28
+    condition: nats.enabled
+  # Note:
+  # "bitnami/common" must be listed the last bitnami one.
+  # Explanation:
+  # when several charts have the same library chart as dependency but using different versions weird things can happen
+  # since the same template is declared twice with the same name
+  - name: common
+    repository: https://charts.bitnami.com/bitnami
+    version: 2.40.0
+    condition: common.enabled
+  - name: unleash-edge
+    alias: unleashEdge
+    repository: https://docs.getunleash.io/helm-charts
+    version: 2.7.4
+    condition: unleashEdge.enabled

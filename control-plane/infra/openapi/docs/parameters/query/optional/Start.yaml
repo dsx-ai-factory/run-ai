@@ -1,0 +1,8 @@
+name: start
+in: query
+description: Start of time range to fetch data from in UTC format.
+required: false
+schema:
+  type: string
+  format: date-time
+  example: '2023-06-06 12:09:18.211'

@@ -1,0 +1,2 @@
+ALTER TABLE IF EXISTS crud_templates
+    ADD COLUMN IF NOT EXISTS routing_method TEXT NOT NULL DEFAULT '';

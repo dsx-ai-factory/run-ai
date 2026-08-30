@@ -1,0 +1,27 @@
+get:
+  summary: Get security settings
+  x-service: identity-manager
+  x-test-coverage: not-applicable
+  operationId: get_security_settings
+  x-authorize:
+    resource-type: security-settings
+    action: read
+  parameters:
+  - $ref: "../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  tags:
+  - Settings
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Settings/SettingsGetResponse.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

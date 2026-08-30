@@ -1,0 +1,27 @@
+.q-notification {
+  min-height: 50px;
+  padding: 0 var(--space-s);
+  border-radius: var(--b-border-radius-radius-s);
+  box-shadow: var(--shadow-m);
+
+  &__message {
+    @extend .text-b-h6;
+    color: var(--feedback-text, #{$grey-0});
+  }
+
+  &.bg-positive {
+    background-color: var(--feedback-default-bg, #{$grey-14}) !important;
+  }
+  &.bg-negative {
+    background-color: var(--feedback-error, #{$red-5}) !important;
+  }
+  &.bg-warning {
+    background-color: var(--feedback-warning, #{$amber-14}) !important;
+  }
+  &.bg-info {
+    background-color: var(--feedback-info, #{$blue-6}) !important;
+  }
+  &.bg-success {
+    background-color: var(--feedback-success, #{$green-6}) !important;
+  }
+}

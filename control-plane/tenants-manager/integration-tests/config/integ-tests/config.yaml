@@ -1,0 +1,18 @@
+
+TM_HOST: "tenants-manager"
+TM_PORT: "8080"
+
+BFF_HOST: "bff-service"
+BFF_PORT: "8080"
+
+DB_HOST: "postgres"
+DB_PORT: "5432"
+DB_USER: "runai"
+DB_PASSWORD: "password"
+DB_NAME: "runai"
+DB_SCHEMA: "tenants_manager"
+DB_SSL_MODE: "disable"
+
+NATS_URL: "nats://n1:4222"
+NATS_USER: "user"
+NATS_PASSWORD: "abc123"

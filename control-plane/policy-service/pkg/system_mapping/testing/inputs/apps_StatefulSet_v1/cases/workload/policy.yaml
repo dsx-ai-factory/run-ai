@@ -1,0 +1,101 @@
+description: |
+  Layer 3 case "workload" for apps/StatefulSet/v1. SETs every field reachable
+  through the statefulSetSpec and selector field groups (i.e. everything in
+  .spec at or above the pod template).
+
+  Custom formatters used here:
+    * podManagementPolicy uses runai-statefulSetSpec for enum enforcement
+      ({OrderedReady, Parallel}).
+    * updateStrategy-Type uses runai-statefulSetSpec for enum enforcement
+      ({OnDelete, RollingUpdate}); -Partition and -MaxUnavailable use KeyValue
+      because they're free-form integer / IntOrString values.
+    * persistentVolumeClaimRetentionPolicy-WhenDeleted / -WhenScaled use
+      runai-statefulSetSpec for enum enforcement ({Retain, Delete}).
+    * volumeClaimTemplates is a rule-builder (runai-statefulSetSpec); one
+      rule per PVC entry, merged into .volumeClaimTemplates by metadata.name
+      via the formatter's arrayKey.
+    * matchExprSelector uses runai-selector (one rule per match expression).
+
+  The parent `updateStrategy` and `persistentVolumeClaimRetentionPolicy`
+  objects are not modeled as settable fields — they're intermediate
+  wrappers (like `selector`). Policies set the meaningful children directly.
+
+  All other rules use KeyValue. Read together with cases/workload/golden.yaml.
+effectiveRules:
+  # ----- statefulSetSpec scalar fields -----
+  - field: replicas
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 1 } }]
+  - field: minReadySeconds
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 0 } }]
+  - field: revisionHistoryLimit
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 10 } }]
+  - field: serviceName
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: my-headless-svc } }]
+
+  # ----- statefulSetSpec enum-enforced (custom formatter) -----
+  - field: podManagementPolicy
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: OrderedReady } }]
+
+  # ----- statefulSetSpec updateStrategy (sub-field SETs) -----
+  - field: updateStrategy-Type
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: RollingUpdate } }]
+  - field: updateStrategy-Partition
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 0 } }]
+  - field: updateStrategy-MaxUnavailable
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "25%" } }]
+
+  # ----- statefulSetSpec persistentVolumeClaimRetentionPolicy (sub-fields) -----
+  - field: persistentVolumeClaimRetentionPolicy-WhenDeleted
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: Retain } }]
+  - field: persistentVolumeClaimRetentionPolicy-WhenScaled
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: Retain } }]
+
+  # ----- statefulSetSpec ordinals -----
+  - field: ordinals-Start
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 0 } }]
+
+  # ----- statefulSetSpec volumeClaimTemplates (custom formatter; one rule
+  # per PVC entry, merged into .volumeClaimTemplates by metadata.name) -----
+  - field: volumeClaimTemplates
+    specSelector: workloadSpec
+    enforcements:
+      - set:
+          name: data
+          accessModes: ["ReadWriteOnce"]
+          storageClassName: standard
+          volumeMode: Filesystem
+          storageRequest: "1Gi"
+
+  # ----- selector ----
+  # matchLabelsSelector uses KeyValueMap to add entries to selector.matchLabels.
+  # matchExprSelector uses runai-selector (one rule per match expression).
+  - field: matchLabelsSelector
+    specSelector: workloadSpec
+    enforcements: [{ set: { key: "app", value: "test" } }]
+  - field: matchExprSelector
+    specSelector: workloadSpec
+    enforcements:
+      - set:
+          key: test
+          operator: In
+          values: ["v1", "v2"]
+
+  # ----- pod template metadata -----
+  # Add a label via policy (must match selector.matchLabels for K8s validation)
+  - field: labels
+    specSelector: podMetadata
+    enforcements: [{ set: { key: "app", value: "test" } }]
+  - field: annotations
+    specSelector: podMetadata
+    enforcements: [{ set: { key: "example.com/annotation", value: "test-value" } }]

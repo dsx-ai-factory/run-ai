@@ -1,0 +1,8 @@
+content:
+  application/json:
+    schema:
+      $ref: "../schemas/APIError.yaml"
+    example:
+      code: 500
+      message: Internal server error
+description: Internal server error

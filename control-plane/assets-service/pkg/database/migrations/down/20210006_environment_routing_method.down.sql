@@ -1,0 +1,1 @@
+ALTER TABLE assets_environment DROP COLUMN IF EXISTS routing_method;

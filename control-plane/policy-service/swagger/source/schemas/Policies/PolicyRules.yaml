@@ -1,0 +1,27 @@
+type: object
+properties:
+  rules:
+    description: >-
+      The rules declared on this policy. Each rule targets a field in the
+      workload spec and constrains its allowed values through its enforcements.
+    type: array
+    items:
+      $ref: "./PolicyRule.yaml"
+example:
+  rules:
+    - field: "environmentVariables-ConfigMapName"
+      specSelector: "appContainerByName"
+      itemSelector: "environmentVariables-FromConfigMap"
+      selectorParams:
+        name: "worker-1"
+      enforcements:
+        - set:
+            containerPort: 1234
+            protocol: TCP
+        - required: true
+
+    - field: "allowPrivilegeEscalation"
+      specSelector: "allAppContainers"
+      enforcements:
+        - set:
+            value: true

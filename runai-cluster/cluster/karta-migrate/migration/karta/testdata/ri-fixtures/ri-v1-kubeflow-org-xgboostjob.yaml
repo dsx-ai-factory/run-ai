@@ -1,0 +1,42 @@
+apiVersion: optimization.nvidia.com/v1alpha1
+kind: ResourceInterface
+metadata:
+  creationTimestamp: "2026-05-10T06:38:29Z"
+  finalizers:
+  - rid.kai.bolt/finalize
+  generation: 1
+  labels:
+    run.ai/resource-interface-group: kubeflow.org
+    run.ai/resource-interface-kind: XGBoostJob
+    run.ai/resource-interface-updated-at: 2026-05-10T06-35-07Z
+    run.ai/resource-interface-version: v1
+    run.ai/workload-type-id: d3c7c5b8-960a-425c-9989-a35e62a92094
+  name: ri-v1-kubeflow-org-xgboostjob
+  resourceVersion: "8690"
+  uid: eef3bd04-66e7-4487-b86c-07c2c17b0ba4
+spec:
+  optimizationInstructions: {}
+  structureDefinition:
+    rootComponent:
+      kind:
+        group: kubeflow.org
+        kind: XGBoostJob
+        version: v1
+      name: ""
+status:
+  conditions:
+  - lastTransitionTime: "2026-05-10T06:38:48Z"
+    message: The CustomResourceDefinition for the group/kind does not exist
+    reason: CRDExists
+    status: "False"
+    type: CRDExists
+  - lastTransitionTime: "2026-05-10T06:38:48Z"
+    message: The RBAC permissions for the group/kind are not ready
+    reason: RBACReady
+    status: "False"
+    type: RBACReady
+  - lastTransitionTime: "2026-05-10T06:38:48Z"
+    message: The sync is not enabled
+    reason: SyncEnabled
+    status: "False"
+    type: SyncEnabled

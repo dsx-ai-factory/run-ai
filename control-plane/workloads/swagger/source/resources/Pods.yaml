@@ -1,0 +1,100 @@
+post:
+  x-internal: true
+  summary: Sync workloads pods.
+  operationId: sync_workloads_pods
+  x-service: workloads
+  x-test-coverage:
+    - e2e/src/test/suites/advancedSuite/workloads/workloadsApi.test.ts
+    - e2e/src/test/suites/metricsSuite/metricsApi.test.ts
+  x-authorize:
+    resource-type: workloads
+    action: sync
+  tags:
+    - Pods
+  requestBody:
+    description: The pods to sync.
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Pods/PodsSyncRequest.yaml'
+  responses:
+    204:
+      $ref: '../../../../infra/openapi/docs/responses/204NoContent.yaml'
+    207:
+      description: Partial success.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - successfullySyncedPods
+              - failedPods
+            properties:
+              successfullySyncedPods:
+                type: array
+                items:
+                  type: string
+                  format: uuid
+              failedPods:
+                type: array
+                items:
+                  type: string
+                  format: uuid
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+get:
+  summary: List pods.
+  description: Retrieve a list of pods from a cluster.
+  operationId: list_pods
+  x-service: workloads
+  x-test-coverage:
+    - e2e/src/test/suites/advancedSuite/workloads/workloadsApi.test.ts
+    - e2e/src/test/suites/metricsSuite/metricsApi.test.ts
+  x-authorize:
+    resource-type: workloads
+    action: read
+  tags:
+    - Pods
+  parameters:
+    - $ref: '../parameters/query/Deleted.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+    - $ref: '../parameters/query/PodsSort.yaml'
+    - $ref: '../parameters/query/PodsFilter.yaml'
+    - $ref: '../parameters/query/PodsQueryVerbosity.yaml'
+    - $ref: '../parameters/query/Completed.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Search.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - pods
+            properties:
+              next:
+                type: integer
+                example: 1
+              pods:
+                $ref: '../schemas/Pods/Pods.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,84 @@
+parameters:
+  - $ref: "../../../../infra/openapi/docs/parameters/path/ModelId.yaml"
+get:
+  summary: Get model asset.
+  description: Returns the details of model asset, by id.
+  operationId: get_model_asset_by_id
+  x-no-authorization: true
+  x-service: assets-service
+  x-test-coverage: null
+  tags:
+    - Model
+  parameters:
+    - $ref: "../parameters/query/optional/IncludeUsageInfo.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToProject.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToWorkloadType.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToReplicaType.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Model/ModelAsset.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+
+put:
+  summary: Update model asset.
+  description: Updates the details of model asset, by id.
+  operationId: update_model_asset_by_id
+  x-no-authorization: true
+  x-service: assets-service
+  x-test-coverage: null
+  x-audit: true
+  tags:
+    - Model
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Model/ModelUpdateRequest.yaml"
+  responses:
+    202:
+      description: Request accepted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Model/ModelAsset.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    default:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+
+delete:
+  summary: Delete model asset.
+  description: Deletes model asset, by id.
+  operationId: delete_model_asset_by_id
+  x-no-authorization: true
+  x-service: assets-service
+  x-test-coverage: null
+  x-audit: true
+  tags:
+    - Model
+  responses:
+    202:
+      $ref: "../../../../infra/openapi/docs/responses/202Accepted.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

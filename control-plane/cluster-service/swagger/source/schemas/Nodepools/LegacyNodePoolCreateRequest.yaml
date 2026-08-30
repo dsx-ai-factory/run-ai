@@ -1,0 +1,22 @@
+properties:
+  name:
+    type: string
+    description: Node Pool Name
+    example: node-pool-a
+  labelKey:
+    type: string
+    description: Label key for associated nodes to the Node Pool (with value as in labelValue)
+    example: node-type
+  labelValue:
+    type: string
+    description: Label value for associated nodes to the Node Pool (with key as in labelKey)
+    example: type-x
+  # Accepted from pre-3.0 callers and discarded. These endpoints reject unknown
+  # fields, so dropping it outright would 400 any caller that still sends it.
+  # Never stored and never returned.
+  overProvisioningRatio:
+    type: integer
+    deprecated: true
+    nullable: true
+  placementStrategy:
+    $ref: './LegacyPlacementStrategy.yaml'

@@ -1,0 +1,40 @@
+get:
+  summary: Get inference workload revisions by id.
+  description: Retrieve the details of inference workload revisions by workload id. Supported for clusters v2.21+.
+  operationId: get_inference_workload_revisions
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/revisions_api_test.go
+  x-authorize:
+    resource-type: inferences
+    action: read
+    resource-id: workloadId
+  tags:
+    - Revisions
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+    - $ref: '../parameters/query/Deleted.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - revisions
+            properties:
+              revisions:
+                type: array
+                items:
+                  $ref: "../schemas/Revisions/Revision.yaml"
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,9 @@
+name: architecture
+in: path
+required: true
+description: The architecture type.
+schema:
+  type: string
+  maxLength: 10
+  minLength: 4
+  example: arm64

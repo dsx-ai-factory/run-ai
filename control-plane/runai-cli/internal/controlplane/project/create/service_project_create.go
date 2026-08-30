@@ -1,0 +1,30 @@
+package create
+
+import (
+	"context"
+
+	"github.com/run-ai/runai/control-plane/runai-cli/internal/transaction"
+	openapi "github.com/run-ai/runai/runai-clients/org-unit-service-client/generated"
+)
+
+const (
+	TimerCreate = "project_create_timer"
+)
+
+type ProjectCreator interface {
+	CreateProject(ctx context.Context, creationRequest *openapi.ProjectCreationRequest) (*openapi.Project, error)
+}
+
+type ProjectService struct {
+	projectClient ProjectCreator
+}
+
+func NewProjectService(projectCreator ProjectCreator) *ProjectService {
+	return &ProjectService{projectClient: projectCreator}
+}
+
+func (ps *ProjectService) Project(txn *transaction.Txn, request *openapi.ProjectCreationRequest) (*openapi.Project, error) {
+	ptnId := txn.AddTimer(TimerCreate)
+	defer txn.StopTimer(ptnId)
+	return ps.projectClient.CreateProject(txn.GetCtx(), request)
+}

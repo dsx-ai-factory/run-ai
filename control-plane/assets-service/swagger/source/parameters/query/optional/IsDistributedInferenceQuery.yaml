@@ -1,0 +1,7 @@
+name: isDistributedInference
+in: query
+required: false
+description: Filter results to workload of type distributed inference.
+schema:
+  type: boolean
+allowReserved: true

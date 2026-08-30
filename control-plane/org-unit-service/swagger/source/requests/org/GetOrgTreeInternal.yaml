@@ -1,0 +1,32 @@
+get:
+  summary: Get internal org tree
+  operationId: get_internal_org_tree
+  x-internal: true
+  x-no-authorization: true
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/org_tree_internal_api_test.go
+  x-service: org-unit-service
+  tags:
+    - Org unit
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - orgUnits
+            properties:
+              orgUnits:
+                type: array
+                items:
+                  $ref: '../../schemas/OrgUnit.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

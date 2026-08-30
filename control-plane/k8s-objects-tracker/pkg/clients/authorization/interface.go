@@ -1,0 +1,14 @@
+package authorization
+
+import (
+	"context"
+
+	authorizationClient "github.com/run-ai/runai/control-plane/authorization/pkg/client/generated"
+	"github.com/run-ai/runai/control-plane/k8s-objects-tracker/internal/generated/pkg/api"
+)
+
+type ClientInterface interface {
+	// CheckPermittedScopes returns the scopes in which actions are permitted on a given resource type
+	// action is optional, if given - checking will be done only for the specific action.
+	CheckPermittedScopes(ctx context.Context, resourceType authorizationClient.ResourceType, action *authorizationClient.Action) (*authorizationClient.PermittedScopesActions, *api.Error)
+}

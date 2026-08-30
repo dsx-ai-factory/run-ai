@@ -1,0 +1,6 @@
+name: scopeId
+in: query
+required: false
+description: The id of the cluster, department or project, depending on the scope type.
+schema:
+  type: string

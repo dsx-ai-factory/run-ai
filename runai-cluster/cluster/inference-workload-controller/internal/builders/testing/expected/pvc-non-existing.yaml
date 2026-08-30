@@ -1,0 +1,67 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    project: team-a
+    workloadKind: InferenceWorkload
+    workloadName: non-existing-pvc
+  name: non-existing-pvc
+  namespace: runai-team-a
+spec:
+  template:
+    metadata:
+      annotations:
+        user: user.name
+      labels:
+        project: team-a
+        release: non-existing-pvc
+        run.ai/inferenceworkload: non-existing-pvc
+        workloadKind: InferenceWorkload
+        workloadName: non-existing-pvc
+    spec:
+      containers:
+      - image: image
+        imagePullPolicy: Always
+        name: ""
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources:
+          limits:
+            nvidia.com/gpu: "1"
+        volumeMounts:
+        - mountPath: /tmp/ofer
+          name: pvc-volume-0
+      enableServiceLinks: false
+      schedulerName: runai-scheduler
+      volumes:
+      - name: pvc-volume-0
+        persistentVolumeClaim:
+          claimName: pvc-non-existing-pvc-0
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: service
+    createdBy: Service
+    project: team-a
+    release: non-existing-pvc
+    workloadKind: InferenceWorkload
+    workloadName: non-existing-pvc
+  name: pvc-non-existing-pvc-0
+  namespace: runai-team-a
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  storageClassName: storage
+status: {}

@@ -1,0 +1,16 @@
+required:
+  - name
+properties:
+  name:
+    description: A unique name of this connection.
+      This name correlates between the connection information specified at the environment asset, to the information about the connection as specified in SpecificEnv for a specific workspace.
+    type: string
+    minLength: 1
+  isExternal:
+    description: Internal tools (isExternal=false) are tools that run as part of the container. External tools (isExternal=true) run outside the container, typically in the cloud.
+    type: boolean
+    default: false
+  internalToolInfo:
+    $ref: "./InternalToolInfo.yaml"
+  externalToolInfo:
+    $ref: "./ExternalToolInfo.yaml"

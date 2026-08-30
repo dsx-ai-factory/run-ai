@@ -1,0 +1,8 @@
+name: templateName
+in: query
+description: The name of the template.
+required: true
+schema:
+  type: string
+  example: my-template-name
+  minLength: 1

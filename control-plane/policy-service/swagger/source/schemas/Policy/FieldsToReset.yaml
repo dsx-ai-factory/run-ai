@@ -1,0 +1,8 @@
+description: set of fields in jsonpath format that is requested to clear their policy (default and rules)
+type: array
+items:
+  type: string
+  pattern: .*
+example:
+  - master.security.runAsGpu
+  - worker.compute.gpu

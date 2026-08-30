@@ -1,0 +1,14 @@
+name: filterBy
+in: query
+required: false
+description: |
+  Filter results by username. Use the format field-name operator value. Supported operators are == (exact match) and =@ (contains).
+  Multiple entries (up to 25) are allowed only with the == operator.
+schema:
+  type: array
+  maxItems: 25
+  items:
+    type: string
+    pattern: "^username(==|=@).+$"
+  example: ["username==test@run.ai"]
+explode: false

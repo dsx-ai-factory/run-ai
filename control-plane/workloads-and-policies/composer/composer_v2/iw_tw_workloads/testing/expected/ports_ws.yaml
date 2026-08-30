@@ -1,0 +1,122 @@
+BatchJobTarget:
+  Config:
+    networking:
+    - services:
+      - spec:
+          name: job-ports-cip
+          ports:
+          - name: port-8080
+            port: 32010
+            protocol: TCP
+            targetPort: 8080
+          selector:
+            release: ports
+          type: ClusterIP
+    - services:
+      - spec:
+          name: job-ports-lb
+          ports:
+          - name: port-8081
+            port: 8081
+            protocol: TCP
+            targetPort: 8081
+          selector:
+            release: ports
+          type: LoadBalancer
+    - services:
+      - spec:
+          name: job-ports-np
+          ports:
+          - name: port-8082
+            port: 8082
+            protocol: TCP
+            targetPort: 8082
+          selector:
+            release: ports
+          type: NodePort
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: ports
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: ports
+      name: ports
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: ports
+            workloadKind: Workspace
+            workloadName: ports
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: ports
+            image: ubuntu
+            name: ports
+            resources: {}
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections:
+    - connectionType: NodePort
+      containerPort: 8080
+      correlationName: port
+      name: my-jupyter
+      portResourceName: port-8080
+      serviceResourceName: job-ports-cip
+      toolType: jupyter
+    - connectionType: LoadBalancer
+      containerPort: 8081
+      correlationName: port-1
+      name: port-1
+      portResourceName: port-8081
+      serviceResourceName: job-ports-lb
+      toolType: tensor
+    - connectionType: NodePort
+      containerPort: 8082
+      correlationName: port-2
+      name: my-tool
+      portResourceName: port-8082
+      serviceResourceName: job-ports-np
+      toolType: ""
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: ports, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: ports, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

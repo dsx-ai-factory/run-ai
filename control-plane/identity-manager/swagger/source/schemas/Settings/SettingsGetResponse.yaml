@@ -1,0 +1,8 @@
+type: object
+properties:
+  autoRedirectSSO:
+    $ref: "./AutoRedirectSsoSetting/GetAutoRedirectSsoSetting.yaml"
+  browserSessionTimeout:
+    $ref: "./BrowserSessionTimeoutSetting/GetBrowserSessionTimeoutSetting.yaml"
+  logoutRedirectUri:
+    $ref: "./LogoutRedirectUriSetting/GetLogoutRedirectUriSetting.yaml"

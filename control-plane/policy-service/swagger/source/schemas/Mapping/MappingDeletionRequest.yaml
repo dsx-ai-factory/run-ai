@@ -1,0 +1,17 @@
+type: object
+description: The workload type identifying the mapping to delete.
+required:
+  - workloadType
+properties:
+  workloadType:
+    description: >-
+      The Kubernetes group, version, and kind of the workload type whose mapping
+      is deleted.
+    allOf:
+      - $ref: "../../../../../workloads-manager/swagger/source/schemas/WorkloadsV2/GVK.yaml"
+
+example:
+  workloadType:
+    group: apps
+    kind: Deployment
+    version: v1

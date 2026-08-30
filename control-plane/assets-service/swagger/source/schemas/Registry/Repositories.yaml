@@ -1,0 +1,7 @@
+required:
+  - repositories
+properties:
+  repositories:
+    type: array
+    items:
+      type: string

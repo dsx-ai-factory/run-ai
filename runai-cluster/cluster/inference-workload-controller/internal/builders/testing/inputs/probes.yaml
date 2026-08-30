@@ -1,0 +1,42 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  name: probes
+  namespace: runai-team-a
+spec:
+  readinessProbe:
+    values:
+      initialDelaySeconds:
+        value: 1
+      periodSeconds:
+        value: 2
+      timeoutSeconds:
+        value: 3
+      successThreshold:
+        value: 4
+      failureThreshold:
+        value: 5
+      httpGetPort:
+        value: 8080
+      httpGetPath:
+        value: /ready
+      httpGetScheme:
+        value: HTTPS
+  ports:
+    items:
+      port-80:
+        value:
+          serviceType: ServingPort
+          container: 80
+  usage: Submit
+  image:
+    value: image
+  imagePullPolicy:
+    value: Always
+  name:
+    value: probes
+  gpu:
+    value: "1"
+  username:
+    value: user.name
+status: {}

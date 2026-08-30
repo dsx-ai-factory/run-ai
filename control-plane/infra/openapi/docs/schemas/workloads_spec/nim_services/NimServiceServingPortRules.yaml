@@ -1,0 +1,24 @@
+description: A port for accessing the inference service
+properties:
+  serviceType:
+    $ref: "./ServingPortServiceTypeRules.yaml"
+  port:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  grpcPort:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  metricsPort:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  exposeExternally:
+    $ref: "../../policy_rules/BooleanRules.yaml"
+  exposedUrl:
+    $ref: "../../policy_rules/StringRules.yaml"
+  exposedProtocol:
+    $ref: "./ServingPortExposedProtocolRules.yaml"
+  authorizationType:
+    $ref: "./NimServiceServingPortAuthorizationTypeRules.yaml"
+  authorizedUsers:
+    $ref: "../../policy_rules/ArrayRules.yaml"
+  authorizedGroups:
+    $ref: "../../policy_rules/ArrayRules.yaml"
+nullable: true
+type: object

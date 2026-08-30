@@ -1,0 +1,50 @@
+{{- if .Values.crdUpgrader.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: runai-crd-upgrader
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": pre-upgrade, pre-install
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
+    {{- include "jobAnnotations" . | nindent 4 }}
+  labels:
+    {{- include "jobLabels" . | nindent 4 }}
+spec:
+  template:
+    metadata:
+      name: runai-crd-upgrader
+      annotations:
+        {{- include "jobAnnotations" . | nindent 8 }}
+      labels:
+        {{- include "jobLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Values.global.serviceAccountName | default "runai-crd-upgrader" }}
+      # The CRD upgrader requires in-cluster Kubernetes API credentials.
+      automountServiceAccountToken: true
+      containers:
+        - name: runai-crd-upgrader
+          image: {{ include "crdUpgrader.image" . }}
+          imagePullPolicy: {{ .Values.crdUpgrader.image.pullPolicy }}
+          args:
+            - {{ printf "--established-timeout=%s" .Values.crdUpgrader.establishedTimeout | quote }}
+          env:
+            - name: GODEBUG
+              value: {{ printf "fips140=%s" (include "globalFipsMode" .) | quote }}
+          resources:
+            {{- toYaml .Values.crdUpgrader.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+      restartPolicy: OnFailure
+      imagePullSecrets: {{ include "imagePullSecretList" .| nindent 8 }}
+      affinity: {{- include "deploymentAffinity" .| nindent 8 }}
+      tolerations: {{- include "deploymentTolerations" .| nindent 8 }}
+{{- end }}

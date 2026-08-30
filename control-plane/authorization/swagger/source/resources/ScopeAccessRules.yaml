@@ -1,0 +1,89 @@
+delete:
+  summary: Delete access rules that assigned to the requested scope resource
+  operationId: delete_scope_access_rules
+  x-service: authorization
+  x-internal: true
+  x-test-coverage: not-applicable
+  x-no-authorization: true
+  tags:
+    - Internal
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ScopeType.yaml"
+    - $ref: "../parameters/query/ScopeId.yaml"
+    - $ref: "../parameters/query/LastUpdated.yaml"
+    - $ref: "../parameters/query/Roles.yaml"
+  responses:
+    204:
+      $ref: '../../../../infra/openapi/docs/responses/204NoContent.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+put:
+  summary: Update access rules that assigned to the requested scope resource
+  operationId: update_scope_access_rules
+  x-service: authorization
+  x-test-coverage: not-applicable
+  x-no-authorization: true
+  tags:
+    - Internal
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ScopeType.yaml"
+    - $ref: "../parameters/query/ScopeId.yaml"
+  requestBody:
+    description: The access rule fields to update.
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - scopeName
+          properties:
+            scopeName:
+              type: string
+              example: "team-a"
+  responses:
+    204:
+      $ref: '../../../../infra/openapi/docs/responses/204NoContent.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+get:
+  summary: Get access rules that assigned to the requested scope resource
+  operationId: get_scope_access_rules
+  x-service: authorization
+  x-test-coverage: not-applicable
+  x-no-authorization: true
+  tags:
+    - Internal
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml"
+    - $ref: "../parameters/query/Roles.yaml"
+    - $ref: "../parameters/query/DepartmentIds.yaml"
+    - $ref: "../parameters/query/ProjectIds.yaml"
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - totalRecords
+              - displayRecords
+              - accessRules
+            properties:
+              totalRecords:
+                type: integer
+                example: 1
+              displayRecords:
+                type: integer
+                example: 1
+              accessRules:
+                $ref: '../schemas/AccessRules/AccessRules.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

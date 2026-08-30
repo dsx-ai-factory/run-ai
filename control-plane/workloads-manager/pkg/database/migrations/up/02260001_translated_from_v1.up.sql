@@ -1,0 +1,5 @@
+
+ALTER TABLE workloads_queue
+    ADD COLUMN IF NOT EXISTS translated_from_v1 BOOLEAN NOT NULL DEFAULT FALSE;
+
+

@@ -1,0 +1,6 @@
+name: statusInfo
+in: query
+required: false
+description: Whether the query should include asset status information as part of the response.
+schema:
+  type: boolean

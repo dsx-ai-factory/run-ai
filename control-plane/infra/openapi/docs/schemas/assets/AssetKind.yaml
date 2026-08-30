@@ -1,0 +1,22 @@
+description: The kind of the asset.
+type: string
+minLength: 1
+enum:
+  - compute
+  - environment
+  - accessKey
+  - dockerRegistry
+  - password
+  - genericSecret
+  - registry
+  - s3
+  - git
+  - nfs
+  - pvc
+  - hostPath
+  - workload-template
+  - model
+  - config-map
+  - secret-volume
+  - data-volume
+  - ngcApiKey

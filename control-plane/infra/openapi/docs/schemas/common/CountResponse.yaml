@@ -1,0 +1,8 @@
+type: object
+required:
+  - count
+properties:
+  count:
+    type: integer
+    format: int64
+    example: 1

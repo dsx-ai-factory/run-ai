@@ -1,0 +1,79 @@
+name: Pull Request Backporting
+
+on:
+  pull_request:
+    types:
+      - closed
+      - labeled
+  workflow_dispatch:
+    inputs:
+      pr_url:
+        description: "Full GitHub API URL of the PR to backport (e.g. https://api.github.com/repos/run-ai/runai/pulls/123)"
+        required: true
+      target_branch:
+        description: "Target branch to backport to (e.g. release-3.0 or v2.26)"
+        required: true
+      bp_branch_name:
+        description: "Backport branch name override (e.g. bp-master-my-feature). Defaults to action's naming scheme."
+        required: false
+
+permissions: {}
+
+jobs:
+  backporting:
+    name: Backporting
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.fork == false
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - name: Check Labels and Extract Branch Names
+        id: check_and_extract
+        if: github.event_name != 'workflow_dispatch'
+        env:
+          EVENT_ACTION: ${{ github.event.action }}
+          PR_LABELS_JSON: ${{ toJson(github.event.pull_request.labels) }}
+          EVENT_LABEL_NAME: ${{ github.event.label.name }}
+        run: |
+          set -euo pipefail
+          branches_list=""
+          labels=""
+
+          if [[ "$EVENT_ACTION" == "closed" ]]; then
+            labels=$(jq -r '.[].name' <<< "$PR_LABELS_JSON")
+          else
+            labels="$EVENT_LABEL_NAME"
+          fi
+          echo "$labels"
+
+          for label in $labels; do
+            echo "Checking label: $label"
+            if [[ "$label" == backport-* ]]; then
+              echo "Found backport label: $label"
+              echo "backport_match=true" >> $GITHUB_OUTPUT
+              branches_list="$branches_list,${label#backport-}"
+            fi
+          done
+
+          branches_list="${branches_list#,}"
+          echo "Got branches: $branches_list"
+          echo "BRANCH_NAME=$branches_list" >> $GITHUB_OUTPUT
+
+      - name: Backporting (pull_request)
+        uses: kiegroup/git-backporting@v4
+        if: github.event_name != 'workflow_dispatch' && steps.check_and_extract.outputs.backport_match == 'true' && github.event.pull_request.merged == true
+        with:
+          target-branch: ${{ steps.check_and_extract.outputs.BRANCH_NAME }}
+          pull-request: ${{ github.event.pull_request.url }}
+          auth: ${{ secrets.GIT_HUB_OSS }}
+
+      - name: Backporting (manual)
+        uses: kiegroup/git-backporting@v4
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          target-branch: ${{ inputs.target_branch }}
+          pull-request: ${{ inputs.pr_url }}
+          bp-branch-name: ${{ inputs.bp_branch_name }}
+          auth: ${{ secrets.GIT_HUB_OSS }}

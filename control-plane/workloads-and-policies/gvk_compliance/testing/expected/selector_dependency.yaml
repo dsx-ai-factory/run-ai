@@ -1,0 +1,48 @@
+policy:
+  effectiveRules:
+  - enforcements:
+    - set:
+        key: injected-by-policy
+        value: "true"
+    field: annotations
+    sourceOfRule: null
+    specSelector: templateMetadata
+  - enforcements:
+    - set:
+        key: root-annotation
+        value: present
+    field: annotations
+    sourceOfRule: null
+    specSelector: workloadMetadata
+  - enforcements:
+    - set:
+        key: service-annotation
+        value: from-policy
+    field: annotations
+    selectorParams:
+      serviceName: svc-a
+    sourceOfRule: null
+    specSelector: servicePodMetadata
+  workloadType:
+    group: test
+    kind: TestWorkload
+    version: v1
+workload:
+  apiVersion: test/v1
+  kind: TestWorkload
+  metadata:
+    annotations:
+      root-annotation: present
+    name: test-workload
+  spec:
+    replicas: 1
+    services:
+    - extraPodMetadata:
+        annotations:
+          service-annotation: from-policy
+      name: svc-a
+      port: 8080
+    template:
+      metadata:
+        annotations:
+          injected-by-policy: "true"

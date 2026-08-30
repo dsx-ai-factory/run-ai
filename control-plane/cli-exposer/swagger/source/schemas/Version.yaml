@@ -1,0 +1,23 @@
+type: object
+required:
+  - sdkVersion
+  - cpVersion
+  - needUpgrade
+properties:
+  sdkVersion:
+    type: string
+    maxLength: 100
+    minLength: 1
+    example: "2.0.0"
+    description: The version of the CLI SDK
+  cpVersion:
+    type: string
+    maxLength: 100
+    minLength: 1
+    example: "2.50.0"
+    description: The version of the CP
+  needUpgrade:
+    type: boolean
+    default: false
+    example: false
+    description: Whether the CLI needs to be upgraded

@@ -1,0 +1,45 @@
+policy:
+  id: test-policy
+  effectiveRules:
+    # Scalar at .spec.innerSpec.layer1.layer11.scalar
+    # innerSpec doesn't exist, so the spec selector returns null and this rule won't apply
+    - field: deepScalar
+      type: string
+      specSelector: innerSpec
+      enforcements:
+        - set: { value: deep }
+        - options: [ "deep" ]
+
+    # Map at .spec.innerSpec.layer2.layer22.map
+    # innerSpec doesn't exist, so the spec selector returns null and this rule won't apply
+    - field: deepMap
+      specSelector: innerSpec
+      enforcements:
+        - set: { key: keyX, value: xxx }
+        - set: { key: keyY, value: yyy }
+
+  breakdown:
+    fields:
+      deepScalar:
+        - specSelectors: [innerSpec]
+          formatter:
+            builtin: KeyValue
+          specRef: layer1.layer11.scalar
+
+      deepMap:
+        - specSelectors: [innerSpec]
+          formatter:
+            builtin: KeyValueMap
+          specRef: layer2.layer22.map
+
+    specSelectors:
+      innerSpec:
+        query: "( .spec.innerSpec )"
+
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: test
+  spec:
+    replicas: 1

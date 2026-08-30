@@ -1,0 +1,7 @@
+description: Limitations on the CPU memory to allocate for this workload (1G, 20M, .etc). The system guarantees that this workload will not be able to consume more than this amount of memory. The workload will receive an error when trying to allocate more memory than this limit.
+type: string
+pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+##WAIT_FOR_35331## minLength: 1
+maxLength: 63
+example: 30M
+nullable: true

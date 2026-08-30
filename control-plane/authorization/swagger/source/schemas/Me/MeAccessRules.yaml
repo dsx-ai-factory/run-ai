@@ -1,0 +1,4 @@
+type: array
+items:
+  $ref: './MeAccessRule.yaml'
+x-schema-name: MeAccessRules

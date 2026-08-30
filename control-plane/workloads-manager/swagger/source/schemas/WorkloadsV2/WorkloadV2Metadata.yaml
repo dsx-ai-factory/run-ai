@@ -1,0 +1,3 @@
+allOf:
+  - $ref: "./WorkloadV2MetadataResponse.yaml"
+  - $ref: "./WorkloadV2MetadataAutoFill.yaml"

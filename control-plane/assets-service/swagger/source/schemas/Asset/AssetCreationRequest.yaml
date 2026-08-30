@@ -1,0 +1,12 @@
+allOf:
+  - $ref: "./AssetUpdatableFields.yaml"
+  - $ref: "./AssetCreationFields.yaml"
+example:
+  name: my-asset
+  scope: tenant
+  workloadSupportedTypes:
+    workspace: false
+    training: false
+    inference: false
+    distributed: true
+    distFramework: "TF"

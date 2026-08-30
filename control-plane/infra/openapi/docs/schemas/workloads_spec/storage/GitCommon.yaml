@@ -1,0 +1,31 @@
+properties:
+  repository:
+    description: URL to a remote Git repository. The content of this repository will be mapped to the
+      container running the workload. (mandatory)
+    type: string
+    minLength: 1
+    maxLength: 2048
+    example: https://github.com/my-git/my-repo
+    nullable: true
+  branch:
+    description: Specific branch to synchronize the repository from.
+    type: string
+    minLength: 1
+    maxLength: 63
+    example: main
+    nullable: true
+  revision:
+    description: Specific revision to synchronize the repository from.
+    type: string
+    minLength: 1
+    maxLength: 63
+    nullable: true
+  path:
+    description: Local path within the workload to which the Git repository will be mapped (mandatory).
+    type: string
+    minLength: 1
+    maxLength: 4096
+    example: /container/my-repository
+    nullable: true
+nullable: true
+type: object

@@ -1,0 +1,7 @@
+type: object
+properties:
+    permissions:
+        $ref: "./StorageClassPermissions.yaml"
+    customization:
+        $ref: "./StorageClassCustomization.yaml"
+

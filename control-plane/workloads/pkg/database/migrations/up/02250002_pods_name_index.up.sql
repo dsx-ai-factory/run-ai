@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_pods_name ON pods (name);

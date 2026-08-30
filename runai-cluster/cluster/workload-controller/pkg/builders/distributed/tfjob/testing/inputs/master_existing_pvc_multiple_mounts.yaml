@@ -1,0 +1,71 @@
+apiVersion: run.ai/v2alpha1
+kind: DistributedWorkload
+metadata:
+  name: job-1
+  namespace: runai-team-a
+  uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+spec:
+  jobType: TFJob
+  name:
+    value: job-1
+  pvcs:
+    items:
+      pvc-0:
+        value:
+          existingPvc: true
+          path: /tmp/path1
+          readOnly: true
+          claimName: existing
+      pvc-1:
+        value:
+          existingPvc: true
+          path: /tmp/path2
+          readOnly: true
+          claimName: existing
+      pvc-2:
+        value:
+          existingPvc: true
+          path: /tmp/path3
+          readOnly: true
+          claimName: existing2
+      pvc-3:
+        value:
+          claimName: non-existing
+          path: /tmp/path4
+          size: 10M
+          storageClass: local-storage
+      pvc-4:
+        value:
+          path: /tmp/path5
+          size: 10M
+          storageClass: local-storage
+  workers:
+    value: 1
+  username:
+    value: user.name
+masterSpec:
+  pvcs:
+    items:
+      pvc-5:
+        value:
+          existingPvc: true
+          path: /tmp/path6
+          readOnly: true
+          claimName: existing3
+      pvc-6:
+        value:
+          existingPvc: true
+          path: /tmp/path7
+          readOnly: true
+          claimName: existing3
+      pvc-7:
+        value:
+          claimName: non-existing
+          path: /tmp/path8
+          size: 10M
+          storageClass: local-storage
+      pvc-8:
+        value:
+          path: /tmp/path9
+          size: 10M
+          storageClass: local-storage

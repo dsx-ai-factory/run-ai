@@ -1,0 +1,17 @@
+type: object
+properties:
+  value:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        nullable: true
+  displayName:
+    type: string
+    readOnly: true
+  description:
+    type: string
+    readOnly: true
+  stage:
+    type: string
+    readOnly: true

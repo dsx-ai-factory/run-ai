@@ -1,0 +1,15 @@
+x-internal: true
+description: link template to assets. this means that values are obtained from the asset
+  and any change to the assets is reflected in the template
+properties:
+  environment:
+    $ref: "../assets/AssetIdOptional.yaml"
+  compute:
+    $ref: "../assets/AssetIdOptional.yaml"
+  datasources:
+    type: array
+    items:
+      $ref: "../assets/AssetId.yaml"
+    example:
+      - befeeb6e-8db0-4fa2-a772-faa80fc985a3
+      - 7149cd9e-dbed-424e-880d-70e84027fbc8

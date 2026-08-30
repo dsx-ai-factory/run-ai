@@ -1,0 +1,141 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      template: test-s3
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      kai.scheduler/preemptibility: non-preemptible
+      priorityClassName: build
+      project: team-a
+      release: test-s3
+      workloadKind: InteractiveWorkload
+      workloadName: test-s3
+    name: job-3
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 0
+    completions: 1
+    maxIdleDurationSeconds: 1200
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          user: user.name
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          kai.scheduler/preemptibility: non-preemptible
+          priorityClassName: build
+          project: team-a
+          release: test-s3
+          run.ai/top-owner-uid: ""
+          workloadKind: InteractiveWorkload
+          workloadName: test-s3
+      spec:
+        containers:
+        - image: ubuntu
+          imagePullPolicy: Always
+          name: job-3
+          resources: {}
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+          - mountPath: /home/mydata1
+            mountPropagation: HostToContainer
+            name: s3-0
+          - mountPath: /home/mydata2
+            mountPropagation: HostToContainer
+            name: s3-1
+        - command:
+          - goofys
+          - -f
+          - --dir-mode
+          - "0777"
+          - --file-mode
+          - "0777"
+          - -o
+          - allow_other
+          - --debug_s3
+          - --uid
+          - "501"
+          - --gid
+          - "20"
+          - ofer-bucket-1
+          - /home/mydata1
+          env:
+          - name: AWS_ACCESS_KEY_ID
+            value: aaabbbccc
+          - name: AWS_SECRET_ACCESS_KEY
+            value: dddeeefff
+          image: runai.jfrog.io/op-containers-prod/goofys
+          imagePullPolicy: IfNotPresent
+          name: s3-fs-0
+          resources: {}
+          securityContext:
+            privileged: true
+          volumeMounts:
+          - mountPath: /home/mydata1
+            mountPropagation: Bidirectional
+            name: s3-0
+          - mountPath: /etc/ssl/certs/s3-key.pem
+            name: s3-secret.pem
+            subPath: s3-key.pem
+        - command:
+          - goofys
+          - -f
+          - --dir-mode
+          - "0777"
+          - --file-mode
+          - "0777"
+          - -o
+          - allow_other
+          - --debug_s3
+          - --uid
+          - "501"
+          - --gid
+          - "20"
+          - --endpoint
+          - https://s3.ofer.com
+          - ofer-bucket-2
+          - /home/mydata2
+          env:
+          - name: AWS_ACCESS_KEY_ID
+            value: ggghhhiii
+          - name: AWS_SECRET_ACCESS_KEY
+            value: jjjkkklll
+          image: runai.jfrog.io/op-containers-prod/goofys
+          imagePullPolicy: IfNotPresent
+          name: s3-fs-1
+          resources: {}
+          securityContext:
+            privileged: true
+          volumeMounts:
+          - mountPath: /home/mydata2
+            mountPropagation: Bidirectional
+            name: s3-1
+          - mountPath: /etc/ssl/certs/s3-key.pem
+            name: s3-secret.pem
+            subPath: s3-key.pem
+        restartPolicy: OnFailure
+        schedulerName: runai-scheduler
+        volumes:
+        - emptyDir: {}
+          name: s3-0
+        - emptyDir: {}
+          name: s3-1
+        - name: s3-secret.pem
+          secret:
+            defaultMode: 420
+            items:
+            - key: s3-key.pem
+              path: s3-key.pem
+            optional: true
+            secretName: s3-secret.pem
+  status: {}

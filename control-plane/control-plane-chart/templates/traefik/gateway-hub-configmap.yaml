@@ -1,0 +1,17 @@
+{{- if .Values.traefik.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "common.fullname" . }}-gateway-hub
+  labels:
+    {{- include "common.labels" . | nindent 4 }}
+data:
+  SERVICE_PORT: "8181"
+  SERVICE_NAME: "gateway-hub"
+  KEYCLOAK_URL: {{ printf "%s/auth" .Values.global.keycloakx.host | quote }}
+  {{- if .Values.global.multiTenancy.enabled }}
+  MANAGEMENT_REALM: {{ .Values.global.management.name | quote }}
+  {{- end }}
+  TENANTS_MANAGER_URL: {{ printf "http://%s-%s:%s" .Values.fullnameOverride .Values.tenantsManager.name (.Values.tenantsManager.service.port | toString) | quote }}
+  CLUSTER_SERVICE_URL: {{ printf "http://%s-%s:%s" .Values.fullnameOverride .Values.clusterService.name (.Values.clusterService.service.port | toString) | quote }}
+{{- end }}

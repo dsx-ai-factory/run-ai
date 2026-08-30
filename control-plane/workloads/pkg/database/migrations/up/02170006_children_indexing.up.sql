@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_workloads_children_type ON workloads_children (workload_id, child_type);

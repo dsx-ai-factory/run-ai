@@ -1,0 +1,23 @@
+required:
+  - clusterId
+  - status
+properties:
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  status:
+    description: Policy sync status of the cluster
+    type: string
+    enum:
+      - Not ready
+      - Applying
+      - Failed
+      - Ready
+      - Pending deletion
+      - Deleting
+      - Deleted
+      - Deletion failed
+  errorMessage:
+    description: In case sync failed, holds the error message received from the cluster
+    type: string
+    nullable: true
+type: object

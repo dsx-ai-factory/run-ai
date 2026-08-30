@@ -1,0 +1,47 @@
+get:
+  summary: Get project metrics data.
+  operationId: get_project_metrics
+  description: Retrieves project data metrics from the metrics database. Use in reporting and analysis tools.
+  x-service: org-unit-service
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/metrics_v1_api_test.go
+  x-authorize:
+    resource-type: project
+    action: read
+    resource-id: projectId
+  tags:
+    - Projects
+  parameters:
+    - $ref: "../../parameters/ProjectId.yaml"
+    - $ref: "../../parameters/OrgUnitMetricTypes.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/mandatory/StartRequired.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/mandatory/EndRequired.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/NumberOfSamples.yaml"
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/FilterByNodepoolName.yaml'
+    - $ref: '../../parameters/MetricsGroupBy.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../infra/openapi/docs/schemas/metrics/MetricsResponse.yaml'
+        text/csv: { }
+    207:
+      description: Partial success.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../infra/openapi/docs/schemas/metrics/MetricsResponse.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,16 @@
+apiVersion: run.ai/v1alpha1
+kind: DistributedInferenceWorkload
+metadata:
+  name: test-lws
+  namespace: runai-team-a
+spec:
+  servingPorts:
+    items:
+      serving-port:
+        value:
+          port: 8080
+          authorizationType: authenticatedUsers
+          authorizedGroups: group1, group2
+leaderSpec:
+  image:
+    value: image

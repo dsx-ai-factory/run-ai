@@ -1,0 +1,154 @@
+{
+  "events": [
+    {
+      "createdAt": "2025-12-15T08:58:39Z",
+      "id": "a4674fd4-2b2a-4eff-8ebd-a7d81413ba7f",
+      "type": "Warning",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "\n<runai-cluster-control-plane>: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.\n<runai-cluster-system-0-0>: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.\n<runai-cluster-system-0-1>: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.\n<runai-cluster-worker-0-0>: node(s) didn't match Pod's node affinity/selector.\nno nodes with enough resources were found.",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "0261a663-48d6-4d26-ac71-6ae7d883f531",
+        "kind": "Pod",
+        "name": "my-training-demo-123-0-0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:39Z",
+      "id": "7fb0e89c-782b-47be-8a5d-fbe38e110557",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "PodSchedulingErrors: Resources were not found for pod runai-team-b/my-training-demo-123-0-0 due to: no nodes with enough resources were found: 1 node(s) didn't match Pod's node affinity/selector. \n3 node(s) didn't have enough resources: GPUs.\n",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "4e55ff63-55f6-4b10-87fa-f6e073469c38",
+        "kind": "PodGroup",
+        "name": "pg-my-training-demo-123-0-2019b712-da03-4170-b236-b27cd5356a13",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:39Z",
+      "id": "526aa6c1-8176-4eea-8e95-88c8d8292039",
+      "type": "Warning",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "\n<runai-cluster-control-plane>: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.\n<runai-cluster-system-0-0>: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.\n<runai-cluster-system-0-1>: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.\n<runai-cluster-worker-0-0>: node(s) didn't match Pod's node affinity/selector.\nno nodes with enough resources were found.",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "8715fb16-1ed4-4046-a8da-a2881e623d06",
+        "kind": "Pod",
+        "name": "my-training-demo-123-1-0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:39Z",
+      "id": "e657a850-b569-49d5-9dc4-f7779ef4e5a3",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "PodSchedulingErrors: Resources were not found for pod runai-team-b/my-training-demo-123-1-0 due to: no nodes with enough resources were found: 1 node(s) didn't match Pod's node affinity/selector. \n3 node(s) didn't have enough resources: GPUs.\n",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "a010e068-5aff-4f48-b7d9-2e65adfaec3c",
+        "kind": "PodGroup",
+        "name": "pg-my-training-demo-123-1-2019b712-da03-4170-b236-b27cd5356a13",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:37Z",
+      "id": "94b454aa-dca2-4fef-a3bb-fbb7c11391f2",
+      "type": "Warning",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "Operation cannot be fulfilled on podgroups.scheduling.run.ai \"pg-my-training-demo-123-1-2019b712-da03-4170-b236-b27cd5356a13\": the object has been modified; please apply your changes to the latest version and try again",
+      "reason": "PodGrouperWarning",
+      "source": "pod-grouper",
+      "involvedObject": {
+        "uid": "8715fb16-1ed4-4046-a8da-a2881e623d06",
+        "kind": "Pod",
+        "name": "my-training-demo-123-1-0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:36Z",
+      "id": "320384a0-a83c-4606-b48c-9c39deaa8ead",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "Job status is Pending",
+      "reason": "Pending",
+      "source": "status-updater",
+      "involvedObject": {
+        "uid": "a010e068-5aff-4f48-b7d9-2e65adfaec3c",
+        "kind": "PodGroup",
+        "name": "pg-my-training-demo-123-1-2019b712-da03-4170-b236-b27cd5356a13",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:36Z",
+      "id": "e72abac3-1e0a-4b49-9f27-37475e1aa023",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "Job status is Pending",
+      "reason": "Pending",
+      "source": "status-updater",
+      "involvedObject": {
+        "uid": "4e55ff63-55f6-4b10-87fa-f6e073469c38",
+        "kind": "PodGroup",
+        "name": "pg-my-training-demo-123-0-2019b712-da03-4170-b236-b27cd5356a13",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:35Z",
+      "id": "a1cd6bb0-5a01-4d21-9f81-b025816ebfc9",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "Created pod: my-training-demo-123-1-0",
+      "reason": "SuccessfulCreate",
+      "source": "runaijobcontroller",
+      "involvedObject": {
+        "uid": "2019b712-da03-4170-b236-b27cd5356a13",
+        "kind": "RunaiJob",
+        "name": "my-training-demo-123",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:34Z",
+      "id": "bdec7379-4579-4c84-8a0f-4829660d1b6d",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "Scheduled for sync",
+      "reason": "Sync",
+      "source": "nginx-ingress-controller",
+      "involvedObject": {
+        "uid": "bac99484-857d-4fd0-9342-5ccc5192d0f6",
+        "kind": "Ingress",
+        "name": "tw-my-training-demo-123-0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:34Z",
+      "id": "2c410ea7-eb27-4550-9e7f-6d3a0c76a460",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "Created pod: my-training-demo-123-0-0",
+      "reason": "SuccessfulCreate",
+      "source": "runaijobcontroller",
+      "involvedObject": {
+        "uid": "2019b712-da03-4170-b236-b27cd5356a13",
+        "kind": "RunaiJob",
+        "name": "my-training-demo-123",
+        "namespace": "runai-team-b"
+      }
+    }
+  ]
+}

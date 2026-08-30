@@ -1,0 +1,11 @@
+type: string
+enum:
+  - Creating
+  - Updating
+  - Deleting
+  - Empty
+  - Unschedulable
+  - MissingPrerequisites
+  - Ready
+  - Deleted
+description: Phase of Node Pool

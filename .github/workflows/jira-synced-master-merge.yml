@@ -1,0 +1,40 @@
+name: "Jira: On merge to master or a release branch (trigger)"
+
+on:
+  pull_request:
+    branches:
+      - 'master'
+      - 'main'
+      - 'v*.*'
+      - 'release-*.*'
+    types: [closed]
+    paths:
+      - 'runai-cluster/**'
+      - 'control-plane/**'
+
+permissions:
+  contents: read
+
+jobs:
+  dispatch:
+    name: Dispatch to saas-configuration
+    # Only merged (not just closed) PRs, and skip hotfix PRs.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.merged == true &&
+      !startsWith(github.event.pull_request.title, 'hotfix')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cross-repo dispatch to saas-configuration worker
+        uses: benc-uk/workflow-dispatch@31e2b3319479a63f0ab15bf800eff9e913504e26 # v1
+        with:
+          workflow: jira-synced-master-merge.yml
+          repo: run-ai/saas-configuration
+          ref: master
+          token: ${{ secrets.GIT_HUB_OSS }}
+          inputs: |
+            {
+              "head_ref":    ${{ toJSON(github.head_ref) }},
+              "base_ref":    ${{ toJSON(github.event.pull_request.base.ref) }},
+              "source_repo": ${{ toJSON(github.repository) }}
+            }

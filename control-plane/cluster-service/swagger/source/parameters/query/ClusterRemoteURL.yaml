@@ -1,0 +1,7 @@
+name: remoteClusterUrl
+in: query
+required: false
+description: The remote URL of the runai cluster
+schema:
+  type: string
+  example: https://cluster.runai

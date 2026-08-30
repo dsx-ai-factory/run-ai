@@ -1,0 +1,93 @@
+*,
+*::after,
+*::before {
+  margin: 0;
+  padding: 0;
+  box-sizing: inherit;
+}
+
+body {
+  box-sizing: border-box;
+  font-size: 14px;
+  color: $main-font-color;
+  height: 100%;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+#app {
+  height: 100%;
+  width: 100%;
+  min-height: 100vh;
+  background-color: $body-background-color;
+}
+
+// reset css
+ol,
+ul,
+li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  @include m-link-clr;
+
+  &:link,
+  &:visited,
+  &:active {
+    text-decoration: none;
+  }
+
+  &:hover {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  line-height: inherit;
+}
+
+.loading-clr {
+  color: $black-87;
+}
+
+.active-clr {
+  color: $success;
+}
+
+.failed-clr {
+  color: $negative;
+}
+
+.pending-clr {
+  color: $warning;
+}
+
+.default-clr {
+  color: $main-font-color;
+}
+.initializing-clr {
+  color: $warning;
+}
+
+.overflow-hidden {
+  overflow: hidden !important;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.underline-on-hover {
+  &:hover {
+    text-decoration: underline;
+  }
+}

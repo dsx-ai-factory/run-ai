@@ -1,0 +1,23 @@
+type: object
+properties:
+  key:
+    description: "Key is the taint key that the toleration applies to. Empty means match all taint keys."
+    type: string
+    example: ""
+  operator:
+    type: string
+    description: "Operator represents a key's relationship to the value."
+    example: "Exists"
+  value:
+    type: string
+    description: "Value is the taint value the toleration matches to."
+    example: ""
+  effect:
+    type: string
+    description: "Effect indicates the taint effect to match. Empty means match all taint effects."
+    example: "NoExecute"
+  tolerationSeconds:
+    description: "TolerationSeconds represents the period of time the toleration (which must be of effect NoExecute, otherwise this field is ignored) tolerates the taint."
+    type: integer
+    nullable: true
+    example: "10"

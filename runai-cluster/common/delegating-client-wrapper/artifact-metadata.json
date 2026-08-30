@@ -1,0 +1,5 @@
+{
+    "service_name": "delegating-client-wrapper",
+    "artifact_type": "none",
+    "cache_artifacts": false
+  }

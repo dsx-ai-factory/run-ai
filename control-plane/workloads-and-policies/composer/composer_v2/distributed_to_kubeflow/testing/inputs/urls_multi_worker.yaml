@@ -1,0 +1,5 @@
+image: ubuntu
+numWorkers: 3
+exposedUrls:
+  - container: 8080
+    toolType: jupyter

@@ -1,0 +1,6 @@
+name: includeFallbackPolicies
+in: query
+required: false
+description: whether to include fallback policies in the list. Default to false.
+schema:
+  type: boolean

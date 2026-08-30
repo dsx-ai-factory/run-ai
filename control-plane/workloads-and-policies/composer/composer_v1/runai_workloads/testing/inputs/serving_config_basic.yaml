@@ -1,0 +1,7 @@
+image: ubuntu
+servingPort:
+  container: 8081
+  protocol: http
+servingConfiguration:
+    initializationTimeoutSeconds: 400
+    requestTimeoutSeconds: 500

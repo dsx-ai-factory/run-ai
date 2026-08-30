@@ -1,0 +1,35 @@
+policy:
+  effectiveRules:
+  - enforcements:
+    - default:
+        value: ubuntu
+    field: image
+    sourceOfRule: null
+    specSelector: allContainers
+  - enforcements:
+    - set:
+        value: false
+    field: allowPrivilegeEscalation
+    sourceOfRule: null
+    specSelector: allContainers
+  workloadType:
+    group: apps
+    kind: Deployment
+    version: v1
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: test-deployment
+  spec:
+    template:
+      spec:
+        containers:
+        - image: redhat
+          name: container-1
+          securityContext:
+            allowPrivilegeEscalation: false
+        - image: ubuntu
+          name: container-2
+          securityContext:
+            allowPrivilegeEscalation: false

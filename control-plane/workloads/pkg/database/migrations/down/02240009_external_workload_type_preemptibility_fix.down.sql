@@ -1,0 +1,1 @@
+-- This migration is not applicable for down migrations as it only involves data correction.

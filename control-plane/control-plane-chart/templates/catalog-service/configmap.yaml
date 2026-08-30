@@ -1,0 +1,30 @@
+{{- if .Values.catalogService.enabled }}
+{{- include "common.configMap" (list . .Values.catalogService "control-plane.catalogService.configmap") }}
+{{- end }}
+
+{{- define "control-plane.catalogService.configmap" -}}
+{{- $top := first . }}
+data:
+  SERVICE_PORT: {{ $top.Values.catalogService.service.port | quote }}
+  SERVICE_NAME: {{ $top.Values.catalogService.name | quote }}
+  SERVER_WRITE_TIMEOUT: {{ $top.Values.catalogService.config.server.writeTimeout | quote }}
+  SERVER_READ_TIMEOUT: {{ $top.Values.catalogService.config.server.readTimeout | quote }}
+  SERVER_IDLE_TIMEOUT: {{ $top.Values.catalogService.config.server.idleTimeout | quote }}
+  TRACING_ENABLED: {{ $top.Values.catalogService.config.tracingEnabled | default $top.Values.global.config.tracingEnabled | quote }}
+  AUDIT_ENABLED: {{ $top.Values.catalogService.config.auditEnabled | default $top.Values.global.config.auditEnabled | quote }}
+  AUDIT_ENABLE_PRINT_TO_STDOUT: {{ $top.Values.catalogService.config.auditEnablePrintToStdout | default $top.Values.global.config.auditEnablePrintToStdout | quote }}
+  DB_NAME: {{ $top.Values.catalogService.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_HOST: {{ $top.Values.catalogService.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_MIGRATION_FILES: {{ $top.Values.catalogService.config.migrationFiles | quote }}
+  DB_SSL_MODE: {{ $top.Values.catalogService.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_PORT: {{ $top.Values.catalogService.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  DB_SCHEMA: {{ $top.Values.catalogService.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  TEMP_BACKEND_SETTINGS_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.tempBackendSettings.name (toString $top.Values.tempBackendSettings.service.port) }}
+  {{- $cacheEnabled := $top.Values.catalogService.config.cacheEnabled | default false }}
+  CACHE_ENABLED: {{ $cacheEnabled | quote }}
+  {{- if eq (toString $cacheEnabled) "true" }}
+  CACHE_MAX_RECORD_SIZE_KB: {{ $top.Values.catalogService.config.cacheMaxRecordSizeKb | default 10000 | quote }}
+  CACHE_MAX_STORE_SIZE_MB: {{ $top.Values.catalogService.config.cacheMaxStoreSizeMb | default 10000 | quote }}
+  CACHE_TTL_SECONDS: {{ $top.Values.catalogService.config.cacheTTLSeconds| default 600 | quote }}
+  {{- end }}
+{{- end }}

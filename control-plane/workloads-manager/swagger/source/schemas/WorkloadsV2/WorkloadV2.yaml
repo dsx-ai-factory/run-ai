@@ -1,0 +1,15 @@
+type: object
+required:
+  - metadata
+  - desiredPhase
+  - workloadManifest
+  - rawManifest
+properties:
+  metadata:
+    $ref: "./WorkloadV2Metadata.yaml"
+  desiredPhase:
+    $ref: "./DesiredPhase.yaml"
+  workloadManifest:
+    $ref: "./Manifest.yaml"
+  rawManifest:
+    $ref: "./Manifest.yaml"

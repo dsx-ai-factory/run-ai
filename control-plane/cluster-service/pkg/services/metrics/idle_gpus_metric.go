@@ -1,0 +1,38 @@
+package metrics
+
+import (
+	"github.com/google/uuid"
+	"github.com/run-ai/runai/control-plane/cluster-service/pkg/runaimetrics"
+	metrics_client "github.com/run-ai/runai/control-plane/metrics-service/pkg/client"
+)
+
+func GetIdleAllocatedGpusMetric(clusterIdsFilter []uuid.UUID, nodePoolFilter []string, metricGroupBy MetricGroupBy) metrics_client.Metric {
+	switch metricGroupBy {
+	case GroupByNode:
+		return runaimetrics.RunaiIdleAllocatedGpuCountPerNodeMetric{
+			Filters: runaimetrics.RunaiIdleAllocatedGpuCountPerNodeFilters{
+				ClusterId: clusterIdsFilter,
+				Nodepool:  nodePoolFilter,
+			},
+		}
+	case GroupByNodePool:
+		return runaimetrics.RunaiIdleAllocatedGpuCountPerNodepoolMetric{
+			Filters: runaimetrics.RunaiIdleAllocatedGpuCountPerNodepoolFilters{
+				ClusterId: clusterIdsFilter,
+				Nodepool:  nodePoolFilter,
+			},
+		}
+	case GroupByCluster:
+		return runaimetrics.RunaiIdleAllocatedGpuCountPerClusterMetric{
+			Filters: runaimetrics.RunaiIdleAllocatedGpuCountPerClusterFilters{
+				ClusterId: clusterIdsFilter,
+			},
+		}
+	default: // GroupByTenant
+		return runaimetrics.RunaiIdleAllocatedGpuCountPerTenantMetric{
+			Filters: runaimetrics.RunaiIdleAllocatedGpuCountPerTenantFilters{
+				ClusterId: clusterIdsFilter,
+			},
+		}
+	}
+}

@@ -1,0 +1,46 @@
+# PodGroup
+
+## Properties
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**JobId** | **string** |  | [default to null]
+**PodGroupId** | **string** | Unique identifier of the pod group. | [default to null]
+**PodGroupName** | **string** | Name of the pod group. | [optional] [default to null]
+**WorkloadName** | **string** | Name of the workload. | [default to null]
+**WorkloadType** | **string** | Type of the workload. | [default to null]
+**WorkloadKind** | **string** | Specifies the kind of k8s resource that owns the pod group. | [default to null]
+**ClusterUuid** | **string** | Unique identifier of the cluster. | [default to null]
+**ImageName** | **string** | The name of the image executed by the pod. | [default to null]
+**PodGroupPhase** | **string** | The phase of the pod group. | [optional] [default to null]
+**JobPhase** | **string** |  | [default to null]
+**WorkloadUser** | **string** | The owner of the pod group. | [default to null]
+**Project** | **string** | The project that the pod group belongs to. | [default to null]
+**NodeId** | **string** | Unique identifier of the node. | [optional] [default to null]
+**Created** | **int64** | Pod group creation time. | [default to null]
+**LastUpdated** | **int64** | Time of the latest update to the pod group details. | [default to null]
+**Parallelism** | **int32** | Specifies the maximum number of pods the workload is able run at any given time. | [default to null]
+**Completions** | **int32** | Specifies the number of successfully finished pods the created workload should be run with. | [default to null]
+**CurrentRequestedGpus** | **float64** |  | [default to null]
+**TotalRequestedGpus** | **float64** |  | [default to null]
+**RequestedGpusPerPodgroup** | **float64** |  | [default to null]
+**RequestedGpusMemoryPerPodgroup** | **float64** |  | [default to null]
+**ParentWorkloadName** | **string** | Specifies the Parent Workload Name | [default to null]
+**CurrentAllocatedGpus** | **float64** |  | [optional] [default to null]
+**CurrentAllocatedGpusMemory** | **float64** |  | [optional] [default to null]
+**TotalRequestedCpu** | **float64** |  | [optional] [default to null]
+**TotalRequestedMemory** | **float64** |  | [optional] [default to null]
+**TotalLimitCpu** | **float64** |  | [optional] [default to null]
+**TotalLimitMemory** | **float64** |  | [optional] [default to null]
+**CliCommand** | **string** |  | [optional] [default to null]
+**RequestedMigDevices** | **string** |  | [optional] [default to null]
+**DynamicData** | [***interface{}**](interface{}.md) |  | [optional] [default to null]
+**ExistsInCluster** | **bool** |  | [optional] [default to null]
+**JobUrlType** | **string** | Describe the content of jobUrl field, values may be (tensorboard , jupyter or &#x27;&#x27;) | [optional] 
+**IsJupyter** | **bool** | If true, it indicates that the pod group runs jupyter notebook. | [optional] [default to false]
+**JobUrl** | **string** |  | [optional] [default to null]
+**WorkspaceId** | **string** | this attribute is obsolete, use workloadId instead. | [optional] [default to null]
+**WorkloadId** | **string** | reference to the workspace which was used for the creation of the job. | [optional] [default to null]
+**NodePool** | **string** | The node pool of the podgroup. | [optional] [default to null]
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+

@@ -1,0 +1,8 @@
+x-internal: true
+description: project information that are needed for the construction of the submission form
+properties:
+  name:
+    type: string
+    description: the name of the project, for reference
+type: object
+nullable: true

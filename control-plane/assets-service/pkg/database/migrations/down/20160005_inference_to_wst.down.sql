@@ -1,0 +1,1 @@
+ALTER TABLE assets_supported_workload_types DROP COLUMN IF EXISTS inference;

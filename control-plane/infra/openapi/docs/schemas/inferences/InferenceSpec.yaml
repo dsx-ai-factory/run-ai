@@ -1,0 +1,4 @@
+description: The specifications of the inference to be created.
+properties:
+  spec:
+    $ref: "InferenceSpecSpec.yaml"

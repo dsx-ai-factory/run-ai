@@ -1,0 +1,1 @@
+ALTER TABLE assets_environment DROP COLUMN if exists probes;

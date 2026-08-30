@@ -1,0 +1,25 @@
+openapi: 3.0.0
+info:
+  version: 2.0.0
+  description: |
+    # Introduction
+
+    The NVIDIA Run:ai Management Interface API is a centralized API which enables platform owners to programmatically manage tenants, clusters, and access across a multi-tenant environment. This API is designed for use by host organizations operating the centralized control plane and is not accessible to individual tenants.
+
+    NVIDIA Run:ai APIs are accessed using bearer tokens. To obtain a token, you need to create an Application using the `api/v1/apps` endpoint, which returns a `clientId` and `clientSecret`. Then, generate an access token using the `/api/v1/token` by sending a `client_credentials` grant request with those credentials. 
+
+    To get your access token, follow the instructions in [API Access Setup](https://run-ai-docs.nvidia.com/multi-tenant/getting-started/api-access-setup).
+  title: NVIDIA Run:ai
+  x-logo:
+    url: ./runai-logo-api.png
+    altText: NVIDIA Run:ai
+    href: https://run.ai
+  license:
+    name: NVIDIA Run:ai
+    url: https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-software-license-agreement/
+paths: {}
+
+components:
+  schemas: {}
+  parameters: {}
+  responses: {}

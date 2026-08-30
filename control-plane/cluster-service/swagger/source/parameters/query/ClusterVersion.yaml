@@ -1,0 +1,7 @@
+name: version
+in: query
+required: true
+description: The cluster version to install
+schema:
+  type: string
+  example: 2.16

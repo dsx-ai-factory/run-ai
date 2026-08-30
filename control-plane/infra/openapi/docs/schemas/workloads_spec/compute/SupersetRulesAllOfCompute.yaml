@@ -1,0 +1,28 @@
+title: SupersetRulesAllOfCompute
+nullable: true
+properties:
+  cpuCoreLimit:
+    $ref: ../../policy_rules/NumberRules.yaml
+  cpuCoreRequest:
+    $ref: ../../policy_rules/NumberRules.yaml
+  cpuMemoryLimit:
+    $ref: ../../policy_rules/QuantityRules.yaml
+  cpuMemoryRequest:
+    $ref: ../../policy_rules/QuantityRules.yaml
+  extendedResources:
+    $ref: ./ExtendedResourcesRules.yaml
+  gpuDevicesRequest:
+    $ref: ../../policy_rules/IntegerRules.yaml
+  gpuMemoryLimit:
+    $ref: ../../policy_rules/QuantityRules.yaml
+  gpuMemoryRequest:
+    $ref: ../../policy_rules/QuantityRules.yaml
+  gpuPortionLimit:
+    $ref: ../../policy_rules/NumberRules.yaml
+  gpuPortionRequest:
+    $ref: ../../policy_rules/NumberRules.yaml
+  gpuRequestType:
+    $ref: ./GpuRequestRules.yaml
+  largeShmRequest:
+    $ref: ../../policy_rules/BooleanRules.yaml
+type: object

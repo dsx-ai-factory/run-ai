@@ -1,0 +1,52 @@
+openapi: 3.0.3
+info:
+  title: Temp Backend Settings Service
+  version: '1.0'
+  description: |
+    Temporary backend settings service that manages tenant-level feature flags
+    and configuration settings. Migrated from the TypeScript backend's
+    SettingController and InternalTenantController.
+  contact:
+    name: Run.AI
+    url: 'https://www.run.ai/'
+    email: support@run.ai
+servers:
+- url: 'https://app.run.ai'
+- url: 'https://staging.run.ai'
+- url: 'https://test.run.ai'
+- url: 'http://localhost:8080'
+paths:
+  /health:
+    x-internal: true
+    get:
+      summary: Health check
+      operationId: health
+      x-no-authorization: true
+      x-service: temp-backend-settings
+      tags:
+      - Health
+      responses:
+        '200':
+          description: Executed successfully.
+  /v1/k8s/setting:
+    x-scope: [ system, tenant ]
+    $ref: './resources/tenant/setting.yaml'
+  /v1/k8s/setting/{settingKey}:
+    x-scope: [ system, tenant ]
+    $ref: './resources/tenant/settingByKey.yaml'
+  /internal/tenants/all-tenants/setting/{key}:
+    x-internal: true
+    $ref: './resources/internal/tenants.yaml'
+components:
+  schemas:
+    $ref: './schemas/_index.yaml'
+  responses:
+    $ref: '../../../infra/openapi/docs/responses/_index.yaml'
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      description: Bearer authentication
+      scheme: bearer
+      type: http
+security:
+- BearerAuth: []

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: test
+spec:
+  minReadySeconds: 0
+  replicas: 1
+  selector:
+    matchExpressions:
+    - key: test
+      operator: In
+      values:
+      - v1
+      - v2
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      annotations:
+        example.com/annotation: test-value
+      labels:
+        app: test
+    spec:
+      containers:
+      - image: placeholder
+        name: test
+      initContainers:
+      - image: placeholder
+        name: test

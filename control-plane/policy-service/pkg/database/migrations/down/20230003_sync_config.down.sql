@@ -1,0 +1,1 @@
+ALTER TABLE approved_deletions DROP COLUMN IF EXISTS avoid_deletions_of_obsolete_policies;

@@ -1,0 +1,14 @@
+{{- if .Values.k8sObjectsTracker.enabled }}
+{{- include "common.deployment" (list . .Values.k8sObjectsTracker .Values.k8sObjectsTracker.autoscaling .Values.k8sObjectsTracker.serviceAccount "control-plane.k8sObjectsTracker.deployment" ) }}
+{{- end }}
+
+{{- define "control-plane.k8sObjectsTracker.deployment" -}}
+spec:
+  template:
+    spec:
+      initContainers:
+        {{- include "awaitingPostgresReadinessContainer" . | nindent 8 }}
+        {{- include "common.initContainer" . | nindent 8 }}
+      containers:
+      - {{- include "common.container" . | nindent 8 }}
+{{- end }}

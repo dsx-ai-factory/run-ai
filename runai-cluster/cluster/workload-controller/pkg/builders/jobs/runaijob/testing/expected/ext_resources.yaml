@@ -1,0 +1,57 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      template: ext_resources
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      kai.scheduler/preemptibility: non-preemptible
+      priorityClassName: build
+      project: team-a
+      release: ext_resources
+      workloadKind: InteractiveWorkload
+      workloadName: ext_resources
+    name: ext_resources
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 0
+    completions: 1
+    maxIdleDurationSeconds: 1200
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          user: ""
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          kai.scheduler/preemptibility: non-preemptible
+          priorityClassName: build
+          project: team-a
+          release: ext_resources
+          run.ai/top-owner-uid: ""
+          workloadKind: InteractiveWorkload
+          workloadName: ext_resources
+      spec:
+        containers:
+        - image: ubuntu
+          imagePullPolicy: IfNotPresent
+          name: ext_resources
+          resources:
+            limits:
+              ext/a: "5"
+              ext/b: 10M
+            requests:
+              ext/a: "5"
+              ext/b: 10M
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+        restartPolicy: Never
+        schedulerName: runai-scheduler
+  status: {}

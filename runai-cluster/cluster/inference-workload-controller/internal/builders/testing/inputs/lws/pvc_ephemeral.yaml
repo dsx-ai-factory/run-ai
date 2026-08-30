@@ -1,0 +1,28 @@
+apiVersion: run.ai/v1alpha1
+kind: DistributedInferenceWorkload
+metadata:
+  name: test-lws
+  namespace: runai-team-a
+spec:
+  workers:
+    value: 1
+  replicas:
+    value: 1
+leaderSpec:
+  image:
+    value: leader-image:latest
+  pvcs:
+    items:
+      pvc1-ephemeral:
+        value:
+          path: /tmp/new-1
+          readOnly: false
+          size: 10M
+          storageClass: storage
+          ephemeral: true
+      pvc2-new:
+        value:
+          path: /tmp/new-2
+          readOnly: false
+          size: 20M
+          storageClass: storage

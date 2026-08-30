@@ -1,0 +1,6 @@
+required:
+  - afterUpdate
+description: value that the agent sent to the afterUpdate query parameter.
+properties:
+  afterUpdate:
+    $ref: "./UpdateCount.yaml"

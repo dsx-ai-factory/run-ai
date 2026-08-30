@@ -1,0 +1,34 @@
+type: object
+required:
+- name
+- id
+- clientId
+- createdBy
+- createdAt
+- lastLogin
+
+properties:
+  name:
+    type: string
+  id:
+    type: string
+  clientId:
+    type: string
+  createdBy:
+    type: string
+  createdAt:
+    type: string
+    format: date-time
+    nullable: true
+  lastLogin:
+    type: string
+    format: date-time
+    nullable: true
+
+example:
+  name: my-access-key
+  id: 3434c-12323ab-4ce2ea6-b44fc-db344d
+  clientId: 1434c-123233ab-4ce2ea6-b44fc-db344d
+  createdBy: test@run.ai
+  createdAt: 2020-01-01T00:00:00Z
+  lastLogin: 2020-01-01T00:00:00Z

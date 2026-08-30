@@ -1,0 +1,6 @@
+type: string
+nullable: true
+enum:
+  - Master
+  - Worker
+  - Leader

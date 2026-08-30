@@ -1,0 +1,8 @@
+name: dryRun
+in: query
+required: false
+description: True to perform validations only, without side effects.
+schema:
+  type: boolean
+  example: false
+  default: false

@@ -1,0 +1,14 @@
+apiVersion: run.ai/v2alpha1
+kind: InteractiveWorkload
+metadata:
+  name: name-prefix
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  image:
+    value: ubuntu
+  namePrefix:
+    value: ofer
+  username:
+    value: user.name
+status: {}

@@ -1,0 +1,30 @@
+apiVersion: run.ai/v1alpha1
+kind: DistributedInferenceWorkload
+metadata:
+  name: test-lws
+  namespace: runai-team-a
+spec:
+  workers:
+    value: 1
+  replicas: 
+    value: 1
+leaderSpec:
+  image: 
+    value: leader-image:latest
+  command:
+    value: "/bin/bash"
+  arguments:
+    value: "-c sleep infinity"
+  environment:
+    items:
+      ENV_VAR_1:
+        value: value1
+      ENV_VAR_2:
+        value: value2
+workerSpec:
+  image:
+    value: worker-image:latest
+  environment:
+    items:
+      ENV_VAR_3:
+        value: value3

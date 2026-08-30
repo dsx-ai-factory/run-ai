@@ -1,0 +1,16 @@
+description: The ancestors of an org unit.
+type: object
+required:
+  - tenant_id
+properties:
+  tenant_id:
+    type: string
+    example: '1'
+  cluster_uuid:
+    $ref: "./ClusterIdOptional.yaml"
+  department_id:
+    $ref: "./DepartmentIdOptional.yaml"
+  project_id:
+    type: string
+    example: '1'
+    nullable: true

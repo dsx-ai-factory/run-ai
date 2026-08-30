@@ -1,0 +1,1 @@
+ALTER TABLE report_metrics DROP COLUMN IF EXISTS quantile FLOAT4;

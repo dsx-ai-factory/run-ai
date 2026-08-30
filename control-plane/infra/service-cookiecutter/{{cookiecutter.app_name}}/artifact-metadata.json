@@ -1,0 +1,7 @@
+{
+  "service_name": "{{cookiecutter.app_name}}",
+  "enabled": false,
+  "artifact_type": "container",
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/"
+}

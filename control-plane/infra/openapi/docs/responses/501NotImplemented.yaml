@@ -1,0 +1,8 @@
+description: unexpected error
+content:
+  application/json:
+    schema:
+      $ref: './Error.yaml'
+    example:
+      code: 501
+      message: "Not implemented"

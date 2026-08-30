@@ -1,0 +1,11 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+autoscaling:
+  minReplicas: 0
+  maxReplicas: 5
+  metric: throughput
+  metricThreshold: 100
+  scaleToZeroRetentionSeconds: 200
+  concurrencyHardLimit: 50

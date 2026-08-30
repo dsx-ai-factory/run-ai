@@ -1,0 +1,5 @@
+type: object
+description: Aggregated response containing all notifications settings configured for the tenant
+properties:
+  adminMessage:
+    $ref: './AdminMessage/GetAdminMessage.yaml'

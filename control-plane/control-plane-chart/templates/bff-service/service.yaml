@@ -1,0 +1,1 @@
+{{- include "common.service" (list . .Values.bffService.service .Values.bffService) }}

@@ -1,0 +1,1 @@
+ALTER TABLE realm_settings DROP CONSTRAINT if exists unique_tenant_setting;

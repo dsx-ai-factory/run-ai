@@ -1,0 +1,284 @@
+@import "quasar/src/css/variables";
+@import "quasar/src/css/core/typography";
+@import "../vendor/quasar-variables";
+
+// we wanted to use the quasar typography definition.
+// Here you can find the size/ weight for each class (I added it here for a quick view)
+// (You can find it here: https://quasar.dev/style/typography)
+
+.text-body-color {
+  color: $main-font-color;
+}
+
+.italic {
+  font-style: italic;
+}
+
+.fs-16 {
+  font-size: 16px;
+}
+
+.text-black-30 {
+  color: $black-30;
+}
+
+.text-black-40 {
+  color: $black-40;
+}
+
+.text-black-54 {
+  color: $black-54;
+}
+
+.text-soft-blue {
+  color: $soft-blue;
+}
+
+// ==========================================
+// Typography System from Figma
+// Source: https://www.figma.com/design/4JHDZ3kV0hkDeIDBLBrfcR
+// ==========================================
+
+// Headings
+
+.text-b-h1 {
+  color: var(--b-text-main);
+  font-size: 45px;
+  font-weight: 700;
+  line-height: 100%;
+  text-transform: uppercase;
+}
+
+.text-b-h4-alt {
+  color: var(--b-text-main);
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 31px;
+  text-transform: capitalize;
+}
+
+.text-b-h5-plus {
+  color: var(--b-text-main);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 28px;
+  text-transform: capitalize;
+}
+
+.text-b-h5 {
+  color: var(--b-text-main);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.text-b-h6-bold {
+  color: var(--b-text-main);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 22.5px;
+}
+
+.text-b-h6-md {
+  color: var(--b-text-main);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 22.5px;
+}
+
+.text-b-h6 {
+  color: var(--b-text-main);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 22.5px;
+}
+
+// Subtitles
+
+.text-b-subtitle1-caps {
+  color: var(--b-text-main);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  text-transform: uppercase;
+}
+
+.text-b-subtitle1 {
+  color: var(--b-text-main);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.text-b-subtitle2 {
+  color: var(--b-text-main);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 19.5px;
+}
+
+// Body Text
+
+.text-b-body1-bold {
+  color: var(--b-text-main);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 16.8px;
+}
+
+.text-b-body1-md {
+  color: var(--b-text-main);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16.8px;
+}
+
+.text-b-body1 {
+  color: var(--b-text-main);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16.8px;
+}
+
+.text-b-overline {
+  color: var(--b-text-main);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 14px;
+  text-transform: uppercase;
+}
+
+.text-b-body2 {
+  color: var(--b-text-main);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 14px;
+}
+
+// Mono
+
+.text-b-mono {
+  color: var(--b-text-main);
+  font-family: "Roboto Mono", SFMono-Regular, Consolas, Menlo, monospace;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+// Caption
+
+.text-b-caption-md {
+  color: var(--b-text-main);
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 12.5px;
+}
+
+.text-b-caption {
+  color: var(--b-text-main);
+  font-size: 9px;
+  font-weight: 400;
+  line-height: 12.5px;
+}
+
+// Monospace
+
+.text-b-mono {
+  color: var(--b-text-main);
+  font-family: "Roboto Mono", monospace;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+// ==========================================
+// Text Color Utilities (MUST come AFTER typography for cascade to work)
+// ==========================================
+.text-b-main {
+  color: var(--b-text-main);
+}
+
+.text-b-sub {
+  color: var(--b-text-sub);
+}
+
+.text-b-label {
+  color: var(--b-text-label);
+}
+
+.text-icon-default {
+  color: var(--icon-default, #707070);
+}
+
+// ==========================================
+// Legacy Typography Reference (Old Quasar)
+// ==========================================
+/*
+Headings
+
+text-caption
+font-size: 12px;
+font-weight: 400;
+
+text-body2
+font-size: 14px;
+font-weight: 400;
+
+text-body1
+font-size: 16px;
+font-weight: 400;
+
+text-subtitle2
+font-size: 14px;
+font-weight: 500;
+
+text-subtitle1
+font-size: 16px;
+font-weight: 400;
+
+text-h6/ h6
+font-size: 20px;
+font-weight: 500;
+
+text-h5/ h5
+font-size: 24px;
+font-weight: 400;
+
+text-h4/ h4
+font-size: 34px;
+font-weight: 400;
+
+text-h3/ h3
+font-size: 48px;
+font-weight: 400;
+
+text-h2/ h2
+font-size: 60px;
+font-weight: 300;
+
+text-h1/ h1
+font-size: 96px;
+font-weight: 300;
+*/
+
+/**
+Font Weights
+
+text-weight-thin
+font-weight 100
+
+text-weight-light
+font-weight 300
+
+text-weight-regular
+font-weight 400
+
+text-weight-medium
+font-weight 500
+
+text-weight-bold
+font-weight 700
+
+text-weight-bolder
+font-weight 900
+*/

@@ -1,0 +1,1 @@
+ALTER TABLE workloads_assets ADD COLUMN IF NOT EXISTS overrides jsonb;

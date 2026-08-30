@@ -1,0 +1,11 @@
+ngcAuthSecret: "ngc-secret"
+image: "nvidia/nim-llama3-8b-instruct:1.0.0"
+modelStore:
+  nimCache:
+    name: "nim-cache"
+servingPort:
+  port: 8000
+  grpcPort: 8001
+  serviceType: "LoadBalancer"
+  exposeExternally: true
+  exposedProtocol: "http"

@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS project_phase_idx ON project (phase);

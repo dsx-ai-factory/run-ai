@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: operator
+  namespace: runai
+spec:
+  template:
+    spec:
+      # Disabling ServiceAccount token automounting to pass sonar security check (this manifest is not in use)
+      automountServiceAccountToken: false
+      containers:
+      - name: manager
+        args:
+        - "--config=controller_manager_config.yaml"
+        volumeMounts:
+        - name: controller-manager-config
+          mountPath: /controller_manager_config.yaml
+          subPath: controller_manager_config.yaml
+      volumes:
+      - name: controller-manager-config
+        configMap:
+          name: controller-manager-config

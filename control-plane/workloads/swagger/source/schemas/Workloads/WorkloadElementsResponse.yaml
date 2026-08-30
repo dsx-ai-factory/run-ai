@@ -1,0 +1,18 @@
+type: object
+required:
+  - elements
+properties:
+  next:
+    type: integer
+    format: int32
+    description: >
+      Offset for the next page of results. Present only when there are more elements
+      beyond the current page (i.e., the number of returned elements equals the limit).
+  elements:
+    type: array
+    description: >
+      A flat list of structure elements for this workload, ordered by hierarchy level.
+      This page may contain fewer elements than are stored in the database — use the "next" field
+      to retrieve additional pages. Use the /elements/count endpoint to retrieve total and stored counts.
+    items:
+      $ref: './WorkloadElement.yaml'

@@ -1,0 +1,3 @@
+
+DROP TABLE IF EXISTS secrets;
+DROP TABLE IF EXISTS pvcs;

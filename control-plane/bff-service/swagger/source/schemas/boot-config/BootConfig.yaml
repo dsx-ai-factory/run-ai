@@ -1,0 +1,24 @@
+type: object
+required:
+  - distributionAssets
+  - version
+  - docs
+  - support
+  - capabilities
+  - unleashConfig
+properties:
+  distributionAssets:
+    $ref: './BootConfigDistributionAssets.yaml'
+  version:
+    $ref: './BootConfigVersion.yaml'
+  docs:
+    $ref: './BootConfigDocs.yaml'
+  support:
+    $ref: './BootConfigSupport.yaml'
+  capabilities:
+    $ref: './BootConfigCapabilities.yaml'
+  unleashConfig:
+    type: object
+    allOf:
+      - $ref: './BootConfigUnleashConfig.yaml'
+    nullable: true

@@ -1,0 +1,55 @@
+Name:                               mynim-multi
+ID:                                 6f75680c-255c-422f-b4f4-7c31e4bd9cd9
+Type:                               NIMService
+Phase:                              Running
+Phase Message:                      leaderworkerset "mynim-multi-lws" is ready
+Created At:                         2026-03-10T16:49:32Z
+Updated At:                         2026-03-10T21:40:58Z
+Project:                            testnim
+Department:                         default
+Submitted By:                       test@run.ai
+Priority:                           very-high (150)
+Category:                           Deploy
+Current Node Pool:                  default
+Image:                              gcr.io/run-ai-lab/nim-cpu:latest
+Environment Variables:              []
+
+
+NIM Service Configuration
+
+ NGC Auth Secret:                    my-ngc-secret
+ Replicas (Requested):               2
+ Replicas (Ready):                   2
+ Multi-Node:                         Enabled
+ Workers per Replica:                1
+
+
+Model Store
+
+ Type:                               PVC
+ Access Mode:                        ReadWriteOnce
+
+
+Serving Configuration
+
+ Serving Port:                       8000
+ Expose Externally:                  true
+ Serving URL:                        https://test-cluster.runailabs.com/testnim/mynim-multi
+ Service Type:                       ClusterIP
+
+
+Compute Resources
+
+ Resource              Requested   Limit       Allocated  
+──────────────────────────────────────────────────────────
+ GPU Compute           0.00                    0.00       
+ CPU Cores             0.20                    0.20       
+ GPU Memory                                               
+ CPU Memory            200M                    200M       
+
+
+Network
+
+ Name             Tool Type        Connection Type  Container Port   URL                                                    
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ NIMService       NIMService       ExternalUrl      8080             https://test-cluster.runailabs.com/testnim/mynim-multi 

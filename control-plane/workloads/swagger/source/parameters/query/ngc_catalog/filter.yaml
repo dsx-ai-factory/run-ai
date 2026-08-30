@@ -1,0 +1,13 @@
+name: filter
+in: query
+description: >
+  Repeated filter in the form `filter=field:value`.
+  Exact match only (e.g., `filter=orgName:nvidia`).
+required: false
+schema:
+  type: array
+  items:
+    type: string
+  example:
+    - label:-blueprint
+    - resourceType:ENDPOINT

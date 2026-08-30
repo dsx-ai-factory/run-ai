@@ -1,0 +1,10 @@
+type: object
+description: A null or empty node selector term matches no objects. The requirements of them are ANDed.
+properties:
+  matchExpressions:
+    description: A list of node selector requirements by node's labels.
+    type: array
+    items:
+      $ref:  "./MatchExpression.yaml"
+    maxItems: 1000
+nullable: true

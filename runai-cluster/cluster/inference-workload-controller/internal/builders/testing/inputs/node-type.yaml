@@ -1,0 +1,27 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  name: inference-workload-with-node-type
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  image:
+    value: tensorflow/serving:2.6.0
+  nodeType:
+    value: gpu-node
+  imagePullPolicy:
+    value: Always
+  name:
+    value: inference-0
+  gpu:
+    value: "1"
+  gpuMemory:
+    value: 120M
+  username:
+    value: nael.asbi
+  ports:
+    items:
+      port-80:
+        value:
+          serviceType: ServingPort
+          container: 80

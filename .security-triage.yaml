@@ -1,0 +1,65 @@
+# .security-triage.yaml
+#
+# Persists security triage decisions across runs of the security skills so that
+# only genuinely new findings require manual review. Commit this file to version
+# control so decisions are shared across the team.
+version: "1.0"
+project: "runai"
+last_updated: "2026-08-23"
+
+repository_exposure_classification:
+  visibility: "Public"
+  basis: "origin remote is github.com; Apache-2.0 licensed with public contribution and support docs. SECURITY.md written to public-safe detail."
+  confirmed_by: "security-team"
+  date: "2026-08-02"
+
+service_exposure_classification:
+  tier: "External / Regulated"
+  confidence: "high"
+  basis: "commercially released, customer-deployed enterprise platform with published self-hosted install guide and support obligations; multi-tenant; handles customer credentials, user identities, and workload data"
+  confirmed_by: "security-team"
+  date: "2026-08-02"
+
+false_positives:
+  - slug: "3d-user-input-execution-model-swap-heredoc"
+    category: "Execution of user-controlled input"
+    pattern: "fmt.Sprintf(\"cat <<EOF > %s...\")"
+    finding: >-
+      runai-cluster/cluster/inference-workload-controller/internal/builders/knative_build_model_swap.go:212
+      interpolates model names from the user-supplied model-swap annotation into an unquoted
+      heredoc inside /bin/sh -c, suggesting shell command injection.
+    reason: >-
+      Not exploitable. Every model name is validated in getModelSwapParamsFromAnnotation
+      (same file, ~L136-144) against the anchored allowlist regex ^[a-zA-Z0-9-_]+(\x2F[a-zA-Z0-9-_.]+)?$
+      before reaching the builder. Go RE2 anchors match whole-text (no multiline flag), so shell
+      metacharacters, whitespace, and newlines cannot pass, which also rules out early heredoc
+      termination. Quoting the heredoc delimiter remains a worthwhile defense-in-depth hardening
+      but is not a vulnerability fix.
+    triaged_by: "security-team"
+    date: "2026-08-02"
+
+accepted_risks:
+  - slug: "s3-sidecar-privileged-user-controlled-image"
+    threat: >-
+      runai-cluster/cluster/workload-common/builders/s3.go unconditionally sets
+      SecurityContext.Privileged=true on every S3 filesystem sidecar and honors
+      per-bucket s3bucket.Image when set, so a privileged container is created
+      alongside every workload that mounts an S3 bucket, outside the Privileged
+      ACL policy applied to the main workload container.
+    severity: "high"
+    reason: >-
+      Accepted as intentional platform behavior (won't-do), not a false positive.
+      Privileged mode is required for the trusted goofys FUSE mount and is called
+      out in the SECURITY.md threat model (item 3). The sidecar image customers
+      receive is the cluster-admin-configured goofys image from RunaiConfig /
+      S3_FILE_SYSTEM_IMAGE (see DefaultS3FileSystemImage and the control-plane
+      composer init_containers/s3.go, which always uses cfg.S3FsImage() and never
+      a per-workload image). S3bucketItemValue.Image is reserved for internal
+      purposes and is not reachable from the customer-facing workload submit /
+      REST compose path (neither the CLI nor the control-plane composer sets it).
+      The residual risk — a privileged sidecar on the node for S3-mounting
+      workloads — is knowingly retained pending a rootless FUSE alternative.
+    triaged_by: "security-team"
+    date: "2026-08-23"
+
+suppressed_cves: []

@@ -1,0 +1,165 @@
+openapi: '3.0.3'
+info:
+  title: K8sObjectTracker
+  version: '1.0'
+  description: An API for tracking k8s object in the cluster
+  contact:
+    name: 'Run.AI'
+    url: 'https://www.run.ai/'
+    email: 'support@run.ai'
+servers:
+  - url: https://app.run.ai
+  - url: https://staging.run.ai
+  - url: https://test.run.ai
+  - url: http://localhost:8080
+paths:
+  /:
+    get:
+      summary: health check
+      x-no-authorization: true
+      x-internal: true
+      operationId: health
+      x-service: k8s-objects-tracker
+      tags:
+        - Health
+      responses:
+        200:
+          description: Executed successfully.
+
+  /api/v1/pvcs:
+    $ref: './resources/Pvcs.yaml'
+
+  /api/v1/pvcs/{clusterUuid}:
+    $ref: './resources/v1/ClusterPvcsNames.yaml'
+  /api/v2/pvcs/{clusterUuid}:
+    $ref: './resources/v2/ClusterPvcs.yaml'
+  /api/v1/pvcs/{clusterUuid}/{pvcName}:
+    $ref: './resources/v1/ClusterPvcsNamesByName.yaml'
+  /api/v2/pvcs/{clusterUuid}/{pvcName}:
+    $ref: './resources/v2/ClusterPvcsByName.yaml'
+
+  /api/v1/pvcs/{clusterUuid}/department/{departmentId}:
+    $ref: './resources/v1/DepartmentPvcsNames.yaml'
+  /api/v2/pvcs/{clusterUuid}/department/{departmentId}:
+    $ref: './resources/v2/DepartmentPvcs.yaml'
+  /api/v2/pvcs/{clusterUuid}/departments/{departmentId}:
+    $ref: './resources/v2/DepartmentsPvcs.yaml'
+  /api/v1/pvcs/{clusterUuid}/department/{departmentId}/{pvcName}:
+    $ref: './resources/v1/DepartmentPvcsNamesByName.yaml'
+  /api/v2/pvcs/{clusterUuid}/department/{departmentId}/{pvcName}:
+    $ref: './resources/v2/DepartmentPvcsByName.yaml'
+  /api/v2/pvcs/{clusterUuid}/departments/{departmentId}/{pvcName}:
+    $ref: './resources/v2/DepartmentsPvcsByName.yaml'
+
+  /api/v1/pvcs/{clusterUuid}/namespace/{namespace}:
+    $ref: './resources/v1/ProjectPvcsNames.yaml'
+  /api/v2/pvcs/{clusterUuid}/namespace/{namespace}:
+    $ref: './resources/v2/ProjectPvcs.yaml'
+  /api/v2/pvcs/{clusterUuid}/namespaces/{namespace}:
+    $ref: './resources/v2/ProjectsPvcs.yaml'
+  /api/v1/pvcs/{clusterUuid}/namespace/{namespace}/{pvcName}:
+    $ref: './resources/v1/ProjectPvcsNamesByName.yaml'
+  /api/v2/pvcs/{clusterUuid}/namespace/{namespace}/{pvcName}:
+    $ref: './resources/v2/ProjectPvcsByName.yaml'
+  /api/v2/pvcs/{clusterUuid}/namespaces/{namespace}/{pvcName}:
+    $ref: './resources/v2/ProjectsPvcsByName.yaml'
+
+  /api/v1/secrets:
+    $ref: './resources/Secrets.yaml'
+
+  /api/v1/secrets/{clusterUuid}:
+    $ref: './resources/ClusterSecrets.yaml'
+  /api/v1/secrets/{clusterUuid}/{secretName}:
+    $ref: './resources/ClusterSecretByName.yaml'
+
+  /api/v1/secrets/{clusterUuid}/department/{departmentId}:
+    $ref: './resources/DepartmentSecrets.yaml'
+  /api/v1/secrets/{clusterUuid}/department/{departmentId}/{secretName}:
+    $ref: './resources/DepartmentSecretByName.yaml'
+  /api/v1/secrets/{clusterUuid}/departments/{departmentId}:
+    $ref: './resources/DepartmentsSecrets.yaml'
+  /api/v1/secrets/{clusterUuid}/departments/{departmentId}/{secretName}:
+    $ref: './resources/DepartmentsSecretByName.yaml'
+
+  /api/v1/secrets/{clusterUuid}/namespace/{namespace}:
+    $ref: './resources/ProjectSecrets.yaml'
+  /api/v1/secrets/{clusterUuid}/namespace/{namespace}/{secretName}:
+    $ref: './resources/ProjectSecretByName.yaml'
+  /api/v1/secrets/{clusterUuid}/namespaces/{namespace}:
+    $ref: './resources/ProjectsSecrets.yaml'
+  /api/v1/secrets/{clusterUuid}/namespaces/{namespace}/{secretName}:
+    $ref: './resources/ProjectsSecretByName.yaml'
+
+  /v1/k8s/clusters/{clusterUuid}/{namespace}/secrets:
+    $ref: './resources/obsolete/ObsoleteSecretCreate.yaml'
+  /v1/k8s/clusters/{clusterUuid}/{namespace}/secrets/sync:
+    $ref: './resources/obsolete/ObsoleteSecretsSync.yaml'
+  /v1/k8s/clusters/{clusterUuid}/{namespace}/secrets/{secretName}:
+    $ref: './resources/obsolete/ObsoleteSecretDelete.yaml'
+
+  /v1/k8s/clusters/{clusterUuid}/{namespace}/pvcs:
+    $ref: './resources/obsolete/ObsoletePvcCreate.yaml'
+  /v1/k8s/clusters/{clusterUuid}/{namespace}/pvcs/sync:
+    $ref: './resources/obsolete/ObsoletePvcsSync.yaml'
+  /v1/k8s/clusters/{clusterUuid}/{namespace}/pvcs/{pvcName}:
+    $ref: './resources/obsolete/ObsoletePvcDelete.yaml'
+
+  /api/v1/config-maps:
+    $ref: './resources/v1/ConfigMaps.yaml'
+
+  /api/v1/config-maps/{clusterUuid}:
+    $ref: './resources/v1/ClusterConfigMaps.yaml'
+  /api/v1/config-maps/{clusterUuid}/{configMapName}:
+    $ref: './resources/v1/ClusterConfigMapByName.yaml'
+
+  /api/v1/config-maps/{clusterUuid}/departments/{departmentId}:
+    $ref: './resources/v1/DepartmentsConfigMaps.yaml'
+  /api/v1/config-maps/{clusterUuid}/departments/{departmentId}/{configMapName}:
+    $ref: './resources/v1/DepartmentsConfigMapByName.yaml'
+
+  /api/v1/config-maps/{clusterUuid}/namespaces/{namespace}:
+    $ref: './resources/v1/ProjectsConfigMaps.yaml'
+  /api/v1/config-maps/{clusterUuid}/namespaces/{namespace}/{configMapName}:
+    $ref: './resources/v1/ProjectsConfigMapByName.yaml'
+
+  # Obsolete  
+  /v1/k8s/clusters/{uuid}/storage-classes:
+    $ref: './V1/StorageClass/StorageClass.yaml'
+  # Obsolete
+  /v1/k8s/clusters/{uuid}/storage-classes/{storage_class_name}:
+    $ref: './V1/StorageClass/StorageClassByName.yaml'
+  # Obsolete
+  /v1/k8s/clusters/{uuid}/storage-classes/sync:
+    $ref: './V1/StorageClass/StorageClassSync.yaml'
+
+  # Obsolete
+  /api/v1/storage-classes:
+    $ref: './resources/v1/StorageClass.yaml'
+  /api/v2/storage-classes:
+    $ref: './resources/v2/StorageClass.yaml'
+  /api/v1/storage-classes/sync:
+    $ref: './resources/v1/StorageClassSync.yaml'
+
+  /api/v1/storage-class-configuration:
+    $ref: './resources/StorageClassConfiguration.yaml'
+  /api/v1/storage-class-configuration/{id}:
+    $ref: './resources/StorageClassConfigurationById.yaml'
+
+  /internal/api/v1/storage-class-configuration:
+    $ref: './resources/StorageClassConfigurationInt.yaml'
+
+  /internal/api/v1/cluster-objects/status:
+    $ref: './resources/v1/ClusterObjectsStatus.yaml'
+
+
+components:
+  parameters:
+    $ref: "./parameters/_index.yaml"
+  schemas:
+    $ref: "./schemas/_index.yaml"
+  responses:
+    $ref: "../../../infra/openapi/docs/responses/_index.yaml"
+  securitySchemes:
+    $ref: "./securitySchemes/_index.yaml"
+security:
+  - bearerAuth: []

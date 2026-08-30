@@ -1,0 +1,8 @@
+description: Unprocessable entity - The request was well-formed but contains semantic errors.
+content:
+  application/json:
+    schema:
+      $ref: './Error.yaml'
+    example:
+      code: 422
+      message: "Validation failed - Invalid workload configuration" 

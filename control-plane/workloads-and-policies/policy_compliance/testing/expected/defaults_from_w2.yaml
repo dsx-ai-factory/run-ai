@@ -1,0 +1,12 @@
+compute:
+  cpuCoreLimit: 6
+  cpuCoreRequest: 3
+image: ubuntu
+ports:
+- container: 80
+  external: 80
+- container: 90
+  external: 90
+security:
+  runAsGid: 200
+  runAsUid: 100

@@ -1,0 +1,92 @@
+description: Attribute that is added to any PVC of a given storage class.
+required:
+  - key
+properties:
+  key:
+    type: string
+    minLength: 1
+    description: 'The annotation key for the PVC. Must comply with Kubernetes naming rules: ≤63 characters, beginning and ending with an alphanumeric character ([A-Za-z0-9]), and may include dashes (-), underscores (_), or dots (.).'
+    maxLength: 63
+    pattern: ^([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$
+    example: dnsname
+
+  format:
+    description: 'Defines the data type the attribute can accept. Enum: "text" "number" "boolean"'
+    $ref: "PvcAddedAttributeFormat.yaml"
+
+  display:
+    type: string
+    minLength: 1
+    description: User-friendly display name for the attribute, shown in the UI.
+    nullable: true
+    example: DNS Name
+
+  description:
+    type: string
+    minLength: 1
+    description: A description of the attribute's purpose or expected values.
+    nullable: true
+    example: The host name of the DNS
+
+  placeholder:
+    type: string
+    minLength: 1
+    description: Example or hint text for the attribute's value, displayed as a watermark or help message in the UI.
+    nullable: true
+    example: enter hostname or IP address
+
+  required:
+    description: Indicates whether this attribute is mandatory.
+    type: boolean
+    nullable: true
+    example: "true"
+
+  defaultValue:
+    description: Default value assigned to the attribute when not explicitly provided.
+    type: string
+    minLength: 1
+    nullable: true
+    example: my.dns.com
+
+  validationRegexp:
+    description: Regular expression used to validate user input for text attributes.
+    type: string
+    minLength: 1
+    nullable: true
+    example: "^[a-zA-Z0-9.-_]+$"
+
+  minValue:
+    description: Minimum allowed value for attributes of type number.
+    type: number
+    minLength: 1
+    nullable: true
+    example: "100"
+
+  maxValue:
+    description: Maximum allowed value for attributes of type number.
+    type: number
+    minLength: 1
+    nullable: true
+    example: "200"
+
+  step:
+    description: Defines the incremental step between allowed numeric values (for example, 1, 0.1).
+    type: number
+    minLength: 1
+    nullable: true
+    example: "5"
+
+  validationError:
+    description: Custom validation error message shown if input fails validation. If omitted, a default error message is generated automatically.
+    type: string
+    minLength: 1
+    nullable: true
+    example: Invalid URL
+
+nullable: true
+type: object
+
+
+
+
+

@@ -1,0 +1,3 @@
+{{- if .Values.notificationsProxy.enabled }}
+{{- include "common.service" (list . .Values.notificationsProxy.service .Values.notificationsProxy) }}
+{{- end }}

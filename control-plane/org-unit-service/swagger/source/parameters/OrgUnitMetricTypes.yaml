@@ -1,0 +1,10 @@
+name: metricType
+in: query
+required: true
+description: Specify which data to request.
+explode: false
+schema:
+  type: array
+  maxItems: 10
+  items:
+    $ref: '../schemas/OrgUnitMetricType.yaml'

@@ -1,0 +1,47 @@
+policy:
+  id: test-policy
+  effectiveRules:
+    - field: image
+      specSelector: allContainers
+      enforcements:
+        - options: [ubuntu, redhat]
+    - field: command
+      specSelector: allContainers
+      enforcements:
+        - length: { min: 5 }
+  # Mirrors the seed from
+  # control-plane/policy-service/pkg/services/system_mapping_deployment.go +
+  # system_mapping_podspec_field_groups.go for apps/v1 Deployment.
+  breakdown:
+    fields:
+      image:
+        - specSelectors: [allContainers]
+          specRef: image
+          formatter:
+            builtin: KeyValue
+      command:
+        - specSelectors: [allContainers]
+          specRef: command
+          formatter:
+            builtin: KeyValue
+    specSelectors:
+      allContainers:
+        query: |
+          (
+            .spec.template.spec.containers[]?,
+            .spec.template.spec.initContainers[]?
+          )
+          | select(.)
+
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: test-deployment
+  spec:
+    template:
+      spec:
+        containers:
+          - name: main
+            image: ubuntu
+            command: [echo, a, b, c, d, e]

@@ -1,0 +1,44 @@
+get:
+  summary: Get the node metrics data.
+  description: Retrieve the node metrics data by Universally Unique Identifier (UUID).
+  operationId: get_node_metrics
+  x-service: cluster-service
+  x-test-coverage:
+    - control-plane/cluster-service/pkg/services/api_metrics_test.go
+  x-authorize:
+    resource-type: nodes
+    action: read
+  tags:
+    - Nodes
+  parameters:
+    - $ref: "../parameters/path/NodeId.yaml"
+    - $ref: "../parameters/query/NodeMetricTypes.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/StartRequired.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/EndRequired.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/NumberOfSamples.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/schemas/metrics/MetricsResponse.yaml'
+        text/csv: { }
+    207:
+      description: Partial success.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/schemas/metrics/MetricsResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

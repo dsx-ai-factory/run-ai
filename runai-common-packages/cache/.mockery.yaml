@@ -1,0 +1,76 @@
+template: testify
+template-data:
+  unroll-variadic: true
+dir: "{{.InterfaceDir}}/mocks"
+pkgname: "mocks"
+structname: "{{.InterfaceName}}"
+filename: "{{.InterfaceName}}.go"
+packages:
+  github.com/run-ai/runai/runai-common-packages/cache/v2:
+    interfaces:
+      Cacher:
+        configs:
+          - dir: "{{.InterfaceDir}}/testing"
+            filename: "mock_Cacher.go"
+            structname: "Mock{{.InterfaceName}}"
+            pkgname: "testing"
+          - dir: "{{.InterfaceDir}}/mocks"
+            filename: "{{.InterfaceName}}.go"
+            structname: "{{.InterfaceName}}"
+            pkgname: "mocks"
+      storeRegistryer:
+        config:
+          structname: "StoreRegistryer"
+      cacheClienter:
+        config:
+          structname: "CacheClienter"
+      cacheClientFactoryer:
+        config:
+          dir: "{{.InterfaceDir}}"
+          filename: "mock_CacheClientFactoryer.go"
+          structname: "MockCacheClientFactoryer"
+          pkgname: "cache"
+      observableCacheClienter:
+        config:
+          dir: "{{.InterfaceDir}}"
+          filename: "mock_ObservableCacheClienter.go"
+          structname: "MockObservableCacheClienter"
+          pkgname: "cache"
+  github.com/run-ai/runai/runai-common-packages/cache/v2/internal/lock:
+    interfaces:
+      Locker:
+        configs:
+          - dir: "testing"
+            filename: "mock_Locker.go"
+            structname: "Mock{{.InterfaceName}}"
+            pkgname: "testing"
+          - dir: "mocks"
+            filename: "{{.InterfaceName}}.go"
+            structname: "{{.InterfaceName}}"
+            pkgname: "mocks"
+  github.com/run-ai/runai/runai-common-packages/cache/v2/internal/observability:
+    interfaces:
+      MetricsWriterer:
+        config:
+          dir: "{{.InterfaceDir}}"
+          filename: "mock_MetricsWriterer.go"
+          structname: "Mock{{.InterfaceName}}"
+          pkgname: "observability"
+      MemoryRetrieverer:
+        config:
+          structname: "Mock{{.InterfaceName}}"
+      LengthRetrieverer:
+        config:
+          structname: "Mock{{.InterfaceName}}"
+      StoreLister:
+        config:
+          structname: "Mock{{.InterfaceName}}"
+  github.com/nats-io/nats.go/jetstream:
+    config:
+      dir: internal/nats/mocks
+      recursive: true
+    interfaces:
+      JetStream:
+      KeyValue:
+      KeyValueEntry:
+      KeyLister:

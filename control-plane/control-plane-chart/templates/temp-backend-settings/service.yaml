@@ -1,0 +1,3 @@
+{{- if .Values.tempBackendSettings.enabled }}
+{{- include "common.service" (list . .Values.tempBackendSettings.service .Values.tempBackendSettings) }}
+{{- end }}

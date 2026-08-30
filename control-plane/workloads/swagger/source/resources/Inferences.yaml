@@ -1,0 +1,32 @@
+post:
+  summary: Create an inference.
+  operationId: create_inference
+  description: Create an inference using container related fields.
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/inferences_service_test.go
+  x-authorize:
+    resource-type: inferences
+    action: create
+  tags:
+    - Inferences
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../../../infra/openapi/docs/schemas/inferences/InferenceCreationRequest.yaml"
+  responses:
+    202:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../../../infra/openapi/docs/schemas/inferences/Inference.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

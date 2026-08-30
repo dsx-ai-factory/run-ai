@@ -1,0 +1,1 @@
+ALTER TABLE report_metrics ADD COLUMN IF NOT EXISTS quantile FLOAT4;

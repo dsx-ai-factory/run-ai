@@ -1,0 +1,13 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+packages:
+  github.com/run-ai/runai/control-plane/identity-manager/pkg/client:
+    interfaces:
+      IIdm: {}
+      IIdmExternalClient: {}
+  github.com/run-ai/runai/control-plane/identity-manager/pkg/client/generated:
+    interfaces:
+      TokensAPI: {}

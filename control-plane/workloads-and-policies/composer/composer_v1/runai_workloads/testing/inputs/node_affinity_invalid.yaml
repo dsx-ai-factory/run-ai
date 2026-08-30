@@ -1,0 +1,8 @@
+image: ubuntu
+nodeAffinityRequired:
+  nodeSelectorTerms:
+    - matchExpressions:
+      - key: disktype
+        operator: Exists
+        values:
+        - ssd

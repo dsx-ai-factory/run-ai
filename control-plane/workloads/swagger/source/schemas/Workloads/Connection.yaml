@@ -1,0 +1,75 @@
+type: object
+description: Connection that either expose port from the container (a port is associated with a tool that the container runs), or URL to be used for connecting to an external tool that is related to the action of the container (such as Weights & Biases).
+required:
+  - toolType
+  - name
+  - connectionType
+properties:
+  name:
+    type: string
+    example: "my-pytorch-env"
+  toolType:
+    type: string
+    example: "pytorch"
+  connectionType:
+    type: string
+    example: "ExternalUrl"
+  url:
+    type: string
+    example: "http://wandb.com/yourproject"
+  authorizationType:
+    type: string
+    description: |
+      Specifies who can access the connection URL:
+      - `authenticatedUsers`: Any authenticated user or service account can access the URL; the authorizedUsers and authorizedGroups fields are ignored.
+      - `authorizedUsers`: Only users listed in the authorizedUsers field are allowed to access the URL; the authorizedGroups field is ignored.
+      - `authorizedGroups`: Only members of user groups listed in the authorizedGroups field are allowed to access the URL; the authorizedUsers field is ignored.
+      If not specified, authorization is determined by whether authorizedUsers or authorizedGroups is present. If both fields are set, this results in an error. If neither is set, any authenticatedUser can access.
+    enum:
+      - public
+      - authenticatedUsers
+      - authorizedUsersOrGroups
+  authorizedUsers:
+    type: array
+    description: List of users or service accounts that are allowed to access the URL. Note that authorizedUsers and authorizedGroups are mutually exclusive.
+    items:
+      type: string
+    example: ["user@company.ai", "another@company.ai"]
+  authorizedGroups:
+    type: array
+    items:
+      type: string
+    example: ["group-a", "group-b"]
+  containerPort:
+    description: The port that the container running the workload exposes.
+    type: integer
+    format: int32
+    example: 8080
+  correlationName:
+    x-internal: true
+    description: A given name for the url/port, used for correlating cluster and control-plane information.
+    type: string
+  exposedUrlSubDomain:
+    x-internal: true
+    description: for cluster supporting sub-domain, stores the sub-domain of the exposedUrl. e.g, myproject-myworkload-url-1., t
+      when syncing from the cluster, this subdomain is patched woth the cluster domain to compose the complete connection path
+    type: string
+    nullable: true
+  exposedUrlPath:
+    x-internal: true
+    description: for cluster not supporting sub-domain, stores the path of the exposedUrl. e.g. /myproject/myworkload/url-1
+      when syncing from the cluster, this path is patched with the cluster domain to compose the complete connection path
+    type: string
+    nullable: true
+  portResourceName:
+    x-internal: true
+    description: stores the assigned name to the port resource in the cluster. e.g. workspace-nodeport-0
+      when syncing from the cluster, this name is used to match the connection with it's connection url.
+    type: string
+    nullable: true
+  serviceResourceName:
+    x-internal: true
+    description: stores the assigned resource name to the service holding this port in the cluster. e.g. myworkload-service-0
+      when syncing from the cluster, this name, along with portResourceName, is used to match the connection with it's connection url
+    type: string
+    nullable: true

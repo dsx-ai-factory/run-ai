@@ -1,0 +1,4 @@
+apiVersion: v2
+name: crds
+description: A Helm subchart for installing Run:AI CRDs
+version: 0.0.0

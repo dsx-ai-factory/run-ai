@@ -1,0 +1,21 @@
+properties:
+  bucket:
+    description: The name of the bucket. (mandatory)
+    type: string
+    minLength: 1
+    example: my-bucket
+    nullable: true
+  path:
+    description: Local path within the workload to which the S3 bucket will be mapped. (mandatory)
+    type: string
+    minLength: 1
+    example: /container/my-bucket
+    nullable: true
+  url:
+    description: The url of the S3 service provider. The default is the URL of the Amazon AWS S3 service.
+    type: string
+    minLength: 1
+    example: https://s3.amazonaws.com
+    nullable: true
+nullable: true
+type: object

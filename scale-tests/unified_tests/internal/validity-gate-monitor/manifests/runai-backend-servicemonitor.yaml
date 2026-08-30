@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: runai-backend-services
+  namespace: runai
+spec:
+  namespaceSelector:
+    matchNames:
+      - runai-backend
+  selector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: Exists
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s

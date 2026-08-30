@@ -1,0 +1,5 @@
+description: the type of change to report to the policy server
+type: string
+enum:
+  - updated
+  - deleted

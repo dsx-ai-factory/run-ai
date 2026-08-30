@@ -1,0 +1,11 @@
+ephemeral:
+  customization:
+    claimSize:
+      default: 1G
+      min: 1G
+      supportedUnits:
+        - MB
+        - MiB
+        - GB
+        - GiB
+

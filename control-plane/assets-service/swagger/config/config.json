@@ -1,0 +1,8 @@
+{
+    "packageVersion" : "1.17",
+    "gitUserId" : "run-ai",
+    "gitRepoId" : "backend/assets-service",
+    "sourceFolder" : "pkg/api",
+    "packageName" : "api"
+}
+

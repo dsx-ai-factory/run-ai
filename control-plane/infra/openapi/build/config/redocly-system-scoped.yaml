@@ -1,0 +1,9 @@
+plugins:
+  - ../plugins/system-scoped-filters.js
+  - ../plugins/internal-filters.js
+decorators:
+  remove-x-internal: on
+  internal-filters/filter-internal-enum-values: on
+  remove-unused-components: on
+  system-scoped-filters/filter-system-scoped-paths: on
+  system-scoped-filters/remove-unused-tags-and-clean-x-tags: on

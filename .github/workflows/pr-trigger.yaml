@@ -1,0 +1,80 @@
+# Thin public stub for the OSS-shape PR pipeline. Fires on pull_request
+# (master + v*.* + release-*.*) and merge_group; cross-repo dispatches the real pipeline
+# (pr.yaml, private in run-ai/saas-configuration), which posts the
+# Validate Successful Run commit status back here. Fork PRs are blocked at
+# the workflow level (they reach pr.yaml only via /ok-to-test workflow_dispatch).
+
+name: PR (trigger)
+run-name: ${{ github.event.pull_request.title || github.event.merge_group.head_commit.message || github.workflow }}
+
+on:
+  pull_request:
+    branches: [master, main, "v*.*", "release-*.*"]
+    types: [opened, synchronize, reopened]
+  merge_group:
+  workflow_dispatch:        # Fork PR triage: triggered by dispatch-on-comment.yaml on /ok-to-test
+    inputs:
+      pr-number:    { description: "PR number to simulate", required: true }
+      pr-sha:       { description: "PR head SHA (status target)", required: true }
+      pr-merge-sha: { description: "PR merge commit SHA; empty -> fall back to pr-sha", required: false, default: "" }
+      pin-sha:      { description: "Build exactly this SHA; set by /ok-to-test to pin the authorised commit", required: false, default: "" }
+      pr-ref:       { description: "PR head ref", required: true }
+      base-ref:     { description: "PR base ref (master | release-3.0 | v2.26 | ...)", required: true }
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-trigger-${{ github.event.pull_request.number || github.event.merge_group.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  dispatch:
+    # Block fork PRs (they reach pr.yaml only via /ok-to-test workflow_dispatch).
+    if: |
+      github.event_name == 'merge_group' ||
+      github.event_name == 'workflow_dispatch' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      BASE_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.base-ref || github.event.pull_request.base.ref || github.event.merge_group.base_ref || 'master' }}
+    steps:
+      # Audit mode (Layer-1 fork-reachable lane).
+      - name: Harden runner
+        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - name: Cross-repo dispatch to saas-configuration/pr.yaml
+        id: dispatch
+        uses: benc-uk/workflow-dispatch@31e2b3319479a63f0ab15bf800eff9e913504e26 # v1
+        with:
+          workflow: pr.yaml
+          repo: run-ai/saas-configuration
+          ref: ${{ (env.BASE_REF == 'main' || env.BASE_REF == 'master' || env.BASE_REF == '') && 'master' || env.BASE_REF }}
+          token: ${{ secrets.GIT_HUB_OSS }}
+          inputs: |
+            {
+              "pr-number":    "${{ github.event_name == 'workflow_dispatch' && inputs.pr-number    || github.event.pull_request.number  || github.event.merge_group.head_sha }}",
+              "pr-sha":       "${{ github.event_name == 'workflow_dispatch' && inputs.pr-sha       || github.event.pull_request.head.sha || github.event.merge_group.head_sha }}",
+              "pr-merge-sha": "${{ github.event_name == 'workflow_dispatch' && inputs.pr-merge-sha || github.event.pull_request.merge_commit_sha || '' }}",
+              "pin-sha":      "${{ github.event_name == 'workflow_dispatch' && inputs.pin-sha || '' }}",
+              "pr-ref":       "${{ github.event_name == 'workflow_dispatch' && inputs.pr-ref       || github.event.pull_request.head.ref || github.event.merge_group.head_ref }}",
+              "base-ref":     "${{ github.event_name == 'workflow_dispatch' && inputs.base-ref     || github.event.pull_request.base.ref || github.event.merge_group.base_ref }}",
+              "pr-title":     ${{ toJSON(github.event.pull_request.title) }},
+              "event":        "${{ github.event_name == 'workflow_dispatch' && 'pull_request' || github.event_name }}",
+              "caller_repo":  "${{ github.repository }}"
+            }
+
+      - name: Post CI run link to PR
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: https://github.com/run-ai/saas-configuration/actions/runs/${{ steps.dispatch.outputs.runId }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh api repos/${{ github.repository }}/issues/${PR_NUMBER}/comments \
+            -f body="🔗 **CI run:** ${RUN_URL}"

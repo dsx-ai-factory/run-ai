@@ -1,0 +1,1 @@
+ALTER TABLE IF EXISTS applications DROP COLUMN IF EXISTS department_id;

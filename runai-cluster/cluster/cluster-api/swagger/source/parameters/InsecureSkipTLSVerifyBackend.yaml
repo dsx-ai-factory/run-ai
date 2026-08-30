@@ -1,0 +1,5 @@
+in: query
+name: insecureSkipTLSVerifyBackend
+description: Indicates that the apiserver should not confirm the validity of the serving certificate of the backend it is connecting to. This will make the HTTPS connection between the apiserver and the backend insecure.
+schema:
+  type: boolean

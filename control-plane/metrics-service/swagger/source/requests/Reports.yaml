@@ -1,0 +1,67 @@
+get:
+  summary: List reports
+  operationId: list_reports
+  x-internal: true
+  x-no-authorization: true
+  x-service: metrics-service
+  x-test-coverage:
+    - metrics-service/integration-tests/tests/report_test.go
+  tags:
+    - Reports
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ReportsFilterBy.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ReportsSortBy.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Search.yaml'
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              reports:
+                $ref: '../schemas/Reports.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+post:
+  summary: Create a new report.
+  operationId: create_report
+  x-internal: true
+  x-no-authorization: true
+  x-service: metrics-service
+  x-test-coverage:
+    - metrics-service/integration-tests/tests/report_test.go
+  tags:
+    - Reports
+  requestBody:
+    description: Report to create.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/ReportRequestFields.yaml'
+  responses:
+    202:
+      description: Accepted.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Report.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

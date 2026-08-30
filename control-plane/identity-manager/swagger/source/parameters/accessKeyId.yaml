@@ -1,0 +1,7 @@
+name: accessKeyId
+in: path
+required: true
+description: The access key ID
+schema:
+  type: string
+

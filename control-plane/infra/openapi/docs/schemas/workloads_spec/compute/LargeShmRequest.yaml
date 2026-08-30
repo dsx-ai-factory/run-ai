@@ -1,0 +1,4 @@
+description: A large /dev/shm device to mount into a container running the created workload. An shm is a shared file system mounted on RAM.
+type: boolean
+example: false
+nullable: true

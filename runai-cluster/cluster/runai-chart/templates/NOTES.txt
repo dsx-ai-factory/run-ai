@@ -1,0 +1,6 @@
+Thank you for installing Run:ai.
+To verify your installation, please run the following command in your terminal:
+  kubectl get cm runai-public -n runai -o jsonpath='{.data}' | yq -P
+
+Next, open the Run:ai user interface, setup users and projects and start submitting AI workloads. 
+For additional information see https://run-ai-docs.nvidia.com/

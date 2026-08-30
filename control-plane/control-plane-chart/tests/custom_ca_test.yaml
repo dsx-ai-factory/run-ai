@@ -1,0 +1,96 @@
+suite: Test Custom CA
+
+excludeTemplates:
+  # Thanos query doesn't contain the Custom CA volume so we exclude it
+  - charts/thanos/templates/query/deployment.yaml
+  # Notifications service is a subchart that doesn't use customCA
+  - charts/notifications-service/templates/deployment.yaml
+  - '**/NOTES.txt'
+
+tests:
+  # Test backward compatibility - customCA disabled (default behavior)
+  - it: should NOT render CA volumes when customCA is disabled (backward compatibility)
+    set:
+      global.customCA.enabled: false
+    template: templates/assets-service/deployment.yaml
+    asserts:
+      - isKind:
+          of: Deployment
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: runai-ca-cert
+
+  # Test default behavior with customCA enabled
+  - it: should render deployments with custom CA volume when enabled (default secret name)
+    set:
+      global.customCA.enabled: true
+    documentSelector:
+      path: kind
+      value: Deployment
+      matchMany: true
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: Deployment
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: runai-ca-cert
+            secret:
+              secretName: runai-ca-cert
+              optional: true
+
+  # Test that secret is optional 
+  - it: should mark CA secret as optional to prevent pod failures
+    set:
+      global.customCA.enabled: true
+    template: templates/assets-service/deployment.yaml
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: spec.template.spec.volumes[?(@.name=="runai-ca-cert")].secret.optional
+          value: true
+
+  # Test custom secret name configuration
+  - it: should use custom CA secret name when overridden via global.customCA.volumes
+    set:
+      global.customCA.enabled: true
+      global.customCA.volumes:
+        - name: runai-ca-cert
+          secret:
+            secretName: my-custom-ca-secret
+            optional: true
+    template: templates/assets-service/deployment.yaml
+    asserts:
+      - isKind:
+          of: Deployment
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: runai-ca-cert
+            secret:
+              secretName: my-custom-ca-secret
+              optional: true
+
+  # Test that optional can be set to false if needed
+  - it: "should allow setting CA secret as required (optional: false)"
+    set:
+      global.customCA.enabled: true
+      global.customCA.volumes:
+        - name: runai-ca-cert
+          secret:
+            secretName: runai-ca-cert
+            optional: false
+    template: templates/assets-service/deployment.yaml
+    asserts:
+      - isKind:
+          of: Deployment
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: runai-ca-cert
+            secret:
+              secretName: runai-ca-cert
+              optional: false

@@ -1,0 +1,16 @@
+type: object
+description: External access configuration. Same shape as the networking plugin. Include ingress (Kubernetes), route (OpenShift), or httpRoute (Gateway API). Omit or leave empty for no external access.
+nullable: true
+properties:
+  ingress:
+    description: Full Kubernetes Ingress resource (networking.k8s.io/v1). Used when cluster uses Ingress.
+    type: object
+    nullable: true
+  route:
+    description: Full OpenShift Route resource (route.openshift.io/v1). Used when cluster uses Route.
+    type: object
+    nullable: true
+  httpRoute:
+    description: Full Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1). Used when cluster uses Gateway API.
+    type: object
+    nullable: true

@@ -1,0 +1,9 @@
+description: The scope in which an asset can be used. The highest scope, system, is intended for internal purposes only.
+type: string
+minLength: 1
+enum:
+  - system
+  - tenant
+  - cluster
+  - department
+  - project

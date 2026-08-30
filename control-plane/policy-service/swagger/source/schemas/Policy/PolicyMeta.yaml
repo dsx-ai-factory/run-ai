@@ -1,0 +1,3 @@
+allOf:
+  - $ref: "./PolicyReadOnlyFields.yaml"
+  - $ref: "./PolicyCreationFields.yaml"

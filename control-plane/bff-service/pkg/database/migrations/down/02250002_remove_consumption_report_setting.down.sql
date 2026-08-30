@@ -1,0 +1,1 @@
+-- No rollback: consumptionReport setting data has been deleted and cannot be restored

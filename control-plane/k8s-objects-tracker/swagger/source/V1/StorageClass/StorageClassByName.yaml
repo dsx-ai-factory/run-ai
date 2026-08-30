@@ -1,0 +1,69 @@
+parameters:
+  - $ref: './StorageClassSchema.yaml#/components/parameters/uuid'
+  - $ref: './StorageClassSchema.yaml#/components/parameters/V1Storage_class_name'
+put:
+  summary: Update a storageClass.
+  description: this API is used by cluster versions < 2.20
+  deprecated: true
+  operationId: V1UpdateStorageClass
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: './StorageClassSchema.yaml#/components/schemas/V1StorageClass'
+  tags:
+    - Storage Classes
+  x-internal: true
+  x-service: k8s-objects-tracker
+  x-test-coverage:
+    - src/test/suites/playwright/parallel/dataSource/storageClassApi.test.ts
+  x-audit: false
+  x-authorize:
+    resource-type: pvc-assets
+    action: sync
+  responses:
+    200:
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "./StorageClassSchema.yaml#/components/schemas/V1StorageClasses"
+    401:
+      $ref: './StorageClassSchema.yaml#/components/responses/V1Unauthorized'
+    404:
+      $ref: './StorageClassSchema.yaml#/components/responses/V1NotFound'
+    default:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: "./StorageClassSchema.yaml#/components/schemas/V1Error"
+delete:
+  summary: Delete a storageClass.
+  description: this API is used by cluster versions < 2.20
+  deprecated: true
+  operationId: V1DeleteStorageClass
+  tags:
+    - Storage Classes
+  x-internal: true
+  x-service: k8s-objects-tracker
+  x-test-coverage:
+    - src/test/suites/playwright/parallel/dataSource/storageClassApi.test.ts
+  x-audit: false
+  x-authorize:
+    resource-type: pvc-assets
+    action: delete
+  responses:
+    200:
+      description: Expected response to a valid request
+    401:
+      $ref: './StorageClassSchema.yaml#/components/responses/V1Unauthorized'
+    404:
+      $ref: './StorageClassSchema.yaml#/components/responses/V1NotFound'
+    default:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: "./StorageClassSchema.yaml#/components/schemas/V1Error"

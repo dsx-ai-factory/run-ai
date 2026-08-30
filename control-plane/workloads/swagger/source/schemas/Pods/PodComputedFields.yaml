@@ -1,0 +1,21 @@
+type: object
+required:
+  - tenantId
+  - k8sPhaseUpdatedAt
+  - updatedAt
+properties:
+  tenantId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml'
+  k8sPhaseUpdatedAt:
+    type: string
+    format: date-time
+    example: 2022-06-08T11:28:24.131Z
+  updatedAt:
+    type: string
+    format: date-time
+    example: 2022-06-08T11:28:24.131Z
+  deletedAt:
+    type: string
+    format: date-time
+    example: 2022-08-12T19:28:24.131Z
+    nullable: true

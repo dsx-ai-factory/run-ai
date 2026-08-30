@@ -1,0 +1,32 @@
+post:
+  summary: Create a model-inference
+  description: Creates a model-inference from a given set of assets. The set must include one model asset and one compute asset.
+  operationId: create_model_inference_v2
+  x-service: assets-service
+  x-internal: true
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_model_inference_service_test.go
+    - e2e/src/test/suites/parallel/submitUI/inferenceUI.test.ts
+  x-no-authorization: true
+  tags:
+    - ModelInference
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/ModelInference/ModelInferenceCreationRequestV2.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/ModelInference/ModelInferenceV2.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400SubmissionErrorV2.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

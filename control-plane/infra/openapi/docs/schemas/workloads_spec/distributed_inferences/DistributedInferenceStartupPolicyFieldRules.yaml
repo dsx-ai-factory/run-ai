@@ -1,0 +1,9 @@
+properties:
+  startupPolicy:
+    allOf:
+      - $ref: "../../policy_rules/StringRulesCommon.yaml"
+      - $ref: "./DistributedInferenceStartupPolicyOptions.yaml"
+    nullable: true
+    type: object
+nullable: true
+type: object

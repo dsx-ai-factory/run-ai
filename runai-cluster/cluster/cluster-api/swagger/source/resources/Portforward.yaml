@@ -1,0 +1,31 @@
+get:
+      summary: Port forward to the specified Pod
+      description: Port forward to the specified Pod in the given workload.
+      operationId: portforward
+      tags:
+        - Cluster API
+      x-runai-team: Fox
+      x-no-authorization: true
+      parameters:
+        - $ref: "../parameters/ProjectName.yaml"
+        - $ref: "../parameters/WorkloadName.yaml"
+        - $ref: "../parameters/WorkloadType.yaml"
+        - $ref: "../parameters/Ports.yaml"
+        - $ref: "../parameters/Pod.yaml"
+      responses:
+        200:
+          description: OK
+        400:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/400BadRequest.yaml'
+        401:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/401Unauthorized.yaml'
+        403:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/403Forbidden.yaml'
+        404:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/404NotFound.yaml'
+        412:
+          $ref: '../responses/412PodNotReady.yaml'
+        500:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/500InternalServerError.yaml'
+        503:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/503ServiceUnavailable.yaml'

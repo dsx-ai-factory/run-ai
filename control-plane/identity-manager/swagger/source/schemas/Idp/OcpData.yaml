@@ -1,0 +1,14 @@
+type: object
+nullable: true
+
+properties:
+  idpBaseUrl:
+    type: string
+  clientId:
+    type: string
+  clientSecret:
+    type: string
+  scopes:
+    type: array
+    items:
+      type: string

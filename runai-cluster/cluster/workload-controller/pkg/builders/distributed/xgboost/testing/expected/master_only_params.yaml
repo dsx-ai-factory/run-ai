@@ -1,0 +1,144 @@
+apiVersion: kubeflow.org/v1
+kind: XGBoostJob
+metadata:
+  annotations:
+    image: ubuntu
+    template: job-1
+    user: user.name
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: xgboostjob
+    createdBy: XGBoostJob
+    project: team-a
+    release: job-1
+    run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+    workloadKind: DistributedWorkload
+    workloadName: job-1
+  name: job-1
+  namespace: runai-team-a
+spec:
+  runPolicy:
+    backoffLimit: 18
+    cleanPodPolicy: None
+  xgbReplicaSpecs:
+    Master:
+      replicas: 1
+      template:
+        metadata:
+          annotations:
+            runai-nodepools: default nodepoola
+            totalGPUs: "0"
+            totalGPUsMemory: "0"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-1
+        spec:
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: runai/node-pool
+                    operator: DoesNotExist
+                - matchExpressions:
+                  - key: test-key
+                    operator: In
+                    values:
+                    - test-value
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: training.kubeflow.org/job-name
+                    operator: In
+                    values:
+                    - job-1
+                topologyKey: pod_affinity_topology_value
+          containers:
+          - args:
+            - arg1
+            - arg2
+            - arg3
+            command:
+            - cmd1
+            - cmd2
+            - cmd3
+            image: ubuntu
+            imagePullPolicy: IfNotPresent
+            name: xgboost
+            ports:
+            - containerPort: 80
+              name: port-80
+              protocol: TCP
+            - containerPort: 90
+              name: port-90
+              protocol: TCP
+            resources: {}
+            securityContext:
+              seccompProfile:
+                type: RuntimeDefault
+            volumeMounts:
+            - mountPath: /mypath
+              name: host-path-volume-0
+              readOnly: true
+            - mountPath: /tmp/ofer
+              name: pvc-volume-0
+          schedulerName: runai-scheduler
+          volumes:
+          - hostPath:
+              path: /myvol
+            name: host-path-volume-0
+          - name: pvc-volume-0
+            persistentVolumeClaim:
+              claimName: pvc-job-1-1-0
+    Worker:
+      replicas: 3
+      template:
+        metadata:
+          annotations:
+            totalGPUs: "0"
+            totalGPUsMemory: "0"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-1
+        spec:
+          containers:
+          - image: ubuntu
+            imagePullPolicy: IfNotPresent
+            name: xgboost
+            resources: {}
+            securityContext:
+              seccompProfile:
+                type: RuntimeDefault
+          schedulerName: runai-scheduler
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: xgboostjob
+    createdBy: XGBoostJob
+    project: team-a
+    release: job-1
+    workloadKind: DistributedWorkload
+    workloadName: job-1
+  name: pvc-job-1-1-0
+  namespace: runai-team-a
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  storageClassName: storage
+status: {}

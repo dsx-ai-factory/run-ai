@@ -1,0 +1,17 @@
+required:
+  - deserved
+properties:
+  deserved:
+    type: number
+    description: The amount of resources guaranteed to be allocated in case the cluster has those resources.
+    example: 0
+  maxAllowed:
+    type: number
+    description: Maximum amount of resources that can be allocated. If equal to deserved, no over-quota will be allowed. Use "-1" for unlimited over quota.
+    example: 1000
+    nullable: true
+  overQuotaWeight:
+    type: number
+    description: The priority for over quota resources.
+    example: 2
+    nullable: true

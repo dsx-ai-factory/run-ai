@@ -1,0 +1,3 @@
+{{- if .Values.notificationsProxy.enabled }}
+{{- include "common.hpa" (list . .Values.notificationsProxy.autoscaling .Values.notificationsProxy) -}}
+{{- end }}

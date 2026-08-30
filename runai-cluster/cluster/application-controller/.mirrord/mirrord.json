@@ -1,0 +1,13 @@
+{
+    "target": {
+        "path": {
+            "deployment": "application-controller",
+            "container": "application-controller"
+        },
+        "namespace": "runai"
+    },
+    "feature": {
+        "env": true,
+        "fs": "read"
+    }
+}

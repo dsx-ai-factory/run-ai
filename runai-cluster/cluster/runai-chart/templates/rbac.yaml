@@ -1,0 +1,125 @@
+{{- if and (not .Values.global.serviceAccountName) (index .Values "runai-operator" "enabled") }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: runai-operator
+  namespace: runai
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: runai-operator
+  namespace: runai
+rules:
+  - apiGroups:
+      - ""
+      - batch
+      - apps
+      - networking.k8s.io
+      - rbac.authorization.k8s.io
+      - monitoring.coreos.com
+      - run.ai
+      - route.openshift.io
+      - autoscaling.k8s.io
+      - gateway.networking.k8s.io
+    resources:
+      - prometheuses
+      - prometheusrules
+      - pods
+      - services
+      - configmaps
+      - secrets
+      - serviceaccounts
+      - jobs
+      - deployments
+      - daemonsets
+      - replicasets
+      - statefulsets
+      - roles
+      - rolebindings
+      - ingresses
+      - runaiconfigs
+      - runaiconfigs/status
+      - runaiconfigs/finalizers
+      - interactivepolicies
+      - interactivepolicies/status
+      - interactiveworkloads
+      - interactiveworkloads/status
+      - trainingpolicies
+      - trainingpolicies/status
+      - trainingworkloads
+      - trainingworkloads/status
+      - inferencepolicies
+      - inferencepolicies/status
+      - inferenceworkloads
+      - inferenceworkloads/status
+      - distributedpolicies
+      - distributedpolicies/status
+      - distributedworkloads
+      - distributedworkloads/status
+      - distributedinferencepolicies
+      - distributedinferencepolicies/status
+      - distributedinferenceworkloads
+      - distributedinferenceworkloads/status
+      - distributedinferenceworkloads/scale
+      - servicemonitors
+      - podmonitors
+      - routes
+      - routes/custom-host
+      - verticalpodautoscalers
+      - httproutes
+      - httproutes/status
+    verbs:
+      - '*'
+  - apiGroups:
+      - gateway.networking.k8s.io
+    resources:
+      - gateways
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - deletecollection
+  - apiGroups:
+      - kubeflow.org
+    resources:
+      - mpijobs
+      - pytorchjobs
+      - tfjobs
+      - xgboostjobs
+    verbs:
+      - create
+  # Delete the leader-election Lease orphaned by the runtime-rules rename
+  # (legacy_runtime_runner cleanup operand). Only present on HA installs.
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - get
+      - delete
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-operator
+  namespace: runai
+subjects:
+- kind: ServiceAccount
+  name: runai-operator
+roleRef:
+  kind: Role
+  name: runai-operator
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

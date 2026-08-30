@@ -1,0 +1,32 @@
+SERVICE_PORT: "8080"
+ENVIRONMENT: production
+LOG_LEVEL: info
+
+# DB
+DB_NAME: runai
+DB_SCHEMA: tenants_manager
+DB_HOST: postgres
+DB_PORT: "5432"
+DB_SSL_MODE: disable
+
+MIGRATION_FILES: file:///migrations
+TRACING_ENABLED: "false"
+USE_MOCKS: "true"
+
+CACHE_ENABLED: "false"
+
+# Tenant
+TENANT_DOMAIN_TEMPLATE: https://localhost.example.com
+
+# Auth
+IDENTITY_MNG_URL: http://localhost:8081
+AUTH_SERVICE_URL: https://localhost.example.com
+
+# Pubsub
+PUBSUB_TYPE: nats
+SERVICE_NAME: tenants-manager
+PUBSUB_URL: nats://n1:4222
+PUBSUB_REPLICAS: 1
+
+# BFF Service
+BFF_SERVICE_URL: "http://bff-service:8080"

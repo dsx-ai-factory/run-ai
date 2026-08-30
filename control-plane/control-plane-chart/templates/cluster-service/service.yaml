@@ -1,0 +1,3 @@
+{{- if .Values.clusterService.enabled }}
+{{- include "common.service" (list . .Values.clusterService.service .Values.clusterService) }}
+{{- end }}

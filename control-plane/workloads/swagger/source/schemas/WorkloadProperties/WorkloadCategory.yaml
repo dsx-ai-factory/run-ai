@@ -1,0 +1,22 @@
+type: object
+required:
+  - id
+  - name
+properties:
+  id:
+    type: string
+    format: uuid
+    description: The unique identifier of the workload category.
+  name:
+    type: string
+    description: A unique, human-readable name for the workload category.
+  description:
+    type: string
+    description: An optional description providing additional details about the category.
+  createdAt:
+    type: string
+    format: date-time
+    description: The date and time when the workload category was created.
+  createdBy:
+    type: string
+    description: The user who created the workload category.

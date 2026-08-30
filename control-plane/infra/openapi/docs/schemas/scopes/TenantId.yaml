@@ -1,0 +1,4 @@
+description: The id of the tenant.
+type: integer
+format: int32
+example: 1001

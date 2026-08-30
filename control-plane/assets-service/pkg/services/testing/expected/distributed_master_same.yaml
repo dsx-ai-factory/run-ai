@@ -1,0 +1,53 @@
+flatWorkloads:
+  Distributed:
+  - actualPhase: Creating
+    clusterId: ""
+    createdAt: "0001-01-01T00:00:00Z"
+    createdBy: ""
+    desiredPhase: Running
+    masterSpecSameAsWorker: true
+    name: distributed_master_same
+    projectId: ""
+    requestedName: distributed_master_same
+    spec:
+      annotations:
+      - name: run.ai/assets-info
+        value: ""
+      args: -x worker-command
+      command: python
+      compute:
+        gpuDevicesRequest: 1
+        gpuMemoryLimit: 20M
+        gpuMemoryRequest: 10M
+        gpuRequestType: memory
+      createHomeDir: true
+      distributedFramework: TF
+      environmentVariables:
+      - name: HOME
+        value: /home/worker
+      exposedUrls: []
+      image: ubuntu
+      numWorkers: 3
+      ports: []
+      relatedUrls: []
+      security:
+        allowPrivilegeEscalation: false
+        hostIpc: true
+        hostNetwork: true
+        runAsGid: 30
+        runAsNonRoot: true
+        runAsUid: 500
+        seccompProfileType: RuntimeDefault
+        supplementalGroups: 2,3,5,8
+        uidGidSource: custom
+      storage:
+        nfs:
+        - mountPath: /external/path
+          path: /container/path
+          readOnly: true
+          server: my.nfs.com
+      workingDir: /my/home
+    workloadId: ""
+  Inferences: null
+  Trainings: null
+  Workspaces: null

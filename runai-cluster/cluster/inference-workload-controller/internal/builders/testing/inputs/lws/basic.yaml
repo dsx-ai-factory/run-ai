@@ -1,0 +1,16 @@
+apiVersion: run.ai/v1alpha1
+kind: DistributedInferenceWorkload
+metadata:
+  name: test-lws
+  namespace: runai-team-a
+spec:
+  workers:
+    value: 2
+  replicas: 
+    value: 5
+leaderSpec:
+  image: 
+    value: leader-image:latest
+workerSpec:
+  image: 
+    value: worker-image:latest

@@ -1,0 +1,43 @@
+get:
+  summary: List the access rules.
+  description: Retrieve a list of access rules.
+  operationId: get_access_rules_sync
+  x-service: authorization
+  x-internal: true
+  x-test-coverage:
+    - control-plane/authorization/pkg/services/access_rules_api_test.go
+  x-authorize:
+    resource-type: access_rules
+    action: sync
+  tags:
+    - Access rules
+  parameters:
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../parameters/query/LastUpdated.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml'
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - accessRules
+            properties:
+              next:
+                type: integer
+                example: 1
+              accessRules:
+                type: array
+                items:
+                  $ref: '../schemas/AccessRules/AccessRuleSync.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

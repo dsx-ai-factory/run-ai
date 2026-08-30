@@ -1,0 +1,5 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+preemptibility: preemptible

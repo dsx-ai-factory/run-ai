@@ -1,0 +1,7 @@
+allOf:
+  - replace: me
+  - $ref: "./DistributedInferenceStartupPolicyField.yaml"
+  - $ref: "./DistributedInferenceWorkersField.yaml"
+  - $ref: "./DistributedInferenceReplicasField.yaml"
+nullable: true
+type: object

@@ -1,0 +1,7 @@
+x-internal: true
+required:
+- config
+type: object
+description: GET Cluster Internal Configuration Response
+allOf:
+  - $ref: "ClusterFullConfig.yaml"

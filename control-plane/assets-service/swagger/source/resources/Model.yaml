@@ -1,0 +1,65 @@
+get:
+  summary: List model assets.
+  description: Returns a list of model assets.
+  operationId: list_model_assets
+  x-no-authorization: true
+  x-service: assets-service
+  x-test-coverage: null
+  tags:
+    - Model
+  parameters:
+    - $ref: "../parameters/query/optional/AssetNameFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetScopeFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetProjectFilter.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByDepartment.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml"
+    - $ref: "../parameters/query/optional/IncludeUsageInfo.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToProject.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToWorkloadType.yaml"
+    - $ref: "../parameters/query/optional/EnvironmentId.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToReplicaType.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Model/ModelListResponse.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+post:
+  summary: Create model asset.
+  description: Creates a model asset.
+  operationId: create_model_asset
+  x-no-authorization: true
+  x-service: assets-service
+  x-test-coverage: null
+  x-audit: true
+  tags:
+    - Model
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Model/ModelCreationRequest.yaml"
+  responses:
+    202:
+      description: Request accepted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Model/ModelAsset.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    409:
+      $ref: "../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

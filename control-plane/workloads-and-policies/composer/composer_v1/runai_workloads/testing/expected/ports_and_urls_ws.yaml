@@ -1,0 +1,91 @@
+Dinfw: null
+JobSpec:
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  environment:
+    items:
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  exposedUrls:
+    items:
+      url-1:
+        value:
+          containerPort: 8082
+      url-my-tool-name:
+        value:
+          containerPort: 8081
+      url-url-1:
+        deleted: true
+  image:
+    value: ubuntu
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  ports:
+    items:
+      port:
+        value:
+          autoGenerate: true
+          container: 8081
+          serviceType: NodePort
+      port-port-1:
+        deleted: true
+  priorityClassName:
+    value: high
+  username:
+    value: test
+MasterSpec: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections:
+    - connectionType: ExternalUrl
+      containerPort: 8082
+      correlationName: url-1
+      exposedUrlPath: /project/test
+      exposedUrlSubDomain: project-test
+      name: my-tool
+      toolType: custom
+    - connectionType: ExternalUrl
+      containerPort: 8081
+      correlationName: url-my-tool-name
+      exposedUrlPath: /project/test/url-my-tool-name
+      exposedUrlSubDomain: project-test-url-my-tool-name
+      name: url-my-tool-name
+      toolType: tensor
+    - connectionType: NodePort
+      containerPort: 8081
+      correlationName: port
+      name: port
+      portResourceName: port-test-8081-0
+      serviceResourceName: iw-test-0-nodeport
+      toolType: tensor
+    id: ""
+    name: ""
+    replicaType: null
+  externalConnections:
+  - connectionType: ""
+    name: ""
+    toolType: google
+    url: http://google.com/search
+  - connectionType: ""
+    name: stats
+    toolType: wandb
+    url: http://wandb.com/stats
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: ports_and_urls, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: ports_and_urls, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

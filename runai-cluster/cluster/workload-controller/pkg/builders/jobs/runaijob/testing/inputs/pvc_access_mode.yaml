@@ -1,0 +1,37 @@
+apiVersion: run.ai/v2alpha1
+kind: InteractiveWorkload
+metadata:
+  creationTimestamp: null
+  name: job-33
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  image:
+    value: ubuntu
+  pvcs:
+    items:
+      pvc-0:
+        value:
+          path: /tmp/existing
+          readOnly: true
+          claimName: existing
+          existingPvc: true
+      pvc-1:
+        value:
+          path: /tmp/claim1
+          readOnly: true
+          claimName: claim1
+          size: 20M
+      pvc-2:
+        value:
+          path: /tmp/claim2
+          claimName: claim2
+          size: 20M
+          readOnlyMany: true
+          readWriteOnce: true
+      pvc-3:
+        value:
+          path: /tmp/claim3
+          claimName: claim3
+          size: 10M
+          readWriteMany: true

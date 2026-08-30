@@ -1,0 +1,1 @@
+ALTER TABLE assets_config_map DROP COLUMN IF EXISTS sub_path;

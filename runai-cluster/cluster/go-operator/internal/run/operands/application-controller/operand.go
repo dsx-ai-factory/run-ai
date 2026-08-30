@@ -1,0 +1,75 @@
+package application_controller
+
+import (
+	"context"
+	kc "github.com/run-ai/runai/runai-cluster/cluster/go-operator/pkg/kube-client"
+
+	"github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/run/operands/application-controller/resources"
+	"github.com/run-ai/runai/runai-cluster/cluster/go-operator/pkg/operands"
+	"github.com/run-ai/runai/runai-cluster/cluster/go-operator/pkg/operands/admissionpolicy"
+	"github.com/run-ai/runai/runai-cluster/cluster/go-operator/pkg/operands/utils"
+	runv1 "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1"
+)
+
+const (
+	// Name specifies the name of this operand for logging purposes.
+	Name = operands.RunaiApplicationControllerName
+)
+
+var (
+	// resourceFunctions is a slice of functions that return resources.
+	// Update this variable when adding resources to an operand.
+	resourceFunctions = []operands.ResourceFunction{
+		resources.SecretForRunaiConfig,
+		resources.DeploymentForRunaiConfig,
+		resources.ServiceAccountForRunaiConfig,
+		resources.ServiceMonitorForRunaiConfig,
+		resources.ServiceForRunaiConfig,
+	}
+
+	// resourceStatusFunctions is a slice of functions that know how to calculate
+	// the status of resources.
+	// Update this slice when a resource has a status to report.
+	resourceStatusFunctions = []operands.ResourceStatusFunction{
+		resources.SecretStatus,
+		resources.DeploymentStatus,
+		resources.ServiceAccountStatus,
+		resources.ServiceMonitorStatus,
+		resources.ServiceStatus,
+		resources.ValidatingAdmissionPolicyStatus,
+	}
+)
+
+// RBAC permissions the operand requires for resource management
+//+kubebuilder:rbac:namespace=runai,groups=apps,resources=deployments,verbs=get;create;update;watch;patch;delete;list
+//+kubebuilder:rbac:namespace=runai,groups="",resources=serviceaccounts,verbs=get;create;update;watch;patch;delete;list
+
+type operand struct{}
+
+func (o *operand) Name() string {
+	return Name
+}
+
+// ResourcesForRunaiConfig returns a slice of Kubernetes resources
+// that should be Created/Updated/Deleted by the controller to satisfy
+// the needs of this operand.
+func (o *operand) ResourcesForRunaiConfig(ctx context.Context, hybridClient kc.HybridClient,
+	runaiConfig *runv1.RunaiConfig) ([]operands.ResourceOld, error) {
+	operandResources, err := utils.ResourcesForRunaiConfig(ctx, hybridClient, runaiConfig, resourceFunctions, o.Name())
+	if err != nil {
+		return operandResources, err
+	}
+
+	policyResources, err := admissionpolicy.NewResourcesOld(ctx, o.Name(), hybridClient,
+		resources.ValidatingAdmissionPolicyDefinition(runaiConfig))
+	return append(operandResources, policyResources...), err
+}
+
+func (o *operand) Status(ctx context.Context, hybridClient kc.HybridClient,
+	runaiConfig *runv1.RunaiConfig) (operands.Status, error) {
+	return utils.StatusOld(ctx, hybridClient, runaiConfig, resourceStatusFunctions)
+}
+
+func Operand() operands.OperandOld {
+	return &operand{}
+}

@@ -1,0 +1,1 @@
+ALTER TABLE assets_config_map ADD COLUMN IF NOT EXISTS sub_path text;

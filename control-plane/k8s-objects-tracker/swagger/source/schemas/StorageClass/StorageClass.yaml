@@ -1,0 +1,30 @@
+type: object
+required:
+  - storage_class_name
+properties:
+  cluster_id:
+    type: string
+    format: uuid
+    description: Cluster ID which has sent the resource info
+    example: 550e8400-e29b-41d4-a716-446655440000
+  storage_class_name:
+    type: string
+    description: Storage class name
+    example: my-storage-class
+  Spec:
+    type: object
+    required:
+      - is_default
+    properties:
+      provisioner:
+        type: string
+        description: The provisioner type (unique name)
+        example: kubernetes.io/aws-ebs
+      allow_volume_expansion:
+        type: boolean
+        description: Indicates whether the storage class allows volume expansion
+        example: true
+      is_default:
+        type: boolean
+        description: Indicates whether the storage class is the default one
+        example: false

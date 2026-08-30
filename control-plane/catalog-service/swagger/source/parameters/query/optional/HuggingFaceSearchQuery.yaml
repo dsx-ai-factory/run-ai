@@ -1,0 +1,8 @@
+name: query
+in: query
+required: false
+description: Search query used to look up Hugging Face models. Accepts a full repository ID (`org/model`), a standalone model name, or a partial match string.
+example: "meta-llama/Llama-3.1-405B-Instruct or Llama-3.1-405B-Instruct or Llama-3.1-405B"
+schema:
+  type: string
+  pattern: "^/?[A-Za-z0-9._-/]+$" # pattern to allow alphanumeric, ., _, -, / and optional leading /

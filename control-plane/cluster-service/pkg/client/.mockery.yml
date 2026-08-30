@@ -1,0 +1,10 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+packages:
+  github.com/run-ai/runai/control-plane/cluster-service/pkg/client:
+    interfaces:
+      IClusterClient: {}
+      IClusterExternalClient: {}

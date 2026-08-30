@@ -1,0 +1,7 @@
+{
+  "service_name": "workload-common",
+  "artifact_type": "",
+  "jira": {
+    "team_name": "Viper"
+  }
+}

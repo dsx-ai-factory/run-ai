@@ -1,0 +1,42 @@
+apiVersion: optimization.nvidia.com/v1alpha1
+kind: ResourceInterface
+metadata:
+  creationTimestamp: "2026-05-10T06:38:29Z"
+  finalizers:
+  - rid.kai.bolt/finalize
+  generation: 1
+  labels:
+    run.ai/resource-interface-group: kubeflow.org
+    run.ai/resource-interface-kind: Notebook
+    run.ai/resource-interface-updated-at: 2026-05-10T06-35-07Z
+    run.ai/resource-interface-version: v1beta1
+    run.ai/workload-type-id: f02d897d-1780-48d5-a79a-27874013f703
+  name: ri-v1beta1-kubeflow-org-notebook
+  resourceVersion: "8762"
+  uid: 25f2db0d-1998-437c-8674-dd3e4b4ddbf0
+spec:
+  optimizationInstructions: {}
+  structureDefinition:
+    rootComponent:
+      kind:
+        group: kubeflow.org
+        kind: Notebook
+        version: v1beta1
+      name: ""
+status:
+  conditions:
+  - lastTransitionTime: "2026-05-10T06:38:50Z"
+    message: The sync is not enabled
+    reason: SyncEnabled
+    status: "False"
+    type: SyncEnabled
+  - lastTransitionTime: "2026-05-10T06:38:50Z"
+    message: The CustomResourceDefinition for the group/kind does not exist
+    reason: CRDExists
+    status: "False"
+    type: CRDExists
+  - lastTransitionTime: "2026-05-10T06:38:50Z"
+    message: The RBAC permissions for the group/kind are not ready
+    reason: RBACReady
+    status: "False"
+    type: RBACReady

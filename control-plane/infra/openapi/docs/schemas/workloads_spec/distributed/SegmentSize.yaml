@@ -1,0 +1,8 @@
+description: |
+  The number of workers per topology segment.
+  Workers in the same segment will be placed on nodes that are as close as possible, reducing latency between them.
+  Set this to match your application's parallel segment size.
+  Omit this field to disable segmentation.
+type: integer
+minimum: 1
+nullable: true

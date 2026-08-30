@@ -1,0 +1,6 @@
+type: string
+description: The action to perform on the list of ids.
+enum:
+  - delete
+  - suspend
+  - resume

@@ -1,0 +1,40 @@
+description: Details of an environment variable which is populated into the container.
+properties:
+  name:
+    description: The name of the environment variable. (mandatory)
+    type: string
+    minLength: 1
+    maxLength: 63
+    example: HOME
+    nullable: true
+    pattern: .*
+  value:
+    description: The value of the environment variable. (mutually exclusive with secret, userCredential, configMap and podFieldRef)
+    type: string
+    maxLength: 10000
+    example: /home/my-folder
+    nullable: true
+    pattern: .*
+  secret:
+    $ref: "./EnvironmentVariableSecret.yaml"
+  configMap:
+    $ref: "./EnvironmentVariableConfigMap.yaml"
+  podFieldRef:
+    $ref: "./EnvironmentVariablePodFieldReference.yaml"
+  userCredential:
+    $ref: "./EnvironmentVariableUserCredential.yaml"
+  exclude:
+    description: Use 'true' in case the environment variable is defined in defaults of the policy, and you wish to exclude it from the workload.
+    type: boolean
+    example: false
+    nullable: true
+  description:
+    description: Description of the environment variable.
+    type: string
+    ##WAIT_FOR_35331## minLength: 1
+    maxLength: 250
+    example: Home directory of the user.
+    nullable: true
+    pattern: .*
+nullable: true
+type: object

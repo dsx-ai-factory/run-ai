@@ -1,0 +1,84 @@
+get:
+  summary: List environment assets.
+  description: Use to retrieve a list of environment assets.
+  operationId: list_environment_assets
+  x-service: assets-service
+  x-no-authorization: true
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_environment_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - e2e/src/test/suites/defaultSuite/environment/environmentUI.test.ts
+    - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
+    - e2e/src/test/suites/parallel/submitUI/connectToJupiterUI.test.ts
+  tags:
+    - Environment
+  parameters:
+    - $ref: "../parameters/query/optional/AssetNameFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetScopeFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetProjectFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetDepartmentFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetClusterFilter.yaml"
+    - $ref: "../parameters/query/optional/IncludeUsageInfo.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToProject.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToWorkloadType.yaml"
+    - $ref: "../parameters/query/optional/DistributedFrameworkQuery.yaml"
+    - $ref: "../parameters/query/optional/IsDistributedQuery.yaml"
+    - $ref: "../parameters/query/optional/IsTrainingQuery.yaml"
+    - $ref: "../parameters/query/optional/IsWorkspaceQuery.yaml"
+    - $ref: "../parameters/query/optional/IsInferenceQuery.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToReplicaType.yaml"
+    - $ref: "../parameters/query/optional/IncludeStatus.yaml"
+    - $ref: "../parameters/query/optional/includeDescendants.yaml"
+    - $ref: "../parameters/query/optional/IsDistributedInferenceQuery.yaml"
+
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Environment/EnvironmentListResponse.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+
+post:
+  summary: Create an environment asset.
+  description: Use to create an environment asset.
+  operationId: create_environment_asset
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_environment_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - e2e/src/test/suites/defaultSuite/environment/environmentUI.test.ts
+    - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
+    - e2e/src/test/suites/parallel/submitUI/connectToJupiterUI.test.ts
+  x-no-authorization: true
+  x-audit: true
+  tags:
+    - Environment
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Environment/EnvironmentCreationRequest.yaml"
+  responses:
+    202:
+      description: Request accepted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Environment/EnvironmentAsset.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    409:
+      $ref: "../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

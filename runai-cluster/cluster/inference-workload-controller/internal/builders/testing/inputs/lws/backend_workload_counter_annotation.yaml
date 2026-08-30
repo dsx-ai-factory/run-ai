@@ -1,0 +1,34 @@
+apiVersion: run.ai/v1alpha1
+kind: DistributedInferenceWorkload
+metadata:
+  name: test-lws-backend-counter
+  namespace: runai-team-a
+  annotations:
+    run.ai/workload-update-counter: "42"
+spec:
+  workers:
+    value: 1
+  replicas: 
+    value: 1
+leaderSpec:
+  image: 
+    value: leader-image:latest
+  annotations:
+    items:
+      master-annotation-1:
+        value: master-annotation-value-1
+  labels:
+    items:
+      master-label-1:
+        value: master-label-value-1
+workerSpec:
+  image: 
+    value: worker-image:latest
+  annotations:
+    items:
+      worker-annotation-1:
+        value: worker-annotation-value-1
+  labels:
+    items:
+      worker-label-1:
+        value: worker-label-value-1 

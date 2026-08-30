@@ -1,0 +1,12 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+packages:
+  github.com/run-ai/runai/control-plane/bff-service/pkg/authorization:
+    interfaces:
+      AuthManagerInterface: {}
+  github.com/run-ai/runai/control-plane/bff-service/pkg/services:
+    interfaces:
+      SystemNotificationManager: {}

@@ -1,0 +1,16 @@
+image: ubuntu
+exposedUrls:
+  - container: 8081
+    toolType: tensor
+    authorizationType: authenticatedUsers
+    authorizedGroups:
+      - group-a
+      - group-b
+    authorizedUsers:
+      - user-a
+      - user-b
+
+
+
+
+

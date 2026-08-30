@@ -1,0 +1,41 @@
+type: object
+properties:
+  grantType:
+    $ref: '../../parameters/TokenRequestGrantTypeEnum.yaml'
+  appID:
+    deprecated: true
+    x-internal: true
+    type: string
+    maxLength: 255
+  appSecret:
+    deprecated: true
+    x-internal: true
+    type: string
+    maxLength: 500
+  code:
+    type: string
+    maxLength: 2048
+  redirectUri:
+    type: string
+    maxLength: 2048
+  refreshToken:
+    type: string
+    maxLength: 4096
+  username:
+    type: string
+    maxLength: 255
+  password:
+    type: string
+    maxLength: 255
+  clientID:
+    type: string
+    maxLength: 255
+  clientSecret:
+    type: string
+    maxLength: 500
+  externalToken:
+    type: string
+    maxLength: 4096
+  codeVerifier:
+    type: string
+    maxLength: 128

@@ -1,0 +1,30 @@
+get:
+  deprecated: true
+  summary: Get CLI document by name
+  description: |
+    This endpoint returns a document of help for the Run:AI CLI.
+  operationId: get_manual_document_deprecated
+  x-service: cli-exposer
+  x-test-coverage:
+    - cli-exposer/pkg/services/api_cli_service_test.go
+  x-no-authorization: true
+  tags:
+    - Researcher Command Line Interface Deprecated
+  parameters:
+    - $ref: '../../parameters/DocumentName.yaml'
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        text/html:
+          x-default: true
+          schema:
+            type: string
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

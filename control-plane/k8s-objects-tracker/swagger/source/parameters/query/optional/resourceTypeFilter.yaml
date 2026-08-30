@@ -1,0 +1,6 @@
+name: resourceType
+in: query
+description: filter by resource type
+schema:
+  $ref: '../../../schemas/ClusterObjectsStatus/ClusterResourceType.yaml'
+required: false

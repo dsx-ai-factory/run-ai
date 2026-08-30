@@ -1,0 +1,53 @@
+apiVersion: run.ai/v2alpha1
+kind: InteractivePolicy
+metadata:
+  name: interactive-policy
+  namespace: runai
+spec:
+
+  gpu:
+    rules:
+      required: true
+      max: "10"
+
+  image:
+    value: "ubuntu"
+
+  ports:
+    itemRules:
+      container:
+        min: 30000
+        max: 32767
+      external:
+        max: 32767
+    items:
+      admin-port:
+        rules:
+          canRemove: false
+        value:
+          container: 30100
+          external: 8080
+
+  volumes:
+    items:
+      admin-volume:
+        rules:
+          canRemove: false
+          canEdit: false
+        value:
+          sourcePath: /srcx
+          targetPath: /targetx
+          readOnly: false
+
+  environment:
+    items:
+      HOME:
+        rules:
+          canRemove: false
+        value: /home
+      USER:
+        rules:
+          canEdit: false
+          canRemove: false
+        value: $USER
+

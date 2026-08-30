@@ -1,0 +1,21 @@
+type: object
+required:
+  - id
+properties:
+  id:
+    type: string
+    description: The ID of the project or department
+    example: "123"
+  runningWorkloadsCount:
+    type: integer
+    format: int32
+    nullable: true
+    description: Number of running workloads (populated by the API response)
+    example: 5
+  pendingWorkloadsCount:
+    type: integer
+    format: int32
+    nullable: true
+    description: Number of pending workloads (populated by the API response)
+    example: 2
+

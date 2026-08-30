@@ -1,0 +1,11 @@
+package field_groups
+
+import fields "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
+
+// StateFields defines the workload state related fields
+// +k8s:deepcopy-gen=true
+type StateFields struct {
+	// +kubebuilder:default:={value: true}
+	// Specifies whether the workload should be active or suspended.
+	Active *fields.BoolField `json:"active,omitempty"`
+}

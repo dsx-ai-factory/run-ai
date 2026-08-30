@@ -1,0 +1,9 @@
+type: object
+required:
+  - access_token
+  - id_token
+properties:
+  access_token:
+    type: string
+  id_token:
+    type: string

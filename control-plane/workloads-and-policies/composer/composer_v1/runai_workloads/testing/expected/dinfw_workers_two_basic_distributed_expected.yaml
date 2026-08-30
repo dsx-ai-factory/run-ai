@@ -1,0 +1,75 @@
+Dinfw:
+  leaderSpec:
+    environment:
+      items:
+        RUNAI_JOB_NAME:
+          value: ${RUNAI_JOB_NAME}
+        RUNAI_PROJECT:
+          value: ${RUNAI_PROJECT}
+    image:
+      value: python:3.8
+    labels:
+      items:
+        run.ai/control-plane-managed:
+          value: "true"
+  metadata: {}
+  spec:
+    priorityClassName:
+      value: very-high
+    servingPorts:
+      items:
+        serving-port:
+          value:
+            port: 8081
+    username:
+      value: test
+    workers:
+      value: 2
+  status: {}
+  workerSpec:
+    environment:
+      items:
+        RUNAI_JOB_NAME:
+          value: ${RUNAI_JOB_NAME}
+        RUNAI_PROJECT:
+          value: ${RUNAI_PROJECT}
+    image:
+      value: python:2.7
+    labels:
+      items:
+        run.ai/control-plane-managed:
+          value: "true"
+JobSpec: {}
+MasterSpec: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections:
+    - authorizationType: public
+      connectionType: ServingPort
+      containerPort: 8081
+      correlationName: serving-port
+      name: ServingPort
+      toolType: custom
+    id: ""
+    name: Leader
+    replicaType: Leader
+  - connections: []
+    id: ""
+    name: Worker
+    replicaType: Worker
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: dinfw_workers_two_basic_distributed, Rules: , Type: DistributedInference'
+  images:
+  - python:3.8
+  - python:2.7
+  name: 'Value: dinfw_workers_two_basic_distributed, Rules: , Type: DistributedInference'
+  projectId: project-654-321
+  requestedPods:
+    number: 3
+  submittedBy: test
+  type: DistributedInference
+  version: v1alpha1

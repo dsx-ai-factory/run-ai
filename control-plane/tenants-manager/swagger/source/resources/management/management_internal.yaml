@@ -1,0 +1,25 @@
+get:
+  summary: Get tenants list internal
+  x-service: tenants-manager
+  x-test-coverage: not-applicable
+  operationId: management_get_tenants_internal
+  x-no-authorization: true
+  tags:
+  - internal
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Tenants/Tenants.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

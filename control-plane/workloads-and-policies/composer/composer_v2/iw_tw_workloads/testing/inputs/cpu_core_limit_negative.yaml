@@ -1,0 +1,5 @@
+image: ubuntu
+
+compute:
+  cpuCoreRequest: 3
+  cpuCoreLimit: -5

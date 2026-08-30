@@ -1,0 +1,255 @@
+name: "Validate Cluster Config Schema"
+
+on:
+  pull_request:
+    branches:
+      - "master"
+      - "main"
+      - "v*.*"
+      - "release-*.*"
+    paths:
+      - 'runai-cluster/cluster/sdk/apis/**'
+      - 'runai-cluster/cluster/runai-chart/values.schema.json'
+      - 'runai-cluster/cluster/sdk/hack/generate-values-schema.go'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  GO_VERSION: "1.24.6"
+  SCHEMA_PATH: "runai-cluster/cluster/runai-chart/values.schema.json"
+  SDK_PATH: "runai-cluster/cluster/sdk"
+  GOPRIVATE: "github.com/run-ai/*"
+
+jobs:
+  validate-schema:
+    name: Validate Generated Schema
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.draft == false
+
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      - name: Set Up GitHub Authentication For Go Modules
+        env:
+          GOPRIVATE: "github.com/run-ai/*"
+        run: |
+          git config --global url."https://${{ secrets.GIT_HUB_OSS }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Set up Go
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Check if schema validation is required
+        id: check-schema-requirement
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          echo "🔍 Checking if schema exists in target branch: $BASE_REF"
+          git fetch origin -- "$BASE_REF"
+
+          if git show "origin/${BASE_REF}:${SCHEMA_PATH}" >/dev/null 2>&1; then
+            echo "schema_required=true" >> $GITHUB_OUTPUT
+            echo "✅ Schema exists in target branch - validation required"
+          else
+            echo "schema_required=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ Schema doesn't exist in target branch - skipping validation"
+            echo "This is likely an older release branch that predates the schema"
+          fi
+
+      - name: Generate schema to temporary file
+        id: generate-schema
+        if: steps.check-schema-requirement.outputs.schema_required == 'true'
+        env:
+          GOPRIVATE: "github.com/run-ai/*"
+        run: |
+          cd ${{ env.SDK_PATH }}
+          TEMP_SCHEMA=$(mktemp)
+          echo "temp_schema_path=$TEMP_SCHEMA" >> $GITHUB_OUTPUT
+
+          echo "🔄 Generating values.schema.json..."
+          go run hack/generate-values-schema.go "$TEMP_SCHEMA"
+
+          echo "✅ Generated schema to: $TEMP_SCHEMA"
+          echo "📊 Generated schema size: $(wc -l < "$TEMP_SCHEMA") lines"
+
+      - name: Compare with committed schema
+        id: compare-schema
+        if: steps.check-schema-requirement.outputs.schema_required == 'true'
+        run: |
+          cd ${{ github.workspace }}
+          TEMP_SCHEMA="${{ steps.generate-schema.outputs.temp_schema_path }}"
+          COMMITTED_SCHEMA="${{ env.SCHEMA_PATH }}"
+
+          echo "🔍 Comparing generated schema with committed version..."
+
+          if [ ! -f "$COMMITTED_SCHEMA" ]; then
+            echo "❌ Committed schema file not found: $COMMITTED_SCHEMA"
+            echo "schema_missing=true" >> $GITHUB_OUTPUT
+            echo "validation_failed=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "📊 Committed schema size: $(wc -l < "$COMMITTED_SCHEMA") lines"
+
+          if ! diff_output=$(diff -u "$COMMITTED_SCHEMA" "$TEMP_SCHEMA" 2>&1); then
+            echo "❌ Schema files differ!"
+            echo "validation_failed=true" >> $GITHUB_OUTPUT
+            echo "has_diff=true" >> $GITHUB_OUTPUT
+
+            echo "diff_output<<EOF" >> $GITHUB_OUTPUT
+            echo "$diff_output" | head -50 >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+
+            diff_lines=$(echo "$diff_output" | wc -l)
+            echo "diff_lines=$diff_lines" >> $GITHUB_OUTPUT
+
+            exit 0
+          else
+            echo "✅ Schema files are identical!"
+            echo "validation_failed=false" >> $GITHUB_OUTPUT
+            echo "has_diff=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Clean up temporary files
+        if: always() && steps.check-schema-requirement.outputs.schema_required == 'true'
+        run: |
+          TEMP_SCHEMA="${{ steps.generate-schema.outputs.temp_schema_path }}"
+          if [ -f "$TEMP_SCHEMA" ]; then
+            rm "$TEMP_SCHEMA"
+            echo "🧹 Cleaned up temporary schema file"
+          fi
+
+      - name: Comment on PR with validation results
+        if: steps.check-schema-requirement.outputs.schema_required == 'true' && steps.compare-schema.outputs.validation_failed == 'true'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          DIFF_OUTPUT: ${{ steps.compare-schema.outputs.diff_output }}
+          DIFF_LINES: ${{ steps.compare-schema.outputs.diff_lines }}
+          SCHEMA_MISSING: ${{ steps.compare-schema.outputs.schema_missing }}
+          HAS_DIFF: ${{ steps.compare-schema.outputs.has_diff }}
+          SCHEMA_PATH: ${{ env.SCHEMA_PATH }}
+          SDK_PATH: ${{ env.SDK_PATH }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.login === 'github-actions[bot]' &&
+              comment.body.includes('🔍 Schema Validation Failed')
+            );
+
+            const schemaMissing = process.env.SCHEMA_MISSING === 'true';
+            const hasDiff = process.env.HAS_DIFF === 'true';
+            const diffLines = process.env.DIFF_LINES;
+            const diffOutput = process.env.DIFF_OUTPUT;
+            const schemaPath = process.env.SCHEMA_PATH;
+            const sdkPath = process.env.SDK_PATH;
+
+            let commentBody;
+
+            if (schemaMissing) {
+              commentBody = `## 🔍 Schema Validation Failed
+
+            ❌ **Missing Schema File**
+
+            The committed schema file \`${schemaPath}\` was not found.
+
+            ### 🔧 How to Fix
+
+            \`\`\`bash
+            cd ${sdkPath}
+            make generate-cluster-config-values-schema
+            git add ../runai-chart/values.schema.json
+            git commit -m "Add generated values.schema.json"
+            \`\`\``;
+            } else if (hasDiff) {
+              commentBody = `## 🔍 Schema Validation Failed
+
+            ❌ **Schema Out of Sync**
+
+            The committed \`values.schema.json\` doesn't match what would be generated from the current API types.
+
+            **Diff Summary:** ${diffLines} lines changed
+
+            ### 🔧 How to Fix
+
+            \`\`\`bash
+            cd ${sdkPath}
+            make generate-cluster-config-values-schema
+            git add ../runai-chart/values.schema.json
+            git commit -m "Update values.schema.json after API changes"
+            \`\`\`
+
+            <details>
+            <summary>📋 View Diff (first 50 lines)</summary>
+
+            \`\`\`diff
+            ${diffOutput}
+            \`\`\`
+
+            </details>`;
+            }
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+            }
+
+      - name: Fail if validation failed
+        if: steps.check-schema-requirement.outputs.schema_required == 'true' && steps.compare-schema.outputs.validation_failed == 'true'
+        run: |
+          if [ "${{ steps.compare-schema.outputs.schema_missing }}" = "true" ]; then
+            echo "💥 Validation failed: Schema file is missing"
+            echo "Please run 'make generate-cluster-config-values-schema' and commit the result"
+          elif [ "${{ steps.compare-schema.outputs.has_diff }}" = "true" ]; then
+            echo "💥 Validation failed: Schema is out of sync with API types"
+            echo "Please run 'make generate-cluster-config-values-schema' and commit the updated schema"
+          fi
+          exit 1
+
+      - name: Success message
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ "${{ steps.check-schema-requirement.outputs.schema_required }}" = "true" ]; then
+            if [ "${{ steps.compare-schema.outputs.validation_failed }}" = "false" ]; then
+              echo "🎉 Schema validation passed!"
+              echo "✅ The committed values.schema.json matches the generated schema"
+            fi
+          else
+            echo "ℹ️ Schema validation skipped"
+            echo "✅ Target branch ($BASE_REF) doesn't have values.schema.json yet"
+            echo "   This is expected for older release branches"
+          fi

@@ -1,0 +1,17 @@
+image: ubuntu
+exposedUrls:
+  - container: 8080
+    url: "https://compute.on-demand.io"
+    toolType: jupyter
+    toolName: my-jupyter
+  - container: 8081
+    toolType: tensor
+    authorizedGroups:
+      - group-a
+      - group-b
+  - container: 8082
+    toolName: my-tool
+    authorizedUsers: 
+      - user-a
+      - user-b
+

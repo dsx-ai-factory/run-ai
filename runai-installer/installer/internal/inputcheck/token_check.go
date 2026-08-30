@@ -1,0 +1,24 @@
+package inputcheck
+
+import (
+	"github.com/run-ai/runai/runai-installer/installer/internal/inputs/validation"
+	"github.com/run-ai/runai/runai-installer/installer/internal/orchestrator2/spec"
+)
+
+func init() { checks = append(checks, tokenCheck) }
+
+// tokenCheck validates the registry token format. It is skipped for air-gapped
+// installs (which authenticate to a mirror, not via a JFrog/NGC token) and for
+// non-token auth. Only JFrog tokens have a defined (base64) format to verify.
+func tokenCheck(s *spec.Spec) []Finding {
+	if s.IsAirGapped() || s.Registry == nil {
+		return nil
+	}
+	if s.Registry.Type != spec.RegistryTypeJFrog || s.Registry.Token == "" {
+		return nil
+	}
+	return fromResult(
+		validation.ValidateJfrogCredentials(s.Registry.Token),
+		"token-format", "registry.token",
+	)
+}

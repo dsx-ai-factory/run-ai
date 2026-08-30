@@ -1,0 +1,11 @@
+type: object
+description: The workload type whose minimal mapping information is requested.
+required:
+  - workloadType
+properties:
+  workloadType:
+    description: >-
+      The Kubernetes group, version, and kind of the workload type whose minimal
+      mapping information is requested.
+    allOf:
+      - $ref: "../../../../../workloads-manager/swagger/source/schemas/WorkloadsV2/GVK.yaml"

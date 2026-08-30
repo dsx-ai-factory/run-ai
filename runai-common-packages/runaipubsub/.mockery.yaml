@@ -1,0 +1,59 @@
+template: testify
+template-data:
+  unroll-variadic: true
+dir: "{{.InterfaceDir}}/mocks"
+structname: "{{.InterfaceName}}"
+filename: "{{.InterfaceName}}.go"
+packages:
+  github.com/run-ai/runai/runai-common-packages/runaipubsub:
+    config:
+      pkgname: "runaipubsub"
+    interfaces:
+      PubSuber:
+      Subscriber:
+      PubsubConnectorer:
+      PubSubFactoryer:
+        config:
+          dir: "{{.InterfaceDir}}"
+          filename: "mock_PubSubFactoryer.go"
+          structname: "Mock{{.InterfaceName}}"
+  github.com/run-ai/runai/runai-common-packages/runaipubsub/logger:
+    config:
+      pkgname: "logger"
+    interfaces:
+      Loggerer:
+  github.com/run-ai/runai/runai-common-packages/runaipubsub/kafka:
+    config:
+      pkgname: "kafka"
+    interfaces:
+      kafkaWriter:
+        config:
+          structname: "Mock{{.InterfaceName}}"
+      kafkaReader:
+        config:
+          structname: "Mock{{.InterfaceName}}"
+      topicManagerer:
+        config:
+          structname: "Mock{{.InterfaceName}}"
+      subscriberer:
+        config:
+          structname: "Mock{{.InterfaceName}}"
+      publisherer:
+        config:
+          structname: "Mock{{.InterfaceName}}"
+  github.com/nats-io/nats.go/jetstream:
+    config:
+      dir: nats/mocks
+      pkgname: "mocks"
+      recursive: true
+    interfaces:
+      JetStream:
+      Stream:
+      Consumer:
+  github.com/ThreeDotsLabs/watermill/message:
+    config:
+      dir: redis/mocks
+      pkgname: "mocks"
+      recursive: true
+    interfaces:
+      Publisher:

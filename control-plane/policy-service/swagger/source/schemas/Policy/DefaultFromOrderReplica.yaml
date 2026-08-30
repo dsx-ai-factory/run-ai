@@ -1,0 +1,8 @@
+type: object
+additionalProperties:
+  type: array
+  items:
+    type: string
+example:
+    "": ["compute.cpuCoresRequest", "compute.cpuCoresLimit"]
+    "port": ["external", "container"]

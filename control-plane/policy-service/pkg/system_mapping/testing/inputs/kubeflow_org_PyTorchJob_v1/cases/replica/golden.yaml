@@ -1,0 +1,38 @@
+apiVersion: kubeflow.org/v1
+kind: PyTorchJob
+metadata:
+  name: test
+spec:
+  pytorchReplicaSpecs:
+    Master:
+      replicas: 2
+      restartPolicy: OnFailure
+      template:
+        metadata:
+          annotations:
+            replica.example.com/role: master
+          labels:
+            replica.type: master
+        spec:
+          containers:
+          - image: pytorch/pytorch:2.0
+            name: pytorch
+          initContainers:
+          - image: pytorch/pytorch:2.0
+            name: init
+    Worker:
+      replicas: 3
+      restartPolicy: OnFailure
+      template:
+        metadata:
+          annotations:
+            replica.example.com/role: worker
+          labels:
+            replica.type: worker
+        spec:
+          containers:
+          - image: pytorch/pytorch:2.0
+            name: pytorch
+          initContainers:
+          - image: pytorch/pytorch:2.0
+            name: init

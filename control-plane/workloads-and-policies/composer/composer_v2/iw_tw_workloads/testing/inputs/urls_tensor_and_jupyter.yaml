@@ -1,0 +1,24 @@
+image: jupyter/tensorflow-notebook
+imagePullPolicy: IfNotPresent
+command: /bin/bash
+args: >-
+  -c "tensorboard --logdir=/tmp/logs --bind_all --port 6006 &
+  start-notebook.sh --NotebookApp.token=''"
+compute:
+  gpuDevicesRequest: 1
+exposedUrls:
+  - container: 8888
+    toolType: jupyter-notebook
+    toolName: Jupyter
+    name: jupyter
+  - container: 6006
+    toolType: tensorboard
+    toolName: TensorBoard
+    name: tensorboard
+nodePools:
+  - default
+priorityClass: medium-high
+preemptibility: preemptible
+category: Build
+security:
+  privileged: false

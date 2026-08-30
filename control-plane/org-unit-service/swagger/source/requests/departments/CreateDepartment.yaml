@@ -1,0 +1,36 @@
+summary: Create department
+operationId: create_department
+x-service: org-unit-service
+description: Create Department
+x-test-coverage:
+  - control-plane/org-unit-service/pkg/test/department_api_test.go
+x-authorize:
+  resource-type: department
+  action: create
+x-audit: true
+tags:
+  - Departments
+requestBody:
+  description: Department to create.
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: "../../schemas/departments/DepartmentCreationRequest.yaml"
+responses:
+  201:
+    description: Created
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/departments/Department.yaml"
+  400:
+    $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+  401:
+    $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+  403:
+    $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+  409:
+    $ref: "../../../../../infra/openapi/docs/responses/409Conflict.yaml"
+  503:
+    $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

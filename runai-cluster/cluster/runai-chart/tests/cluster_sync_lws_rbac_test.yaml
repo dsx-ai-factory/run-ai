@@ -1,0 +1,20 @@
+suite: Test cluster-sync LeaderWorkerSet permissions
+
+templates:
+  - templates/clusterroles/cluster-sync.yaml
+
+tests:
+  - it: should let cluster-sync resolve LeaderWorkerSet pod owners
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - leaderworkerset.x-k8s.io
+            resources:
+              - leaderworkersets
+            verbs:
+              - get
+              - list
+              - watch
+        documentIndex: 0

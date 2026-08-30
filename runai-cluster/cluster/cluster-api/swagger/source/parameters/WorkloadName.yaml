@@ -1,0 +1,7 @@
+name: workloadName
+in: path
+required: true
+description: The workload name
+example: jp
+schema:
+  type: string
