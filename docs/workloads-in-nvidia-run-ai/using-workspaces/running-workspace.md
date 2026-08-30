@@ -13,9 +13,8 @@ To learn more about the workspace workload type in NVIDIA Run:ai and determine t
 * Make sure you have created a [project](../../platform-management/aiinitiatives/organization/projects.md) or have one created for you.
 * If the image you are planning to use is hosted in NGC, make sure you have an NGC account with an active NGC API key. To obtain a key, go to [NGC](https://catalog.ngc.nvidia.com/) → Setup → API Keys, then generate or copy an existing key. In NVIDIA Run:ai, store the key either as a [shared secret](../workload-assets/credentials.md#ngc-api-key) (created by an administrator) or a [user credential](../../settings/user-settings/user-credentials.md) (created under User settings).
 
-## Workload Priority and Preemption <a href="#workload-priority-class" id="workload-priority-class"></a>
-
-By default, workspaces are assigned a **High** priority and are **non-preemptible**. These defaults ensure that workspaces are scheduled ahead of lower-priority workloads and are not interrupted once running. Workspaces run strictly within the project’s deserved quota and do not consume over-quota resources.&#x20;
+## Workload Priority and Preemption
+By default, workspaces are assigned a **High** priority and are **non-preemptible**. These defaults ensure that workspaces are scheduled ahead of lower-priority workloads and are not interrupted once running. Workspaces run strictly within the project’s deserved quota and do not consume over-quota resources.
 
 You can override the defaults by configuring priority and preemptibility. For more details, see [Workload priority and preemption](../../platform-management/runai-scheduler/scheduling/workload-priority-control.md).
 
@@ -31,8 +30,7 @@ The effects of the policy are reflected in the workspace creation form:
 * Disabled actions and permitted value ranges for values will be visibly explained per field.
 * Rules and defaults for entire sections (such as environments, compute resources, or data sources) may prevent selection and will appear on the entire library card with an option for additional information via an external modal.
 
-## Submission Form Options <a href="#submission-form-options" id="submission-form-options"></a>
-
+## Submission Form Options
 You can create a new workload using either the **Flexible** or **Original** submission form. The Flexible submission form offers greater customization and is the **recommended** method. Within the Flexible form, you have two options:
 
 * **Load from an existing setup** - You can select an existing setup to populate the workload form with predefined values. While the Original submission form also allows you to select an existing setup, with the Flexible submission you can customize any of the populated fields for a one-time configuration. These changes will apply only to this workload and will not modify the original setup. If needed, you can reset the configuration to the original setup at any time.
@@ -50,7 +48,7 @@ You can create a new workload using either the **Flexible** or **Original** subm
 ## Creating a New Workspace
 
 1. To add a new workspace, go to Workload manager → Workloads.
-2. Click **+NEW WORKLOAD** and select **Workspace** from the dropdown men&#x75;**.**
+2. Click **+NEW WORKLOAD** and select **Workspace** from the dropdown menu**.**
 3. Within the new workspace form, select the **cluster** and **project**. To create a new project, click **+NEW PROJECT** and refer to [Projects](../../platform-management/aiinitiatives/organization/projects.md) for a step-by-step guide.
 4. Select one of the following options to launch a workspace:
    * **Start from scratch** - Opens the full workspace form. You’ll need to configure all required fields. Click **CONTINUE** to proceed.
@@ -68,7 +66,7 @@ You can create a new workload using either the **Flexible** or **Original** subm
 **Note**
 
 * NGC catalog is disabled by default. If unavailable, your administrator must enable it under **General settings** → Workloads → NGC catalog.
-* To select an image from the NGC private registr&#x79;**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
+* To select an image from the NGC private registry**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
 
 </Info>
 

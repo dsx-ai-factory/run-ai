@@ -177,14 +177,14 @@ The administrator can set a [placement strategy](../../aiinitiatives/resources/n
 The primary function of the NVIDIA Run:ai Scheduler is to match workloads with available nodes that satisfy their resource requirements and other constraints (such as node type or topology). Workload resources generally fall into three categories:
 
 * **Kubernetes Native Resources** - CPUs and CPU memory.
-* **Kubernetes Extended Resources** - Non-native Kubernetes resources such as GPUs, FPGAs, or networking adapters. Historically requested as static "extended resources" (for example, `nvidia.com/gpu: 2`). Starting with Kubernetes v1.34, workloads can leverage [Dynamic Resource Allocation (DRA)](concepts-and-principles.md#dynamic-resource-allocation-dra).&#x20;
+* **Kubernetes Extended Resources** - Non-native Kubernetes resources such as GPUs, FPGAs, or networking adapters. Historically requested as static "extended resources" (for example, `nvidia.com/gpu: 2`). Starting with Kubernetes v1.34, workloads can leverage [Dynamic Resource Allocation (DRA)](concepts-and-principles.md#dynamic-resource-allocation-dra).
 * **Kubernetes Storage Resources** - Persistent Volumes (PVs) and Persistent Volume Claims (PVCs), managed by the Kubernetes CSI subsystem.
 
 <Info>
 
 **Note**
 
-With Kubernetes v1.34, DRA is GA. You can also use earlier Kubernetes version v1.33 where DRA was Beta.&#x20;
+With Kubernetes v1.34, DRA is GA. You can also use earlier Kubernetes version v1.33 where DRA was Beta.
 
 </Info>
 
@@ -209,7 +209,7 @@ In both scenarios, the platform schedules the workloads, accounts for the reques
 **Note**
 
 * When submitting NVIDIA Run:ai native workloads, the platform continues using extended resources. Both extended resources and DRA are supported during the transition period.
-* Using DRA and extended resources on the same underlying nodes can cause resource inconsistencies and allocation collisions. It is recommended to separate nodes by splitting them into different node pools - one for extended resources and one for DRA. This allows you to adopt DRA incrementally while maintaining the legacy 'extended resources’ workloads and nodes unaffected.&#x20;
+* Using DRA and extended resources on the same underlying nodes can cause resource inconsistencies and allocation collisions. It is recommended to separate nodes by splitting them into different node pools - one for extended resources and one for DRA. This allows you to adopt DRA incrementally while maintaining the legacy 'extended resources’ workloads and nodes unaffected.
 
 </Info>
 

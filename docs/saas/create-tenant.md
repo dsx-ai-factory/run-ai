@@ -22,7 +22,7 @@ To delegate provisioning to another user, go to [org.ngc.nvidia.com/users](https
    * **Tenant Admin Email** - Pre-filled with your NGC account email. You can assign additional admins after provisioning is complete.
    * **Tenant Alias** - A unique subdomain name for your tenant URL (for example, `myorg` results in `myorg.nv.run.ai`).
 
-3. Click **Create Control Plane Tenant**. NGC provisions your tenant. This may take a few minutes.&#x20;
+3. Click **Create Control Plane Tenant**. NGC provisions your tenant. This may take a few minutes.
 
 Once provisioning is complete, the following details are displayed:
 

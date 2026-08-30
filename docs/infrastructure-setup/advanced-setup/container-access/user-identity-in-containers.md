@@ -18,10 +18,10 @@ NVIDIA Run:ai allows you to enhance security and enforce organizational policies
 NVIDIA Run:ai supports security-related workload configurations to control user permissions and restrict privilege escalation. These options are available via the API and CLI during workload creation:
 
 * `runAsNonRoot` / `--run-as-user` - Force the container to run as non-root user.
-* `allowPrivilegeEscalation` / `--allow-privilege-escalation` - Allow the container to use `setuid` binaries to escalate privileges, even when running as a non-root user. This setting can increase security risk and should be disabled if elevated privileges are not required.&#x20;
+* `allowPrivilegeEscalation` / `--allow-privilege-escalation` - Allow the container to use `setuid` binaries to escalate privileges, even when running as a non-root user. This setting can increase security risk and should be disabled if elevated privileges are not required.
 * `privileged` - Grant full host access to the container, bypassing isolation and security restrictions. By system policy, this parameter is always set to `false` to prevent containers from gaining privileged access. Only an administrator can override this restriction by explicitly creating a policy to override the system policy. This ensures that privileged access is granted only through a deliberate, audited action. See [System policies](../../../platform-management/policies/policies-and-rules.md#system-policies) for more details.
 
-Administrators can enforce secure defaults across the environment using [Policies](../../../platform-management/policies/policy-yaml-reference.md), ensuring consistent workload behavior aligned with organizational security practices.&#x20;
+Administrators can enforce secure defaults across the environment using [Policies](../../../platform-management/policies/policy-yaml-reference.md), ensuring consistent workload behavior aligned with organizational security practices.
 
 <Info>
 
@@ -39,13 +39,13 @@ A best practice is to store the **User Identifier (UID)** and **Group Identifier
 
 ### Passing User Identity via UI
 
-It is possible to explicitly pass user identity when creating an [environment](../../../workloads-in-nvidia-run-ai/workload-assets/environments.md) or submitting a [workload](../../../workloads-in-nvidia-run-ai/workloads.md):&#x20;
+It is possible to explicitly pass user identity when creating an [environment](../../../workloads-in-nvidia-run-ai/workload-assets/environments.md) or submitting a [workload](../../../workloads-in-nvidia-run-ai/workloads.md):
 
 * **From the image** - Use the UID/GID defined in the container image.
 * **From the IdP token** - Use identity attributes provided by the SSO identity provider (available only in SSO-enabled installations).
 * **Custom** - Manually set the **User ID (UID)**, **Group ID (GID)** and **supplementary groups** that can run commands in the container.
 
-Administrators can enforce secure defaults across the environment using [Policies](../../../platform-management/policies/policy-yaml-reference.md), ensuring consistent workload behavior aligned with organizational security practices.&#x20;
+Administrators can enforce secure defaults across the environment using [Policies](../../../platform-management/policies/policy-yaml-reference.md), ensuring consistent workload behavior aligned with organizational security practices.
 
 <Info>
 

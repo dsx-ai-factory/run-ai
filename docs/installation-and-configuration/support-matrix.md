@@ -2,8 +2,7 @@
 
 The support matrix outlines the verified compatibility standards for NVIDIA Run:ai v3.0. To ensure a stable and performant deployment, all infrastructure components, including Kubernetes/OpenShift distributions, NVIDIA Operators, and specialized frameworks, must align with the versions specified below. Use this matrix as a validation checklist prior to performing new installations or upgrades.
 
-## Operator and Framework Versions <a href="#operator-and-framework-versions" id="operator-and-framework-versions"></a>
-
+## Operator and Framework Versions
 | Component                                                                                                    | Supported Versions   |
 | ------------------------------------------------------------------------------------------------------------ | -------------------- |
 | [NVIDIA GPU Operator](installation/install-using-helm/system-requirements.md#nvidia-gpu-operator)                         | 25.10 - 26.3         |

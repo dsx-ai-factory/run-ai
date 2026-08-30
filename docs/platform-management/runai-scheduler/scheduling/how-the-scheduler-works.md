@@ -10,11 +10,11 @@ Resource allocation follows a hierarchical order. Workloads submitted to higher-
 
 The NVIDIA Run:ai Scheduler first allocates resources to the highest-ranked departments and their projects. It prioritizes allocating all possible workload resource requests within deserved quota. Only after all in-quota allocations are satisfied does the Scheduler allocate over-quota resources, which are resources not used by any in-quota projects or departments.
 
-Over-quota resources are also assigned according to department and project ranks. The amount of over-quota resources each project or department receives is determined by its rank and its weight within that rank, relative to other departments and projects.&#x20;
+Over-quota resources are also assigned according to department and project ranks. The amount of over-quota resources each project or department receives is determined by its rank and its weight within that rank, relative to other departments and projects.
 
 ### Pod Creation and Grouping
 
-When a workload is submitted, the submitting workload controller creates a single pod or multiple pods (for distributed training workloads or deployment based inference). When the Scheduler gets a submit request with the first pod, it creates a [pod group](concepts-and-principles.md#workloads-and-pod-groups) and a [sub group](concepts-and-principles.md#sub-groups), and allocates all the relevant building blocks of that workload. The next pods of the same workload are attached to the same pod group, either to the same sub-group or to another sub-group within the top pod-group.&#x20;
+When a workload is submitted, the submitting workload controller creates a single pod or multiple pods (for distributed training workloads or deployment based inference). When the Scheduler gets a submit request with the first pod, it creates a [pod group](concepts-and-principles.md#workloads-and-pod-groups) and a [sub group](concepts-and-principles.md#sub-groups), and allocates all the relevant building blocks of that workload. The next pods of the same workload are attached to the same pod group, either to the same sub-group or to another sub-group within the top pod-group.
 
 ### Queue Management
 
@@ -54,7 +54,7 @@ In this situation, the Scheduler attempts to rebalance resources across queues t
 In certain scenarios, queues that are above their calculated fairshare may still receive additional resources. This can occur when:
 
 * Other queues in the node pool are not fully using their deserved quota or fairshare, leaving unused over-quota resources.
-* The combination of resources requests by workloads cannot be fulfilled simultaneously and the Scheduler has to tie break and decide which queue and which workload will be scheduled first.&#x20;
+* The combination of resources requests by workloads cannot be fulfilled simultaneously and the Scheduler has to tie break and decide which queue and which workload will be scheduled first.
 
 For example, a cluster with 10 GPUs and two projects each with quota of 5 GPUs and over-quota allowed, both try to submit a 10 GPU workload. In this case both are over their deserved quota and fairshare and the Scheduler cannot fulfill both requests simultaneously because their total request is 20 GPUs while the total GPUs in the cluster is 10. Therefore, the Scheduler will give precedence the project (queue) that submitted the workload first.
 
@@ -171,11 +171,11 @@ When re-balancing resources between queues of different projects and departments
 
 ## Time-Based Fairshare
 
-Time-based fairshare is a fairshare scoring mode in which fairshare is calculated based on historical resource usage over time, rather than solely on point-in-time scheduling demand within a single scheduling cycle.&#x20;
+Time-based fairshare is a fairshare scoring mode in which fairshare is calculated based on historical resource usage over time, rather than solely on point-in-time scheduling demand within a single scheduling cycle.
 
 When time-based fairshare is enabled in a node pool, the Scheduler continuously collects real-time resource usage data and uses this data to calculate the fairshare of each queue. This approach enables fairshare to reflect actual resource consumption over time, allowing resources to be distributed more evenly and reducing long-term imbalances caused by short-term demand fluctuations and optimizing resource allocation dynamically.
 
-Resource usage data in the cluster is collected and persisted by default using Prometheus. This data is then used by the Scheduler to perform fairshare calculations. Queues that consume more resources over time relative to their fairshare receive fewer over-quota resources compared to other queues, while queues that consume less than their fairshare over time are rewarded. Over time, this will result in the queues' over-quota resources being reclaimed by more starved queues, thus achieving a more fair allocation of resources over time.&#x20;
+Resource usage data in the cluster is collected and persisted by default using Prometheus. This data is then used by the Scheduler to perform fairshare calculations. Queues that consume more resources over time relative to their fairshare receive fewer over-quota resources compared to other queues, while queues that consume less than their fairshare over time are rewarded. Over time, this will result in the queues' over-quota resources being reclaimed by more starved queues, thus achieving a more fair allocation of resources over time.
 
 To avoid scenarios in which one queue consistently consumes its fairshare steadily while another queue attempts to consume a large amount of resources over a short period, the Scheduler regulates historical usage data by optionally applying time-based decay. This ensures that queues consuming resources regularly in line with their fairshare are not penalized by queues that attempt to consume a large amount of resources in a short time window.
 
@@ -186,4 +186,4 @@ The NVIDIA Run:ai platform administrator can configure how historical usage data
 Now that you have gained insights into how the Scheduler dynamically balances workloads to optimize cluster utilization and maintain fairness across projects and departments, you can [submit workloads](../../../workloads-in-nvidia-run-ai/workloads.md). Before submitting your workloads, it’s important to familiarize yourself with the following key topics:
 
 * [Introduction to workloads](../../../workloads-in-nvidia-run-ai/introduction-to-workloads.md) - Learn what workloads are and what is supported for both NVIDIA Run:ai and third-party workloads.
-* [NVIDIA Run:ai workload types](../../../workloads-in-nvidia-run-ai/workload-types/README.md) - Explore the various NVIDIA Run:ai workload types available and understand their specific purposes to enable you to choose the most appropriate workload type for your needs.
+* [NVIDIA Run:ai workload types](../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) - Explore the various NVIDIA Run:ai workload types available and understand their specific purposes to enable you to choose the most appropriate workload type for your needs.

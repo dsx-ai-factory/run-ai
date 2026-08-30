@@ -7,7 +7,7 @@ Prepare the required details for the tenant you want to create:
 * **Tenant name** - A unique identifier for the tenant.
 * **Administrator email** - The primary contact who will receive access credentials and manage the tenant’s environment.
 
-Refer to the [Tenant](https://app.gitbook.com/s/LYHZWRVgpD7c9mHAx1Vk/organizations/tenant) API endpoint for more details.
+Refer to the [Tenant](api:multi-tenant-api:POST/api/v1/tenants) API endpoint for more details.
 
 ## Create the Tenant
 

@@ -6,7 +6,7 @@ To interact with the NVIDIA Run:ai platform programmatically, configure API acce
 
 Before registering an application, authenticate using administrator credentials. Use the credentials configured via `global.management.user` and `global.management.password` as detailed in [Install the control plane](installation/install-control-plane.md).
 
-Send a `POST` request to the `/api/v1/token` endpoint with `grantType: password` to generate a token. See the [Tokens](https://app.gitbook.com/s/LYHZWRVgpD7c9mHAx1Vk/authentication-and-authorization/tokens) API endpoint for more details.
+Send a `POST` request to the `/api/v1/token` endpoint with `grantType: password` to generate a token. See the [Tokens](api:multi-tenant-api:POST/api/v1/token) API endpoint for more details.
 
 **Example request:**
 
@@ -35,7 +35,7 @@ Use the returned `accessToken` as a Bearer token in the Authorization header for
 
 After generating a token using the admin password, use it to register a service account. Service accounts contain a `clientID` and `clientSecret` that are used to authenticate future API requests via the `client_credentials` grant type.
 
-Send a `POST` request to the `/api/v1/apps` endpoint. See the [Service accounts](https://app.gitbook.com/s/LYHZWRVgpD7c9mHAx1Vk/authentication-and-authorization/service-accounts) API endpoint for more details.
+Send a `POST` request to the `/api/v1/service-accounts` endpoint. See the [Service accounts](api:multi-tenant-api:POST/api/v1/service-accounts) API endpoint for more details.
 
 **Example request:**
 
@@ -63,7 +63,7 @@ curl -L 'https://console.<DOMAIN>/api/v1/service-accounts' \
 
 Use the `clientId` and `clientSecret` from your application to generate an access token for authenticated API calls using the `client_credentials` grant type.
 
-Send a `POST` request to the `/api/v1/token` endpoint with `grantType: client_credentials`. See the [Tokens](https://app.gitbook.com/s/LYHZWRVgpD7c9mHAx1Vk/authentication-and-authorization/tokens) API endpoint for more details.
+Send a `POST` request to the `/api/v1/token` endpoint with `grantType: client_credentials`. See the [Tokens](api:multi-tenant-api:POST/api/v1/token) API endpoint for more details.
 
 **Example request:**
 
@@ -93,7 +93,7 @@ Use the `accessToken` as a Bearer token in the Authorization header for all subs
 
 ## Create a Local User
 
-Send a `POST` request to the `/api/v1/users` endpoint to create a local user. See the [Users](https://app.gitbook.com/s/LYHZWRVgpD7c9mHAx1Vk/authentication-and-authorization/users) API endpoint for more details.
+Send a `POST` request to the `/api/v1/users` endpoint to create a local user. See the [Users](api:multi-tenant-api:POST/api/v1/users) API endpoint for more details.
 
 **Example request:**
 

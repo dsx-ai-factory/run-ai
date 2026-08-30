@@ -1,10 +1,10 @@
 ---
 name: update-mcp-server-docs
-description: Detect changes to MCP server tools on the current branch and update the Available Tools section in docs/installation-and-configuration/mcp-server.md. Run with no arguments — detects changes automatically from git diff against master.
+description: Detect changes to MCP server tools on the current branch and update docs/agents/tools-reference.md. Run with no arguments — detects changes automatically from git diff against master.
 allowed-tools: Bash, Read, Edit
 ---
 
-Detect changes to tools in `runai-mcp-server/internal/tools/` on the current branch and keep the `## Available Tools` section of `docs/installation-and-configuration/mcp-server.md` in sync.
+Detect changes to tools in `runai-mcp-server/internal/tools/` on the current branch and keep `docs/agents/tools-reference.md` in sync.
 
 **Important distinctions before starting:**
 
@@ -73,9 +73,9 @@ git show "$BASE":runai-mcp-server/internal/tools/<group>/<tool>.go | grep 'Name:
 
 ## Step 4 — Read the current doc
 
-Read `$REPO_ROOT/docs/installation-and-configuration/mcp-server.md` and locate the `## Available Tools` section.
+Read `$REPO_ROOT/docs/agents/tools-reference.md`.
 
-The section has `### <Group>` subsections, each with a three-column table:
+The page has `## <Group>` subsections, each with a three-column table:
 
 ```
 | Tool | Type | Description |
@@ -129,7 +129,7 @@ Insert or update rows using this three-column format:
 - Insert new rows in alphabetical order by tool name within the correct domain section.
 - Write tools go in the same domain section as their read counterparts — not in a separate section.
 
-For **new group** (Category C): add a new `### <Group Name>` subsection with the three-column table header. Ask the user what the logical group name should be — do not assume the directory name maps directly to a doc section name.
+For **new group** (Category C): add a new `## <Group Name>` subsection with the three-column table header. Ask the user what the logical group name should be — do not assume the directory name maps directly to a doc section name.
 
 Do not commit. Leave that to the user.
 

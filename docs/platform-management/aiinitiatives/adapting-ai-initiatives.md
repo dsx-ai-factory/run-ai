@@ -69,7 +69,7 @@ Set out below are illustrations of different grouping options.
 
 ### Assigning Your Resources
 
-After the initial grouping of resources, it is time to associate resources to AI initiatives, this is performed by assigning quotas to projects and optionally to departments. Assigning GPU quota to a project, on a node pool basis, means that the workloads submitted by that project are entitled to use those GPUs as guaranteed resources and can use them for all [workload types](../../workloads-in-nvidia-run-ai/workload-types/README.md).
+After the initial grouping of resources, it is time to associate resources to AI initiatives, this is performed by assigning quotas to projects and optionally to departments. Assigning GPU quota to a project, on a node pool basis, means that the workloads submitted by that project are entitled to use those GPUs as guaranteed resources and can use them for all [workload types](../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md).
 
 However, what happens if the project requires more resources than its quota? This depends on the type of workloads that the user wants to submit. If the user requires more resources for non-preemptible workloads, then the quota must be increased, because non-preemptible workloads require guaranteed resources. On the other hand, if the type of workload is, for example, a model Training workload that is preemptible - in this case the project can exploit unused resources of other projects, as long as the other projects don’t need them. over quota is set per project on a node-pool basis and per department.
 

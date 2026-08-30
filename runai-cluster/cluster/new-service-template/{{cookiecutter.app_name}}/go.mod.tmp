@@ -1,0 +1,30 @@
+module github.com/run-ai/runai/runai-cluster/cluster/{{cookiecutter.app_name}}
+
+go 1.24.6
+
+require (
+	github.com/run-ai/runai/runai-cluster/cluster/go-operator v0.0.0-20231016130327-a5dc7c7c3988
+)
+
+replace github.com/run-ai/runai/runai-cluster/cluster/go-operator => ../go-operator
+
+replace github.com/run-ai/runai/runai-cluster/cluster/sdk => ../sdk
+
+replace github.com/run-ai/runai/runai-cluster/common/cert-utils => ../../common/cert-utils
+
+replace github.com/run-ai/runai/runai-cluster/common/clients => ../../common/clients
+
+replace github.com/run-ai/runai/runai-cluster/common/profiling => ../../common/profiling
+
+replace github.com/run-ai/runai/runai-cluster/cluster/common/constants => ../../cluster/common/constants
+
+replace github.com/run-ai/runai/runai-cluster/cluster/common/utils => ../common/utils
+
+replace github.com/run-ai/runai/control-plane/cluster-service/pkg/client => ../../../control-plane/cluster-service/pkg/client
+
+replace github.com/run-ai/runai/runai-clients/identity-manager-client => ../../../runai-clients/identity-manager-client
+
+
+
+
+

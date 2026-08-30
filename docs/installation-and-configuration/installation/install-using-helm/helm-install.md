@@ -12,8 +12,7 @@ This procedure includes:
 
 By completing this process, the NVIDIA Run:ai cluster will be connected to the NVIDIA Run:ai control plane and ready to run training, inference, and other workloads.
 
-## System and Network Requirements <a href="#system-and-network-requirements" id="system-and-network-requirements"></a>
-
+## System and Network Requirements
 Before installing the NVIDIA Run:ai cluster, validate that the [system requirements](system-requirements.md) and [network requirements](network-requirements.md) are met. For air-gapped environments, make sure you have the [software artifacts](preparations.md#software-artifacts) prepared.
 
 Once all the requirements are met, it is highly recommended to use the NVIDIA Run:ai cluster preinstall diagnostics tool to:
@@ -71,8 +70,7 @@ chmod +x ./preinstall-diagnostics-darwin-arm64 && \
 
 NVIDIA Run:ai requires [Helm](https://helm.sh/) 3.14 or later. To install Helm, see [Installing Helm](https://helm.sh/docs/intro/install/). If you are installing an air-gapped version of NVIDIA Run:ai, the NVIDIA Run:ai tar file contains the [helm binary](preparations.md#software-artifacts).
 
-## Permissions <a href="#permissions" id="permissions"></a>
-
+## Permissions
 Using a Kubernetes user with the `cluster-admin` role to ensure a successful installation is recommended. For more information, see [Using RBAC authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
 
 ## Installation
@@ -319,18 +317,15 @@ Use the dry-run flag `--dry-run=client` to gain an understanding of what is bein
 
 </Accordion>
 
-## Troubleshooting <a href="#troubleshooting" id="troubleshooting"></a>
-
+## Troubleshooting
 If you encounter an issue with the installation, try the troubleshooting scenario below.
 
-### Installation <a href="#installation_1" id="installation_1"></a>
-
+### Installation
 If the NVIDIA Run:ai cluster installation failed, check the installation logs to identify the issue. Run the following script to print the installation logs:
 
 [get-installation-logs.sh](../../../assets/get-installation-logs.sh)
 
-### Cluster Status <a href="#cluster-status" id="cluster-status"></a>
-
+### Cluster Status
 If the NVIDIA Run:ai cluster installation completed, but the cluster status did not change its status to **Connected**, refer to the cluster [Troubleshooting scenarios](../../../infrastructure-setup/procedures/clusters.md#troubleshooting-scenarios) section.
 
 ## Next Steps

@@ -152,7 +152,9 @@ func initializeFlags(conf *dbconfig.ConnectionConfig) url.Values {
 	flags.Set("timeZone", "UTC")
 	flags.Set("sslmode", string(conf.SslMode))
 	flags.Set("statement_timeout", conf.StatementTimeout)
-	flags.Set("search_path", conf.Schema)
+	if conf.Schema != "" {
+		flags.Set("search_path", conf.Schema)
+	}
 	if conf.TargetSessionAttrs != "" {
 		flags.Set("target_session_attrs", conf.TargetSessionAttrs)
 	}

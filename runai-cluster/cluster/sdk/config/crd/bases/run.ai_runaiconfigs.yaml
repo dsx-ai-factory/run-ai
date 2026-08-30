@@ -3410,41 +3410,12 @@ spec:
                           level:
                             type: string
                         type: object
-                      dynamicFraction:
-                        properties:
-                          enabled:
-                            type: boolean
-                        type: object
-                      nodeScheduler:
-                        properties:
-                          enabled:
-                            type: boolean
-                        type: object
-                      swap:
-                        properties:
-                          biDirectional:
-                            properties:
-                              blockSizeMB:
-                                type: integer
-                              blockSizeRatioPct:
-                                type: integer
-                              enabled:
-                                type: boolean
-                            type: object
-                          enabled:
-                            type: boolean
-                          mode:
-                            description: SwapMode is a valid value for GpuSwap.Mode.
-                            type: string
-                        type: object
                       timeSlicing:
                         properties:
                           granularity:
                             type: integer
                           leaseTime:
                             type: integer
-                          mode:
-                            type: string
                           rateLimitCount:
                             type: integer
                         type: object
@@ -6222,9 +6193,6 @@ spec:
               mps-server:
                 description: MPSServer specifies configuration for the mps-server
                 properties:
-                  enabled:
-                    description: Enabled specifies if the mps-server should be installed
-                    type: boolean
                   image:
                     description: Image specifies the mps server image
                     properties:
@@ -22889,8 +22857,6 @@ spec:
                       syncTimeout:
                         type: integer
                     type: object
-                  enabled:
-                    type: boolean
                   extendedDaemon:
                     type: boolean
                   image:
@@ -22945,8 +22911,6 @@ spec:
                         description: Tag is the tag of the image
                         type: string
                     type: object
-                  logLevel:
-                    type: string
                   memory:
                     properties:
                       enabled:

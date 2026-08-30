@@ -3,8 +3,8 @@
 tabs:
   documentation:
     display-name: Documentation
-  developers:
-    display-name: REST API Reference
+  reference:
+    display-name: Reference
 
 navigation:
 - tab: documentation
@@ -15,33 +15,29 @@ navigation:
     contents:
     - page: Overview
       path: ../../docs/getting-started/overview.md
-    - page: Architecture
-      path: ../../docs/getting-started/architecture.md
+    - link: Architecture and Components
+      href: /run-ai/developer/architecture
+      target: _blank
+    - section: Quick Start Guides
+      path: ../../docs/getting-started/quick-starts/README.md
+      contents:
+      - page: Deploy Infrastructure Quick Start
+        path: ../../docs/getting-started/quick-starts/deploy-infrastructure-quick-start.md
+      - page: Configure the Platform Quick Start
+        path: ../../docs/getting-started/quick-starts/configure-the-platform-quick-start.md
+      - page: Run Workloads Quick Start
+        path: ../../docs/getting-started/quick-starts/run-workloads-quick-start.md
     - section: What's New
-      path: ../../docs/getting-started/whats-new/README.md
       contents:
       - page: What's New in Version 3.0
         path: ../../docs/getting-started/whats-new/whats-new-3-0.md
       - page: Deprecation Notifications
-        path: ../../docs/getting-started/whats-new/deprecations.md
-      - page: Hotfixes for Version 3.0
-        path: ../../docs/getting-started/whats-new/hotfixes-3-0.md
-    - section: Quick Start Guides
-      path: ../../docs/getting-started/quick-starts/README.md
-      contents:
-      - page: Quick Start for Infrastructure Administrators
-        path: ../../docs/getting-started/quick-starts/infra-admin-quick-start.md
-      - page: Quick Start for Platform Administrators
-        path: ../../docs/getting-started/quick-starts/platform-admin-quick-start.md
-      - page: Quick Start for AI Practitioners
-        path: ../../docs/getting-started/quick-starts/ai-practitioner-quick-start.md
+        path: ../../docs/getting-started/whats-new/deprecation-notifications.md
     - section: About NVIDIA Run:ai Enterprise
       path: ../../docs/about-enterprise/README.md
       contents:
-      - page: Product Support Policy
+      - page: Support, Lifecycle, and Deprecation Policy
         path: ../../docs/about-enterprise/product-support-policy.md
-      - page: Product Version Life Cycle
-        path: ../../docs/about-enterprise/product-version-life-cycle.md
   - section: Installation and Configuration
     contents:
     - page: Overview
@@ -93,8 +89,6 @@ navigation:
         path: ../../docs/installation-and-configuration/post-installation-configuration/control-plane-config.md
       - page: Advanced Cluster Configurations
         path: ../../docs/installation-and-configuration/post-installation-configuration/cluster-config.md
-    - page: MCP Server
-      path: ../../docs/installation-and-configuration/mcp-server.md
   - section: Infrastructure setup
     contents:
     - section: Authentication and Authorization
@@ -271,7 +265,6 @@ navigation:
     - page: Introduction to Workloads
       path: ../../docs/workloads-in-nvidia-run-ai/introduction-to-workloads.md
     - section: Workload Types and Features
-      path: ../../docs/workloads-in-nvidia-run-ai/workload-types/README.md
       contents:
       - page: NVIDIA Run:ai Native Workloads
         path: ../../docs/workloads-in-nvidia-run-ai/workload-types/native-workloads.md
@@ -396,6 +389,20 @@ navigation:
       contents:
       - page: RAG Blueprint Deployment from NGC Catalog
         path: ../../docs/tutorials/blueprint-tutorials/rag-blueprint-deployment.md
+  - section: Agents
+    contents:
+    - page: Overview
+      path: ../../docs/agents/overview.md
+    - section: MCP Server
+      contents:
+      - page: Deploy the MCP Server
+        path: ../../docs/agents/mcp-server/deploy.md
+      - page: Connect Your AI Tool
+        path: ../../docs/agents/mcp-server/connect.md
+      - page: Tools Reference
+        path: ../../docs/agents/tools-reference.md
+    - page: Agent Skills
+      path: ../../docs/agents/agent-skills.md
   - section: Settings
     contents:
     - section: General Settings
@@ -411,42 +418,34 @@ navigation:
         path: ../../docs/settings/user-settings/user-access-keys.md
       - page: User Credentials
         path: ../../docs/settings/user-settings/user-credentials.md
-  - section: CLI Reference
-    contents:
-    - page: Install and Configure CLI
-      path: ../../docs/reference/cli/install-cli.md
-    - page: Add NVIDIA Run:ai Authorization to Kubeconfig
-      path: ../../docs/reference/cli/set-kubeconfig-parameters.md
-    - page: Auto Update CLI Mechanism
-      path: ../../docs/reference/cli/auto-update-cli-mechanism.md
-    - page: CLI Commands Examples
-      path: ../../docs/reference/cli/cli-examples.md
 
-- tab: developers
+- tab: reference
   layout:
   - page: Home
     path: ../../docs/rest-api/README.md
-  - section: Getting Started
+  - section: REST API
     contents:
-    - page: About the REST API
-      path: ../../docs/rest-api/about-the-rest-api.md
-    - section: Using the REST API
+    - section: Getting Started
       contents:
-      - page: Making REST API Requests
-        path: ../../docs/rest-api/making-rest-api-requests.md
-      - page: Pagination
-        path: ../../docs/rest-api/pagination.md
-      - page: HTTP Status Codes
-        path: ../../docs/rest-api/http-status-codes.md
-    - page: How to Authenticate to the API
-      path: ../../docs/rest-api/how-to-authenticate-to-the-api.md
-    - page: NVIDIA Run:ai API Policy
-      path: ../../docs/rest-api/api-policy.md
-  - api: Endpoints
-    api-name: main-api
-    flattened: true
-    tag-description-pages: true
-    layout:
+      - page: About the REST API
+        path: ../../docs/rest-api/about-the-rest-api.md
+      - section: Using the REST API
+        contents:
+        - page: Making REST API Requests
+          path: ../../docs/rest-api/making-rest-api-requests.md
+        - page: Pagination
+          path: ../../docs/rest-api/pagination.md
+        - page: HTTP Status Codes
+          path: ../../docs/rest-api/http-status-codes.md
+      - page: How to Authenticate to the API
+        path: ../../docs/rest-api/how-to-authenticate-to-the-api.md
+      - page: NVIDIA Run:ai API Policy
+        path: ../../docs/rest-api/api-policy.md
+    - api: Endpoints
+      api-name: main-api
+      flattened: true
+      tag-description-pages: true
+      layout:
       - section: Organizations
         contents:
         - clusters
@@ -527,20 +526,30 @@ navigation:
       - section: AI Applications
         contents:
         - aiApplicationsApi
-  - section: API Guides
+    - section: API Guides
+      contents:
+      - page: Interacting with Workloads Using the Cluster API
+        path: ../../docs/rest-api/api-guides/interacting-with-workloads-using-the-cluster-api.md
+      - page: Configuring Slack Notifications
+        path: ../../docs/rest-api/api-guides/configuring-slack-notifications.md
+      - page: Using Node Affinity via API
+        path: ../../docs/rest-api/api-guides/using-node-affinity-via-api.md
+      - page: NIM Observability Metrics via API
+        path: ../../docs/rest-api/api-guides/nim-observability-metrics-via-api.md
+    - section: API Python Client Reference
+      contents:
+      - page: API Python Client (runapy)
+        path: ../../docs/rest-api/api-python-client-reference/api-python-client-runapy.md
+      - page: Install and Configure the Client
+        path: ../../docs/rest-api/api-python-client-reference/install-and-configure-the-client.md
+  - section: CLI
     contents:
-    - page: Interacting with Workloads Using the Cluster API
-      path: ../../docs/rest-api/api-guides/interacting-with-workloads-using-the-cluster-api.md
-    - page: Configuring Slack Notifications
-      path: ../../docs/rest-api/api-guides/configuring-slack-notifications.md
-    - page: Using Node Affinity via API
-      path: ../../docs/rest-api/api-guides/using-node-affinity-via-api.md
-    - page: NIM Observability Metrics via API
-      path: ../../docs/rest-api/api-guides/nim-observability-metrics-via-api.md
-  - section: API Python Client Reference
-    contents:
-    - page: API Python Client (runapy)
-      path: ../../docs/rest-api/api-python-client-reference/api-python-client-runapy.md
-    - page: Install and Configure the Client
-      path: ../../docs/rest-api/api-python-client-reference/install-and-configure-the-client.md
+    - page: Install and Configure CLI
+      path: ../../docs/reference/cli/install-cli.md
+    - page: Add NVIDIA Run:ai Authorization to Kubeconfig
+      path: ../../docs/reference/cli/set-kubeconfig-parameters.md
+    - page: Auto Update CLI Mechanism
+      path: ../../docs/reference/cli/auto-update-cli-mechanism.md
+    - page: CLI Commands Examples
+      path: ../../docs/reference/cli/cli-examples.md
 

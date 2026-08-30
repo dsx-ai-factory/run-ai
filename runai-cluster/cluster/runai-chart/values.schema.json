@@ -583,20 +583,6 @@
       },
       "type": "object"
     },
-    "BiDirectional": {
-      "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
-        "blockSizeMB": {
-          "type": "integer"
-        },
-        "blockSizeRatioPct": {
-          "type": "integer"
-        }
-      },
-      "type": "object"
-    },
     "Binder": {
       "properties": {
         "enabled": {
@@ -1248,15 +1234,6 @@
         "timeSlicing": {
           "$ref": "#/$defs/TimeSlicing"
         },
-        "dynamicFraction": {
-          "$ref": "#/$defs/DynamicFraction"
-        },
-        "nodeScheduler": {
-          "$ref": "#/$defs/NodeScheduler"
-        },
-        "swap": {
-          "$ref": "#/$defs/GpuSwap"
-        },
         "toolkitEvents": {
           "$ref": "#/$defs/ToolkitEvents"
         }
@@ -1369,14 +1346,6 @@
       "required": [
         "Duration"
       ]
-    },
-    "DynamicFraction": {
-      "properties": {
-        "enabled": {
-          "type": "boolean"
-        }
-      },
-      "type": "object"
     },
     "EmbeddedObjectMetadata": {
       "properties": {
@@ -1882,20 +1851,6 @@
         "endpoints",
         "path"
       ]
-    },
-    "GpuSwap": {
-      "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
-        "mode": {
-          "type": "string"
-        },
-        "biDirectional": {
-          "$ref": "#/$defs/BiDirectional"
-        }
-      },
-      "type": "object"
     },
     "HTTPGetAction": {
       "properties": {
@@ -2441,9 +2396,6 @@
     },
     "MPSServer": {
       "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
         "runAIMPSDirectoryHostPath": {
           "type": "string"
         },
@@ -2697,14 +2649,6 @@
         },
         "affinity": {
           "$ref": "#/$defs/Affinity"
-        }
-      },
-      "type": "object"
-    },
-    "NodeScheduler": {
-      "properties": {
-        "enabled": {
-          "type": "boolean"
         }
       },
       "type": "object"
@@ -4336,9 +4280,6 @@
     },
     "RunAIContainerToolkit": {
       "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
         "image": {
           "$ref": "#/$defs/Image"
         },
@@ -4368,9 +4309,6 @@
         },
         "waitForNvidiaToolkit": {
           "type": "boolean"
-        },
-        "logLevel": {
-          "type": "string"
         },
         "metrics": {
           "$ref": "#/$defs/Metrics"
@@ -5732,9 +5670,6 @@
     },
     "TimeSlicing": {
       "properties": {
-        "mode": {
-          "type": "string"
-        },
         "granularity": {
           "type": "integer"
         },

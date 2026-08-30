@@ -10,13 +10,11 @@ Flexible workload templates is enabled by default and applies only to flexible w
 
 </Info>
 
-## Before You Start <a href="#workload-priority-class" id="workload-priority-class"></a>
-
+## Before You Start
 If the image you are planning to use is hosted in NGC, make sure you have an NGC account with an active NGC API key. To obtain a key, go to [NGC](https://catalog.ngc.nvidia.com/) → Setup → API Keys, then generate or copy an existing key. In NVIDIA Run:ai, store the key either as a [shared secret](../../workload-assets/credentials.md#ngc-api-key) (created by an administrator) or a [user credential](../../../settings/user-settings/user-credentials.md) (created under User settings).
 
-## Workload Priority and Preemption <a href="#workload-priority-class" id="workload-priority-class"></a>
-
-By default, training workloads are assigned a **Low** priority and are **preemptible**. These defaults allow training workloads to use opportunistic compute resources beyond the project’s deserved quota while being scheduled after higher-priority workloads. Preemptible training workloads may be interrupted if those resources are required by higher-priority, non-preemptible workloads.&#x20;
+## Workload Priority and Preemption
+By default, training workloads are assigned a **Low** priority and are **preemptible**. These defaults allow training workloads to use opportunistic compute resources beyond the project’s deserved quota while being scheduled after higher-priority workloads. Preemptible training workloads may be interrupted if those resources are required by higher-priority, non-preemptible workloads.
 
 You can override the defaults by configuring priority and preemptibility. For more details, see [Workload priority and preemption](../../../platform-management/runai-scheduler/scheduling/workload-priority-control.md).
 
@@ -35,7 +33,7 @@ Linking data source assets is currently not supported.
 ## Adding a New Template
 
 1. To add a new template, go to Workload manager → Templates.
-2. Click **+NEW TEMPLATE** and select **Training** from the dropdown men&#x75;**.**
+2. Click **+NEW TEMPLATE** and select **Training** from the dropdown menu**.**
 3. Within the new training template form, select the **scope**.
 4. Set the training workload architecture as **standard**, which consists of a single main running process. This workload uses environments that support standard training workloads only.
 5. Enter a unique **name** for the training template. If the name already exists in the project, you will be requested to submit a different name.
@@ -48,7 +46,7 @@ Linking data source assets is currently not supported.
 **Note**
 
 * NGC catalog is disabled by default. If unavailable, your administrator must enable it under **General settings** → Workloads → NGC catalog.
-* To select an image from the NGC private registr&#x79;**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
+* To select an image from the NGC private registry**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
 
 </Info>
 

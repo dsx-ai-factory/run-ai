@@ -3,8 +3,8 @@
 tabs:
   documentation:
     display-name: Documentation
-  developers:
-    display-name: REST API Reference
+  reference:
+    display-name: Reference
 
 navigation:
 - tab: documentation
@@ -25,19 +25,17 @@ navigation:
     - section: Quick Start Guides
       path: ../../docs/getting-started/quick-starts/README.md
       contents:
-      - page: Quick Start for Infrastructure Administrators
-        path: ../../docs/getting-started/quick-starts/infra-admin-quick-start.md
-      - page: Quick Start for Platform Administrators
-        path: ../../docs/getting-started/quick-starts/platform-admin-quick-start.md
-      - page: Quick Start for AI Practitioners
-        path: ../../docs/getting-started/quick-starts/ai-practitioner-quick-start.md
+      - page: Deploy Infrastructure Quick Start
+        path: ../../docs/getting-started/quick-starts/deploy-infrastructure-quick-start.md
+      - page: Configure the Platform Quick Start
+        path: ../../docs/getting-started/quick-starts/configure-the-platform-quick-start.md
+      - page: Run Workloads Quick Start
+        path: ../../docs/getting-started/quick-starts/run-workloads-quick-start.md
     - section: About NVIDIA Run:ai Enterprise
       path: ../../docs/about-enterprise/README.md
       contents:
-      - page: Product Support Policy
+      - page: Support, Lifecycle, and Deprecation Policy
         path: ../../docs/about-enterprise/product-support-policy.md
-      - page: Product Version Life Cycle
-        path: ../../docs/about-enterprise/product-version-life-cycle.md
   - section: Installation and Configuration
     contents:
     - page: Overview
@@ -250,7 +248,6 @@ navigation:
     - page: Introduction to Workloads
       path: ../../docs/workloads-in-nvidia-run-ai/introduction-to-workloads.md
     - section: Workload Types and Features
-      path: ../../docs/workloads-in-nvidia-run-ai/workload-types/README.md
       contents:
       - page: NVIDIA Run:ai Native Workloads
         path: ../../docs/workloads-in-nvidia-run-ai/workload-types/native-workloads.md
@@ -390,7 +387,131 @@ navigation:
         path: ../../docs/settings/user-settings/user-access-keys.md
       - page: User Credentials
         path: ../../docs/settings/user-settings/user-credentials.md
-  - section: CLI Reference
+
+- tab: reference
+  layout:
+  - page: Home
+    path: ../../docs/rest-api/README.md
+  - section: REST API
+    contents:
+    - section: Getting Started
+      contents:
+      - page: About the REST API
+        path: ../../docs/rest-api/about-the-rest-api.md
+      - section: Using the REST API
+        contents:
+        - page: Making REST API Requests
+          path: ../../docs/rest-api/making-rest-api-requests.md
+        - page: Pagination
+          path: ../../docs/rest-api/pagination.md
+        - page: HTTP Status Codes
+          path: ../../docs/rest-api/http-status-codes.md
+      - page: How to Authenticate to the API
+        path: ../../docs/rest-api/how-to-authenticate-to-the-api.md
+      - page: NVIDIA Run:ai API Policy
+        path: ../../docs/rest-api/api-policy.md
+    - api: Endpoints
+      api-name: main-api
+      flattened: true
+      tag-description-pages: true
+      layout:
+        - section: Organizations
+          contents:
+          - clusters
+          - departments
+          - reports
+          - nodePools
+          - nodes
+          - projects
+          - logo
+          - researcherCommandLineInterface
+          - researcherCommandLineInterfaceDeprecated
+          - networkTopologies
+        - section: Authentication and Authorization
+          contents:
+          - accessKeys
+          - accessRules
+          - permissions
+          - applications
+          - serviceAccounts
+          - roles
+          - tokens
+          - users
+          - userApplications
+          - idps
+          - me
+          - settings
+          - orgUnit
+        - section: Audit
+          contents:
+          - auditLogs
+        - section: Datavolumes
+          contents:
+          - datavolumesApi
+        - section: Workloads
+          contents:
+          - events
+          - pods
+          - workloadsApi
+          - workloadsV2
+          - nvidiaNim
+          - workspaces
+          - trainings
+          - inferences
+          - revisions
+          - distributed
+          - workloadsBatch
+          - workloadProperties
+          - workloadTemplates
+          - distributedInferences
+        - section: Workload assets
+          contents:
+          - compute
+          - credentials
+          - datasources
+          - environment
+          - storageClasses
+          - storageClassConfiguration
+          - git
+          - hostPath
+          - nfs
+          - pvc
+          - registry
+          - s3
+          - configMap
+          - secret
+          - template
+        - section: Policies
+          contents:
+          - policy
+        - section: Notifications
+          contents:
+          - notificationState
+          - notificationTypes
+          - notificationChannels
+          - slack
+          - email
+          - subscriptions
+        - section: AI Applications
+          contents:
+          - aiApplicationsApi
+    - section: API Guides
+      contents:
+      - page: Interacting with Workloads Using the Cluster API
+        path: ../../docs/rest-api/api-guides/interacting-with-workloads-using-the-cluster-api.md
+      - page: Configuring Slack Notifications
+        path: ../../docs/rest-api/api-guides/configuring-slack-notifications.md
+      - page: Using Node Affinity via API
+        path: ../../docs/rest-api/api-guides/using-node-affinity-via-api.md
+      - page: NIM Observability Metrics via API
+        path: ../../docs/rest-api/api-guides/nim-observability-metrics-via-api.md
+    - section: API Python Client Reference
+      contents:
+      - page: API Python Client (runapy)
+        path: ../../docs/rest-api/api-python-client-reference/api-python-client-runapy.md
+      - page: Install and Configure the Client
+        path: ../../docs/rest-api/api-python-client-reference/install-and-configure-the-client.md
+  - section: CLI
     contents:
     - page: Install and Configure CLI
       path: ../../docs/reference/cli/install-cli.md
@@ -400,126 +521,4 @@ navigation:
       path: ../../docs/reference/cli/auto-update-cli-mechanism.md
     - page: CLI Commands Examples
       path: ../../docs/reference/cli/cli-examples.md
-
-- tab: developers
-  layout:
-  - page: Home
-    path: ../../docs/rest-api/README.md
-  - section: Getting Started
-    contents:
-    - page: About the REST API
-      path: ../../docs/rest-api/about-the-rest-api.md
-    - section: Using the REST API
-      contents:
-      - page: Making REST API Requests
-        path: ../../docs/rest-api/making-rest-api-requests.md
-      - page: Pagination
-        path: ../../docs/rest-api/pagination.md
-      - page: HTTP Status Codes
-        path: ../../docs/rest-api/http-status-codes.md
-    - page: How to Authenticate to the API
-      path: ../../docs/rest-api/how-to-authenticate-to-the-api.md
-    - page: NVIDIA Run:ai API Policy
-      path: ../../docs/rest-api/api-policy.md
-  - api: Endpoints
-    api-name: main-api
-    flattened: true
-    tag-description-pages: true
-    layout:
-      - section: Organizations
-        contents:
-        - clusters
-        - departments
-        - reports
-        - nodePools
-        - nodes
-        - projects
-        - logo
-        - researcherCommandLineInterface
-        - researcherCommandLineInterfaceDeprecated
-        - networkTopologies
-      - section: Authentication and Authorization
-        contents:
-        - accessKeys
-        - accessRules
-        - permissions
-        - applications
-        - serviceAccounts
-        - roles
-        - tokens
-        - users
-        - userApplications
-        - idps
-        - me
-        - settings
-        - orgUnit
-      - section: Audit
-        contents:
-        - auditLogs
-      - section: Datavolumes
-        contents:
-        - datavolumesApi
-      - section: Workloads
-        contents:
-        - events
-        - pods
-        - workloadsApi
-        - workloadsV2
-        - nvidiaNim
-        - workspaces
-        - trainings
-        - inferences
-        - revisions
-        - distributed
-        - workloadsBatch
-        - workloadProperties
-        - workloadTemplates
-        - distributedInferences
-      - section: Workload assets
-        contents:
-        - compute
-        - credentials
-        - datasources
-        - environment
-        - storageClasses
-        - storageClassConfiguration
-        - git
-        - hostPath
-        - nfs
-        - pvc
-        - registry
-        - s3
-        - configMap
-        - secret
-        - template
-      - section: Policies
-        contents:
-        - policy
-      - section: Notifications
-        contents:
-        - notificationState
-        - notificationTypes
-        - notificationChannels
-        - slack
-        - email
-        - subscriptions
-      - section: AI Applications
-        contents:
-        - aiApplicationsApi
-  - section: API Guides
-    contents:
-    - page: Interacting with Workloads Using the Cluster API
-      path: ../../docs/rest-api/api-guides/interacting-with-workloads-using-the-cluster-api.md
-    - page: Configuring Slack Notifications
-      path: ../../docs/rest-api/api-guides/configuring-slack-notifications.md
-    - page: Using Node Affinity via API
-      path: ../../docs/rest-api/api-guides/using-node-affinity-via-api.md
-    - page: NIM Observability Metrics via API
-      path: ../../docs/rest-api/api-guides/nim-observability-metrics-via-api.md
-  - section: API Python Client Reference
-    contents:
-    - page: API Python Client (runapy)
-      path: ../../docs/rest-api/api-python-client-reference/api-python-client-runapy.md
-    - page: Install and Configure the Client
-      path: ../../docs/rest-api/api-python-client-reference/install-and-configure-the-client.md
 

@@ -1,8 +1,3 @@
----
-vars:
-  version: '2.22'
----
-
 # Upgrade
 
 ## Before Upgrade
@@ -13,7 +8,7 @@ Before upgrading, validate that your environment meets the [system](system-requi
 
 NVIDIA Run:ai supports a **maximum gap of four versions** per upgrade; attempting to skip more than four versions in a single upgrade may fail. If your target version is more than four versions ahead of your current version, perform multiple upgrades. Each upgrade can span a maximum of four versions, and each upgrade must complete successfully before you begin the next.
 
-Upgrades are officially supported and tested only for versions within the current [product version life cycle](../../../about-enterprise/product-version-life-cycle.md).
+Upgrades are officially supported and tested only for versions within the current [product support policy](../../../about-enterprise/product-support-policy.md#supported-versions).
 
 To ensure a smooth and supported upgrade process:
 

@@ -41,8 +41,7 @@ Some supported workload types require additional installation or cluster prepara
 
 </Info>
 
-## Workload Priority and Preemption <a href="#workload-priority-class" id="workload-priority-class"></a>
-
+## Workload Priority and Preemption
 By default, supported workload types are assigned a priority and preemptibility based on their workload type. These defaults determine how workloads are scheduled relative to others within the same project, whether they can use over-quota resources, and whether they may be interrupted once running. You can override the defaults by configuring priority and preemptibility. For more details on the default values per workload type, see [Workload types default](workload-types/supported-workload-types.md#workload-types-defaults).
 
 ## Setting GPU Fractions

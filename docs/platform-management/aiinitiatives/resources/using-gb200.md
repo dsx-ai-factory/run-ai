@@ -2,7 +2,7 @@
 
 Multi-Node NVLink (MNNVL) systems, including NVIDIA GB200, NVIDIA GB200 NVL72 and its derivatives are fully supported by the NVIDIA Run:ai platform.
 
-Kubernetes does not natively recognize NVIDIA’s MNNVL architecture, which makes managing and scheduling workloads across these high-performance domains more complex. The NVIDIA Run:ai platform simplifies this by abstracting the complexity of MNNVL configuration. Without this abstraction, optimal performance on a GB200 NVL72 system would require deep knowledge of NVLink domains, their hardware dependencies, and manual configuration for each distributed workload. NVIDIA Run:ai automates these steps, ensuring high performance with minimal effort. While GB200 NVL72 supports all [workload types](../../../workloads-in-nvidia-run-ai/workload-types/README.md), distributed workloads - training and inference - benefit most from its accelerated GPU networking capabilities.
+Kubernetes does not natively recognize NVIDIA’s MNNVL architecture, which makes managing and scheduling workloads across these high-performance domains more complex. The NVIDIA Run:ai platform simplifies this by abstracting the complexity of MNNVL configuration. Without this abstraction, optimal performance on a GB200 NVL72 system would require deep knowledge of NVLink domains, their hardware dependencies, and manual configuration for each distributed workload. NVIDIA Run:ai automates these steps, ensuring high performance with minimal effort. While GB200 NVL72 supports all [workload types](../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md), distributed workloads - training and inference - benefit most from its accelerated GPU networking capabilities.
 
 <Info>
 

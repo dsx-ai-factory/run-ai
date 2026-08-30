@@ -3,6 +3,14 @@
 ## What this repo is
 Run.ai OSS monorepo. Full stack: control plane services, runai-cluster (Helm chart + controllers), shared packages, and the local development environment.
 
+## Documentation
+
+Documentation rules — when `docs/` gets touched, writing style, terminology,
+and sources of truth — live in `AGENTS.md` and `docs/AGENTS.md`. Read
+`AGENTS.md` before any change that might affect `docs/`.
+
+@AGENTS.md
+
 ## local-dev.sh — spinning up a local environment
 
 ```bash

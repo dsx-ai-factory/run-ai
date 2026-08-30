@@ -64,7 +64,7 @@ Time sharing where single GPUs can serve multiple workloads with fractions remai
 
 ## Setting GPU Fractions
 
-Using the [compute resources](../../../workloads-in-nvidia-run-ai/workload-assets/compute-resources.md) asset, you can define the compute requirements by specifying your requested GPU portion or GPU memory, and use it with any of the [NVIDIA Run:ai workload types](../../../workloads-in-nvidia-run-ai/workload-types/README.md) for single GPU and multi-GPU fractions.
+Using the [compute resources](../../../workloads-in-nvidia-run-ai/workload-assets/compute-resources.md) asset, you can define the compute requirements by specifying your requested GPU portion or GPU memory, and use it with any of the [NVIDIA Run:ai workload types](../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md) for single GPU and multi-GPU fractions.
 
 * **Single-GPU fractions** - Define the compute requirement to run 1 GPU device, by specifying either a fraction (percentage) of the overall memory or a memory request (GB, MB).
 * **Multi-GPU fractions** - Define the compute requirement to run multiple GPU devices, by specifying either a fraction (percentage) of the overall memory or a memory request (GB, MB).

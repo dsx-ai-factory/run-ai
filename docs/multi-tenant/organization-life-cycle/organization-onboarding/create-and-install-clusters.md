@@ -16,7 +16,7 @@ After installing the system requirements on the tenant’s Kubernetes environmen
 
 To create a cluster:
 
-* Send a `POST` request to the `/api/v1/clusters` endpoint. See [Clusters](https://app.gitbook.com/s/LYHZWRVgpD7c9mHAx1Vk/organizations/clusters) API for more details.
+* Send a `POST` request to the `/api/v1/clusters` endpoint. See [Clusters](api:multi-tenant-api:POST/api/v1/clusters) API for more details.
 * Provide the cluster’s **name**, **domain** ([FQDN](system-requirements.md#fully-qualified-domain-name-fqdn)) and the target NVIDIA Run:ai [version](system-requirements.md#kubernetes-distribution).
 * Once registered, the platform will return a cluster UUID. This UUID will be used to complete the installation and connect the tenant’s cluster to the NVIDIA Run:ai control plane.
 

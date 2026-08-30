@@ -87,7 +87,7 @@ NVIDIA Run:ai cluster requires Kubernetes. The following Kubernetes distribution
 **Note**
 
 * The latest release of the NVIDIA Run:ai cluster supports **Kubernetes 1.34 to 1.36** and **OpenShift 4.18 to 4.21**.
-* For [Multi-Node NVLink](https://app.gitbook.com/s/fvuZQSF7VCx1Azh0LF0H/platform-management/aiinitiatives/resources/using-gb200) support (e.g. GB200), Kubernetes 1.32 and above is required.
+* For [Multi-Node NVLink](../../../platform-management/aiinitiatives/resources/using-gb200.md) support (e.g. GB200), Kubernetes 1.32 and above is required.
 
 </Info>
 
@@ -220,7 +220,7 @@ The NVIDIA Run:ai cluster requires NVIDIA GPU Operator to be installed on the Ku
 
 **Note**
 
-For [Multi-Node NVLink](https://app.gitbook.com/s/fvuZQSF7VCx1Azh0LF0H/platform-management/aiinitiatives/resources/using-gb200) support (e.g. GB200), GPU Operator 25.3 and above is required.
+For [Multi-Node NVLink](../../../platform-management/aiinitiatives/resources/using-gb200.md) support (e.g. GB200), GPU Operator 25.3 and above is required.
 
 </Info>
 

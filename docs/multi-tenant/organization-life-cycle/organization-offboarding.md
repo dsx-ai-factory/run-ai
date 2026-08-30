@@ -2,7 +2,7 @@
 
 ## Delete Tenants
 
-Use this endpoint to remove a tenant from your NVIDIA Run:ai environment. You can choose between a soft delete (retains tenant data for future recovery) or a hard delete (permanently removes the tenant and all associated data). See [Tenant](https://app.gitbook.com/s/LYHZWRVgpD7c9mHAx1Vk/organizations/tenant) API endpoint for more details.
+Use this endpoint to remove a tenant from your NVIDIA Run:ai environment. You can choose between a soft delete (retains tenant data for future recovery) or a hard delete (permanently removes the tenant and all associated data). See [Tenant](api:multi-tenant-api:DELETE/api/v1/tenants/{tenantId}) API endpoint for more details.
 
 Send a `DELETE` request to the `/api/v1/tenants/{tenantId}` endpoint:
 

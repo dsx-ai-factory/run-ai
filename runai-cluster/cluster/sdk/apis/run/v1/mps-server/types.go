@@ -8,10 +8,6 @@ import (
 
 // MPSServer defines configuration for the mps-server
 type MPSServer struct {
-	// Enabled specifies if the mps-server should be installed
-	// +kubebuilder:validation:Optional
-	Enabled bool `json:"enabled,omitempty"`
-
 	// RunAIMPSDirectoryHostPath defines the host path for the mps server
 	// +kubebuilder:validation:Optional
 	RunAIMPSDirectoryHostPath string `json:"runAIMPSDirectoryHostPath,omitempty"`
