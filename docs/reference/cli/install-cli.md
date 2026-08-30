@@ -36,8 +36,7 @@ To verify the CLI client was installed properly
 
 Follow the steps below to configure the CLI.
 
-### Setting the Control Plane URL <a href="#setting-the-control-plane-url" id="setting-the-control-plane-url"></a>
-
+### Setting the Control Plane URL
 The following step is required for Windows users only. Linux and Mac clients are configured via the installation script automatically
 
 Run the command `runai config set --cp-url <CONTROL_PLANE_URL>`. This will also create the `config.json` file in the default path.
@@ -78,8 +77,7 @@ Alternatively:
 3. Run the following command `runai project set <PROJECT_NAME>`
 4. If successful, the following message is returned `project <PROJECT_NAME> configured successfully.`
 
-### Validating the Configuration <a href="#validating-the-configuration" id="validating-the-configuration"></a>
-
+### Validating the Configuration
 To view the current configuration run `runai config generate --json`
 
 ### Installing Command Auto-Completion

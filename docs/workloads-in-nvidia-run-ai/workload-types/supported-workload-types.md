@@ -36,7 +36,7 @@ This support is scoped to the `NodeSet` workload as it runs on Kubernetes. It is
 
 ## Submitting Supported Workload Types
 
-Supported workload types are submitted as standard Kubernetes YAML manifest&#x73;**.** Once submitted, the workload is created and appears in the [Workloads](../workloads.md) table for monitoring and management. See [Submit supported workload types via YAML](../submit-via-yaml.md).
+Supported workload types are submitted as standard Kubernetes YAML manifests**.** Once submitted, the workload is created and appears in the [Workloads](../workloads.md) table for monitoring and management. See [Submit supported workload types via YAML](../submit-via-yaml.md).
 
 ## Workload Types and Defaults
 

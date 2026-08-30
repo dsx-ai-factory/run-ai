@@ -14,7 +14,7 @@ This guide provides an overview of the best use cases for the Node Level Schedul
 
 ## Deployment Considerations
 
-* While the Node Level Scheduler applies to all [workload types](../../../workloads-in-nvidia-run-ai/workload-types/README.md), it will best optimize the performance of burstable workloads. Burstable workloads are workloads that use [dynamic GPU fractions](dynamic-fractions.md), giving those more GPU memory than requested and up to the Limit specified.
+* While the Node Level Scheduler applies to all [workload types](../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md), it will best optimize the performance of burstable workloads. Burstable workloads are workloads that use [dynamic GPU fractions](dynamic-fractions.md), giving those more GPU memory than requested and up to the Limit specified.
 * Burstable workloads are always susceptible to an OOM Kill signal if the owner of the excess memory requires it back. This means that using the Node Level Scheduler with inference or training workloads may cause pod preemption.
 * Using interactive workloads with notebooks is the best use case for burstable workloads and Node Level Scheduler. These workloads behave differently since the OOM Kill signal will cause the notebooks' GPU process to exit but not the notebook itself. This keeps the interactive pod running and retrying to attach a GPU again.
 

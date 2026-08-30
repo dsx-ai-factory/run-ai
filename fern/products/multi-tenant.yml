@@ -4,8 +4,8 @@ tabs:
   documentation:
     display-name: Documentation
 
-  api-reference:
-    display-name: REST API Reference
+  reference:
+    display-name: Reference
 navigation:
 - tab: documentation
   layout:
@@ -40,6 +40,11 @@ navigation:
         path: ../../docs/multi-tenant/getting-started/installation/uninstall.md
     - page: API Access Setup
       path: ../../docs/multi-tenant/getting-started/api-access-setup.md
+    - section: About NVIDIA Run:ai Enterprise
+      path: ../../docs/about-enterprise/README.md
+      contents:
+      - page: Support, Lifecycle, and Deprecation Policy
+        path: ../../docs/about-enterprise/product-support-policy.md
   - section: Organization Life Cycle
     contents:
     - section: Organization Onboarding
@@ -67,19 +72,19 @@ navigation:
     - section: Advanced Setup
       contents:
       - page: Node Roles
-        path: ../../docs/multi-tenant/infrastructure-setup/advanced-setup/node-roles.md
+        path: ../../docs/installation-and-configuration/post-installation-configuration/node-roles.md
       - page: Advanced Control Plane Configurations
         path: ../../docs/multi-tenant/infrastructure-setup/advanced-setup/control-plane-config.md
       - page: Advanced Cluster Configurations
-        path: ../../docs/multi-tenant/infrastructure-setup/advanced-setup/cluster-config.md
+        path: ../../docs/installation-and-configuration/post-installation-configuration/cluster-config.md
       - page: Vertical Pod Autoscaling (VPA)
-        path: ../../docs/multi-tenant/infrastructure-setup/advanced-setup/vpa.md
+        path: ../../docs/infrastructure-setup/advanced-setup/vpa.md
       - page: Kubernetes Gateway API
-        path: ../../docs/multi-tenant/infrastructure-setup/advanced-setup/kubernetes-gateway-api.md
+        path: ../../docs/infrastructure-setup/advanced-setup/kubernetes-gateway-api.md
       - page: External Access to Containers
-        path: ../../docs/multi-tenant/infrastructure-setup/advanced-setup/external-access-to-containers.md
+        path: ../../docs/infrastructure-setup/advanced-setup/container-access/external-access-to-containers.md
       - page: Service Mesh
-        path: ../../docs/multi-tenant/infrastructure-setup/advanced-setup/service-mesh.md
+        path: ../../docs/infrastructure-setup/advanced-setup/service-mesh.md
     - section: Infrastructure Procedures
       contents:
       - page: NVIDIA Run:ai at Scale
@@ -87,26 +92,20 @@ navigation:
       - page: Infrastructure Monitoring
         path: ../../docs/multi-tenant/infrastructure-setup/procedures/monitoring.md
       - page: NVIDIA Run:ai System Monitoring
-        path: ../../docs/multi-tenant/infrastructure-setup/procedures/system-monitoring.md
+        path: ../../docs/infrastructure-setup/procedures/system-monitoring.md
       - page: Nodes Maintenance
-        path: ../../docs/multi-tenant/infrastructure-setup/procedures/nodes-maintenance.md
+        path: ../../docs/infrastructure-setup/procedures/nodes-maintenance.md
       - page: Cluster Restore
         path: ../../docs/multi-tenant/infrastructure-setup/procedures/cluster-restore.md
         hidden: true
       - page: Secure Your Cluster
-        path: ../../docs/multi-tenant/infrastructure-setup/procedures/secure-your-cluster.md
+        path: ../../docs/infrastructure-setup/procedures/secure-your-cluster.md
       - page: Logs Collection
-        path: ../../docs/multi-tenant/infrastructure-setup/procedures/logs-collection.md
+        path: ../../docs/infrastructure-setup/procedures/logs-collection.md
       - page: Audit Logs API
         path: ../../docs/multi-tenant/infrastructure-setup/procedures/event-history.md
-  - section: Support Policy
-    contents:
-    - page: Product Support Policy
-      path: ../../docs/multi-tenant/support-policy/product-support-policy.md
-    - page: Product Version Life Cycle
-      path: ../../docs/multi-tenant/support-policy/product-version-life-cycle.md
 
-- tab: api-reference
+- tab: reference
   layout:
   - page: Home
     path: ../../docs/rest-api/multi-tenant/README.md

@@ -53,7 +53,20 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue where the applications list endpoint returned an empty creation date.</td></tr><tr><td>Fixed an issue where the distributed workload submission form incorrectly set GPU fields for the master replica when the MPI framework was selected, resulting in a submission error.</td></tr><tr><td>Fixed an issue where the Users minimal read API returned incorrect search results by including results matched on the creator field instead of filtering by the user's name or username.</td></tr><tr><td>Fixed an issue where a workload policy with <code>canAdd: false</code> for all storage data source types still displayed all storage options in the data source dropdown.</td></tr><tr><td>Fixed an issue where the <code>runai nodepool list</code> command crashed when the cluster had nodes excluded using the <code>managedNodePoolNames</code> configuration.</td></tr><tr><td>Fixed an issue where deleting a DataVolume left stale labels on the origin PVC, preventing it from being re-created.</td></tr><tr><td>Fixed an issue where NIMService workloads using fractional GPU annotations did not display GPU allocation in the NVIDIA Run:ai UI.</td></tr><tr><td>Fixed an issue where the NodePort address was not correctly displayed for workloads configured with the NodePort networking option.</td></tr><tr><td>Fixed an issue where the access rules dialog did not display existing users and service accounts in the selection component on the first click.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-x744-4wpc-v9h2 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2026-42151 with severity HIGH.</td></tr><tr><td>Fixed security vulnerabilities related to CVE-2026-42586 and CVE-2026-42579 with severity HIGH.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue where the applications list endpoint returned an empty creation date. |
+| Fixed an issue where the distributed workload submission form incorrectly set GPU fields for the master replica when the MPI framework was selected, resulting in a submission error. |
+| Fixed an issue where the Users minimal read API returned incorrect search results by including results matched on the creator field instead of filtering by the user's name or username. |
+| Fixed an issue where a workload policy with <code>canAdd: false</code> for all storage data source types still displayed all storage options in the data source dropdown. |
+| Fixed an issue where the <code>runai nodepool list</code> command crashed when the cluster had nodes excluded using the <code>managedNodePoolNames</code> configuration. |
+| Fixed an issue where deleting a DataVolume left stale labels on the origin PVC, preventing it from being re-created. |
+| Fixed an issue where NIMService workloads using fractional GPU annotations did not display GPU allocation in the NVIDIA Run:ai UI. |
+| Fixed an issue where the NodePort address was not correctly displayed for workloads configured with the NodePort networking option. |
+| Fixed an issue where the access rules dialog did not display existing users and service accounts in the selection component on the first click. |
+| Fixed a security vulnerability related to GHSA-x744-4wpc-v9h2 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2026-42151 with severity HIGH. |
+| Fixed security vulnerabilities related to CVE-2026-42586 and CVE-2026-42579 with severity HIGH. |
 
 ## June 2026 Releases
 
@@ -66,7 +79,19 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue where the workload Connections dialog displayed the node IP instead of the user-defined tool name.</td></tr><tr><td>Fixed an issue where a missing runai-go-operator-tls-secret prevented Helm upgrades from completing.</td></tr><tr><td>Fixed an issue where the CLI accepted unsupported storage flags for distributed inference submissions.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2026-42945 with severity CRITICAL.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2026-42154 with severity HIGH.</td></tr><tr><td>Fixed security vulnerabilities related to CVE-2026-39832, CVE-2026-46595, CVE-2026-39831, CVE-2026-39828, CVE-2026-39833, and CVE-2026-42508 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-14459 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-389r-gv7p-r3rp with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2026-42501 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-fqw6-gf59-qr4w with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2026-39852 with severity HIGH.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue where the workload Connections dialog displayed the node IP instead of the user-defined tool name. |
+| Fixed an issue where a missing runai-go-operator-tls-secret prevented Helm upgrades from completing. |
+| Fixed an issue where the CLI accepted unsupported storage flags for distributed inference submissions. |
+| Fixed a security vulnerability related to CVE-2026-42945 with severity CRITICAL. |
+| Fixed a security vulnerability related to CVE-2026-42154 with severity HIGH. |
+| Fixed security vulnerabilities related to CVE-2026-39832, CVE-2026-46595, CVE-2026-39831, CVE-2026-39828, CVE-2026-39833, and CVE-2026-42508 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2025-14459 with severity HIGH. |
+| Fixed a security vulnerability related to GHSA-389r-gv7p-r3rp with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2026-42501 with severity HIGH. |
+| Fixed a security vulnerability related to GHSA-fqw6-gf59-qr4w with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2026-39852 with severity HIGH. |
 
 ## May 2026 Releases
 
@@ -79,7 +104,13 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue where some filters on the Clusters table did not work.</td></tr><tr><td>Fixed an issue where the GPU profiling metrics toggle in General Settings > Analytics displayed without a label.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2026-41080 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2026-33811 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-78h2-9frx-2jm8 with severity HIGH.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue where some filters on the Clusters table did not work. |
+| Fixed an issue where the GPU profiling metrics toggle in General Settings > Analytics displayed without a label. |
+| Fixed a security vulnerability related to CVE-2026-41080 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2026-33811 with severity HIGH. |
+| Fixed a security vulnerability related to GHSA-78h2-9frx-2jm8 with severity HIGH. |
 
 ### May 14
 
@@ -91,7 +122,21 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed a security vulnerability related to GHSA-xw7x-h9fj-p2c7 with severity CRITICAL.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-78h2-9frx-2jm8 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-pc3f-x583-g7j2 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-vmg3-7v43-9g23 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2026-4878 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-5jv8-h7qh-rf5p with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-mh2q-q3fh-2475 with severity HIGH.</td></tr><tr><td>Fixed an issue where NIMService external URLs were intermittently unavailable under load.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2026-22016 with severity HIGH.</td></tr><tr><td>Fixed an issue where the Event history "Download to CSV/JSON" exported only the current page instead of all records.</td></tr><tr><td>Fixed an issue where the Event history "Subject Type" filter did not always return matching results.</td></tr><tr><td>Fixed an issue where the Terminal tab blocked connections to a running pod when the workload phase was not Running.</td></tr><tr><td>Fixed an issue where the Project telemetry endpoint returned a 500 error for project-scoped users.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed a security vulnerability related to GHSA-xw7x-h9fj-p2c7 with severity CRITICAL. |
+| Fixed a security vulnerability related to GHSA-78h2-9frx-2jm8 with severity HIGH. |
+| Fixed a security vulnerability related to GHSA-pc3f-x583-g7j2 with severity HIGH. |
+| Fixed a security vulnerability related to GHSA-vmg3-7v43-9g23 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2026-4878 with severity HIGH. |
+| Fixed a security vulnerability related to GHSA-5jv8-h7qh-rf5p with severity HIGH. |
+| Fixed a security vulnerability related to GHSA-mh2q-q3fh-2475 with severity HIGH. |
+| Fixed an issue where NIMService external URLs were intermittently unavailable under load. |
+| Fixed a security vulnerability related to CVE-2026-22016 with severity HIGH. |
+| Fixed an issue where the Event history "Download to CSV/JSON" exported only the current page instead of all records. |
+| Fixed an issue where the Event history "Subject Type" filter did not always return matching results. |
+| Fixed an issue where the Terminal tab blocked connections to a running pod when the workload phase was not Running. |
+| Fixed an issue where the Project telemetry endpoint returned a 500 error for project-scoped users. |
 
 ## April 2026 Releases
 
@@ -121,7 +166,25 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed a security vulnerability related to GHSA-9jj7-4m8r-rfcm with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2026-27144 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2026-33810 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2026-32281 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-6v2p-p543-phr9 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2026-32280 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2026-27654 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-hfvc-g4fc-pqhx with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-p77j-4mvh-x3m3 with severity CRITICAL.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2024-12797 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability in the OAuth/OpenID login flow.</td></tr><tr><td>Fixed an issue where the Admin > Event history page returned a 500 error when filtering by Event ID.</td></tr><tr><td>Fixed an issue where the CLI v2 <code>--preemptible</code> flag did not set preemptibility on workspace workloads.</td></tr><tr><td>Fixed an issue where the <code>GET /api/v1/workloads/pods</code> endpoint ignored project scope for user API tokens.</td></tr><tr><td>Fixed an issue where <code>ingressClass</code> was missing from the Minimal Cluster resource.</td></tr><tr><td>Fixed an issue where enabling <code>enableWorkloadOwnershipProtection</code> prevented the Workload Overseer from enforcing project scheduling rules such as Idle GPU timeout and Workload Duration limits.</td></tr><tr><td>Fixed an issue where the UI displayed impossible Free GPU values (allocated + free exceeding the node's total capacity) on nodes with fractional GPU allocations.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed a security vulnerability related to GHSA-9jj7-4m8r-rfcm with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2026-27144 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2026-33810 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2026-32281 with severity HIGH. |
+| Fixed a security vulnerability related to GHSA-6v2p-p543-phr9 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2026-32280 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2026-27654 with severity HIGH. |
+| Fixed a security vulnerability related to GHSA-hfvc-g4fc-pqhx with severity HIGH. |
+| Fixed a security vulnerability related to GHSA-p77j-4mvh-x3m3 with severity CRITICAL. |
+| Fixed a security vulnerability related to CVE-2024-12797 with severity HIGH. |
+| Fixed a security vulnerability in the OAuth/OpenID login flow. |
+| Fixed an issue where the Admin > Event history page returned a 500 error when filtering by Event ID. |
+| Fixed an issue where the CLI v2 <code>--preemptible</code> flag did not set preemptibility on workspace workloads. |
+| Fixed an issue where the <code>GET /api/v1/workloads/pods</code> endpoint ignored project scope for user API tokens. |
+| Fixed an issue where <code>ingressClass</code> was missing from the Minimal Cluster resource. |
+| Fixed an issue where enabling <code>enableWorkloadOwnershipProtection</code> prevented the Workload Overseer from enforcing project scheduling rules such as Idle GPU timeout and Workload Duration limits. |
+| Fixed an issue where the UI displayed impossible Free GPU values (allocated + free exceeding the node's total capacity) on nodes with fractional GPU allocations. |
 
 ### April 15
 
@@ -138,7 +201,16 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue where workspaces using the TensorBoard environment preset failed to start due to the tensorboard executable not being found in $PATH.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-23c5-xmqv-rm74 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-p77j-4mvh-x3m3 with severity HIGH.</td></tr><tr><td>Fixed an issue where the Access Rules API accepted invalid <code>subjectType</code> values without returning an error.</td></tr><tr><td>Fixed an issue where the emptyDir storage option was not applied to inference workloads even when selected.</td></tr><tr><td>Fixed an issue where the workload count displayed in the General settings was incorrect when filtering by enabled or disabled.</td></tr><tr><td>Fixed an issue where the automatic topology constraint applied to a workload targeted the farthest topology level instead of the closest.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2024-12797 with severity HIGH.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue where workspaces using the TensorBoard environment preset failed to start due to the tensorboard executable not being found in $PATH. |
+| Fixed a security vulnerability related to GHSA-23c5-xmqv-rm74 with severity HIGH. |
+| Fixed a security vulnerability related to GHSA-p77j-4mvh-x3m3 with severity HIGH. |
+| Fixed an issue where the Access Rules API accepted invalid <code>subjectType</code> values without returning an error. |
+| Fixed an issue where the emptyDir storage option was not applied to inference workloads even when selected. |
+| Fixed an issue where the workload count displayed in the General settings was incorrect when filtering by enabled or disabled. |
+| Fixed an issue where the automatic topology constraint applied to a workload targeted the farthest topology level instead of the closest. |
+| Fixed a security vulnerability related to CVE-2024-12797 with severity HIGH. |
 
 ## March 2026 Releases
 
@@ -151,7 +223,18 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed a security vulnerability related to GHSA-m297-3jv9-m927 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-61732 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2024-1013 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-72hv-8253-57qq with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-5rq4-664w-9x2c with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-9h8m-3fm2-qjrq with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2026-27142 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2024-41110 with severity HIGH.</td></tr><tr><td>Fixed an issue where workspace workload submissions intermittently failed with a "Workload failed due to a Network issue" error.</td></tr><tr><td>Fixed an issue where updating a project with node type names in the payload did not return the node type names in the 200 success response.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed a security vulnerability related to GHSA-m297-3jv9-m927 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2025-61732 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2024-1013 with severity HIGH. |
+| Fixed a security vulnerability related to GHSA-72hv-8253-57qq with severity HIGH. |
+| Fixed a security vulnerability related to GHSA-5rq4-664w-9x2c with severity HIGH. |
+| Fixed a security vulnerability related to GHSA-9h8m-3fm2-qjrq with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2026-27142 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2024-41110 with severity HIGH. |
+| Fixed an issue where workspace workload submissions intermittently failed with a "Workload failed due to a Network issue" error. |
+| Fixed an issue where updating a project with node type names in the payload did not return the node type names in the 200 success response. |
 
 ### March 08
 
@@ -165,7 +248,19 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue where image strings that included a port number in the registry URL were not parsed correctly.</td></tr><tr><td>Fixed an issue where the NVLink total bytes per pod metric was labeled with GPU metrics labels instead of the expected pod labels.</td></tr><tr><td>Fixed an issue where the Analytics table displayed incorrect GPU Compute Utilization values for Training and Interactive workloads.</td></tr><tr><td>Fixed an issue where department data was not synced to the cluster, affecting both department creation and updates.</td></tr><tr><td>Fixed an issue where the Connect button did not open the workspace URL for workloads submitted through YAML.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2024-56171 with severity HIGH.</td></tr><tr><td>Fixed an issue where the dashboard returned a 500 error instead of an informative error message.</td></tr><tr><td>Fixed an issue where NIM and HuggingFace inference templates failed to submit when a policy defined locked storage instances.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-64756 with severity HIGH.</td></tr><tr><td>Fixed an issue where updating a project with node type names in the payload did not return the node type names in the 200 success response.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-5vv4-hvf7-2h46 with severity HIGH.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue where image strings that included a port number in the registry URL were not parsed correctly. |
+| Fixed an issue where the NVLink total bytes per pod metric was labeled with GPU metrics labels instead of the expected pod labels. |
+| Fixed an issue where the Analytics table displayed incorrect GPU Compute Utilization values for Training and Interactive workloads. |
+| Fixed an issue where department data was not synced to the cluster, affecting both department creation and updates. |
+| Fixed an issue where the Connect button did not open the workspace URL for workloads submitted through YAML. |
+| Fixed a security vulnerability related to CVE-2024-56171 with severity HIGH. |
+| Fixed an issue where the dashboard returned a 500 error instead of an informative error message. |
+| Fixed an issue where NIM and HuggingFace inference templates failed to submit when a policy defined locked storage instances. |
+| Fixed a security vulnerability related to CVE-2025-64756 with severity HIGH. |
+| Fixed an issue where updating a project with node type names in the payload did not return the node type names in the 200 success response. |
+| Fixed a security vulnerability related to GHSA-5vv4-hvf7-2h46 with severity HIGH. |
 
 ## February 2026 Releases
 
@@ -185,7 +280,22 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue where the "Allocation ratio by node pool" widget in the Overview dashboard aggregated unlimited quotas together with other quotas, resulting in incorrect data.</td></tr><tr><td>Fixed an issue where, after the <code>runai upgrade</code> command completed successfully, the CLI incorrectly prompted the user to run the upgrade again.</td></tr><tr><td>Fixed an issue where inference workload metrics were not being refreshed correctly.</td></tr><tr><td>Fixed an issue in the flexible workload submission form where image pull secret section would present shared credentials instead of shared secrets resulting in a failure to submit the workload.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-jmp9-x22r-554x with severity HIGH.</td></tr><tr><td>Fixed an issue where department data was not synced to the cluster, affecting both department creation and updates.</td></tr><tr><td>Fixed an issue in Projects and Departments where GPU utilization/allocation metrics were not displayed if only partial data was available.</td></tr><tr><td>Fixed a security vulnerability related to GHSA-cv78-6m8q-ph82 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-14459 and CVE-2025-64324 with severity HIGH.</td></tr><tr><td>Fixed an issue where users with the appropriate permissions could not delete system templates in the UI.</td></tr><tr><td>Fixed an issue where, on rare occasions, "Allocation ratio by node pool" widget would show incorrect data.</td></tr><tr><td>Fixed an issue where a node pool that included nodes without required topology labels became stuck in Updating after a topology was attached.</td></tr><tr><td>Fixed an issue where the UI shows the wrong GPU quotas for node pools associated with the “Default” department.</td></tr><tr><td>Fixed an issue where, on rare occasions, there was a race condition in some of the metrics causing the average GPU utilization to be above 100%.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue where the "Allocation ratio by node pool" widget in the Overview dashboard aggregated unlimited quotas together with other quotas, resulting in incorrect data. |
+| Fixed an issue where, after the <code>runai upgrade</code> command completed successfully, the CLI incorrectly prompted the user to run the upgrade again. |
+| Fixed an issue where inference workload metrics were not being refreshed correctly. |
+| Fixed an issue in the flexible workload submission form where image pull secret section would present shared credentials instead of shared secrets resulting in a failure to submit the workload. |
+| Fixed a security vulnerability related to GHSA-jmp9-x22r-554x with severity HIGH. |
+| Fixed an issue where department data was not synced to the cluster, affecting both department creation and updates. |
+| Fixed an issue in Projects and Departments where GPU utilization/allocation metrics were not displayed if only partial data was available. |
+| Fixed a security vulnerability related to GHSA-cv78-6m8q-ph82 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2025-14459 and CVE-2025-64324 with severity HIGH. |
+| Fixed an issue where users with the appropriate permissions could not delete system templates in the UI. |
+| Fixed an issue where, on rare occasions, "Allocation ratio by node pool" widget would show incorrect data. |
+| Fixed an issue where a node pool that included nodes without required topology labels became stuck in Updating after a topology was attached. |
+| Fixed an issue where the UI shows the wrong GPU quotas for node pools associated with the “Default” department. |
+| Fixed an issue where, on rare occasions, there was a race condition in some of the metrics causing the average GPU utilization to be above 100%. |
 
 ### February 10
 
@@ -202,7 +312,23 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue where credentials assets were not displayed in the Credentials table.</td></tr><tr><td>Fixed an issue where navigating back to the root level in dashboard widgets caused the dashboard to crash.</td></tr><tr><td>Fixed an issue where workloads submitted with names longer than 63 characters failed to schedule.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2026-0861 with severity HIGH.</td></tr><tr><td>Fixed an issue where, when CPU quota and Limit projects from exceeding department quota were both enabled, updating department or project memory quotas to very large values failed with incorrect validation errors, even though the values were valid.</td></tr><tr><td>Fixed an issue where providing an invalid admin password during installation caused the tenant to become permanently stuck.</td></tr><tr><td>Fixed an issue where the <code>workload describe</code> command did not display the master specification for distributed workloads.</td></tr><tr><td>Fixed an issue where an incorrect FQDN used during certificate generation caused errors.</td></tr><tr><td>Fixed an issue where AI practitioner role did not have read access to policies granted through workload submission permission sets (for example, <code>workspaceEditAccess</code>).</td></tr><tr><td>Fixed an issue where a race condition during webhook certificate generation caused failures.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-68973 with severity HIGH.</td></tr><tr><td>Fixed an issue where the Projects/Departments table in the Overview dashboard sometimes showed fewer than 15 projects/departments when their workloads did not have allocated GPUs or were not in Running or Pending status.</td></tr><tr><td>Fixed an issue where distributed inference workloads could be submitted successfully with an invalid workers value</td></tr><tr><td>Fixed an issue in the Overview dashboard where the Node pool filter did not work for the Idle workloads table.</td></tr><tr><td>Fixed an issue where <code>runai template list</code> returned incorrect output when using <code>--page-size</code> and <code>--max-items</code> together.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue where credentials assets were not displayed in the Credentials table. |
+| Fixed an issue where navigating back to the root level in dashboard widgets caused the dashboard to crash. |
+| Fixed an issue where workloads submitted with names longer than 63 characters failed to schedule. |
+| Fixed a security vulnerability related to CVE-2026-0861 with severity HIGH. |
+| Fixed an issue where, when CPU quota and Limit projects from exceeding department quota were both enabled, updating department or project memory quotas to very large values failed with incorrect validation errors, even though the values were valid. |
+| Fixed an issue where providing an invalid admin password during installation caused the tenant to become permanently stuck. |
+| Fixed an issue where the <code>workload describe</code> command did not display the master specification for distributed workloads. |
+| Fixed an issue where an incorrect FQDN used during certificate generation caused errors. |
+| Fixed an issue where AI practitioner role did not have read access to policies granted through workload submission permission sets (for example, <code>workspaceEditAccess</code>). |
+| Fixed an issue where a race condition during webhook certificate generation caused failures. |
+| Fixed a security vulnerability related to CVE-2025-68973 with severity HIGH. |
+| Fixed an issue where the Projects/Departments table in the Overview dashboard sometimes showed fewer than 15 projects/departments when their workloads did not have allocated GPUs or were not in Running or Pending status. |
+| Fixed an issue where distributed inference workloads could be submitted successfully with an invalid workers value |
+| Fixed an issue in the Overview dashboard where the Node pool filter did not work for the Idle workloads table. |
+| Fixed an issue where <code>runai template list</code> returned incorrect output when using <code>--page-size</code> and <code>--max-items</code> together. |
 
 ## January 2026 Releases
 
@@ -218,7 +344,18 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue where running <code>runai logout</code> returned 404 Not Found when the session token had already expired. The logout command now completes successfully and returns a clear message.</td></tr><tr><td>Fixed an issue where the <code>template describe</code> command did not display the master specification for distributed templates when the master and worker configurations differed.</td></tr><tr><td>Fixed an issue where image pull secrets marked with <code>exclude=true</code> were not excluded from the workload.</td></tr><tr><td>Fixed an issue where during password change, the wrong current password logged the user out and redirected them to the login page.</td></tr><tr><td>Fixed an issue on OpenShift clusters where missing permissions to manage finalizers caused all workloads to remain stuck in Creating state.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-15284 with severity HIGH.</td></tr><tr><td>Fixed an issue where distributed training workloads were not blocked when master and worker roles used different node pools.</td></tr><tr><td>Fixed an issue where charts in the Overview dashboard did not render data after the node pool filter was changed.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-32988 with severity HIGH.</td></tr><tr><td>Fixed an issue where enabling authentication and authorization prevented user metrics from being collected for inference workloads running on Knative and NIM.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue where running <code>runai logout</code> returned 404 Not Found when the session token had already expired. The logout command now completes successfully and returns a clear message. |
+| Fixed an issue where the <code>template describe</code> command did not display the master specification for distributed templates when the master and worker configurations differed. |
+| Fixed an issue where image pull secrets marked with <code>exclude=true</code> were not excluded from the workload. |
+| Fixed an issue where during password change, the wrong current password logged the user out and redirected them to the login page. |
+| Fixed an issue on OpenShift clusters where missing permissions to manage finalizers caused all workloads to remain stuck in Creating state. |
+| Fixed a security vulnerability related to CVE-2025-15284 with severity HIGH. |
+| Fixed an issue where distributed training workloads were not blocked when master and worker roles used different node pools. |
+| Fixed an issue where charts in the Overview dashboard did not render data after the node pool filter was changed. |
+| Fixed a security vulnerability related to CVE-2025-32988 with severity HIGH. |
+| Fixed an issue where enabling authentication and authorization prevented user metrics from being collected for inference workloads running on Knative and NIM. |
 
 ### January 15
 
@@ -255,7 +392,24 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue where the <code>--working-dir</code> parameter was ignored for Knative-based inference workloads, causing containers to start in <code>/</code> instead of the specified directory.</td></tr><tr><td>Fixed an issue where the Fully free GPU devices column displayed <code>-</code> instead of <code>0</code> when no fully free GPU devices were available under fractional GPU allocations.</td></tr><tr><td>Fixed an issue where projects created or updated during node pool deletion could reference a non-existent node pool and remain NotReady.</td></tr><tr><td>Fixed issues where readiness probes did not work correctly with serving port authorization in single-node Knative inference workloads.</td></tr><tr><td>Fixed an issue where the <code>/v1/k8s/setting</code> endpoint returned a 500 error for tenants without clusters, causing the UI to hang instead of redirecting to cluster creation.</td></tr><tr><td>Fixed an issue where the Node column displayed a sort icon but did not actually sort results in the Running / Requested Pods modal.</td></tr><tr><td>Fixed an issue where image names longer than the display limit were truncated without providing access to the full name.</td></tr><tr><td>Fixed an issue causing a delay before newly created clusters could be deleted, leaving the Remove option temporarily unavailable after creation.</td></tr><tr><td>Fixed an issue where Overview widgets did not update correctly when navigating from departments to projects.</td></tr><tr><td>Fixed an issue where copying a workload that included node affinity settings caused the re-submission to fail.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2024-25621 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-32988 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-65637 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-58183 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-64756 with severity HIGH.</td></tr><tr><td>Fixed an issue where, in rare cases, sessions could disconnect due to token refresh handling.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue where the <code>--working-dir</code> parameter was ignored for Knative-based inference workloads, causing containers to start in <code>/</code> instead of the specified directory. |
+| Fixed an issue where the Fully free GPU devices column displayed <code>-</code> instead of <code>0</code> when no fully free GPU devices were available under fractional GPU allocations. |
+| Fixed an issue where projects created or updated during node pool deletion could reference a non-existent node pool and remain NotReady. |
+| Fixed issues where readiness probes did not work correctly with serving port authorization in single-node Knative inference workloads. |
+| Fixed an issue where the <code>/v1/k8s/setting</code> endpoint returned a 500 error for tenants without clusters, causing the UI to hang instead of redirecting to cluster creation. |
+| Fixed an issue where the Node column displayed a sort icon but did not actually sort results in the Running / Requested Pods modal. |
+| Fixed an issue where image names longer than the display limit were truncated without providing access to the full name. |
+| Fixed an issue causing a delay before newly created clusters could be deleted, leaving the Remove option temporarily unavailable after creation. |
+| Fixed an issue where Overview widgets did not update correctly when navigating from departments to projects. |
+| Fixed an issue where copying a workload that included node affinity settings caused the re-submission to fail. |
+| Fixed a security vulnerability related to CVE-2024-25621 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2025-32988 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2025-65637 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2025-58183 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2025-64756 with severity HIGH. |
+| Fixed an issue where, in rare cases, sessions could disconnect due to token refresh handling. |
 
 ### January 05
 
@@ -278,7 +432,17 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue where the Project GET API returned missing limit fields instead of an explicit unlimited value when CPU quotas were enabled.</td></tr><tr><td>Fixed an issue where the PVC API did not validate <code>claimName</code> uniqueness.</td></tr><tr><td>Fixed an issue where workloads using multiple GPU fractions were missing GPU utilization and memory metrics.</td></tr><tr><td>Fixed an issue where the identity manager failed to start when the notification service was disabled.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-58183 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-58186 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-58187 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-61729 with severity HIGH.</td></tr><tr><td>Fixed an issue where setting a GPU memory limit caused workload creation to fail.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue where the Project GET API returned missing limit fields instead of an explicit unlimited value when CPU quotas were enabled. |
+| Fixed an issue where the PVC API did not validate <code>claimName</code> uniqueness. |
+| Fixed an issue where workloads using multiple GPU fractions were missing GPU utilization and memory metrics. |
+| Fixed an issue where the identity manager failed to start when the notification service was disabled. |
+| Fixed a security vulnerability related to CVE-2025-58183 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2025-58186 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2025-58187 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2025-61729 with severity HIGH. |
+| Fixed an issue where setting a GPU memory limit caused workload creation to fail. |
 
 ## December 2025 Releases
 
@@ -301,7 +465,16 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue where the PVC API did not validate <code>claimName</code> uniqueness.</td></tr><tr><td>Fixed an issue so each access rule created or deleted in a batch action is now audited in the events history.</td></tr><tr><td>Fixed an issue where containers ran as root instead of a non-privileged user.</td></tr><tr><td>Fixed a permissions issue that allowed users with write-settings permissions to edit a centralized channel.</td></tr><tr><td>Fixed an issue where inference workload URLs were generated as <code>http</code> instead of <code>https</code>.</td></tr><tr><td>Fixed an issue where users with L1 Researcher and L2 Researcher roles could not list node pools using the NVIDIA Run:ai CLI.</td></tr><tr><td>Fixed an issue where the NGC API key asset <code>getById</code> API response was missing the <code>status</code> field.</td></tr><tr><td>Fixed an issue where users with the correct project permissions could create templates but were blocked from saving edits due to incorrect permission checks.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue where the PVC API did not validate <code>claimName</code> uniqueness. |
+| Fixed an issue so each access rule created or deleted in a batch action is now audited in the events history. |
+| Fixed an issue where containers ran as root instead of a non-privileged user. |
+| Fixed a permissions issue that allowed users with write-settings permissions to edit a centralized channel. |
+| Fixed an issue where inference workload URLs were generated as <code>http</code> instead of <code>https</code>. |
+| Fixed an issue where users with L1 Researcher and L2 Researcher roles could not list node pools using the NVIDIA Run:ai CLI. |
+| Fixed an issue where the NGC API key asset <code>getById</code> API response was missing the <code>status</code> field. |
+| Fixed an issue where users with the correct project permissions could create templates but were blocked from saving edits due to incorrect permission checks. |
 
 ### December 03
 
@@ -333,7 +506,18 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue that caused charts to remain in a loading state on every data refresh instead of only during the initial load.</td></tr><tr><td>Fixed an issue where the workloads service could enter a CrashLoopBackOff during upgrade.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-47907 with severity HIGH.</td></tr><tr><td>Fixed an issue that caused session disconnections.</td></tr><tr><td>Fixed an issue that caused distributed inference workloads to become unsynchronized.</td></tr><tr><td>Fixed an issue where the external-workload-integrator on OpenShift entered a constant reconcile loop, causing high CPU utilization.</td></tr><tr><td>Fixed missing validations for CPU resources when the CPU quota feature flag was disabled, which caused project and department updates to skip required CPU checks.</td></tr><tr><td>Fixed an issue that could cause the operator to crash during installation due to a race condition in ingress initialization.</td></tr><tr><td>Fixed an issue where the UI incorrectly prevented creating templates with the same name across different scopes.</td></tr><tr><td>Fixed an issue where idle GPU timeout rules were incorrectly applied to preemptible workspaces.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue that caused charts to remain in a loading state on every data refresh instead of only during the initial load. |
+| Fixed an issue where the workloads service could enter a CrashLoopBackOff during upgrade. |
+| Fixed a security vulnerability related to CVE-2025-47907 with severity HIGH. |
+| Fixed an issue that caused session disconnections. |
+| Fixed an issue that caused distributed inference workloads to become unsynchronized. |
+| Fixed an issue where the external-workload-integrator on OpenShift entered a constant reconcile loop, causing high CPU utilization. |
+| Fixed missing validations for CPU resources when the CPU quota feature flag was disabled, which caused project and department updates to skip required CPU checks. |
+| Fixed an issue that could cause the operator to crash during installation due to a race condition in ingress initialization. |
+| Fixed an issue where the UI incorrectly prevented creating templates with the same name across different scopes. |
+| Fixed an issue where idle GPU timeout rules were incorrectly applied to preemptible workspaces. |
 
 ## November 2025 Releases
 
@@ -350,7 +534,31 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue where cluster authentication didn’t use the tenant URL.</td></tr><tr><td>Fixed an issue where the DCGM metric chart was displayed even when the cluster did not support DCGM metrics.</td></tr><tr><td>Fixed an issue where resource name validation failed for hugepage resources by enhancing validation rules to properly support hugepages.</td></tr><tr><td>Fixed an issue where switching between workloads in the workload Details drawer displayed incorrect data, particularly the workload lifespan value.</td></tr><tr><td>Fixed an issue where the master spec was not inherited when creating a distributed workload from a template.</td></tr><tr><td>Fixed an issue where policies allowed <code>canEdit: false</code> under <code>attributes</code> without specifying a default value, which incorrectly passed validation.</td></tr><tr><td>Fixed an issue where the log viewer for distributed workloads displayed only a partial and unsorted list of pods.</td></tr><tr><td>Fixed an issue where the metric <code>gpu_memory_utilization_avg</code> returned a NaN value.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-62156 with severity HIGH.</td></tr><tr><td>Fixed an issue where workload submission in the CLI failed when commands contained special characters.</td></tr><tr><td>Fixed an issue where a mismatch between Helm schema validation and pre-hooks runtime validation code caused <code>clusterConfig.binder.resources</code> errors during upgrades</td></tr><tr><td>Fixed an issue where workloads logs initially loaded older logs instead of the most recent ones.</td></tr><tr><td>Fixed an issue where creating or updating a policy failed with an ‘asset Id not found’ error when specifying an imposedAsset.</td></tr><tr><td>Fixed an issue where the workload controller could delete all running workloads when <code>init-ca</code> generated a new certificate (every 30 days).</td></tr><tr><td>Fixed an issue where users running Red Hat OpenShift Serverless experienced “Down” status alerts in OpenShift monitoring due to NVIDIA Run:ai Knative ServiceMonitors.</td></tr><tr><td>Fixed an issue where logs were not displayed in the UI for workloads submitted using the Workloads v2 submission API.</td></tr><tr><td>Fixed an issue where inference workload metrics did not allow selecting a specific pod for viewing metrics.</td></tr><tr><td>Fixed an issue where the UI displayed an incorrect access rule status for users with Cloud Operator roles.</td></tr><tr><td>Fixed an issue where the <code>RunaiAgentPullRateLow</code> and <code>RunaiAgentClusterInfoPushRateLow</code> Prometheus alerts were firing incorrectly without cause.</td></tr><tr><td>Fixed an issue where a race condition between the NVIDIA Run:ai operator and upgrade/install post hooks caused the upgrade to fail.</td></tr><tr><td>Fixed an issue where GPU fraction requests were not applied when submitting distributed workloads.</td></tr><tr><td>Fixed an issue where the NVIDIA Run:ai operator experienced unusually high CPU utilization after upgrade.</td></tr><tr><td>Fixed an issue where PVCs appeared with the status “Issues found” after upgrading to version 2.22.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue where cluster authentication didn’t use the tenant URL. |
+| Fixed an issue where the DCGM metric chart was displayed even when the cluster did not support DCGM metrics. |
+| Fixed an issue where resource name validation failed for hugepage resources by enhancing validation rules to properly support hugepages. |
+| Fixed an issue where switching between workloads in the workload Details drawer displayed incorrect data, particularly the workload lifespan value. |
+| Fixed an issue where the master spec was not inherited when creating a distributed workload from a template. |
+| Fixed an issue where policies allowed <code>canEdit: false</code> under <code>attributes</code> without specifying a default value, which incorrectly passed validation. |
+| Fixed an issue where the log viewer for distributed workloads displayed only a partial and unsorted list of pods. |
+| Fixed an issue where the metric <code>gpu_memory_utilization_avg</code> returned a NaN value. |
+| Fixed a security vulnerability related to CVE-2025-62156 with severity HIGH. |
+| Fixed an issue where workload submission in the CLI failed when commands contained special characters. |
+| Fixed an issue where a mismatch between Helm schema validation and pre-hooks runtime validation code caused <code>clusterConfig.binder.resources</code> errors during upgrades |
+| Fixed an issue where workloads logs initially loaded older logs instead of the most recent ones. |
+| Fixed an issue where creating or updating a policy failed with an ‘asset Id not found’ error when specifying an imposedAsset. |
+| Fixed an issue where the workload controller could delete all running workloads when <code>init-ca</code> generated a new certificate (every 30 days). |
+| Fixed an issue where users running Red Hat OpenShift Serverless experienced “Down” status alerts in OpenShift monitoring due to NVIDIA Run:ai Knative ServiceMonitors. |
+| Fixed an issue where logs were not displayed in the UI for workloads submitted using the Workloads v2 submission API. |
+| Fixed an issue where inference workload metrics did not allow selecting a specific pod for viewing metrics. |
+| Fixed an issue where the UI displayed an incorrect access rule status for users with Cloud Operator roles. |
+| Fixed an issue where the <code>RunaiAgentPullRateLow</code> and <code>RunaiAgentClusterInfoPushRateLow</code> Prometheus alerts were firing incorrectly without cause. |
+| Fixed an issue where a race condition between the NVIDIA Run:ai operator and upgrade/install post hooks caused the upgrade to fail. |
+| Fixed an issue where GPU fraction requests were not applied when submitting distributed workloads. |
+| Fixed an issue where the NVIDIA Run:ai operator experienced unusually high CPU utilization after upgrade. |
+| Fixed an issue where PVCs appeared with the status “Issues found” after upgrading to version 2.22. |
 
 ### November 02
 
@@ -363,7 +571,25 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue where selecting an environment asset template in the flexible workload form would not present the the capabilities field correctly.</td></tr><tr><td>Fixed an issue where the API allowed creating a PVC asset without a <code>claimName</code> when <code>existingPVC=false</code>.</td></tr><tr><td>Fixed an issue where users without permission to create data source assets were blocked from adding one-time data sources during workload submission.</td></tr><tr><td>Fixed an issue where the NGC API key validation did not allow special characters (<code>-</code>, <code>_</code>, <code>.</code>). Validation now supports these characters as expected.</td></tr><tr><td>Fixed an issue where removing the logo in Branding settings displayed an empty square.</td></tr><tr><td>Fixed an issue where pagination in the Node Pool page did not respond.</td></tr><tr><td>Fixed an issue where department administrators could not include cluster-scope templates in workloads due to incorrect validation of permitted scopes.</td></tr><tr><td>Fixed an issue where the grace period preemption field in the UI was limited to 5 minutes, even when the workload policy allowed longer durations.</td></tr><tr><td>Fixed an issue in the CLI installer where the PATH was not configured for all shells. The installer now correctly configures PATH for both zsh and bash.</td></tr><tr><td>Fixed an issue where policies were not applied when submitting a workload using a template.</td></tr><tr><td>Fixed an issue where the filterBy department option in the consumption report did not work as expected.</td></tr><tr><td>Fixed an issue where stale department were not properly removed after deleting a cluster.</td></tr><tr><td>Fixed an issue that caused conflicts with additional built-in Prometheus Operator deployments in OpenShift.</td></tr><tr><td>Fixed an issue where running a NIM inference workload on a fractional GPU prevented the Triton server from starting, causing inference endpoint requests to fail.</td></tr><tr><td>Fixed an issue where incorrect average GPU utilization per project and workload type was displayed in the Projects view charts and tables.</td></tr><tr><td>Fixed an issue where the <code>updatedBy</code> field of a policy did not show the latest user who updated it.</td></tr><tr><td>Fixed an issue where the Quota management dashboard occasionally displayed incorrect GPU quota values.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue where selecting an environment asset template in the flexible workload form would not present the the capabilities field correctly. |
+| Fixed an issue where the API allowed creating a PVC asset without a <code>claimName</code> when <code>existingPVC=false</code>. |
+| Fixed an issue where users without permission to create data source assets were blocked from adding one-time data sources during workload submission. |
+| Fixed an issue where the NGC API key validation did not allow special characters (<code>-</code>, <code>_</code>, <code>.</code>). Validation now supports these characters as expected. |
+| Fixed an issue where removing the logo in Branding settings displayed an empty square. |
+| Fixed an issue where pagination in the Node Pool page did not respond. |
+| Fixed an issue where department administrators could not include cluster-scope templates in workloads due to incorrect validation of permitted scopes. |
+| Fixed an issue where the grace period preemption field in the UI was limited to 5 minutes, even when the workload policy allowed longer durations. |
+| Fixed an issue in the CLI installer where the PATH was not configured for all shells. The installer now correctly configures PATH for both zsh and bash. |
+| Fixed an issue where policies were not applied when submitting a workload using a template. |
+| Fixed an issue where the filterBy department option in the consumption report did not work as expected. |
+| Fixed an issue where stale department were not properly removed after deleting a cluster. |
+| Fixed an issue that caused conflicts with additional built-in Prometheus Operator deployments in OpenShift. |
+| Fixed an issue where running a NIM inference workload on a fractional GPU prevented the Triton server from starting, causing inference endpoint requests to fail. |
+| Fixed an issue where incorrect average GPU utilization per project and workload type was displayed in the Projects view charts and tables. |
+| Fixed an issue where the <code>updatedBy</code> field of a policy did not show the latest user who updated it. |
+| Fixed an issue where the Quota management dashboard occasionally displayed incorrect GPU quota values. |
 
 ## October 2025 Releases
 
@@ -371,7 +597,11 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue where setting <code>uid</code> or <code>gid</code> to <code>0</code> during environment creation was not allowed.</td></tr><tr><td>Fixed an issue where users with expired refresh tokens (after 24 hours) could not log in, as the token endpoint returned a 400 error.</td></tr><tr><td>Fixed an issue where certain policy calls failed when at least one unconfigured cluster existed in the system.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue where setting <code>uid</code> or <code>gid</code> to <code>0</code> during environment creation was not allowed. |
+| Fixed an issue where users with expired refresh tokens (after 24 hours) could not log in, as the token endpoint returned a 400 error. |
+| Fixed an issue where certain policy calls failed when at least one unconfigured cluster existed in the system. |
 
 ### October 08
 
@@ -381,7 +611,12 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue where credentials that were not yet synced to the cluster appeared in the credential selection dropdown in Hugging Face and NIM inference workloads.</td></tr><tr><td>Fixed an issue where YAML submitted workloads were not supported in batch deletion.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-58754 with severity HIGH.</td></tr><tr><td>Fixed an issue where deleting a project did not remove access rules scoped to that project</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue where credentials that were not yet synced to the cluster appeared in the credential selection dropdown in Hugging Face and NIM inference workloads. |
+| Fixed an issue where YAML submitted workloads were not supported in batch deletion. |
+| Fixed a security vulnerability related to CVE-2025-58754 with severity HIGH. |
+| Fixed an issue where deleting a project did not remove access rules scoped to that project |
 
 ## September 2025 Releases
 
@@ -424,7 +659,22 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue where external token exchange failed because the API was incompatible with <code>access_tokens</code>.</td></tr><tr><td>Fixed an issue where updating project resources created through the deprecated Projects API did not work correctly.</td></tr><tr><td>Fixed an issue where inference workloads failed when using user credentials as an image pull secret.</td></tr><tr><td>Fixed an issue where, in certain edge cases, removing an inference workload without deleting its revision caused the cluster to panic during revision sync.</td></tr><tr><td>Fixed an issue where mappers could not be updated in identity providers (IdPs).</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-22868 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-7425 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-49794 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-53547 with severity HIGH.</td></tr><tr><td>Fixed an issue where email notifications configured through User settings were still sent after selecting and then immediately de-selecting all notification types.</td></tr><tr><td>Fixed an issue where the search and filter logic for NIM models retrieved from the NGC catalog produced inconsistent results, causing some models to appear in unexpected positions in the list.</td></tr><tr><td>Fixed an issue in the distributed inference policy API where some error messages displayed field names twice.</td></tr><tr><td>Fixed an issue in CLI v2 where the <code>--master-extended-resource</code> flag had no effect in MPI training workloads.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-22874 with severity HIGH.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue where external token exchange failed because the API was incompatible with <code>access_tokens</code>. |
+| Fixed an issue where updating project resources created through the deprecated Projects API did not work correctly. |
+| Fixed an issue where inference workloads failed when using user credentials as an image pull secret. |
+| Fixed an issue where, in certain edge cases, removing an inference workload without deleting its revision caused the cluster to panic during revision sync. |
+| Fixed an issue where mappers could not be updated in identity providers (IdPs). |
+| Fixed a security vulnerability related to CVE-2025-22868 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2025-7425 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2025-49794 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2025-53547 with severity HIGH. |
+| Fixed an issue where email notifications configured through User settings were still sent after selecting and then immediately de-selecting all notification types. |
+| Fixed an issue where the search and filter logic for NIM models retrieved from the NGC catalog produced inconsistent results, causing some models to appear in unexpected positions in the list. |
+| Fixed an issue in the distributed inference policy API where some error messages displayed field names twice. |
+| Fixed an issue in CLI v2 where the <code>--master-extended-resource</code> flag had no effect in MPI training workloads. |
+| Fixed a security vulnerability related to CVE-2025-22874 with severity HIGH. |
 
 ### September 16
 
@@ -450,7 +700,12 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue where the selected node pool was not preserved when switching sections within the workload submission form for all workloads.</td></tr><tr><td>Fixed an issue where exported CSVs had misaligned columns, causing values (e.g., scope, workload type, creation time, cluster) to shift into incorrect fields.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-5914 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-53547 with severity HIGH.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue where the selected node pool was not preserved when switching sections within the workload submission form for all workloads. |
+| Fixed an issue where exported CSVs had misaligned columns, causing values (e.g., scope, workload type, creation time, cluster) to shift into incorrect fields. |
+| Fixed a security vulnerability related to CVE-2025-5914 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2025-53547 with severity HIGH. |
 
 ## August 2025 Releases
 
@@ -464,7 +719,10 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed a security vulnerability related to CVE-2025-47907 with severity HIGH.</td></tr><tr><td>Fixed a bug which presented the value of the CPU memory in the wrong unit.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed a security vulnerability related to CVE-2025-47907 with severity HIGH. |
+| Fixed a bug which presented the value of the CPU memory in the wrong unit. |
 
 ### August 17
 
@@ -477,7 +735,14 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue where creating a workspace /training workload returned the error "terminationGracePeriod is not supported in this cluster.</td></tr><tr><td>Fixed an issue where the non-preemptible priority over-quota warning text was missing from the inference workload creation page.</td></tr><tr><td>Fixed an issue in the CLI documentation where the <code>--new-pvc</code> description did not clearly indicate that creating a new pvc means creating a new volume that is used only for the duration of the workload's lifecycle.</td></tr><tr><td>Fixed an issue where the "Get Role by ID" API returned an "insufficient permissions" error for system administrator.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-22868 with severity HIGH.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-7425 with severity HIGH.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue where creating a workspace /training workload returned the error "terminationGracePeriod is not supported in this cluster. |
+| Fixed an issue where the non-preemptible priority over-quota warning text was missing from the inference workload creation page. |
+| Fixed an issue in the CLI documentation where the <code>--new-pvc</code> description did not clearly indicate that creating a new pvc means creating a new volume that is used only for the duration of the workload's lifecycle. |
+| Fixed an issue where the "Get Role by ID" API returned an "insufficient permissions" error for system administrator. |
+| Fixed a security vulnerability related to CVE-2025-22868 with severity HIGH. |
+| Fixed a security vulnerability related to CVE-2025-7425 with severity HIGH. |
 
 ### August 03
 
@@ -489,7 +754,24 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Fixed an issue where the audit logs page filter converted strings to lowercase, causing filtration to fail.</td></tr><tr><td>Fixed an issue where templates did not appear in the templates table.</td></tr><tr><td>Fixed an issue where upgrades failed due to changes in the OpenShift monitoring stack.</td></tr><tr><td>Fixed an issue where the workload flexible submission form did not load the correct default node pools for a project.</td></tr><tr><td>Fixed an issue where workloads created via CLI could not be cloned in the UI when flexible submission was disabled.</td></tr><tr><td>Fixed an issue where workloads could not be scheduled if the combined length of the project name and node pool name was excessively long.</td></tr><tr><td>Fixed an issue where, in OpenShift environments, certain container failures caused workloads to remain in the "Pending" phase instead of transitioning to "Failed".</td></tr><tr><td>Fixed an issue where enabling <code>enableWorkloadOwnershipProtection</code> for inference workloads caused newly submitted workloads to get stuck.</td></tr><tr><td>Fixed an issue where the <code>terminationGracePeriodSeconds</code> field accepted values greater than 300 seconds when submitted via the API.</td></tr><tr><td>Fixed an issue where setting defaults for <code>servingPort</code> fields failed and incorrectly required the container port default as well.</td></tr><tr><td>Fixed a security vulnerability related to CVE-2025-30749 with severity HIGH.</td></tr><tr><td>Fixed an issue where the UI logs view called an unsupported API. The fix added a cluster version check to ensure the correct API is used.</td></tr><tr><td>Fixed an issue where the <code>createdAt</code> timestamp was not updated when a policy was recreated, causing the timestamp to incorrectly reflect the original creation time.</td></tr><tr><td>Fixed a base image security vulnerability in <code>libxml2</code> related to CVE-2025-49796 with severity HIGH.</td></tr><tr><td>Fixed an issue where some services were missing from cluster service groups.</td></tr><tr><td>Fixed an issue where the SAML metadata XML redirect URL was invalid.</td></tr></tbody></table>
+| Description |
+| --- |
+| Fixed an issue where the audit logs page filter converted strings to lowercase, causing filtration to fail. |
+| Fixed an issue where templates did not appear in the templates table. |
+| Fixed an issue where upgrades failed due to changes in the OpenShift monitoring stack. |
+| Fixed an issue where the workload flexible submission form did not load the correct default node pools for a project. |
+| Fixed an issue where workloads created via CLI could not be cloned in the UI when flexible submission was disabled. |
+| Fixed an issue where workloads could not be scheduled if the combined length of the project name and node pool name was excessively long. |
+| Fixed an issue where, in OpenShift environments, certain container failures caused workloads to remain in the "Pending" phase instead of transitioning to "Failed". |
+| Fixed an issue where enabling <code>enableWorkloadOwnershipProtection</code> for inference workloads caused newly submitted workloads to get stuck. |
+| Fixed an issue where the <code>terminationGracePeriodSeconds</code> field accepted values greater than 300 seconds when submitted via the API. |
+| Fixed an issue where setting defaults for <code>servingPort</code> fields failed and incorrectly required the container port default as well. |
+| Fixed a security vulnerability related to CVE-2025-30749 with severity HIGH. |
+| Fixed an issue where the UI logs view called an unsupported API. The fix added a cluster version check to ensure the correct API is used. |
+| Fixed an issue where the <code>createdAt</code> timestamp was not updated when a policy was recreated, causing the timestamp to incorrectly reflect the original creation time. |
+| Fixed a base image security vulnerability in <code>libxml2</code> related to CVE-2025-49796 with severity HIGH. |
+| Fixed an issue where some services were missing from cluster service groups. |
+| Fixed an issue where the SAML metadata XML redirect URL was invalid. |
 
 ## July 2025 Releases
 
@@ -501,7 +783,13 @@ A known Kubernetes issue can cause batch job workload types (such as Job, PyTorc
 
 #### Resolved Bugs
 
-<table><thead><tr><th>Description</th></tr></thead><tbody><tr><td>Removed Groups resource type from the available permissions in NVIDIA Run:ai roles.</td></tr><tr><td>Fixed an issue where the Inference Policy View option was missing from the Project and Department pages.</td></tr><tr><td>Fixed a security vulnerability in <code>runai-container-runtime-installer</code> and <code>runai-container-toolkit</code> related to CVE-2025-49794 with severity HIGH.</td></tr><tr><td>Fixed an issue where the validation for the number of workers in a policy was not applied correctly.</td></tr><tr><td>Fixed an issue where negative values were allowed for GPU resource optimization swap size in node pool API.</td></tr></tbody></table>
+| Description |
+| --- |
+| Removed Groups resource type from the available permissions in NVIDIA Run:ai roles. |
+| Fixed an issue where the Inference Policy View option was missing from the Project and Department pages. |
+| Fixed a security vulnerability in <code>runai-container-runtime-installer</code> and <code>runai-container-toolkit</code> related to CVE-2025-49794 with severity HIGH. |
+| Fixed an issue where the validation for the number of workers in a policy was not applied correctly. |
+| Fixed an issue where negative values were allowed for GPU resource optimization swap size in node pool API. |
 
 ## Transition Notices
 

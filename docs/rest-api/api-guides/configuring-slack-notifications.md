@@ -2,13 +2,11 @@
 
 This section demonstrates how to install the Slack App in your Slack workspace and receive notifications to your Slack channels and direct messages.
 
-## Prerequisites <a href="#prerequisites" id="prerequisites"></a>
-
+## Prerequisites
 * Make sure you have sufficient permissions for your Slack workspace to install the Slack App.
 * Make sure you have an NVIDIA Run:ai API token. See [How to authenticate to the API](../how-to-authenticate-to-the-api.md) for more details.
 
-## Install a New Slack App <a href="#install-a-new-slack-app" id="install-a-new-slack-app"></a>
-
+## Install a New Slack App
 1. Visit [https://api.slack.com/apps](https://api.slack.com/apps) and generate an [App Configuration token](https://api.slack.com/authentication/config-tokens)
 2. Copy the access token (should start with `xoxe.xoxp)`
 3. Send a POST request using the Create Slack app API and add the access token:

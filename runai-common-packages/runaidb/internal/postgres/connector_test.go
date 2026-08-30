@@ -46,6 +46,19 @@ func TestBuildDSN(t *testing.T) {
 	)
 }
 
+func TestBuildDSN_EmptySchema(t *testing.T) {
+	c := NewConnector()
+	conf := defaultTestConfig()
+	conf.Connection.Schema = ""
+
+	dsn := c.buildDSN(&conf.Connection)
+	require.Equal(
+		t,
+		"postgres://admin:secret@localhost:5432/backend?sslmode=disable&statement_timeout=2min&timeZone=UTC",
+		dsn.String(),
+	)
+}
+
 func TestBuildDSN_MultiHost(t *testing.T) {
 	c := NewConnector()
 	conf := defaultTestConfig()

@@ -24,8 +24,7 @@ To learn more about the inference workload type in NVIDIA Run:ai and determine t
 
 </Info>
 
-## Workload Priority and Preemption <a href="#workload-priority-class" id="workload-priority-class"></a>
-
+## Workload Priority and Preemption
 By default, inference workloads in NVIDIA Run:ai are assigned a **Very high** priority and are **non-preemptible**. These defaults ensures that inference workloads, which often serve real-time or latency-sensitive traffic, are guaranteed the resources they need. The default very-high priority ensures the fastest possible scheduling, and the default non-preemptible value guarantees that the workload will not be disrupted by other workloads once it starts running.
 
 You can override the defaults by configuring priority and preemptibility. For more details, see [Workload priority and preemption](../../platform-management/runai-scheduler/scheduling/workload-priority-control.md).
@@ -61,7 +60,7 @@ You can create a new workload using either the **Flexible** or **Original** subm
 ## Creating a Custom Inference Workload
 
 1. To create an inference workload, go to Workload manager → Workloads.
-2. Click **+NEW WORKLOAD** and select **Inference** from the dropdown men&#x75;**.**
+2. Click **+NEW WORKLOAD** and select **Inference** from the dropdown menu**.**
 3. Within the new form, select the **cluster** and **project**. To create a new project, click **+NEW PROJECT** and refer to [Projects](../../platform-management/aiinitiatives/organization/projects.md) for a step-by-step guide.
 4. Set the inference workload architecture as **Standard.** This workload will only be able to use environments that support standard workloads. A standard workload consists of a single process.
 5. Set the inference server to **custom** (if applicable). This allows you to use an inference server not listed, such as SGLang. This requires a custom container image and manual server configuration.
@@ -76,7 +75,7 @@ You can create a new workload using either the **Flexible** or **Original** subm
 **Note**
 
 * NGC catalog is disabled by default. If unavailable, your administrator must enable it under **General settings** → Workloads → NGC catalog.
-* To select an image from the NGC private registr&#x79;**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
+* To select an image from the NGC private registry**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
 
 </Info>
 
@@ -381,8 +380,7 @@ The following general settings are optional.
 
 After the workload is created, it is added to the [Workloads](../workloads.md) table, where it can be managed and monitored.
 
-## Rolling Inference Updates <a href="#rolling-inference-updates" id="rolling-inference-updates"></a>
-
+## Rolling Inference Updates
 <Info>
 
 **Note**
@@ -437,8 +435,7 @@ The **status** of the workload continues to reflect the operational state of the
     kubectl patch ConfigMap config-deployment -n knative-serving --type='merge' -p '{"data": {"progress-deadline": "1800s"}}'
     ```
 
-#### Inference Workloads With Knative <a href="#inference-workloads-with-knative-new-behavior-in-v219" id="inference-workloads-with-knative-new-behavior-in-v219"></a>
-
+#### Inference Workloads With Knative
 Starting in version 2.19, all pods of a single Knative revision are grouped under a single pod-group. This means that when a new Knative revision is created:
 
 * It either succeeds in allocating the minimum number of pods; or

@@ -1,0 +1,26 @@
+{
+    "target": {
+        "path": {
+            "deployment": "runai-backend-workloads-manager"
+        },
+        "namespace": "runai-backend"
+    },
+    "feature": {
+        "env": true,
+        "fs": {
+            "mode": "read",
+            "read_only": [
+                "/etc.*"
+            ]
+        },
+        "network": {
+          "incoming": {
+            "mode": "steal"
+          },
+          "outgoing": {
+            "tcp": true,
+            "udp": true
+          }
+        }
+    }
+}

@@ -125,7 +125,7 @@ To create a new node pool:
          * **Greater than 1.0** - Historical usage has a greater effect on fairshare, making it the dominant factor in the fairshare calculation.
        * **Historical usage window** - Sets the duration of the sliding time window used to calculate historical resource usage. Default is 7 days. Only usage within this window is considered; anything outside the window is no longer counted.
 
-       Administrators can customize additional time-based fairshare configuration parameters at the node pool level using the [Node pools](https://run-ai-docs.nvidia.com/api/2.26/organizations/nodepools) API.&#x20;
+       Administrators can customize additional time-based fairshare configuration parameters at the node pool level using the [Node pools](https://run-ai-docs.nvidia.com/api/2.26/organizations/nodepools) API.
    * **NUMA-aware scheduling** - When enabled, the Scheduler places workloads so that GPU, CPU, and CPU memory are allocated within the same NUMA node where possible, minimizing cross-NUMA fragmentation and improving performance. There are cluster prerequisites for enabling this feature. When disabled, the Scheduler places workloads using aggregate node capacity only, without considering NUMA topology. See [Configuring NUMA-Aware Scheduling](../../../platform-management/aiinitiatives/resources/numa-aware-scheduling.md) for more details.
    * Configure the **GPU pods** placement strategy. GPU workloads are workloads that request both GPU and CPU resources.
      * Set the **node placement strategy** - Determines how workloads are distributed across nodes in the node pool:

@@ -25,7 +25,7 @@ Since Kubernetes abstracts the container's physical location, exposing ports is 
 Many tools used by researchers, such as Jupyter, TensorBoard, or VSCode, require remote access to the running workload's container. In NVIDIA Run:ai, this access is provided through dynamically generated URLs. NVIDIA Run:ai supports two routing models for exposing workloads:
 
 * Host-based routing (default)
-* Path-based routing&#x20;
+* Path-based routing
 
 ### Host-Based Routing
 
@@ -45,7 +45,7 @@ Path-based routing uses the [Cluster URL](../../../installation-and-configuratio
 https://<CLUSTER_URL>/project-name/workload-name
 ```
 
-To use path-based routing instead, disable host-based routing by setting `subdomainSupport: false` in [Advanced cluster configurations](../../../installation-and-configuration/post-installation-configuration/cluster-config.md).&#x20;
+To use path-based routing instead, disable host-based routing by setting `subdomainSupport: false` in [Advanced cluster configurations](../../../installation-and-configuration/post-installation-configuration/cluster-config.md).
 
 While path-based routing works with applications such as Jupyter Notebooks, it may not be compatible with other applications. Some applications assume they are running at the root file system, so hardcoded file paths and settings within the container may become invalid when running at a path other than the root. For example, if an application expects to access `/etc/config.json` but is served at `/project-name/workspace-name`, the file will not be found. This can cause the container to fail or not function as intended.
 

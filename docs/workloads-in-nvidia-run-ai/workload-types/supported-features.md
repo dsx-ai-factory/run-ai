@@ -8,8 +8,7 @@ This page compares feature support across different workload types in NVIDIA Run
 
 Feature availability may vary across NVIDIA Run:ai versions and cluster deployments. Refer to this page and the linked documentation for the most up-to-date support details.
 
-## Workload Submission <a href="#workload-submission-methods" id="workload-submission-methods"></a>
-
+## Workload Submission
 |   | Workspace | Standard Training | Distributed Training | Inference | Distributed Inference | Supported workload types |
 | --- | --- | --- | --- | --- | --- | --- |
 | UI | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ |

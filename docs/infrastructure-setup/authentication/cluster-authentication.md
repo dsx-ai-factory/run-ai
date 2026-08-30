@@ -1,6 +1,6 @@
 # Cluster Authentication
 
-To allow users to securely submit workloads using `kubectl`, you must configure the Kubernetes API server to authenticate users via the NVIDIA Run:ai identity provider. This is done by adding OpenID Connect (OIDC) flags to the Kubernetes API server configuration on each cluster.&#x20;
+To allow users to securely submit workloads using `kubectl`, you must configure the Kubernetes API server to authenticate users via the NVIDIA Run:ai identity provider. This is done by adding OpenID Connect (OIDC) flags to the Kubernetes API server configuration on each cluster.
 
 ### Retrieve Required OIDC Flags
 
@@ -99,7 +99,7 @@ To configure researcher authentication on GKE, use **Anthos Identity Service** a
     ```
 
 2) Install the [yq](https://github.com/mikefarah/yq) utility.
-3)  Configure the OIDC provider for username-password authentication. Make sure to use the [required OIDC flags](cluster-authentication.md#retrieve-required-oidc-values):&#x20;
+3)  Configure the OIDC provider for username-password authentication. Make sure to use the [required OIDC flags](cluster-authentication.md#retrieve-required-oidc-values):
 
     ```bash
     kubectl get clientconfig default -n kube-public -o yaml > login-config.yaml
@@ -107,7 +107,7 @@ To configure researcher authentication on GKE, use **Anthos Identity Service** a
     kubectl apply -f login-config.yaml
     ```
 
-4.  Or, configure the OIDC provider for single-sign-on. Make sure to use the [required OIDC flags](cluster-authentication.md#retrieve-required-oidc-values):&#x20;
+4.  Or, configure the OIDC provider for single-sign-on. Make sure to use the [required OIDC flags](cluster-authentication.md#retrieve-required-oidc-values):
 
     ```bash
     kubectl get clientconfig default -n kube-public -o yaml > login-config.yaml

@@ -11,8 +11,7 @@ The NVIDIA Run:ai platform allows you to dedicate specific nodes (system nodes) 
 
 Ensure that at least **three system nodes** are configured to support high availability. If you use only a single node for core services, horizontally scaled components will not be distributed, resulting in a single point of failure. See [NVIDIA Run:ai system nodes](../../installation-and-configuration/post-installation-configuration/node-roles.md) for more details. This practice applies to both the NVIDIA Run:ai cluster and control plane.
 
-## Service Replicas <a href="#undefined" id="undefined"></a>
-
+## Service Replicas
 ### Control Plane Service Replicas
 
 The NVIDIA Run:ai control plane runs in the `runai-backend` namespace and consists of multiple Kubernetes [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) and [StatefulSets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/). To achieve high availability, it is recommended to configure multiple replicas during installation or upgrade using Helm flags.
@@ -41,6 +40,5 @@ NVIDIA Run:ai uses the following third-party components which are managed as Kub
     --set keycloakx.autoscaling.enabled=true
     ```
 
-### Cluster Services Replicas <a href="#nvidia-run-ai-services-replicas" id="nvidia-run-ai-services-replicas"></a>
-
+### Cluster Services Replicas
 By default, NVIDIA Run:ai cluster services are deployed with a single replica. To achieve high availability, it is recommended to configure multiple replicas for core NVIDIA Run:ai services. For more information, see [NVIDIA Run:ai services replicas](../../installation-and-configuration/post-installation-configuration/cluster-config.md#nvidia-run-ai-services-replicas).

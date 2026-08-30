@@ -10,8 +10,7 @@ This procedure includes:
 
 By completing this process, the NVIDIA Run:ai control plane will be running in your cluster and accessible via the configured domain.
 
-## System and Network Requirements <a href="#system-and-network-requirements" id="system-and-network-requirements"></a>
-
+## System and Network Requirements
 Before installing the NVIDIA Run:ai control plane, validate that the [system requirements](cp-system-requirements.md) and [network requirements](network-requirements.md) are met. For air-gapped environments, make sure you have the [software artifacts](preparations.md#software-artifacts) prepared.
 
 ## Permissions

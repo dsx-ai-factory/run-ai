@@ -2,7 +2,7 @@
 
 NVIDIA Run:ai empowers organizations to establish and operate a secure and scalable multi-tenant control plane to provide AI Platform-as-a-Service (PaaS) to untrusted organizations. This model is ideal for enterprises, service providers, and public sector institutions seeking to deliver isolated, policy-driven AI infrastructure to internal teams, departments, or external partners, all while centralizing control and maintaining infrastructure efficiency.
 
-NVIDIA Run:ai multi-tenancy is implemented at the control plane level and requires a separate Kubernetes cluster isolated from other tenants. While NVIDIA Run:ai provides logical and access isolation through its own tenant model, Kubernetes cluster provisioning including network, compute, and storage isolation must be implemented by the host organization at the infrastructure level.&#x20;
+NVIDIA Run:ai multi-tenancy is implemented at the control plane level and requires a separate Kubernetes cluster isolated from other tenants. While NVIDIA Run:ai provides logical and access isolation through its own tenant model, Kubernetes cluster provisioning including network, compute, and storage isolation must be implemented by the host organization at the infrastructure level.
 
 ## Multi-Tenant Deployment
 
@@ -14,7 +14,7 @@ A multi-tenant deployment involves a centralized NVIDIA Run:ai control plane man
 
 ## Multi-Tenancy: Cluster vs. Namespace
 
-### Untrusted Tenants: Multi-Tenant Control Plane&#x20;
+### Untrusted Tenants: Multi-Tenant Control Plane
 
 Untrusted tenants, such as external organizations, are typically assigned dedicated Kubernetes clusters to ensure **cluster-level isolation**. This model provides complete separation between tenants at the infrastructure level, with no shared network, compute, or storage resources. The host organization centrally manages the control plane while maintaining strict tenant isolation and administrative boundaries.
 

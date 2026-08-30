@@ -32,8 +32,7 @@ The NIM option in the NVIDIA Run:ai UI requires cluster access to NVIDIA NGC and
 
 </Info>
 
-## Workload Priority and Preemption <a href="#workload-priority-class" id="workload-priority-class"></a>
-
+## Workload Priority and Preemption
 By default, inference workloads in NVIDIA Run:ai are assigned a **Very high** priority and are **non-preemptible**. These defaults ensures that inference workloads, which often serve real-time or latency-sensitive traffic, are guaranteed the resources they need. The default very-high priority ensures the fastest possible scheduling, and the default non-preemptible value guarantees that the workload will not be disrupted by other workloads once it starts running.
 
 You can override the defaults by configuring priority and preemptibility. For more details, see [Workload priority and preemption](../../platform-management/runai-scheduler/scheduling/workload-priority-control.md).
@@ -54,7 +53,7 @@ Within the form, you have two options:
 ## Creating a NIM Inference Workload
 
 * To create an inference workload, go to Workload manager → Workloads.
-* Click **+NEW WORKLOAD** and select **Inference** from the dropdown men&#x75;**.**
+* Click **+NEW WORKLOAD** and select **Inference** from the dropdown menu**.**
 * Within the new form, select the **cluster** and **project**. To create a new project, click **+NEW PROJECT** and refer to [Projects](../../platform-management/aiinitiatives/organization/projects.md) for a step-by-step guide.
 * Set the inference workload architecture as **Standard.** This workload will only be able to use environments that support standard workloads. A standard workload consists of a single process.
 * Set the inference server to **NVIDIA NIM**.
@@ -69,7 +68,7 @@ Within the form, you have two options:
 **Note**
 
 * NGC catalog is disabled by default. If unavailable, your administrator must enable it under **General settings** → Workloads → NGC catalog.
-* To select an image from the NGC private registr&#x79;**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
+* To select an image from the NGC private registry**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
 
 </Info>
 
@@ -370,8 +369,7 @@ Select **Volume** to allocate a storage space to your workspace that is persiste
 
 After the inference workload is created, it is added to the [Workloads](../workloads.md) table, where it can be managed and monitored.
 
-## Rolling Inference Updates <a href="#rolling-inference-updates" id="rolling-inference-updates"></a>
-
+## Rolling Inference Updates
 When deploying models and running inference workloads, you may need to update the workload configuration in real-time without disrupting critical services. Rolling inference updates allow you to submit changes to an existing inference workload, regardless of its current status (running, pending, etc.).
 
 To update an inference workload, select the workload and click **UPDATE**. Only the settings listed below can be modified.
@@ -418,8 +416,7 @@ The **status** of the workload continues to reflect the operational state of the
     kubectl patch ConfigMap config-deployment -n knative-serving --type='merge' -p '{"data": {"progress-deadline": "1800s"}}'
     ```
 
-#### Inference Workloads With Knative <a href="#inference-workloads-with-knative-new-behavior-in-v219" id="inference-workloads-with-knative-new-behavior-in-v219"></a>
-
+#### Inference Workloads With Knative
 Starting in version 2.19, all pods of a single Knative revision are grouped under a single pod-group. This means that when a new Knative revision is created:
 
 * It either succeeds in allocating the minimum number of pods; or

@@ -4,12 +4,12 @@ NVIDIA Run:ai APIs are accessed using **bearer tokens**. A token can be obtained
 
 An access key consists of a client ID and client secret, which are used to generate an access token for API authentication. Once a token is obtained, it can be included in the `Authorization` header of subsequent API requests.
 
-* To create service accounts for your organization, see [Service accounts](https://app.gitbook.com/s/MeXTfFihZ2OyRbNxZBY3/infrastructure-setup/authentication/service-accounts)
-* To create your own access keys, see [User access keys](https://app.gitbook.com/s/MeXTfFihZ2OyRbNxZBY3/settings/user-settings/user-access-keys)
+* To create service accounts for your organization, see [Service accounts](../infrastructure-setup/authentication/service-accounts.md)
+* To create your own access keys, see [User access keys](../settings/user-settings/user-access-keys.md)
 
 ## Assign Access Rules
 
-After you have created a new service account, you will need to assign it access rules. To assign access rules to the service account, see [Access rules](https://app.gitbook.com/s/MeXTfFihZ2OyRbNxZBY3/infrastructure-setup/authentication/accessrules). Make sure you assign the correct rules to your service account. Use the [Roles](https://app.gitbook.com/s/MeXTfFihZ2OyRbNxZBY3/infrastructure-setup/authentication/roles) to assign the correct access rules.
+After you have created a new service account, you will need to assign it access rules. To assign access rules to the service account, see [Access rules](../infrastructure-setup/authentication/accessrules.md). Make sure you assign the correct rules to your service account. Use the [Roles](../infrastructure-setup/authentication/roles.md) to assign the correct access rules.
 
 ## Request an API Token
 

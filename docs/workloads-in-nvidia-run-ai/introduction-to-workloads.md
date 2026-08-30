@@ -27,8 +27,7 @@ The workload, defined by the AI practitioner, consists of:
 
 NVIDIA Run:ai’s core mission is to optimize AI resource usage at scale. This is achieved through efficient [scheduling and orchestrating](../platform-management/runai-scheduler/scheduling/how-the-scheduler-works.md) of all cluster workloads using the NVIDIA Run:ai [Scheduler](../platform-management/runai-scheduler/scheduling/concepts-and-principles.md). The Scheduler allows the prioritization of workloads across different departments and projects within the organization at large scales, based on the resource distribution set by the system administrator.
 
-## Workloads in NVIDIA Run:ai <a href="#types-of-workloads-in-runai" id="types-of-workloads-in-runai"></a>
-
+## Workloads in NVIDIA Run:ai
 Workloads in NVIDIA Run:ai can be either built into the platform or brought in from any ML framework, tool, or the broader Kubernetes ecosystem. All workloads benefit from platform-level features such as scheduling, monitoring, and orchestration. For a list of feature support across workloads, see [Supported features](workload-types/supported-features.md).
 
 ### NVIDIA Run:ai Native Workloads

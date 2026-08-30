@@ -12,13 +12,11 @@ This guide explains how to create vLLM inference templates for reuse during work
 
 </Info>
 
-## Before You Start <a href="#workload-priority-class" id="workload-priority-class"></a>
-
+## Before You Start
 * To access gated Hugging Face models, make sure to obtain an access token from [Hugging Face Account Settings](https://huggingface.co/) → Access Token. In NVIDIA Run:ai, store the token as a [shared secret](../../workload-assets/credentials.md#generic-secret) (created by an administrator). The credential must be a Generic secret that contains an `HF_TOKEN`.
 * If the image you are planning to use is hosted in NGC, make sure you have an NGC account with an active NGC API key. To obtain a key, go to [NGC](https://catalog.ngc.nvidia.com/) → Setup → API Keys, then generate or copy an existing key. In NVIDIA Run:ai, store the key either as a [shared secret](../../workload-assets/credentials.md#ngc-api-key) (created by an administrator) or a [user credential](../../../settings/user-settings/user-credentials.md) (created under User settings).
 
-## Workload Priority and Preemption <a href="#workload-priority-class" id="workload-priority-class"></a>
-
+## Workload Priority and Preemption
 By default, inference workloads in NVIDIA Run:ai are assigned a **Very high** priority and are **non-preemptible**. These defaults ensures that inference workloads, which often serve real-time or latency-sensitive traffic, are guaranteed the resources they need. The default very-high priority ensures the fastest possible scheduling, and the default non-preemptible value guarantees that the workload will not be disrupted by other workloads once it starts running.
 
 You can override the defaults by configuring priority and preemptibility. For more details, see [Workload priority and preemption](../../../platform-management/runai-scheduler/scheduling/workload-priority-control.md).
@@ -38,7 +36,7 @@ Linking data source assets is currently not supported.
 ## Adding a New Template
 
 1. To add a new template, go to Workload manager → Templates.
-2. Click **+NEW TEMPLATE** and select **Inference** from the dropdown men&#x75;**.**
+2. Click **+NEW TEMPLATE** and select **Inference** from the dropdown menu**.**
 3. Within the new inference template form, select the **scope**.
 4. Set the inference server to [**vLLM** ](https://docs.vllm.ai/en/latest/models/supported_models.html)or [**TGI**](https://huggingface.co/docs/text-generation-inference/en/supported_models)**.**
 5. Enter a unique **name** for the inference template. If the name already exists in the project, you will be requested to submit a different name.
@@ -51,7 +49,7 @@ Linking data source assets is currently not supported.
 **Note**
 
 * NGC catalog is disabled by default. If unavailable, your administrator must enable it under **General settings** → Workloads → NGC catalog.
-* To select an image from the NGC private registr&#x79;**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
+* To select an image from the NGC private registry**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
 
 </Info>
 

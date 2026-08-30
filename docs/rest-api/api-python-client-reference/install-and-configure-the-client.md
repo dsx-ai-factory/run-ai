@@ -15,14 +15,14 @@ The Python client is not covered under standard NVIDIA Run:ai product support.
 * **NVIDIA Run:ai control plane version ≥ 2.18** - Required for compatibility
 * **Python version ≥ 3.8** - Required for dependency compatibility
 * **NVIDIA Run:ai access keys** - Required to generate the `client_id` and `client_secret` credentials:
-  * To create organization-level service accounts, see [Service accounts](https://app.gitbook.com/s/MeXTfFihZ2OyRbNxZBY3/infrastructure-setup/authentication/service-accounts)
-  * To create user-level access keys, see [User access keys](https://app.gitbook.com/s/MeXTfFihZ2OyRbNxZBY3/settings/user-settings/user-access-keys)
+  * To create organization-level service accounts, see [Service accounts](../../infrastructure-setup/authentication/service-accounts.md)
+  * To create user-level access keys, see [User access keys](../../settings/user-settings/user-access-keys.md)
 
 <Info>
 
 **Note**
 
-Ensure your token has the required [role and scope](https://app.gitbook.com/s/MeXTfFihZ2OyRbNxZBY3/infrastructure-setup/authentication/accessrules) permissions for your intended API operations. API calls will fail with a 403 error if the token lacks sufficient role or scope.
+Ensure your token has the required [role and scope](../../infrastructure-setup/authentication/accessrules.md) permissions for your intended API operations. API calls will fail with a 403 error if the token lacks sufficient role or scope.
 
 </Info>
 
@@ -106,7 +106,7 @@ The client supports three authentication methods:
 
 ### Client Credentials
 
-Use the `client_id` and `client_secret` from your NVIDIA Run:ai [service accounts](https://app.gitbook.com/s/MeXTfFihZ2OyRbNxZBY3/infrastructure-setup/authentication/service-accounts) or [user access keys](https://app.gitbook.com/s/MeXTfFihZ2OyRbNxZBY3/settings/user-settings/user-access-keys):&#x20;
+Use the `client_id` and `client_secret` from your NVIDIA Run:ai [service accounts](../../infrastructure-setup/authentication/service-accounts.md) or [user access keys](../../settings/user-settings/user-access-keys.md):
 
 ```python
 config = Configuration(
@@ -138,7 +138,7 @@ The CLI v2 token method is useful for:
 
 Requirements:
 
-* NVIDIA Run:ai CLI v2 is [installed](https://app.gitbook.com/s/MeXTfFihZ2OyRbNxZBY3/reference/cli/install-cli)
+* NVIDIA Run:ai CLI v2 is [installed](../../reference/cli/install-cli.md)
 * Successful `runai login` completed
 * Valid authentication token in CLI config
 

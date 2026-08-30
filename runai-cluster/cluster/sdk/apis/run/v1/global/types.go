@@ -662,12 +662,6 @@ type Core struct {
 	// +kubebuilder:validation:Optional
 	TimeSlicing *TimeSlicing `json:"timeSlicing,omitempty"`
 	// +kubebuilder:validation:Optional
-	DynamicFraction *DynamicFraction `json:"dynamicFraction,omitempty"`
-	// +kubebuilder:validation:Optional
-	NodeScheduler *NodeScheduler `json:"nodeScheduler,omitempty"`
-	// +kubebuilder:validation:Optional
-	GpuSwap *GpuSwap `json:"swap,omitempty"`
-	// +kubebuilder:validation:Optional
 	ToolkitEvents *ToolkitEvents `json:"toolkitEvents,omitempty"`
 }
 
@@ -688,50 +682,12 @@ type Debug struct {
 }
 
 type TimeSlicing struct {
-	// +kubebuilder:validation:Optional,Enum=timesharing;strict;fair
-	Mode *string `json:"mode,omitempty"`
 	// +kubebuilder:validation:Optional,Minimum=1,Maximum=25
 	Granularity *int `json:"granularity,omitempty"`
 	// +kubebuilder:validation:Optional,Minimum=1
 	LeaseTime *int `json:"leaseTime,omitempty"`
 	// +kubebuilder:validation:Optional,Minimum=0
 	RateLimitCount *int `json:"rateLimitCount,omitempty"`
-}
-
-type DynamicFraction struct {
-	// +kubebuilder:validation:Optional
-	Enabled *bool `json:"enabled,omitempty"`
-}
-
-type NodeScheduler struct {
-	// +kubebuilder:validation:Optional
-	Enabled *bool `json:"enabled,omitempty"`
-}
-
-// SwapMode is a valid value for GpuSwap.Mode.
-type SwapMode string
-
-const (
-	SwapModeMapped  SwapMode = "mapped"
-	SwapModeManaged SwapMode = "managed"
-)
-
-type BiDirectional struct {
-	// +kubebuilder:validation:Optional
-	Enabled *bool `json:"enabled,omitempty"`
-	// +kubebuilder:validation:Optional
-	BlockSizeMB *int `json:"blockSizeMB,omitempty"`
-	// +kubebuilder:validation:Optional
-	BlockSizeRatioPct *int `json:"blockSizeRatioPct,omitempty"`
-}
-
-type GpuSwap struct {
-	// +kubebuilder:validation:Optional
-	Enabled *bool `json:"enabled,omitempty"`
-	// +kubebuilder:validation:Optional,Enum=mapped;managed
-	Mode *SwapMode `json:"mode,omitempty"`
-	// +kubebuilder:validation:Optional
-	BiDirectional *BiDirectional `json:"biDirectional,omitempty"`
 }
 
 // ToolkitEventReason is the local wire-compatible form of the former Engine SDK type.

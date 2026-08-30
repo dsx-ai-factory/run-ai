@@ -11,8 +11,6 @@ import (
 // Deprecated: the RunAI container toolkit is not reconciled in KAI-based releases.
 type RunAIContainerToolkit struct {
 	// +kubebuilder:validation:Optional
-	Enabled *bool `json:"enabled,omitempty"`
-	// +kubebuilder:validation:Optional
 	Image *Image `json:"image,omitempty"`
 	// +kubebuilder:validation:Optional
 	InitContainerImage *common.Image `json:"init-container-image,omitempty"`
@@ -30,8 +28,6 @@ type RunAIContainerToolkit struct {
 	AdditionalNodeAffinityMatchExpressions []corev1.NodeSelectorRequirement `json:"additionalNodeAffinityMatchExpressions,omitempty"`
 	// +kubebuilder:validation:Optional
 	WaitForNvidiaToolkit *bool `json:"waitForNvidiaToolkit,omitempty"`
-	// +kubebuilder:validation:Optional
-	LogLevel *string `json:"logLevel,omitempty"`
 	// +kubebuilder:validation:Optional
 	Metrics *Metrics `json:"metrics,omitempty"`
 	// +kubebuilder:validation:Optional

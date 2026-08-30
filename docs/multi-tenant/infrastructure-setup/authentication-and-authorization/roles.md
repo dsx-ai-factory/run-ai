@@ -8,11 +8,11 @@ NVIDIA Run:ai provides [predefined roles](roles.md#roles-in-nvidia-run-ai) for c
 
 ## Roles in NVIDIA Run:ai
 
-NVIDIA Run:ai provides a set of predefined roles and their permissions. Under each role is a detailed list of the actions that the role assignee is authorized to perform for each entity. See [Roles](https://app.gitbook.com/s/LYHZWRVgpD7c9mHAx1Vk/authentication-and-authorization/roles) API for more details.
+NVIDIA Run:ai provides a set of predefined roles and their permissions. Under each role is a detailed list of the actions that the role assignee is authorized to perform for each entity. See [Roles](api:multi-tenant-api:GET/api/v2/authorization/roles) API for more details.
 
 ## Custom Roles
 
-Administrators can create and manage custom roles to meet specific organizational access requirements using the [Roles](https://app.gitbook.com/s/LYHZWRVgpD7c9mHAx1Vk/authentication-and-authorization/roles) API.
+Administrators can create and manage custom roles to meet specific organizational access requirements using the [Roles](api:multi-tenant-api:POST/api/v2/authorization/roles) API.
 
 A custom role defines access by combining one or more **permission sets**, which together determine the actions that can be performed across NVIDIA Run:ai resources. By selecting the appropriate permission sets, administrators can tailor roles to match their organization’s access model while maintaining consistent and controlled authorization across the platform.
 
@@ -33,11 +33,11 @@ A permission set is constructed from a collection of permissions. Each permissio
 * a **resource type**, and
 * the allowed **actions** on that resource: `create`, `read`, `update`, or `delete`
 
-The Permission sets API provides a catalog of all available permission sets in the NVIDIA Run:ai platform. Permission sets may overlap in the resource types or actions they include. For more details, see the [Permissions](https://app.gitbook.com/s/LYHZWRVgpD7c9mHAx1Vk/authentication-and-authorization/permissions) API.
+The Permission sets API provides a catalog of all available permission sets in the NVIDIA Run:ai platform. Permission sets may overlap in the resource types or actions they include. For more details, see the [Permissions](api:multi-tenant-api:GET/api/v1/authorization/permissions) API.
 
 #### Permission Set Naming and Scope
 
-Permission sets are designed to group actions logically, following a clear pattern to define scope. To view the complete list of permission sets and understand how each is defined, see the [Permissions](https://app.gitbook.com/s/LYHZWRVgpD7c9mHAx1Vk/authentication-and-authorization/permissions) API:
+Permission sets are designed to group actions logically, following a clear pattern to define scope. To view the complete list of permission sets and understand how each is defined, see the [Permissions](api:multi-tenant-api:GET/api/v1/authorization/permissions) API:
 
 * Edit Access (`EditAccess`) - These sets grant full CRUD (Create, Read, Update, Delete) permissions over the specified resource type, along with Read access to any associated data or dependencies required for management. For example, **workspaceEditAccess** grants full permissions to `create`, `read`, `update`, and `delete` workspaces, and `read` access all related data and resources required for their management, such as:
   * `workloads`

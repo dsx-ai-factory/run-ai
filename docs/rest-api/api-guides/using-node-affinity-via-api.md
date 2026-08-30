@@ -6,7 +6,7 @@ NVIDIA Run:ai leverages the Kubernetes' Node Affinity feature to allow administr
 
 You can use the `nodeAffinity` field within your workload specifications (`spec.nodeAffinityRequired`) to define scheduling constraints based on node labels.
 
-When a workload with a node affinity specification is submitted, the [NVIDIA Run:ai Scheduler](https://app.gitbook.com/s/MeXTfFihZ2OyRbNxZBY3/platform-management/runai-scheduler/scheduling/concepts-and-principles) evaluates these constraints alongside other scheduling factors such as resource availability and fairness policies.
+When a workload with a node affinity specification is submitted, the [NVIDIA Run:ai Scheduler](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md) evaluates these constraints alongside other scheduling factors such as resource availability and fairness policies.
 
 <Info>
 
@@ -163,7 +163,7 @@ The project also has quotas on two node pools: `pool-a` and `pool-b`. The merged
 
 ## Applying Node Affinity via Policies
 
-Administrators can enforce node affinity [policies](https://app.gitbook.com/s/MeXTfFihZ2OyRbNxZBY3/platform-management/policies/policy-yaml-reference) in two ways:
+Administrators can enforce node affinity [policies](../../platform-management/policies/policy-yaml-reference.md) in two ways:
 
 * Can edit - The administrator applies a policy, but users can override it when submitting a workload.
 * Can't edit - The administrator applies a policy that can't be overridden by the user.

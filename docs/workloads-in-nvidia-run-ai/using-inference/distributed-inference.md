@@ -16,8 +16,7 @@ To learn more about the inference workload type in NVIDIA Run:ai and determine t
 * Make sure [LWS](../../installation-and-configuration/installation/install-using-helm/system-requirements.md#distributed-inference) is properly installed by your administrator.
 * If the image you are planning to use is hosted in NGC, make sure you have an NGC account with an active NGC API key. To obtain a key, go to [NGC](https://catalog.ngc.nvidia.com/) → Setup → API Keys, then generate or copy an existing key. In NVIDIA Run:ai, store the key either as a [shared secret](../workload-assets/credentials.md#ngc-api-key) (created by an administrator) or a [user credential](../../settings/user-settings/user-credentials.md) (created under User settings).
 
-## Workload Priority and Preemption <a href="#workload-priority-class" id="workload-priority-class"></a>
-
+## Workload Priority and Preemption
 By default, inference workloads in NVIDIA Run:ai are assigned a **Very high** priority and are **non-preemptible**. These defaults ensures that inference workloads, which often serve real-time or latency-sensitive traffic, are guaranteed the resources they need. The default very-high priority ensures the fastest possible scheduling, and the default non-preemptible value guarantees that the workload will not be disrupted by other workloads once it starts running.
 
 You can override the defaults by configuring priority and preemptibility. For more details, see [Workload priority and preemption](../../platform-management/runai-scheduler/scheduling/workload-priority-control.md).
@@ -47,7 +46,7 @@ Distributed inference workloads are based on a [Leader Worker Set (LWS)](https:/
 ## Creating a Custom Distributed Inference Workload
 
 1. To create an inference workload, go to Workload manager → Workloads.
-2. Click **+NEW WORKLOAD** and select **Inference** from the dropdown men&#x75;**.**
+2. Click **+NEW WORKLOAD** and select **Inference** from the dropdown menu**.**
 3. Within the new form, select the **cluster** and **project**. To create a new project, click **+NEW PROJECT** and refer to [Projects](../../platform-management/aiinitiatives/organization/projects.md) for a step-by-step guide.
 4. Set the inference workload architecture as **Distributed**. This workload will only be able to use environments that support distributed workloads. A distributed workload consists of multiple processes working together. These processes can run on different nodes.
 5. Enter a unique **name** for the workload. If the name already exists in the project, you will be requested to submit a different name.
@@ -60,7 +59,7 @@ Distributed inference workloads are based on a [Leader Worker Set (LWS)](https:/
 **Note**
 
 * NGC catalog is disabled by default. If unavailable, your administrator must enable it under **General settings** → Workloads → NGC catalog.
-* To select an image from the NGC private registr&#x79;**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
+* To select an image from the NGC private registry**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
 
 </Info>
 

@@ -46,8 +46,7 @@ To use the API, you will need to obtain a token as shown in [API authentication]
 
 </Tabs>
 
-## Step 2: Submitting the First Training Workload (team-a) <a href="#i3c9jpfzerlq" id="i3c9jpfzerlq"></a>
-
+## Step 2: Submitting the First Training Workload (team-a)
 <Tabs>
 
 <Tab title="UI - Flexible">
@@ -154,8 +153,7 @@ The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 
 </Tabs>
 
-## Step 3: Submitting the Second Training Workload (team-a) <a href="#i3c9jpfzerlq" id="i3c9jpfzerlq"></a>
-
+## Step 3: Submitting the Second Training Workload (team-a)
 <Tabs>
 
 <Tab title="UI - Flexible">
@@ -254,8 +252,7 @@ The above API snippet runs with NVIDIA Run:ai clusters of 2.18 and above only.
 
 </Tabs>
 
-## Step 4: Submitting the First Training Workload (team-b) <a href="#i3c9jpfzerlq" id="i3c9jpfzerlq"></a>
-
+## Step 4: Submitting the First Training Workload (team-b)
 <Tabs>
 
 <Tab title="UI - Flexible">
@@ -404,8 +401,7 @@ curl --location 'https://<COMPANY-URL>/api/v1/workloads' \
 
 </Tabs>
 
-## Step 5: Submitting the Second Training Workload (team-b) <a href="#i3c9jpfzerlq" id="i3c9jpfzerlq"></a>
-
+## Step 5: Submitting the Second Training Workload (team-b)
 <Tabs>
 
 <Tab title="UI - Flexible">

@@ -52,7 +52,7 @@ If CPU compute and memory resource requests and/or limits are not explicitly pro
 
 ### CPU Compute and Memory Limits
 
-By default, NVIDIA Run:ai sets the limit to Auto, meaning the workload can use up to the node’s maximum available resources unless you explicitly set a limit. Administrators can configure default limits using the cluster configuration.&#x20;
+By default, NVIDIA Run:ai sets the limit to Auto, meaning the workload can use up to the node’s maximum available resources unless you explicitly set a limit. Administrators can configure default limits using the cluster configuration.
 
 ## Setting Cluster Defaults
 

@@ -78,9 +78,8 @@ var _ = Describe("KAIConfigForRunaiConfig", func() {
 		expected := buildKAIConfig(runaiConfig)
 
 		runaiConfig.Spec.Engine = &engine.Engine{Enabled: ptr.To(true)}
-		runaiConfig.Spec.Global.Core = &global.Core{
-			DynamicFraction: &global.DynamicFraction{Enabled: ptr.To(true)},
-		}
+		//nolint:staticcheck // Core is deprecated by design; this test exists to prove it is ignored.
+		runaiConfig.Spec.Global.Core = &global.Core{}
 		runaiConfig.Spec.AdmissionController.Args = &admission_controller.Args{
 			RunAIFractionalMinAllocationEnforcementBytes: 1234,
 		}

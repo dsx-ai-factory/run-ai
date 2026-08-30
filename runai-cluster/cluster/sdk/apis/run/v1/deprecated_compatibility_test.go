@@ -20,11 +20,9 @@ import (
 var _ = Describe("Deprecated RunaiConfig compatibility data", func() {
 	It("survives defaulting, deep copy, and JSON round trips without being changed", func() {
 		eventMask := []global.ToolkitEventReason{"gpuOOMKilled", "nodeScheduler"}
-		mode := global.SwapModeManaged
 		legacy := RunaiConfigSpec{
 			Engine: &engine.Engine{Enabled: ptr.To(false)},
 			RunAIContainerToolkit: &runai_container_toolkit.RunAIContainerToolkit{
-				Enabled:                      ptr.To(false),
 				RunAISharedDirectoryHostPath: ptr.To("/legacy/shared"),
 				Metrics: &runai_container_toolkit.Metrics{
 					Enabled:            ptr.To(true),
@@ -46,9 +44,7 @@ var _ = Describe("Deprecated RunaiConfig compatibility data", func() {
 				RunaiContainerRuntimeEnabled: ptr.To(false),
 				DevicePluginBindings:         ptr.To(true),
 				Core: &global.Core{
-					DynamicFraction: &global.DynamicFraction{Enabled: ptr.To(true)},
-					GpuSwap:         &global.GpuSwap{Enabled: ptr.To(true), Mode: &mode},
-					ToolkitEvents:   &global.ToolkitEvents{Enabled: ptr.To(true), Mask: &eventMask},
+					ToolkitEvents: &global.ToolkitEvents{Enabled: ptr.To(true), Mask: &eventMask},
 				},
 			},
 			AdmissionController: &admission_controller.AdmissionController{

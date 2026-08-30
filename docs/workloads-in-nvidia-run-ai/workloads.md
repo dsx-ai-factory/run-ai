@@ -353,8 +353,7 @@ Once a workload is deleted, it appears under **Workload manager** -> Deleted wor
 
 </Info>
 
-## Managing Workload Properties <a href="#managing-workload-properties" id="managing-workload-properties"></a>
-
+## Managing Workload Properties
 Administrators can change the default priority and category assigned to a workload type by updating the mapping using the [NVIDIA Run:ai API](https://run-ai-docs.nvidia.com/api/2.26/):
 
 * To update the priority mapping, see [Workload priority control](../platform-management/runai-scheduler/scheduling/workload-priority-control.md#updating-the-default-priority-mapping)

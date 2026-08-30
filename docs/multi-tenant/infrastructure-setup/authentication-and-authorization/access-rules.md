@@ -1,6 +1,6 @@
 # Access Rules
 
-Access rules provide users, groups, or service accounts privileges to system entities. An access rule is the assignment of a role to a subject in a scope: `<Subject>` is a `<Role>` in a `<Scope>`.&#x20;
+Access rules provide users, groups, or service accounts privileges to system entities. An access rule is the assignment of a role to a subject in a scope: `<Subject>` is a `<Role>` in a `<Scope>`.
 
 ## Scope Behavior
 
@@ -21,7 +21,7 @@ When creating access rules across tenants, apply the principle of no privilege e
 
 To create an access rule:
 
-* Send a `POST` request to the `/api/v1/authorization/access-rules` endpoint. See [Access rules](https://app.gitbook.com/s/LYHZWRVgpD7c9mHAx1Vk/authentication-and-authorization/access-rules) API for more details.
+* Send a `POST` request to the `/api/v1/authorization/access-rules` endpoint. See [Access rules](api:multi-tenant-api:POST/api/v1/authorization/access-rules) API for more details.
 * Provide the following:
   * The **subject** you want to assign a role to:
     * `subjectType`: `user`, `group`, or `service-account`

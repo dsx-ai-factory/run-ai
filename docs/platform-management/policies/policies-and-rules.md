@@ -108,7 +108,7 @@ System policies apply to NVIDIA Run:ai native workloads only. They do not apply 
 
 </Info>
 
-By default, every account in NVIDIA Run:ai is governed by system policies that establish foundational security controls across all workloads, scopes, and interfaces (UI, CLI, API). These policies ensure consistent workload behavior and prevent unauthorized escalation. They can also be viewed as part of the effective policy for every scop&#x65;**.**
+By default, every account in NVIDIA Run:ai is governed by system policies that establish foundational security controls across all workloads, scopes, and interfaces (UI, CLI, API). These policies ensure consistent workload behavior and prevent unauthorized escalation. They can also be viewed as part of the effective policy for every scope**.**
 
 Administrators can create new policies to modify these defaults at any scope, including the project scope. A cluster- or department-scoped policy is not required to override a system policy default. This flexibility allows easing certain API restrictions that were previously enforced more strictly, while ensuring all changes are explicit and audited. Any update requires direct administrative action, adding an additional security layer.
 

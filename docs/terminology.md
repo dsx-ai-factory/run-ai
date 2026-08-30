@@ -1,178 +1,208 @@
-# Terminology
+# NVIDIA Run:ai Controlled Word List
 
-Reference for correct spelling, casing, and usage of NVIDIA Run:ai terms. When in doubt, check this page before writing.
+This list defines approved NVIDIA Run:ai technical terms for explanatory text. It gives each term one product meaning and identifies alternatives that can make that meaning unclear.
 
-## Product and Editions
+This list is not a general English dictionary.
 
-| Term | Correct form | Notes |
-|---|---|---|
-| Product name | **NVIDIA Run:ai** | Always use the full name in prose. Never shorten to "Run:ai" in body text. Colon is part of the name. |
-| In code | `runai` | CLI commands, API flags, code blocks, and inline code only |
-| Commercial edition | **NVIDIA Run:ai Enterprise** | Full name on first mention per page |
-| Open source edition | **NVIDIA Run:ai OSS** | Spell out "Open Source Software" on first mention |
-| Deployment type | **Self-Hosted** | Capitalize; hyphenated |
-| Deployment type | **SaaS** | All caps |
-| Deployment type | **Multi-Tenant** | Capitalize; hyphenated |
+## Use the List
 
-## Platform Components
+- Use the approved term with the meaning and form shown here.
+- Treat an alternative as discouraged only when it refers to the same concept.
+- Use a different term when it identifies a real difference. Define that difference at first use.
+- Preserve literal identifiers, commands, output, API fields, quotations, and official third-party names.
+- Apply the list to changed text. Report unrelated terminology debt in a focused follow-up.
 
-| Term | Correct form | Notes |
-|---|---|---|
-| Scheduler | **NVIDIA Run:ai Scheduler** | Full name on first mention per page; "the Scheduler" after |
-| KAI Scheduler | **KAI Scheduler** | The underlying scheduling engine (Kubernetes AI Scheduler). Capitalize both words. Distinct from "NVIDIA Run:ai Scheduler" (the brand name). |
-| Control plane | **NVIDIA Run:ai control plane** | Lowercase "control plane" |
-| Cluster component | **NVIDIA Run:ai cluster** | Lowercase "cluster" |
+## Product and Component Names
 
-## Organizational Hierarchy
+| Use | Use as | Meaning | Avoid for this meaning |
+|---|---|---|---|
+| `NVIDIA Run:ai` | Product name | The full product name. | RunAI, Run.ai, Run:AI |
+| `Run:ai` | Short product name | Short form of NVIDIA Run:ai when the product is already established. | RunAI, Run.ai, Run:AI |
+| `runai` | Technical noun | CLI commands, API flags, code blocks, and inline code only. | NVIDIA Run:ai or Run:ai in code contexts |
+| `NVIDIA Run:ai OSS` | Product name | The open source edition. Spell out "Open Source Software" on first mention. | OSS alone without first spelling it out |
+| `NVIDIA Run:ai Support-entitled Release` | Product name | The supported, non-OSS release. | NVIDIA Run:ai Enterprise (retired term) |
+| `Self-hosted` | Deployment type | Customer-managed deployment. | Self-Hosted (use sentence case, not title case, for this compound term) |
+| `SaaS` | Deployment type | NVIDIA-hosted, software-as-a-service deployment. | — |
+| `Multi-tenant` | Deployment type | A host-organization-managed deployment serving multiple tenants. | Multi-Tenant (use sentence case, not title case, for this compound term) |
+| `NVIDIA Run:ai control plane` | Architecture concept | The central NVIDIA Run:ai management layer. Use `control plane` when the full name is already clear. | Omitting "NVIDIA Run:ai" on first mention |
+| `NVIDIA Run:ai cluster` | Architecture concept | Full form on first mention; "the cluster" after. | Omitting "NVIDIA Run:ai" on first mention |
+| `NVIDIA Run:ai Scheduler` | Component name | The NVIDIA Run:ai component responsible for workload scheduling and resource allocation. Use `Scheduler` when the full name is already clear. | Run:ai scheduler when the named component is intended |
 
-| Term | Correct form | Notes |
-|---|---|---|
-| Cluster | **Cluster** | Capitalize when referring to the Run:ai construct; lowercase in generic Kubernetes context |
-| Department | **Department** | Capitalize when referring to the Run:ai construct |
-| Project | **Project** | Capitalize when referring to the Run:ai construct |
-| Scope | **Scope** | Capitalize when referring to the Run:ai access scope concept |
-| Tenant | **Tenant** | Capitalize when referring to the SaaS or Multi-Tenant construct |
-| Namespace | `namespace` | Lowercase; Kubernetes concept |
-| AI initiative | **AI initiative** | Lowercase "initiative." The conceptual framing around which Projects and Departments are organized. |
-| Organizational tree | **organizational tree** | Lowercase. The logical hierarchy of accounts, clusters, departments, and projects. |
-| Access rule | **access rule** | Lowercase. The RBAC assignment of a subject to a scope and role. |
-| Subject | **subject** | Lowercase. In RBAC context: a user, SSO group, or service account. |
-| Project rank | **project rank** | Lowercase. Official term replacing "project priority." The scheduling precedence of a Project relative to others. |
-| Department rank | **department rank** | Lowercase. Official term replacing "department priority." |
+Qualify `control plane` when necessary to distinguish the NVIDIA Run:ai control plane from the Kubernetes control plane.
 
-## Workload Types
+## Workloads
 
-| Term | Correct form | Notes |
-|---|---|---|
-| Workspace | **Workspace** | Capitalize; NVIDIA Run:ai native workload type |
-| Training | **Training** | Capitalize when referring to the Run:ai workload type generically |
-| Standard training | **Standard training** | Capitalize "Standard," lowercase "training." The non-distributed Training workload type; used when distinguishing from Distributed Training. |
-| Distributed training | **Distributed Training** | Capitalize both words |
-| Distributed inference | **Distributed Inference** | Capitalize both words; matches Distributed Training pattern |
-| Inference | **Inference** | Capitalize when referring to the Run:ai workload type |
-| AI application | **AI application** | Lowercase "application" |
-| Workload category | **workload category** | Lowercase. Three named values: **Build** (default for Workspaces), **Train** (default for Training), **Deploy** (default for Inference). Capitalize the category names. |
-| Karta | **Karta** | Always capitalize. The platform's workload extensibility framework — a declarative contract for CRD-based workload types. |
-| Supported workload type | **supported workload type** | Lowercase. Non-native workloads registered via the Workload Types API (for example, NVIDIA Dynamo via Grove). |
-| Grove | **Grove** | Capitalize. The Kubernetes CRD and controller for NVIDIA Dynamo workloads. |
-| NVIDIA Dynamo | **NVIDIA Dynamo** | Full name on first mention; "Dynamo" after. Inference framework. |
-| NVCF | **NVCF** | Spell out "NVIDIA Cloud Functions (NVCF)" on first mention. |
-| LeaderWorkerSet | **LeaderWorkerSet (LWS)** | Spell out on first mention. A Kubernetes workload type for distributed inference. |
-| vLLM | **vLLM** | Mixed case exactly as shown. Inference serving framework. |
+| Use | Use as | Meaning | Avoid for this meaning |
+|---|---|---|---|
+| `distributed inference workload` | Workload type | An inference workload that uses distributed execution. | distributed inference job |
+| `distributed training workload` | Workload type | A workload used for distributed model training. | distributed training job |
+| `externally submitted workload` | Product concept | A workload submitted outside NVIDIA Run:ai and subsequently managed by NVIDIA Run:ai. | external job |
+| `inference workload` | Workload type | A workload used to serve a model for inference. | inference job |
+| `native workload` | Product concept | A workload created using a workload type natively supported by NVIDIA Run:ai. | — |
+| `non-preemptible` | Scheduling property | Describes a workload protected from scheduling preemption after it starts. | non-preemptive |
+| `preemptibility` | Scheduling property | The property that determines whether a workload is preemptible or non-preemptible. | — |
+| `preemptible` | Scheduling property | Describes a workload that can be interrupted by the Scheduler. | preemptive |
+| `standard training workload` | Workload type | A non-distributed training workload. | standard training job |
+| `supported workload type` | Product concept | A Kubernetes or ML workload type integrated with NVIDIA Run:ai. | native workload when the distinction matters |
+| `training workload` | Workload type | A workload used to train a model. | training job |
+| `workload` | Product concept | A unit of compute work submitted to or managed by NVIDIA Run:ai. | job, task |
+| `workload type` | Product concept | A supported classification of workload. | job type |
+| `workspace` | Workload type | An interactive workload for development and experimentation. | job |
 
-## Resources and Quotas
+Use `Job` when referring to a Kubernetes workload type whose official name contains `Job`, such as `Job`, `RayJob`, or `PyTorchJob`.
 
-| Term | Correct form | Notes |
-|---|---|---|
-| Graphics processing unit | **GPU** | Always uppercase |
-| Central processing unit | **CPU** | Always uppercase |
-| Node pool | **Node Pool** | Capitalize when referring to the Run:ai construct |
-| Default node pool | **default node pool** | Lowercase. Every cluster has one node pool named "default" created automatically. |
-| GPU quota | **GPU quota** | Lowercase "quota" |
-| Deserved quota | **deserved quota** | Lowercase. The guaranteed resource allocation a Project is entitled to. |
-| Over-quota | **over-quota** (adjective); **over quota** (noun) | Hyphenate when used before a noun ("over-quota resources"); two words when used as a noun ("running in over quota"). |
-| Over-quota weight | **over-quota weight** | Lowercase, uppercase GPU. Controls how over-quota resources are distributed among competing Projects. |
-| GPU fraction | **GPU fraction** | Lowercase "fraction" |
-| Dynamic GPU fractions | **dynamic GPU fractions** | Lowercase except GPU |
-| Multi-GPU fractions | **multi-GPU fractions** | Lowercase "multi," uppercase GPU, lowercase "fractions." |
-| GPU time-slicing | **GPU time-slicing** | Hyphenated, uppercase GPU. NVIDIA-native mechanism for sharing GPU compute time. |
-| GPU memory swap | **GPU memory swap** | Lowercase "memory swap." Extends GPU physical memory using CPU memory. |
-| Max GPU device allocation | **max GPU device allocation** | Lowercase except GPU. The maximum number of GPU devices a Project or Department can allocate. |
-| Multi-Instance GPU | **MIG** | Spell out "Multi-Instance GPU (MIG)" on first mention |
-| Dynamic Resource Allocation | **Dynamic Resource Allocation (DRA)** | Spell out on first mention, then "DRA." Kubernetes-native mechanism for flexible hardware requests. |
-| Persistent volume claim | **PVC** | Spell out on first mention |
-| Network file system | **NFS** | Spell out on first mention |
+Preserve `job` in literal identifiers, API fields, commands, output, and other interfaces that use that term.
 
-## Scheduler Concepts
+## Organization and Scope
 
-| Term | Correct form | Notes |
-|---|---|---|
-| Fairshare | **fairshare** | One word, all lowercase in prose. The scheduling principle of distributing resources proportionally. Not "fair share" (two words). |
-| Fairshare balancing | **fairshare balancing** | Lowercase. The ongoing process of redistributing resources to maintain fairshare across Projects. |
-| Point-in-time fairshare | **point-in-time fairshare** | Lowercase. The default fairshare calculation mode. |
-| Time-based fairshare | **time-based fairshare** | Lowercase. Fairshare mode that accounts for historical resource usage. |
-| Gang scheduling | **gang scheduling** | Lowercase. Scheduling all pods of a workload simultaneously. |
-| Multi-level gang scheduling | **multi-level gang scheduling** | Lowercase. |
-| Pod group | **pod group** | Two words, lowercase. A set of pods that must be scheduled together. |
-| Sub-group | **sub-group** | Hyphenated, lowercase. A subset of a pod group. |
-| Consolidation | **consolidation** | Lowercase. The scheduler action of rearranging workloads to free resources before preemption. |
-| Preemption | **preemption** | Lowercase. The act of stopping a lower-priority workload to free resources for a higher-priority one. |
-| Reclaim | **reclaim** | Lowercase. Inter-project or inter-department preemption to reclaim deserved quota. |
-| Preemptible | **preemptible** | Lowercase adjective. Workload property indicating it can be preempted. |
-| Non-preemptible | **non-preemptible** | Hyphenated, lowercase adjective. |
-| Workload priority | **workload priority** | Lowercase. The scheduling precedence of a workload within a Project. |
-| Priority class | **priority class** / `PriorityClass` | Lowercase in prose; `PriorityClass` (CamelCase in code) when referring to the Kubernetes object. |
-| Bin-pack | **bin-pack** | Hyphenated. The placement strategy that concentrates workloads on as few nodes as possible. Use "bin packing" only as a gerund ("the scheduler uses bin packing"). |
-| Spread | **spread** | Lowercase. The placement strategy that distributes workloads across nodes. Opposite of bin-pack. |
-| Scheduling queue | **scheduling queue** | Lowercase. The internal queue (one per Project/Node Pool pair and Department/Node Pool pair). |
-| Over-subscription | **over-subscription** | Hyphenated, lowercase. When the sum of all deserved quotas exceeds available physical resources. |
-| NUMA-aware scheduling | **NUMA-aware scheduling** | Uppercase NUMA (acronym), lowercase rest. |
-| Topology-aware scheduling | **topology-aware scheduling** | Lowercase. Network-topology-based placement optimization. |
-| Network topology | **network topology** | Lowercase. Platform construct associated with Node Pools for accelerating distributed workloads. |
+| Use | Use as | Meaning | Avoid for this meaning |
+|---|---|---|---|
+| `account` | Product concept | The top-level NVIDIA Run:ai organizational scope. | tenant |
+| `department` | Product concept | An organizational and resource-management scope that groups projects. | project |
+| `Kubernetes namespace` | Kubernetes concept | A Kubernetes namespace. | project |
+| `project` | Product concept | An organizational and resource-management scope under which workloads run. | namespace |
+| `scope` | Product concept | The part of the NVIDIA Run:ai hierarchy in which an object or access assignment applies. | — |
 
-## Policy and Governance
+Preserve `tenant` in literal API fields and other interfaces that use that term.
 
-| Term | Correct form | Notes |
-|---|---|---|
-| Workload policy | **workload policy** | Lowercase. The platform construct for controlling workload submission across scopes. |
-| Scheduling rules | **scheduling rules** | Lowercase. Policy restrictions on workload resources or runtime duration. |
-| Effective policy | **effective policy** | Lowercase. The reconciled result of all policies from system through cluster, department, and project scopes. |
-| Imposed assets | **imposed assets** | Lowercase. Policy construct for assets automatically attached to any workload in scope. |
-| System policy | **system policy** | Lowercase. Platform-level baseline policies. |
-| Grace period | **grace period** | Lowercase. Duration after preemption request before forced termination (default 30s; system policy caps at 5 minutes). |
-| Idle GPU timeout | **idle GPU timeout** | Lowercase, uppercase GPU. Scheduling rule that stops workloads with an idle GPU after a set duration. |
+Do not use `project` and `Kubernetes namespace` interchangeably. A project is an NVIDIA Run:ai concept even when it is associated with a Kubernetes namespace.
 
-## Infrastructure
+## Clusters and Nodes
 
-| Term | Correct form | Notes |
-|---|---|---|
-| NVLink | **NVLink** | Mixed case exactly. NVIDIA's GPU interconnect technology. |
-| MNNVL | **MNNVL** | All caps. Spell out "Multi-Node NVLink (MNNVL)" on first mention. |
+| Use | Use as | Meaning | Avoid for this meaning |
+|---|---|---|---|
+| `cluster` | Product and Kubernetes concept | A Kubernetes cluster connected to NVIDIA Run:ai. | — |
+| `node` | Kubernetes concept | A Kubernetes node that provides resources to workloads or platform services. | — |
+| `node pool` | Product concept | A group of nodes treated as a resource pool for resource allocation and scheduling. | node type |
+| `node type` | Scheduling concept | A label-based node classification used to constrain workloads to matching nodes. | node pool |
+| `system node` | Infrastructure concept | A node designated to run NVIDIA Run:ai system services. | — |
 
-## Access and Authentication
+Do not use `node pool` and `node type` interchangeably. A node type can identify nodes within a node pool.
 
-| Term | Correct form | Notes |
-|---|---|---|
-| Single sign-on | **SSO** | Spell out on first mention |
-| OpenID Connect | **OIDC** | Spell out on first mention |
-| Role-based access control | **RBAC** | Spell out on first mention |
-| Access key | **access key** | Lowercase |
-| Client secret | **client secret** | Lowercase |
-| SSO group | **SSO group** | Lowercase "group" |
-| Service account | **service account** | Lowercase |
+## Quota and Resource Allocation
 
-## Third-Party Tools and Ecosystem
+| Use | Use as | Meaning | Avoid for this meaning |
+|---|---|---|---|
+| `deserved quota` | Scheduling concept | Resources that a project or department is entitled to use according to its configured quota. | guaranteed quota, guaranteed resources |
+| `fairshare` | Scheduling concept | The calculated resource entitlement of a scheduling queue. | fair share |
+| `in quota` | Scheduling state | Resource use within deserved quota. | under quota |
+| `in-quota` | Scheduling adjective | Describes resource use within deserved quota. | under-quota |
+| `max GPU device allocation` | Resource-allocation property | The maximum number of GPU devices a project or department can allocate from a node pool. | GPU limit when the named setting is intended |
+| `over quota` | Scheduling state | Resource use beyond deserved quota. | above quota |
+| `over-fairshare` | Scheduling adjective | Describes a queue whose allocation exceeds its calculated fairshare. | above fairshare |
+| `over-quota` | Scheduling adjective | Describes resource use beyond deserved quota. | above-quota |
+| `over-quota resources` | Scheduling concept | Resources consumed beyond deserved quota. | — |
+| `over-quota weight` | Scheduling property | A value used to calculate a queue's relative share of available over-quota resources. | priority |
+| `over-subscription` | Resource-management concept | A state in which assigned deserved quota exceeds available physical resources. | oversubscription |
+| `priority` | Workload property | Ordering used when scheduling workloads within a project. | rank |
+| `quota` | Resource-management concept | A configured resource allocation for a project or department. | guaranteed quota |
+| `rank` | Scheduling property | Ordering used when allocating resources among project or department queues. | priority |
+| `scheduling queue` | Scheduling concept | The Scheduler representation of a project or department for resource allocation within a node pool. | job queue |
+| `time-based fairshare` | Scheduling concept | Fairshare that accounts for historical resource consumption. | time-based fair share |
 
-| Term | Correct form | Notes |
-|---|---|---|
-| Kubernetes | **Kubernetes** | Never "k8s" in prose; use `k8s` only in code |
-| Helm | **Helm** | Capitalize |
-| kubectl | `kubectl` | Lowercase; always in code style |
-| NVIDIA GPU Operator | **NVIDIA GPU Operator** | Full name; capitalize "Operator" |
-| NVIDIA Network Operator | **NVIDIA Network Operator** | Full name |
-| NVIDIA NIM | **NVIDIA NIM** | Full name on first mention; "NIM" after |
-| NGC catalog | **NGC catalog** | Uppercase "NGC"; lowercase "catalog" |
-| NGC API key | **NGC API key** | Uppercase "NGC" and "API"; lowercase "key" |
-| NIM Operator | **NIM Operator** | Capitalize "Operator" |
+Do not use `rank` and `priority` interchangeably. Rank applies to resource allocation among project or department queues. Priority applies to workload scheduling within a project.
 
-## CLI and API
+## Preemption and Resource Reclaim
 
-| Term | Correct form | Notes |
-|---|---|---|
-| CLI version | **CLI v2** | Not "CLI v2.0", "new CLI", or "the CLI" without qualifier on first mention |
-| API reference | **REST API Reference** | Capitalize all words in the nav label |
-| API endpoint | lowercase in prose | e.g. "the workloads endpoint"; capitalize only in nav/UI labels |
+| Use | Use as | Meaning | Avoid for this meaning |
+|---|---|---|---|
+| `preemption` | Scheduling concept | Interruption of a preemptible workload so its resources can be reallocated. | — |
+| `reclaim` | Verb | Reallocate resources between queues to restore deserved quota or fairness. | preempt when the cross-queue action is intended |
+| `resource reclaim` | Scheduling concept | Reallocation of resources between project or department queues to restore deserved quota or fairness. | priority preemption |
 
-## UI Labels and Navigation
+Do not describe cross-project or cross-department resource reclaim as priority-based preemption. Priority applies to workload scheduling within a project.
 
-Use bold for UI element names in prose. Capitalize exactly as shown in the product.
+## GPU Resource Optimization
 
-| UI element | Correct form |
-|---|---|
-| Top-level nav item | **Workload manager** |
-| Sub-item | **Workloads** |
-| Settings area | **General settings** |
-| Button (action) | **+NEW WORKLOAD**, **SAVE & CONTINUE**, **DELETE** |
-| Form field | Match exact label from UI, in bold |
+| Use | Use as | Meaning | Avoid for this meaning |
+|---|---|---|---|
+| `dynamic GPU fractions` | Resource-optimization concept | GPU fractions that can dynamically use additional available GPU memory up to a configured limit. | — |
+| `GPU fraction` | Resource-optimization concept | A portion of a physical GPU allocated to a workload. | fractional GPU |
+| `GPU fractions` | Feature or plural concept | NVIDIA Run:ai functionality for allocating portions of GPUs to workloads. | fractional GPUs |
+| `GPU memory limit` | Resource property | The maximum GPU memory available to a workload using dynamic GPU fractions. | GPU memory request |
+| `GPU memory request` | Resource property | The amount of GPU memory requested for a workload. | GPU memory limit |
+| `GPU time-slicing` | Resource-optimization concept | Sharing GPU compute time among workloads. | GPU fractions when compute time-sharing is intended |
+| `multi-GPU fractions` | Resource-optimization concept | Fractional allocations across multiple GPU devices. | multi GPU fractions |
+| `single-GPU fraction` | Resource-optimization concept | A fractional allocation from one GPU device. | single GPU fraction |
 
-Navigation paths use → as the separator: go to **Workload manager** → **Workloads**.
+Do not use `GPU fractions`, `dynamic GPU fractions`, and `GPU time-slicing` interchangeably.
+
+## Policies and Scheduling Rules
+
+| Use | Use as | Meaning | Avoid for this meaning |
+|---|---|---|---|
+| `default` | Workload-policy concept | A value supplied by a workload policy when the workload does not specify one. | rule |
+| `idle GPU time limit` | Scheduling rule | A scheduling rule that limits allowed GPU inactivity. | — |
+| `imposed asset` | Workload-policy concept | A workload asset that a workload policy requires a workload to use. | default asset |
+| `rule` | Workload-policy concept | A constraint applied by a workload policy. | default |
+| `scheduling rule` | Product concept | A restriction on workload runtime or eligible nodes. | workload policy |
+| `workload duration` | Scheduling rule | A scheduling rule that limits how long a workload can run. | — |
+| `workload policy` | Product concept | A policy that controls workload submission through rules, defaults, or imposed assets. | scheduling rule |
+
+Do not use `workload policy` and `scheduling rule` interchangeably.
+
+## Workload Assets
+
+| Use | Use as | Meaning | Avoid for this meaning |
+|---|---|---|---|
+| `compute resource` | Workload asset | A reusable specification of workload compute requirements. | — |
+| `ConfigMap` | Kubernetes object | A Kubernetes ConfigMap. | data source |
+| `container image` | Technical concept | An image used to create a workload container. | environment |
+| `credential` | Workload asset | A reusable object containing authentication information required by a workload. | Kubernetes Secret |
+| `data source` | Workload asset | A reusable definition for making data or storage available to a workload. | data volume |
+| `data volume` | Workload storage concept | Storage configured for use by a workload. | data source |
+| `environment` | Workload asset | A reusable configuration for the environment in which a workload runs. | container image |
+| `PersistentVolumeClaim` (`PVC`) | Kubernetes object | A Kubernetes request for persistent storage. | data source |
+| `Secret` | Kubernetes object | A Kubernetes Secret. | credential |
+| `workload asset` | Product concept | A reusable NVIDIA Run:ai object used to configure workloads. | — |
+
+Do not use an underlying Kubernetes or storage object as a synonym for an NVIDIA Run:ai workload asset.
+
+## Workload Templates
+
+| Use | Use as | Meaning | Avoid for this meaning |
+|---|---|---|---|
+| `one-time configuration` | Product concept | Configuration defined for a specific workload rather than saved as a reusable asset. | workload asset |
+| `training template` | Template type | A workload template for training workloads. | — |
+| `workload template` | Product concept | A reusable configuration for creating workloads. | workload asset |
+| `workspace template` | Template type | A workload template for workspaces. | — |
+
+Do not use `workload template` and `workload asset` interchangeably.
+
+## Authentication and Authorization
+
+| Use | Use as | Meaning | Avoid for this meaning |
+|---|---|---|---|
+| `access rule` | Authorization concept | Assignment of a role to a subject in a scope. | role |
+| `authentication` | Security concept | Verification of an identity. | authorization |
+| `authorization` | Security concept | Determination of what an authenticated subject can do. | authentication |
+| `group` | Identity concept | A collection of users used for access management. | — |
+| `identity provider` | Security concept | A system that authenticates identities used with NVIDIA Run:ai. Use `IdP` after defining it when appropriate. | — |
+| `permission` | Authorization concept | An allowed action on an NVIDIA Run:ai entity. | role |
+| `permission set` | Authorization concept | A reusable group of permissions. | role |
+| `role` | Authorization concept | A defined set of permissions that can be assigned to a subject. | permission, access rule |
+| `service account` | Identity concept | A non-human identity used for programmatic access. | application |
+| `subject` | Authorization concept | A user, group, or service account to which access can be granted. | user when other subject types are possible |
+| `user` | Identity concept | A human identity. | account |
+
+`application` is legacy terminology for a service account. Preserve it when referring to the legacy concept or when it appears in literal interfaces.
+
+## Maintain the List
+
+The list has no fixed entry count. Expand it when repository usage proves that a term needs control, and remove an entry when the project no longer uses its concept or exact form. The section boundaries help writers find terms; they do not create separate vocabularies.
+
+Add or change an entry only when it does at least one of these things:
+
+- Resolves a recurring ambiguity across repository surfaces.
+- Separates concepts whose difference affects behavior, security, support, or evidence.
+- Preserves an exact product name or text form.
+
+For each entry:
+
+1. Confirm the term against the applicable CLI, code, tests, and current documentation. Confirm an external product name against its official form.
+2. Select the shortest familiar term that preserves the current meaning.
+3. Define one meaning. Add another row when the same word has a different controlled meaning.
+4. List only alternatives that writers use for that same meaning.
+5. Keep entries alphabetical within their section.
+
+Do not add every acceptable English word. Do not use this list to rename a command, identifier, schema field, UI label, or third-party product. Such a rename needs its own behavior or interface decision.

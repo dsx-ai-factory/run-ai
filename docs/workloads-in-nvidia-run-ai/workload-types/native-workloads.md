@@ -2,8 +2,7 @@
 
 NVIDIA Run:ai workloads are ready-to-use workload types provided natively in the platform, including Workspaces, Training, and Inference. Native workloads include built-in support for orchestration, scheduling, and policy controls, ensuring optimization, governance, and security standards. These workloads are fully integrated and immediately available as part of the platform. For more details on feature support, see [Supported features](supported-features.md).
 
-## ML Lifecycle and Workload Mapping <a href="#ml-lifecycle--workload-mapping" id="ml-lifecycle--workload-mapping"></a>
-
+## ML Lifecycle and Workload Mapping
 In the world of machine learning (ML), the journey from raw data to actionable insights is a complex process that spans multiple stages. Each stage of the AI lifecycle requires different tools, resources, and frameworks to ensure optimal performance. NVIDIA Run:ai simplifies this process by offering specialized workload types tailored to each phase, facilitating a smooth transition across various stages of the ML workflows.
 
 The ML lifecycle usually begins with the experimental work on data and exploration of different modeling techniques to identify the best approach for accurate predictions. At this stage, resource consumption is usually moderate as experimentation is done on a smaller scale. As confidence grows in the model's potential and its accuracy, the demand for compute resources increases. This is especially true during the training phase, where vast amounts of data need to be processed, particularly with complex models such as large language models (LLMs), with their huge parameter sizes, that often require distributed training across multiple GPUs to handle the intensive computational load.
