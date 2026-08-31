@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package v1 contains API Schema definitions for the ray v1 API group
 // +kubebuilder:object:generate=true
 // +groupName=ray.io

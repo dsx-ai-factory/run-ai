@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section class="runai-itemized-list">
     <div v-if="title" class="q-pb-md q-gutter-md row items-center" :class="paddingTop ? 'q-pt-md' : ''">

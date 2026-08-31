@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <q-header class="runai-header row items-center" :class="{ 'with-shadow': fullWidthPage }">
     <q-toolbar class="header-toolbar">

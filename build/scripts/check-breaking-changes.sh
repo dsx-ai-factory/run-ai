@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 # check-breaking-changes.sh
 # Compares the current package against its latest prod tag using apidiff.
 # Exit 0: no breaking changes — 'make package-bump-version' selects a patch bump

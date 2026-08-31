@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section class="application-submission-setting">
     <toggle-setting aid="application-submission-toggle" :setting="setting" emit-only @update-setting="onUpdateSetting" />

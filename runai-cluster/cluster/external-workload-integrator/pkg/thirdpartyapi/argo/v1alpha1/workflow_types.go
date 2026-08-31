@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package v1alpha1 is a minimal local stand-in for the subset of
 // github.com/argoproj/argo-workflows/v3/pkg/apis/workflow/v1alpha1 that
 // external-workload-integrator actually consumes. The handler reads the

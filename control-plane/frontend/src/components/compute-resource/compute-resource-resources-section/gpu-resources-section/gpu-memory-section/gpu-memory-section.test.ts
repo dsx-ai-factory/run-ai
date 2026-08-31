@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { mount, type VueWrapper } from "@vue/test-utils";
 import GpuMemorySection from "./gpu-memory-section.vue";
 import { Quasar } from "quasar";

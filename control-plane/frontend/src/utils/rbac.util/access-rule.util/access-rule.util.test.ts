@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, expect, it } from "vitest";
 import { type Permission, ResourceType, ResourceTypeGroupId } from "@/swagger-models/authorization-client";
 import { accessRuleUtil } from "@/utils/rbac.util/access-rule.util/access-rule.util";

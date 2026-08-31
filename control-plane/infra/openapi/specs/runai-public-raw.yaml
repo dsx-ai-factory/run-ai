@@ -28372,6 +28372,18 @@ components:
           example: Tesla-V100
         gpuCount:
           type: integer
+        gpuMemoryBytes:
+          type: integer
+          format: int64
+          minimum: 0
+          x-internal: true
+          description: >-
+            Memory of a single GPU device on this node, in bytes, taken from the
+            node's GPU vendor labels. Note this is per device, unlike the
+            TOTAL_GPU_MEMORY_BYTES node telemetry type which reports the node's
+            total across all of its devices. Omitted when the node's GPU labels
+            do not report memory.
+          example: 85899345920
       x-schema-name: GpuInfo
     LabelValue:
       type: string
@@ -29336,6 +29348,45 @@ components:
                   items:
                     type: string
                     example: node1
+    NodepoolGpuTypeDetails:
+      type: object
+      x-internal: true
+      required:
+        - type
+        - totalDevices
+      properties:
+        type:
+          type: string
+          description: >-
+            The GPU model, as reported by the GPU vendor labels on the node
+            pool's nodes.
+          example: NVIDIA-H100-80GB-HBM3
+        gpuMemoryBytes:
+          type: integer
+          format: int64
+          minimum: 0
+          description: >-
+            Memory of a single GPU device of this type, in bytes. Omitted when
+            the node pool's nodes do not report GPU memory.
+          example: 85899345920
+        totalDevices:
+          type: integer
+          minimum: 0
+          description: >-
+            Total number of GPU devices of this type across the node pool's
+            nodes.
+          example: 16
+      x-schema-name: NodepoolGpuTypeDetails
+    NodepoolGpuTypes:
+      type: array
+      x-internal: true
+      description: >-
+        The GPU hardware in the node pool, one entry per distinct combination of
+        GPU model and per-device memory found across its nodes. A heterogeneous
+        node pool yields several entries. Omitted when the node pool has no GPU
+        nodes.
+      items:
+        $ref: '#/components/schemas/NodepoolGpuTypeDetails'
     NodepoolCalculatedFields:
       type: object
       required:
@@ -29384,6 +29435,8 @@ components:
           type: boolean
           description: Is the Node Pool is the cluster default
           example: false
+        gpuTypes:
+          $ref: '#/components/schemas/NodepoolGpuTypes'
     NodepoolDeprecatedPlacementStrategy:
       type: object
       x-internal: true
@@ -29442,6 +29495,8 @@ components:
             detected in some nodepool's nodes
         schedulingCapabilities:
           $ref: '#/components/schemas/SchedulingCapabilities'
+        gpuTypes:
+          $ref: '#/components/schemas/NodepoolGpuTypes'
     NetworkTopologyLabelValuesOptional:
       type: array
       items:

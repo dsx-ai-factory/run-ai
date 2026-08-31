@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Place holder for a fix we merged to 2.16, this will never run on 2.17 but it has a copy on 02170008 which will run
 CREATE TABLE IF NOT EXISTS containers_unique AS
 SELECT DISTINCT ON (cluster_id, pod_id, name) *

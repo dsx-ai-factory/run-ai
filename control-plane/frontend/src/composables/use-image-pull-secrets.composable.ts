@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { useClusterStore } from "@/stores/cluster.store";
 import { MIN_CLUSTER_VERSION_FOR_IMAGE_PULL_SECRETS } from "@/common/version.constant";
 import { computed } from "vue";

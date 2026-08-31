@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 DELETE FROM identity_manager.realm_settings
 WHERE setting_key = 'excludeGroupsFromToken';
 

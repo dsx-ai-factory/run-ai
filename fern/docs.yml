@@ -29,11 +29,6 @@ products:
       - display-name: "2.24"
         slug: v2.24
         path: archived-versions.yml
-  - display-name: SaaS
-    slug: saas
-    path: products/saas.yml
-    icon: fa-solid fa-cloud
-    subtitle: Enterprise · Cloud-hosted
   - display-name: Multi-Tenant
     slug: multi-tenant
     path: products/multi-tenant.yml

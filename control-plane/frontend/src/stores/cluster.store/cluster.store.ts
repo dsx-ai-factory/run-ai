@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { defineStore } from "pinia";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { clusterApiServiceOld } from "@/services/cluster/cluster-api.service/cluster-api-old.service";

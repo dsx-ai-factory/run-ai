@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { assetService } from "@/services/control-plane/asset.service/asset.service";
 import { errorMessages } from "../error-message.constant";
 import type { ValidationRule } from "quasar";

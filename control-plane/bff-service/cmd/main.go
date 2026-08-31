@@ -1,4 +1,9 @@
 /*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/*
  * BFF Service - Backend for Frontend Service
  * API version: 1.0.0
  * Contact: support@run.ai

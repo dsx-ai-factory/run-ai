@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 **Phase** | Pointer to [**NodepoolPhase**](NodepoolPhase.md) |  | [optional] 
 **GpuNetworkAccelerationDetected** | Pointer to **bool** | Signals to all relevant parties about GPUNetworkAcceleration being detected in some nodepool&#39;s nodes | [optional] 
 **SchedulingCapabilities** | Pointer to [**SchedulingCapabilities**](SchedulingCapabilities.md) |  | [optional] 
+**GpuTypes** | Pointer to [**[]NodepoolGpuTypeDetails**](NodepoolGpuTypeDetails.md) | The GPU hardware in the node pool, one entry per distinct combination of GPU model and per-device memory found across its nodes. A heterogeneous node pool yields several entries. Omitted when the node pool has no GPU nodes. | [optional] 
 
 ## Methods
 
@@ -164,6 +165,31 @@ SetSchedulingCapabilities sets SchedulingCapabilities field to given value.
 `func (o *NodepoolMinimal) HasSchedulingCapabilities() bool`
 
 HasSchedulingCapabilities returns a boolean if a field has been set.
+
+### GetGpuTypes
+
+`func (o *NodepoolMinimal) GetGpuTypes() []NodepoolGpuTypeDetails`
+
+GetGpuTypes returns the GpuTypes field if non-nil, zero value otherwise.
+
+### GetGpuTypesOk
+
+`func (o *NodepoolMinimal) GetGpuTypesOk() (*[]NodepoolGpuTypeDetails, bool)`
+
+GetGpuTypesOk returns a tuple with the GpuTypes field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuTypes
+
+`func (o *NodepoolMinimal) SetGpuTypes(v []NodepoolGpuTypeDetails)`
+
+SetGpuTypes sets GpuTypes field to given value.
+
+### HasGpuTypes
+
+`func (o *NodepoolMinimal) HasGpuTypes() bool`
+
+HasGpuTypes returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

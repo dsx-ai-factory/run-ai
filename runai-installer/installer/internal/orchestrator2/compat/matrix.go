@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package compat holds the version compatibility matrix that pins each
 // prerequisite/feature to a known-good version per major.minor Run:ai release.
 // Plan resolution consults it to fill any dependency version the spec leaves

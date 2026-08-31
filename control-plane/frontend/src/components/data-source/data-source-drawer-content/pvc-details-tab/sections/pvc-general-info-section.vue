@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <div class="pvc-general-info-section column">
     <div v-for="(group, gIdx) in visibleGroups" :key="`g-${gIdx}`" class="details-group column">

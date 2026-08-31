@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { IConnectionAccess } from "@/components/environment/connection-access/connection-access-modal/connection-access-modal.model";
 import type { ISelectOption } from "@/models/global.model";
 import { ServingPortInfoProtocolEnum } from "@/swagger-models/assets-service-client";

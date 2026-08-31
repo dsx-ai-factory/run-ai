@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package test
 
 import (
@@ -76,8 +81,9 @@ var _ = Describe("Node DB tests", Ordered, func() {
 			updatedNode.Taints = (*testNodeInfos[1]).Taints
 			updatedNode.NodePool = (*testNodeInfos[0]).NodePool + "-random-suffix"
 			updatedNode.GpuInfo = &api.GpuInfo{
-				GpuType:  (*testNodeInfos[0]).GpuInfo.GpuType + "-different-type",
-				GpuCount: 0,
+				GpuType:        (*testNodeInfos[0]).GpuInfo.GpuType + "-different-type",
+				GpuCount:       0,
+				GpuMemoryBytes: (*testNodeInfos[0]).GpuInfo.GpuMemoryBytes * 2,
 			}
 			time.Sleep(time.Second)
 			updatedNode.CreatedAt = time.Now() // shouldn't be updated, just testing
@@ -106,6 +112,8 @@ var _ = Describe("Node DB tests", Ordered, func() {
 				"node's GPU type different after update")
 			Expect(updatedApiNode.GpuInfo.GpuCount).ToNot(Equal((*testNodeInfos[0]).GpuInfo.GpuCount),
 				"node's GPU count different after update")
+			Expect(updatedApiNode.GpuInfo.GpuMemoryBytes).ToNot(Equal((*testNodeInfos[0]).GpuInfo.GpuMemoryBytes),
+				"node's GPU memory different after update")
 			validateNumOfNodesInCluster(nodeService, 0, 1)
 
 			// delete the node
@@ -937,6 +945,7 @@ func validateNodesEqual(actual *api.Node,
 	} else {
 		ExpectWithOffset(offset, actual.GpuInfo.GpuType).To(Equal(expectedNodeInfo.GpuInfo.GpuType), "node's gpu type")
 		ExpectWithOffset(offset, actual.GpuInfo.GpuCount).To(Equal(expectedNodeInfo.GpuInfo.GpuCount), "node's gpu count")
+		ExpectWithOffset(offset, actual.GpuInfo.GpuMemoryBytes).To(Equal(expectedNodeInfo.GpuInfo.GpuMemoryBytes), "node's gpu memory")
 	}
 	ExpectWithOffset(offset, actual.Status).To(Equal(expectedNodeInfo.Status), "node's status")
 	ExpectWithOffset(offset, actual.NvLinkDomainUid).To(Equal(expectedNodeInfo.NvLinkDomainUid), "node's NvLinkDomainUid")

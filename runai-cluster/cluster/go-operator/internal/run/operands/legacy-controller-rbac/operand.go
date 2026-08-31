@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package legacy_controller_rbac removes the Helm-managed RBAC left behind
 // when one of the legacy workload controllers is disabled. The allowlist is
 // intentionally explicit so this cleanup cannot expand to similarly named

@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 ALTER TABLE overtime_data ADD COLUMN IF NOT EXISTS avg_gpu_memory_utilization24h  DECIMAL(12,3);
 ALTER TABLE overtime_data ADD COLUMN IF NOT EXISTS avg_gpu_memory_utilization7d  DECIMAL(12,3);
 ALTER TABLE overtime_data ADD COLUMN IF NOT EXISTS avg_gpu_memory_utilization30d DECIMAL(12,3);

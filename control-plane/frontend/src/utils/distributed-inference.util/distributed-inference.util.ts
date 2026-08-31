@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { isEqual } from "@/utils/common.util";
 import type { UnifiedPolicyInfo } from "@/swagger-models/workloads-client";
 import { AssetKind } from "@/swagger-models/assets-service-client";

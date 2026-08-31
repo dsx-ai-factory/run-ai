@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Drop the dependent view first so the table/column renames don't fail on dependency.
 DROP VIEW IF EXISTS external_workloads_type_config_view;
 

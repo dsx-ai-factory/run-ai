@@ -1,5 +1,9 @@
 #! /bin/bash
 
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+
 # GuyContinue: Move the cluster CRD to the runai-chart/crds directory and the runai-crd-upgrader directory
 
 crdUpgraderPath="../runai-crd-upgrader/crds"

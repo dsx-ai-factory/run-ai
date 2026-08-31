@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- as we no longer support soft-delete following this rollback, need to
 -- physically remove anything that was marked for deletion                     
 DO $$

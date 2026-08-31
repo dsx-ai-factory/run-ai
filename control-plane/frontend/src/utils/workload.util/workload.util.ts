@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { Connection, Endpoint, Environment, Training, Workspace } from "@/swagger-models/workloads-client";
 import type { WorkloadV2 } from "@/swagger-models/workloads-manager-client";
 import {

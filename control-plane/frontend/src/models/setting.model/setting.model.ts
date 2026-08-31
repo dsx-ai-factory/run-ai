@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { Mappers } from "@/swagger-models/identity-manager-client";
 import type { Setting as ServerSetting } from "@/swagger-models/temp-backend-settings-client";
 

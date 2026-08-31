@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 ALTER TABLE IF EXISTS project ADD COLUMN IF NOT EXISTS deletion_request TIMESTAMPTZ default null;
 ALTER TABLE IF EXISTS project ADD COLUMN IF NOT EXISTS deletion_type TEXT default null;
 ALTER TABLE IF EXISTS project ADD COLUMN IF NOT EXISTS force_delete BOOLEAN default null;

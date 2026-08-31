@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { ServingPortProtocol } from "@/swagger-models/assets-service-client";
 
 // This is an hard-coded uuid in the db migrations therefore we can filter the environments by this id.

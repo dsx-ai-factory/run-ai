@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <base-edge :path="path" :style="edgeStyle" />
   <circle :cx="circleX" :cy="circleY" r="4" :fill="edgeColor" />

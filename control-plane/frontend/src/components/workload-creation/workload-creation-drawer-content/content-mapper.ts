@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { type IDrawerListItem, WorkloadCreationDrawerEntities } from "@/models/workload-creation-drawer-model";
 import { computeResourceService } from "@/services/control-plane/compute-resource.service/compute-resource.service";
 import { environmentService } from "@/services/control-plane/environment.service/environment.service";

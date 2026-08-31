@@ -23,6 +23,8 @@ var _ MappedNullable = &GpuInfo{}
 type GpuInfo struct {
 	GpuType  string `json:"gpuType"`
 	GpuCount int32  `json:"gpuCount"`
+	// Memory of a single GPU device on this node, in bytes, taken from the node's GPU vendor labels. Note this is per device, unlike the TOTAL_GPU_MEMORY_BYTES node telemetry type which reports the node's total across all of its devices. Omitted when the node's GPU labels do not report memory.
+	GpuMemoryBytes *int64 `json:"gpuMemoryBytes,omitempty"`
 }
 
 type _GpuInfo GpuInfo
@@ -94,6 +96,38 @@ func (o *GpuInfo) SetGpuCount(v int32) {
 	o.GpuCount = v
 }
 
+// GetGpuMemoryBytes returns the GpuMemoryBytes field value if set, zero value otherwise.
+func (o *GpuInfo) GetGpuMemoryBytes() int64 {
+	if o == nil || IsNil(o.GpuMemoryBytes) {
+		var ret int64
+		return ret
+	}
+	return *o.GpuMemoryBytes
+}
+
+// GetGpuMemoryBytesOk returns a tuple with the GpuMemoryBytes field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GpuInfo) GetGpuMemoryBytesOk() (*int64, bool) {
+	if o == nil || IsNil(o.GpuMemoryBytes) {
+		return nil, false
+	}
+	return o.GpuMemoryBytes, true
+}
+
+// HasGpuMemoryBytes returns a boolean if a field has been set.
+func (o *GpuInfo) HasGpuMemoryBytes() bool {
+	if o != nil && !IsNil(o.GpuMemoryBytes) {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuMemoryBytes gets a reference to the given int64 and assigns it to the GpuMemoryBytes field.
+func (o *GpuInfo) SetGpuMemoryBytes(v int64) {
+	o.GpuMemoryBytes = &v
+}
+
 func (o GpuInfo) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -106,6 +140,9 @@ func (o GpuInfo) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["gpuType"] = o.GpuType
 	toSerialize["gpuCount"] = o.GpuCount
+	if !IsNil(o.GpuMemoryBytes) {
+		toSerialize["gpuMemoryBytes"] = o.GpuMemoryBytes
+	}
 	return toSerialize, nil
 }
 

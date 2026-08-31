@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package handlers
 
 import (
@@ -300,13 +305,20 @@ func (nodeHandler *NodeHandler) nullableStringChanged(old swagger.NullableString
 }
 
 func (nodeHandler *NodeHandler) gpuInfoChanged(old swagger.NullableGpuInfo, new swagger.NullableGpuInfo) bool {
-	if !old.IsSet() && old.Get() == nil {
-		return new.IsSet() && old.Get() != nil
+	oldGpuInfo, newGpuInfo := old.Get(), new.Get()
+	if oldGpuInfo == nil || newGpuInfo == nil {
+		return oldGpuInfo != newGpuInfo
 	}
-	if !new.IsSet() {
-		return true
+	return oldGpuInfo.GpuType != newGpuInfo.GpuType ||
+		oldGpuInfo.GpuCount != newGpuInfo.GpuCount ||
+		gpuMemoryBytesChanged(oldGpuInfo.GpuMemoryBytes, newGpuInfo.GpuMemoryBytes)
+}
+
+func gpuMemoryBytesChanged(old *int64, new *int64) bool {
+	if old == nil || new == nil {
+		return old != new
 	}
-	return *old.Get() != *new.Get()
+	return *old != *new
 }
 
 func (nodeHandler *NodeHandler) networkTopologyLabelsChanged(old []swagger.NetworkTopologyLabel, new []swagger.NetworkTopologyLabel) bool {

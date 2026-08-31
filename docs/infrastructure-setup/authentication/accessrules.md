@@ -22,8 +22,8 @@ The Access rules table consists of the following columns:
 
 | Column        | Description                                                                                                  |
 | ------------- | ------------------------------------------------------------------------------------------------------------ |
-| Type          | The type of subject assigned to the access rule (user, SSO group, or service account).                       |
-| Subject       | The user, SSO group, or service account assigned with the role                                               |
+| Type          | The type of subject assigned to the access rule (User, SSO Group, Service account, or All authenticated users and service accounts). |
+| Subject       | The User, SSO Group, or Service account assigned with the role. Not applicable when Type is All authenticated users and service accounts. |
 | Role          | The role assigned to the subject                                                                             |
 | Scope         | The scope to which the subject has access. Click the name of the scope to see the scope and its subordinates |
 | Status        | The access rule creation status.                                                                             |
@@ -55,8 +55,8 @@ The following table describes the condition of access rules and whether they wer
 To add a new access rule:
 
 1. Click **+NEW ACCESS RULE**
-2. Select a subject - **User, SSO Group**, or **Service Account**
-3. Select or enter the subject identifier. You can define up to 10 subjects of the selected type:
+2. Select a subject - **User, SSO Group, Service account**, or **All authenticated users and service accounts**
+3. Select or enter the subject identifier. You can define up to 10 subjects of the selected type. Not applicable when the subject is All authenticated users and service accounts:
    * **User** for a local user created in NVIDIA Run:ai or for an SSO user as recognized by the IDP. Search by name or email, or manually enter the user's email if they do not appear in the search results.
    * **Group name** as recognized by the IDP
    * **Service account name** as created in NVIDIA Run:ai

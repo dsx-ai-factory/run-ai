@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package async
 
 import (
@@ -537,16 +542,19 @@ var _ = Describe("Subscribers", func() {
 				tenant2NodesAfterDelete, _ := dao.GetNodes(ctx, int32(tenant2Id), &tenant2PermittedScopes, nil, "", "", 0, 100, "")
 				Expect(len(*tenant2NodesAfterDelete)).Should(Equal(3))
 
-				// Verify specific cluster and node details for tenant 2 are preserved
-				tenant2Cluster1AfterDelete := (*tenant2ClustersAfterDelete)[0]
-				Expect(tenant2Cluster1AfterDelete.Name).Should(Equal("tenant2-cluster1"))
-				Expect(tenant2Cluster1AfterDelete.Domain).Should(Equal("tenant2-cluster1.test"))
-				Expect(tenant2Cluster1AfterDelete.Version).Should(Equal("2.22"))
+				// Matched by name rather than by position: neither GetClusters nor GetNodes
+				// applies an ORDER BY here, so the row order is whatever the planner yields.
+				Expect(*tenant2ClustersAfterDelete).Should(ContainElement(SatisfyAll(
+					HaveField("Name", "tenant2-cluster1"),
+					HaveField("Domain", "tenant2-cluster1.test"),
+					HaveField("Version", "2.22"),
+				)))
 
-				tenant2Node1AfterDelete := (*tenant2NodesAfterDelete)[0]
-				Expect(tenant2Node1AfterDelete.Name).Should(Equal("tenant2-node1"))
-				Expect(tenant2Node1AfterDelete.GpuCount).Should(Equal(int32(4)))
-				Expect(tenant2Node1AfterDelete.Status).Should(Equal("Ready"))
+				Expect(*tenant2NodesAfterDelete).Should(ContainElement(SatisfyAll(
+					HaveField("Name", "tenant2-node1"),
+					HaveField("GpuCount", int32(4)),
+					HaveField("Status", "Ready"),
+				)))
 			})
 		})
 

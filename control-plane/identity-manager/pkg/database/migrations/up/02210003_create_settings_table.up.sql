@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 CREATE TABLE IF NOT EXISTS realm_settings (
     id                          UUID NOT NULL PRIMARY KEY,
     tenant_id                   TEXT NOT NULL,

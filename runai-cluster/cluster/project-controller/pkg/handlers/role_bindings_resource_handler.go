@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package handlers
 
 import (
@@ -156,18 +161,25 @@ func (handler RoleBindingsResourceHandler) deleteOmittedRoleBindings(
 
 	for i := range roleBindings.Items {
 		roleBinding := &roleBindings.Items[i]
-		if !metav1.IsControlledBy(roleBinding, &project) {
+		if !metav1.IsControlledBy(roleBinding, &project) || !isManagedByProjectController(roleBinding) {
 			continue
 		}
 		if _, desired := desiredRoleBindings[roleBinding.Name]; desired {
 			continue
 		}
 
+		handler.Log.Info("Deleting RoleBinding that is no longer in the desired set",
+			common.LogRoleBindingTag, roleBinding.Name,
+			common.LogNamespaceTag, namespace, common.LogProjectTag, project.Name)
 		if err := handler.Client.Delete(ctx, roleBinding); err != nil && !errors.IsNotFound(err) {
 			return fmt.Errorf("delete omitted RoleBinding %s/%s: %w", namespace, roleBinding.Name, err)
 		}
 	}
 	return nil
+}
+
+func isManagedByProjectController(roleBinding *rbacv1.RoleBinding) bool {
+	return roleBinding.Labels[common.ManagedByLabel] == common.ProjectControllerName
 }
 
 func (handler RoleBindingsResourceHandler) manageStaticRoleBinding(
@@ -189,10 +201,14 @@ func (handler RoleBindingsResourceHandler) manageStaticRoleBinding(
 		shouldRecreateRoleBinding := currentRoleBinding.RoleRef.Name != desiredRoleBinding.RoleRef.Name
 		currentRoleBinding.RoleRef = desiredRoleBinding.RoleRef
 		currentRoleBinding.Subjects = subjects
+		if currentRoleBinding.Labels == nil {
+			currentRoleBinding.Labels = map[string]string{}
+		}
+		currentRoleBinding.Labels[common.ManagedByLabel] = common.ProjectControllerName
 
 		if shouldRecreateRoleBinding {
 			handler.Log.Info(fmt.Sprintf("Recreating %s, %s RoleBinding", name, namespace), common.LogRoleBindingTag, name, common.LogNamespaceTag, namespace, common.LogProjectTag, project.Name)
-			return handler.recreateRoleBinding(&currentRoleBinding, desiredRoleBinding, project.Name)
+			return handler.recreateRoleBinding(&currentRoleBinding, desiredRoleBinding, project)
 		}
 
 		handler.Log.Info(fmt.Sprintf("Updating %s, %s RoleBinding", name, namespace), common.LogRoleBindingTag, name, common.LogNamespaceTag, namespace, common.LogProjectTag, project.Name)
@@ -225,6 +241,10 @@ func (handler RoleBindingsResourceHandler) getOrCreateRoleBinding(roleBindingNam
 }
 
 func shouldUpdateRoleBinding(current, desired rbacv1.RoleBinding) bool {
+	if !isManagedByProjectController(&current) {
+		return true
+	}
+
 	if current.RoleRef.Name != desired.RoleRef.Name || current.RoleRef.Kind != desired.RoleRef.Kind ||
 		current.RoleRef.APIGroup != desired.RoleRef.APIGroup {
 		return true
@@ -278,6 +298,7 @@ func (handler RoleBindingsResourceHandler) buildRoleBinding(roleBindingName, nam
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      roleBindingName,
 			Namespace: namespace,
+			Labels:    map[string]string{common.ManagedByLabel: common.ProjectControllerName},
 			OwnerReferences: []metav1.OwnerReference{{
 				APIVersion:         kaiv1alpha1.GroupVersion.Identifier(),
 				Kind:               common.ProjectKind,
@@ -296,23 +317,35 @@ func (handler RoleBindingsResourceHandler) buildRoleBinding(roleBindingName, nam
 	}
 }
 
-func (handler RoleBindingsResourceHandler) recreateRoleBinding(currentRoleBinding *rbacv1.RoleBinding, desiredRoleBinding *rbacv1.RoleBinding, projectName string) (err error) {
+func (handler RoleBindingsResourceHandler) recreateRoleBinding(currentRoleBinding *rbacv1.RoleBinding, desiredRoleBinding *rbacv1.RoleBinding, project kaiv1alpha1.Project) (err error) {
 	if err = handler.Client.Delete(context.Background(), currentRoleBinding); err != nil {
 		handler.Log.Error(err, "Error deleting RoleBinding while attempting to recreate it",
 			common.LogRoleBindingTag, currentRoleBinding.Name,
 			common.LogNamespaceTag, currentRoleBinding.Namespace,
-			common.LogProjectTag, projectName)
+			common.LogProjectTag, project.Name)
 
 		return err
 	}
 
 	desiredRoleBindingToCreate := desiredRoleBinding.DeepCopy()
 	desiredRoleBindingToCreate.Namespace = currentRoleBinding.Namespace
+	if desiredRoleBindingToCreate.Labels == nil {
+		desiredRoleBindingToCreate.Labels = map[string]string{}
+	}
+	desiredRoleBindingToCreate.Labels[common.ManagedByLabel] = common.ProjectControllerName
+	desiredRoleBindingToCreate.OwnerReferences = []metav1.OwnerReference{{
+		APIVersion:         kaiv1alpha1.GroupVersion.Identifier(),
+		Kind:               common.ProjectKind,
+		Name:               project.Name,
+		UID:                project.UID,
+		Controller:         &common.TrueRef,
+		BlockOwnerDeletion: &common.TrueRef,
+	}}
 	if err = handler.Client.Create(context.Background(), desiredRoleBindingToCreate); err != nil && !errors.IsAlreadyExists(err) {
 		handler.Log.Error(err, "Error creating RoleBinding while attempting to recreate it",
 			common.LogRoleBindingTag, desiredRoleBinding.Name,
 			common.LogNamespaceTag, desiredRoleBinding.Namespace,
-			common.LogProjectTag, projectName)
+			common.LogProjectTag, project.Name)
 
 		return err
 	}

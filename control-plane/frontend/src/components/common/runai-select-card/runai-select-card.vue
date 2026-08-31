@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <label class="runai-select-card" :for="cmpId">
     <q-card class="card-content" :class="{ 'is-checked': value, 'is-disabled': disabled, 'no-padding': noPadding }">

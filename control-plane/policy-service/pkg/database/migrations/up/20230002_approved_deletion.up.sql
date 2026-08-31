@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- list of clusters for which deletion of policies has been approved
 CREATE TABLE IF NOT EXISTS approved_deletions (
     tenant_id integer NOT NULL,

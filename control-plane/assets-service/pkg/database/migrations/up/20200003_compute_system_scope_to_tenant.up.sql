@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- This scripts migrates 4 compute assets under system scope to tenant scope
 -- it looks for tenants that use the asset in either workloads or templates
 -- and creates a new asset for each tenant with the same metadata and content

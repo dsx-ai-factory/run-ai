@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { ROOT_URL, getUrlByEnvType } from "@/constants/docs";
 import type { ComponentOptions } from "vue";
 

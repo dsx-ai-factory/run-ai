@@ -5,7 +5,7 @@
 # control so decisions are shared across the team.
 version: "1.0"
 project: "runai"
-last_updated: "2026-08-23"
+last_updated: "2026-08-30"
 
 repository_exposure_classification:
   visibility: "Public"
@@ -61,5 +61,32 @@ accepted_risks:
       workloads — is knowingly retained pending a rootless FUSE alternative.
     triaged_by: "security-team"
     date: "2026-08-23"
+
+  - slug: "device-code-grant-not-supported"
+    threat: >-
+      OAuth 2.0 Device Authorization Grant (device_code, RFC 8628) was evaluated
+      as a login option for runai-cli (see RUN-41724 HLD:
+      https://nvidia.atlassian.net/wiki/spaces/Runai/pages/3806540674) to remove
+      the manual paste-back step in the `runai login sso` / remote-browser flow.
+      Won't-do: not implemented. identity-manager keeps
+      oauth2.device.authorization.grant.enabled=false unconditionally for every
+      client; no per-client-type exception has been introduced.
+    severity: "medium"
+    reason: >-
+      Rejected due to security tradeoffs documented in the HLD: (1) device codes
+      are valid ~10 minutes vs. near-instant code exchange in the existing local-
+      redirect and remote-browser flows, a materially longer interception window;
+      (2) "device code phishing" is a documented real-world attack pattern
+      against this grant — an attacker starts their own device-flow session and
+      socially engineers a victim into approving the attacker's user_code on the
+      real IdP login page, hijacking the victim's session; (3) supporting it
+      would broaden identity-manager's policy surface by introducing a new
+      per-client-type exception to today's strict, unconditional deny of this
+      grant. The UX benefit (no copy/paste) did not outweigh these risks. If
+      reconsidered, requires: verification_uri_complete, short code TTL, clear
+      client-name display on the consent screen, and rate limiting on the
+      device-authorization endpoint.
+    triaged_by: "security-team"
+    date: "2026-08-30"
 
 suppressed_cves: []

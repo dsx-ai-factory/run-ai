@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { defineStore } from "pinia";
 import type { SettingsGetResponse, SettingsKeyEnum } from "@/swagger-models/identity-manager-client";
 import { securitySettingsService } from "@/services/control-plane/security-settings.service/security-settings.service";

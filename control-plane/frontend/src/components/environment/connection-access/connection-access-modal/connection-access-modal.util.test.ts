@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { convertNamesToItems } from "./connection-access-modal.util";
 
 import { EToolLabel } from "./connection-access-modal.model";

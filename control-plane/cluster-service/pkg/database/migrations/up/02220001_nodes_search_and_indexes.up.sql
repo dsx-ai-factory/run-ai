@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 CREATE INDEX IF NOT EXISTS idx_node_name ON node (name);
 CREATE INDEX IF NOT EXISTS idx_node_status ON node (status);
 CREATE INDEX IF NOT EXISTS idx_node_node_pool ON node (node_pool);

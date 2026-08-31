@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Restore the applications_view definition from 03000001 (department_name, no resource_connections)
 -- so it no longer references resource_refs, then drop the column.
 DROP VIEW IF EXISTS applications_view;

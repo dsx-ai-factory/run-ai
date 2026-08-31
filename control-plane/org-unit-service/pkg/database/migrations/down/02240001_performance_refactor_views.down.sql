@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 DROP INDEX IF EXISTS resources_deleted_idx;
 DROP INDEX IF EXISTS resources_updated_idx;
 DROP INDEX IF EXISTS idx_resources_org_unit_deleted_null;

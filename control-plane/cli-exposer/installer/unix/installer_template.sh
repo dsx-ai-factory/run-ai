@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+
 sdk_version="{{ or .SdkVersion "${RUNAI_CLI_SDK_VERSION}" }}"
 cp_version="{{ or .CpVersion "${RUNAI_CLI_CP_VERSION}" }}"
 runai_home_dir="${HOME}/.runai"

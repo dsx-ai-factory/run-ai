@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <div class="setting-editable-field row justify-between no-wrap items-center q-pa-sm q-mt-md">
     <span class="ellipsis col-6" :class="{ 'text-subtitle1': useLargerLabel }">{{ label }}</span>

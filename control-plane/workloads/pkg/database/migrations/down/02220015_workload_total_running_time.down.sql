@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 CREATE OR REPLACE FUNCTION update_phases_update_time()
     RETURNS TRIGGER AS $$
 BEGIN

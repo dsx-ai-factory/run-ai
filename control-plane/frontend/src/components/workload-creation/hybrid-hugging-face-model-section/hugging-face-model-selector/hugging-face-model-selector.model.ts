@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export enum BACKEND_MESSAGES {
   MODEL_WAS_NOT_FOUND_ON_HUGGING_FACE = "the provided model was not found on hugging face",
 }

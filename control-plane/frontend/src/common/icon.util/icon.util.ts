@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import {
   LLM_IMAGE_FOR_HUGGING_FACE,
   LLM_IMAGE_FOR_TGI,

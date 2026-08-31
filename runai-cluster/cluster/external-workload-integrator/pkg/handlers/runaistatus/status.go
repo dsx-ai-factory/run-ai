@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package runaistatus computes the Run:ai phase + phaseMessage for v2 wlr-owned Jobs, matching v1 semantics.
 package runaistatus
 

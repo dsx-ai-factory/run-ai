@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Add configuration column to workloads_queue table
 -- This column stores workload configuration as a structured JSONB object
 -- Including MNNVL configuration with mode and GPU acceleration label keys

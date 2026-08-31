@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Add node_affinities column to workloads table
 ALTER TABLE workloads ADD COLUMN IF NOT EXISTS node_affinities JSONB;
 

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package externalworkloads
 
 import (
@@ -155,7 +160,11 @@ func (h *ExternalWorkloadHandler) applyDistributedInferenceStatus(ctx context.Co
 		input.MNNVLReady = plugin != nil && plugin.Phase == dromosv1alpha1.PluginPhaseReady
 	}
 
-	result := runaistatus.ComputeDistributedInferenceStatus(input)
+	networkingPhase := dromosv1alpha1.PluginPhase("")
+	if plugin, ok := wlr.Status.Plugins[networkingPluginName]; ok && plugin != nil {
+		networkingPhase = plugin.Phase
+	}
+	result := runaistatus.ComputeDistributedInferenceStatus(input, networkingPhase)
 	externalWorkload.Status.ObservedStatus.Phase = result.Phase
 	externalWorkload.Status.ObservedStatus.Message = result.Message
 	externalWorkload.Status.ObservedStatus.K8sStatus = distributedInferenceK8sPhase(result.Phase)

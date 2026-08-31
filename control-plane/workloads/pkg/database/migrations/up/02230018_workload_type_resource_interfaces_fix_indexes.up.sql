@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 
 -- Drop the old unique index that allowed multiple NULL tenant_id rows
 DROP INDEX IF EXISTS workload_type_resource_interfaces_version;

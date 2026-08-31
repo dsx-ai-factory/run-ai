@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { MetricsResponse } from "@/swagger-models/workloads-client";
 import { NodeMetricType } from "@/swagger-models/cluster-service-client";
 

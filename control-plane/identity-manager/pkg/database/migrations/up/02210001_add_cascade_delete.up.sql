@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 ALTER TABLE reconciler_versions DROP CONSTRAINT if exists fk_tenant_id;
 ALTER TABLE reconciler_versions ADD CONSTRAINT fk_tenant_id  FOREIGN KEY (tenant_id) REFERENCES realms(tenant_id) ON DELETE CASCADE;
 

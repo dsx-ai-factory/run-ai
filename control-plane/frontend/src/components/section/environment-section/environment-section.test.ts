@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { TTestEmit } from "@/models/unit-test.model";
 import type { IUIWorkloadEnvSectionModel } from "./environment-section.model";
 import {

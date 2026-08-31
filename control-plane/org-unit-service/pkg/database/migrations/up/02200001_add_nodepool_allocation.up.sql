@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 ALTER TABLE IF EXISTS resources ADD COLUMN IF NOT EXISTS allocated_gpu DECIMAL(12,3);
 ALTER TABLE IF EXISTS resources ADD COLUMN IF NOT EXISTS allocated_cpu DECIMAL(12,3);
 ALTER TABLE IF EXISTS resources ADD COLUMN IF NOT EXISTS allocated_memory DECIMAL(12,3);

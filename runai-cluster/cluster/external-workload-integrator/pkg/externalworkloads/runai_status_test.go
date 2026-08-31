@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package externalworkloads
 
 import (
@@ -130,6 +135,45 @@ var _ = Describe("ExternalWorkloadHandler.applyRunaiStatus", func() {
 			HaveKeyWithValue("statusReplicas", float64(1)),
 			HaveKeyWithValue("readyReplicas", float64(1)),
 		))
+	})
+
+	It("keeps ready distributed inference initializing while networking initializes", func() {
+		scheme := newScheme()
+		runner := newRunner("dinf-runner")
+		runner.Status.Plugins = map[string]*dromosv1alpha1.PluginStatus{
+			networkingPluginName: {Phase: dromosv1alpha1.PluginPhaseInitializing},
+		}
+		pod := &corev1.Pod{ObjectMeta: metav1.ObjectMeta{
+			Name: "model-0", Namespace: namespace,
+			Labels: map[string]string{
+				"leaderworkerset.sigs.k8s.io/name":         "model",
+				"leaderworkerset.sigs.k8s.io/group-index":  "0",
+				"leaderworkerset.sigs.k8s.io/worker-index": "0",
+			},
+		}, Status: corev1.PodStatus{
+			Phase:      corev1.PodRunning,
+			Conditions: []corev1.PodCondition{{Type: corev1.PodReady, Status: corev1.ConditionTrue}},
+		}}
+		cachedClient := fakeclient.NewClientBuilder().WithScheme(scheme).WithObjects(pod).Build()
+		handler := &ExternalWorkloadHandler{cachedClient: cachedClient}
+		lws := &unstructured.Unstructured{Object: map[string]any{
+			"apiVersion": "leaderworkerset.x-k8s.io/v1",
+			"kind":       "LeaderWorkerSet",
+			"metadata":   map[string]any{"name": "model", "namespace": namespace},
+			"spec": map[string]any{
+				"replicas": int64(1), "leaderWorkerTemplate": map[string]any{"size": int64(1)},
+			},
+		}}
+		lws.SetGroupVersionKind(schema.GroupVersionKind{
+			Group: "leaderworkerset.x-k8s.io", Version: "v1", Kind: "LeaderWorkerSet",
+		})
+		ew := newEW(distributedInferenceWorkloadType, runner.Name)
+
+		Expect(handler.applyDistributedInferenceStatus(context.Background(), lws, runner, ew)).To(Succeed())
+
+		Expect(ew.Status.ObservedStatus.Phase).To(Equal(v1alpha1.ExWInitializingPhase))
+		Expect(ew.Status.ObservedStatus.Message).To(Equal("Replicas: 1; Ready: 1"))
+		Expect(ew.Status.ObservedStatus.K8sStatus).To(Equal("Initializing"))
 	})
 
 	It("rejects an LWS replica count above the int32 maximum", func() {

@@ -45,3 +45,5 @@ properties:
     type: boolean
     description: Is the Node Pool is the cluster default
     example: false
+  gpuTypes:
+    $ref: "./NodepoolGpuTypes.yaml"

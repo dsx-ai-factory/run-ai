@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Convert boolean enable_nim setting to JSON format {enabled: true/false}
 
 -- Update the value column to convert boolean to JSON object

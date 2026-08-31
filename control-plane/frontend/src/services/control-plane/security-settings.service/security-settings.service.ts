@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { identityManagerApi } from "@/services/infra/client-apis/identity-manager-api/identity-manager-api";
 import type { UpdateSecuritySettingByKeyRequest, SettingsGetResponse } from "@/swagger-models/identity-manager-client";
 import type { SettingsKeyEnum } from "@/swagger-models/identity-manager-client";

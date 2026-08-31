@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 #
 # Attaches local Grafana to a running cluster: port-forwards Prometheus and starts the
 # Grafana container, then cleans both up on exit.

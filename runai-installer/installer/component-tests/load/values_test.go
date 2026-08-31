@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package load_test
 
 import (
@@ -24,7 +29,7 @@ func TestLoad_GeneratedValues(t *testing.T) {
 
 	res := run(t, loadConfig(t, bundle), false)
 	require.NoError(t, res.err)
-	assert.Contains(t, res.pusher.Pushes, destination+"/karta/operator:0.2.1")
+	assert.Contains(t, res.pusher.Pushes, destination+"/karta/operator:0.2.3")
 	assert.Contains(t, res.pusher.Pushes, destination+"/kai-scheduler/operator:v0.16.8")
 
 	for _, name := range []string{"control-plane-airgap-values.yaml", "cluster-airgap-values.yaml"} {
@@ -71,9 +76,9 @@ func bindingsLock() *artifactlock.ArtifactLock {
 		},
 		{
 			Name:    "karta",
-			Version: "0.2.1",
+			Version: "0.2.3",
 			Images: []artifactlock.Image{
-				lockImage("operator", "ghcr.io/run-ai/karta/karta-operator", "0.2.1"),
+				lockImage("operator", "ghcr.io/run-ai/karta/karta-operator", "0.2.3"),
 			},
 		},
 		{

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import WorkloadTemplateNew from "./workload-template-new.vue";
 import { useWorkloadTemplateStore } from "@/stores/workload-template.store";
 import { createTestingPinia } from "@pinia/testing";

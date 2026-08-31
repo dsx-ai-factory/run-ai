@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Remove the deprecated idle_gpu_number / idle_gpu_number_updated_at columns
 -- (they backed the removed Workload.idleGpus API field; idle_allocated_gpus is the replacement).
 -- Both view families (workloads_view/workloads_materialized_view and the

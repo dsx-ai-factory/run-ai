@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package services
 
 import (
@@ -19,6 +24,7 @@ import (
 	"gorm.io/gorm"
 	"k8s.io/utils/ptr"
 
+	authorization_api "github.com/run-ai/runai/control-plane/authorization/pkg/client/generated"
 	authorization_utils "github.com/run-ai/runai/control-plane/authorization/pkg/client/helpers"
 	"github.com/run-ai/runai/control-plane/cluster-service/internal/generated/pkg/api"
 	verbosity "github.com/run-ai/runai/control-plane/cluster-service/pkg/api"
@@ -193,7 +199,7 @@ func (s *NodePoolsApiService) CreateNodepool(ctx context.Context, fields api.Nod
 	audit.AuditFromCtx(ctx).WithEntityName(nodepool.Name).WithEntityType(NodepoolAuditEntityType).WithEntityId(strconv.Itoa(int(nodepool.ID)))
 
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Debugf("Create nodepool %s request completed successfuly", nodepoolModel.Name)
-	apiNp, shapeErr := s.nodepoolToApiResponse(ctx, nodepool)
+	apiNp, shapeErr := s.nodepoolToApiResponseWithGpuTypes(ctx, nodepool)
 	if shapeErr != nil {
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError,
 			fmt.Sprintf("Failed to shape nodepool %s response", nodepool.Name), shapeErr)), nil
@@ -259,11 +265,12 @@ func (s *NodePoolsApiService) GetNodepool(ctx context.Context, nodepoolId string
 			fmt.Sprintf("Failed to get nodepool with id %s", nodepoolId), dbErr)), nil
 	}
 
-	apiNp, shapeErr := s.nodepoolToApiResponse(ctx, nodepool)
+	apiNp, shapeErr := s.nodepoolToApiResponseWithGpuTypes(ctx, nodepool)
 	if shapeErr != nil {
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError,
 			fmt.Sprintf("Failed to shape nodepool %s response", nodepool.Name), shapeErr)), nil
 	}
+
 	return api.Response(http.StatusOK, apiNp), nil
 }
 
@@ -273,9 +280,14 @@ func (s *NodePoolsApiService) GetNodepoolsMinimal(ctx context.Context, filterBy 
 		return NewErrorResponse(apiErr), nil
 	}
 
+	gpuTypes, apiErr := gpuTypesByNodepool(ctx, nodepools, nil)
+	if apiErr != nil {
+		return NewErrorResponse(apiErr), nil
+	}
+
 	nodepoolsMetadata := make([]api.NodepoolMinimal, len(nodepools))
 	for i, nodepool := range nodepools {
-		nodepoolsMetadata[i] = nodepool.ToMetadataApiModel()
+		nodepoolsMetadata[i] = nodepool.ToMetadataApiModel(gpuTypesOf(gpuTypes, nodepool))
 	}
 
 	return api.Response(http.StatusOK, api.GetNodepoolsMinimal200Response{Nodepools: nodepoolsMetadata}), nil
@@ -298,7 +310,12 @@ func (s *NodePoolsApiService) GetNodepoolMinimal(ctx context.Context, nodepoolId
 		return NewErrorResponse(apiErr), nil
 	}
 
-	return api.Response(http.StatusOK, nodepool.ToMetadataApiModel()), nil
+	gpuTypes, apiErr := gpuTypesByNodepool(ctx, []models.Nodepool{nodepool}, permittedScopes)
+	if apiErr != nil {
+		return NewErrorResponse(apiErr), nil
+	}
+
+	return api.Response(http.StatusOK, nodepool.ToMetadataApiModel(gpuTypesOf(gpuTypes, nodepool))), nil
 }
 
 func (s *NodePoolsApiService) GetNodepools(ctx context.Context, filterBy []string, sortBy api.NodepoolSortFilterFields, sortOrder string, offset int32, limit int32) (api.ImplResponse, error) {
@@ -332,9 +349,15 @@ func (s *NodePoolsApiService) GetNodepools(ctx context.Context, filterBy []strin
 	// Older runai-cluster agents call this endpoint with exactly `clusterId==<uuid>` and
 	// still read the deprecated top-level placementStrategy field.
 	includeDeprecatedFields := isClusterIdOnlyFilter(filters)
+
+	gpuTypes, gpuTypesErr := gpuTypesByNodepool(ctx, nodepools, permittedScopes)
+	if gpuTypesErr != nil {
+		return NewErrorResponse(gpuTypesErr), nil
+	}
+
 	responseNodepools := make([]api.Nodepool, len(nodepools))
 	for i, nodepool := range nodepools {
-		apiNp, shapeErr := s.nodepoolToApiResponse(ctx, nodepool)
+		apiNp, shapeErr := s.nodepoolToApiResponse(ctx, nodepool, gpuTypesOf(gpuTypes, nodepool))
 		if shapeErr != nil {
 			return NewErrorResponse(api.NewError(http.StatusInternalServerError,
 				fmt.Sprintf("Failed to shape nodepool %s response", nodepool.Name), shapeErr)), nil
@@ -373,7 +396,7 @@ func (s *NodePoolsApiService) GetNodepoolsMinimalInternal(ctx context.Context, t
 
 	responseNodepools := make([]api.NodepoolMinimal, len(nodepools))
 	for i, nodepool := range nodepools {
-		responseNodepools[i] = nodepool.ToMetadataApiModel()
+		responseNodepools[i] = nodepool.ToMetadataApiModel(nil)
 	}
 
 	return api.Response(http.StatusOK, api.GetNodepoolsMinimalInternal200Response{Nodepools: responseNodepools}), nil
@@ -392,7 +415,7 @@ func (s *NodePoolsApiService) GetNodepoolsInternal(ctx context.Context, clusterU
 
 	responseNodepools := make([]api.Nodepool, len(nodepools))
 	for i, nodepool := range nodepools {
-		apiNp, shapeErr := s.nodepoolToApiResponse(ctx, nodepool)
+		apiNp, shapeErr := s.nodepoolToApiResponse(ctx, nodepool, nil)
 		if shapeErr != nil {
 			return NewErrorResponse(api.NewError(http.StatusInternalServerError,
 				fmt.Sprintf("Failed to shape nodepool %s response", nodepool.Name), shapeErr)), nil
@@ -473,7 +496,7 @@ func (s *NodePoolsApiService) PatchNodepool(ctx context.Context, nodepoolId stri
 	audit.AuditFromCtx(ctx).WithEntityName(nodepool.Name).WithEntityType(NodepoolAuditEntityType).WithEntityId(strconv.Itoa(int(nodepool.ID)))
 
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Debugf("Patch nodepool %s with id %s request completed successfuly", nodepoolModel.Name, nodepoolId)
-	apiNp, shapeErr := s.nodepoolToApiResponse(ctx, nodepool)
+	apiNp, shapeErr := s.nodepoolToApiResponseWithGpuTypes(ctx, nodepool)
 	if shapeErr != nil {
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError,
 			fmt.Sprintf("Failed to shape nodepool %s response", nodepool.Name), shapeErr)), nil
@@ -588,7 +611,7 @@ func (s *NodePoolsApiService) UpdateNodepool(ctx context.Context, nodepoolId str
 	audit.AuditFromCtx(ctx).WithEntityName(nodepool.Name).WithEntityType(NodepoolAuditEntityType).WithEntityId(strconv.Itoa(int(nodepool.ID)))
 
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Debugf("Update nodepool %s with id %s request completed successfuly", nodepoolModel.Name, nodepoolId)
-	apiNp, shapeErr := s.nodepoolToApiResponse(ctx, nodepool)
+	apiNp, shapeErr := s.nodepoolToApiResponseWithGpuTypes(ctx, nodepool)
 	if shapeErr != nil {
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError,
 			fmt.Sprintf("Failed to shape nodepool %s response", nodepool.Name), shapeErr)), nil
@@ -757,13 +780,58 @@ func mapPatchFieldsToModel(ctx context.Context, nodepoolModel models.Nodepool, p
 // nodepoolToApiResponse builds the API response object for a nodepool, applying
 // cluster-capability-based response shaping. All endpoints that return a Nodepool
 // should funnel through this method so unsupported fields are stripped consistently.
-func (s *NodePoolsApiService) nodepoolToApiResponse(ctx context.Context, nodepool models.Nodepool) (api.Nodepool, error) {
+func (s *NodePoolsApiService) nodepoolToApiResponse(
+	ctx context.Context, nodepool models.Nodepool, gpuTypes []api.NodepoolGpuTypeDetails,
+) (api.Nodepool, error) {
 	apiNp := nodepoolDaoToApi(nodepool)
+	apiNp.GpuTypes = gpuTypes
 	capChecker := s.clusterCapabilityCheckerFactory(nodepool.ClusterId.String())
 	if err := stripUnsupportedSchedulingFields(ctx, apiNp.SchedulingConfiguration, capChecker); err != nil {
 		return api.Nodepool{}, err
 	}
 	return apiNp, nil
+}
+
+func (s *NodePoolsApiService) nodepoolToApiResponseWithGpuTypes(
+	ctx context.Context, nodepool models.Nodepool,
+) (api.Nodepool, error) {
+	gpuTypes, apiErr := gpuTypesByNodepool(ctx, []models.Nodepool{nodepool}, nil)
+	if apiErr != nil {
+		return api.Nodepool{}, apiErr
+	}
+	return s.nodepoolToApiResponse(ctx, nodepool, gpuTypesOf(gpuTypes, nodepool))
+}
+
+func gpuTypesByNodepool(
+	ctx context.Context, nodepools []models.Nodepool, permittedScopes *authorization_api.PermittedScopes,
+) (map[dao.NodepoolKey][]api.NodepoolGpuTypeDetails, *api.Error) {
+	tenantId, err := ParseTenantId(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if permittedScopes == nil {
+		scopes, ok := authorization_utils.GetPermittedScopesFromCtx(ctx)
+		if !ok || scopes == nil {
+			// Should never happen
+			return nil, api.NewError(http.StatusInternalServerError, "no permitted scopes defined", nil)
+		}
+		permittedScopes = scopes
+	}
+
+	keys := make([]dao.NodepoolKey, len(nodepools))
+	for i, nodepool := range nodepools {
+		keys[i] = dao.NewNodepoolKey(nodepool.ClusterId.String(), nodepool.Name)
+	}
+
+	return dao.GetNodepoolsGpuTypes(ctx, tenantId, *permittedScopes, keys)
+}
+
+// gpuTypesOf picks one nodepool's entry out of a gpuTypesByNodepool result.
+func gpuTypesOf(
+	gpuTypes map[dao.NodepoolKey][]api.NodepoolGpuTypeDetails, nodepool models.Nodepool,
+) []api.NodepoolGpuTypeDetails {
+	return gpuTypes[dao.NewNodepoolKey(nodepool.ClusterId.String(), nodepool.Name)]
 }
 
 func nodepoolDaoToApi(nodepool models.Nodepool) api.Nodepool {

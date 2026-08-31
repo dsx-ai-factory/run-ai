@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { RunaiRouteRecord } from "vue-router";
 import { ReportRoutesName } from "@/router/report.routes/report.routes.names";
 import { EMenuSubjectNames } from "@/components/infra/runai-layout/routes-model/routes-model";

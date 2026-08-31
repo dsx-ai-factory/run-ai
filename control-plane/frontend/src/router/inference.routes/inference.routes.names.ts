@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export enum INFERENCE_ROUTE_NAMES {
   INFERENCE_NEW = "inference-new",
   INFERENCE_ASSETS_EDIT = "inference-assets-edit",

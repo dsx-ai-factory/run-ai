@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { shallowMount } from "@vue/test-utils";
 import { describe, it, expect, vi } from "vitest";
 import { serviceAccountsService } from "@/services/control-plane/service-accounts.service/service-accounts.service";

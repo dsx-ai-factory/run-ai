@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import NoSsoEmailMapper from "@/views/errors/no-sso-email-mapper.vue";
 import ErrorApp from "@/views/errors/error-app.vue";
 import { ERROR_ROUTE_NAMES } from "./error.routes.names";

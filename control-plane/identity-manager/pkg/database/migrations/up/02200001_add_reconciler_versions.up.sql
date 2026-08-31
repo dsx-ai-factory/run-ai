@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Create the new table 'reconciler_versions'
 CREATE TABLE IF NOT EXISTS reconciler_versions (
     id                      UUID DEFAULT gen_random_uuid() PRIMARY KEY,

@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <template v-for="(segment, index) in segments" :key="`${segment.text}-${index}`">
     <mark v-if="segment.highlighted" class="search-highlight">{{ segment.text }}</mark>

@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 DROP TRIGGER IF EXISTS application_crud_sync_update_count_trigger ON application_crud_sync;
 DROP FUNCTION IF EXISTS application_crud_sync_inc_update_count();
 DROP INDEX IF EXISTS application_crud_sync_for_sync;

@@ -1,4 +1,8 @@
 #!/bin/sh
+
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 set -e
 S=/opt/keycloak/conf/secrets
 CONF=/conf/keycloak.conf

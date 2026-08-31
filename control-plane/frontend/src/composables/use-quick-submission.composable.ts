@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { inferenceService } from "@/services/control-plane/inference.service/inference.service";
 import { trainingService } from "@/services/control-plane/training.service/training.service";
 import { workspaceService } from "@/services/control-plane/workspace.service/workspace.service";

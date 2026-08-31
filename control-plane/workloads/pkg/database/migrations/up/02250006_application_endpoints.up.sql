@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 DROP VIEW IF EXISTS applications_view;
 CREATE VIEW applications_view AS (SELECT DISTINCT ON (a.id)
       a.*,

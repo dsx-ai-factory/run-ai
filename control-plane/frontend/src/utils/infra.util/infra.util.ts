@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export const prodDomains = /^(https:\/\/)?([a-zA-Z0-9-]+\.)?run\.ai$/;
 export const stagingDomains = /^(https:\/\/)?([a-zA-Z0-9-]+\.)?staging\.run\.ai$/;
 export const testDomains = /^(https:\/\/)?([a-zA-Z0-9-]+\.)?test\.run\.ai$/;

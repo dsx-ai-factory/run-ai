@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 DROP INDEX IF EXISTS datavolumes_search_vector_idx;
 ALTER TABLE datavolumes DROP COLUMN IF EXISTS search_vector;
 

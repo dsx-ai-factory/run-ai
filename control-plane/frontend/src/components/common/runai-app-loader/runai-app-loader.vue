@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section class="runai-app-loader">
     <vue3-lottie class="lottie-loader" :animation-data="modifiedAnimationData" :height="70" :width="70" />

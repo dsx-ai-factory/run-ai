@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <div class="diagram-legend flex items-center bg-white" :class="{ collapsed: isCollapsed }">
     <div v-if="!isCollapsed" class="legend-items flex items-center q-gutter-md">

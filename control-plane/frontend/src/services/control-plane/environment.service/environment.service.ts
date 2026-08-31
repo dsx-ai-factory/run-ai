@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { assetsServiceApi } from "@/services/infra/client-apis/assets-service-api/assets-service-api";
 import type { IAssetsFilter } from "@/models/filter.model";
 import { httpService } from "@/services/infra/https.service/http.service";

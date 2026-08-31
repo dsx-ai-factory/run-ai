@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section :class="['runai-drawer-nodata', wrapperPaddingClass]">
     <div v-for="(message, index) of messages" class="row justify-center" :key="index">{{ message }}</div>

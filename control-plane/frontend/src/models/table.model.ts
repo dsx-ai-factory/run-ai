@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { EFilterOperator, EColumnFilterType } from "@/models/filter.model";
 import type { ISelectOption } from "@/models/global.model";
 import type {

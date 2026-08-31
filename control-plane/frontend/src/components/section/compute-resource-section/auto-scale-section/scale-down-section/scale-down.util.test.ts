@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { scaleDownUtil } from "./scale-down.util";
 import { SCALE_TO_ZERO_RETENTION_IN_MINUTES_DEFAULT_VALUE } from "./scale-down-section.model";
 import type { AutoScaling } from "@/swagger-models/workloads-client";

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Position, type Node, type Edge } from "@vue-flow/core";
 import type { Workload, WorkloadElement, Pod, WorkloadElementResponse } from "@/swagger-models/workloads-client";
 import { DEFAULT_ENDPOINT_HANDLE_ID } from "@/components/common/diagram-layout/diagram-layout.util";

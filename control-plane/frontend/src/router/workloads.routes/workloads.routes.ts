@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Action, ResourceType } from "@/swagger-models/authorization-client";
 import type { NavigationGuardNext, RouteLocationNormalized, RunaiRouteRecord } from "vue-router";
 import { EWorkloadViewType, WORKLOAD_ROUTE_NAMES } from "@/router/workloads.routes/workloads.routes.names";

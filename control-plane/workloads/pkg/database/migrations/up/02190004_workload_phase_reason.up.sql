@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 drop MATERIALIZED VIEW IF EXISTS workloads_materialized_view;
 drop view if exists workloads_view;
 

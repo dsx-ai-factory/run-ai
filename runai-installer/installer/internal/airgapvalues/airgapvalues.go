@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package airgapvalues builds the Helm values that point the Run:ai charts at a
 // mirror registry. It is the one place that knows how each chart consumes an
 // image reference, which the charts do not agree on: most take a

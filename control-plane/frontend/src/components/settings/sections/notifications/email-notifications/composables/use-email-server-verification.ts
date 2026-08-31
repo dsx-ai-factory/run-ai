@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { ref, computed, type Ref } from "vue";
 import { ERunaiVerifyButtonStatus } from "@/components/common/runai-verify-button";
 import { notificationService } from "@/services/control-plane/notifications.service/notification.service";

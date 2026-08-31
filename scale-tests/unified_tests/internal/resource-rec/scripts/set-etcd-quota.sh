@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 # Raise etcd's backend quota above the 2 GiB default, for scale levels expected to exceed it.
 #
 # A Run:ai workload costs ~23 KiB of etcd across six keys (pod, job, podgroup,

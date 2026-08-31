@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { httpService } from "@/services/infra/https.service/http.service";
 import { identityManagerApi } from "@/services/infra/client-apis/identity-manager-api/identity-manager-api";
 import type {

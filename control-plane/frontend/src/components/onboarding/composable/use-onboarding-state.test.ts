@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useOnboardingState } from "./use-onboarding-state";
 import { setActivePinia, createPinia } from "pinia";

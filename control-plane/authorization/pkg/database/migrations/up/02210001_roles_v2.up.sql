@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 ALTER TABLE IF EXISTS roles ADD COLUMN IF NOT EXISTS scope_type text not null default 'system';
 ALTER TABLE IF EXISTS roles ADD COLUMN IF NOT EXISTS scope_id text default null;
 ALTER TABLE IF EXISTS roles ADD COLUMN IF NOT EXISTS scope_name text default null;

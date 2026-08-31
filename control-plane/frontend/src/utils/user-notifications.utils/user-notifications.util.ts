@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { type CategorizedNotificationSettings, type NotificationSettings } from "@/models/user-setting.model";
 import type { Subscription, SubscriptionEvent } from "@/swagger-models/notifications-proxy-client";
 

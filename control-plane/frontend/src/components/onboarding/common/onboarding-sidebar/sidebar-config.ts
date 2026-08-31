@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { showsClusterLocationStep } from "@/services/infra/boot-config.service/boot-config.service";
 import type { OnboardingSidebarConfig } from "./types";
 import { OnboardingStep } from "@/components/onboarding/models/admin-onboarding.model";

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package v1alpha1 contains a minimal local mirror of the argoproj.io/v1alpha1
 // Workflow type tree, kept just large enough for ArgoWorkflowTopOwnerHandler
 // to parse the fields it consumes. See workflow_types.go for the rationale.

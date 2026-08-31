@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <q-tr class="runai-table-row" :class="{ selected: isSelected }" @click="rowClicked">
     <q-td class="q-table--col-auto-width" v-if="isSelectable">

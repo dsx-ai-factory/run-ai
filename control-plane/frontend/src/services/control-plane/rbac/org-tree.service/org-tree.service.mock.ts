@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { OrgUnit } from "@/swagger-models/org-unit-service-client";
 import { ScopeType } from "@/swagger-models/authorization-client";
 import type { IOrgTreeNode } from "@/models/org-tree.model";

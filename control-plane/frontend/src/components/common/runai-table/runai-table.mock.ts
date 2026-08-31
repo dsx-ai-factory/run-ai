@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { computeResourceIndexColumns } from "@/table-models/compute-resource.table-model";
 import { dataSourceIndexColumns } from "@/table-models/data-source.table-model";
 import { environmentIndexColumns } from "@/table-models/environment.table-model";

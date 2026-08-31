@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export enum errorMessages {
   VALUE_NOT_EMPTY = "Enter a value",
   SELECT_A_VALUE = "Select a value",

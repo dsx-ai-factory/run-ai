@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, expect, vi, it } from "vitest";
 import type { VueWrapper } from "@vue/test-utils";
 import { mount } from "@vue/test-utils";

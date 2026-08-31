@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 declare module "vue-draggable-plus" {
   import type { DefineComponent, ComponentOptionsMixin, PublicProps } from "vue";
   import type { Options, SortableEvent } from "sortablejs";

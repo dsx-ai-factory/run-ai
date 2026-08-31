@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 CREATE TABLE IF NOT EXISTS storage_class_configurations (
        id            UUID DEFAULT gen_random_uuid() PRIMARY KEY,
        tenant_id     INT NOT NULL,

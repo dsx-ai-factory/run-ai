@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Use btree_gist extension with exclusion constraint to enforce proper scoped uniqueness
 
 -- Drop the existing global unique constraint on role name

@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 
 -- return the index to the same strucutre it was before we updated it in the up migration
 DROP INDEX IF EXISTS by_name;

@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 ALTER TABLE datavolumes DROP constraint if exists datavolume_cluster_unique_constraint, ADD constraint datavolume_cluster_unique_constraint UNIQUE (cluster_id, name);
 ALTER TABLE datavolumes DROP constraint if exists datavolume_tenant_unique_constraint;
 

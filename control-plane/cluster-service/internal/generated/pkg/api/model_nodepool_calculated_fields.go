@@ -75,6 +75,12 @@ type NodepoolCalculatedFields struct {
 	//IsDefault bool `json:"isDefault"`
 	IsDefault bool `json:"isDefault" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// The GPU hardware in the node pool, one entry per distinct combination of GPU model and per-device memory found across its nodes. A heterogeneous node pool yields several entries. Omitted when the node pool has no GPU nodes.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuTypes []NodepoolGpuTypeDetails `json:"gpuTypes,omitempty"`
+	GpuTypes []NodepoolGpuTypeDetails `json:"gpuTypes,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertNodepoolCalculatedFieldsRequired checks if the required fields are not zero-ed
@@ -95,6 +101,11 @@ func AssertNodepoolCalculatedFieldsRequired(obj NodepoolCalculatedFields) error 
 		}
 	}
 
+	for _, el := range obj.GpuTypes {
+		if err := AssertNodepoolGpuTypeDetailsRequired(el); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -150,5 +161,15 @@ func AssertNodepoolCalculatedFieldsConstraints(obj NodepoolCalculatedFields) err
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	for _, el := range obj.GpuTypes {
+		if err := AssertNodepoolGpuTypeDetailsConstraints(el); err != nil {
+			return err
+		}
+	}
 	return nil
 }

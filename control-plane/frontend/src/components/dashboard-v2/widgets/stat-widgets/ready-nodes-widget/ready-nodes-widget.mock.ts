@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export const mockReadyNodesTelemetry = {
   type: "READY_GPU_NODES",
   timestamp: "2024-01-01T00:00:00Z",

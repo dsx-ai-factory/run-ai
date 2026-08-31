@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export enum INFERENCE_TEMPLATE_ROUTE_NAMES {
   WORKLOAD_TEMPLATE_INFERENCE_NEW = "workload-template-inference-new",
   WORKLOAD_TEMPLATE_INFERENCE_VLLM = "workload-template-inference-vllm",

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package personalcreds materializes Run:AI personal-credential Secrets for
 // YAML / NIM-API workloads. See designs/personal-credentials-plugin/.
 package personalcreds

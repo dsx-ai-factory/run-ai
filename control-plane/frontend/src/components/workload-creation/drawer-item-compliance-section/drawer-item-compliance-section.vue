@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <overlay-drawer-section-wrapper @close="$emit('close')" :header-style="{ background: '#EEEEEE' }">
     <template #header-title>

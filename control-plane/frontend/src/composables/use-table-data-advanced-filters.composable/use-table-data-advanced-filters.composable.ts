@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { computed, type ComputedRef, onUnmounted, ref, type Ref, watch } from "vue";
 import { useQuasar } from "quasar";
 import { useRoute } from "vue-router";

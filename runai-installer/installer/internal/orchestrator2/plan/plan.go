@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package plan builds executable orchestrator plans for every command
 // (install, upgrade, uninstall). It lives outside the orchestrator2 core
 // because it depends on the actions package (which itself depends on

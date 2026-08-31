@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <runai-action-button v-if="isReadOnlyPermission" btn-action="review" @click="handleReviewAction">
     <runai-select-menu :list="availableReviewSteps" :loading="loadingSteps" @selected-value="onReviewStepSelected" />

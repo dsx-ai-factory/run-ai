@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { IRunaiWizardLayoutStep } from "@/models/runai-wizard-layout.model";
 import { EDistributedReplicaType } from "@/models/workload.model";
 import type { DistributedFramework, ScopeType } from "@/swagger-models/workloads-client";

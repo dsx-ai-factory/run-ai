@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { ISecurityModel } from "@/models/environment.model";
 import { UidGidSource } from "@/swagger-models/assets-service-client";
 import type { VueWrapper } from "@vue/test-utils";

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import RunaiDetailsPanel from "./runai-details-panel.vue";
 import RunaiDetailsPanelControls from "./runai-details-panel-controls.vue";
 import RunaiDetailsPanelSection from "./runai-details-panel-section.vue";

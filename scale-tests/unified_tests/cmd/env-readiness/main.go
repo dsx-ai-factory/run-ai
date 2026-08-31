@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // env-readiness gates whether a provisioned environment has settled enough to start a
 // measurement run against. Exits non-zero if any check fails, and always writes
 // env-readiness-report.json to OUTPUT_DIR.

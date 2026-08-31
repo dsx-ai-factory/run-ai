@@ -10,6 +10,8 @@ github.com/ClickHouse/ch-go v0.73.0 h1:jsHiGRbQ3sz+gekvDFJF29LWDo5dzbJm5s1h8TWVP
 github.com/ClickHouse/ch-go v0.73.0/go.mod h1:wkFIxrqlXeRJ9cn3r5Fz5Qen9jl5aTMPuGZeuJpANNY=
 github.com/ClickHouse/clickhouse-go/v2 v2.47.0 h1:ZDAzrnKSOPTIsm4tdUNfrii2yc8dk4SVRLC77BR7Z5Q=
 github.com/ClickHouse/clickhouse-go/v2 v2.47.0/go.mod h1:sPj7C7UYQ2MWHcfX+4eGN6nwnCqwUKfgO6PcwKpd6K8=
+github.com/DATA-DOG/go-sqlmock v1.5.2 h1:OcvFkGmslmlZibjAjaHm3L//6LiuBgolP7OputlJIzU=
+github.com/DATA-DOG/go-sqlmock v1.5.2/go.mod h1:88MAG/4G7SMwSE3CeA0ZKzrT5CiOU3OJ+JlNzwDqpNU=
 github.com/Masterminds/semver/v3 v3.4.0 h1:Zog+i5UMtVoCU8oKka5P7i9q9HgrJeGzI9SA1Xbatp0=
 github.com/Masterminds/semver/v3 v3.4.0/go.mod h1:4V+yj/TJE1HU9XfppCwVMZq3I84lprf4nC11bSS5beM=
 github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERoyfY=
@@ -22,8 +24,8 @@ github.com/ThreeDotsLabs/watermill-redisstream v1.3.0 h1:iCNX6d2MiBkx0reAfLWa2Ls
 github.com/ThreeDotsLabs/watermill-redisstream v1.3.0/go.mod h1:ZRe0VpA0Ho/4MESUrXdqJMaWtiWhi4emxIYpqsxi98Y=
 github.com/andybalholm/brotli v1.2.1 h1:R+f5xP285VArJDRgowrfb9DqL18yVK0gKAW/F+eTWro=
 github.com/andybalholm/brotli v1.2.1/go.mod h1:rzTDkvFWvIrjDXZHkuS16NPggd91W3kUSvPlQ1pLaKY=
-github.com/aws/smithy-go v1.27.2 h1:y9NPmSE6am6LjEFPfqHqG/jJk7AauQvhCJONKh7kpzk=
-github.com/aws/smithy-go v1.27.2/go.mod h1:YE2RhdIuDbA5E5bTdciG9KrW3+TiEONeUWCqxX9i1Fc=
+github.com/aws/smithy-go v1.27.8 h1:FR0dxZfIlV7Z8eh2iHfIofdunw382XsDV3Mxt9nUvRY=
+github.com/aws/smithy-go v1.27.8/go.mod h1:YE2RhdIuDbA5E5bTdciG9KrW3+TiEONeUWCqxX9i1Fc=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/bsm/ginkgo/v2 v2.12.0 h1:Ny8MWAHyOepLGlLKYmXG4IEkioBysk6GpaRTLC8zwWs=
@@ -164,8 +166,8 @@ github.com/kylelemons/godebug v1.1.0 h1:RPNrshWIDI6G2gRW9EHilWtl7Z6Sb1BR0xunSBf0
 github.com/kylelemons/godebug v1.1.0/go.mod h1:9/0rRGxNHcop5bhtWyNeEfOS8JIWk580+fNqagV/RAw=
 github.com/leodido/go-urn v1.4.0 h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=
 github.com/leodido/go-urn v1.4.0/go.mod h1:bvxc+MVxLKB4z00jd1z+Dvzr47oO32F/QSNjSBOlFxI=
-github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=
-github.com/lib/pq v1.10.9/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
+github.com/lib/pq v1.11.2 h1:x6gxUeu39V0BHZiugWe8LXZYZ+Utk7hSJGThs8sdzfs=
+github.com/lib/pq v1.11.2/go.mod h1:/p+8NSbOcwzAEI7wiMXFlgydTwcgTr3OSKMsD2BitpA=
 github.com/lithammer/shortuuid/v3 v3.0.7 h1:trX0KTHy4Pbwo/6ia8fscyHoGA+mf1jWbPJVuvyJQQ8=
 github.com/lithammer/shortuuid/v3 v3.0.7/go.mod h1:vMk8ke37EmiewwolSO1NLW8vP4ZaKlRuDIi8tWWmAts=
 github.com/lithammer/shortuuid/v4 v4.2.0 h1:LMFOzVB3996a7b8aBuEXxqOBflbfPQAiVzkIcHO0h8c=
@@ -286,8 +288,8 @@ github.com/run-ai/runai/runai-common-packages/cache/v2 v2.4.3 h1:RLsiDzZcrutp2Q6
 github.com/run-ai/runai/runai-common-packages/cache/v2 v2.4.3/go.mod h1:N1pit62iSeb9DsxLhay8GFnM/3GIiTlnQNcGT7voLdI=
 github.com/run-ai/runai/runai-common-packages/config v1.2.8 h1:ZBEGLkOUO3IMNvwOs1t1a+ahvbexuurEFoOXSVcFgnA=
 github.com/run-ai/runai/runai-common-packages/config v1.2.8/go.mod h1:UnL9BuK3PoNqv6kgEhDbTwnVL4V0HflcQ3DwJBa0M3M=
-github.com/run-ai/runai/runai-common-packages/dao-utils v1.4.19 h1:Kk8TJKg0Yn0W13Cb9pk1zC9m1YFf57R51K0ai08n5wE=
-github.com/run-ai/runai/runai-common-packages/dao-utils v1.4.19/go.mod h1:EO0pyJQtf6S33Khp9W+YDIePNeKW+UA3AGTKhBmbdVc=
+github.com/run-ai/runai/runai-common-packages/dao-utils v1.4.21 h1:wBH8vIAu04PyGOEWvz0m+Enf27nMr2pK/P9xz9e14Dg=
+github.com/run-ai/runai/runai-common-packages/dao-utils v1.4.21/go.mod h1:MfWlB5IuoCcuMKx7WKR1XZ5jM7ys8xCmA1xW+dn8l9o=
 github.com/run-ai/runai/runai-common-packages/fips v1.0.0 h1:AIbVhkeISd+In5VJsdYUH75tTi1wC2gL5of329ISpnU=
 github.com/run-ai/runai/runai-common-packages/fips v1.0.0/go.mod h1:jFTWAI5RnXd4qul4l4e56kRnGJfxnsJlZzk9K3BY76g=
 github.com/run-ai/runai/runai-common-packages/logging v1.0.13 h1:iHfJp7PcHzu3tKxkjxLD2neu6W6nFMffIb40bQYFRas=
@@ -296,6 +298,8 @@ github.com/run-ai/runai/runai-common-packages/metrics v1.2.4 h1:7+TetbiDTFIxZ46J
 github.com/run-ai/runai/runai-common-packages/metrics v1.2.4/go.mod h1:gE7gr07lZktg7X1Xab48nHCYiNNr+ya15f5nGMhbJxc=
 github.com/run-ai/runai/runai-common-packages/runaictx v1.1.5 h1:HACPWsBPp+VXkvAnHuHiPxT1or33IAO8mkRE//k9ql4=
 github.com/run-ai/runai/runai-common-packages/runaictx v1.1.5/go.mod h1:AdsugYhhrgH9cbO6NzNUVdHvcaLx0AjTbTma6FXfv8U=
+github.com/run-ai/runai/runai-common-packages/runaidb v1.0.11 h1:NNmPaCZxD6vtpWTRdQJg8Fw9Z/nVf6xdoVVAQRsP6cY=
+github.com/run-ai/runai/runai-common-packages/runaidb v1.0.11/go.mod h1:M9w2vK+oCtTlSyU7OxEKif7PnzMalbloNOSt2ThmnBU=
 github.com/run-ai/runai/runai-common-packages/runaihttp v1.1.5 h1:tmNr4ZupPI3xka7L1fCnO9GU7OULr0bP83t3KO8rW4I=
 github.com/run-ai/runai/runai-common-packages/runaihttp v1.1.5/go.mod h1:dBwPgLdMFo/FrGG+aNeOp6FUqZyXBmcbij1sP/mz11c=
 github.com/run-ai/runai/runai-common-packages/runaipubsub v1.6.3 h1:M5avZyKbUZ1VAAJUrNxGXgWRvR4bSV04J7BCN9y8h7E=

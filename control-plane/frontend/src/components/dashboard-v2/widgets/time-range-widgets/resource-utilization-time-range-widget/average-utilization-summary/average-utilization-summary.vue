@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <div class="row items-center avg-utilization-summary" aid="avg-utilization-summary">
     <div class="avg-item" v-for="(avg, i) in avgData" :key="avg.name">

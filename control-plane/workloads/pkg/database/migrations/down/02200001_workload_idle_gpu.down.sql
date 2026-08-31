@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 ALTER TABLE workloads DROP COLUMN IF EXISTS idle_gpu_number;
 ALTER TABLE workloads DROP COLUMN IF EXISTS idle_gpu_number_updated_at;
 

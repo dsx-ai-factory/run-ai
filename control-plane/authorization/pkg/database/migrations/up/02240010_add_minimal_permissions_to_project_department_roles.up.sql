@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Migration to add clusters-minimal and nodepools-minimal permissions to custom roles and permission sets
 -- that have department or project read permissions but are missing the minimal permissions
 

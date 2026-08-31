@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { fileService } from "@/services/file.service/file.service";
 import { ESortOrder, type IPaginationFilter } from "@/models/filter.model";
 import { describe, vi, test, expect } from "vitest";

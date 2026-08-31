@@ -36,4 +36,4 @@ kai-scheduler:
 karta:
     image:
         repository: registry.local:5000/runai/karta/operator
-        tag: 0.2.1
+        tag: 0.2.3

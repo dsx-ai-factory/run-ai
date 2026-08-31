@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 ALTER TABLE IF EXISTS project DROP COLUMN IF EXISTS deletion_request;
 ALTER TABLE IF EXISTS project DROP COLUMN IF EXISTS deletion_type;
 ALTER TABLE IF EXISTS project DROP COLUMN IF EXISTS force_delete;

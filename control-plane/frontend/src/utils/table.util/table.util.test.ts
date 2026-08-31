@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { tableUtil } from "@/utils/table.util";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { columnA, columnB, rowA, rowB, rowC, rowD } from "@/utils/table.util/table.util.mock";

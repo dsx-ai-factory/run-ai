@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Drop the dependent views first so the column drop doesn't fail on dependency,
 -- and so SELECT w.* doesn't carry references to the soon-to-be-dropped columns.
 DROP MATERIALIZED VIEW IF EXISTS workloads_materialized_view;

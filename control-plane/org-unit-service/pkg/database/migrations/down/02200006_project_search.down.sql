@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 DROP INDEX IF EXISTS project_search_vector_idx;
 DROP VIEW IF EXISTS project_view;
 ALTER TABLE IF EXISTS project DROP COLUMN IF EXISTS search_vector;

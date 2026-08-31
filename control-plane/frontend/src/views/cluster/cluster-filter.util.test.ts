@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, expect, it } from "vitest";
 import { filterClustersByAdvancedFilters } from "./cluster-filter.util";
 import type { IAdvancedFilterModel, IEnumBasedFilterModel, IFreeTextFilterModel } from "@/models/filter.model";

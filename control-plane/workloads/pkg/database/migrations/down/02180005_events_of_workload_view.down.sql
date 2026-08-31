@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 drop view if exists timeout_events_of_workload_view;
 drop view if exists events_of_workload_view;
 create view events_of_workload_view AS (

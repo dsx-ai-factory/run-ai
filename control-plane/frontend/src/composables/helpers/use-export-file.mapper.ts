@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { ETableExportCsvFilesNames } from "@/models/table.model";
 import { DepartmentFilterSortFields, ProjectFilterSortFields } from "@/swagger-models/org-unit-service-client";
 import { CLUSTER_COLUMN_FILTER_NAME } from "@/models/filter.model";

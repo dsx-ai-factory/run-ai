@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <runai-form-wrapper :form-state="formData" ref="reportForm" full-width>
     <report-name-section v-model:report-name="formData.name" v-model:description="formData.description" />

@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 CREATE INDEX IF NOT EXISTS idx_workloads_type ON workloads (type);
 CREATE INDEX IF NOT EXISTS idx_workloads_name ON workloads (name);
 CREATE INDEX IF NOT EXISTS idx_workloads_project_name ON workloads (project_name);

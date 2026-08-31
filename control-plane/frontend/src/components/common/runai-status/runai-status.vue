@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <span :class="getStatusClass"
     >{{ options.status }} <span v-if="displayUpdateTime" aid="status-update-time">({{ updateTime }})</span></span

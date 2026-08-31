@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section class="dcgm-nvlink-bandwidth-section-per-gpu-widget">
     <dcgm-nvlink-bandwidth-total-bytes-per-gpu-widget

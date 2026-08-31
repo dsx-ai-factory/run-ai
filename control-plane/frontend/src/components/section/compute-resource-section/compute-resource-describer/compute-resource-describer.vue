@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <div class="compute-resource-describer q-pa-md q-mb-md">
     <span class="q-mr-sm">For {{ amount }} {{ label }}:</span>

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, it, expect } from "vitest";
 import { orgUnitUtil } from "@/utils/org-unit.util/org-unit.util";
 import { EGpuResourceState } from "@/models/org-unit-forms.model";

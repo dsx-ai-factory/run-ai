@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 DROP INDEX IF EXISTS workload_type_status_cluster_version;
 CREATE UNIQUE INDEX IF NOT EXISTS workload_type_status_cluster ON workload_type_statuses(workload_type_id,cluster_id,tenant_id);
 

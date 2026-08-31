@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package specrun wires the terminal, event manager, failure handler, and
 // orchestrator runner around a resolved spec. It is command-agnostic: any CLI
 // command builds a *spec.Spec however it likes and hands it here for execution.

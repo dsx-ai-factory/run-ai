@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { AssetKind } from "@/swagger-models/assets-service-client";
 import { DATA_VOLUME_ROUTE_NAMES } from "../data-volume.routes/data-volume.routes.names";
 

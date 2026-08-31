@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export type PhosphorWeight = "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
 export type RunaiGlyphVariant = "outlined" | "filled";
 

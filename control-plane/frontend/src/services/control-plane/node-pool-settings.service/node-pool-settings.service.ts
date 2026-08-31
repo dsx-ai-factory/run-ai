@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { clusterServiceApi } from "@/services/infra/client-apis/cluster-service-api/cluster-service-api";
 import { httpService } from "@/services/infra/https.service/http.service";
 import {

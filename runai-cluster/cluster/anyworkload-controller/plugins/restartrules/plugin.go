@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package restartrules validates the WorkloadRunner restart ownership protocol
 // (spec.managedBy + the run.ai/request-ref label) on the dromos validating webhook.
 package restartrules

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { TourStep } from "@/components/common/guided-tour-popup/guided-tour.types";
 import { useGuidedTourStore } from "@/stores/guided-tour.store";
 import { guidedTourService } from "./guided-tour.service";

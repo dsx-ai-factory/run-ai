@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 
 -- Return the index to its original structure. the up script reversed the order ot the tenant id and scope type
 DROP INDEX IF EXISTS crud_templates_by_name;

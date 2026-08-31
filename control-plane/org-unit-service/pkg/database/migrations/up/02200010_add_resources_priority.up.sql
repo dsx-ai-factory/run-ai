@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 ALTER TABLE resources ADD COLUMN IF NOT EXISTS priority VARCHAR(100) DEFAULT 'Normal';
 
 DROP VIEW IF EXISTS project_view;

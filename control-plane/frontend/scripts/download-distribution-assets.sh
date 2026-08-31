@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+
 set -efu
 
 manifest_path="${1:?Usage: download-distribution-assets.sh <manifest-path> <output-directory>}"

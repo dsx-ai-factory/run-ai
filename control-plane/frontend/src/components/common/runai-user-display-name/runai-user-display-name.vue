@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <span ref="wrapperRef" class="runai-user-display-name">
     <q-skeleton v-if="loading" type="text" width="120px" />

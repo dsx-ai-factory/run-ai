@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 CREATE TABLE IF NOT EXISTS permission_sets (
     id              UUID PRIMARY KEY,
     name            VARCHAR NOT NULL,

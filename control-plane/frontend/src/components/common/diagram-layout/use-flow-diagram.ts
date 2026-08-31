@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { ref, nextTick } from "vue";
 import type { Node } from "@vue-flow/core";
 import { useVueFlow } from "@vue-flow/core";

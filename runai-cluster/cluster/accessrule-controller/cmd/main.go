@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package main
 
 import (
@@ -14,7 +19,6 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/run-ai/runai/runai-cluster/cluster/accessrule-controller/pkg/controllers/accessrule"
-	"github.com/run-ai/runai/runai-cluster/cluster/accessrule-controller/pkg/legacyprojectpermissions"
 	accessrulevalidator "github.com/run-ai/runai/runai-cluster/cluster/accessrule-controller/pkg/validators/accessrule"
 	"github.com/run-ai/runai/runai-cluster/cluster/accessrule-controller/pkg/version"
 	scheme_init "github.com/run-ai/runai/runai-cluster/cluster/go-operator/pkg/scheme-init"
@@ -98,13 +102,6 @@ func main() {
 	if err = mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
 		log.Error().Msgf("unable to set up ready check, error: %s", err.Error())
 		os.Exit(1)
-	}
-
-	if options.LegacyProjectPermissions {
-		stopper := make(chan struct{})
-		projectLegacyPermissionsHandler := legacyprojectpermissions.NewProjectLegacyPermissionsHandler(mgr.GetClient(), options.LegacyProjectPermissionsIntervalSeconds)
-		projectLegacyPermissionsHandler.Start(managerContext, stopper)
-		defer close(stopper)
 	}
 
 	printVersion()

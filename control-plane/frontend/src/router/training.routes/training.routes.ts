@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import TrainingNewApp from "@/views/training/creation/training-new-app.vue";
 import TrainingNew from "@/views/training/creation/training-new.vue";
 

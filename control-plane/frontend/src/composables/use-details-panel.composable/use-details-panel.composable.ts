@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { computed, isRef, ref, watch, type ComputedRef, type Ref } from "vue";
 import type { IDetailsPanelSectionDef } from "@/models/details-panel.model";
 

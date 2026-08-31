@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { TEnvVarNoneCustomSourceOption } from "@/models/environment.model";
 import type { IAssetsFilter } from "@/models/filter.model";
 import { credentialService } from "@/services/control-plane/credential.service/credential.service";

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package harness exposes shared fakes and utilities for orchestrator-level
 // component tests. Helpers live in a regular (non-_test) package so they can
 // be imported from any test package under component-tests/.
@@ -10,6 +15,8 @@ import (
 	"time"
 
 	"github.com/run-ai/runai/runai-installer/installer/internal/step"
+	"github.com/run-ai/runai/runai-installer/installer/internal/utils/helmclient"
+	"helm.sh/helm/v3/pkg/release"
 )
 
 type HelmCall struct {
@@ -30,11 +37,12 @@ type HelmCall struct {
 // implements both step.HelmInstaller (install/upgrade path) and
 // uninstall.HelmWrapper (uninstall path).
 type FakeHelmInstaller struct {
-	mu              sync.Mutex
-	Calls           []HelmCall
-	Releases        map[string]string
-	PendingReleases map[string]bool
-	UninstallErrors map[string]error
+	mu                 sync.Mutex
+	Calls              []HelmCall
+	Releases           map[string]string
+	PendingReleases    map[string]bool
+	UninstallErrors    map[string]error
+	UninstallResponses map[string]*release.UninstallReleaseResponse
 	// InstallErrors maps a release name to an error returned by
 	// InstallOrUpgradeRelease, letting tests simulate a failing install. The
 	// call is still recorded so tests can assert the attempt was made.
@@ -169,7 +177,7 @@ func (f *FakeHelmInstaller) UninstallRelease(releaseName, _ string, _ time.Durat
 	delete(f.Releases, releaseName)
 	if f.UninstallErrors != nil {
 		if err, ok := f.UninstallErrors[releaseName]; ok {
-			return err
+			return helmclient.NormalizeUninstallError(f.UninstallResponses[releaseName], err)
 		}
 	}
 	return nil

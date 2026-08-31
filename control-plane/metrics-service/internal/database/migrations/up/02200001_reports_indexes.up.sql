@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 CREATE INDEX IF NOT EXISTS idx_reports_created_by ON reports (created_by);
 CREATE INDEX IF NOT EXISTS idx_reports_created_at ON reports (created_at);
 CREATE INDEX IF NOT EXISTS idx_reports_status ON reports (status);

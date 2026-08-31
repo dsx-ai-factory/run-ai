@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package parsers
 
 import (
@@ -37,9 +42,17 @@ const (
 
 	NvidiaGpuCountLabelKey         = "nvidia.com/gpu.count"
 	NvidiaGpuTypeLabelKey          = "nvidia.com/gpu.product"
+	NvidiaGpuMemoryLabelKey        = "nvidia.com/gpu.memory"
 	AmdGpuTypeLabelPrefix          = "beta.amd.com/gpu.family."
 	GPUNetworkAccelerationLabelKey = "gpuNetworkAccelerationLabelKey"
 	NvidiaGpuCliqueLabel           = "nvidia.com/gpu.clique"
+
+	bytesInMib = 1024 * 1024
+	// Some gpu-feature-discovery versions report nvidia.com/gpu.memory in bytes rather than
+	// MiB (https://github.com/NVIDIA/gpu-feature-discovery/issues/26). No single device has
+	// more than 1 TiB of memory, so anything above that is really bytes. The boundary itself
+	// counts as MiB: a 1 TiB device is conceivable, a 1 MiB one is not.
+	maxPlausibleGpuMemoryMib = 1024 * 1024
 )
 
 var (
@@ -454,7 +467,8 @@ func getNvidiaGpuInfo(nodeLabels map[string]string, nodeName string) *swagger.Gp
 	}
 
 	result := &swagger.GpuInfo{
-		GpuType: nvidiaGpuType,
+		GpuType:        nvidiaGpuType,
+		GpuMemoryBytes: getNvidiaGpuMemoryBytes(nodeLabels, nodeName),
 	}
 
 	nvidiaGpuCountStr, countFound := nodeLabels[NvidiaGpuCountLabelKey]
@@ -473,6 +487,33 @@ func getNvidiaGpuInfo(nodeLabels map[string]string, nodeName string) *swagger.Gp
 
 	result.GpuCount = int32(nvidiaGpuCount)
 	return result
+}
+
+// Returns nil when the label is missing or unusable, so a node still reports its GPU type
+// and count when only the memory is unknown.
+func getNvidiaGpuMemoryBytes(nodeLabels map[string]string, nodeName string) *int64 {
+	gpuMemoryStr, found := nodeLabels[NvidiaGpuMemoryLabelKey]
+	if !found {
+		return nil
+	}
+
+	gpuMemory, err := strconv.Atoi(gpuMemoryStr)
+	if err != nil {
+		zap.S().Errorf("Failed to parse nvidia gpu memory label value: <%s> for node <%s>, error: %s",
+			gpuMemoryStr, nodeName, err.Error())
+		return nil
+	}
+
+	if gpuMemory <= 0 {
+		zap.S().Warnf("Found non-positive nvidia gpu memory <%d> on node <%s>", gpuMemory, nodeName)
+		return nil
+	}
+
+	if gpuMemory > maxPlausibleGpuMemoryMib {
+		return ptr.To(int64(gpuMemory))
+	}
+
+	return ptr.To(int64(gpuMemory) * bytesInMib)
 }
 
 func getAmdGpuInfo(nodeLabels map[string]string, nodeName string) *swagger.GpuInfo {

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { UnleashClient } from "@unleash/proxy-client-vue";
 import { getBootConfig } from "@/services/infra/boot-config.service/boot-config.service";
 

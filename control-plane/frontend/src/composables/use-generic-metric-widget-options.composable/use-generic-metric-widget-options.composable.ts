@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { ref, type Ref } from "vue";
 import type { EChartsOption } from "echarts";
 import type { LineSeriesOption } from "echarts/charts";

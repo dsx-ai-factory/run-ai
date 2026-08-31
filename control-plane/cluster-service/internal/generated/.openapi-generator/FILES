@@ -139,6 +139,7 @@ pkg/api/model_nodepool_create_response_fields.go
 pkg/api/model_nodepool_deprecated_fields.go
 pkg/api/model_nodepool_deprecated_placement_strategy.go
 pkg/api/model_nodepool_gpu_network_acceleration_detection.go
+pkg/api/model_nodepool_gpu_type_details.go
 pkg/api/model_nodepool_minimal.go
 pkg/api/model_nodepool_minimal_sort_fields.go
 pkg/api/model_nodepool_phase.go

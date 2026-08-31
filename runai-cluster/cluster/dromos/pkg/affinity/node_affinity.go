@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package affinity holds the node-affinity merge primitives shared by the dromos
 // plugins that write scheduling constraints onto a workload's pods. Every merge
 // here is idempotent, which is what keeps the framework's multi-round

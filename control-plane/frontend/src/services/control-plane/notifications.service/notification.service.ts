@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { notificationServiceApi } from "@/services/infra/client-apis/notification-service-api/notification-service-api";
 import {
   type NotificationChannel,

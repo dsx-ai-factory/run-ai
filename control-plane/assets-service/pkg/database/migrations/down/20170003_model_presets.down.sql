@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- order matters, first the containing assets, then the contained ones, then the metadata
 
 DELETE FROM assets_supported_workload_types WHERE asset_id in

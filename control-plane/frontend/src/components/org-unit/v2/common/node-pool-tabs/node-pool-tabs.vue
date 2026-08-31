@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <!-- Tabs bar - hidden when only one available node pool -->
   <div v-if="showTabs" class="node-pool-tabs-container row items-center no-wrap">

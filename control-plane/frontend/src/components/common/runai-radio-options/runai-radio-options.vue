@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <runai-section :title="title" :tooltip-text="titleTooltip" :tooltip-width="titleTooltipWidth" tooltip-position="right">
     <div v-if="showSearch" class="q-pl-sm q-pr-md q-pb-sm sticky-search w-25">

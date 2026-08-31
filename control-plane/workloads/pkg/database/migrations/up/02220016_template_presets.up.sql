@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 
 -- Put scope type in front of the key, to allow searching by scope type system with no tenant id
 DROP INDEX IF EXISTS crud_templates_by_name;

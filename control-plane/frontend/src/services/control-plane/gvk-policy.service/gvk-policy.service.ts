@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { policyServiceApi } from "@/services/infra/client-apis/policy-service-api/policy-service-api";
 import { httpService } from "@/services/infra/https.service/http.service";
 import { gvkPolicyUtil } from "@/utils/gvk-policy.util";

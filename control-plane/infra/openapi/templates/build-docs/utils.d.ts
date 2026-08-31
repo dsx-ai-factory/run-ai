@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Config } from '@redocly/openapi-core';
 import type { BuildDocsOptions } from './types';
 export declare function getObjectOrJSON(openapiOptions: string | Record<string, unknown>, config: Config): JSON | Record<string, unknown> | Config;

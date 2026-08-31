@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 create table if not exists audit_logs (
     created_at    timestamp with time zone,
     deleted_at    timestamp with time zone,

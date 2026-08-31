@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from "vitest";
 import { OnboardingStep } from "@/components/onboarding/models/admin-onboarding.model";
 import { Action, ResourceType } from "@/swagger-models/authorization-client";

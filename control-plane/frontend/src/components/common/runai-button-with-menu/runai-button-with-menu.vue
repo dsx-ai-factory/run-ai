@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <q-btn flat color="primary" class="btn-icon-sm" icon="ph-bold ph-plus" :label="buttonLabel" :disable="disable">
     <q-menu anchor="bottom left">

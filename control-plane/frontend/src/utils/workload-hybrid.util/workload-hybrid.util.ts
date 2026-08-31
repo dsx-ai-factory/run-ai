@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { DATA_SOURCE_ICONS_NAMES, distFrameworkIconsMap, toolTypeIconsMap } from "@/common/icons.constant";
 import { getNvidiaImageBasedIcon } from "@/common/icon.util";
 import {

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package nodepools reads node pool names from the cluster for the policy field rules.
 //
 // It exists so that sdk/apis/workload_fields/field_groups can offer node pool options

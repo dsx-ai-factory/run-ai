@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { afterEach, describe, it, expect, vi } from "vitest";
 import { workloadService } from "./workload.service";
 import { workloadsManagerApi } from "@/services/infra/client-apis/workloads-manager-api/workloads-manager-api";

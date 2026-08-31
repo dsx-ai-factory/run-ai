@@ -8,7 +8,7 @@ require (
 	github.com/onsi/gomega v1.43.0
 	github.com/run-ai/runai/control-plane/org-unit-service v0.0.0
 	github.com/run-ai/runai/runai-application-packages/convutils v1.0.4
-	github.com/run-ai/runai/runai-common-packages/dao-utils v1.4.19
+	github.com/run-ai/runai/runai-common-packages/dao-utils v1.4.21
 	github.com/run-ai/runai/runai-common-packages/logging v1.0.13
 	gorm.io/driver/postgres v1.6.2
 	gorm.io/gorm v1.31.2
@@ -27,7 +27,7 @@ require (
 	github.com/ThreeDotsLabs/watermill v1.3.5 // indirect
 	github.com/ThreeDotsLabs/watermill-redisstream v1.3.0 // indirect
 	github.com/andybalholm/brotli v1.2.1 // indirect
-	github.com/aws/smithy-go v1.27.2 // indirect
+	github.com/aws/smithy-go v1.27.8 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v3 v3.2.2 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
@@ -75,7 +75,7 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/klauspost/compress v1.18.6 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
-	github.com/lib/pq v1.10.9 // indirect
+	github.com/lib/pq v1.11.2 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/lithammer/shortuuid/v4 v4.2.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20260330125221-c963978e514e // indirect

@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 DROP VIEW IF EXISTS project_view;
 ALTER TABLE project DROP CONSTRAINT IF EXISTS fk_quota_status;
 

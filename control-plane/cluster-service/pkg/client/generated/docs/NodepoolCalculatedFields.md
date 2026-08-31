@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **DeletedBy** | Pointer to **string** |  | [optional] 
 **DeletedAt** | Pointer to **NullableTime** |  | [optional] 
 **IsDefault** | **bool** | Is the Node Pool is the cluster default | 
+**GpuTypes** | Pointer to [**[]NodepoolGpuTypeDetails**](NodepoolGpuTypeDetails.md) | The GPU hardware in the node pool, one entry per distinct combination of GPU model and per-device memory found across its nodes. A heterogeneous node pool yields several entries. Omitted when the node pool has no GPU nodes. | [optional] 
 
 ## Methods
 
@@ -253,6 +254,31 @@ and a boolean to check if the value has been set.
 
 SetIsDefault sets IsDefault field to given value.
 
+
+### GetGpuTypes
+
+`func (o *NodepoolCalculatedFields) GetGpuTypes() []NodepoolGpuTypeDetails`
+
+GetGpuTypes returns the GpuTypes field if non-nil, zero value otherwise.
+
+### GetGpuTypesOk
+
+`func (o *NodepoolCalculatedFields) GetGpuTypesOk() (*[]NodepoolGpuTypeDetails, bool)`
+
+GetGpuTypesOk returns a tuple with the GpuTypes field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuTypes
+
+`func (o *NodepoolCalculatedFields) SetGpuTypes(v []NodepoolGpuTypeDetails)`
+
+SetGpuTypes sets GpuTypes field to given value.
+
+### HasGpuTypes
+
+`func (o *NodepoolCalculatedFields) HasGpuTypes() bool`
+
+HasGpuTypes returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

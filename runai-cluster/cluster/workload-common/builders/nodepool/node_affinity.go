@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package nodepool resolves node pools and turns them into node affinity.
 //
 // It is deliberately a separate package from workload-common/builders: reading the

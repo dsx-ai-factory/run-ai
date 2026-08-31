@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- we used this sequence to mark every update on the table with increasing number
 -- which will be used as the timestamp for the sync.
 CREATE SEQUENCE IF NOT EXISTS crud_workloads_sequence;

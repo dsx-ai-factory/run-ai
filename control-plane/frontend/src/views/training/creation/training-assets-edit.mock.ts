@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { TrainingPolicyV2 } from "@/swagger-models/policy-service-client";
 
 import { type IProjectResources } from "@/models/project.model";

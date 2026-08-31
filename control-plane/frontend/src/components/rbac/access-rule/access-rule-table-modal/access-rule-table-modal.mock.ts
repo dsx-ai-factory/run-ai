@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { type AccessRule, ScopeType, SubjectType } from "@/swagger-models/authorization-client";
 import type { IAccessRuleTableModalOptions } from "@/models/access-rule.model";
 import { accessRulesMiniTableColumns } from "@/table-models/access-rule.table-model";

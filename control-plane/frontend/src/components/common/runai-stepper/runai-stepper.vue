@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section ref="stepperContainer" class="runai-stepper" :class="{ 'hide-stepper': steps.length === 1 }">
     <q-stepper

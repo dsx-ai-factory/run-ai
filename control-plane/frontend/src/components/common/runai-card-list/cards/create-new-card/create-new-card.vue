@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <runai-select-card :value="isSelected" @clicked="$emit('card-clicked')" aid="create-new-card">
     <q-card class="create-new-card workload-card-content text-body1 text-weight-medium">

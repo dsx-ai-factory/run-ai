@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Replace sync views with optimized SQL functions
 --
 -- The project_sync_view and department_sync_view virtual views aggregate the

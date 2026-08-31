@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- ###############################################################################################################
 --    create new partial materialized view - contain all fields other than the ones which are always changing
 --    and new wrapper view on those fields + the materialized view

@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 UPDATE resources SET priority = 'LowPlus' where priority='Low';
 UPDATE resources SET priority = 'Low' where priority='VeryLow';
 UPDATE resources SET priority = 'Normal' where priority='MediumLow';

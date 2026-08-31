@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, expect, it } from "vitest";
 import { shallowMount } from "@vue/test-utils";
 import AiApplicationResourceCard from "./ai-application-resource-card.vue";

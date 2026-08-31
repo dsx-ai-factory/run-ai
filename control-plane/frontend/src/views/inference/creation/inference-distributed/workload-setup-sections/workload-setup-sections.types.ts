@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { IWorkloadPriorityData } from "@/components/section/general-section/general-section.model";
 import type { IComputeSectionNodePoolsPolicy } from "@/components/section/compute-resource-section/node-pools-resource-section";
 import type { IntegerRules, StringOption } from "@/swagger-models/assets-service-client";

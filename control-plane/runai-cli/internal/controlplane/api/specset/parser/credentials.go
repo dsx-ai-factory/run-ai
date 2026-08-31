@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package parser
 
 // Personal-credential attribute keys used in submit (e.g. --env-my-credentials type=...,name=...,credential-name=...).

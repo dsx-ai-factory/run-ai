@@ -147,6 +147,12 @@ type Nodepool struct {
 	IsDefault bool `json:"isDefault" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// The GPU hardware in the node pool, one entry per distinct combination of GPU model and per-device memory found across its nodes. A heterogeneous node pool yields several entries. Omitted when the node pool has no GPU nodes.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuTypes []NodepoolGpuTypeDetails `json:"gpuTypes,omitempty"`
+	GpuTypes []NodepoolGpuTypeDetails `json:"gpuTypes,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	// Deprecated
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//PlacementStrategy NodepoolDeprecatedPlacementStrategy `json:"placementStrategy,omitempty"`
@@ -186,6 +192,11 @@ func AssertNodepoolRequired(obj Nodepool) error {
 	}
 	if err := AssertNodepoolSyncFieldsStatusRequired(obj.Status); err != nil {
 		return err
+	}
+	for _, el := range obj.GpuTypes {
+		if err := AssertNodepoolGpuTypeDetailsRequired(el); err != nil {
+			return err
+		}
 	}
 	if err := AssertNodepoolDeprecatedPlacementStrategyRequired(obj.PlacementStrategy); err != nil {
 		return err
@@ -346,6 +357,16 @@ func AssertNodepoolConstraints(obj Nodepool) error {
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	for _, el := range obj.GpuTypes {
+		if err := AssertNodepoolGpuTypeDetailsConstraints(el); err != nil {
+			return err
+		}
+	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

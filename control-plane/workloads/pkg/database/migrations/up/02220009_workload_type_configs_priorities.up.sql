@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 DROP TABLE IF EXISTS workload_types;
 CREATE TABLE IF NOT EXISTS workload_types (
     id              UUID NOT NULL PRIMARY KEY,

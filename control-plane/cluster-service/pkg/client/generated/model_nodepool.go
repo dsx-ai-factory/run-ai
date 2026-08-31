@@ -54,6 +54,8 @@ type Nodepool struct {
 	DeletedAt   NullableTime `json:"deletedAt,omitempty"`
 	// Is the Node Pool is the cluster default
 	IsDefault bool `json:"isDefault"`
+	// The GPU hardware in the node pool, one entry per distinct combination of GPU model and per-device memory found across its nodes. A heterogeneous node pool yields several entries. Omitted when the node pool has no GPU nodes.
+	GpuTypes []NodepoolGpuTypeDetails `json:"gpuTypes,omitempty"`
 	// Deprecated
 	PlacementStrategy *NodepoolDeprecatedPlacementStrategy `json:"placementStrategy,omitempty"`
 }
@@ -788,6 +790,38 @@ func (o *Nodepool) SetIsDefault(v bool) {
 	o.IsDefault = v
 }
 
+// GetGpuTypes returns the GpuTypes field value if set, zero value otherwise.
+func (o *Nodepool) GetGpuTypes() []NodepoolGpuTypeDetails {
+	if o == nil || IsNil(o.GpuTypes) {
+		var ret []NodepoolGpuTypeDetails
+		return ret
+	}
+	return o.GpuTypes
+}
+
+// GetGpuTypesOk returns a tuple with the GpuTypes field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Nodepool) GetGpuTypesOk() ([]NodepoolGpuTypeDetails, bool) {
+	if o == nil || IsNil(o.GpuTypes) {
+		return nil, false
+	}
+	return o.GpuTypes, true
+}
+
+// HasGpuTypes returns a boolean if a field has been set.
+func (o *Nodepool) HasGpuTypes() bool {
+	if o != nil && !IsNil(o.GpuTypes) {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuTypes gets a reference to the given []NodepoolGpuTypeDetails and assigns it to the GpuTypes field.
+func (o *Nodepool) SetGpuTypes(v []NodepoolGpuTypeDetails) {
+	o.GpuTypes = v
+}
+
 // GetPlacementStrategy returns the PlacementStrategy field value if set, zero value otherwise.
 // Deprecated
 func (o *Nodepool) GetPlacementStrategy() NodepoolDeprecatedPlacementStrategy {
@@ -878,6 +912,9 @@ func (o Nodepool) ToMap() (map[string]interface{}, error) {
 		toSerialize["deletedAt"] = o.DeletedAt.Get()
 	}
 	toSerialize["isDefault"] = o.IsDefault
+	if !IsNil(o.GpuTypes) {
+		toSerialize["gpuTypes"] = o.GpuTypes
+	}
 	if !IsNil(o.PlacementStrategy) {
 		toSerialize["placementStrategy"] = o.PlacementStrategy
 	}

@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <runai-expansion-item class="notifications-settings-container" label="Notifications" :subheader="notificationSummary">
     <runai-form-wrapper :form-state="{}" :init-dirty="hasChanges" full-width>

@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <div class="workload-compute-section column">
     <runai-details-panel-row v-for="(item, idx) in visibleItems" :key="`${item.label}-${idx}`" :label="item.label">

@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <div role="img" :aria-label="accessibleDescription">
     <v-chart aid="node-free-gpu-chart" :option="bubbleChartOptions" autoresize style="height: 240px" />

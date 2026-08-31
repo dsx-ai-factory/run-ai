@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Registers the runai-glyph SVG sprite injected by vite-plugin-svg-icons.
 // Side-effect import only — exposes <symbol id="runai-<name>"> elements consumed by iconMapFn.
 import "virtual:svg-icons-register";

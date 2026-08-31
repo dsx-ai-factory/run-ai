@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package services_crud
 
 import (
@@ -77,14 +82,79 @@ func (s *AnyWorkloadSubmitterDinf) Create(ctx context.Context, wc *workloadConte
 	if err != nil {
 		return nil, workloadsApi.NewSubmissionErrorV2(http.StatusInternalServerError, err.Error())
 	}
+	if metadataErr := composeDinfConnectionMetadata(ctx, wc, spec); metadataErr != nil {
+		return nil, metadataErr
+	}
 
 	return &Submission{
 		Request: workloadMgrApi.WorkloadV2CreateRequest{
 			Metadata: buildDinfWorkloadV2Metadata(&params.Response.Name, &params.Response.ProjectId, &target.Config, spec),
 			Manifest: manifest,
 		},
-		Requirements: composer.WorkloadRequirements,
+		Requirements:             composer.WorkloadRequirements,
+		ConnectionMetadata:       newWorkloadsServiceConnectionMetadata(wc.create.notificationsComposer.Output),
+		ConnectionCreationFields: wc.create.notificationsComposer.Output,
 	}, nil
+}
+
+func composeDinfConnectionMetadata(
+	ctx context.Context,
+	wc *workloadContext,
+	spec *workloadsApi.DistributedInferenceSpecSpec,
+) *workloadsApi.SubmissionErrorV2 {
+	if wc.create.notificationsComposer == nil {
+		return workloadsApi.NewSubmissionErrorV2(http.StatusInternalServerError, "workload notification composer was not initialized")
+	}
+
+	leaderSpec, ok := spec.GetLeaderOk()
+	if !ok || leaderSpec == nil {
+		return workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, "leader spec is required for distributed inference workload")
+	}
+
+	var leaderAsSuperset workloadsApi.SupersetSpec
+	if err := convutils.CopySpecs(&leaderAsSuperset, leaderSpec); err != nil {
+		return workloadsApi.NewSubmissionErrorV2(http.StatusInternalServerError, err.Error())
+	}
+	leaderAsSuperset.Category.Set(spec.Category.Get())
+	if servingPort := spec.ServingPort.Get(); servingPort != nil {
+		var servingPortAsSuperset workloadsApi.SupersetServingPort
+		if err := convutils.CopySpecs(&servingPortAsSuperset, servingPort); err != nil {
+			return workloadsApi.NewSubmissionErrorV2(http.StatusInternalServerError, err.Error())
+		}
+		leaderAsSuperset.ServingPort.Set(&servingPortAsSuperset)
+	}
+	leaderAsSuperset.NodePools = spec.NodePools
+	leaderAsSuperset.Workers.Set(spec.Workers.Get())
+	leaderAsSuperset.Replicas.Set(spec.Replicas.Get())
+
+	leaderReplicaType := workloadsApi.REPLICATYPE_LEADER
+	if composerErr := wc.create.notificationsComposer.Compose(ctx, &leaderReplicaType, nil, &leaderAsSuperset)(); composerErr != nil {
+		return workloadsApi.NewSubmissionErrorV2(composerErr.Code, composerErr.Message)
+	}
+
+	if spec.GetWorkers() == 0 {
+		return nil
+	}
+
+	workerSpec, ok := spec.GetWorkerOk()
+	if !ok || workerSpec == nil {
+		// V2 LWS composition copies the leader pod template when workers are requested
+		// without a distinct worker spec. Mirror that effective topology in metadata.
+		workerSpec = leaderSpec
+	}
+
+	var workerAsSuperset workloadsApi.SupersetSpec
+	if err := convutils.CopySpecs(&workerAsSuperset, workerSpec); err != nil {
+		return workloadsApi.NewSubmissionErrorV2(http.StatusInternalServerError, err.Error())
+	}
+	workerAsSuperset.Category.Set(spec.Category.Get())
+
+	workerReplicaType := workloadsApi.REPLICATYPE_WORKER
+	if composerErr := wc.create.notificationsComposer.Compose(ctx, &workerReplicaType, nil, &workerAsSuperset)(); composerErr != nil {
+		return workloadsApi.NewSubmissionErrorV2(composerErr.Code, composerErr.Message)
+	}
+
+	return nil
 }
 
 func (s *AnyWorkloadSubmitterDinf) Update(ctx context.Context, wc *workloadContext, workloadId string,

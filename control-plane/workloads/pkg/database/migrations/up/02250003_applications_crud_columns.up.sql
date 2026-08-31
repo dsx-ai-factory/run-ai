@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 ALTER TABLE applications ADD COLUMN IF NOT EXISTS actual_phase VARCHAR;
 ALTER TABLE applications ADD COLUMN IF NOT EXISTS message VARCHAR;
 

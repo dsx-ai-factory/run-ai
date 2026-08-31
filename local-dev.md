@@ -350,7 +350,7 @@ Confirm by size — a real chart is tens of KB, a placeholder a few hundred byte
 ```bash
 ls -l runai-cluster/cluster/runai-chart/charts/*.tgz
 # kai-scheduler-v0.16.8.tgz   ~84 KB   real
-# karta-0.2.1.tgz             ~13 KB   real
+# karta-0.2.3.tgz             ~13 KB   real
 ```
 
 Fix by fetching manually, then redeploying just the chart:

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export interface ITheme {
   name: string;
   // When true, Run:ai-specific UI elements are hidden (breadcrumb icon, tenant name, certain menu items and features).

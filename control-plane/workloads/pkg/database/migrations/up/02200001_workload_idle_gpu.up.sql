@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 ALTER TABLE workloads ADD COLUMN IF NOT EXISTS idle_gpu_number INTEGER;
 ALTER TABLE workloads ADD COLUMN IF NOT EXISTS idle_gpu_number_updated_at TIMESTAMPTZ;
 

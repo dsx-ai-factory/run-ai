@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { EFilterOperator, type IAssetsFilter } from "@/models/filter.model";
 import { filterUtil } from "@/utils/filter.util/filter.util";
 import { policyUtil } from "@/utils/policy.util/policy.util";

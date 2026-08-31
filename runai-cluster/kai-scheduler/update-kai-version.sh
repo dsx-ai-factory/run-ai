@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+
 set -euo pipefail
 
 ref="${1:?usage: $0 <KAI tag, branch, or commit, for example v0.16.1, main, or 6ee3494ea357>}"

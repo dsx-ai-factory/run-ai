@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { use, registerTheme } from "echarts/core";
 import { LineChart, BarChart, ScatterChart, CustomChart } from "echarts/charts";
 import {

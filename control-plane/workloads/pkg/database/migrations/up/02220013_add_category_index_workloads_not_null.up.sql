@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 DROP INDEX IF EXISTS idx_workloads_category;
 CREATE INDEX IF NOT EXISTS idx_workloads_category_not_null ON workloads (category_id) WHERE category_id IS NOT NULL;
 

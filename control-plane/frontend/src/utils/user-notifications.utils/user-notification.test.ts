@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, it, expect } from "vitest";
 import { uniqueEmailChannelRunaiId } from "@/models/user-setting.model";
 import type { NotificationSettings, CategorizedNotificationSettings } from "@/models/user-setting.model";

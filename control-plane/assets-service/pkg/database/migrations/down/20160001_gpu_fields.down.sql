@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 
 
 UPDATE assets_compute SET gpu_portion_request = gpu_devices_request WHERE gpu_devices_request = 0 OR gpu_devices_request > 1;

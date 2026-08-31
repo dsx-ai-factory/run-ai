@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 create MATERIALIZED VIEW IF NOT EXISTS workloads_materialized_view AS (SELECT * from workloads_view);
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_view_workloads_id ON workloads_materialized_view (id);

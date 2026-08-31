@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section class="icons-section row q-mr-md">
     <q-icon v-if="isFontIcon" :name="firstIcon" :key="icons[0]?.name" size="26px" color="grey-8" />

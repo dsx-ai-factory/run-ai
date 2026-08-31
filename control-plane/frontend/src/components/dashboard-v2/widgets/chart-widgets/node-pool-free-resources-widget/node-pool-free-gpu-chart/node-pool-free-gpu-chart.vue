@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <div class="node-pool-free-gpu-chart__container" role="img" :aria-label="accessibleDescription">
     <div class="node-pool-free-gpu-chart__y-axis-title">Free GPU devices</div>

@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Revert the resource interface for InferenceService workload type to its previous state
 UPDATE workload_type_resource_interfaces
 SET resource_interface = jsonb_build_object(

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /* eslint-disable */
 import { httpResponseService } from "@/services/infra/http-response.service/http-response.service";
 import type { HttpErrorResponse, IHTTPOptions, RequestHeaders } from "@/models/http-response.model";

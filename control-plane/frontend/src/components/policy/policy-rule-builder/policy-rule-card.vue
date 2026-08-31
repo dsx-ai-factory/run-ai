@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <q-form ref="ruleForm" greedy class="policy-rule-card q-pa-md" :class="{ 'policy-rule-card--embedded': embedded }">
     <!-- no RunAI wrapper: inner q-form needed for isolated rule validation -->

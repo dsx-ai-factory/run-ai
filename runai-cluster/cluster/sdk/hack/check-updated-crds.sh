@@ -1,5 +1,9 @@
 #! /bin/bash
 
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+
 crd_upgrader_path="cluster/runai-crd-upgrader/crds"
 runai_chart_path="cluster/runai-chart/crds"
 generated_deepcopy="zz_generated.*.go"

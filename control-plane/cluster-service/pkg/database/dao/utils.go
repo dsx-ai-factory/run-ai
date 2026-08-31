@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package dao
 
 import (
@@ -50,6 +55,7 @@ func NodeInfoToNodeDao(tenantId int32, clusterUuid, nodeName string, nodeInfo ap
 	if nodeInfo.GpuInfo != nil {
 		node.GpuType = nodeInfo.GpuInfo.GpuType
 		node.GpuCount = nodeInfo.GpuInfo.GpuCount
+		node.GpuMemoryBytes = nodeInfo.GpuInfo.GpuMemoryBytes
 	}
 
 	if nodeInfo.NetworkTopologyLabels != nil {

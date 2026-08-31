@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { computed, type Ref } from "vue";
 //model
 import type { IFilterBy, IPaginationFilter } from "@/models/filter.model";

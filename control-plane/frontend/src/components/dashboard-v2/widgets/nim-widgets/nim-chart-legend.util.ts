@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { IRangeDates } from "@/utils/date.util";
 import { LEGEND_DASHED_LINE_ICON, LEGEND_RECT_ICON } from "@/models/chart.model";
 

@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section class="runai-rename-modal">
     <runai-base-dialog :model-value="modelValue" @close="$emit('close')" size="width-sm" :no-padding="true">

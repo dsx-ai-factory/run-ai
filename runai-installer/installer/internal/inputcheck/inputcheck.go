@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package inputcheck validates a resolved installer spec against the local
 // machine before any installation work begins. Every check is offline: it
 // relies only on the spec (in memory) and the filesystem (certs, keys,

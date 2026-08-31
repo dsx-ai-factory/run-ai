@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package ri groups operations that act on the legacy ResourceInterface
 // CRD/CRs (existence check, cleanup). Constants for the RI side live here.
 package ri
