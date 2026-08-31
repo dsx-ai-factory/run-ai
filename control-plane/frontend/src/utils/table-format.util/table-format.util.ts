@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // models
 import type { TEntity } from "@/models/entity.model";
 import type { ICustomCellConfig, ITableColumn } from "@/models/table.model";

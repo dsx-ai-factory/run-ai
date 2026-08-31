@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { Department } from "@/swagger-models/org-unit-service-client";
 import type { IFilterBy } from "@/models/filter.model";
 import type { AVG_RESOURCE_TIMEFRAME_FILTER_KEY } from "@/models/org-unit.model";

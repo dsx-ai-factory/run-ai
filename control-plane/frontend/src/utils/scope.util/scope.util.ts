@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { IScopeModel, IUIAssetCreationMeta } from "@/models/global.model";
 import { Scope } from "@/swagger-models/assets-service-client";
 import { ScopeType } from "@/swagger-models/authorization-client";

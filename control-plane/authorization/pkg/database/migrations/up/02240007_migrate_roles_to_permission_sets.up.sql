@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Migrate roles without permission sets to use permission sets
 -- For each role that doesn't have a permission_set in role_to_permission_set:
 -- 1. Create a new permission_set with internal=true and name based on role name and tenant_id

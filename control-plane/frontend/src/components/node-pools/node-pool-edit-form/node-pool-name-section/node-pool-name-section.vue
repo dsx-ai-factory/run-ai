@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <runai-expansion-item label="Node pool name" default-opened :section-invalid="sectionInvalid" :loading="loading">
     <template #subheader>

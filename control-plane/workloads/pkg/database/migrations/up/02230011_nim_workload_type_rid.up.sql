@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 INSERT INTO workload_types (id, name, "group", source, created_by)
 VALUES (gen_random_uuid(), 'NIMCache', 'apps.nvidia.com', 'external', 'Run.ai'),
        (gen_random_uuid(), 'NIMService', 'apps.nvidia.com', 'external', 'Run.ai'),

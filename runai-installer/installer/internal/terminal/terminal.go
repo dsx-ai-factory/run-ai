@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package terminal provides line-mode styled output and interactive prompts
 // for the installer CLI. It wraps pterm so callers get spinners, progress
 // bars, colored banners, and prompts without managing pterm globals.

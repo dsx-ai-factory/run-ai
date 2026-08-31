@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <q-linear-progress animation-speed="100" indeterminate v-if="loading" />
   <div class="runai-org-tree">

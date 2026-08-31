@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- since deleted_at is currently a part of an index, we must remove the rows that have it set before changing the index.
 -- otherwise, we'll fail due to multiple rows with the same (tenant_id, workload_type, name) tuple, which is supposed
 -- to be unique.

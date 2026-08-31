@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <div class="runai-section-title q-mb-sm row items-center justify-between" :class="{ 'no-margin': flat }">
     <div class="row items-center">

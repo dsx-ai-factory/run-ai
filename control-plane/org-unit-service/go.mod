@@ -7,7 +7,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jackc/pgx/v5 v5.10.0
-	github.com/lib/pq v1.10.9
+	github.com/lib/pq v1.11.2
 	github.com/minio/minio-go/v7 v7.0.77
 	github.com/onsi/ginkgo/v2 v2.22.0
 	github.com/onsi/gomega v1.41.0
@@ -29,11 +29,12 @@ require (
 	github.com/run-ai/runai/runai-cluster/common/cluster-capabilities v0.0.0
 	github.com/run-ai/runai/runai-common-packages/cache/v2 v2.4.3
 	github.com/run-ai/runai/runai-common-packages/config v1.2.8
-	github.com/run-ai/runai/runai-common-packages/dao-utils v1.4.19
+	github.com/run-ai/runai/runai-common-packages/dao-utils v1.4.21
 	github.com/run-ai/runai/runai-common-packages/fips v1.0.0
 	github.com/run-ai/runai/runai-common-packages/logging v1.0.13
 	github.com/run-ai/runai/runai-common-packages/metrics v1.2.4
 	github.com/run-ai/runai/runai-common-packages/runaictx v1.1.5
+	github.com/run-ai/runai/runai-common-packages/runaidb v1.0.11
 	github.com/run-ai/runai/runai-common-packages/runaihttp v1.1.5
 	github.com/run-ai/runai/runai-common-packages/runaipubsub v1.6.3
 	github.com/run-ai/runai/runai-common-packages/s3 v1.0.4
@@ -54,12 +55,13 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/ClickHouse/ch-go v0.73.0 // indirect
 	github.com/ClickHouse/clickhouse-go/v2 v2.47.0 // indirect
+	github.com/DATA-DOG/go-sqlmock v1.5.2 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/Rican7/retry v0.3.1 // indirect
 	github.com/ThreeDotsLabs/watermill v1.3.5 // indirect
 	github.com/ThreeDotsLabs/watermill-redisstream v1.3.0 // indirect
 	github.com/andybalholm/brotli v1.2.1 // indirect
-	github.com/aws/smithy-go v1.27.2 // indirect
+	github.com/aws/smithy-go v1.27.8 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v3 v3.2.2 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
@@ -73,7 +75,6 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/distribution/reference v0.6.0 // indirect
-	github.com/docker/docker v28.5.2+incompatible // indirect
 	github.com/docker/go-connections v0.7.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -188,13 +189,13 @@ require (
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260427160629-7cedc36a6bc4 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260427160629-7cedc36a6bc4 // indirect
-	google.golang.org/grpc v1.80.0 // indirect
+	google.golang.org/grpc v1.82.1 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/validator.v2 v2.0.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/driver/clickhouse v0.7.0 // indirect
 	gorm.io/driver/mysql v1.6.0 // indirect
-	gorm.io/driver/postgres v1.6.0 // indirect
+	gorm.io/driver/postgres v1.6.2 // indirect
 	gorm.io/plugin/opentelemetry v0.1.15 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 )

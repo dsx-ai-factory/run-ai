@@ -30,6 +30,8 @@ type NodepoolMinimal struct {
 	// Signals to all relevant parties about GPUNetworkAcceleration being detected in some nodepool's nodes
 	GpuNetworkAccelerationDetected *bool                   `json:"gpuNetworkAccelerationDetected,omitempty"`
 	SchedulingCapabilities         *SchedulingCapabilities `json:"schedulingCapabilities,omitempty"`
+	// The GPU hardware in the node pool, one entry per distinct combination of GPU model and per-device memory found across its nodes. A heterogeneous node pool yields several entries. Omitted when the node pool has no GPU nodes.
+	GpuTypes []NodepoolGpuTypeDetails `json:"gpuTypes,omitempty"`
 }
 
 type _NodepoolMinimal NodepoolMinimal
@@ -222,6 +224,38 @@ func (o *NodepoolMinimal) SetSchedulingCapabilities(v SchedulingCapabilities) {
 	o.SchedulingCapabilities = &v
 }
 
+// GetGpuTypes returns the GpuTypes field value if set, zero value otherwise.
+func (o *NodepoolMinimal) GetGpuTypes() []NodepoolGpuTypeDetails {
+	if o == nil || IsNil(o.GpuTypes) {
+		var ret []NodepoolGpuTypeDetails
+		return ret
+	}
+	return o.GpuTypes
+}
+
+// GetGpuTypesOk returns a tuple with the GpuTypes field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *NodepoolMinimal) GetGpuTypesOk() ([]NodepoolGpuTypeDetails, bool) {
+	if o == nil || IsNil(o.GpuTypes) {
+		return nil, false
+	}
+	return o.GpuTypes, true
+}
+
+// HasGpuTypes returns a boolean if a field has been set.
+func (o *NodepoolMinimal) HasGpuTypes() bool {
+	if o != nil && !IsNil(o.GpuTypes) {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuTypes gets a reference to the given []NodepoolGpuTypeDetails and assigns it to the GpuTypes field.
+func (o *NodepoolMinimal) SetGpuTypes(v []NodepoolGpuTypeDetails) {
+	o.GpuTypes = v
+}
+
 func (o NodepoolMinimal) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -243,6 +277,9 @@ func (o NodepoolMinimal) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.SchedulingCapabilities) {
 		toSerialize["schedulingCapabilities"] = o.SchedulingCapabilities
+	}
+	if !IsNil(o.GpuTypes) {
+		toSerialize["gpuTypes"] = o.GpuTypes
 	}
 	return toSerialize, nil
 }

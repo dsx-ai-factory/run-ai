@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <runai-base-dialog :model-value="true" @close="$emit('close')" size="dynamic" no-padding :loading="loading">
     <template #header> GPU Devices for Node {{ node.name }} </template>

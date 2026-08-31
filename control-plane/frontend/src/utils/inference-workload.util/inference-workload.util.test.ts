@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import type { IConnectionAccess } from "@/components/environment/connection-access/connection-access-modal/connection-access-modal.model";

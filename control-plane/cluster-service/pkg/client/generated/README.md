@@ -269,6 +269,7 @@ Class | Method | HTTP request | Description
  - [NodepoolDeprecatedFields](docs/NodepoolDeprecatedFields.md)
  - [NodepoolDeprecatedPlacementStrategy](docs/NodepoolDeprecatedPlacementStrategy.md)
  - [NodepoolGPUNetworkAccelerationDetection](docs/NodepoolGPUNetworkAccelerationDetection.md)
+ - [NodepoolGpuTypeDetails](docs/NodepoolGpuTypeDetails.md)
  - [NodepoolMinimal](docs/NodepoolMinimal.md)
  - [NodepoolMinimalSortFields](docs/NodepoolMinimalSortFields.md)
  - [NodepoolPhase](docs/NodepoolPhase.md)

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { mount } from "@vue/test-utils";
 import PvcDataMount from "./pvc-data-mount.vue";
 import { describe, expect, test } from "vitest";

@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <runai-expansion-item label="Runtime settings" :section-invalid="!sectionValid" aid="form-runtime-section">
     <template #subheader>{{ summary }} </template>

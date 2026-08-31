@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 set -e
 SUPPORTED_DIRS_WITH_INTEGRATION_TESTS=$(cat runai-cluster/cluster/integration-tests/supported-dirs.txt)
 INFRA_DIRS=$(cat runai-cluster/cluster/integration-tests/infra-dirs.txt)

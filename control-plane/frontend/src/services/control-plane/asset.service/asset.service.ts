@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { controlPlaneService } from "@/services/control-plane/control-plane.service/control-plane.service";
 import { API } from "@/common/api.constant";
 import { HttpErrorResponse } from "@/models/http-response.model";

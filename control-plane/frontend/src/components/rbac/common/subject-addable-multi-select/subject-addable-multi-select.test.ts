@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { mount, flushPromises, type VueWrapper } from "@vue/test-utils";
 import { createTestingPinia } from "@pinia/testing";

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import compareVersions from "semver-compare";
 import { CLUSTER_PR_TO_MASTER_VERSION_PREFIX, TEST_ENV_VERSION } from "@/models/cluster.model";
 

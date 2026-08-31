@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // extract-container-metrics derives per-container CPU and memory from Prometheus for
 // namespaces VPA cannot cover — notably kube-system, whose apiserver and etcd are static
 // pods with no controller for VPA to target.

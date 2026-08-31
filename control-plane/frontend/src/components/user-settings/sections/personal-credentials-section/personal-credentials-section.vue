@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <runai-expansion-item class="user-credentials-container" label="Credentials" :subheader="subheader" body-no-padding>
     <notification-alert-bar class="q-pa-md" v-if="shouldShowInfoBar" :variant="ENotificationBarVariant.Info">

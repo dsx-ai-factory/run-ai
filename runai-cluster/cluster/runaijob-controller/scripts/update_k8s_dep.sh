@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+
 # Stolen from https://github.com/kubernetes/kubernetes/issues/79384#issuecomment-521493597
 # in order to support deprecated imports of k8s.io/kubernetes
 

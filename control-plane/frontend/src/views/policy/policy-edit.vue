@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section class="policy-edit" :class="submitting ? 'form-disabled' : ''">
     <runai-default-loader v-if="initialLoading" />

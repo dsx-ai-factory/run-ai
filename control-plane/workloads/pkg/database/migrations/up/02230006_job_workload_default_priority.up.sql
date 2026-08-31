@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Update Job workload type configuration to use Train category and low priority
 UPDATE external_workloads_type_config
 SET 

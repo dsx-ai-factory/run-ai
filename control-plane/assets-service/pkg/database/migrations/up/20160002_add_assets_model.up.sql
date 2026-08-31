@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- add new table assets_model with fields:
 --  id, title, description, thumbnail, huggingface_id, compute_asset_id, environment_asset_id
 create table if not exists assets_model (

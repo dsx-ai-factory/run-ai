@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <q-dialog class="runai-side-drawer" :model-value="isOpen" seamless no-backdrop-dismiss position="right">
     <q-card :style="{ width: drawerWidth + 'px' }" class="drawer-wrapper" :class="{ 'disable-selection': resizing }">

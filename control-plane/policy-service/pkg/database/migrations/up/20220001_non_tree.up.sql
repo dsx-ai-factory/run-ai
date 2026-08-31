@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 
 -- remove empty records. they are auto-created as part of service runs, and it will reduce
 -- the number of records to migrate.

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package async_events
 
 // PvcEvents are events that are emitted from the k8s-objects-tracker service when a PVC issues is the cluster are found or fixed.

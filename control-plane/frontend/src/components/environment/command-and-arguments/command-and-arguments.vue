@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section class="command-and-args">
     <div class="q-py-md" v-if="!hideTitle">Set a command and arguments for the container running in the pod</div>

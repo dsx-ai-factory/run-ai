@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package artifactlock defines the artifact lock Run:ai publishes for a
 // release: the exact images, charts and CLI binaries an air-gapped bundle is
 // built from. It mirrors the schema produced by build/airgap/artifact-lock.

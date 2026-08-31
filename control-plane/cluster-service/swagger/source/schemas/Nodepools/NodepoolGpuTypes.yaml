@@ -1,0 +1,8 @@
+type: array
+x-internal: true
+description: >-
+  The GPU hardware in the node pool, one entry per distinct combination of GPU model and
+  per-device memory found across its nodes. A heterogeneous node pool yields several entries.
+  Omitted when the node pool has no GPU nodes.
+items:
+  $ref: "./NodepoolGpuTypeDetails.yaml"

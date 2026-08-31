@@ -1940,6 +1940,12 @@ export interface GpuInfo {
      * @memberof GpuInfo
      */
     'gpuCount': number;
+    /**
+     * Memory of a single GPU device on this node, in bytes, taken from the node\'s GPU vendor labels. Note this is per device, unlike the TOTAL_GPU_MEMORY_BYTES node telemetry type which reports the node\'s total across all of its devices. Omitted when the node\'s GPU labels do not report memory.
+     * @type {number}
+     * @memberof GpuInfo
+     */
+    'gpuMemoryBytes'?: number;
 }
 /**
  * Defines the placement strategy for GPU pods within the node pool.
@@ -3748,6 +3754,12 @@ export interface Nodepool {
      */
     'isDefault': boolean;
     /**
+     * The GPU hardware in the node pool, one entry per distinct combination of GPU model and per-device memory found across its nodes. A heterogeneous node pool yields several entries. Omitted when the node pool has no GPU nodes.
+     * @type {Array<NodepoolGpuTypeDetails>}
+     * @memberof Nodepool
+     */
+    'gpuTypes'?: Array<NodepoolGpuTypeDetails>;
+    /**
      * 
      * @type {NodepoolDeprecatedPlacementStrategy}
      * @memberof Nodepool
@@ -3821,6 +3833,12 @@ export interface NodepoolCalculatedFields {
      * @memberof NodepoolCalculatedFields
      */
     'isDefault': boolean;
+    /**
+     * The GPU hardware in the node pool, one entry per distinct combination of GPU model and per-device memory found across its nodes. A heterogeneous node pool yields several entries. Omitted when the node pool has no GPU nodes.
+     * @type {Array<NodepoolGpuTypeDetails>}
+     * @memberof NodepoolCalculatedFields
+     */
+    'gpuTypes'?: Array<NodepoolGpuTypeDetails>;
 }
 /**
  * 
@@ -4046,6 +4064,31 @@ export type NodepoolGPUNetworkAccelerationDetection = typeof NodepoolGPUNetworkA
 /**
  * 
  * @export
+ * @interface NodepoolGpuTypeDetails
+ */
+export interface NodepoolGpuTypeDetails {
+    /**
+     * The GPU model, as reported by the GPU vendor labels on the node pool\'s nodes.
+     * @type {string}
+     * @memberof NodepoolGpuTypeDetails
+     */
+    'type': string;
+    /**
+     * Memory of a single GPU device of this type, in bytes. Omitted when the node pool\'s nodes do not report GPU memory.
+     * @type {number}
+     * @memberof NodepoolGpuTypeDetails
+     */
+    'gpuMemoryBytes'?: number;
+    /**
+     * Total number of GPU devices of this type across the node pool\'s nodes.
+     * @type {number}
+     * @memberof NodepoolGpuTypeDetails
+     */
+    'totalDevices': number;
+}
+/**
+ * 
+ * @export
  * @interface NodepoolMinimal
  */
 export interface NodepoolMinimal {
@@ -4085,6 +4128,12 @@ export interface NodepoolMinimal {
      * @memberof NodepoolMinimal
      */
     'schedulingCapabilities'?: SchedulingCapabilities;
+    /**
+     * The GPU hardware in the node pool, one entry per distinct combination of GPU model and per-device memory found across its nodes. A heterogeneous node pool yields several entries. Omitted when the node pool has no GPU nodes.
+     * @type {Array<NodepoolGpuTypeDetails>}
+     * @memberof NodepoolMinimal
+     */
+    'gpuTypes'?: Array<NodepoolGpuTypeDetails>;
 }
 /**
  * Fields available for sorting nodepool metadata

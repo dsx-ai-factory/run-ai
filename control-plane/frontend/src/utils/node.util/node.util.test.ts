@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { vi, describe, it, expect } from "vitest";
 import { NodeStatusEnum, type Node, type MetricsResponse } from "@/swagger-models/cluster-service-client";
 import { NrtHealthyConditionType } from "@/models/node.model";

@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <runai-form-wrapper class="cluster-form" :form-state="{}">
     <runai-expansion-item class="name-section" label="Cluster name" :subheader="nameSummary"></runai-expansion-item>

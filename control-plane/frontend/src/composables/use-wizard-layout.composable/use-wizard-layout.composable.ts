@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { ref, computed } from "vue";
 import type { Ref, ComputedRef } from "vue";
 import type { IRunaiWizardLayoutStep } from "@/models/runai-wizard-layout.model";

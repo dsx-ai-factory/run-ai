@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <div class="workload-by-type-mock-skeleton full-width q-pa-md" style="height: 240px">
     <div class="column full-width full-height justify-end">

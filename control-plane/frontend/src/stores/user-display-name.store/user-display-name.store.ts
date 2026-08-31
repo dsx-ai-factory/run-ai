@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { defineStore } from "pinia";
 import { userService } from "@/services/control-plane/user.service/user.service";
 import { userUtils, type IUserDisplayLabel } from "@/utils/user.util/user.util";

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { IStatusColOptions, StatusColor } from "@/models/table.model";
 import { EApplicationPhase, type IApplicationTable } from "@/models/ai-application.model";
 import { stringUtil } from "@/utils/string.util";

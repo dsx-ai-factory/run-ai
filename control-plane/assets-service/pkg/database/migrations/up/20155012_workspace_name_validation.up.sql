@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 ---- Redo of 0012_workspace_name_validation.up.sql in idempotent in case it didn't run
 ----------------------------------------------------------------------------------
 -- Workload name validator

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { OVER_QUOTA_DISABLED_VALUE, OVER_QUOTA_ENABLED_VALUE } from "@/models/resource.model";
 
 export const defaultResources = [

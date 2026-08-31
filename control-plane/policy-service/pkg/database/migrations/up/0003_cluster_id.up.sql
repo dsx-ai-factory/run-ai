@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 ALTER TABLE policies ADD COLUMN IF NOT EXISTS cluster_id UUID NULL;
 
 CREATE INDEX IF NOT EXISTS by_tenant_policies     ON policies (tenant_id) WHERE scope = 'tenant';

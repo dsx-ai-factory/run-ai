@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- department.parent_id is unused (multi-hierarchy plan was dropped) and
 -- is always NULL. The self-referencing FK forces Postgres to scan the referencing
 -- column on every DELETE FROM department, which is prohibitively slow on the

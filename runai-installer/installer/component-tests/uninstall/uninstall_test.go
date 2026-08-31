@@ -1,7 +1,11 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package uninstall_test
 
 import (
-	"context"
 	"fmt"
 	"strings"
 	"testing"
@@ -14,6 +18,7 @@ import (
 	"github.com/run-ai/runai/runai-installer/installer/internal/uninstall"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"helm.sh/helm/v3/pkg/release"
 )
 
 func newUninstallBaseCfg() *config.UninstallConfig {
@@ -69,10 +74,7 @@ func TestUninstall_NoReleasesReturnsSuccess(t *testing.T) {
 }
 
 func TestUninstall_HelmTimeoutIsNonFatal(t *testing.T) {
-	// Simulate the OpenShift case: helm uninstall wait times out (resources not
-	// deleted within the step budget), but the flow continues to ForceDeleteNamespace
-	// which handles cleanup. The overall uninstall should succeed.
-	timeoutErr := fmt.Errorf("helm uninstall timed out: %w", context.DeadlineExceeded)
+	timeoutErr := fmt.Errorf("uninstallation completed with 1 error(s): timed out waiting for the condition")
 	fakeHelm := harness.NewFakeHelmWithReleases(
 		harness.ReleaseEntry{Name: step.CPReleaseName, Version: "1.0.0"},
 		harness.ReleaseEntry{Name: step.ClusterReleaseName, Version: "1.0.0"},
@@ -80,6 +82,10 @@ func TestUninstall_HelmTimeoutIsNonFatal(t *testing.T) {
 	fakeHelm.UninstallErrors = map[string]error{
 		step.CPReleaseName:      timeoutErr,
 		step.ClusterReleaseName: timeoutErr,
+	}
+	fakeHelm.UninstallResponses = map[string]*release.UninstallReleaseResponse{
+		step.CPReleaseName:      completedUninstallResponse(),
+		step.ClusterReleaseName: completedUninstallResponse(),
 	}
 	fakeK8s := harness.NewFakeK8s(harness.FakeK8sEnv{
 		Namespaces: []string{
@@ -108,6 +114,39 @@ func TestUninstall_HelmTimeoutIsNonFatal(t *testing.T) {
 	assertNamespaceGone(t, fakeK8s, step.ClusterNamespace, "cluster namespace should have been deleted by ForceDeleteNamespace")
 	assertNamespaceGone(t, fakeK8s, step.ReservationNamespace, "runai-reservation namespace should have been deleted")
 	assertNamespaceGone(t, fakeK8s, step.ScaleAdjustNamespace, "runai-scale-adjust namespace should have been deleted")
+}
+
+func TestUninstall_PreDeleteTimeoutIsFatal(t *testing.T) {
+	fakeHelm := harness.NewFakeHelmWithReleases(
+		harness.ReleaseEntry{Name: step.ClusterReleaseName, Version: "1.0.0"},
+	)
+	fakeHelm.UninstallErrors = map[string]error{
+		step.ClusterReleaseName: fmt.Errorf("timed out waiting for the condition"),
+	}
+	fakeHelm.UninstallResponses = map[string]*release.UninstallReleaseResponse{
+		step.ClusterReleaseName: {
+			Release: &release.Release{Info: &release.Info{Status: release.StatusUninstalling}},
+		},
+	}
+	fakeK8s := harness.NewFakeK8s(harness.FakeK8sEnv{
+		Namespaces: []string{step.ClusterNamespace},
+	})
+
+	err := orchestrator.RunUninstall(newUninstallBaseCfg(), uninstall.Deps{
+		HelmWrapper: fakeHelm,
+		K8sWrapper:  fakeK8s,
+	})
+
+	require.Error(t, err)
+	exists, existsErr := fakeK8s.NamespaceExists(step.ClusterNamespace)
+	require.NoError(t, existsErr)
+	assert.True(t, exists)
+}
+
+func completedUninstallResponse() *release.UninstallReleaseResponse {
+	return &release.UninstallReleaseResponse{
+		Release: &release.Release{Info: &release.Info{Status: release.StatusUninstalled}},
+	}
 }
 
 func TestUninstall_HelmGenuineFailureIsFatal(t *testing.T) {

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package k8sobject provides middleware and a cached authorizer for the
 // workload-scoped k8s-object endpoints (cluster-api /api/v2/workloads/.../object).
 package k8sobject

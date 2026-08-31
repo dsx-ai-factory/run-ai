@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package packconfig defines the airgap pack config file and maps it onto the
 // orchestrator spec, mirroring installconfig's conventions.
 package packconfig

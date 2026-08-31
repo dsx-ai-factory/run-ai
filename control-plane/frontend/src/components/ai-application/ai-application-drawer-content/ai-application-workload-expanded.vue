@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <div class="q-pt-sm q-mt-sm ai-application-workload-details">
     <div v-for="detail in visibleDetails" :key="detail.label">{{ detail.label }}: {{ detail.value }}</div>

@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <q-item v-if="!isWhiteLabel" clickable aid="guided-steps-menu" class="guided-steps-trigger">
     <q-item-section>

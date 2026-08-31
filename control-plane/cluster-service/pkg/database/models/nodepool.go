@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package models
 
 import (
@@ -227,7 +232,7 @@ func (np *Nodepool) GetSchedulingCapabilities() api.SchedulingCapabilities {
 
 // ToMetadataApiModel converts a DAO NodepoolMinimal model to API NodepoolMinimal model
 // This is used for the metadata endpoint which only returns essential fields
-func (np *Nodepool) ToMetadataApiModel() api.NodepoolMinimal {
+func (np *Nodepool) ToMetadataApiModel(gpuTypes []api.NodepoolGpuTypeDetails) api.NodepoolMinimal {
 	metadata := api.NodepoolMinimal{
 		Id:                             strconv.Itoa(int(np.ID)),
 		Name:                           np.Name,
@@ -235,6 +240,7 @@ func (np *Nodepool) ToMetadataApiModel() api.NodepoolMinimal {
 		Phase:                          np.Phase,
 		GpuNetworkAccelerationDetected: np.GPUNetworkAccelerationDetected,
 		SchedulingCapabilities:         np.GetSchedulingCapabilities(),
+		GpuTypes:                       gpuTypes,
 	}
 	return metadata
 }

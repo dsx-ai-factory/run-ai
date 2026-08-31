@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { IAccessInput } from "@/components/environment/connection-access/access-input-list";
 import type { EToolLabel } from "./connection-access-modal.model";
 

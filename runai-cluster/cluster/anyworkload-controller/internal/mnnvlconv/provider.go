@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package mnnvlconv provides the Run:AI pod-affinity grouping the dromos mnnvl
 // plugin does not own: group GPU pods by run.ai/top-owner-uid, skipped under a
 // kai.scheduler/* topology annotation. Internal to anyworkload-controller.

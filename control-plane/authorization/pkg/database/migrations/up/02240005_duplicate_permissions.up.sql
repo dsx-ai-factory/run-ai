@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 ALTER TABLE IF EXISTS permission_sets ADD COLUMN IF NOT EXISTS created_by VARCHAR;
 ALTER TABLE IF EXISTS permission_sets ADD COLUMN IF NOT EXISTS updated_by VARCHAR;
 ALTER TABLE IF EXISTS permission_sets ADD CONSTRAINT permission_sets_name_key UNIQUE (name);

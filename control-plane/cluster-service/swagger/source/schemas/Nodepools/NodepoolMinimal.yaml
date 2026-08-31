@@ -19,4 +19,6 @@ properties:
     description: Signals to all relevant parties about GPUNetworkAcceleration being detected in some nodepool's nodes
   schedulingCapabilities:
     $ref: "./SchedulingCapabilities.yaml"
+  gpuTypes:
+    $ref: "./NodepoolGpuTypes.yaml"
 

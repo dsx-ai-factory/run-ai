@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package decoupling holds a guardrail test that keeps dromos free of
 // runai-private dependencies. dromos is meant to be open-sourceable: it must
 // not import anything from the runai monorepo except its own WorkloadRunner

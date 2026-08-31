@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { AuditLogsApi, Configuration, type ConfigurationParameters } from "@/swagger-models/audit-service-client";
 import { authenticatedAxios } from "@/services/infra/https.service/auth-axios.service";
 

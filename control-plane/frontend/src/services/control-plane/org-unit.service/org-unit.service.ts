@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { IDepartmentTable, IDepartmentTableFilterBy } from "@/models/department.model";
 import { DEFAULT_DEPARTMENT_NAME } from "@/models/department.model";
 import type { IFilterBy, IPaginationFilter } from "@/models/filter.model";

@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section class="access-rule-management" :class="noInnerPadding ? '' : 'q-px-md q-pt-md'">
     <div class="sub-header">{{ subheader }}</div>

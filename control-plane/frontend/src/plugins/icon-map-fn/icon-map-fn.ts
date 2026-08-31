@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Quasar `iconMapFn` — maps an app icon name to a Quasar render config.
 //
 // This is the glue that lets the codebase use two icon systems through a single

@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Migration to remove legacy Grafana dashboard permission sets
 -- The dashboards-overview, dashboards-analytics, dashboards-consumption resource types
 -- were removed in 2.25 as part of the Grafana decommission.

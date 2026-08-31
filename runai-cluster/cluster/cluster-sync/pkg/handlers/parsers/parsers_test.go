@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package parsers_test
 
 import (
@@ -958,6 +963,65 @@ var _ = Describe("Parsers", Ordered, func() {
 			gpuInfo := parsedNodeInfo.GpuInfo.Get()
 			Expect(gpuInfo.GpuType).To(Equal(testGpuTypeA100))
 			Expect(gpuInfo.GpuCount).To(BeEquivalentTo(0))
+		})
+
+		It("Parse Node To Update Info Request - Nvidia Gpu with memory", func() {
+			node.Status.Conditions = []corev1.NodeCondition{readyCondition}
+			node.Labels[parsers.NvidiaGpuTypeLabelKey] = testGpuTypeA100
+			node.Labels[parsers.NvidiaGpuCountLabelKey] = "2"
+			node.Labels[parsers.NvidiaGpuMemoryLabelKey] = "81920"
+
+			parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+			gpuInfo := parsedNodeInfo.GpuInfo.Get()
+			Expect(gpuInfo.GpuMemoryBytes).ToNot(BeNil())
+			Expect(*gpuInfo.GpuMemoryBytes).To(BeEquivalentTo(81920 * 1024 * 1024))
+		})
+
+		It("Parse Node To Update Info Request - Nvidia Gpu with memory reported in bytes", func() {
+			node.Status.Conditions = []corev1.NodeCondition{readyCondition}
+			node.Labels[parsers.NvidiaGpuTypeLabelKey] = testGpuTypeA100
+			node.Labels[parsers.NvidiaGpuMemoryLabelKey] = "85899345920"
+
+			parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+			gpuInfo := parsedNodeInfo.GpuInfo.Get()
+			Expect(gpuInfo.GpuMemoryBytes).ToNot(BeNil())
+			Expect(*gpuInfo.GpuMemoryBytes).To(BeEquivalentTo(85899345920))
+		})
+
+		It("Parse Node To Update Info Request - Nvidia Gpu with memory at the bytes-vs-MiB boundary", func() {
+			node.Status.Conditions = []corev1.NodeCondition{readyCondition}
+			node.Labels[parsers.NvidiaGpuTypeLabelKey] = testGpuTypeA100
+			node.Labels[parsers.NvidiaGpuMemoryLabelKey] = "1048576"
+
+			parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+			gpuInfo := parsedNodeInfo.GpuInfo.Get()
+			Expect(gpuInfo.GpuMemoryBytes).ToNot(BeNil())
+			Expect(*gpuInfo.GpuMemoryBytes).To(BeEquivalentTo(int64(1048576) * 1024 * 1024))
+		})
+
+		It("Parse Node To Update Info Request - Nvidia Gpu without memory", func() {
+			node.Status.Conditions = []corev1.NodeCondition{readyCondition}
+			node.Labels[parsers.NvidiaGpuTypeLabelKey] = testGpuTypeA100
+			node.Labels[parsers.NvidiaGpuCountLabelKey] = "2"
+
+			parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+			gpuInfo := parsedNodeInfo.GpuInfo.Get()
+			Expect(gpuInfo.GpuType).To(Equal(testGpuTypeA100))
+			Expect(gpuInfo.GpuCount).To(BeEquivalentTo(2))
+			Expect(gpuInfo.GpuMemoryBytes).To(BeNil())
+		})
+
+		It("Parse Node To Update Info Request - Nvidia Gpu with bad memory", func() {
+			node.Status.Conditions = []corev1.NodeCondition{readyCondition}
+			node.Labels[parsers.NvidiaGpuTypeLabelKey] = testGpuTypeA100
+			node.Labels[parsers.NvidiaGpuCountLabelKey] = "2"
+			node.Labels[parsers.NvidiaGpuMemoryLabelKey] = "non-int"
+
+			parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+			gpuInfo := parsedNodeInfo.GpuInfo.Get()
+			Expect(gpuInfo.GpuType).To(Equal(testGpuTypeA100))
+			Expect(gpuInfo.GpuCount).To(BeEquivalentTo(2))
+			Expect(gpuInfo.GpuMemoryBytes).To(BeNil())
 		})
 
 		It("Parse Node To Update Info Request - AMD Gpu", func() {

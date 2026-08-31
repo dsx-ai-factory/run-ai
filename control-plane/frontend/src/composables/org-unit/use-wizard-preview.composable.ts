@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { inject, provide, ref, type Ref } from "vue";
 import type { NodeTypesPerWorkload, SchedulingRules } from "@/swagger-models/org-unit-service-client";
 

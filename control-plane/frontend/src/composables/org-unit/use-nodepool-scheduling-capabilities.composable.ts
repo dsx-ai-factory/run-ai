@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { ref, reactive } from "vue";
 import { useQuasar } from "quasar";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package field_groups
 
 import fields "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"

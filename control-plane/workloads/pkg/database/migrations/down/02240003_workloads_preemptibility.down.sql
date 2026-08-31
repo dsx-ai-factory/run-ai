@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Before removing the preemptibility column from workloads table,
 -- we need to revert the workloads_view to the previous version that does not reference the preemptibility column.
 -- #################################################################

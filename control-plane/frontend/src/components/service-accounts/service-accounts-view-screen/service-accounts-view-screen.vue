@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section class="service-accounts-view-screen">
     <p class="text-b-subtitle2 credential-header">Copy the client ID and client secret and store them securely</p>

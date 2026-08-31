@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // This file is a workaround for a bug in vite.
 // The bug:
 // When you import the WORKSPACE_ROUTE_NAMES from the workspace.route.ts file into

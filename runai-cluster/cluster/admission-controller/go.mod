@@ -8,8 +8,8 @@ require (
 	github.com/magiconair/properties v1.18.11
 	github.com/run-ai/runai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
 	github.com/run-ai/runai/runai-cluster/cluster/common/dra v0.0.0-00010101000000-000000000000
-	github.com/run-ai/runai/runai-cluster/common/constants v0.0.0-20260830075020-9fe682b2ccbf
-	github.com/run-ai/runai/runai-cluster/common/priority v0.0.0-20260830075020-9fe682b2ccbf
+	github.com/run-ai/runai/runai-cluster/common/constants v0.0.0-20260831032653-c1f436394559
+	github.com/run-ai/runai/runai-cluster/common/priority v0.0.0-20260831032653-c1f436394559
 	github.com/run-ai/runai/runai-common-packages/fips v1.0.0
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/exp v0.0.0-20260824195058-e88cd73687aa

@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <q-layout view="lHr Lpr lfr" container style="height: 100vh">
     <runai-header v-if="!fullPage" :breadcrumbs-full-path="sideNavMiniState"></runai-header>

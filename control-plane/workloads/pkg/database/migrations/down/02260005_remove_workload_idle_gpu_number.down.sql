@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Revert: re-add the idle_gpu_number / idle_gpu_number_updated_at columns and recreate both view families.
 
 DROP VIEW IF EXISTS workloads_materialized_wrapper_view;

@@ -187,7 +187,7 @@ make -C build/airgap artifact-lock \
 dist/image-locks/runai-control-plane-3.0.0-linux-amd64.yaml \
 dist/image-locks/runai-cluster-3.0.0-linux-amd64.yaml \
 dist/image-locks/kai-scheduler-v0.16.8-linux-amd64.yaml \
-dist/image-locks/karta-0.2.1-linux-amd64.yaml"
+dist/image-locks/karta-0.2.3-linux-amd64.yaml"
 ```
 
 This example writes:

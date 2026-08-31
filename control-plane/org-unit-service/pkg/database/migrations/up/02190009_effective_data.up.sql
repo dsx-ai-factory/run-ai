@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 ALTER TABLE org_unit_data ADD COLUMN IF NOT EXISTS interactive_job_time_limit_effective INTEGER;
 UPDATE org_unit_data SET interactive_job_time_limit_effective = interactive_job_time_limit;
 ALTER TABLE org_unit_data ADD COLUMN IF NOT EXISTS interactive_job_max_idle_duration_effective INTEGER;

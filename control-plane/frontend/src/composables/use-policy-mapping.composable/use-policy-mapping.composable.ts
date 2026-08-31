@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { ref } from "vue";
 import { gvkPolicyService } from "@/services/control-plane/gvk-policy.service/gvk-policy.service";
 import { EEnforcementType, type IFieldInfo, type IMappingParam } from "@/models/gvk-policy.model";

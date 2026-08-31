@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { tenantManagerApi } from "@/services/infra/client-apis/tenants-manager-api/tenants-manager-api";
 import { httpService } from "@/services/infra/https.service/http.service";
 

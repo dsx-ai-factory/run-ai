@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 UPDATE permission_sets
 SET name = 'NetQ metrics read'
 WHERE name = 'Integration metrics read';

@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 create table if not exists datavolumes (
     id            uuid primary key,
     created_at    timestamp with time zone not null default now(),

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { InferenceV2 } from "@/swagger-models/assets-service-client";
 import type { DisplayedCluster } from "@/swagger-models/cluster-service-client";
 import type { ProjectMetadata } from "@/swagger-models/org-unit-service-client";

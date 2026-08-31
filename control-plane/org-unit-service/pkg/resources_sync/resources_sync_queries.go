@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package resources_sync
 
 const NodePoolTable = "node_pool_list AS (SELECT unnest(ARRAY%s) AS node_pool_id)"

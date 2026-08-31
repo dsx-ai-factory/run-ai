@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import NodePoolFreeGpuChartComponent from "@/components/dashboard-v2/widgets/chart-widgets/node-pool-free-resources-widget/node-pool-free-gpu-chart/node-pool-free-gpu-chart.vue";
 import { describe, it, expect, beforeEach, test, vi, type MockedFunction, afterEach } from "vitest";
 import type { VueWrapper } from "@vue/test-utils";

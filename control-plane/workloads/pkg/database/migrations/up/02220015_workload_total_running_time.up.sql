@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 ALTER TABLE workloads ADD COLUMN IF NOT EXISTS total_calculated_running_time_seconds BIGINT;
 ALTER TABLE workloads ADD COLUMN IF NOT EXISTS total_calculated_running_time_updated_at TIMESTAMPTZ;
 

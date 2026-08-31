@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Drop functions and types (re-runnable)
 DROP FUNCTION IF EXISTS get_sync_projects(TEXT, UUID);
 DROP FUNCTION IF EXISTS get_sync_departments(TEXT, UUID);

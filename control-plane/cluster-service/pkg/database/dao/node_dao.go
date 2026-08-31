@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package dao
 
 import (
@@ -52,7 +57,7 @@ func prepareNodeForUpsert(node *models.Node) []any {
 	return []any{
 		node.ID, node.TenantId, node.ClusterUuid, node.Name,
 		node.Status, conditionsJSON, taintsJSON, node.NodePool,
-		node.GpuType, node.GpuCount, node.CreatedAt, node.UpdatedAt,
+		node.GpuType, node.GpuCount, node.GpuMemoryBytes, node.CreatedAt, node.UpdatedAt,
 		node.NvLinkDomainUid, node.NvLinkCliqueId,
 		node.NetworkTopologyLabelValues, networkTopologyLabelsJSON,
 		node.TopologyManagerPolicy,
@@ -523,6 +528,84 @@ func GetGpuCount(ctx context.Context, tenantId int32, tenantIds []string, cluste
 	}
 
 	return workloadTelemetry, nil
+}
+
+// Nodes record a nodepool by name rather than by id, so the cluster has to be part of the
+// key for the name to be unique. A nodepool's own identifier is still its id.
+type NodepoolKey struct {
+	ClusterUuid  string
+	NodepoolName string
+}
+
+func NewNodepoolKey(clusterId, nodepoolName string) NodepoolKey {
+	return NodepoolKey{ClusterUuid: clusterId, NodepoolName: nodepoolName}
+}
+
+type nodepoolGpuTypeRow struct {
+	ClusterUuid    string
+	NodePool       string
+	GpuType        string
+	GpuMemoryBytes int64
+	TotalDevices   int32
+}
+
+// Grouping on memory as well as model is deliberate: a pool holding one model in two memory
+// variants yields an entry per variant.
+func GetNodepoolsGpuTypes(ctx context.Context, tenantId int32, permittedScopes openapi.PermittedScopes,
+	keys []NodepoolKey,
+) (map[NodepoolKey][]api.NodepoolGpuTypeDetails, *api.Error) {
+	result := map[NodepoolKey][]api.NodepoolGpuTypeDetails{}
+	if len(keys) == 0 {
+		return result, nil
+	}
+
+	requested := make(map[NodepoolKey]bool, len(keys))
+	clusterUuids := make([]string, 0, len(keys))
+	nodepoolNames := make([]string, 0, len(keys))
+	for _, key := range keys {
+		if requested[key] {
+			continue
+		}
+		requested[key] = true
+		clusterUuids = append(clusterUuids, key.ClusterUuid)
+		nodepoolNames = append(nodepoolNames, key.NodepoolName)
+	}
+
+	rows := []nodepoolGpuTypeRow{}
+	query := runaidb.DB().WithContext(ctx).
+		Table(models.NodeTable).
+		Select("cluster_uuid, node_pool, gpu_type, gpu_memory_bytes, COALESCE(SUM(gpu_count), 0) as total_devices").
+		Where("tenant_id = ?", tenantId).
+		Where("gpu_type <> ''").
+		Where("cluster_uuid IN ?", clusterUuids).
+		Where("node_pool IN ?", nodepoolNames).
+		Where(GetPermittedScopesFilter(permittedScopes, "cluster_uuid")).
+		Group("cluster_uuid").
+		Group("node_pool").
+		Group("gpu_type").
+		Group("gpu_memory_bytes").
+		Order("gpu_type, gpu_memory_bytes")
+
+	if _, err := query.Scan(&rows); err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get nodepools gpu types, error: %v", err)
+		return result, api.NewError(http.StatusInternalServerError, "Failed to get nodepools gpu types", err)
+	}
+
+	for _, row := range rows {
+		key := NewNodepoolKey(row.ClusterUuid, row.NodePool)
+		// The two IN clauses match every cluster/name combination, so discard rows for pairs
+		// that were never asked for — same nodepool name in two clusters would otherwise cross over.
+		if !requested[key] {
+			continue
+		}
+		result[key] = append(result[key], api.NodepoolGpuTypeDetails{
+			Type:           row.GpuType,
+			GpuMemoryBytes: row.GpuMemoryBytes,
+			TotalDevices:   row.TotalDevices,
+		})
+	}
+
+	return result, nil
 }
 
 func HardDeleteAllTenantNodes(ctx context.Context, tenantId int32) error {

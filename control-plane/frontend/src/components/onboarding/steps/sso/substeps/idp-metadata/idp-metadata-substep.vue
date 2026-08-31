@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <div class="idp-metadata-substep">
     <sso-creation-error v-if="ssoData.ssoErrorType === SsoErrorType.IdpCreation" />

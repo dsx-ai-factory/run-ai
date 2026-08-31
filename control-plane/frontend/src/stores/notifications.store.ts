@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { defineStore } from "pinia";
 import { notificationService } from "@/services/control-plane/notifications.service/notification.service";
 import type { NotificationChannelMeta } from "@/swagger-models/notifications-proxy-client";

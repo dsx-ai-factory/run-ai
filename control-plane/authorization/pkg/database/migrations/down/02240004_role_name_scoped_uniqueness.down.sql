@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Revert btree_gist approach
 -- Drop the exclusion constraint
 ALTER TABLE IF EXISTS roles DROP CONSTRAINT IF EXISTS roles_name_scope_exclusion;

@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <div class="runai-data-tooltip">
     <p v-if="heading" class="runai-data-tooltip__heading text-b-body1">{{ heading }}</p>

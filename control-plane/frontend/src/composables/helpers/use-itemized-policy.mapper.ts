@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { IItemizedListItem } from "@/components/common/runai-itemized-list";
 import type { EnvironmentVariableOfAsset, Toleration } from "@/swagger-models/assets-service-client";
 import type { ExtendedResource } from "@/swagger-models/policy-service-client";

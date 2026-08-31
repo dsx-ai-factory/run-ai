@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // @ts-nocheck
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { notificationService } from "./notification.service";

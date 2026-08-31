@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package pack_test drives the airgap pack command end to end
 // (packconfig.Load -> artifactlock.ParseFile -> ToSpec -> specrun.Execute). No
 // test reaches into the internals; assertions are made against the run's error,

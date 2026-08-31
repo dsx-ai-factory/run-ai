@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, it, expect, test } from "vitest";
 import { dateUtil, TimeUnit } from "@/utils/date.util";
 import { PREDEFINED_DATES } from "@/models/date.model";

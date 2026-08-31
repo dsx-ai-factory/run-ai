@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { ICardQuery, TCardSortValues } from "@/components/common/runai-card-list/runai-card-list.model";
 import {
   type TTemplateSortBy,

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { TCardCmpName } from "@/components/common/runai-card-list";
 import { GpuRequestType } from "@/swagger-models/assets-service-client";
 

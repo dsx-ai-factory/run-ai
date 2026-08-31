@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const bootConfigState = vi.hoisted(() => ({

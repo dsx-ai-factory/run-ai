@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section class="view-policy column items-center q-pt-lg">
     <runai-expansion-item class="scope-section" label="Scope" hide-expend-icon>

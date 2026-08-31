@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package linetail provides an io.Writer that keeps the last N complete lines
 // written to it and reports the current tail on every write. It is handy for
 // surfacing a live "last few lines" view of a long-running command's output

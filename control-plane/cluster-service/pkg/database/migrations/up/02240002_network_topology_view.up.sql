@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Create a view that lists each network topology and the nodepools using it
 -- Nodepools are associated via nodepools.network_topology_id matching network_topologies.id
 -- Both network topologies and nodepools are filtered to non-deleted entries

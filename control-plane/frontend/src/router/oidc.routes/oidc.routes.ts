@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import OidcIndex from "@/views/oidc/oidc-index.vue";
 import type { RunaiRouteRecord } from "vue-router";
 import { OIDC_ROUTE_NAMES } from "@/router/oidc.routes/oidc.routes.names";

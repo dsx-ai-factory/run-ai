@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Fix preemptibility for all rows based on priority value
 UPDATE external_workloads_type_config AS ewtc
 SET preemptibility = CASE

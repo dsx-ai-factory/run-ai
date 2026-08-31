@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { environmentService } from "@/services/control-plane/environment.service/environment.service";
 import type { IUIWorkloadEnvSectionModel } from "./environment-section.model";
 import type {

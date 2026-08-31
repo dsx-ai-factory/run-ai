@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { dataSourceService } from "@/services/control-plane/data-source.service/data-source.service";
 import type { ClaimInfo } from "@/swagger-models/assets-service-client";
 import type { ClaimSizeCustomization, StorageClassV2 } from "@/swagger-models/k8s-objects-tracker-client";

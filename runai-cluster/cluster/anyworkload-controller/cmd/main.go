@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Run:ai's anyworkload-controller binary: a thin consumer of the dromos library
 // that wires the Run:AI / KAI conventions the dromos plugins do not own.
 package main

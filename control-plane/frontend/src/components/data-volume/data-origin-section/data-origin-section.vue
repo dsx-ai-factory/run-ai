@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <runai-expansion-item class="data-origin-section" label="Data origin" default-opened should-validate>
     <runai-section title="Set the project where the data is located">

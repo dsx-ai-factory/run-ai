@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package steps holds the concrete orchestrator2 Step implementations used to
 // build install/upgrade plans. Each step type lives in its own file and owns
 // its full lifecycle: PreValidate, Detect (read-only "is it already there?"),

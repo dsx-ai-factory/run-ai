@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { afterEach, describe, expect, test } from "vitest";
 import type { IDateFilterModel } from "@/models/filter.model";
 import { EColumnFilterType, EDateFilterOperator } from "@/models/filter.model";

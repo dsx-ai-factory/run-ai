@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <q-btn v-if="roleStage" @click.stop :class="badgeClass" :label="roleStage" size="xs" class="q-pa-xs">
     <q-menu class="q-pa-sm" anchor="bottom middle" self="top middle" max-width="400px">

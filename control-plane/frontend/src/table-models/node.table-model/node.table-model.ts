@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { type Node, NodeFilterSortFields, NodeStatusEnum } from "@/swagger-models/cluster-service-client";
 import { ECustomCell, type IStatusColOptions, type ITableColumn } from "@/models/table.model";
 import { viewLinkColumn } from "@/table-models/common-columns";

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import WorkspaceNewApp from "@/views/workspace/creation/worksapce-new-app.vue";
 import WorkspaceNew from "@/views/workspace/creation/workspace-new.vue";
 import WorkloadTemplateEdit from "@/views/workspace/creation/workspace-assets-edit.vue";

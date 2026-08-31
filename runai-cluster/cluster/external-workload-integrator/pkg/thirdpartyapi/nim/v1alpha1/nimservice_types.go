@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package v1alpha1 contains local NIMService types with MultiNode support
 // This extends the upstream nim-operator types to include fields not present in v1.0.0
 package v1alpha1

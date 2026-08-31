@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 ALTER TABLE IF EXISTS org_unit_data ADD COLUMN IF NOT EXISTS sync_failed BOOLEAN NOT NULL DEFAULT FALSE;
 
 DROP VIEW IF EXISTS project_sync_view;

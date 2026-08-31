@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // scopeUtil.test.ts
 import { describe, test, expect } from "vitest";
 import { idpCommon } from "@/components/settings/sections/security/sso-settings/idps/idp-common/idp-common";

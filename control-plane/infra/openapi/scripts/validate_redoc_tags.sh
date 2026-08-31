@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+
 tagsPublished=$(yq e '.x-tagGroups[].tags'  $REDOC_ROOT_API_PATH | sed 's/- //g' | sort )
 
 # Get parent group names from x-tagGroups (these are category headers, not endpoint tags)

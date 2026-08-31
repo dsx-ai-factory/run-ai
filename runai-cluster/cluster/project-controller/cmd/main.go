@@ -1,8 +1,7 @@
 /*
-   PROPRIETARY CONFIDENTIAL
-   Property of run:ai
-   Do not distribute
-*/
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 package main
 

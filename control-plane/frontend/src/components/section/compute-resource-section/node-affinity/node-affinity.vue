@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <div class="node-affinity-section column q-mt-lg">
     <div class="q-mb-md">Set node affinity to schedule the workload on a specific node type</div>

@@ -6,6 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **GpuType** | **string** |  | 
 **GpuCount** | **int32** |  | 
+**GpuMemoryBytes** | Pointer to **int64** | Memory of a single GPU device on this node, in bytes, taken from the node&#39;s GPU vendor labels. Note this is per device, unlike the TOTAL_GPU_MEMORY_BYTES node telemetry type which reports the node&#39;s total across all of its devices. Omitted when the node&#39;s GPU labels do not report memory. | [optional] 
 
 ## Methods
 
@@ -65,6 +66,31 @@ and a boolean to check if the value has been set.
 
 SetGpuCount sets GpuCount field to given value.
 
+
+### GetGpuMemoryBytes
+
+`func (o *GpuInfo) GetGpuMemoryBytes() int64`
+
+GetGpuMemoryBytes returns the GpuMemoryBytes field if non-nil, zero value otherwise.
+
+### GetGpuMemoryBytesOk
+
+`func (o *GpuInfo) GetGpuMemoryBytesOk() (*int64, bool)`
+
+GetGpuMemoryBytesOk returns a tuple with the GpuMemoryBytes field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuMemoryBytes
+
+`func (o *GpuInfo) SetGpuMemoryBytes(v int64)`
+
+SetGpuMemoryBytes sets GpuMemoryBytes field to given value.
+
+### HasGpuMemoryBytes
+
+`func (o *GpuInfo) HasGpuMemoryBytes() bool`
+
+HasGpuMemoryBytes returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

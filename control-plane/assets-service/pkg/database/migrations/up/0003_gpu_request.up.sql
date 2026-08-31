@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 
 ALTER TABLE assets_compute ADD COLUMN if not exists gpu_request_type text;
 ALTER TABLE assets_compute ADD COLUMN if not exists gpu_portion numeric;

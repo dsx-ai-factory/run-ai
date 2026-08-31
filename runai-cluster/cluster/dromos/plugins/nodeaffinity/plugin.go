@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package nodeaffinity implements the dromos node-affinity plugin: it merges the
 // node affinity declared in spec.instructions.nodeAffinity into every component's
 // pod affinity on the rendered child manifest. The instruction is how an external

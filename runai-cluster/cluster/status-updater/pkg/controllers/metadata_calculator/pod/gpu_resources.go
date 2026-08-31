@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package pod
 
 import (
@@ -235,8 +240,9 @@ func getNodeSingleGpuMemory(ctx context.Context, pod *v1.Pod, kubeClient client.
 	return singleGpuMemory, nil
 }
 
+// The boundary itself counts as MiB: a 1 TiB device is conceivable, a 1 MiB one is not.
 func checkGpuMemoryIsInMib(gpuMemoryValue int) bool {
-	return gpuMemoryValue < TibInMib
+	return gpuMemoryValue <= TibInMib
 }
 
 func convertBytesToMib(gpuMemoryValue int) int {

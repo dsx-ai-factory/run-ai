@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { CREDENTIAL_ROUTE_NAMES } from "@/router/credential.routes/credential.routes.names";
 import type { IScopeModel, IUIAssetCreationMeta } from "./global.model";
 import type {

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, expect, it } from "vitest";
 import { orgTreeService } from "@/services/control-plane/rbac/org-tree.service/org-tree.service";
 import type { IOrgTreeNode, IOrgTreeNodeId } from "@/models/org-tree.model";

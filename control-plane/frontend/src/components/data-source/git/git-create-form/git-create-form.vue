@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section class="git-create-form column items-center q-pt-md">
     <runai-form-wrapper ref="elGitForm" class="git-form" :form-state="gitModel" :enter-callback="save">

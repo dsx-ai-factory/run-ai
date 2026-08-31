@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 alter table workloads add column if not exists department_id varchar;
 alter table workloads add column if not exists department_name varchar;
 

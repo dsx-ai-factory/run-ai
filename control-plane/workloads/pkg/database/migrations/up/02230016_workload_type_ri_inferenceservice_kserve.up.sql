@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 INSERT INTO workload_types (id, name, "group", source, created_by)
 VALUES (gen_random_uuid(), 'InferenceService', 'serving.kserve.io', 'custom', 'Run.ai')
     ON CONFLICT (name, "group") DO NOTHING;

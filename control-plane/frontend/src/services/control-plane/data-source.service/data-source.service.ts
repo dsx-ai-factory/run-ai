@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // services
 import { assetsServiceApi } from "@/services/infra/client-apis/assets-service-api/assets-service-api";
 import { k8sObjectTrackerApi } from "@/services/infra/client-apis/k8s-object-tracker-api/k8s-object-tracker-api";

@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <notification-alert-bar v-if="shouldShowClusterWarning" :variant="statusWarningLevel" :message="clusterWarningMessage">
     <template #inline-actions>

@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <runai-section class="q-mb-lg" title="Set if the workload may be interrupted" :tooltip-text="tooltipText">
     <div class="row items-center q-mt-lg q-gutter-x-md">

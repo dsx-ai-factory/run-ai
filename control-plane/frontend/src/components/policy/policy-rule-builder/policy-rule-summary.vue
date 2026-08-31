@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <div class="policy-rule-summary row items-center justify-between no-wrap q-px-md q-py-sm">
     <div class="summary-text text-black-87">

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, expect, test, vi } from "vitest";
 import { chartUtil, STANDARD_TOOLTIP_STYLE } from "./chart.util";
 

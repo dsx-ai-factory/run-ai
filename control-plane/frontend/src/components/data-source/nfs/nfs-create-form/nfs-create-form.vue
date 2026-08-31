@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section class="nfs-create-form column items-center q-pt-md">
     <runai-form-wrapper ref="elNfsForm" class="nfs-form" :form-state="nfsModel" :enter-callback="save">

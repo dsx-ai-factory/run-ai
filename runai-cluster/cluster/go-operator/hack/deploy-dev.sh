@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 # need to docker login first
 
 dockerTagName=${IMAGE_NAME:-"runai-developer"} # You can also put it in the git ignored .env

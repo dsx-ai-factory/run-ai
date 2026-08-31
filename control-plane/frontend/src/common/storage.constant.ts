@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export const ONBOARDING_MODAL_SHOWN = "onboarding-modal-shown";
 export const ADMIN_ONBOARDING_MODAL_SHOWN = "admin-onboarding-modal-shown";
 export const ACCESS_TOKEN = "access-token";

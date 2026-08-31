@@ -7068,6 +7068,7 @@ components:
       x-schema-name: NodeTaint
     GpuInfo:
       example:
+        gpuMemoryBytes: 85899345920
         gpuCount: 0
         gpuType: Tesla-V100
       nullable: true
@@ -7077,6 +7078,17 @@ components:
           type: string
         gpuCount:
           type: integer
+        gpuMemoryBytes:
+          description: "Memory of a single GPU device on this node, in bytes, taken\
+            \ from the node's GPU vendor labels. Note this is per device, unlike the\
+            \ TOTAL_GPU_MEMORY_BYTES node telemetry type which reports the node's\
+            \ total across all of its devices. Omitted when the node's GPU labels\
+            \ do not report memory."
+          example: 85899345920
+          format: int64
+          minimum: 0
+          type: integer
+          x-internal: true
       required:
       - gpuCount
       - gpuType
@@ -7162,6 +7174,7 @@ components:
           type: type
           message: container runtime status check may not have completed yet
         gpuInfo:
+          gpuMemoryBytes: 85899345920
           gpuCount: 0
           gpuType: Tesla-V100
         nvLinkDomainUid: nvlink-domain-uid
@@ -7268,6 +7281,7 @@ components:
             type: type
             message: container runtime status check may not have completed yet
           gpuInfo:
+            gpuMemoryBytes: 85899345920
             gpuCount: 0
             gpuType: Tesla-V100
           nvLinkDomainUid: nvlink-domain-uid
@@ -7303,6 +7317,7 @@ components:
               type: type
               message: container runtime status check may not have completed yet
             gpuInfo:
+              gpuMemoryBytes: 85899345920
               gpuCount: 0
               gpuType: Tesla-V100
             nvLinkDomainUid: nvlink-domain-uid
@@ -7334,6 +7349,7 @@ components:
               type: type
               message: container runtime status check may not have completed yet
             gpuInfo:
+              gpuMemoryBytes: 85899345920
               gpuCount: 0
               gpuType: Tesla-V100
             nvLinkDomainUid: nvlink-domain-uid
@@ -8322,6 +8338,43 @@ components:
       required:
       - name
       type: object
+    NodepoolGpuTypeDetails:
+      example:
+        totalDevices: 16
+        gpuMemoryBytes: 85899345920
+        type: NVIDIA-H100-80GB-HBM3
+      properties:
+        type:
+          description: "The GPU model, as reported by the GPU vendor labels on the\
+            \ node pool's nodes."
+          example: NVIDIA-H100-80GB-HBM3
+          type: string
+        gpuMemoryBytes:
+          description: "Memory of a single GPU device of this type, in bytes. Omitted\
+            \ when the node pool's nodes do not report GPU memory."
+          example: 85899345920
+          format: int64
+          minimum: 0
+          type: integer
+        totalDevices:
+          description: Total number of GPU devices of this type across the node pool's
+            nodes.
+          example: 16
+          minimum: 0
+          type: integer
+      required:
+      - totalDevices
+      - type
+      type: object
+      x-schema-name: NodepoolGpuTypeDetails
+    NodepoolGpuTypes:
+      description: "The GPU hardware in the node pool, one entry per distinct combination\
+        \ of GPU model and per-device memory found across its nodes. A heterogeneous\
+        \ node pool yields several entries. Omitted when the node pool has no GPU\
+        \ nodes."
+      items:
+        $ref: '#/components/schemas/NodepoolGpuTypeDetails'
+      type: array
     NodepoolCalculatedFields:
       properties:
         id:
@@ -8360,6 +8413,14 @@ components:
           description: Is the Node Pool is the cluster default
           example: false
           type: boolean
+        gpuTypes:
+          description: "The GPU hardware in the node pool, one entry per distinct\
+            \ combination of GPU model and per-device memory found across its nodes.\
+            \ A heterogeneous node pool yields several entries. Omitted when the node\
+            \ pool has no GPU nodes."
+          items:
+            $ref: '#/components/schemas/NodepoolGpuTypeDetails'
+          type: array
       required:
       - clusterName
       - createdAt
@@ -8395,10 +8456,6 @@ components:
       - $ref: '#/components/schemas/NodepoolCalculatedFields'
       - $ref: '#/components/schemas/NodepoolDeprecatedFields'
       example:
-        phase: Creating
-        phaseMessage: all nodes are down
-        gpuNetworkAccelerationLabelKey: gpuNetworkAccelerationLabelKey
-        updatedBy: user@lab.com
         schedulingConfiguration:
           numaAwareScheduling: true
           placementStrategy:
@@ -8420,6 +8477,18 @@ components:
         clusterId: d73a738f-fab3-430a-8fa3-5241493d7128
         deletedBy: user@lab.com
         createdAt: 2000-01-23T04:56:07.000+00:00
+        schedulingCapabilities:
+          adjustableWeights: true
+          cpuQuota: false
+          ranks: false
+          quota: false
+        clusterName: prod-cluster
+        id: "5"
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+        phase: Creating
+        phaseMessage: all nodes are down
+        gpuNetworkAccelerationLabelKey: gpuNetworkAccelerationLabelKey
+        updatedBy: user@lab.com
         networkTopologyName: default-topology
         deletedAt: 2000-01-23T04:56:07.000+00:00
         isDefault: false
@@ -8427,17 +8496,10 @@ components:
         placementStrategy:
           cpu: spread
           gpu: spread
-        schedulingCapabilities:
-          adjustableWeights: true
-          cpuQuota: false
-          ranks: false
-          quota: false
-        clusterName: prod-cluster
         name: v100
         tenantId: 1
         labelValue: type-x
         gpuNetworkAccelerationDetection: Auto
-        id: "5"
         labelKey: node-type
         networkTopologyId: 123e4567-e89b-12d3-a456-426614174000
         status:
@@ -8491,7 +8553,13 @@ components:
             type: type
             message: Network Topology labels mismatch
             status: "True"
-        updatedAt: 2000-01-23T04:56:07.000+00:00
+        gpuTypes:
+        - totalDevices: 16
+          gpuMemoryBytes: 85899345920
+          type: NVIDIA-H100-80GB-HBM3
+        - totalDevices: 16
+          gpuMemoryBytes: 85899345920
+          type: NVIDIA-H100-80GB-HBM3
     NodepoolId:
       description: The NodePool id
       example: "5"
@@ -8514,6 +8582,13 @@ components:
         id: "5"
         clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
         gpuNetworkAccelerationDetected: true
+        gpuTypes:
+        - totalDevices: 16
+          gpuMemoryBytes: 85899345920
+          type: NVIDIA-H100-80GB-HBM3
+        - totalDevices: 16
+          gpuMemoryBytes: 85899345920
+          type: NVIDIA-H100-80GB-HBM3
       properties:
         id:
           description: The NodePool id
@@ -8537,6 +8612,14 @@ components:
           type: boolean
         schedulingCapabilities:
           $ref: '#/components/schemas/SchedulingCapabilities'
+        gpuTypes:
+          description: "The GPU hardware in the node pool, one entry per distinct\
+            \ combination of GPU model and per-device memory found across its nodes.\
+            \ A heterogeneous node pool yields several entries. Omitted when the node\
+            \ pool has no GPU nodes."
+          items:
+            $ref: '#/components/schemas/NodepoolGpuTypeDetails'
+          type: array
       required:
       - clusterId
       - id
@@ -9349,6 +9432,7 @@ components:
           value: bar
           key: foo
         gpuInfo:
+          gpuMemoryBytes: 85899345920
           gpuCount: 0
           gpuType: Tesla-V100
         nvLinkCliqueId: clique-id
@@ -9386,6 +9470,7 @@ components:
             value: bar
             key: foo
           gpuInfo:
+            gpuMemoryBytes: 85899345920
             gpuCount: 0
             gpuType: Tesla-V100
           nvLinkCliqueId: clique-id
@@ -9419,6 +9504,7 @@ components:
             value: bar
             key: foo
           gpuInfo:
+            gpuMemoryBytes: 85899345920
             gpuCount: 0
             gpuType: Tesla-V100
           nvLinkCliqueId: clique-id
@@ -9514,6 +9600,7 @@ components:
           value: bar
           key: foo
         gpuInfo:
+          gpuMemoryBytes: 85899345920
           gpuCount: 0
           gpuType: Tesla-V100
         nvLinkCliqueId: clique-id
@@ -10439,11 +10526,7 @@ components:
     get_nodepools_internal_200_response:
       example:
         nodepools:
-        - phase: Creating
-          phaseMessage: all nodes are down
-          gpuNetworkAccelerationLabelKey: gpuNetworkAccelerationLabelKey
-          updatedBy: user@lab.com
-          schedulingConfiguration:
+        - schedulingConfiguration:
             numaAwareScheduling: true
             placementStrategy:
               cpu: spread
@@ -10464,6 +10547,18 @@ components:
           clusterId: d73a738f-fab3-430a-8fa3-5241493d7128
           deletedBy: user@lab.com
           createdAt: 2000-01-23T04:56:07.000+00:00
+          schedulingCapabilities:
+            adjustableWeights: true
+            cpuQuota: false
+            ranks: false
+            quota: false
+          clusterName: prod-cluster
+          id: "5"
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+          phase: Creating
+          phaseMessage: all nodes are down
+          gpuNetworkAccelerationLabelKey: gpuNetworkAccelerationLabelKey
+          updatedBy: user@lab.com
           networkTopologyName: default-topology
           deletedAt: 2000-01-23T04:56:07.000+00:00
           isDefault: false
@@ -10471,17 +10566,10 @@ components:
           placementStrategy:
             cpu: spread
             gpu: spread
-          schedulingCapabilities:
-            adjustableWeights: true
-            cpuQuota: false
-            ranks: false
-            quota: false
-          clusterName: prod-cluster
           name: v100
           tenantId: 1
           labelValue: type-x
           gpuNetworkAccelerationDetection: Auto
-          id: "5"
           labelKey: node-type
           networkTopologyId: 123e4567-e89b-12d3-a456-426614174000
           status:
@@ -10535,12 +10623,14 @@ components:
               type: type
               message: Network Topology labels mismatch
               status: "True"
-          updatedAt: 2000-01-23T04:56:07.000+00:00
-        - phase: Creating
-          phaseMessage: all nodes are down
-          gpuNetworkAccelerationLabelKey: gpuNetworkAccelerationLabelKey
-          updatedBy: user@lab.com
-          schedulingConfiguration:
+          gpuTypes:
+          - totalDevices: 16
+            gpuMemoryBytes: 85899345920
+            type: NVIDIA-H100-80GB-HBM3
+          - totalDevices: 16
+            gpuMemoryBytes: 85899345920
+            type: NVIDIA-H100-80GB-HBM3
+        - schedulingConfiguration:
             numaAwareScheduling: true
             placementStrategy:
               cpu: spread
@@ -10561,6 +10651,18 @@ components:
           clusterId: d73a738f-fab3-430a-8fa3-5241493d7128
           deletedBy: user@lab.com
           createdAt: 2000-01-23T04:56:07.000+00:00
+          schedulingCapabilities:
+            adjustableWeights: true
+            cpuQuota: false
+            ranks: false
+            quota: false
+          clusterName: prod-cluster
+          id: "5"
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+          phase: Creating
+          phaseMessage: all nodes are down
+          gpuNetworkAccelerationLabelKey: gpuNetworkAccelerationLabelKey
+          updatedBy: user@lab.com
           networkTopologyName: default-topology
           deletedAt: 2000-01-23T04:56:07.000+00:00
           isDefault: false
@@ -10568,17 +10670,10 @@ components:
           placementStrategy:
             cpu: spread
             gpu: spread
-          schedulingCapabilities:
-            adjustableWeights: true
-            cpuQuota: false
-            ranks: false
-            quota: false
-          clusterName: prod-cluster
           name: v100
           tenantId: 1
           labelValue: type-x
           gpuNetworkAccelerationDetection: Auto
-          id: "5"
           labelKey: node-type
           networkTopologyId: 123e4567-e89b-12d3-a456-426614174000
           status:
@@ -10632,7 +10727,13 @@ components:
               type: type
               message: Network Topology labels mismatch
               status: "True"
-          updatedAt: 2000-01-23T04:56:07.000+00:00
+          gpuTypes:
+          - totalDevices: 16
+            gpuMemoryBytes: 85899345920
+            type: NVIDIA-H100-80GB-HBM3
+          - totalDevices: 16
+            gpuMemoryBytes: 85899345920
+            type: NVIDIA-H100-80GB-HBM3
       properties:
         nodepools:
           items:
@@ -10652,6 +10753,13 @@ components:
           id: "5"
           clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
           gpuNetworkAccelerationDetected: true
+          gpuTypes:
+          - totalDevices: 16
+            gpuMemoryBytes: 85899345920
+            type: NVIDIA-H100-80GB-HBM3
+          - totalDevices: 16
+            gpuMemoryBytes: 85899345920
+            type: NVIDIA-H100-80GB-HBM3
         - phase: Creating
           schedulingCapabilities:
             adjustableWeights: true
@@ -10662,6 +10770,13 @@ components:
           id: "5"
           clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
           gpuNetworkAccelerationDetected: true
+          gpuTypes:
+          - totalDevices: 16
+            gpuMemoryBytes: 85899345920
+            type: NVIDIA-H100-80GB-HBM3
+          - totalDevices: 16
+            gpuMemoryBytes: 85899345920
+            type: NVIDIA-H100-80GB-HBM3
       properties:
         nodepools:
           items:
@@ -10671,11 +10786,7 @@ components:
     get_nodepools_200_response:
       example:
         nodepools:
-        - phase: Creating
-          phaseMessage: all nodes are down
-          gpuNetworkAccelerationLabelKey: gpuNetworkAccelerationLabelKey
-          updatedBy: user@lab.com
-          schedulingConfiguration:
+        - schedulingConfiguration:
             numaAwareScheduling: true
             placementStrategy:
               cpu: spread
@@ -10696,6 +10807,18 @@ components:
           clusterId: d73a738f-fab3-430a-8fa3-5241493d7128
           deletedBy: user@lab.com
           createdAt: 2000-01-23T04:56:07.000+00:00
+          schedulingCapabilities:
+            adjustableWeights: true
+            cpuQuota: false
+            ranks: false
+            quota: false
+          clusterName: prod-cluster
+          id: "5"
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+          phase: Creating
+          phaseMessage: all nodes are down
+          gpuNetworkAccelerationLabelKey: gpuNetworkAccelerationLabelKey
+          updatedBy: user@lab.com
           networkTopologyName: default-topology
           deletedAt: 2000-01-23T04:56:07.000+00:00
           isDefault: false
@@ -10703,17 +10826,10 @@ components:
           placementStrategy:
             cpu: spread
             gpu: spread
-          schedulingCapabilities:
-            adjustableWeights: true
-            cpuQuota: false
-            ranks: false
-            quota: false
-          clusterName: prod-cluster
           name: v100
           tenantId: 1
           labelValue: type-x
           gpuNetworkAccelerationDetection: Auto
-          id: "5"
           labelKey: node-type
           networkTopologyId: 123e4567-e89b-12d3-a456-426614174000
           status:
@@ -10767,12 +10883,14 @@ components:
               type: type
               message: Network Topology labels mismatch
               status: "True"
-          updatedAt: 2000-01-23T04:56:07.000+00:00
-        - phase: Creating
-          phaseMessage: all nodes are down
-          gpuNetworkAccelerationLabelKey: gpuNetworkAccelerationLabelKey
-          updatedBy: user@lab.com
-          schedulingConfiguration:
+          gpuTypes:
+          - totalDevices: 16
+            gpuMemoryBytes: 85899345920
+            type: NVIDIA-H100-80GB-HBM3
+          - totalDevices: 16
+            gpuMemoryBytes: 85899345920
+            type: NVIDIA-H100-80GB-HBM3
+        - schedulingConfiguration:
             numaAwareScheduling: true
             placementStrategy:
               cpu: spread
@@ -10793,6 +10911,18 @@ components:
           clusterId: d73a738f-fab3-430a-8fa3-5241493d7128
           deletedBy: user@lab.com
           createdAt: 2000-01-23T04:56:07.000+00:00
+          schedulingCapabilities:
+            adjustableWeights: true
+            cpuQuota: false
+            ranks: false
+            quota: false
+          clusterName: prod-cluster
+          id: "5"
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+          phase: Creating
+          phaseMessage: all nodes are down
+          gpuNetworkAccelerationLabelKey: gpuNetworkAccelerationLabelKey
+          updatedBy: user@lab.com
           networkTopologyName: default-topology
           deletedAt: 2000-01-23T04:56:07.000+00:00
           isDefault: false
@@ -10800,17 +10930,10 @@ components:
           placementStrategy:
             cpu: spread
             gpu: spread
-          schedulingCapabilities:
-            adjustableWeights: true
-            cpuQuota: false
-            ranks: false
-            quota: false
-          clusterName: prod-cluster
           name: v100
           tenantId: 1
           labelValue: type-x
           gpuNetworkAccelerationDetection: Auto
-          id: "5"
           labelKey: node-type
           networkTopologyId: 123e4567-e89b-12d3-a456-426614174000
           status:
@@ -10864,7 +10987,13 @@ components:
               type: type
               message: Network Topology labels mismatch
               status: "True"
-          updatedAt: 2000-01-23T04:56:07.000+00:00
+          gpuTypes:
+          - totalDevices: 16
+            gpuMemoryBytes: 85899345920
+            type: NVIDIA-H100-80GB-HBM3
+          - totalDevices: 16
+            gpuMemoryBytes: 85899345920
+            type: NVIDIA-H100-80GB-HBM3
       properties:
         nodepools:
           items:
@@ -10885,6 +11014,13 @@ components:
           id: "5"
           clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
           gpuNetworkAccelerationDetected: true
+          gpuTypes:
+          - totalDevices: 16
+            gpuMemoryBytes: 85899345920
+            type: NVIDIA-H100-80GB-HBM3
+          - totalDevices: 16
+            gpuMemoryBytes: 85899345920
+            type: NVIDIA-H100-80GB-HBM3
         - phase: Creating
           schedulingCapabilities:
             adjustableWeights: true
@@ -10895,6 +11031,13 @@ components:
           id: "5"
           clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
           gpuNetworkAccelerationDetected: true
+          gpuTypes:
+          - totalDevices: 16
+            gpuMemoryBytes: 85899345920
+            type: NVIDIA-H100-80GB-HBM3
+          - totalDevices: 16
+            gpuMemoryBytes: 85899345920
+            type: NVIDIA-H100-80GB-HBM3
       properties:
         nodepools:
           items:

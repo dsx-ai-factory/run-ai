@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { ref, computed, type Ref } from "vue";
 import { workloadService } from "@/services/cluster/workload.service/workload.service";
 import type { ClusterPriority } from "@/swagger-models/workloads-client";

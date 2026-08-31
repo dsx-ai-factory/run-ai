@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package containermetrics derives per-container resource usage from Prometheus for
 // components VPA cannot target. Static pods such as kube-apiserver and etcd are owned by
 // the Node rather than a controller, so they have no targetRef and VPA produces nothing

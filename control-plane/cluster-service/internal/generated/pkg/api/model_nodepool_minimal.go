@@ -51,6 +51,12 @@ type NodepoolMinimal struct {
 	//SchedulingCapabilities SchedulingCapabilities `json:"schedulingCapabilities,omitempty"`
 	SchedulingCapabilities SchedulingCapabilities `json:"schedulingCapabilities,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// The GPU hardware in the node pool, one entry per distinct combination of GPU model and per-device memory found across its nodes. A heterogeneous node pool yields several entries. Omitted when the node pool has no GPU nodes.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuTypes []NodepoolGpuTypeDetails `json:"gpuTypes,omitempty"`
+	GpuTypes []NodepoolGpuTypeDetails `json:"gpuTypes,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertNodepoolMinimalRequired checks if the required fields are not zero-ed
@@ -68,6 +74,11 @@ func AssertNodepoolMinimalRequired(obj NodepoolMinimal) error {
 
 	if err := AssertSchedulingCapabilitiesRequired(obj.SchedulingCapabilities); err != nil {
 		return err
+	}
+	for _, el := range obj.GpuTypes {
+		if err := AssertNodepoolGpuTypeDetailsRequired(el); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -113,6 +124,16 @@ func AssertNodepoolMinimalConstraints(obj NodepoolMinimal) error {
 	//////////////////////// RUNAI END //////////////////////////
 	if err := AssertSchedulingCapabilitiesConstraints(obj.SchedulingCapabilities); err != nil {
 		return err
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	for _, el := range obj.GpuTypes {
+		if err := AssertNodepoolGpuTypeDetailsConstraints(el); err != nil {
+			return err
+		}
 	}
 	return nil
 }

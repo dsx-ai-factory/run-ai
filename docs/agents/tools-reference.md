@@ -8,7 +8,14 @@ The MCP server exposes read and write tools, organized by domain. Write tools ar
 |---|---|---|
 | `whoami` | Read | Who am I authenticated as? Returns the current NVIDIA Run:ai principal (user or service account) and their permissions. |
 
-## Workload Visibility
+## Credentials
+
+| Tool | Type | Description |
+|---|---|---|
+| `list_credentials` | Read | List safe metadata for shared credentials and the caller's own user credentials, with filtering and pagination. Never returns credential values. |
+| `manage_credentials` | Write | Create, update, or delete shared and user credentials (access keys, passwords, Docker registry, generic secrets, NGC API keys). Create accepts secret material but never returns it; update and delete require confirmation. |
+
+## Workloads
 
 | Tool | Type | Description |
 |---|---|---|
@@ -21,6 +28,8 @@ The MCP server exposes read and write tools, organized by domain. Write tools ar
 | `get_workload_effective_policy` | Read | What policy rules and defaults apply to a given workload type in a project? |
 | `get_workloads_summary` | Read | How many workloads are running, pending, and failed? Scoped to a cluster, project, department, node pool, or the whole platform. |
 | `get_node_pods` | Read | Which pods are running on a specific node and which workloads do they belong to? Returns up to 10 pods, each with its status, requested and allocated resources, and the workload it belongs to, plus the node's pool, status, and GPU type and count. |
+| `submit_workload` | Write | Submit a new workload — either a native NVIDIA Run:ai workload (Training, Workspace, Distributed, Inference, or DistributedInference) or, on supported control-plane versions, a raw Kubernetes YAML manifest. A real submission requires confirmation. |
+| `manage_workload_operations` | Write | Stop, restart, update, or permanently delete an existing workload. Stop and restart require the workload to support suspension; update applies only to native Inference or DistributedInference workloads. Every operation requires confirmation. |
 
 ## Cluster and Infrastructure
 

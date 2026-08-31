@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // karta-migrate is a helm-hook binary that migrates legacy ResourceInterface
 // CRs to Karta CRs, and (with --remove-rid) deletes the legacy RIs and CRD.
 package main

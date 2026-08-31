@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 DROP VIEW IF EXISTS project_sync_view;
 CREATE VIEW project_sync_view AS
 (

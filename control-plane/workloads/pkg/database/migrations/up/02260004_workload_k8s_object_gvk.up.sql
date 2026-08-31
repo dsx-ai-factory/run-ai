@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Populated only for External workloads; null for native workload types.
 ALTER TABLE workloads ADD COLUMN IF NOT EXISTS k8s_object_group VARCHAR;
 ALTER TABLE workloads ADD COLUMN IF NOT EXISTS k8s_object_version VARCHAR;

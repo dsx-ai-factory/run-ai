@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package testcerts generates throwaway self-signed serving certs for webhook
 // integration tests, so no private key needs to be committed to the repo.
 package testcerts

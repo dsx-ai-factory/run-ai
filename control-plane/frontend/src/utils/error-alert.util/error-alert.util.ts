@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { HttpErrorResponse } from "@/models/http-response.model";
 import { alertUtil } from "@/utils/alert.util";
 import { httpResponseService } from "@/services/infra/http-response.service/http-response.service";

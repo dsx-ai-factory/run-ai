@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 DROP TRIGGER IF EXISTS set_revision_phases_update_time ON revisions;
 DROP FUNCTION IF EXISTS update_revision_phases_update_time;
 

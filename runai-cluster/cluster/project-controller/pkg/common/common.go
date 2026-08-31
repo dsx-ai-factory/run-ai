@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package common
 
 import (
@@ -32,6 +37,12 @@ const (
 
 	AppLabel                  = "app"
 	OcpClusterMonitoringLabel = "openshift.io/cluster-monitoring"
+
+	// ManagedByLabel marks the per-project RoleBindings this controller owns. Other controllers
+	// set the Project as owner of their own RoleBindings too, so ownership alone can't tell them
+	// apart - only bindings carrying this label may be pruned.
+	ManagedByLabel        = "app.kubernetes.io/managed-by"
+	ProjectControllerName = "project-controller"
 
 	//--------------------------- Replication Labels -------------------------------------------------------------------
 	// Two groups are involved: (a) type labels  (b) scope labels

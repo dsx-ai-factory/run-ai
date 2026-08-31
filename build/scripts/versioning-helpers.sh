@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 # Shell helpers sourced by build/makefile/versioning.mk recipes and by
 # check-breaking-changes.sh. Required env: TAG_FORMAT. Optional: MAX_PATCH
 # (defaults to 100).

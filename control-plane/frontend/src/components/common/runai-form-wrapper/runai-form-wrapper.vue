@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section :class="['runai-form-wrapper', fullWidth ? 'full-width' : 'medium-width']">
     <!-- @submit.prevent blocks the native submit fired by Enter; @keydown.enter runs the custom callback first -->

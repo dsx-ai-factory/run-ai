@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { AxiosHeaders } from "axios";
 import { userService } from "./user.service";

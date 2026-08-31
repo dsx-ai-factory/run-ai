@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 CREATE INDEX IF NOT EXISTS idx_events_tenant_cluster_obj ON events (tenant_id, cluster_id, involved_object_uid);
 CREATE INDEX IF NOT EXISTS idx_events_create_time ON events (created_at desc);
 CREATE INDEX IF NOT EXISTS idx_phase_create_time ON workloads_phase_history (created_at desc);

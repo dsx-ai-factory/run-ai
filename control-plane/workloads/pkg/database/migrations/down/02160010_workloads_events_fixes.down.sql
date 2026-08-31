@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 DROP INDEX IF EXISTS idx_events_tenant_cluster_obj;
 DROP INDEX IF EXISTS idx_events_create_time;
 DROP INDEX IF EXISTS idx_phase_create_time;

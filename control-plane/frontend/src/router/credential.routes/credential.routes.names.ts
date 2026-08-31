@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export enum CREDENTIAL_ROUTE_NAMES {
   CREDENTIAL_INDEX = "credential-index",
   CREDENTIAL_USERPASS_NEW = "userpass-new",

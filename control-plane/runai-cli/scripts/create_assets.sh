@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+
 if [ "$#" -ne 2 ]; then
     echo "Usage: $0 <project_name> <asset_name>"
     exit 1

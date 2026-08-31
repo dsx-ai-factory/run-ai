@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Remove external_workload_name column from workloads table
 ALTER TABLE workloads DROP COLUMN IF EXISTS external_workload_name;
 

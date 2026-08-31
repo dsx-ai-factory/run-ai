@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // What the selected YAML target resolves to (drives which k8s-object API is called).
 export enum ETargetKind {
   Workload = "workload",

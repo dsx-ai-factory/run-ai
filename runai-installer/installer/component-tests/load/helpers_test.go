@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package load_test drives the airgap load command end to end
 // (loadconfig.Load -> ToSpec -> specrun.Execute). No test reaches into the
 // internals; assertions are made against the run's error, the terminal output,

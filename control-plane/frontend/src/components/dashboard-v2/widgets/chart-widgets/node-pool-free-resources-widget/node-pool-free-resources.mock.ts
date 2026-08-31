@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export const mockNodePoolFreeGpusResponse = {
   type: "FREE_GPUS",
   timestamp: "2024-03-10T09:57:42.397731288Z",

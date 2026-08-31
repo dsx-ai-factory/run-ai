@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- this migration installs model presets, to make them available for quick deployment.
 -- it adds compute assets, environment assets and model assets that use the the compute and environment ones.
 -- the assets are added with the system scope, so they are available to all the tenants in the system.

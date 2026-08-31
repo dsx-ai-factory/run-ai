@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section class="pvc-create-form column items-center q-pt-md">
     <runai-form-wrapper ref="elPvcForm" class="pvc-form" :form-state="pvcModel" :enter-callback="save">

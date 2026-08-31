@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 set -x
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o `dirname "$0"`/../runai-mutate `dirname "$0"`/..
 TAG=${TAG:-$USER}

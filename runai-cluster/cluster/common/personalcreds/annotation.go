@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package personalcreds is the shared library for the run.ai/personal-credentials
 // annotation contract. The CP composer writes the annotation, the
 // agent forwards it, and the anyworkload-controller plugin acts on

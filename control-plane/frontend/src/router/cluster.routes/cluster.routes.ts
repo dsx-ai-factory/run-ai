@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import ClusterIndex from "@/views/cluster/cluster-index.vue";
 import ClusterNew from "@/views/cluster/cluster-new.vue";
 import { ResourceType, Action } from "@/swagger-models/authorization-client";

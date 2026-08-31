@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <div class="row items-center breadcrumbs-wrapper" v-if="breadcrumbs.length > 1">
     <template v-for="(breadcrumb, index) in breadcrumbs" :key="index">

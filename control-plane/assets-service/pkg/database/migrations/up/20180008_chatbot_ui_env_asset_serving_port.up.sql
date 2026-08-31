@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- add serving port to the existing environment preset of chatbot-ui
 -- remove space in connection name, as it caused an invalid string (with space) in the workload spec
 

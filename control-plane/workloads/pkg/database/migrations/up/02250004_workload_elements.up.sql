@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- workload_elements: stores hierarchy levels 1-3 (root synthesized at query time)
 CREATE TABLE IF NOT EXISTS workload_elements (
     id              VARCHAR NOT NULL,

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package models
 
 import (
@@ -63,6 +68,7 @@ type Node struct {
 	NodePool                   string                      `gorm:"not null"`
 	GpuType                    string                      `gorm:"not null"`
 	GpuCount                   int32                       `gorm:"not null"`
+	GpuMemoryBytes             int64                       `gorm:"not null"`
 	Name                       string                      `gorm:"uniqueIndex:unique_node_name_per_cluster;not null"`
 	ClusterUuid                string                      `gorm:"uniqueIndex:unique_node_name_per_cluster;index:idx_cluster;not null"`
 	NvLinkDomainUid            *string                     `gorm:""`
@@ -92,7 +98,7 @@ func (Node) ConflictColumns() []clause.Column {
 func (Node) ColumnsToUpdate() []string {
 	// TODO tenant id should not be updatable, it should be part of the conflict columns and add to the unique index
 	return []string{
-		"updated_at", "status", "conditions", "taints", "node_pool", "gpu_type", "gpu_count", "tenant_id",
+		"updated_at", "status", "conditions", "taints", "node_pool", "gpu_type", "gpu_count", "gpu_memory_bytes", "tenant_id",
 		"nv_link_clique_id", "nv_link_domain_uid", "network_topology_label_values", "network_topology_labels",
 		"topology_manager_policy",
 	}
@@ -102,7 +108,7 @@ func (Node) ColumnsToUpdate() []string {
 func (n Node) InsertColumns() []string {
 	return []string{
 		"id", "tenant_id", "cluster_uuid", "name", "status", "conditions", "taints",
-		"node_pool", "gpu_type", "gpu_count", "created_at", "updated_at",
+		"node_pool", "gpu_type", "gpu_count", "gpu_memory_bytes", "created_at", "updated_at",
 		"nv_link_domain_uid", "nv_link_clique_id",
 		"network_topology_label_values", "network_topology_labels",
 		"topology_manager_policy",
@@ -246,8 +252,9 @@ func (n *Node) ToApiModel() api.Node {
 
 	if n.GpuType != "" || n.GpuCount != 0 {
 		nodeInfo.GpuInfo = &api.GpuInfo{
-			GpuType:  n.GpuType,
-			GpuCount: n.GpuCount,
+			GpuType:        n.GpuType,
+			GpuCount:       n.GpuCount,
+			GpuMemoryBytes: n.GpuMemoryBytes,
 		}
 	}
 

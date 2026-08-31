@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 ALTER TABLE workloads_phase_history ADD COLUMN IF NOT EXISTS cluster_id uuid;
 ALTER TABLE workloads_phase_history ADD COLUMN IF NOT EXISTS tenant_id bigint;
 

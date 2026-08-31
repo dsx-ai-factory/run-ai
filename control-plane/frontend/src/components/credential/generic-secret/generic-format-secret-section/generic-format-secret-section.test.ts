@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { mount } from "@vue/test-utils";
 import GenericFormatSecretSection from "./generic-format-secret-section.vue";
 import { beforeEach, describe, expect, test } from "vitest";

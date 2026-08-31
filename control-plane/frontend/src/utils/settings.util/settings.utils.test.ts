@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, expect, it } from "vitest"; // Replace 'yourModule' with the actual module path
 import type { Mappers, OidcCreationData, SamlCreationData } from "@/swagger-models/identity-manager-client";
 import { IdpTypeEnum } from "@/swagger-models/identity-manager-client";

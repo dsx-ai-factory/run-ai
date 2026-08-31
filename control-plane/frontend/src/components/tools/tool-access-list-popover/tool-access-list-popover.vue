@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <runai-base-popover @hide="onHide" :no-padding="true" size="width-sm" ref="popover" max-height="50vh">
     <template #header> <span class=""> Access </span> </template>

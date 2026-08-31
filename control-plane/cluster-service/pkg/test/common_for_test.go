@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package test
 
 import (
@@ -28,6 +33,9 @@ const (
 
 	testGpuType1 = "Tesla-V100"
 	testGpuType2 = "Navi"
+
+	testGpuMemoryBytes1 = int64(34359738368)
+	testGpuMemoryBytes2 = int64(17179869184)
 )
 
 var (
@@ -80,8 +88,9 @@ var (
 		NodePool:  testNodePoolName0,
 		CreatedAt: time.Now(),
 		GpuInfo: &api.GpuInfo{
-			GpuType:  testGpuType1,
-			GpuCount: 1,
+			GpuType:        testGpuType1,
+			GpuCount:       1,
+			GpuMemoryBytes: testGpuMemoryBytes1,
 		},
 		NvLinkDomainUid:       pointer.To("DOMAIN-X"),
 		NvLinkCliqueId:        pointer.To("CLIQUE-Y"),
@@ -102,8 +111,9 @@ var (
 		NodePool:  testNodePoolName1,
 		CreatedAt: time.Now(),
 		GpuInfo: &api.GpuInfo{
-			GpuType:  testGpuType2,
-			GpuCount: 2,
+			GpuType:        testGpuType2,
+			GpuCount:       2,
+			GpuMemoryBytes: testGpuMemoryBytes2,
 		},
 		NetworkTopologyLabels: testTopologyLabels1,
 	}

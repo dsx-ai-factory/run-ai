@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Create categories table
 CREATE TABLE IF NOT EXISTS workloads_categories (
     id uuid NOT NULL PRIMARY KEY,

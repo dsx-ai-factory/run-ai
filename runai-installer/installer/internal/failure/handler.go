@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package failure provides a terminal-driven FailureHandler for the
 // orchestrator. In interactive mode it prompts the user to choose between
 // abort, skip, and retry; in non-interactive mode it follows the configured

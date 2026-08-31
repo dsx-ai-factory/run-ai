@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { ENodePoolsListOrigin, IComputeSectionNodePoolsPolicy } from "./node-pools-resource-section";
 import type { IAutoScaleData } from "./auto-scale-section";
 import type { PodAffinity, Toleration } from "@/swagger-models/assets-service-client";

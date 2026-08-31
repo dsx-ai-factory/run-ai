@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package helmclient
 
 import (
@@ -163,14 +168,24 @@ func InstallOrUpgradeFromLocalChart(ctx context.Context, chartPath, releaseName,
 	return nil
 }
 
-// isHelmWaitTimeout reports whether err is the wait-timeout error helm returns
-// when resources are not deleted within the wait window. Helm v3 uses
-// github.com/pkg/errors.Errorf which breaks the error chain, so
-// errors.Is(err, context.DeadlineExceeded) always returns false. We detect it
-// by checking the error string instead.
-// NOTE: validated against helm v3.19.0; verify in integration tests on upgrade.
 func isHelmWaitTimeout(err error) bool {
-	return strings.Contains(err.Error(), "context deadline exceeded")
+	message := err.Error()
+	return strings.Contains(message, "context deadline exceeded") ||
+		strings.Contains(message, "timed out waiting for the condition")
+}
+
+// NormalizeUninstallError converts a completed Helm uninstall's sole wait
+// timeout into context.DeadlineExceeded.
+func NormalizeUninstallError(response *release.UninstallReleaseResponse, err error) error {
+	if err == nil || response == nil || response.Release == nil || response.Release.Info == nil {
+		return err
+	}
+	if response.Release.Info.Status != release.StatusUninstalled ||
+		!strings.Contains(err.Error(), "uninstallation completed with 1 error(s):") ||
+		!isHelmWaitTimeout(err) {
+		return err
+	}
+	return fmt.Errorf("%v: %w", err, context.DeadlineExceeded)
 }
 
 // FixPendingRelease transitions a Helm release stuck in a pending state
@@ -217,7 +232,8 @@ func UninstallRelease(releaseName, namespace string, waitTimeout time.Duration) 
 		uninstall.Wait = true
 		uninstall.Timeout = waitTimeout
 	}
-	if _, err := uninstall.Run(releaseName); err != nil {
+	response, err := uninstall.Run(releaseName)
+	if err = NormalizeUninstallError(response, err); err != nil {
 		if errors.Is(err, driver.ErrReleaseNotFound) {
 			logging.Infof("[Helm] Release '%s' not found in namespace '%s', skipping uninstall", releaseName, namespace)
 			return nil

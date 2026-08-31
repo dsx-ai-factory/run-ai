@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <runai-section title="Set the number of workers per segment" :tooltip-text="segmentSizeTooltip" tooltip-width="300px">
     <div class="row">

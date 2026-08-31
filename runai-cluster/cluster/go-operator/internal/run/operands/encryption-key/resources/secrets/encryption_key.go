@@ -1,9 +1,14 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package secrets
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 
 	"github.com/run-ai/runai/runai-cluster/cluster/common/constants"
@@ -17,8 +22,17 @@ import (
 )
 
 const (
-	// AES-256-GCM key size in bytes
+	// AES-256-GCM key size in bytes. The stored key is a 32-byte printable string
+	// (base64-url characters), passed to consumers via an env var and consumed via
+	// aes.NewCipher([]byte(env)); the raw ASCII of that string becomes the AES-256
+	// key material.
 	aesKeySize = 32
+	// keyEntropyBytes is the number of raw random bytes drawn from crypto/rand.
+	// Base64 (no-padding) encoding expands 3 raw bytes to 4 chars, so 24 raw bytes
+	// -> exactly aesKeySize (32) chars. The resulting 32-byte key string carries
+	// 24*8 = 192 bits of true entropy, well above what is required to make offline
+	// brute force of AES-256-GCM infeasible.
+	keyEntropyBytes = 24
 	// encryptionKeyOperandName is the name of the encryption key operand
 	encryptionKeyOperandName = "encryption-key"
 )
@@ -63,20 +77,41 @@ func (s *encryptionKeySecretResource) Object(ctx context.Context) (client.Object
 		return nil, err
 	}
 
-	// If secret exists and has the key, keep it
+	// If a secret with a valid-length key already exists, keep it. The key never rotates
+	// automatically: rotating it would render every already-encrypted personal-credential
+	// payload in the runai namespace undecryptable and break every workload that consumes
+	// them. Rotation requires an operator-driven re-encryption of existing payloads and is
+	// out of scope for this operand.
 	if err == nil && len(secret.Data[constants.RunaiAdsEncryptionKeyName]) == aesKeySize {
 		return secret, nil
 	}
 
-	// Generate new key
-	keyHash := sha256.Sum256([]byte(s.runaiConfig.Spec.Internal.Global.ControlPlane.ClusterUUID))
-	keyHex := hex.EncodeToString(keyHash[:])
+	// Generate a fresh key from a cryptographically secure source. The key MUST NOT be
+	// derived from any cluster identifier: ClusterUUID and friends are public (URL path
+	// segments, the runaiconfig CR, the CLUSTER_ID env var on the metrics-exporter pod,
+	// the CP cluster-list API), so any deterministic derivation from them is equivalent
+	// to no key at all against an attacker with read access to encrypted personal-credential
+	// payloads.
+	//
+	// The key is stored as a 32-character base64-url string rather than 32 raw bytes on
+	// purpose: it is delivered to consumers via SecretKeyRef -> container env var, and env
+	// var values are NUL-terminated at exec() time, so raw random bytes would be truncated.
+	// Encoding 24 random bytes yields 32 printable chars with 192 bits preserves the existing
+	// consumer contract
+	raw := make([]byte, keyEntropyBytes)
+	if _, err := rand.Read(raw); err != nil {
+		return nil, fmt.Errorf("failed to generate encryption key: %w", err)
+	}
+	keyStr := base64.RawURLEncoding.EncodeToString(raw)
+	if len(keyStr) != aesKeySize {
+		return nil, fmt.Errorf("generated encryption key has unexpected length %d, want %d", len(keyStr), aesKeySize)
+	}
 
 	secret.ObjectMeta.Name = name
 	secret.ObjectMeta.Namespace = namespace
 	secret.Type = corev1.SecretTypeOpaque
 	secret.StringData = map[string]string{
-		constants.RunaiAdsEncryptionKeyName: keyHex[:32],
+		constants.RunaiAdsEncryptionKeyName: keyStr,
 	}
 
 	return secret, nil

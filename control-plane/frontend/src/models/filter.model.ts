@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { DistributedFramework, Scope } from "@/swagger-models/assets-service-client";
 import type { EWorkloadTypeSupportedInAssetsService } from "@/models/workload.model";
 import type { ISelectOption } from "@/models/global.model";

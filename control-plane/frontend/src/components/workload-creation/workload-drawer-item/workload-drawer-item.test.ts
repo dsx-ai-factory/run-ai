@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { mount } from "@vue/test-utils";
 import WorkloadDrawerItem from "./workload-drawer-item.vue";
 import type { IDrawerListItem } from "@/models/workload-creation-drawer-model";

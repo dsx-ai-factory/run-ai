@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <runai-page-filter-wrapper display :title="filter.label" @save="saveFilter" @close="$emit('close')" max-width="250px">
     <template #body>

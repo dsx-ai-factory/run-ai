@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <runai-expansion-item class="runai-name-section" :label="sectionLabel" :default-opened="defaultOpened" should-validate>
     <template #subheader>

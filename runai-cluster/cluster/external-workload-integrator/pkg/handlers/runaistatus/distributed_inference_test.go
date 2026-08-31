@@ -1,8 +1,14 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 package runaistatus
 
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	dromosv1alpha1 "github.com/run-ai/runai/runai-cluster/cluster/dromos/api/v1alpha1"
 	mnnvltypes "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/mnnvl"
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -14,7 +20,7 @@ var _ = Describe("ComputeDistributedInferenceStatus", func() {
 	Describe("legacy phase parity", func() {
 		DescribeTable("calculates the expected phase and message",
 			func(input DistributedInferenceInput, phase v1alpha1.ExternalWorkloadPhase, message string) {
-				result := ComputeDistributedInferenceStatus(input)
+				result := ComputeDistributedInferenceStatus(input, "")
 
 				Expect(result.Phase).To(Equal(phase))
 				Expect(result.Message).To(Equal(message))
@@ -52,13 +58,50 @@ var _ = Describe("ComputeDistributedInferenceStatus", func() {
 		It("degrades the workload and includes a user-facing message", func() {
 			result := ComputeDistributedInferenceStatus(DistributedInferenceInput{
 				Exists: true, Replicas: 0, GroupSize: 1, MNNVLEnabled: true,
-			})
+			}, "")
 
 			Expect(result.Phase).To(Equal(v1alpha1.ExWDegradedPhase))
 			Expect(result.Message).To(Equal(
 				"Replicas: 0; " + mnnvltypes.UserFacingFeatureName + " is not ready"))
 		})
 	})
+
+	DescribeTable("composes a running lifecycle result with networking",
+		func(input DistributedInferenceInput, networkingPhase dromosv1alpha1.PluginPhase,
+			expectedPhase v1alpha1.ExternalWorkloadPhase,
+		) {
+			result := ComputeDistributedInferenceStatus(input, networkingPhase)
+
+			Expect(result.Phase).To(Equal(expectedPhase))
+		},
+		Entry("missing plugin status is neutral",
+			DistributedInferenceInput{Exists: true, GroupSize: 1},
+			dromosv1alpha1.PluginPhase(""), v1alpha1.ExWRunningPhase),
+		Entry("Disabled is neutral",
+			DistributedInferenceInput{Exists: true, GroupSize: 1},
+			dromosv1alpha1.PluginPhaseDisabled, v1alpha1.ExWRunningPhase),
+		Entry("Ready is neutral",
+			DistributedInferenceInput{Exists: true, GroupSize: 1},
+			dromosv1alpha1.PluginPhaseReady, v1alpha1.ExWRunningPhase),
+		Entry("Creating gates Running",
+			DistributedInferenceInput{Exists: true, GroupSize: 1},
+			dromosv1alpha1.PluginPhaseCreating, v1alpha1.ExWInitializingPhase),
+		Entry("Pending gates Running",
+			DistributedInferenceInput{Exists: true, GroupSize: 1},
+			dromosv1alpha1.PluginPhasePending, v1alpha1.ExWInitializingPhase),
+		Entry("Initializing gates Running",
+			DistributedInferenceInput{Exists: true, GroupSize: 1},
+			dromosv1alpha1.PluginPhaseInitializing, v1alpha1.ExWInitializingPhase),
+		Entry("Unknown gates Running",
+			DistributedInferenceInput{Exists: true, GroupSize: 1},
+			dromosv1alpha1.PluginPhaseUnknown, v1alpha1.ExWInitializingPhase),
+		Entry("Failed degrades Running",
+			DistributedInferenceInput{Exists: true, GroupSize: 1},
+			dromosv1alpha1.PluginPhaseFailed, v1alpha1.ExWDegradedPhase),
+		Entry("networking does not override a non-running lifecycle phase",
+			DistributedInferenceInput{},
+			dromosv1alpha1.PluginPhaseFailed, v1alpha1.ExWCreatingPhase),
+	)
 })
 
 func distributedInferenceGroupPod(group, worker string, phase corev1.PodPhase, ready bool, waitingReason string) corev1.Pod {

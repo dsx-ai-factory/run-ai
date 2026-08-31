@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, expect, it } from "vitest";
 import { PREDEFINED_HOURS, PREDEFINED_MINUTES } from "@/models/date.model";
 import { getOverviewShortRangeAxisInterval, ONE_MINUTE_IN_MS, TEN_MINUTES_IN_MS } from "./overview-time-axis.util";

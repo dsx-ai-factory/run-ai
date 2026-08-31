@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package installconfig defines the installer spec file (YAML) and loads it
 // with strict, type-level validation. The struct mirrors the installer design
 // doc; many fields are parsed but not yet consumed by the orchestrator, so the

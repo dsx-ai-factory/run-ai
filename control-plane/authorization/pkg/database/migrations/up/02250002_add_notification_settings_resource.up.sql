@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Migration to add notification-settings permissions mirroring security-settings for custom roles
 -- This migration should only run once. If notification-settings already exists, skip entirely.
 

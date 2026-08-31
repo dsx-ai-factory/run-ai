@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { getBootConfig } from "@/services/infra/boot-config.service/boot-config.service";
 
 export const ROOT_URL = "https://run-ai-docs.nvidia.com";

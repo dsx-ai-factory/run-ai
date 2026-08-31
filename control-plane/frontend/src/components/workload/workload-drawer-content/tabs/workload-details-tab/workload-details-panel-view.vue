@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <runai-details-panel :key="selectedSpec || 'default'" :sections="accordionSections">
     <template v-if="showSpecSelect" #controls-prepend>

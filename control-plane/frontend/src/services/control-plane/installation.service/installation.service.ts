@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { serviceAccountsService } from "@/services/control-plane/service-accounts.service/service-accounts.service";
 import type { DisplayedCluster } from "@/swagger-models/cluster-service-client";

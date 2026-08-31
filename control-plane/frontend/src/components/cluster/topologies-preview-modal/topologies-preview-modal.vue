@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section class="topologies-preview-modal">
     <runai-base-dialog class="topologies-preview-modal" model-value @close="$emit('close')" size="width-xl" no-padding>

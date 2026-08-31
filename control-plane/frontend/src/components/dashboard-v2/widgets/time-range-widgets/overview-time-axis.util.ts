@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { PREDEFINED_MINUTES } from "@/models/date.model";
 
 export const ONE_MINUTE_IN_MS = 60 * 1000;

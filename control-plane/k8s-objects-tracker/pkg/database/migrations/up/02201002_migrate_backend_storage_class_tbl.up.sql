@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- create a trigger to sync any change
 CREATE OR REPLACE FUNCTION k8s_objects_tracker.sync_storage_classes_from_backend_func()
         RETURNS TRIGGER AS $$

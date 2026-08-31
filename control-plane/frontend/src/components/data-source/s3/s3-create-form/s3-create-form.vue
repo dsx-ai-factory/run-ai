@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section class="s3-create-form column items-center q-pt-md">
     <runai-form-wrapper ref="elS3Form" class="s3-form" :form-state="s3Model" :enter-callback="save">

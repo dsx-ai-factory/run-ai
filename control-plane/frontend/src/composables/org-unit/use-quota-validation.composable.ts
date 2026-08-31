@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { computed, unref, type Ref, type ComputedRef } from "vue";
 import { EQuotaInputState } from "@/models/org-unit.model";
 import { formValidators } from "@/common/form.validators";

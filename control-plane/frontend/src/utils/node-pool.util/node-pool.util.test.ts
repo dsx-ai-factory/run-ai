@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { NodepoolPhase, type TelemetryResponse } from "@/swagger-models/cluster-service-client";
 import { describe, expect, it, vi } from "vitest";
 import type { INodePoolTable } from "@/table-models/node-pool.table-model";

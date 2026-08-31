@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <section aid="report-collection-period-section" class="q-pt-lg">
     <runai-section-title title="Set the report's data collection period" tooltip-text="Set a period of up to 30 days" />

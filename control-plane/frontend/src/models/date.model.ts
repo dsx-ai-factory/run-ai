@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export enum PREDEFINED_DATES {
   CUSTOM = "Custom",
   WORKLOADS_LIFESPAN = "Workload's lifespan",

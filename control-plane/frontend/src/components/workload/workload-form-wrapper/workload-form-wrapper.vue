@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events, vuejs-accessibility/no-static-element-interactions -- @click.self only closes the drawer as a mouse-only convenience when clicking the dimmed background; the drawer itself already exposes an accessible close control (see @close on the drawer in consumers, e.g. training-hybrid.vue) -->
   <section

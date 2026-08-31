@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package display turns the installer's internal machine names (the stable
 // identifiers used in JSON events, tests, and control flow) into human-readable
 // labels for the text UI. It is the default source of a label; a step, flow, or

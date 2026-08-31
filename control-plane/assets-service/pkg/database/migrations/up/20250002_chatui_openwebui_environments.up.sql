@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Migration to add Chat-UI and OpenWebUI environment presets
 -- Chat-UI: Two versions (host-based and path-based routing)
 -- OpenWebUI: One version (host-based routing only)

@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <runai-base-dialog model-value class="workload-stop-modal" size="width-sm" @close="$emit('close')">
     <template #header>Stop</template>

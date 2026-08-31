@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { inferenceDataSourceRestrictionsUtil } from "./inference-data-source-restrictions.util";
 import type { IDrawerListItem } from "@/models/workload-creation-drawer-model";

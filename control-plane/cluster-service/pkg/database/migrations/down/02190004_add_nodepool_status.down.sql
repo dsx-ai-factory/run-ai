@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 ALTER TABLE nodepools DROP COLUMN IF EXISTS status_label_key;
 ALTER TABLE nodepools DROP COLUMN IF EXISTS status_label_value;
 ALTER TABLE nodepools DROP COLUMN IF EXISTS status_over_provisioning_ratio;

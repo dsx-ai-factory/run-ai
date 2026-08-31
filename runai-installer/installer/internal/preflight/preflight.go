@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package preflight assembles the preflight flow: read-only checks that run
 // against the live cluster (and, for air-gap, the registry) before any install
 // work. Each check is implemented as a read-only action (in the actions

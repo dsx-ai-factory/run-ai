@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export enum WORKLOAD_ROUTE_NAMES {
   WORKLOAD_INDEX = "workload-index",
   WORKLOAD_DELETED_INDEX = "workload-deleted-index",

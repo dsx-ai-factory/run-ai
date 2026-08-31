@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { userService } from "@/services/control-plane/user.service/user.service";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 import { accessRuleService } from "@/services/control-plane/rbac/access-rule.service/access-rule.service";

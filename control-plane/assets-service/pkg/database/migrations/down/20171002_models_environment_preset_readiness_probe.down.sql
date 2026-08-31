@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 DO $$
 DECLARE
     uuid_environment_falcon_7b uuid := '514b77df-0869-468d-94ce-5a2c7b5dc1bb';

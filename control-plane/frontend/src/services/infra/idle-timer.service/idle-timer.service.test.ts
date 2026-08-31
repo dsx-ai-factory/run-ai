@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { describe, it, vi, beforeEach, afterEach, expect } from "vitest";
 import { IdleTimer } from "./idle-timer.service";
 import { useAuthStore } from "@/stores/auth.store";

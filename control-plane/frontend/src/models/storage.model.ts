@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export const STORAGE_KEYS = {
   LOGGED_IN_USER_EMAIL: "logged-in-user-email",
   IS_FIRST_LOGIN: "is-first-login",

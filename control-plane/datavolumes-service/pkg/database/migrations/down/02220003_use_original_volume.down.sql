@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 DROP VIEW if exists datavolumes_view;
 CREATE VIEW datavolumes_view AS (SELECT DISTINCT ON (d.id, s.scope_id, s.scope_type)
     d.id,

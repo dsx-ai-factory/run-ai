@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <runai-base-dialog :model-value="isModalOpen" @close="$emit('close')" size="width-md" no-padding :loading="loading">
     <template #header>Delete</template>

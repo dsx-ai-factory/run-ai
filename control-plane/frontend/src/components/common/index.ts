@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { RunaiListModalSearch } from "./runai-list-modal-search";
 import { RunaiAutocompleteSelect } from "./runai-autocomplete-select";
 import { RunaiToggle } from "./runai-toggle";

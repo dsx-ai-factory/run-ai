@@ -1,3 +1,6 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
 CREATE SEQUENCE IF NOT EXISTS id_sequence START WITH 4500000;
 
 CREATE TABLE IF NOT EXISTS node_type (

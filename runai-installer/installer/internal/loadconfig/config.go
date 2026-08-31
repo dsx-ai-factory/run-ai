@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Package loadconfig defines the airgap load config file and maps it onto the
 // orchestrator spec, mirroring packconfig's conventions.
 package loadconfig

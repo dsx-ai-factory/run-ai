@@ -1,4 +1,9 @@
 /*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/*
  * Management
  *
  * An API for managing management objects like: tenants, subscriptions and more

@@ -1,3 +1,8 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+
 <template>
   <div :aid="aid" class="runai-badge-mono">
     <span v-if="content" :aid="`${aid}-content`" class="runai-badge-mono-content text-b-mono">

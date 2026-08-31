@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import ProjectIndex from "@/views/projects/project-index.vue";
 import ProjectEdit from "@/views/projects/project-edit.vue";
 import { ResourceType, Action } from "@/swagger-models/authorization-client";
