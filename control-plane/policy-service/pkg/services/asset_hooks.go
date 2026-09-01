@@ -20,7 +20,7 @@ import (
 	"github.com/run-ai/runai/runai-application-packages/datastructs"
 	assetsApi "github.com/run-ai/runai/runai-clients/assets-service-client/generated"
 	workloadsApi "github.com/run-ai/runai/runai-clients/workloads-client/generated"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 	"golang.org/x/exp/maps"
 
 	"github.com/run-ai/runai/control-plane/policy-service/generated/pkg/api"
@@ -96,7 +96,7 @@ func assetHook(ctx context.Context, assetId string, notification api.AssetChange
 	//  so rare, that it would be a real waste to lock the tree before we even know if the asset is relevant. if
 	//  such rear case ever happens an additional update to the policy will fix it.
 	//
-	policies, err := dao.FindGivenPoliciesOfOrgUnitAllTypes(ctx, dao_utils.DB().WithContext(ctx), orgUnit.Scope, orgUnit.ClusterId(),
+	policies, err := dao.FindGivenPoliciesOfOrgUnitAllTypes(ctx, runaidb.DB().WithContext(ctx), orgUnit.Scope, orgUnit.ClusterId(),
 		orgUnit.DepartmentId(), orgUnit.ProjectId(ctx), dbmodel.NotToIncludeDeletedPolicies)
 	if err != nil {
 		return err

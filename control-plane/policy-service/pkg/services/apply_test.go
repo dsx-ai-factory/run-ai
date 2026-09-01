@@ -26,9 +26,9 @@ import (
 	. "github.com/onsi/gomega"
 	authClient "github.com/run-ai/runai/control-plane/authorization/pkg/client/generated"
 	assetsService "github.com/run-ai/runai/runai-clients/assets-service-client/generated"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
 	"github.com/run-ai/runai/runai-common-packages/runaictx"
 	runaictx_http "github.com/run-ai/runai/runai-common-packages/runaictx/http"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 
 	clusterServiceApi "github.com/run-ai/runai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/run-ai/runai/control-plane/policy-service/generated/pkg/api"
@@ -2392,7 +2392,7 @@ var _ = Describe("ApplyTest", Ordered, func() {
 	Context("policy update should update updated_by field", func() {
 		It("should update updated_by when policy is modified by different user", func() {
 			// Test the database update function directly
-			db := dao_utils.DB()
+			db := runaidb.DB()
 
 			// Create a test policy in the database
 			testPolicy := dbmodel.Policy{
@@ -2412,8 +2412,8 @@ var _ = Describe("ApplyTest", Ordered, func() {
 			testPolicy.UpdatedAt = time.Now()
 
 			// Insert the policy
-			result := db.Create(&testPolicy)
-			Expect(result.Error).To(BeNil())
+			_, err := db.Create(&testPolicy)
+			Expect(err).To(BeNil())
 			Expect(testPolicy.ID).ToNot(BeZero())
 
 			// Now update the policy with a different user
@@ -2422,13 +2422,13 @@ var _ = Describe("ApplyTest", Ordered, func() {
 			testPolicy.DefaultsV2 = map[string]interface{}{"image": "alpine"}
 
 			// Call the UpdatePolicySpec function directly
-			err := dao.UpdatePolicySpec(context.Background(), db, &testPolicy)
+			err = dao.UpdatePolicySpec(context.Background(), db, &testPolicy)
 			Expect(err).To(BeNil())
 
 			// Verify the database was updated correctly
 			var updatedPolicy dbmodel.Policy
-			result = db.Where("id = ?", testPolicy.ID).First(&updatedPolicy)
-			Expect(result.Error).To(BeNil())
+			err = db.Where("id = ?", testPolicy.ID).First(&updatedPolicy)
+			Expect(err).To(BeNil())
 
 			// Verify that updated_by was changed to user 2, but created_by remains user 1
 			Expect(updatedPolicy.UpdatedBy).To(Equal("user2"))
@@ -2436,7 +2436,8 @@ var _ = Describe("ApplyTest", Ordered, func() {
 			Expect(updatedPolicy.DefaultsV2["image"]).To(Equal("alpine"))
 
 			// Clean up
-			db.Delete(&testPolicy)
+			_, err = db.Delete(&testPolicy)
+			Expect(err).To(BeNil())
 		})
 	})
 

@@ -40,7 +40,10 @@ func AddDepartmentHandlerToCache(backendClient *backendclient.BackendClient, cac
 			}
 		},
 		DeleteFunc: func(object any) {
-			department := object.(*kaiv1alpha1.Department)
+			department, ok := deletedObject[*kaiv1alpha1.Department](object)
+			if !ok {
+				return
+			}
 			rateLimitedController.MarkItemDeleted(objectKeyFromObject(department))
 			departmentHandler.HandleDelete(department)
 		},

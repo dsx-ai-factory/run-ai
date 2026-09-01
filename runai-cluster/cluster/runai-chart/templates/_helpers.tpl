@@ -13,35 +13,6 @@
     {{- end -}}
 {{- end -}}
 
-{{- define "shouldApplyFreshInstallLegacyDefaults" -}}
-    {{- $appVersion := trimPrefix "v" .Chart.AppVersion -}}
-    {{- if or (eq $appVersion "") (eq $appVersion "CHART_APP_VERSION") (hasPrefix "0.0.0" $appVersion) -}}
-        {{- true -}}
-    {{- else -}}
-        {{- semverCompare ">=3.0.0-0" $appVersion -}}
-    {{- end -}}
-{{- end -}}
-
-{{- define "legacyControllerRBACEnabled" -}}
-    {{- $root := index . 0 -}}
-    {{- $controller := index . 1 -}}
-    {{- if $root.Release.IsInstall -}}
-        {{- false -}}
-    {{- else -}}
-        {{- $enabled := true -}}
-        {{- if eq (include "runaiConfigCRDExists" $root) "true" -}}
-            {{- $runaiConfig := lookup "run.ai/v1" "RunaiConfig" $root.Release.Namespace "runai" -}}
-            {{- if $runaiConfig -}}
-                {{- $controllerConfig := get $runaiConfig.spec $controller -}}
-                {{- if and $controllerConfig (hasKey $controllerConfig "enabled") -}}
-                    {{- $enabled = get $controllerConfig "enabled" -}}
-                {{- end -}}
-            {{- end -}}
-        {{- end -}}
-        {{- $enabled -}}
-    {{- end -}}
-{{- end -}}
-
 {{- define "imageRegistry" -}}
     {{- $globalRegistry := .Values.global.image.registry -}}
     {{- with index .Values "runai-operator" "image" -}}

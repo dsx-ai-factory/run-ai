@@ -23,9 +23,12 @@ import (
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/clients/authorization"
 	"github.com/run-ai/runai/runai-application-packages/convutils"
 	"github.com/run-ai/runai/runai-application-packages/datastructs"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
+	"github.com/run-ai/runai/runai-application-packages/queryapi"
 	"github.com/run-ai/runai/runai-common-packages/logging"
 	"github.com/run-ai/runai/runai-common-packages/runaictx"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
+	"github.com/run-ai/runai/runai-common-packages/runaidb/orm"
 	"gorm.io/gorm"
 )
 
@@ -46,7 +49,7 @@ const (
 
 func (pa *PolicyApiService) createGvkPolicy(ctx context.Context, req api.CreateGvkPolicyReq) (*api.Policy, *api.Error) {
 	committed := false
-	tx := dao_utils.DB().WithContext(ctx).Begin()
+	tx := runaidb.DB().WithContext(ctx).Begin()
 	defer database.FinalizeTransaction(tx, &committed)
 
 	tenantId := auth.TenantIdOf(ctx)
@@ -94,7 +97,7 @@ func (pa *PolicyApiService) createGvkPolicy(ctx context.Context, req api.CreateG
 		}
 		projectIdNum = &n
 	}
-	existing, findErr := dao.FindPolicyOfOrgUnit(ctx, dao_utils.DB().WithContext(ctx),
+	existing, findErr := dao.FindPolicyOfOrgUnit(ctx, runaidb.DB().WithContext(ctx),
 		req.Scope, req.DepartmentId, projectIdNum, req.ClusterId, workloadTypeKey,
 		dbmodel.NotToIncludeDeletedPolicies)
 	if findErr != nil {
@@ -134,7 +137,7 @@ func (pa *PolicyApiService) createGvkPolicy(ctx context.Context, req api.CreateG
 		return nil, e
 	}
 
-	db := dao_utils.DB().WithContext(ctx)
+	db := runaidb.DB().WithContext(ctx)
 
 	updated := false
 
@@ -206,9 +209,9 @@ func (pa *PolicyApiService) createGvkPolicy(ctx context.Context, req api.CreateG
 			return nil, err
 		}
 
-		result := tx.Commit()
-		if result.Error != nil {
-			return nil, database.Error(database.UPSERT, database.Policies).WithDetailsFromDb(result)
+		commitErr := tx.Commit()
+		if commitErr != nil {
+			return nil, database.Error(database.UPSERT, database.Policies).WithDetails(commitErr)
 		}
 		committed = true
 
@@ -279,7 +282,7 @@ func (pa *PolicyApiService) getGvkPolicyByTypeAndScope(ctx context.Context, req 
 		projectId = &pid
 	}
 
-	db := dao_utils.DB().WithContext(ctx)
+	db := runaidb.DB().WithContext(ctx)
 
 	stored, findErr := dao.FindPolicyOfOrgUnit(ctx, db, req.Scope, nil, projectId, nil, workloadType, dbmodel.IncludeDeletedPolicies)
 	if findErr != nil {
@@ -312,7 +315,7 @@ func (pa *PolicyApiService) getGvkPolicyByTypeAndScope(ctx context.Context, req 
 }
 
 func (pa *PolicyApiService) getGvkPolicyById(ctx context.Context, policyId string, toAddBreakdown bool) (*api.GetGvkPolicyResp, *api.Error) {
-	db := dao_utils.DB().WithContext(ctx)
+	db := runaidb.DB().WithContext(ctx)
 
 	stored, findErr := dao.FindPolicyByID(ctx, db, policyId, findGvkPolicyOptions)
 	if findErr != nil {
@@ -326,7 +329,7 @@ func (pa *PolicyApiService) getGvkPolicyById(ctx context.Context, policyId strin
 	return pa.getGvkPolicy(ctx, db, stored, toAddBreakdown)
 }
 
-func (pa *PolicyApiService) getGvkPolicy(ctx context.Context, db *gorm.DB, stored *dbmodel.PolicyWithOptionalEffective, toAddBreakdown bool) (*api.GetGvkPolicyResp, *api.Error) {
+func (pa *PolicyApiService) getGvkPolicy(ctx context.Context, db orm.DB, stored *dbmodel.PolicyWithOptionalEffective, toAddBreakdown bool) (*api.GetGvkPolicyResp, *api.Error) {
 	_, scopeParams, scopeErr := NewScopeInfoFromPolicy(ctx, &stored.Policy)
 	if scopeErr != nil {
 		return nil, scopeErr
@@ -395,9 +398,9 @@ func (pa *PolicyApiService) getGvkPolicy(ctx context.Context, db *gorm.DB, store
 
 			stored.EffectivePolicy = *effectivePolicy
 
-			result := tx.Commit()
-			if result.Error != nil {
-				return nil, database.Error(database.UPSERT, database.Policies).WithDetailsFromDb(result)
+			commitErr := tx.Commit()
+			if commitErr != nil {
+				return nil, database.Error(database.UPSERT, database.Policies).WithDetails(commitErr)
 			}
 			committed = true
 
@@ -517,8 +520,8 @@ func (pa *PolicyApiService) getGvkPolicy(ctx context.Context, db *gorm.DB, store
 			gvkPolicyResp.Status = newStatus
 		}
 
-		if res := tx.Commit(); res.Error != nil {
-			return nil, database.Error(database.UPDATE, database.Policies).WithDetailsFromDb(res)
+		if commitErr := tx.Commit(); commitErr != nil {
+			return nil, database.Error(database.UPDATE, database.Policies).WithDetails(commitErr)
 		}
 		committed = true
 	}
@@ -538,7 +541,7 @@ func (pa *PolicyApiService) getGvkPolicy(ctx context.Context, db *gorm.DB, store
 // reported on the resulting incomplete breakdown). The collector is also
 // what bounds the work via maxErrors. Pass nil for issues when running in
 // a context where there are no rules to attribute findings to.
-func (pa *PolicyApiService) GeneratePolicyBreakdown(ctx context.Context, tx *gorm.DB, gvk api.Gvk, rules []api.PolicyRule, issues *ruleIssues) (*BreakdownResult, *api.Error) {
+func (pa *PolicyApiService) GeneratePolicyBreakdown(ctx context.Context, tx orm.DB, gvk api.Gvk, rules []api.PolicyRule, issues *ruleIssues) (*BreakdownResult, *api.Error) {
 	bg, bgErr := NewBreakdownGenerator(ctx, tx, gvk)
 	if bgErr != nil {
 		return nil, bgErr
@@ -568,7 +571,7 @@ func (pa *PolicyApiService) GeneratePolicyBreakdown(ctx context.Context, tx *gor
 
 // getMappingMinimal returns minimal information about all fields in a mapping.
 func (pa *PolicyApiService) getMappingMinimal(ctx context.Context, gvk api.Gvk) (*api.GetMappingMinimalResp, *api.Error) {
-	tx := dao_utils.DB().WithContext(ctx)
+	tx := runaidb.DB().WithContext(ctx)
 
 	bg, bgErr := NewBreakdownGenerator(ctx, tx, gvk)
 	if bgErr != nil {
@@ -640,7 +643,7 @@ func (pa *PolicyApiService) getMappingFieldInfo(ctx context.Context, gvk api.Gvk
 		return nil, api.NewError(http.StatusBadRequest, "fieldsRef is required", nil)
 	}
 
-	tx := dao_utils.DB().WithContext(ctx)
+	tx := runaidb.DB().WithContext(ctx)
 
 	bg, bgErr := NewBreakdownGenerator(ctx, tx, gvk)
 	if bgErr != nil {
@@ -721,12 +724,12 @@ func (pa *PolicyApiService) listGvkPolicies(ctx context.Context, filterBy []stri
 		return nil, api.NewError(int(authErr.Code), authErr.Message, nil)
 	}
 
-	filters, filterErr := dao_utils.ValidateAndParameterizeApiFilters(filterBy, dbmodel.Policy{}.FilterFieldsToColumn())
+	filters, filterErr := queryapi.NewParser(dbmodel.Policy{}.FilterFieldsToColumn()).Filters(filterBy)
 	if filterErr != nil {
 		return nil, api.NewValidationError(filterErr.Error())
 	}
 
-	sortColumn, sortError := dao_utils.ValidateSortByField(sortBy, dbmodel.Policy{}.SortFieldsToColumn())
+	sortColumn, sortError := queryapi.NewParser(dbmodel.Policy{}.SortFieldsToColumn()).GetMapping(sortBy)
 	if sortError != nil {
 		return nil, api.NewValidationError(sortError.Error())
 	}
@@ -753,7 +756,7 @@ func (pa *PolicyApiService) listGvkPolicies(ctx context.Context, filterBy []stri
 
 func (pa *PolicyApiService) deleteGvkPolicy(ctx context.Context, policyId string) *api.Error {
 	committed := false
-	tx := dao_utils.DB().WithContext(ctx).Begin()
+	tx := runaidb.DB().WithContext(ctx).Begin()
 	defer database.FinalizeTransaction(tx, &committed)
 
 	stored, findErr := dao.FindPolicyByID(ctx, tx, policyId, findGvkPolicyOptions)
@@ -795,8 +798,8 @@ func (pa *PolicyApiService) deleteGvkPolicy(ctx context.Context, policyId string
 		return err
 	}
 
-	if res := tx.Commit(); res.Error != nil {
-		return database.Error(database.DELETE, database.Policies).WithDetailsFromDb(res)
+	if commitErr := tx.Commit(); commitErr != nil {
+		return database.Error(database.DELETE, database.Policies).WithDetails(commitErr)
 	}
 	committed = true
 
@@ -804,7 +807,7 @@ func (pa *PolicyApiService) deleteGvkPolicy(ctx context.Context, policyId string
 }
 
 func (pa *PolicyApiService) deleteGvkPolicyRules(ctx context.Context, policyId string, req api.DeleteGvkPolicyRulesReq) (*api.Policy, *api.Error) {
-	db := dao_utils.DB().WithContext(ctx)
+	db := runaidb.DB().WithContext(ctx)
 
 	stored, findErr := dao.FindPolicyByID(ctx, db, policyId, findGvkPolicyOptions)
 	if findErr != nil {
@@ -942,9 +945,9 @@ func (pa *PolicyApiService) deleteGvkPolicyRules(ctx context.Context, policyId s
 			}
 		}
 
-		result := tx.Commit()
-		if result.Error != nil {
-			return nil, database.Error(database.UPDATE, database.Policies).WithDetailsFromDb(result)
+		commitErr := tx.Commit()
+		if commitErr != nil {
+			return nil, database.Error(database.UPDATE, database.Policies).WithDetails(commitErr)
 		}
 		committed = true
 
@@ -977,7 +980,7 @@ func (pa *PolicyApiService) deleteGvkPolicyRules(ctx context.Context, policyId s
 }
 
 func (pa *PolicyApiService) updateGvkPolicy(ctx context.Context, policyId string, req api.UpdateGvkPolicyReq, options updateOptions) (*api.Policy, *api.Error) {
-	db := dao_utils.DB().WithContext(ctx)
+	db := runaidb.DB().WithContext(ctx)
 
 	stored, findErr := dao.FindPolicyByID(ctx, db, policyId, findGvkPolicyOptions)
 	if findErr != nil {
@@ -1146,9 +1149,9 @@ func (pa *PolicyApiService) updateGvkPolicy(ctx context.Context, policyId string
 			}
 		}
 
-		result := tx.Commit()
-		if result.Error != nil {
-			return nil, database.Error(database.UPDATE, database.Policies).WithDetailsFromDb(result)
+		commitErr := tx.Commit()
+		if commitErr != nil {
+			return nil, database.Error(database.UPDATE, database.Policies).WithDetails(commitErr)
 		}
 		committed = true
 
@@ -1198,8 +1201,8 @@ func stringSlicesEqual(a, b []string) bool {
 // before we calculate the effective. Missing rows are inserted as soft-deleted
 // placeholders so the effective-calculation path can rely on a stable
 // hierarchy.
-func makeSureAllPoliciesExist(ctx context.Context, db *gorm.DB, workloadType string, relevantOrgUnits []scopes.OrgUnit) *api.Error {
-	emptyRules := dao_utils.JsonBMap{}
+func makeSureAllPoliciesExist(ctx context.Context, db orm.DB, workloadType string, relevantOrgUnits []scopes.OrgUnit) *api.Error {
+	emptyRules := dbmodels.JsonBMap{}
 
 	for _, orgUnit := range relevantOrgUnits {
 		if orgUnit.Scope == api.SCOPETYPE_SYSTEM {

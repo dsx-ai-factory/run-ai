@@ -35,7 +35,10 @@ func AddNetworkTopologyHandlerToCache(backendClient *backendclient.BackendClient
 			genericControllerErrorHandler(networkTopologyHandler.HandleUpdate(newNp), constants.UpdateOperation, constants.NetworkTopologyResourceName, newNp)
 		},
 		DeleteFunc: func(object any) {
-			np := object.(*kaiv1alpha1.Topology)
+			np, ok := deletedObject[*kaiv1alpha1.Topology](object)
+			if !ok {
+				return
+			}
 			genericControllerErrorHandler(networkTopologyHandler.HandleDelete(np), constants.DeleteOperation, constants.NetworkTopologyResourceName, np)
 		},
 	})

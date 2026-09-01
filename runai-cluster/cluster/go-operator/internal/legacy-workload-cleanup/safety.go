@@ -26,57 +26,6 @@ const (
 	anyWorkloadControllerNamespace            = "runai"
 )
 
-type controllerState int
-
-const (
-	controllersEnabled controllerState = iota + 1
-	controllersDisabled
-)
-
-func classifyControllerState(config *runaiv1.RunaiConfig) (controllerState, error) {
-	if config == nil {
-		return 0, fmt.Errorf("RunaiConfig is missing")
-	}
-	values := []struct {
-		name    string
-		enabled *bool
-	}{
-		{name: "workload-controller", enabled: nil},
-		{name: "inference-workload-controller", enabled: nil},
-		{name: "job-controller", enabled: nil},
-	}
-	if config.Spec.WorkloadController != nil {
-		values[0].enabled = config.Spec.WorkloadController.Enabled
-	}
-	if config.Spec.InferenceWorkloadController != nil {
-		values[1].enabled = config.Spec.InferenceWorkloadController.Enabled
-	}
-	if config.Spec.JobController != nil {
-		values[2].enabled = config.Spec.JobController.Enabled
-	}
-	for _, value := range values {
-		if value.enabled == nil {
-			return 0, fmt.Errorf("legacy controller flag %s.enabled is missing", value.name)
-		}
-	}
-	if *values[0].enabled && *values[1].enabled && *values[2].enabled {
-		return controllersEnabled, nil
-	}
-	if !*values[0].enabled && !*values[1].enabled && !*values[2].enabled {
-		return controllersDisabled, nil
-	}
-	return 0, fmt.Errorf("legacy controller flags are not atomic: workload-controller=%t, inference-workload-controller=%t, job-controller=%t",
-		*values[0].enabled, *values[1].enabled, *values[2].enabled)
-}
-
-func ControllersDisabled(config *runaiv1.RunaiConfig) (bool, error) {
-	state, err := classifyControllerState(config)
-	if err != nil {
-		return false, err
-	}
-	return state == controllersDisabled, nil
-}
-
 func ownershipProtectionEnabled(config *runaiv1.RunaiConfig) bool {
 	return config != nil && config.Spec.Global != nil &&
 		config.Spec.Global.EnableWorkloadOwnershipProtection != nil &&
@@ -100,7 +49,7 @@ var retiredResources = map[string]struct{}{
 	"trainingworkloads": {}, "interactiveworkloads": {}, "distributedworkloads": {},
 	"inferenceworkloads": {}, "distributedinferenceworkloads": {}, "runaijobs": {},
 	"trainingpolicies": {}, "interactivepolicies": {}, "distributedpolicies": {},
-	"inferencepolicies": {}, "distributedinferencepolicies": {}, "restartrequests": {},
+	"inferencepolicies": {}, "distributedinferencepolicies": {},
 }
 
 var ownershipResourcesByConfiguration = map[string]map[string]string{

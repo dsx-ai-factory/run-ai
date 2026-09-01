@@ -12,6 +12,7 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/generated/pkg/api"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbtables"
 	"github.com/run-ai/runai/runai-application-packages/convutils"
+	"github.com/run-ai/runai/runai-application-packages/queryapi"
 )
 
 // MappingSelectors is one scope-specific row (system or tenant) for a workload GVK mapping.
@@ -62,10 +63,10 @@ func (ms MappingSelectors) DbmodelToApi() *api.Mapping {
 }
 
 // FilterFieldsToColumn maps API filter field names (OpenAPI MappingFilter: group, kind, version) to mapping_selectors columns.
-func (MappingSelectors) FilterFieldsToColumn() map[string]string {
-	return map[string]string{
-		"group":   dbtables.MappingSelectorsColumnGvkGroup,
-		"kind":    dbtables.MappingSelectorsColumnGvkKind,
-		"version": dbtables.MappingSelectorsColumnGvkVersion,
+func (MappingSelectors) FilterFieldsToColumn() queryapi.APIFieldsMapping {
+	return queryapi.APIFieldsMapping{
+		"group":   queryapi.NewFieldMapping(dbtables.MappingSelectorsColumnGvkGroup),
+		"kind":    queryapi.NewFieldMapping(dbtables.MappingSelectorsColumnGvkKind),
+		"version": queryapi.NewFieldMapping(dbtables.MappingSelectorsColumnGvkVersion),
 	}
 }

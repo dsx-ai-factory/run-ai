@@ -501,21 +501,15 @@ var _ = Describe("WorkloadRunner observation wiring", func() {
 	})
 
 	Describe("WorkloadRunner enablement", func() {
-		It("includes WorkloadRunner in SupportedJobKinds when the pre-3 disable flag is set", func() {
-			rr := pkg.NewRuntimeRules(nil, nil, nil, nil, nil, validation.NewWorkloadValidator(), true)
-			_, ok := rr.SupportedJobKinds[constants.KindWorkloadRunner]
-			Expect(ok).To(BeTrue())
-		})
-
-		It("registers WorkloadRunner in SupportedJobKinds by default (rule enforcement enabled)", func() {
-			rr := pkg.NewRuntimeRules(nil, nil, nil, nil, nil, validation.NewWorkloadValidator(), false)
+		It("registers WorkloadRunner in SupportedJobKinds", func() {
+			rr := pkg.NewRuntimeRules(nil, nil, nil, nil, nil, validation.NewWorkloadValidator())
 			obj, ok := rr.SupportedJobKinds[constants.KindWorkloadRunner]
 			Expect(ok).To(BeTrue())
 			Expect(obj).NotTo(BeNil())
 		})
 	})
 
-	Describe("Watch + periodic enqueue with the flag on", Serial, func() {
+	Describe("WorkloadRunner watch and periodic enqueue", Serial, func() {
 		var (
 			watchClient client.WithWatch
 			stopper     chan struct{}
@@ -536,14 +530,12 @@ var _ = Describe("WorkloadRunner observation wiring", func() {
 
 			qm := &queuesManager.QueuesManager{}
 			rr := pkg.NewRuntimeRules(watchClient, qm, promClient, record.NewFakeRecorder(recorderBufferSize),
-				[]int{queuesManager.UnknownEvent, queuesManager.DeactivateEvent}, validation.NewWorkloadValidator(), false)
+				[]int{queuesManager.UnknownEvent, queuesManager.DeactivateEvent}, validation.NewWorkloadValidator())
 
 			workloadCache := util.WorkloadCache{}
 			rr.InitQueueManager(ctx, &workloadCache)
 
-			// Manually start only the WorkloadRunner controller; the goal of these
-			// integration tests is to verify the runner watch wiring, not the
-			// legacy paths (those are exercised by add_workload_test.go).
+			// Manually start the WorkloadRunner controller to verify its watch wiring.
 			workloadHandler := handlers.NewWorkloadHandler(rr.K8sClient, rr.QueuesManager, rr.PrometheusQuerier, &workloadCache, rr.SupportedJobKinds)
 			runnerController := controllers.NewWorkloadController(rr.K8sClient, workloadHandler, constants.KindWorkloadRunner)
 			stopper = make(chan struct{})
@@ -558,13 +550,11 @@ var _ = Describe("WorkloadRunner observation wiring", func() {
 			queuesManager.SetKillWorker(true, time.Duration(workerSleepSeconds+1))
 		})
 
-		It("observes runner events without panicking and without modifying the runner", func() {
+		It("leaves an out-of-scope runner untouched", func() {
 			runner := BuildWorkloadRunner(testNamespaceName, "obs-runner", dromosv1alpha1.WorkloadRunnerPhaseRunning)
 			Expect(watchClient.Create(ctx, runner)).To(BeNil())
 
-			// Wait past the project's 5-second TrainingJobTimeLimit. With the
-			// flag on but no enforcement edge implemented, the runner must not
-			// be modified, suspended, or deleted.
+			// The runner has no v1-cast labels, so it remains outside the enforcement scope.
 			time.Sleep(8 * time.Second)
 
 			got, err := kubeConfig.GetWLR(ctx, watchClient, testNamespaceName, "obs-runner")
@@ -583,7 +573,7 @@ var _ = Describe("WorkloadRunner observation wiring", func() {
 			freshCache := util.WorkloadCache{}
 			freshQM := &queuesManager.QueuesManager{}
 			freshRR := pkg.NewRuntimeRules(watchClient, freshQM, promClient, record.NewFakeRecorder(recorderBufferSize),
-				[]int{queuesManager.UnknownEvent, queuesManager.DeactivateEvent}, validation.NewWorkloadValidator(), false)
+				[]int{queuesManager.UnknownEvent, queuesManager.DeactivateEvent}, validation.NewWorkloadValidator())
 
 			freshRR.InitQueueManager(ctx, &freshCache)
 
@@ -598,11 +588,8 @@ var _ = Describe("WorkloadRunner observation wiring", func() {
 		})
 	})
 
-	Describe("project enumeration with legacy workloads disabled", func() {
-		It("invokes ListWLR when the pre-3 disable flag is set", func() {
-			// Wrap the fake client with an interceptor that counts List calls
-			// targeting WorkloadRunnerList. Runtime-rules must enumerate runners
-			// even when the pre-3 disable flag is set.
+	Describe("project enumeration", func() {
+		It("invokes ListWLR", func() {
 			ctx, cancel := context.WithCancel(context.TODO())
 			defer cancel()
 
@@ -628,7 +615,7 @@ var _ = Describe("WorkloadRunner observation wiring", func() {
 			qm := &queuesManager.QueuesManager{}
 			promClient := prometheus.GetQuerierClient(false, "")
 			rr := pkg.NewRuntimeRules(c, qm, promClient, record.NewFakeRecorder(recorderBufferSize),
-				[]int{queuesManager.UnknownEvent, queuesManager.DeactivateEvent}, validation.NewWorkloadValidator(), true)
+				[]int{queuesManager.UnknownEvent, queuesManager.DeactivateEvent}, validation.NewWorkloadValidator())
 
 			workloadCache := util.WorkloadCache{}
 			rr.InitQueueManager(ctx, &workloadCache)

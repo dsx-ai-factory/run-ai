@@ -282,10 +282,10 @@ func (d *DeploymentResource) buildEnvVars(config *anyworkload_controller.Anywork
 		}
 	}
 
-	if wc := d.runaiConfig.Spec.WorkloadController; wc != nil {
+	if config != nil {
 		envVars = append(envVars, v1.EnvVar{
 			Name:  "OPENSHIFT_ROUTE_TERMINATION_POLICY",
-			Value: string(wc.OpenshiftRouteConfiguration.GetTerminationPolicy()),
+			Value: string(config.OpenshiftRouteConfiguration.GetTerminationPolicy()),
 		})
 	}
 

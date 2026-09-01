@@ -45,8 +45,7 @@ func NewWorkloadHandler(k8sClient client.Client, qm *queuesManager.QueuesManager
 // the runner's lifecycle annotations (so the conversion sees fresh
 // start-time/completion-time on the same event), projects the runner onto a
 // JobWorkload via the runner converter (which fetches the wrapped child for
-// GPU + auto-delete fields), then dispatches into the same enqueue path the
-// legacy CRDs use.
+// GPU + auto-delete fields), then dispatches into the runtime-limit enqueue path.
 //
 // Two distinct gates apply, in order:
 //   - The scope gate (cast label + in-scope wrapped kind): out-of-scope runners

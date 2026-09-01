@@ -28,7 +28,10 @@ func AddNodePoolHandlerToCache(backendClient *backendclient.BackendClient, cache
 			genericControllerErrorHandler(nodePoolHandler.HandleAdd(np), constants.AddOperation, constants.NodePoolResourceName, np)
 		},
 		DeleteFunc: func(object any) {
-			np := object.(*v1alpha1.NodePool)
+			np, ok := deletedObject[*v1alpha1.NodePool](object)
+			if !ok {
+				return
+			}
 			rateLimitedController.MarkItemDeleted(objectKeyFromObject(np))
 			genericControllerErrorHandler(nodePoolHandler.HandleDelete(np), constants.DeleteOperation, constants.NodePoolResourceName, np)
 		},

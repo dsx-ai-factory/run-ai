@@ -123,7 +123,10 @@ func AddNumaNodeHandlerToCache(
 				rateLimitedController.AddRateLimited(objectKeyFromObject(nrt))
 			},
 			DeleteFunc: func(obj any) {
-				nrt := obj.(*nrtv1alpha2.NodeResourceTopology)
+				nrt, ok := deletedObject[*nrtv1alpha2.NodeResourceTopology](obj)
+				if !ok {
+					return
+				}
 				rateLimitedController.MarkItemDeleted(objectKeyFromObject(nrt))
 				genericControllerErrorHandler(
 					handler.HandleDelete(nrt),

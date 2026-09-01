@@ -36,7 +36,10 @@ func AddAccessRuleHandlerToCache(backendClient *backendclient.BackendClient, cac
 				constants.AddOperation, constants.AccessRuleResourceName, obj)
 		},
 		DeleteFunc: func(object any) {
-			obj := object.(*v1alpha1.AccessRule)
+			obj, ok := deletedObject[*v1alpha1.AccessRule](object)
+			if !ok {
+				return
+			}
 			rateLimitedController.MarkItemDeleted(objectKeyFromObject(obj))
 			genericControllerErrorHandler(accessRuleHandler.HandleDelete(obj),
 				constants.DeleteOperation, constants.AccessRuleResourceName, obj)

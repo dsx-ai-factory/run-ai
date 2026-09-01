@@ -17,6 +17,7 @@ import (
 	"github.com/run-ai/runai/runai-mcp-server/internal/tools/orgunits"
 	"github.com/run-ai/runai/runai-mcp-server/internal/tools/resources"
 	"github.com/run-ai/runai/runai-mcp-server/internal/tools/settings"
+	"github.com/run-ai/runai/runai-mcp-server/internal/tools/templates"
 	"github.com/run-ai/runai/runai-mcp-server/internal/tools/workloads"
 )
 
@@ -30,5 +31,6 @@ func Register(r *runaimcp.Registry, client *runaiclient.Client) {
 	orgunits.Register(r, client)
 	resources.Register(r, client)
 	settings.Register(r, client)
+	templates.Register(r, client)
 	workloads.Register(r, client)
 }

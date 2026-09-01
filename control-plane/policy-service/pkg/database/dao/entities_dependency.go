@@ -15,7 +15,7 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbtables"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/auth"
 	"github.com/run-ai/runai/runai-common-packages/logging"
-	"gorm.io/gorm"
+	"github.com/run-ai/runai/runai-common-packages/runaidb/orm"
 	"gorm.io/gorm/clause"
 )
 
@@ -29,7 +29,7 @@ import (
 // rows that collide on the (component_type, component_id, cache_id) primary
 // key are silently ignored - dependency rows have no payload beyond their key,
 // so re-asserting an existing edge is a no-op.
-func UpsertEntityDependencies(ctx context.Context, db *gorm.DB, rows []dbmodel.EntitiesDependency) *api.Error {
+func UpsertEntityDependencies(ctx context.Context, db orm.DB, rows []dbmodel.EntitiesDependency) *api.Error {
 	if len(rows) == 0 {
 		return nil
 	}
@@ -39,11 +39,10 @@ func UpsertEntityDependencies(ctx context.Context, db *gorm.DB, rows []dbmodel.E
 		rows[i].TenantId = tenantId
 	}
 
-	res := db.Clauses(clause.OnConflict{DoNothing: true}).
-		Create(&rows)
-	if res.Error != nil {
-		dbErr := database.Error(database.UPSERT, database.EntitiesDependency).WithDetailsFromDb(res)
-		logging.Errorf("failed to upsert %d entity dependency rows: %s: %v", len(rows), dbErr.Message, res.Error)
+	if _, err := db.Clauses(clause.OnConflict{DoNothing: true}).
+		Create(&rows); err != nil {
+		dbErr := database.Error(database.UPSERT, database.EntitiesDependency).WithDetails(err)
+		logging.Errorf("failed to upsert %d entity dependency rows: %s: %v", len(rows), dbErr.Message, err)
 		return dbErr
 	}
 
@@ -63,8 +62,8 @@ func UpsertEntityDependencies(ctx context.Context, db *gorm.DB, rows []dbmodel.E
 // db must be a *gorm.DB scoped to the right context. when the caller already
 // owns a transaction, pass it here so the invalidation is atomic with the
 // main change and happens before the caller's commit. when there is no
-// surrounding transaction, pass dao_utils.DB().WithContext(ctx).
-func OnComponentDeleted(ctx context.Context, db *gorm.DB, componentType dbmodel.ComponentType, componentId string) *api.Error {
+// surrounding transaction, pass runaidb.DB().WithContext(ctx).
+func OnComponentDeleted(ctx context.Context, db orm.DB, componentType dbmodel.ComponentType, componentId string) *api.Error {
 	tenantId := auth.TenantIdOf(ctx)
 
 	// step 1: find affected cache ids (scoped to the tenant)
@@ -76,11 +75,10 @@ func OnComponentDeleted(ctx context.Context, db *gorm.DB, componentType dbmodel.
 		ComponentId:   componentId,
 	}
 
-	res := db.Model(&queryIds).Where(&queryIds).Distinct().
-		Pluck(dbtables.EntitiesDependencyColumnCacheId, &cacheIds)
-	if res.Error != nil {
-		dbErr := database.Error(database.DELETE, database.EntitiesDependency).WithDetailsFromDb(res)
-		logging.Errorf("failed to find caches for component %s/%s: %s: %v", componentType, componentId, dbErr.Message, res.Error)
+	if err := db.Model(&queryIds).Where(&queryIds).Distinct().
+		Pluck(dbtables.EntitiesDependencyColumnCacheId, &cacheIds); err != nil {
+		dbErr := database.Error(database.DELETE, database.EntitiesDependency).WithDetails(err)
+		logging.Errorf("failed to find caches for component %s/%s: %s: %v", componentType, componentId, dbErr.Message, err)
 		return dbErr
 	}
 
@@ -90,13 +88,12 @@ func OnComponentDeleted(ctx context.Context, db *gorm.DB, componentType dbmodel.
 
 	// step 2: get policy IDs (entity_ids) from the cache rows that will be deleted
 	var policyIds []string
-	res = db.Model(&dbmodel.EntitiesCache{}).
+	if err := db.Model(&dbmodel.EntitiesCache{}).
 		Where(&dbmodel.EntitiesCache{TenantId: tenantId, EntityType: dbmodel.EntityTypeBreakdown}).
 		Where(fmt.Sprintf("%s IN ?", dbtables.EntitiesCacheColumnId), cacheIds).
-		Pluck(dbtables.EntitiesCacheColumnEntityId, &policyIds)
-	if res.Error != nil {
-		dbErr := database.Error(database.LIST, database.EntitiesCache).WithDetailsFromDb(res)
-		logging.Errorf("failed to get policy ids from cache for component %s/%s: %s: %v", componentType, componentId, dbErr.Message, res.Error)
+		Pluck(dbtables.EntitiesCacheColumnEntityId, &policyIds); err != nil {
+		dbErr := database.Error(database.LIST, database.EntitiesCache).WithDetails(err)
+		logging.Errorf("failed to get policy ids from cache for component %s/%s: %s: %v", componentType, componentId, dbErr.Message, err)
 		return dbErr
 	}
 
@@ -111,23 +108,23 @@ func OnComponentDeleted(ctx context.Context, db *gorm.DB, componentType dbmodel.
 		}
 	}
 
-	// step 4: delete ALL dep rows for those caches
-	res = db.Where(&dbmodel.EntitiesDependency{TenantId: tenantId}).
+	// step 4: delete ALL dep rowsAffected for those caches
+	rowsAffected, err := db.Where(&dbmodel.EntitiesDependency{TenantId: tenantId}).
 		Where(fmt.Sprintf("%s IN ?", dbtables.EntitiesDependencyColumnCacheId), cacheIds).
 		Delete(&dbmodel.EntitiesDependency{})
-	if res.Error != nil {
-		dbErr := database.Error(database.DELETE, database.EntitiesDependency).WithDetailsFromDb(res)
-		logging.Errorf("failed to delete dep rows for component %s/%s: %s: %v", componentType, componentId, dbErr.Message, res.Error)
+	if err != nil {
+		dbErr := database.Error(database.DELETE, database.EntitiesDependency).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("failed to delete dep rows for component %s/%s: %s: %v", componentType, componentId, dbErr.Message, err)
 		return dbErr
 	}
 
 	// step 5: delete the cache rows
-	res = db.Where(&dbmodel.EntitiesCache{TenantId: tenantId}).
+	rowsAffected, err = db.Where(&dbmodel.EntitiesCache{TenantId: tenantId}).
 		Where(fmt.Sprintf("%s IN ?", dbtables.EntitiesCacheColumnId), cacheIds).
 		Delete(&dbmodel.EntitiesCache{})
-	if res.Error != nil {
-		dbErr := database.Error(database.DELETE, database.EntitiesCache).WithDetailsFromDb(res)
-		logging.Errorf("failed to delete cache rows for component %s/%s: %s: %v", componentType, componentId, dbErr.Message, res.Error)
+	if err != nil {
+		dbErr := database.Error(database.DELETE, database.EntitiesCache).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("failed to delete cache rows for component %s/%s: %s: %v", componentType, componentId, dbErr.Message, err)
 		return dbErr
 	}
 

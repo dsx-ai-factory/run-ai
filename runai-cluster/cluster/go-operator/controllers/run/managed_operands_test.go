@@ -173,28 +173,6 @@ func TestManagedOperands_KaiOperatorDisabled(t *testing.T) {
 	assert.Nil(t, kaiOperator, "kai-operator should not be enabled when disabled")
 }
 
-func TestManagedOperands_WorkloadControllerDisabled(t *testing.T) {
-	ctx := context.Background()
-	apiContext := &ContextMock{}
-	fc := createEmptyKubeClientMock(apiContext)
-	kbClient := kc.New(fc, fc, nil)
-	runaiConfig := createTestRunaiConfig()
-
-	runaiConfig.Spec.WorkloadController.Enabled = ptr.To(false)
-
-	mo := NewManagedOperands(ctx, kbClient, kbClient, &runaiConfig)
-
-	remoteEnabled := mo.GetRemoteClusterEnabled()
-	workloadController := findOperandByName(remoteEnabled, "workload-controller")
-	assert.Nil(t, workloadController, "WorkloadController should not be in enabled list when disabled")
-
-	mpiOp := findOperandByName(remoteEnabled, "mpi-operator")
-	assert.NotNil(t, mpiOp, "MPI operator should remain enabled when WorkloadController is disabled")
-
-	trainingOp := findOperandByName(remoteEnabled, "training-operator")
-	assert.NotNil(t, trainingOp, "Training operator should remain enabled when WorkloadController is disabled")
-}
-
 func TestManagedOperands_HeadlessMode(t *testing.T) {
 	ctx := context.Background()
 	apiContext := &ContextMock{}

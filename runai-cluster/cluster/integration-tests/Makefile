@@ -27,14 +27,6 @@ external-workload-integrator-test: git-config-command install-ginkgo
 	$(MAKE) TEST_PATH=./suites/external-workload-integrator run-ginkgo-tests
 .PHONY: external-workload-integrator-test
 
-workload-controller-test: git-config-command install-ginkgo
-	$(MAKE) TEST_PATH=./suites/workload-controller run-ginkgo-tests
-.PHONY: workload-controller-test
-
-inference-workload-controller-test: git-config-command install-ginkgo
-	$(MAKE) TEST_PATH=./suites/inference-workload-controller run-ginkgo-tests
-.PHONY: inference-workload-controller-test
-
 project-controller-test: git-config-command install-ginkgo
 	$(MAKE) TEST_PATH=./suites/project-controller run-ginkgo-tests
 .PHONY: project-controller-test

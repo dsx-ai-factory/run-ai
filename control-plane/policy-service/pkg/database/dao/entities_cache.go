@@ -15,9 +15,10 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbtables"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/auth"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
 	"github.com/run-ai/runai/runai-common-packages/logging"
-	"gorm.io/gorm"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
+	"github.com/run-ai/runai/runai-common-packages/runaidb/orm"
 	"gorm.io/gorm/clause"
 )
 
@@ -32,13 +33,13 @@ func getCachedEntity(ctx context.Context, entityType dbmodel.EntityType, entityI
 
 	var row dbmodel.EntitiesCache
 
-	res := dao_utils.DB().WithContext(ctx).Where(&key).First(&row)
-	if res.Error != nil {
-		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+	err := runaidb.DB().WithContext(ctx).Where(&key).First(&row)
+	if err != nil {
+		if errors.Is(err, orm.ErrRecordNotFound) {
 			return nil, nil
 		}
-		dbErr := database.Error(database.GET, database.EntitiesCache).WithDetailsFromDb(res)
-		logging.Errorf("failed to get entity cache for %s/%s: %s: %v", entityType, entityId, dbErr.Message, res.Error)
+		dbErr := database.Error(database.GET, database.EntitiesCache).WithDetails(err)
+		logging.Errorf("failed to get entity cache for %s/%s: %s: %v", entityType, entityId, dbErr.Message, err)
 		return nil, dbErr
 	}
 
@@ -52,16 +53,16 @@ func getCachedEntity(ctx context.Context, entityType dbmodel.EntityType, entityI
 //
 // db must be a *gorm.DB scoped to the right context. pass a transaction when
 // the upsert must be atomic with a subsequent UpsertEntityDependencies call.
-func UpsertEntityCache(ctx context.Context, db *gorm.DB, row *dbmodel.EntitiesCache) *api.Error {
+func UpsertEntityCache(ctx context.Context, db orm.DB, row *dbmodel.EntitiesCache) *api.Error {
 	if row.CachedInfo == nil {
-		row.CachedInfo = dao_utils.JsonBMap{}
+		row.CachedInfo = dbmodels.JsonBMap{}
 	}
 	if row.ID == uuid.Nil {
 		row.ID = uuid.New()
 	}
 	row.TenantId = auth.TenantIdOf(ctx)
 
-	res := db.Clauses(
+	_, err := db.Clauses(
 		clause.OnConflict{
 			Columns: []clause.Column{
 				{Name: dbtables.EntitiesCacheColumnTenantId},
@@ -73,9 +74,9 @@ func UpsertEntityCache(ctx context.Context, db *gorm.DB, row *dbmodel.EntitiesCa
 		clause.Returning{Columns: []clause.Column{{Name: dbtables.EntitiesCacheColumnId}}},
 	).
 		Create(row)
-	if res.Error != nil {
-		dbErr := database.Error(database.UPSERT, database.EntitiesCache).WithDetailsFromDb(res)
-		logging.Errorf("failed to upsert entity cache for %s/%s: %s: %v", row.EntityType, row.EntityId, dbErr.Message, res.Error)
+	if err != nil {
+		dbErr := database.Error(database.UPSERT, database.EntitiesCache).WithDetails(err)
+		logging.Errorf("failed to upsert entity cache for %s/%s: %s: %v", row.EntityType, row.EntityId, dbErr.Message, err)
 		return dbErr
 	}
 
@@ -89,7 +90,7 @@ func UpsertEntityCache(ctx context.Context, db *gorm.DB, row *dbmodel.EntitiesCa
 // entity. db must be a *gorm.DB scoped to the right context — pass the
 // caller's transaction when one exists so the invalidation is atomic with the
 // entity deletion itself.
-func OnEntityDeleted(ctx context.Context, db *gorm.DB, entityType dbmodel.EntityType, entityId string) *api.Error {
+func OnEntityDeleted(ctx context.Context, db orm.DB, entityType dbmodel.EntityType, entityId string) *api.Error {
 	tenantId := auth.TenantIdOf(ctx)
 
 	cacheKey := dbmodel.EntitiesCache{
@@ -100,31 +101,30 @@ func OnEntityDeleted(ctx context.Context, db *gorm.DB, entityType dbmodel.Entity
 
 	var cache dbmodel.EntitiesCache
 
-	res := db.Where(&cacheKey).First(&cache)
-	if res.Error != nil {
-		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+	if err := db.Where(&cacheKey).First(&cache); err != nil {
+		if errors.Is(err, orm.ErrRecordNotFound) {
 			return nil // no cache to invalidate — no-op
 		}
-		dbErr := database.Error(database.DELETE, database.EntitiesCache).WithDetailsFromDb(res)
-		logging.Errorf("failed to find cache for entity %s/%s: %s: %v", entityType, entityId, dbErr.Message, res.Error)
+		dbErr := database.Error(database.DELETE, database.EntitiesCache).WithDetails(err)
+		logging.Errorf("failed to find cache for entity %s/%s: %s: %v", entityType, entityId, dbErr.Message, err)
 		return dbErr
 	}
 
-	res = db.Model(&dbmodel.EntitiesDependency{}).
+	rowsAffected, err := db.Model(&dbmodel.EntitiesDependency{}).
 		Where(&dbmodel.EntitiesDependency{CacheId: cache.ID, TenantId: tenantId}).
 		Delete(&dbmodel.EntitiesDependency{})
-	if res.Error != nil {
-		dbErr := database.Error(database.DELETE, database.EntitiesDependency).WithDetailsFromDb(res)
-		logging.Errorf("failed to delete deps for entity %s/%s: %s: %v", entityType, entityId, dbErr.Message, res.Error)
+	if err != nil {
+		dbErr := database.Error(database.DELETE, database.EntitiesDependency).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("failed to delete deps for entity %s/%s: %s: %v", entityType, entityId, dbErr.Message, err)
 		return dbErr
 	}
 
-	res = db.Model(&dbmodel.EntitiesCache{}).
+	rowsAffected, err = db.Model(&dbmodel.EntitiesCache{}).
 		Where(&dbmodel.EntitiesCache{ID: cache.ID, TenantId: tenantId}).
 		Delete(&dbmodel.EntitiesCache{})
-	if res.Error != nil {
-		dbErr := database.Error(database.DELETE, database.EntitiesCache).WithDetailsFromDb(res)
-		logging.Errorf("failed to delete cache for entity %s/%s: %s: %v", entityType, entityId, dbErr.Message, res.Error)
+	if err != nil {
+		dbErr := database.Error(database.DELETE, database.EntitiesCache).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("failed to delete cache for entity %s/%s: %s: %v", entityType, entityId, dbErr.Message, err)
 		return dbErr
 	}
 

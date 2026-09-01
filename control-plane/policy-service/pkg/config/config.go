@@ -9,11 +9,8 @@ import (
 	"os"
 
 	runai_config "github.com/run-ai/runai/runai-common-packages/config"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
 	"github.com/run-ai/runai/runai-common-packages/logging"
 )
-
-var databaseConfig *dao_utils.DataBaseConfig
 
 // ServerConfig holds server-related configurations
 type ServerConfig struct {
@@ -72,38 +69,13 @@ func registerConfigs() {
 // Init initializes the configuration
 func Init() {
 	registerConfigs()
-	databaseConfig = dao_utils.ConstructConfig("policy-service-db")
-}
-
-// Database returns the database configuration
-func Database() *dao_utils.DataBaseConfig {
-	return databaseConfig
 }
 
 // MockConfig sets mock environment variables for testing
 func MockConfig() {
-	// Point the secrets folder at an existing dir (no secret files) so config.Init's
-	// SetKbSecretsFolder doesn't fail on the missing default /etc/secrets in tests.
 	os.Setenv("SECRETS_MOUNT_PATH", ".")
 	os.Setenv("PUBSUB_ENABLED", "false")
-	os.Setenv(dao_utils.EnvDbName, "postgres")
-	os.Setenv(dao_utils.EnvDbSchema, "public")
-	os.Setenv(dao_utils.EnvDbUser, "postgres")
-	os.Setenv(dao_utils.EnvDbPassword, "admin")
-	os.Setenv(dao_utils.EnvDbHost, "temporary-value") // value is set when postgres container is being created
-	os.Setenv(dao_utils.EnvMigrationFiles, "file://../database/migrations")
 
-	runai_config.Set(&dao_utils.DataBaseConfig{
-		Name:             "postgres",
-		Schema:           "public",
-		User:             "postgres",
-		Password:         "admin",
-		Host:             "temporary-value",
-		MigrationFiles:   "file://../database/migrations",
-		Port:             "5432",
-		SslMode:          "disable",
-		StatementTimeout: "2min",
-	})
 	runai_config.Set(&ServerConfig{
 		PoliciesPerBulk: 5,
 	})

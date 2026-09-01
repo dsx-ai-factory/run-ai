@@ -30,7 +30,6 @@ import (
 	scheme_init "github.com/run-ai/runai/runai-cluster/cluster/go-operator/pkg/scheme-init"
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	diwv2 "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/distributedworkload/v2alpha1"
-	infwv2a1 "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/inferenceworkload/v2alpha1"
 	iwv2a1 "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/interactiveworkload/v2alpha1"
 	twv2a1 "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/trainingworkload/v2alpha1"
 	"github.com/run-ai/runai/runai-cluster/cluster/workload-exporter/pkg/controller/node"
@@ -70,7 +69,7 @@ var _ = BeforeSuite(func() {
 	Expect(diwv2.AddToScheme(scheme)).Should(Succeed())
 	Expect(iwv2a1.AddToScheme(scheme)).Should(Succeed())
 	Expect(twv2a1.AddToScheme(scheme)).Should(Succeed())
-	Expect(infwv2a1.AddToScheme(scheme)).Should(Succeed())
+	Expect(infwv2.AddToScheme(scheme)).Should(Succeed())
 	Expect(dinfw.AddToScheme(scheme)).Should(Succeed())
 	Expect(kaiv2.AddToScheme(scheme)).Should(Succeed())
 	Expect(kaiv2alpha2.AddToScheme(scheme)).Should(Succeed())

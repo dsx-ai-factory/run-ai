@@ -349,40 +349,6 @@ func ConfigMapForRunaiConfig(ctx context.Context, k8sReader client.Reader,
 			return string(roleBindingYAML)
 		}()
 
-		if *runaiConfig.Spec.JobController.Enabled {
-			data["job-controller.yaml"] = func() string {
-				roleBinding := &rbacv1.RoleBinding{
-					TypeMeta: metav1.TypeMeta{
-						APIVersion: fmt.Sprintf("%s/%s",
-							rbacv1.SchemeGroupVersion.Group, rbacv1.SchemeGroupVersion.Version),
-						Kind: utils.ResourceStructType(&rbacv1.RoleBinding{}),
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "runai-job-controller-project",
-					},
-					RoleRef: rbacv1.RoleRef{
-						APIGroup: rbacv1.SchemeGroupVersion.Group,
-						Kind:     utils.ResourceStructType(&rbacv1.ClusterRole{}),
-						Name:     "runai-job-controller-project",
-					},
-					Subjects: []rbacv1.Subject{
-						{
-							Kind:      utils.ResourceStructType(&v1.ServiceAccount{}),
-							Name:      operands.RunaiProjectControllerName,
-							Namespace: namespace,
-						},
-					},
-				}
-
-				roleBindingYAML, err := yaml.Marshal(roleBinding)
-				if err != nil {
-					panic(err)
-				}
-
-				return string(roleBindingYAML)
-			}()
-		}
-
 		data["researcher-service-rw.yaml"] = func() string {
 			roleBinding := &rbacv1.RoleBinding{
 				TypeMeta: metav1.TypeMeta{
@@ -478,74 +444,6 @@ func ConfigMapForRunaiConfig(ctx context.Context, k8sReader client.Reader,
 
 			return string(roleBindingYAML)
 		}()
-
-		if *runaiConfig.Spec.WorkloadController.Enabled {
-			data["workload-controller-rw.yaml"] = func() string {
-				roleBinding := &rbacv1.RoleBinding{
-					TypeMeta: metav1.TypeMeta{
-						APIVersion: fmt.Sprintf("%s/%s",
-							rbacv1.SchemeGroupVersion.Group, rbacv1.SchemeGroupVersion.Version),
-						Kind: utils.ResourceStructType(&rbacv1.RoleBinding{}),
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "workload-controller-rw",
-					},
-					RoleRef: rbacv1.RoleRef{
-						APIGroup: rbacv1.SchemeGroupVersion.Group,
-						Kind:     utils.ResourceStructType(&rbacv1.ClusterRole{}),
-						Name:     "workload-controller-rw",
-					},
-					Subjects: []rbacv1.Subject{
-						{
-							Kind:      utils.ResourceStructType(&v1.ServiceAccount{}),
-							Name:      "workload-controller",
-							Namespace: namespace,
-						},
-					},
-				}
-
-				roleBindingYAML, err := yaml.Marshal(roleBinding)
-				if err != nil {
-					panic(err)
-				}
-
-				return string(roleBindingYAML)
-			}()
-		}
-
-		if *runaiConfig.Spec.JobController.Enabled {
-			data["runai-job-controller-project.yaml"] = func() string {
-				roleBinding := &rbacv1.RoleBinding{
-					TypeMeta: metav1.TypeMeta{
-						APIVersion: fmt.Sprintf("%s/%s",
-							rbacv1.SchemeGroupVersion.Group, rbacv1.SchemeGroupVersion.Version),
-						Kind: utils.ResourceStructType(&rbacv1.RoleBinding{}),
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "runai-job-controller-project",
-					},
-					RoleRef: rbacv1.RoleRef{
-						APIGroup: rbacv1.SchemeGroupVersion.Group,
-						Kind:     utils.ResourceStructType(&rbacv1.ClusterRole{}),
-						Name:     "runai-job-controller-project",
-					},
-					Subjects: []rbacv1.Subject{
-						{
-							Kind:      utils.ResourceStructType(&v1.ServiceAccount{}),
-							Name:      "runai-job-controller",
-							Namespace: namespace,
-						},
-					},
-				}
-
-				roleBindingYAML, err := yaml.Marshal(roleBinding)
-				if err != nil {
-					panic(err)
-				}
-
-				return string(roleBindingYAML)
-			}()
-		}
 
 		data["runai-project-controller-project.yaml"] = func() string {
 			roleBinding := &rbacv1.RoleBinding{
@@ -770,40 +668,6 @@ func ConfigMapForRunaiConfig(ctx context.Context, k8sReader client.Reader,
 
 			return string(roleBindingYAML)
 		}()
-
-		if *runaiConfig.Spec.InferenceWorkloadController.Enabled {
-			data["inference-workload-controller.yaml"] = func() string {
-				roleBinding := &rbacv1.RoleBinding{
-					TypeMeta: metav1.TypeMeta{
-						APIVersion: fmt.Sprintf("%s/%s",
-							rbacv1.SchemeGroupVersion.Group, rbacv1.SchemeGroupVersion.Version),
-						Kind: utils.ResourceStructType(&rbacv1.RoleBinding{}),
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "inference-workload-controller",
-					},
-					RoleRef: rbacv1.RoleRef{
-						APIGroup: rbacv1.SchemeGroupVersion.Group,
-						Kind:     utils.ResourceStructType(&rbacv1.ClusterRole{}),
-						Name:     "runai-inference-workload-controller-project",
-					},
-					Subjects: []rbacv1.Subject{
-						{
-							Kind:      utils.ResourceStructType(&v1.ServiceAccount{}),
-							Name:      "inference-workload-controller",
-							Namespace: namespace,
-						},
-					},
-				}
-
-				roleBindingYAML, err := yaml.Marshal(roleBinding)
-				if err != nil {
-					panic(err)
-				}
-
-				return string(roleBindingYAML)
-			}()
-		}
 
 		data["cluster-api.yaml"] = func() string {
 			roleBinding := &rbacv1.RoleBinding{

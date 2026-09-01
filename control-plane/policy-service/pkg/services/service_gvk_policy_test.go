@@ -31,7 +31,8 @@ import (
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/clients/authorization"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/clients/orgunit"
 	"github.com/run-ai/runai/runai-application-packages/convutils"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 )
 
 const (
@@ -856,7 +857,7 @@ var _ = Describe("GVK Policy Service", Ordered, func() {
 				pId := uuid.New()
 				badPolicyId = pId.String()
 				bad := dbmodel.Policy{
-					BaseModel: dao_utils.BaseModel{
+					BaseModel: dbmodels.BaseModel{
 						ID:        pId,
 						CreatedBy: "test",
 						UpdatedBy: "test",
@@ -869,7 +870,7 @@ var _ = Describe("GVK Policy Service", Ordered, func() {
 					TenantId:     tenantId,
 					GvkWorkload:  true,
 				}
-				Expect(dao.AddPolicy(context.Background(), dao_utils.DB(), &bad)).To(BeNil())
+				Expect(dao.AddPolicy(context.Background(), runaidb.DB(), &bad)).To(BeNil())
 			})
 
 			It("returns error on get", func() {
@@ -937,12 +938,12 @@ var _ = Describe("GVK Policy Service", Ordered, func() {
 				Phase:  degradedPhase,
 				Issues: []string{"specSelector portByName is not defined", "field foo has no matching formatter"},
 			}
-			Expect(dao.UpdatePoliciesStatus(ctx, dao_utils.DB().WithContext(ctx), []string{created.Id}, status)).To(BeNil())
+			Expect(dao.UpdatePoliciesStatus(ctx, runaidb.DB().WithContext(ctx), []string{created.Id}, status)).To(BeNil())
 
 			// Verify by reading directly from DB
 			var stored dbmodel.Policy
-			result := dao_utils.DB().Where("id = ?", created.Id).First(&stored)
-			Expect(result.Error).To(BeNil())
+			result := runaidb.DB().Where("id = ?", created.Id).First(&stored)
+			Expect(result).To(BeNil())
 			Expect(stored.ValidationStatus).NotTo(BeNil())
 			Expect(*stored.ValidationStatus).To(Equal(api.POLICYPHASE_DEGRADED))
 			Expect(stored.ValidationIssues).To(HaveLen(2))
@@ -960,21 +961,21 @@ var _ = Describe("GVK Policy Service", Ordered, func() {
 				Phase:  degradedPhase,
 				Issues: []string{"temporary issue"},
 			}
-			Expect(dao.UpdatePoliciesStatus(ctx, dao_utils.DB().WithContext(ctx), []string{created.Id}, status)).To(BeNil())
+			Expect(dao.UpdatePoliciesStatus(ctx, runaidb.DB().WithContext(ctx), []string{created.Id}, status)).To(BeNil())
 
 			// Verify issues are set
 			var stored dbmodel.Policy
-			result := dao_utils.DB().Where("id = ?", created.Id).First(&stored)
-			Expect(result.Error).To(BeNil())
+			result := runaidb.DB().Where("id = ?", created.Id).First(&stored)
+			Expect(result).To(BeNil())
 			Expect(stored.ValidationStatus).NotTo(BeNil())
 			Expect(stored.ValidationIssues).To(HaveLen(1))
 
 			// Clear status by setting to nil
-			Expect(dao.UpdatePoliciesStatus(ctx, dao_utils.DB().WithContext(ctx), []string{created.Id}, nil)).To(BeNil())
+			Expect(dao.UpdatePoliciesStatus(ctx, runaidb.DB().WithContext(ctx), []string{created.Id}, nil)).To(BeNil())
 
 			// Verify status is cleared
-			result = dao_utils.DB().Where("id = ?", created.Id).First(&stored)
-			Expect(result.Error).To(BeNil())
+			result = runaidb.DB().Where("id = ?", created.Id).First(&stored)
+			Expect(result).To(BeNil())
 			Expect(stored.ValidationStatus).To(BeNil())
 			Expect(stored.ValidationIssues).To(BeEmpty())
 		})
@@ -1392,14 +1393,14 @@ var _ = Describe("GVK Policy Service", Ordered, func() {
 					// depends on and call OnComponentDeleted directly to simulate
 					// what happens when that field group is updated via the API.
 					var dep dbmodel.EntitiesDependency
-					res := dao_utils.DB().WithContext(ctx).
+					res := runaidb.DB().WithContext(ctx).
 						Where(fmt.Sprintf("%s = ?", "component_type"),
 							string(dbmodel.ComponentTypeFieldGroup)).
 						First(&dep)
-					Expect(res.Error).To(BeNil(), "expected at least one field_group dependency")
+					Expect(res).To(BeNil(), "expected at least one field_group dependency")
 
 					dbErr := dao.OnComponentDeleted(ctx,
-						dao_utils.DB().WithContext(ctx),
+						runaidb.DB().WithContext(ctx),
 						dbmodel.ComponentTypeFieldGroup,
 						dep.ComponentId)
 					Expect(dbErr).To(BeNil())
@@ -1506,11 +1507,11 @@ var _ = Describe("GVK Policy Service", Ordered, func() {
 			// Verify policy was marked PendingUpdate in the DB (before we access it via API)
 			// We check the DB directly because accessing via API will trigger validation
 			var policyRow dbmodel.Policy
-			dbRes := dao_utils.DB().WithContext(ctx).
+			dbRes := runaidb.DB().WithContext(ctx).
 				Table("policies").
 				Where("id = ?", created.Id).
 				First(&policyRow)
-			Expect(dbRes.Error).To(BeNil())
+			Expect(dbRes).To(BeNil())
 			Expect(policyRow.ValidationStatus).NotTo(BeNil())
 			Expect(*policyRow.ValidationStatus).To(Equal(api.POLICYPHASE_PENDING_UPDATE),
 				"policy should be PendingUpdate in DB after related specSelector is removed")
@@ -1763,22 +1764,22 @@ func cacheExistsForPolicy(ctx context.Context, policyId string) bool {
 func dependenciesExistForPolicy(ctx context.Context, policyId string) bool {
 	// look up the cache row directly so we can use its id to find deps
 	var cacheRow dbmodel.EntitiesCache
-	res := dao_utils.DB().WithContext(ctx).
+	res := runaidb.DB().WithContext(ctx).
 		Where(&dbmodel.EntitiesCache{
 			EntityType: dbmodel.EntityTypeBreakdown,
 			EntityId:   policyId,
 		}).
 		First(&cacheRow)
-	if res.Error != nil {
+	if res != nil {
 		// no cache row → no deps either
 		return false
 	}
 	var count int64
-	depRes := dao_utils.DB().WithContext(ctx).
+	depRes := runaidb.DB().WithContext(ctx).
 		Model(&dbmodel.EntitiesDependency{}).
 		Where("cache_id = ?", cacheRow.ID).
 		Count(&count)
-	Expect(depRes.Error).To(BeNil())
+	Expect(depRes).To(BeNil())
 	return count > 0
 }
 
@@ -1811,5 +1812,5 @@ func seedMappingForGvk(gvk api.Gvk) {
 		UpdatedBy: systemMappingActor,
 		UpdatedAt: time.Now(),
 	}
-	Expect(dao.SaveMapping(sysCtx, dao_utils.DB().WithContext(sysCtx), mapping)).To(BeNil())
+	Expect(dao.SaveMapping(sysCtx, runaidb.DB().WithContext(sysCtx), mapping)).To(BeNil())
 }

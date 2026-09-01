@@ -13,9 +13,6 @@ import (
 	dromosv1alpha1 "github.com/run-ai/runai/runai-cluster/cluster/dromos/api/v1alpha1"
 	"github.com/run-ai/runai/runai-cluster/cluster/runtime-rules/pkg/handlers"
 	"github.com/run-ai/runai/runai-cluster/cluster/runtime-rules/pkg/util"
-	dw "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/distributedworkload/v2alpha1"
-	iw "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/interactiveworkload/v2alpha1"
-	tw "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/trainingworkload/v2alpha1"
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/watch"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -61,34 +58,19 @@ loop:
 			object := event.Object
 			eventType := event.Type
 
-			// WorkloadRunner has its own conversion path — the converter
-			// reads GPU and auto-delete metadata off the runner's Spec.Template,
-			// which the legacy free-function ConvertToJobWorkload can't supply.
-			if runner, ok := object.(*dromosv1alpha1.WorkloadRunner); ok {
-				switch eventType {
-				case watch.Added:
-					controllerErrorHandler(controller.workloadHandler.HandleRunnerEvent(ctx, runner), "add", constants.KindWorkloadRunner)
-				case watch.Modified:
-					controllerErrorHandler(controller.workloadHandler.HandleRunnerEvent(ctx, runner), "update", constants.KindWorkloadRunner)
-				default:
-					zap.S().Debugf("WorkloadHandler (%s) , (%s) - Deleted ", controller.workloadKind, runner.Name)
-				}
-				continue
-			}
-
-			jobWorkload, convertErr := util.ConvertToJobWorkload(object)
-			if convertErr != nil {
-				zap.S().Errorf(fmt.Sprintf("%s Controller failed to convert a workload: %+v", controller.workloadKind, err))
+			runner, ok := object.(*dromosv1alpha1.WorkloadRunner)
+			if !ok {
+				zap.S().Warnf("%s Controller received unsupported object type %T", controller.workloadKind, object)
 				continue
 			}
 
 			switch eventType {
 			case watch.Added:
-				controllerErrorHandler(controller.workloadHandler.HandleAddUpdate(ctx, jobWorkload), "add", jobWorkload.Kind)
+				controllerErrorHandler(controller.workloadHandler.HandleRunnerEvent(ctx, runner), "add", constants.KindWorkloadRunner)
 			case watch.Modified:
-				controllerErrorHandler(controller.workloadHandler.HandleAddUpdate(ctx, jobWorkload), "update", jobWorkload.Kind)
+				controllerErrorHandler(controller.workloadHandler.HandleRunnerEvent(ctx, runner), "update", constants.KindWorkloadRunner)
 			default:
-				zap.S().Debugf("WorkloadHandler (%s) , (%s) - Deleted ", controller.workloadKind, jobWorkload.Name)
+				zap.S().Debugf("WorkloadHandler (%s) , (%s) - Deleted ", controller.workloadKind, runner.Name)
 			}
 		case <-stopCh:
 			workloadWatcher.Stop()
@@ -105,12 +87,6 @@ func controllerErrorHandler(err error, operation, resourceName string) {
 
 func (controller *WorkloadController) getObjectList() (client.ObjectList, error) {
 	switch controller.workloadKind {
-	case constants.KindTrainingWorkload:
-		return &tw.TrainingWorkloadList{}, nil
-	case constants.KindInteractiveWorkload:
-		return &iw.InteractiveWorkloadList{}, nil
-	case constants.KindDistributedWorkload:
-		return &dw.DistributedWorkloadList{}, nil
 	case constants.KindWorkloadRunner:
 		return &dromosv1alpha1.WorkloadRunnerList{}, nil
 	default:

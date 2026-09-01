@@ -162,3 +162,102 @@ var _ = Describe("legacy workload API lifecycle", func() {
 		Expect(cachedClient.indexCalls).To(Equal(4))
 	})
 })
+
+const serverResourceVersion = "server-assigned"
+
+// mutatingWriterClient mimics the real writer client, which decodes the API-server response
+// into the object it was handed.
+type mutatingWriterClient struct {
+	client.Client
+	written client.Object
+}
+
+func (c *mutatingWriterClient) record(obj client.Object) error {
+	obj.SetResourceVersion(serverResourceVersion)
+	obj.SetManagedFields(nil)
+	c.written = obj
+	return nil
+}
+
+func (c *mutatingWriterClient) Patch(_ context.Context, obj client.Object, _ client.Patch,
+	_ ...client.PatchOption) error {
+	return c.record(obj)
+}
+
+func (c *mutatingWriterClient) Update(_ context.Context, obj client.Object,
+	_ ...client.UpdateOption) error {
+	return c.record(obj)
+}
+
+func (c *mutatingWriterClient) Status() client.SubResourceWriter {
+	return &mutatingSubResourceWriter{owner: c}
+}
+
+type mutatingSubResourceWriter struct {
+	client.SubResourceWriter
+	owner *mutatingWriterClient
+}
+
+func (w *mutatingSubResourceWriter) Patch(_ context.Context, obj client.Object, _ client.Patch,
+	_ ...client.SubResourcePatchOption) error {
+	return w.owner.record(obj)
+}
+
+func (w *mutatingSubResourceWriter) Update(_ context.Context, obj client.Object,
+	_ ...client.SubResourceUpdateOption) error {
+	return w.owner.record(obj)
+}
+
+var _ = Describe("writes against informer-owned objects", func() {
+	var (
+		writer       *mutatingWriterClient
+		cachedClient *ClusterSyncCachedClient
+		workload     *twv2.TrainingWorkload
+	)
+
+	BeforeEach(func() {
+		writer = &mutatingWriterClient{}
+		cachedClient = &ClusterSyncCachedClient{Client: writer}
+		workload = &twv2.TrainingWorkload{ObjectMeta: metav1.ObjectMeta{
+			Namespace:       "runai",
+			Name:            "cached",
+			ResourceVersion: "1",
+			Labels:          map[string]string{"project": "team-a"},
+			Annotations:     map[string]string{"runai/last-sync": "2026-07-28T00:00:00Z"},
+			Finalizers:      []string{"runai.io/external-workload"},
+			OwnerReferences: []metav1.OwnerReference{{
+				APIVersion: "v1", Kind: "Pod", Name: "owner", UID: "owner-uid",
+			}},
+			// two entries on purpose: RUN-41759 panicked indexing [1] of this slice mid-DeepCopy
+			ManagedFields: []metav1.ManagedFieldsEntry{
+				{Manager: "cluster-sync", Operation: metav1.ManagedFieldsOperationUpdate},
+				{Manager: "workload-controller", Operation: metav1.ManagedFieldsOperationApply},
+			},
+		}}
+	})
+
+	DescribeTable("never let the API-server response be decoded into the caller's object",
+		func(write func(context.Context, client.Object) error) {
+			snapshot := workload.DeepCopy()
+
+			Expect(write(context.Background(), workload)).To(Succeed())
+
+			Expect(workload).To(Equal(snapshot))
+			Expect(writer.written.GetName()).To(Equal("cached"))
+			Expect(writer.written.GetResourceVersion()).To(Equal(serverResourceVersion))
+			Expect(writer.written.GetManagedFields()).To(BeEmpty())
+		},
+		Entry("Patch", func(ctx context.Context, obj client.Object) error {
+			return cachedClient.Patch(ctx, obj, client.RawPatch(types.MergePatchType, []byte("{}")))
+		}),
+		Entry("Update", func(ctx context.Context, obj client.Object) error {
+			return cachedClient.Update(ctx, obj)
+		}),
+		Entry("Status().Patch", func(ctx context.Context, obj client.Object) error {
+			return cachedClient.Status().Patch(ctx, obj, client.RawPatch(types.MergePatchType, []byte("{}")))
+		}),
+		Entry("Status().Update", func(ctx context.Context, obj client.Object) error {
+			return cachedClient.Status().Update(ctx, obj)
+		}),
+	)
+})

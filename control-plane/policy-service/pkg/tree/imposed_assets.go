@@ -21,11 +21,11 @@ import (
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/auth"
 	"github.com/run-ai/runai/runai-application-packages/convutils"
 	"github.com/run-ai/runai/runai-application-packages/datastructs"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
 	"github.com/run-ai/runai/runai-application-packages/jsonutils"
 	"github.com/run-ai/runai/runai-application-packages/jsonutils/conjungo"
 	"github.com/run-ai/runai/runai-application-packages/jsonutils/gojsonq"
 	assetsService "github.com/run-ai/runai/runai-clients/assets-service-client/generated"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
 	"github.com/run-ai/runai/runai-common-packages/logging"
 	"github.com/run-ai/runai/runai-common-packages/runaictx"
 )
@@ -219,16 +219,16 @@ func (ht *HierarchyTree) validateImposedAssets(ctx context.Context, policyScope 
 	return resultDefaults, resultRules, nil
 }
 
-func (ht *HierarchyTree) enrichDefaultsWithImposed(defaults dao_utils.JsonBMap,
+func (ht *HierarchyTree) enrichDefaultsWithImposed(defaults dbmodels.JsonBMap,
 	imposedWorkerAssets map[string]interface{}, imposedMasterAssets map[string]interface{},
-) (dao_utils.JsonBMap, *api.Error) {
+) (dbmodels.JsonBMap, *api.Error) {
 	if imposedWorkerAssets == nil && imposedMasterAssets == nil {
 		return defaults, nil
 	}
 
 	result := defaults
 	if result == nil {
-		result = dao_utils.JsonBMap{}
+		result = dbmodels.JsonBMap{}
 	}
 
 	if imposedWorkerAssets != nil {
@@ -268,16 +268,16 @@ func (ht *HierarchyTree) enrichDefaultsWithImposed(defaults dao_utils.JsonBMap,
 	return result, nil
 }
 
-func (ht *HierarchyTree) enrichRulesWithImposed(rules dao_utils.JsonBMap,
+func (ht *HierarchyTree) enrichRulesWithImposed(rules dbmodels.JsonBMap,
 	imposedWorkerRules map[string]interface{}, imposedMasterRules map[string]interface{},
-) (dao_utils.JsonBMap, *api.Error) {
+) (dbmodels.JsonBMap, *api.Error) {
 	if imposedWorkerRules == nil && imposedMasterRules == nil {
 		return rules, nil
 	}
 
 	result := rules
 	if result == nil {
-		result = dao_utils.JsonBMap{}
+		result = dbmodels.JsonBMap{}
 	}
 
 	if imposedWorkerRules != nil {

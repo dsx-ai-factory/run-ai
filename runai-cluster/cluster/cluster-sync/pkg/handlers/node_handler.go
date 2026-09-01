@@ -37,9 +37,10 @@ type NodeHandler struct {
 	numaNodeHandler         *NumaNodeHandler
 
 	// names of already synced nodes
-	syncedObjects map[string]bool
-	syncMutex     sync.Mutex
-	syncWaiting   atomic.Bool
+	syncedObjects      map[string]bool
+	syncedObjectsMutex sync.RWMutex
+	syncMutex          sync.Mutex
+	syncWaiting        atomic.Bool
 }
 
 func NewNodeHandler(runaiBackendClient *runaiBackendClient.BackendClient, cachedReader client.Reader) *NodeHandler {
@@ -64,7 +65,10 @@ func (nodeHandler *NodeHandler) HandleUpdateItem(key client.ObjectKey) error {
 }
 
 func (nodeHandler *NodeHandler) HandleAdd(node *corev1.Node) error {
-	if _, found := nodeHandler.syncedObjects[node.Name]; found {
+	nodeHandler.syncedObjectsMutex.RLock()
+	_, found := nodeHandler.syncedObjects[node.Name]
+	nodeHandler.syncedObjectsMutex.RUnlock()
+	if found {
 		zap.S().Infof("Node <%s> was already synced - not adding", node.Name)
 		return nil
 	}
@@ -141,13 +145,15 @@ func (nodeHandler *NodeHandler) syncAllNodes() bool {
 	nodeNamesMap, nodesToSync := nodeHandler.nodeParser.ParseNodesToServerScheme(managedNodes)
 
 	err = nodeHandler.handleNodesSyncWithPagination(nodesToSync)
+
+	nodeHandler.syncedObjectsMutex.Lock()
+	defer nodeHandler.syncedObjectsMutex.Unlock()
 	if err != nil {
 		zap.S().Errorf("Had an error while syncing nodes: %+v", err)
 		nodeHandler.syncedObjects = map[string]bool{}
 		return false
-	} else {
-		nodeHandler.syncedObjects = nodeNamesMap
 	}
+	nodeHandler.syncedObjects = nodeNamesMap
 	return true
 }
 

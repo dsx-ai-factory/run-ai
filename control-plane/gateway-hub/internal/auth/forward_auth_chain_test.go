@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/run-ai/runai/control-plane/gateway-hub/internal/auth"
+	"github.com/run-ai/runai/runai-common-packages/runaictx"
+	runaictxhttp "github.com/run-ai/runai/runai-common-packages/runaictx/http"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -44,8 +46,8 @@ func applyForwardAuth(h *auth.Handler, clientReq *http.Request) (allowed bool, s
 	upstream = clientReq.Clone(clientReq.Context())
 	for _, header := range allRunaiHeaders {
 		upstream.Header.Del(header)
-		if v := authRec.Header().Get(header); v != "" {
-			upstream.Header.Set(header, v)
+		for _, v := range authRec.Header().Values(header) {
+			upstream.Header.Add(header, v)
 		}
 	}
 	return true, http.StatusOK, upstream
@@ -102,6 +104,64 @@ func TestForwardAuth_SEC1_ClientHeadersStripped(t *testing.T) {
 	} {
 		assert.Equal(t, tc.want, upstream.Header.Get(tc.header), "SEC-1: %s attacker value leaked", tc.header)
 	}
+}
+
+func TestForwardAuth_SEC1_ClientGroupsHeaderStripped(t *testing.T) {
+	kp := generateKeyPair(t)
+	keycloak := keycloakServer(t, "runai", kp)
+	defer keycloak.Close()
+
+	h := auth.NewHandler(keycloak.URL, "")
+	issuer := keycloak.URL + "/realms/runai"
+	token, _ := kp.signRS256(makeClaims(issuer, "alice@run.ai", 42, time.Hour, map[string]any{"groups": []string{"eng"}}))
+
+	req := httptest.NewRequest(http.MethodGet, "/api/something", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Add(auth.HeaderGroups, "attacker-group")
+	req.Header.Add(auth.HeaderGroups, "runai-admins")
+
+	allowed, _, upstream := applyForwardAuth(h, req)
+	require.True(t, allowed, "expected request to be allowed")
+
+	assert.Equal(t, []string{"eng"}, upstream.Header.Values(auth.HeaderGroups), "SEC-1: attacker-supplied groups leaked")
+}
+
+func TestForwardAuth_GroupNameContainingComma_RoundTripsThroughRealMiddleware(t *testing.T) {
+	kp := generateKeyPair(t)
+	keycloak := keycloakServer(t, "runai", kp)
+	defer keycloak.Close()
+
+	h := auth.NewHandler(keycloak.URL, "")
+	authServer := httptest.NewServer(h)
+	defer authServer.Close()
+
+	issuer := keycloak.URL + "/realms/runai"
+	token, _ := kp.signRS256(makeClaims(issuer, "alice@run.ai", 42, time.Hour, map[string]any{"groups": []string{"x,runai-admins"}}))
+
+	authReq, err := http.NewRequest(http.MethodGet, authServer.URL, nil)
+	require.NoError(t, err)
+	authReq.Header.Set("Authorization", "Bearer "+token)
+
+	authResp, err := http.DefaultClient.Do(authReq)
+	require.NoError(t, err)
+	defer authResp.Body.Close()
+	require.Equal(t, http.StatusOK, authResp.StatusCode)
+
+	upstream := httptest.NewRequest(http.MethodGet, "/api/something", nil)
+	for _, header := range allRunaiHeaders {
+		upstream.Header.Del(header)
+		for _, v := range authResp.Header.Values(header) {
+			upstream.Header.Add(header, v)
+		}
+	}
+
+	var gotGroups []string
+	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotGroups, _ = r.Context().Value(runaictx.CfGroups).([]string)
+	})
+	runaictxhttp.ContextMiddleware(next).ServeHTTP(httptest.NewRecorder(), upstream)
+
+	assert.Equal(t, []string{"x%2Crunai-admins"}, gotGroups, "comma in group name must not be split into extra groups")
 }
 
 func TestForwardAuth_Unauthenticated_Returns401(t *testing.T) {

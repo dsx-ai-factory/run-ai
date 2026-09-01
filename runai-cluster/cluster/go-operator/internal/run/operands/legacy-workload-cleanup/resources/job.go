@@ -83,8 +83,7 @@ func (r *JobResource) Object(ctx context.Context) (client.Object, error) {
 			Labels:    map[string]string{"app": legacycleanup.CleanupJobName},
 		},
 		Spec: batchv1.JobSpec{
-			ActiveDeadlineSeconds: ptr.To[int64](600),
-			BackoffLimit:          ptr.To[int32](3),
+			BackoffLimit: ptr.To[int32](3),
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{"app": legacycleanup.CleanupJobName}},
 				Spec:       *podSpec,

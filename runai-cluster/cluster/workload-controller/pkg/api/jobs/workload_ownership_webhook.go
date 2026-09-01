@@ -197,4 +197,3 @@ func (wom *WorkloadOwnershipMutator) mutateWorkloadOwnerOnUpdate(ctx context.Con
 	wrapper.SetOwnerUID(oldWorkloadOwnerUID)
 	return true, nil
 }
-

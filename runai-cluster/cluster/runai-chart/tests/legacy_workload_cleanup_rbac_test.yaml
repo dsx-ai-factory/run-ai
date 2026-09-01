@@ -29,7 +29,7 @@ tests:
           value: ["runai"]
       - equal:
           path: rules[0].verbs
-          value: ["get", "update"]
+          value: ["get"]
       - lengthEqual:
           path: rules
           count: 1
@@ -47,16 +47,16 @@ tests:
       - notExists:
           path: metadata.annotations["helm.sh/hook"]
       - equal:
-          path: rules[3].resources
+          path: rules[15].resources
           value: ["trainingworkloads", "interactiveworkloads", "distributedworkloads"]
       - equal:
-          path: rules[3].verbs
+          path: rules[15].verbs
           value: ["get", "list", "patch"]
       - notContains:
           path: rules[1].resourceNames
           content: workloadrunners.run.ai
 
-  - it: grants only the four required cluster permission groups
+  - it: grants the cleanup transaction permissions
     templates:
       - templates/clusterroles/legacy-workload-cleanup.yaml
     documentSelector:
@@ -65,7 +65,7 @@ tests:
     asserts:
       - lengthEqual:
           path: rules
-          count: 4
+          count: 16
       - equal:
           path: rules[0].verbs
           value: ["create"]
@@ -77,6 +77,15 @@ tests:
           value: ["list"]
       - equal:
           path: rules[3].verbs
+          value: ["delete"]
+      - equal:
+          path: rules[4].resources
+          value: ["pods"]
+      - equal:
+          path: rules[4].verbs
+          value: ["list"]
+      - equal:
+          path: rules[15].verbs
           value: ["get", "list", "patch"]
 
   - it: renders exactly the three namespaced RBAC resources

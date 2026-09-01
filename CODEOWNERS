@@ -145,15 +145,12 @@ control-plane/infra/openapi/scripts/openapi-scanner @dsx-ai-factory/appsec-guild
 /runai-cluster/cluster/application-controller/ @dsx-ai-factory/workloads
 /runai-cluster/cluster/assets-sync/ @dsx-ai-factory/workloads
 /runai-cluster/cluster/oauth2-proxy/ @dsx-ai-factory/workloads
-/runai-cluster/cluster/workload-controller/pkg/builders/ @dsx-ai-factory/workloads
 /runai-cluster/cluster/application-controller/pkg/deployers/ @dsx-ai-factory/workloads
 /runai-cluster/common/flat-workloads/ @dsx-ai-factory/workloads
-/runai-cluster/cluster/inference-workload-controller/ @dsx-ai-factory/workloads
 /runai-cluster/cluster/workload-common/ @dsx-ai-factory/workload-runtime @dsx-ai-factory/workloads
-/runai-cluster/cluster/workload-controller/ @dsx-ai-factory/workloads
-/runai-cluster/cluster/runaijob-controller/ @dsx-ai-factory/workloads
 /runai-cluster/cluster/shared-objects-controller/ @dsx-ai-factory/workloads
 /runai-cluster/cluster/anyworkload-controller/ @dsx-ai-factory/workloads
+/runai-cluster/cluster/workload-controller/ @dsx-ai-factory/workloads
 /runai-cluster/cluster/cluster-api/ @dsx-ai-factory/workloads
 
 # Fox

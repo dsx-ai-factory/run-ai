@@ -14,12 +14,36 @@ import (
 	"github.com/run-ai/runai/runai-cluster/cluster/common/constants"
 	"github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/run/utils"
 	runaiv1 "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1"
+	anyworkloadcontroller "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/anyworkload-controller"
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/global"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
+
+func TestBuildEnvVarsUsesAnyworkloadOpenShiftRouteConfiguration(t *testing.T) {
+	runaiConfig := &runaiv1.RunaiConfig{}
+	runaiConfig.SetDefaultsWhereNeeded()
+	runaiConfig.Spec.AnyworkloadController.OpenshiftRouteConfiguration =
+		&anyworkloadcontroller.OpenshiftRouteConfiguration{
+			TerminationPolicy: anyworkloadcontroller.OpenshiftRouteTerminationPolicyPassthrough,
+		}
+	resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
+
+	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+	if err != nil {
+		t.Fatalf("buildEnvVars() error = %v", err)
+	}
+
+	value, found := envValue(envVars, "OPENSHIFT_ROUTE_TERMINATION_POLICY")
+	if !found {
+		t.Fatal("OPENSHIFT_ROUTE_TERMINATION_POLICY env var not found")
+	}
+	if value != "passthrough" {
+		t.Fatalf("OPENSHIFT_ROUTE_TERMINATION_POLICY = %q, want %q", value, "passthrough")
+	}
+}
 
 func TestDeploymentMarksOwnershipWebhookServingVersion(t *testing.T) {
 	runaiConfig := utils.GetDefaultRunaiConfig()

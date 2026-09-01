@@ -421,6 +421,38 @@ func (c *ClusterSyncCachedClient) List(ctx context.Context, list client.ObjectLi
 	return c.cachedClient.List(ctx, list, opts...)
 }
 
+// Patch hands the writer client a copy, as do Update and Status. The writer decodes the
+// API-server response back into obj, and callers routinely pass an object owned by the
+// informer cache, where overwriting it races the informer's own goroutine reading it.
+func (c *ClusterSyncCachedClient) Patch(ctx context.Context, obj client.Object, patch client.Patch,
+	opts ...client.PatchOption) error {
+	return c.Client.Patch(ctx, obj.DeepCopyObject().(client.Object), patch, opts...)
+}
+
+func (c *ClusterSyncCachedClient) Update(ctx context.Context, obj client.Object,
+	opts ...client.UpdateOption) error {
+	return c.Client.Update(ctx, obj.DeepCopyObject().(client.Object), opts...)
+}
+
+func (c *ClusterSyncCachedClient) Status() client.SubResourceWriter {
+	return &copyingSubResourceWriter{SubResourceWriter: c.Client.Status()}
+}
+
+// copyingSubResourceWriter extends the same protection to subresource writes.
+type copyingSubResourceWriter struct {
+	client.SubResourceWriter
+}
+
+func (w *copyingSubResourceWriter) Update(ctx context.Context, obj client.Object,
+	opts ...client.SubResourceUpdateOption) error {
+	return w.SubResourceWriter.Update(ctx, obj.DeepCopyObject().(client.Object), opts...)
+}
+
+func (w *copyingSubResourceWriter) Patch(ctx context.Context, obj client.Object, patch client.Patch,
+	opts ...client.SubResourcePatchOption) error {
+	return w.SubResourceWriter.Patch(ctx, obj.DeepCopyObject().(client.Object), patch, opts...)
+}
+
 func legacyWorkloadTypeForList(list client.ObjectList) (SupportedType, bool) {
 	switch list.(type) {
 	case *twv2.TrainingWorkloadList:

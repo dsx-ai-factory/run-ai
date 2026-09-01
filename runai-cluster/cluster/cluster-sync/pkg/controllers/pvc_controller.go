@@ -41,7 +41,10 @@ func AddPVCHandlerToCache(backendClient *backendclient.BackendClient, cachedClie
 				genericControllerErrorHandler(pvcHandler.HandlePVCAdd(object), constants.AddOperation, "pvc", object)
 			},
 			DeleteFunc: func(obj any) {
-				object := obj.(*corev1.PersistentVolumeClaim)
+				object, ok := deletedObject[*corev1.PersistentVolumeClaim](obj)
+				if !ok {
+					return
+				}
 				rateLimitedController.MarkItemDeleted(objectKeyFromObject(object))
 				genericControllerErrorHandler(pvcHandler.HandlePVCDelete(object), constants.DeleteOperation, "pvc", object)
 			},

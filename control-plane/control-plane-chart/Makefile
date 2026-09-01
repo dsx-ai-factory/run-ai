@@ -31,8 +31,6 @@ build:
 	yq -i e ".global.image.tag=\"$(VERSION)\"" values.yaml
 	yq -i e ".notificationsService.image.registry=\"$(REGISTRY_URL)/$(REGISTRY)\"" values.yaml
 	yq -i e ".notificationsService.image.tag=\"$(VERSION)\"" values.yaml
-	yq -i e ".telemetryService.image.registry=\"$(REGISTRY_URL)/$(REGISTRY)\"" values.yaml
-	yq -i e ".telemetryService.image.tag=\"$(VERSION)\"" values.yaml
 	${SED_INPLACE} "s/ubi:latest/ubi:$(VERSION)/g" values.yaml
 	rm -f $(CHART_NAME).tgz
 	helm dep up	$(CHART_DIR)

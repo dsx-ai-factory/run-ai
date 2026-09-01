@@ -22,7 +22,7 @@ import (
 const (
 	prometheusMetricTimeoutSeconds = 5
 	serviceAccountTokenFile        = "/var/run/secrets/kubernetes.io/serviceaccount/token" //nolint:gosec
-	httpClientName                 = "runai-job-controller-prom-client"
+	httpClientName                 = "runtime-rules-prom-client"
 	httpsPrefix                    = "https"
 )
 

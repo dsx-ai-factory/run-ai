@@ -8,7 +8,7 @@ package dbtesting
 import (
 	"fmt"
 
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 )
 
 const (
@@ -16,5 +16,5 @@ const (
 )
 
 func RestartUpdateCounter() {
-	dao_utils.DB().Exec(fmt.Sprintf("ALTER SEQUENCE %s RESTART WITH 1", syncUpdateCounter))
+	_, _ = runaidb.DB().Exec(fmt.Sprintf("ALTER SEQUENCE %s RESTART WITH 1", syncUpdateCounter))
 }

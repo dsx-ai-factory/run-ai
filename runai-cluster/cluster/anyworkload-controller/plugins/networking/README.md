@@ -327,7 +327,7 @@ The plugin enriches Ingress/Route specs with defaults. **User values always win*
 
 **OpenShift Route:**
 - TLS termination with redirect (defaults to `edge`; switch cluster-wide to `passthrough` via
-  `spec.workload-controller.openshiftRouteConfiguration.terminationPolicy` in `RunaiConfig`,
+  `spec.anyworkload-controller.openshiftRouteConfiguration.terminationPolicy` in `RunaiConfig`,
   overridable per-route via `spec.tls`)
 - Annotations from `INGRESS_ANNOTATIONS` (cluster-configurable, merged with user annotations)
 

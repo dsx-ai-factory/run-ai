@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/run-ai/runai/scale-tests/unified_tests/internal/scale"
 	runaiv1 "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1"
+	"github.com/run-ai/runai/scale-tests/unified_tests/internal/scale"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/discovery"
@@ -39,7 +39,7 @@ type RunaiResourcesInfo struct {
 	SchedulingServices *ComponentResourceInfo
 	SyncServices       *ComponentResourceInfo
 	WorkloadServices   *ComponentResourceInfo
-	WorkloadController *ControllerConfigInfo
+	WorkloadExporter   *ComponentResourceInfo
 }
 
 // ComponentResourceInfo contains resource requests and limits for a component
@@ -48,12 +48,6 @@ type ComponentResourceInfo struct {
 	CPULimit      string
 	MemoryRequest string
 	MemoryLimit   string
-}
-
-// ControllerConfigInfo contains workload controller configuration
-type ControllerConfigInfo struct {
-	MaxConcurrentReconciles int
-	Resources               *ComponentResourceInfo
 }
 
 // GatherEnvironmentInfo collects cluster environment information
@@ -123,14 +117,11 @@ func GatherEnvironmentInfo(ctx context.Context, kubeClient client.Client, restCo
 			envInfo["workload_services_memory_request"] = runaiResources.WorkloadServices.MemoryRequest
 			envInfo["workload_services_memory_limit"] = runaiResources.WorkloadServices.MemoryLimit
 		}
-		if runaiResources.WorkloadController != nil {
-			envInfo["workload_controller_max_concurrent_reconciles"] = fmt.Sprintf("%d", runaiResources.WorkloadController.MaxConcurrentReconciles)
-			if runaiResources.WorkloadController.Resources != nil {
-				envInfo["workload_exporter_cpu_request"] = runaiResources.WorkloadController.Resources.CPURequest
-				envInfo["workload_exporter_cpu_limit"] = runaiResources.WorkloadController.Resources.CPULimit
-				envInfo["workload_exporter_memory_request"] = runaiResources.WorkloadController.Resources.MemoryRequest
-				envInfo["workload_exporter_memory_limit"] = runaiResources.WorkloadController.Resources.MemoryLimit
-			}
+		if runaiResources.WorkloadExporter != nil {
+			envInfo["workload_exporter_cpu_request"] = runaiResources.WorkloadExporter.CPURequest
+			envInfo["workload_exporter_cpu_limit"] = runaiResources.WorkloadExporter.CPULimit
+			envInfo["workload_exporter_memory_request"] = runaiResources.WorkloadExporter.MemoryRequest
+			envInfo["workload_exporter_memory_limit"] = runaiResources.WorkloadExporter.MemoryLimit
 		}
 	}
 
@@ -265,15 +256,9 @@ func getRunaiConfigResources(ctx context.Context, kubeClient client.Client) (*Ru
 	}
 
 	// Extract workload controller config
-	if runaiConfig.Spec.WorkloadController != nil || runaiConfig.Spec.WorkloadExporter != nil {
-		controllerInfo := &ControllerConfigInfo{}
-
-		if runaiConfig.Spec.WorkloadController != nil && runaiConfig.Spec.WorkloadController.TrainingMaxConcurrentReconciles != nil {
-			controllerInfo.MaxConcurrentReconciles = *runaiConfig.Spec.WorkloadController.TrainingMaxConcurrentReconciles
-		}
-
+	if runaiConfig.Spec.WorkloadExporter != nil {
 		if runaiConfig.Spec.WorkloadExporter != nil && runaiConfig.Spec.WorkloadExporter.Resources != nil {
-			controllerInfo.Resources = &ComponentResourceInfo{
+			resourceInfo.WorkloadExporter = &ComponentResourceInfo{
 				CPURequest:    getResourceString(runaiConfig.Spec.WorkloadExporter.Resources.Requests, corev1.ResourceCPU),
 				CPULimit:      getResourceString(runaiConfig.Spec.WorkloadExporter.Resources.Limits, corev1.ResourceCPU),
 				MemoryRequest: getResourceString(runaiConfig.Spec.WorkloadExporter.Resources.Requests, corev1.ResourceMemory),
@@ -281,7 +266,6 @@ func getRunaiConfigResources(ctx context.Context, kubeClient client.Client) (*Ru
 			}
 		}
 
-		resourceInfo.WorkloadController = controllerInfo
 	}
 
 	return resourceInfo, nil
@@ -300,4 +284,3 @@ func getResourceString(resourceList corev1.ResourceList, resourceName corev1.Res
 
 	return quantity.String()
 }
-

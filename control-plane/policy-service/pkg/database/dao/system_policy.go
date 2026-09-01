@@ -14,9 +14,10 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/scopes"
 	"github.com/run-ai/runai/runai-application-packages/convutils"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
 	"github.com/run-ai/runai/runai-application-packages/jsonutils/gojsonq"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
 	"github.com/run-ai/runai/runai-common-packages/logging"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 )
 
 var systemScope = scopes.OrgUnit{
@@ -67,11 +68,11 @@ var systemPolicyDB dbmodel.PolicyWithOptionalEffective
 func HandleSystemPolicy() {
 	logging.Infof("handle system policy")
 
-	db := dao_utils.DB()
+	db := runaidb.DB()
 
 	systemPolicyDB = dbmodel.PolicyWithOptionalEffective{
 		Policy: dbmodel.Policy{
-			BaseModel: dao_utils.BaseModel{
+			BaseModel: dbmodels.BaseModel{
 				CreatedAt: time.Now(),
 				CreatedBy: "run:ai",
 				UpdatedAt: time.Now(),

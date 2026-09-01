@@ -20,7 +20,7 @@ import (
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/auth"
 	"github.com/run-ai/runai/runai-application-packages/datastructs"
 	"github.com/run-ai/runai/runai-application-packages/jsonutils/conjungo"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 )
 
 const (
@@ -33,7 +33,7 @@ const (
 
 func (ms MappingApiService) createFieldGroup(ctx context.Context, req *dbmodel.MappingFieldGroups) (*api.FieldGroup, *api.Error) {
 	committed := false
-	tx := dao_utils.DB().WithContext(ctx).Begin()
+	tx := runaidb.DB().WithContext(ctx).Begin()
 	defer database.FinalizeTransaction(tx, &committed)
 
 	byScope, err := dao.GetFieldGroupByName(ctx, tx, req.Name)
@@ -71,9 +71,9 @@ func (ms MappingApiService) createFieldGroup(ctx context.Context, req *dbmodel.M
 		return nil, err
 	}
 
-	result := tx.Commit()
-	if result.Error != nil {
-		return nil, database.Error(database.COMMIT_CREATIONS, database.MappingFieldGroups).WithDetailsFromDb(result)
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		return nil, database.Error(database.COMMIT_CREATIONS, database.MappingFieldGroups).WithDetails(commitErr)
 	}
 	committed = true
 
@@ -81,7 +81,7 @@ func (ms MappingApiService) createFieldGroup(ctx context.Context, req *dbmodel.M
 }
 
 func (ms MappingApiService) listFieldGroups(ctx context.Context, offset, limit int) ([]api.FieldGroup, *api.Error) {
-	db := dao_utils.DB().WithContext(ctx)
+	db := runaidb.DB().WithContext(ctx)
 
 	names, err := dao.ListFieldGroupNamesPage(ctx, db, offset, limit)
 	if err != nil {
@@ -115,7 +115,7 @@ func (ms MappingApiService) listFieldGroups(ctx context.Context, offset, limit i
 }
 
 func (ms MappingApiService) getFieldGroup(ctx context.Context, name string) (*api.FieldGroup, *api.Error) {
-	db := dao_utils.DB().WithContext(ctx)
+	db := runaidb.DB().WithContext(ctx)
 
 	if strings.TrimSpace(name) == "" {
 		return nil, api.NewError(http.StatusBadRequest, "field group name is required", nil)
@@ -138,7 +138,7 @@ func (ms MappingApiService) patchFieldGroup(ctx context.Context, groupName strin
 	req *api.FieldGroupUpdateRequest, cv *MappingConsistencyValidator,
 ) (*api.FieldGroup, *api.Error) {
 	committed := false
-	tx := dao_utils.DB().WithContext(ctx).Begin()
+	tx := runaidb.DB().WithContext(ctx).Begin()
 	defer database.FinalizeTransaction(tx, &committed)
 
 	byScope, err := dao.GetFieldGroupByName(ctx, tx, groupName)
@@ -210,9 +210,9 @@ func (ms MappingApiService) patchFieldGroup(ctx context.Context, groupName strin
 		return nil, err
 	}
 
-	result := tx.Commit()
-	if result.Error != nil {
-		return nil, database.Error(database.COMMIT_UPDATES, database.MappingFieldGroups).WithDetailsFromDb(result)
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		return nil, database.Error(database.COMMIT_UPDATES, database.MappingFieldGroups).WithDetails(commitErr)
 	}
 	committed = true
 
@@ -221,7 +221,7 @@ func (ms MappingApiService) patchFieldGroup(ctx context.Context, groupName strin
 
 func (ms MappingApiService) deleteFieldGroup(ctx context.Context, name string, scope api.MappingScope) *api.Error {
 	committed := false
-	tx := dao_utils.DB().WithContext(ctx).Begin()
+	tx := runaidb.DB().WithContext(ctx).Begin()
 	defer database.FinalizeTransaction(tx, &committed)
 
 	// fetch the UUID before deleting so we can invalidate the cache afterwards
@@ -238,9 +238,9 @@ func (ms MappingApiService) deleteFieldGroup(ctx context.Context, name string, s
 		return err
 	}
 
-	result := tx.Commit()
-	if result.Error != nil {
-		return database.Error(database.COMMIT_DELETIONS, database.MappingFieldGroups).WithDetailsFromDb(result)
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		return database.Error(database.COMMIT_DELETIONS, database.MappingFieldGroups).WithDetails(commitErr)
 	}
 	committed = true
 
@@ -251,7 +251,7 @@ func (ms MappingApiService) deleteFieldGroupFields(ctx context.Context, groupNam
 	scope api.MappingScope, req *api.FieldGroupDeleteFieldsRequest,
 ) (*api.FieldGroup, *api.Error) {
 	committed := false
-	tx := dao_utils.DB().WithContext(ctx).Begin()
+	tx := runaidb.DB().WithContext(ctx).Begin()
 	defer database.FinalizeTransaction(tx, &committed)
 
 	byScope, err := dao.GetFieldGroupByName(ctx, tx, groupName)
@@ -298,9 +298,9 @@ func (ms MappingApiService) deleteFieldGroupFields(ctx context.Context, groupNam
 		return nil, err
 	}
 
-	result := tx.Commit()
-	if result.Error != nil {
-		return nil, database.Error(database.COMMIT_UPDATES, database.MappingFieldGroups).WithDetailsFromDb(result)
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		return nil, database.Error(database.COMMIT_UPDATES, database.MappingFieldGroups).WithDetails(commitErr)
 	}
 	committed = true
 
@@ -311,7 +311,7 @@ func (ms MappingApiService) deleteFieldGroupItemSelectors(ctx context.Context, g
 	scope api.MappingScope, req *api.FieldGroupDeleteItemSelectorsRequest,
 ) (*api.FieldGroup, *api.Error) {
 	committed := false
-	tx := dao_utils.DB().WithContext(ctx).Begin()
+	tx := runaidb.DB().WithContext(ctx).Begin()
 	defer database.FinalizeTransaction(tx, &committed)
 
 	byScope, err := dao.GetFieldGroupByName(ctx, tx, groupName)
@@ -376,9 +376,9 @@ func (ms MappingApiService) deleteFieldGroupItemSelectors(ctx context.Context, g
 		return nil, err
 	}
 
-	result := tx.Commit()
-	if result.Error != nil {
-		return nil, database.Error(database.COMMIT_UPDATES, database.MappingFieldGroups).WithDetailsFromDb(result)
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		return nil, database.Error(database.COMMIT_UPDATES, database.MappingFieldGroups).WithDetails(commitErr)
 	}
 	committed = true
 

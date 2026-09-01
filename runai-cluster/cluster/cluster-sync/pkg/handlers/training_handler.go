@@ -54,6 +54,8 @@ func (h *WorkloadHandler) HandleTrainUpdate(workload *v2alpha1.TrainingWorkload)
 }
 
 func (h *WorkloadHandler) handleTrainAddUpdate(workload *v2alpha1.TrainingWorkload) error {
+	workload = workload.DeepCopy()
+
 	workloadSyncFields, _, err := h.parser.ParseTrainingWorkloadToServerScheme(workload)
 	if err != nil {
 		return err

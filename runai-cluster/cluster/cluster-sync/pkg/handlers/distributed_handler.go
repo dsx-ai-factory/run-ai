@@ -57,6 +57,8 @@ func (h *WorkloadHandler) HandleDistributedUpdate(workload *diwv2.DistributedWor
 }
 
 func (h *WorkloadHandler) handleDistributedAddUpdate(workload *diwv2.DistributedWorkload) error {
+	workload = workload.DeepCopy()
+
 	clusterFrameworkExtension, depsErr := h.getClusterFrameworkExtension(context.Background())
 	if depsErr != nil {
 		zap.S().Errorf("Failed to get cluster dependencies, error: %s", depsErr.Error())

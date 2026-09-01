@@ -15,7 +15,7 @@ import (
 
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database"
 	policyCompliance "github.com/run-ai/runai/control-plane/workloads-and-policies/policy_compliance"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
 )
 
 const isFallbackField = "isFallback"
@@ -23,7 +23,7 @@ const isFallbackField = "isFallback"
 // MergeRules calculates current effective based on inherit effective and current given rules
 // it is also used to merge effective with fallback effective, in this case the givenRules are the
 // rules of the fallback policy
-func (ht *HierarchyTree) MergeRules(effectiveRules dao_utils.JsonBMap, givenRules dao_utils.JsonBMap,
+func (ht *HierarchyTree) MergeRules(effectiveRules dbmodels.JsonBMap, givenRules dbmodels.JsonBMap,
 	rulesFromParent map[string]bool, currentSourceOfTrue map[string]interface{},
 ) (map[string]interface{}, error) {
 	//
@@ -55,7 +55,7 @@ func (ht *HierarchyTree) MergeRules(effectiveRules dao_utils.JsonBMap, givenRule
 // toMap containing effective policy from parent
 // fromMap containing given policy
 // --> toMap should contain the merged rules b/w then
-func mergeRules(fieldPrefix string, toMap dao_utils.JsonBMap, fromMap dao_utils.JsonBMap, rulesFromParent map[string]bool) error {
+func mergeRules(fieldPrefix string, toMap dbmodels.JsonBMap, fromMap dbmodels.JsonBMap, rulesFromParent map[string]bool) error {
 	for field, rulesFromGivenPolicy := range fromMap {
 		//
 		//   parent does not have rules for this field so just use the rules from the given policy
@@ -120,8 +120,8 @@ type MergeDefaultsOptions struct {
 // MergeDefaults calculates current effective defaults based on inherit effective and current given rules
 // it is also used to merge effective with fallback effective, in this case the givenDefaults are the
 // rules of the fallback policy
-func (ht *HierarchyTree) MergeDefaults(effectiveDefaults dao_utils.JsonBMap, givenDefaults dao_utils.JsonBMap,
-	effectiveRules dao_utils.JsonBMap, currentOrgUnit scopes.OrgUnit,
+func (ht *HierarchyTree) MergeDefaults(effectiveDefaults dbmodels.JsonBMap, givenDefaults dbmodels.JsonBMap,
+	effectiveRules dbmodels.JsonBMap, currentOrgUnit scopes.OrgUnit,
 	options MergeDefaultsOptions,
 ) (map[string]interface{}, error) {
 	//
@@ -152,8 +152,8 @@ func (ht *HierarchyTree) MergeDefaults(effectiveDefaults dao_utils.JsonBMap, giv
 // toMap containing effective policy from parent
 // fromMap containing given policy
 // --> toMap should contain the merged defaults b/w then
-func mergeDefaults(fieldPrefix string, toMap dao_utils.JsonBMap, fromMap dao_utils.JsonBMap,
-	effectiveRules dao_utils.JsonBMap, currentOrgUnit scopes.OrgUnit, options MergeDefaultsOptions,
+func mergeDefaults(fieldPrefix string, toMap dbmodels.JsonBMap, fromMap dbmodels.JsonBMap,
+	effectiveRules dbmodels.JsonBMap, currentOrgUnit scopes.OrgUnit, options MergeDefaultsOptions,
 ) error {
 	for field, defaultsFromGivenPolicy := range fromMap {
 		//

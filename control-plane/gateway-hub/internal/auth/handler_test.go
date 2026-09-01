@@ -126,6 +126,7 @@ type authFlowCase struct {
 
 	wantStatus        int
 	wantHeaders       map[string]string
+	wantMultiHeaders  map[string][]string
 	wantAbsentHeaders []string
 	wantErrSubstr     string
 }
@@ -168,14 +169,20 @@ func TestAuthHandler_Flow(t *testing.T) {
 		},
 		{
 			name: "groups present", sub: "alice@run.ai", tenantID: 1, ttl: time.Hour,
-			extra:       map[string]any{"groups": []string{"eng", "ops"}},
-			wantStatus:  http.StatusOK,
-			wantHeaders: map[string]string{auth.HeaderGroups: "eng,ops"},
+			extra:            map[string]any{"groups": []string{"eng", "ops"}},
+			wantStatus:       http.StatusOK,
+			wantMultiHeaders: map[string][]string{auth.HeaderGroups: {"eng", "ops"}},
 		},
 		{
 			name: "groups absent - header not set", sub: "alice@run.ai", tenantID: 1, ttl: time.Hour,
 			wantStatus:        http.StatusOK,
 			wantAbsentHeaders: []string{auth.HeaderGroups},
+		},
+		{
+			name: "group name containing comma is escaped, not split", sub: "alice@run.ai", tenantID: 1, ttl: time.Hour,
+			extra:            map[string]any{"groups": []string{"x,runai-admins"}},
+			wantStatus:       http.StatusOK,
+			wantMultiHeaders: map[string][]string{auth.HeaderGroups: {"x%2Crunai-admins"}},
 		},
 		{
 			name: "gid uid session headers", sub: "alice@run.ai", tenantID: 1, ttl: time.Hour,
@@ -194,10 +201,11 @@ func TestAuthHandler_Flow(t *testing.T) {
 			wantStatus:      http.StatusOK,
 			wantHeaders: map[string]string{
 				auth.HeaderTenantId: "42", auth.HeaderSubjectId: "app-abc123", auth.HeaderSubjectType: "ServiceAccount",
-				auth.HeaderGroups: "eng,ops", auth.HeaderSupplementalGroups: "100,200",
+				auth.HeaderSupplementalGroups: "100,200",
 				auth.HeaderGID: "1000", auth.HeaderUID: "2000", auth.HeaderIsManagementTenant: "true",
 				auth.HeaderClientId: "app-abc123", auth.HeaderSessionId: "session-1",
 			},
+			wantMultiHeaders: map[string][]string{auth.HeaderGroups: {"eng", "ops"}},
 		},
 		{
 			name: "tenant id as string",
@@ -295,6 +303,9 @@ func TestAuthHandler_Flow(t *testing.T) {
 			require.Equal(t, tc.wantStatus, rw.Code, "status mismatch: %s", rw.Body.String())
 			for header, want := range tc.wantHeaders {
 				assertHeader(t, rw, header, want)
+			}
+			for header, want := range tc.wantMultiHeaders {
+				assert.Equal(t, want, rw.Header().Values(header), "header %s", header)
 			}
 			for _, header := range tc.wantAbsentHeaders {
 				assert.Empty(t, rw.Header().Get(header), "header %s should be absent", header)

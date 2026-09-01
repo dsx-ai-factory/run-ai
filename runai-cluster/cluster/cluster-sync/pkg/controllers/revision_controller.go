@@ -17,7 +17,6 @@ import (
 	"go.uber.org/zap"
 	"k8s.io/client-go/tools/cache"
 	knv1 "knative.dev/serving/pkg/apis/serving/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func AddRevisionHandlerToCache(backendClient *backendclient.BackendClient, cachedClient cachedclient.CachedClient) *cachedclient.RateLimitedController {
@@ -47,9 +46,12 @@ func AddRevisionHandlerToCache(backendClient *backendclient.BackendClient, cache
 				genericControllerErrorHandler(revisionHandler.HandleRevisionAdd(obj), constants2.AddOperation, constants2.RevisionResourceName, obj)
 			},
 			DeleteFunc: func(object interface{}) {
-				obj := object.(*knv1.Revision)
+				obj, ok := deletedObject[*knv1.Revision](object)
+				if !ok {
+					return
+				}
 				rateLimitedController.MarkItemDeleted(objectKeyFromObject(obj))
-				genericControllerErrorHandler(revisionHandler.HandleRevisionDelete(object.(client.Object)), constants2.DeleteOperation, constants2.RevisionResourceName, obj)
+				genericControllerErrorHandler(revisionHandler.HandleRevisionDelete(obj), constants2.DeleteOperation, constants2.RevisionResourceName, obj)
 			},
 			UpdateFunc: func(oldObject interface{}, newObject interface{}) {
 				oldRevision := oldObject.(*knv1.Revision)

@@ -20,24 +20,6 @@ service_exposure_classification:
   confirmed_by: "security-team"
   date: "2026-08-02"
 
-false_positives:
-  - slug: "3d-user-input-execution-model-swap-heredoc"
-    category: "Execution of user-controlled input"
-    pattern: "fmt.Sprintf(\"cat <<EOF > %s...\")"
-    finding: >-
-      runai-cluster/cluster/inference-workload-controller/internal/builders/knative_build_model_swap.go:212
-      interpolates model names from the user-supplied model-swap annotation into an unquoted
-      heredoc inside /bin/sh -c, suggesting shell command injection.
-    reason: >-
-      Not exploitable. Every model name is validated in getModelSwapParamsFromAnnotation
-      (same file, ~L136-144) against the anchored allowlist regex ^[a-zA-Z0-9-_]+(\x2F[a-zA-Z0-9-_.]+)?$
-      before reaching the builder. Go RE2 anchors match whole-text (no multiline flag), so shell
-      metacharacters, whitespace, and newlines cannot pass, which also rules out early heredoc
-      termination. Quoting the heredoc delimiter remains a worthwhile defense-in-depth hardening
-      but is not a vulnerability fix.
-    triaged_by: "security-team"
-    date: "2026-08-02"
-
 accepted_risks:
   - slug: "s3-sidecar-privileged-user-controlled-image"
     threat: >-

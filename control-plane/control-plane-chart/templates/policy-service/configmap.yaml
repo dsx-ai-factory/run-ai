@@ -10,12 +10,11 @@ data:
   AUDIT_ENABLE_PRINT_TO_STDOUT: {{ if hasKey $top.Values.policyService.config "auditEnablePrintToStdout" }}{{ $top.Values.policyService.config.auditEnablePrintToStdout | quote }}{{ else }}{{ $top.Values.global.config.auditEnablePrintToStdout | quote }}{{ end }}
   AUDIT_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.auditService.name ($top.Values.auditService.service.port | toString) | quote }}
   AUTH_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.authorization.name ($top.Values.authorization.service.port | toString) | quote }}
-  MIGRATION_FILES: {{ $top.Values.policyService.config.migrationFiles | quote }}
   ASSETS_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.assetsService.name ($top.Values.assetsService.service.port | toString) | quote }}
   ORG_UNIT_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.orgUnitService.name ($top.Values.orgUnitService.service.port | toString) | quote }}
 
   DB_NAME: {{ $top.Values.policyService.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
-  DB_VERBOSE_LOGGING: {{ $top.Values.policyService.config.dbVerboseLogging | default $top.Values.global.postgresql.dbVerboseLogging | quote }}
+  DB_MIGRATION_FILES: {{ $top.Values.policyService.config.migrationFiles | quote }}
   DB_HOST: {{ $top.Values.policyService.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
   DB_SSL_MODE: {{ $top.Values.policyService.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
   DB_PORT: {{ $top.Values.policyService.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}

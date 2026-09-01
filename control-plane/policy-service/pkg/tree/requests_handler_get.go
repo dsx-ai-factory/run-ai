@@ -15,15 +15,15 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dao"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/scopes"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
 	"github.com/run-ai/runai/runai-common-packages/logging"
 	"github.com/run-ai/runai/runai-common-packages/runaictx"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 )
 
 func (ht *HierarchyTree) HandleGetRequest(ctx context.Context, request *GenericPolicyRequest) (*dbmodel.PolicyWithOptionalEffective, *api.Error) {
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("[%s] get %s policy started", ht.treeId.ToString(), request.WorkloadType)
 
-	db := dao_utils.DB().WithContext(ctx)
+	db := runaidb.DB().WithContext(ctx)
 
 	orgUnit, err := scopes.MakeOrgUnit(request.PolicyMeta.Scope, request.TenantId, request.PolicyMeta.ClusterId, request.PolicyMeta.DepartmentId, request.PolicyMeta.ProjectId)
 	if err != nil {
@@ -134,9 +134,9 @@ func (ht *HierarchyTree) HandleGetRequest(ctx context.Context, request *GenericP
 		}
 		policyAndEffective.EffectivePolicy = *effectivePolicy
 
-		result := tx.Commit()
-		if result.Error != nil {
-			return nil, database.Error(database.UPSERT, database.Policies).WithDetailsFromDb(result)
+		commitErr := tx.Commit()
+		if commitErr != nil {
+			return nil, database.Error(database.UPSERT, database.Policies).WithDetails(commitErr)
 		}
 		committed = true
 

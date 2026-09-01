@@ -1,5 +1,9 @@
 clusterConfig:
     anyworkload-controller:
+        gitSyncImage:
+            name: git-sync
+            registry: registry.local:5000/runai/runai-cluster
+            tag: v4.7.0
         runaiOauth2ProxyUsernameLoaderImage:
             name: wait-ubi-minimal
             registry: registry.local:5000/runai/runai-cluster
@@ -9,24 +13,6 @@ clusterConfig:
             name: valkey
             registry: registry.local:5000/runai/runai-cluster
             tag: 9.0.4
-    inference-workload-controller:
-        gitSyncImage:
-            name: git-sync
-            registry: registry.local:5000/runai/runai-cluster
-            tag: v4.7.0
-        runaiOauth2ProxyUsernameLoaderImage:
-            name: wait-ubi-minimal
-            registry: registry.local:5000/runai/runai-cluster
-            tag: "9.8"
-    workload-controller:
-        gitSyncImage:
-            name: git-sync
-            registry: registry.local:5000/runai/runai-cluster
-            tag: v4.7.0
-        runaiOauth2ProxyUsernameLoaderImage:
-            name: wait-ubi-minimal
-            registry: registry.local:5000/runai/runai-cluster
-            tag: "9.8"
 global:
     image:
         registry: registry.local:5000/runai/runai-cluster

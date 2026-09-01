@@ -19,7 +19,7 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dao"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/auth"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 )
 
 // MappingConsistencyValidator: single-selector scenarios (multi-selector support comes later).
@@ -28,7 +28,7 @@ var _ = Describe("MappingConsistencyValidator", Ordered, func() {
 	tenantCtxA := mappingTestTenantCtx(tenantA)
 	sysAdminCtx := auth.MockAuthContext(systemMappingActor, 0)
 
-	db := dao_utils.DB().WithContext(sysAdminCtx)
+	db := runaidb.DB().WithContext(sysAdminCtx)
 
 	BeforeEach(func() {
 		database.DeleteAllTablesForTesting()
@@ -506,7 +506,7 @@ func specSelectorForTest(fieldGroups ...string) api.SpecSelectorsWithScopeValue 
 
 func validateMappingChangeForTest(ctx context.Context, mappingScope api.MappingScope, specSelName string, sel api.SpecSelectorsWithScopeValue) *api.Error {
 	v := NewMappingConsistencyValidator(ctx, mappingScope)
-	return v.ValidateMappingChange(ctx, database.DB().WithContext(ctx), map[string]api.SpecSelectorsWithScopeValue{
+	return v.ValidateMappingChange(ctx, runaidb.DB().WithContext(ctx), map[string]api.SpecSelectorsWithScopeValue{
 		specSelName: sel,
 	})
 }

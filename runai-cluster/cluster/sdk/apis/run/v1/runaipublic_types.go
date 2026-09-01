@@ -56,9 +56,9 @@ type PublicConfiguration struct {
 	ExternalAuthUrlEnabled                 *bool                       `yaml:"externalAuthUrlEnabled,omitempty"`
 	OpenshiftRouteTerminationPolicy        *string                     `yaml:"openshiftRouteTerminationPolicy,omitempty"`
 
-	// DistGPUNetworkAcceleration mirrors workload-controller's GPUNetworkAccelerationEnabled (distributed-training MNNVL support).
+	// DistGPUNetworkAcceleration mirrors AnyWorkload's GPUNetworkAccelerationEnabled for distributed training.
 	DistGPUNetworkAcceleration *bool `yaml:"distGPUNetworkAcceleration,omitempty"`
-	// DinfGPUNetworkAcceleration mirrors inference-workload-controller's GPUNetworkAccelerationEnabled (distributed-inference MNNVL support).
+	// DinfGPUNetworkAcceleration mirrors AnyWorkload's GPUNetworkAccelerationEnabled for distributed inference.
 	DinfGPUNetworkAcceleration *bool `yaml:"dinfGPUNetworkAcceleration,omitempty"`
 }
 

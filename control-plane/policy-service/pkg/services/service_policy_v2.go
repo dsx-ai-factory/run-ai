@@ -20,8 +20,8 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/generated/pkg/api"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/tree"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
 	"github.com/run-ai/runai/runai-application-packages/jsonutils/gojsonq"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
 )
 
 type PolicyApiService struct{}
@@ -736,7 +736,7 @@ func (pa *PolicyApiService) applyWorkloadPolicyV2(ctx context.Context, meta api.
 	return result, nil
 }
 
-func jsonBMapToResponse[T any](dest **T, src dao_utils.JsonBMap) {
+func jsonBMapToResponse[T any](dest **T, src dbmodels.JsonBMap) {
 	if src != nil {
 		if (*dest) == nil {
 			(*dest) = new(T)

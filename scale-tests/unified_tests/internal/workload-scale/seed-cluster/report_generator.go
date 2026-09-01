@@ -10,12 +10,12 @@ import (
 	"fmt"
 	"time"
 
+	workloadclient "github.com/run-ai/runai/runai-clients/workloads-client/generated"
+	workloadcommon "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/common"
 	"github.com/run-ai/runai/scale-tests/unified_tests/internal/sampler_actions"
 	"github.com/run-ai/runai/scale-tests/unified_tests/internal/scale"
 	workload_scale "github.com/run-ai/runai/scale-tests/unified_tests/internal/workload-scale"
 	"github.com/run-ai/runai/scale-tests/unified_tests/internal/workload-scale/analyze"
-	workloadclient "github.com/run-ai/runai/runai-clients/workloads-client/generated"
-	workloadcommon "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/common"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -39,14 +39,14 @@ func (w *WorkloadSamplesReportsGenerator) GenerateRawDataReport() (*scale.Sample
 		return nil, fmt.Errorf("failed to collect workload results:[%v]", err)
 	}
 	rawReport := scale.NewSamplesReport(w.sampleGenerationCompletedWithSuccess, data)
-	
+
 	// Add workload creation timing metrics to metadata
 	if rawReport.MetaData == nil {
 		rawReport.MetaData = make(map[string]string)
 	}
 	rawReport.MetaData["workload_creation_duration_seconds"] = fmt.Sprintf("%.2f", w.workloadSampler.creationDuration.Seconds())
 	rawReport.MetaData["workload_creation_throughput_per_sec"] = fmt.Sprintf("%.2f", w.workloadSampler.workloadsPerSecond)
-	
+
 	return rawReport, nil
 }
 

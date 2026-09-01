@@ -1,9 +1,4 @@
 /*
- * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
- * SPDX-License-Identifier: Apache-2.0
- */
-
-/*
 NVIDIA Run:ai
 
 # Introduction  The NVIDIA Run:ai Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding various tasks to your application, including workload submission, resource management, and administrative operations.  NVIDIA Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the NVIDIA Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/authentication/accessrules#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/authentication/roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://run-ai-docs.nvidia.com/self-hosted/latest/reference/api/rest-auth/#request-an-api-token).

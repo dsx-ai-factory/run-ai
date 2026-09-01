@@ -21,6 +21,69 @@ rules:
   - apiGroups: ["admissionregistration.k8s.io"]
     resources: ["validatingwebhookconfigurations", "mutatingwebhookconfigurations"]
     verbs: ["list"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames: ["workload-controller", "inference-workload-controller", "runai-job-controller"]
+    verbs: ["delete"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["list"]
+  - apiGroups: [""]
+    resources: ["services", "serviceaccounts"]
+    resourceNames: ["workload-controller", "inference-workload-controller", "runai-job-controller"]
+    verbs: ["delete"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["runai-workload-controller-tls-secret", "runai-inference-workload-controller-tls-secret"]
+    verbs: ["delete"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["roles"]
+    resourceNames: ["workload-controller", "inference-workload-controller", "workload-controller-migration"]
+    verbs: ["delete"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["rolebindings"]
+    verbs: ["list", "delete"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["clusterroles"]
+    resourceNames: ["workload-controller-rw", "workload-controller-ro", "runai-inference-workload-controller-project", "runai-inference-workload-controller", "runai-job-controller", "runai-job-controller-project"]
+    verbs: ["delete"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["clusterrolebindings"]
+    resourceNames: ["workload-controller-ro", "runai-inference-workload-controller", "runai-job-controller"]
+    verbs: ["delete"]
+  - apiGroups: ["monitoring.coreos.com"]
+    resources: ["servicemonitors"]
+    resourceNames: ["workload-controller", "inference-workload-controller"]
+    verbs: ["delete"]
+  - apiGroups: ["autoscaling.k8s.io"]
+    resources: ["verticalpodautoscalers"]
+    resourceNames: ["workload-controller", "inference-workload-controller", "runai-job-controller"]
+    verbs: ["delete"]
+  - apiGroups: ["admissionregistration.k8s.io"]
+    resources: ["validatingwebhookconfigurations"]
+    resourceNames:
+      - runai-interactive-policy-validation
+      - runai-interactive-workload-validation
+      - runai-training-policy-validation
+      - runai-training-workload-validation
+      - runai-distributed-policy-validation
+      - runai-distributed-workload-validation
+      - runai-inference-policy-validation-old
+      - runai-inference-policy-validation
+      - runai-inference-workload-validation-old
+      - runai-inference-workload-validation
+      - runai-distributed-inference-workload-validation
+    verbs: ["delete"]
+  - apiGroups: ["admissionregistration.k8s.io"]
+    resources: ["mutatingwebhookconfigurations"]
+    resourceNames:
+      - runai-interactive-workload-mutation
+      - runai-training-workload-mutation
+      - runai-distributed-workload-mutation
+      - runai-inference-workload-mutation-old
+      - runai-inference-workload-mutation
+      - runai-distributed-inference-workload-mutation
+    verbs: ["delete"]
   - apiGroups: ["run.ai"]
     resources: ["trainingworkloads", "interactiveworkloads", "distributedworkloads"]
     verbs: ["get", "list", "patch"]

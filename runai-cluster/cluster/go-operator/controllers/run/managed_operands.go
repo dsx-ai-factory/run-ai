@@ -32,10 +32,7 @@ import (
 	cluster_sync "github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/run/operands/cluster-sync"
 	encryption_key "github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/run/operands/encryption-key"
 	external_workload_integrator "github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/run/operands/external-workload-integrator"
-	inference_workload_controller "github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/run/operands/inference-workload-controller"
-	job_controller "github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/run/operands/job-controller"
 	kai_operator "github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/run/operands/kai-operator"
-	legacy_controller_rbac "github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/run/operands/legacy-controller-rbac"
 	metrics_exporter "github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/run/operands/metrics-exporter"
 	mps_server "github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/run/operands/mps-server"
 	nmc_mgmt_prometheus "github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/run/operands/nmc-mgmt-prometheus"
@@ -50,7 +47,6 @@ import (
 	legacy_runtime_runner "github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/run/operands/legacy-runtime-runner"
 	managed_nodes_config "github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/run/operands/managed-nodes-config"
 	runtime_rules "github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/run/operands/runtime-rules"
-	workload_controller "github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/run/operands/workload-controller"
 	workload_exporter "github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/run/operands/workload-exporter"
 	kc "github.com/run-ai/runai/runai-cluster/cluster/go-operator/pkg/kube-client"
 	"github.com/run-ai/runai/runai-cluster/cluster/go-operator/pkg/operands"
@@ -143,8 +139,6 @@ func NewManagedOperands(ctx context.Context, localClusterClient kc.HybridClient,
 	mo.addRemoteCluster(legacy_runtime_runner.Operand(remoteClusterClient, runaiConfig))
 	mo.addOldRemoteCluster(project_controller.Operand(), *spec.ProjectController.Enabled)
 	mo.addOldRemoteCluster(accessrule_controller.Operand(), *spec.AccessRuleController.Enabled && *spec.ProjectController.CreateRoleBindings)
-	mo.addRemoteCluster(job_controller.Operand(remoteClusterClient, runaiConfig))
-	mo.addRemoteCluster(workload_controller.Operand(remoteClusterClient, runaiConfig))
 	mo.addOldRemoteCluster(mpi_operator.Operand(), true)
 	mo.addOldRemoteCluster(training_operator.Operand(), true)
 	mo.addOldRemoteCluster(admission_controller.Operand(), *spec.AdmissionController.Enabled)
@@ -154,8 +148,6 @@ func NewManagedOperands(ctx context.Context, localClusterClient kc.HybridClient,
 	mo.addRemoteCluster(queue_controller.Operand(remoteClusterClient, runaiConfig))
 	mo.addRemoteCluster(pod_group_assigner.Operand(remoteClusterClient, runaiConfig))
 	mo.addRemoteCluster(cluster_api.Operand(remoteClusterClient, runaiConfig))
-	mo.addRemoteCluster(inference_workload_controller.Operand(remoteClusterClient, runaiConfig))
-	mo.addRemoteCluster(legacy_controller_rbac.Operand(remoteClusterClient, runaiConfig))
 	mo.addRemoteCluster(knative.Operand(remoteClusterClient, runaiConfig))
 	mo.addRemoteCluster(cluster_redis.Operand(remoteClusterClient, runaiConfig))
 	mo.addOldRemoteCluster(managed_nodes_config.Operand(), *spec.NodePoolController.Enabled)

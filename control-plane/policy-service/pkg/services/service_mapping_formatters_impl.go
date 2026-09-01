@@ -19,7 +19,7 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/auth"
 	"github.com/run-ai/runai/runai-application-packages/datastructs"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 )
 
 // keep a list of builtin formatters, those that are pre-defined
@@ -30,7 +30,7 @@ func (ms MappingApiService) createFormatter(ctx context.Context, req *dbmodel.Ma
 		return nil, api.NewValidationError(fmt.Sprintf("formatter %s is a builtin formatter and cannot be created", req.Name))
 	}
 
-	db := dao_utils.DB().WithContext(ctx)
+	db := runaidb.DB().WithContext(ctx)
 
 	_, getErr := dao.GetFormatterByName(ctx, db, req.Name)
 	if getErr == nil {
@@ -84,7 +84,7 @@ func (ms MappingApiService) getFormatter(ctx context.Context, formatterName stri
 		return nil, api.NewError(http.StatusBadRequest, "formatter name is required", nil)
 	}
 
-	formatter, err := dao.GetFormatterByName(ctx, dao_utils.DB().WithContext(ctx), formatterName)
+	formatter, err := dao.GetFormatterByName(ctx, runaidb.DB().WithContext(ctx), formatterName)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (ms MappingApiService) deleteFormatter(ctx context.Context, formatterName s
 	}
 
 	committed := false
-	tx := dao_utils.DB().WithContext(ctx).Begin()
+	tx := runaidb.DB().WithContext(ctx).Begin()
 	defer database.FinalizeTransaction(tx, &committed)
 
 	row, err := dao.GetFormatterByName(ctx, tx, formatterName)
@@ -123,9 +123,9 @@ func (ms MappingApiService) deleteFormatter(ctx context.Context, formatterName s
 		return err
 	}
 
-	result := tx.Commit()
-	if result.Error != nil {
-		return database.Error(database.COMMIT_DELETIONS, database.MappingFormatters).WithDetailsFromDb(result)
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		return database.Error(database.COMMIT_DELETIONS, database.MappingFormatters).WithDetails(commitErr)
 	}
 	committed = true
 
@@ -144,7 +144,7 @@ func (ms MappingApiService) patchFormatter(ctx context.Context, formatterName st
 	}
 
 	committed := false
-	tx := dao_utils.DB().WithContext(ctx).Begin()
+	tx := runaidb.DB().WithContext(ctx).Begin()
 	defer database.FinalizeTransaction(tx, &committed)
 
 	row, err := dao.GetFormatterByName(ctx, tx, formatterName)
@@ -185,9 +185,9 @@ func (ms MappingApiService) patchFormatter(ctx context.Context, formatterName st
 		return nil, api.NewError(http.StatusInternalServerError, fmt.Sprintf("failed to load formatter %s after update: %v", row.Name, err.Message), err)
 	}
 
-	result := tx.Commit()
-	if result.Error != nil {
-		return nil, database.Error(database.COMMIT_UPDATES, database.MappingFormatters).WithDetailsFromDb(result)
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		return nil, database.Error(database.COMMIT_UPDATES, database.MappingFormatters).WithDetails(commitErr)
 	}
 	committed = true
 
@@ -202,7 +202,7 @@ func (ms MappingApiService) deleteFormatterFields(ctx context.Context, formatter
 	}
 
 	committed := false
-	tx := dao_utils.DB().WithContext(ctx).Begin()
+	tx := runaidb.DB().WithContext(ctx).Begin()
 	defer database.FinalizeTransaction(tx, &committed)
 
 	row, err := dao.GetFormatterByName(ctx, tx, formatterName)
@@ -235,9 +235,9 @@ func (ms MappingApiService) deleteFormatterFields(ctx context.Context, formatter
 		return err
 	}
 
-	result := tx.Commit()
-	if result.Error != nil {
-		return database.Error(database.COMMIT_UPDATES, database.MappingFormatters).WithDetailsFromDb(result)
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		return database.Error(database.COMMIT_UPDATES, database.MappingFormatters).WithDetails(commitErr)
 	}
 	committed = true
 

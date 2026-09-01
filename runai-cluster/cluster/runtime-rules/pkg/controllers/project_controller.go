@@ -27,9 +27,9 @@ type ProjectController struct {
 }
 
 func NewProjectController(k8sClient client.Client, k8sClientWithWatch client.WithWatch, qm *queuesManager.QueuesManager, promQuerier prometheus.Querier, workloadCache *util.WorkloadCache,
-	recorder record.EventRecorder, eventList []int, workloadValidator *validation.WorkloadValidator, supportedJobKinds map[string]client.Object, legacyWorkloadsEnabled bool) *ProjectController {
+	recorder record.EventRecorder, eventList []int, workloadValidator *validation.WorkloadValidator, supportedJobKinds map[string]client.Object) *ProjectController {
 	projectController := &ProjectController{
-		projectHandler:     handlers.NewProjectHandler(k8sClient, qm, promQuerier, workloadCache, recorder, eventList, workloadValidator, supportedJobKinds, legacyWorkloadsEnabled),
+		projectHandler:     handlers.NewProjectHandler(k8sClient, qm, promQuerier, workloadCache, recorder, eventList, workloadValidator, supportedJobKinds),
 		K8sClientWithWatch: k8sClientWithWatch,
 	}
 	return projectController

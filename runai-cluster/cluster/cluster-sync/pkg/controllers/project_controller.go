@@ -47,7 +47,10 @@ func AddProjectHandlerToCache(backendClient *backendclient.BackendClient, cached
 			}
 		},
 		DeleteFunc: func(object any) {
-			obj := object.(*kaiv1alpha1.Project)
+			obj, ok := deletedObject[*kaiv1alpha1.Project](object)
+			if !ok {
+				return
+			}
 			rateLimitedController.MarkItemDeleted(objectKeyFromObject(obj))
 			genericControllerErrorHandler(projectHandler.HandleDelete(obj), constants.DeleteOperation, constants.ProjectResourceName, obj)
 		},

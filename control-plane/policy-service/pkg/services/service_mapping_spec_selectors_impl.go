@@ -21,7 +21,8 @@ import (
 	"github.com/run-ai/runai/runai-application-packages/convutils"
 	"github.com/run-ai/runai/runai-application-packages/datastructs"
 	"github.com/run-ai/runai/runai-application-packages/jsonutils/conjungo"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-application-packages/queryapi"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/auth"
 )
@@ -32,7 +33,7 @@ import (
 const runAiMappingGroup = "run.ai"
 
 func (ms MappingApiService) listMappings(ctx context.Context, filterBy []string) (*api.MappingListResponse, *api.Error) {
-	filters, filterErr := dao_utils.ValidateAndParameterizeApiFilters(filterBy, dbmodel.MappingSelectors{}.FilterFieldsToColumn())
+	filters, filterErr := queryapi.NewParser(dbmodel.MappingSelectors{}.FilterFieldsToColumn()).Filters(filterBy)
 	if filterErr != nil {
 		return nil, api.NewValidationError(filterErr.Error())
 	}
@@ -113,7 +114,7 @@ func (ms MappingApiService) createMapping(ctx context.Context, req *dbmodel.Mapp
 	}
 
 	if cv != nil {
-		err = cv.ValidateMappingChange(ctx, dao_utils.DB().WithContext(ctx), req.SpecSelectors)
+		err = cv.ValidateMappingChange(ctx, runaidb.DB().WithContext(ctx), req.SpecSelectors)
 		if err != nil {
 			return nil, err
 		}
@@ -128,7 +129,7 @@ func (ms MappingApiService) createMapping(ctx context.Context, req *dbmodel.Mapp
 
 func (ms MappingApiService) deleteMapping(ctx context.Context, req *api.MappingDeletionRequest, scopeType api.MappingScope) *api.Error {
 	committed := false
-	tx := dao_utils.DB().WithContext(ctx).Begin()
+	tx := runaidb.DB().WithContext(ctx).Begin()
 	defer database.FinalizeTransaction(tx, &committed)
 
 	if err := dao.DeleteMappingByGvkAndScope(ctx, tx, req.WorkloadType, scopeType); err != nil {
@@ -139,9 +140,9 @@ func (ms MappingApiService) deleteMapping(ctx context.Context, req *api.MappingD
 		return err
 	}
 
-	result := tx.Commit()
-	if result.Error != nil {
-		return database.Error(database.COMMIT_DELETIONS, database.MappingSelectors).WithDetailsFromDb(result)
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		return database.Error(database.COMMIT_DELETIONS, database.MappingSelectors).WithDetails(commitErr)
 	}
 	committed = true
 
@@ -194,14 +195,14 @@ func (ms MappingApiService) updateMapping(ctx context.Context, req *api.MappingC
 	row.UpdatedBy = auth.SubjectIdOf(ctx)
 
 	if cv != nil {
-		err = cv.ValidateMappingChange(ctx, dao_utils.DB().WithContext(ctx), row.SpecSelectors)
+		err = cv.ValidateMappingChange(ctx, runaidb.DB().WithContext(ctx), row.SpecSelectors)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	committed := false
-	tx := dao_utils.DB().WithContext(ctx).Begin()
+	tx := runaidb.DB().WithContext(ctx).Begin()
 	defer database.FinalizeTransaction(tx, &committed)
 
 	if err := dao.SaveMapping(ctx, tx, &row); err != nil {
@@ -212,9 +213,9 @@ func (ms MappingApiService) updateMapping(ctx context.Context, req *api.MappingC
 		return nil, err
 	}
 
-	result := tx.Commit()
-	if result.Error != nil {
-		return nil, database.Error(database.COMMIT_UPDATES, database.MappingSelectors).WithDetailsFromDb(result)
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		return nil, database.Error(database.COMMIT_UPDATES, database.MappingSelectors).WithDetails(commitErr)
 	}
 	committed = true
 
@@ -256,7 +257,7 @@ func (ms MappingApiService) deleteMappingSpecSelectors(ctx context.Context, req 
 	row.UpdatedBy = auth.SubjectIdOf(ctx)
 
 	committed := false
-	tx := dao_utils.DB().WithContext(ctx).Begin()
+	tx := runaidb.DB().WithContext(ctx).Begin()
 	defer database.FinalizeTransaction(tx, &committed)
 
 	if err := dao.SaveMapping(ctx, tx, &row); err != nil {
@@ -267,9 +268,9 @@ func (ms MappingApiService) deleteMappingSpecSelectors(ctx context.Context, req 
 		return nil, err
 	}
 
-	result := tx.Commit()
-	if result.Error != nil {
-		return nil, database.Error(database.COMMIT_UPDATES, database.MappingSelectors).WithDetailsFromDb(result)
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		return nil, database.Error(database.COMMIT_UPDATES, database.MappingSelectors).WithDetails(commitErr)
 	}
 	committed = true
 

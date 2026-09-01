@@ -42,7 +42,10 @@ func AddConfigMapHandlerToCache(backendClient *backendclient.BackendClient, cach
 				genericControllerErrorHandler(configMapHandler.HandleConfigMapAdd(object), constants.AddOperation, "ConfigMap", object)
 			},
 			DeleteFunc: func(obj any) {
-				object := obj.(*corev1.ConfigMap)
+				object, ok := deletedObject[*corev1.ConfigMap](obj)
+				if !ok {
+					return
+				}
 				rateLimitedController.MarkItemDeleted(objectKeyFromObject(object))
 				genericControllerErrorHandler(configMapHandler.HandleConfigMapDelete(object), constants.DeleteOperation, "ConfigMap", object)
 			},

@@ -121,18 +121,18 @@ func TestRunaiPublicRejectsInvalidInjectedContainerResources(t *testing.T) {
 func TestRunaiPublic_InitContainerConstructorInputs(t *testing.T) {
 	runaiConfig := getRunaiConfig()
 
-	wc := runaiConfig.Spec.WorkloadController
-	wc.GitSyncImage = &common.Image{
+	aw := runaiConfig.Spec.AnyworkloadController
+	aw.GitSyncImage = &common.Image{
 		Registry: ptr.To("reg.example.com"),
 		Name:     ptr.To("git-sync"),
 		Tag:      ptr.To("v1"),
 	}
-	wc.S3FileSystemImage = &common.Image{
+	aw.S3FileSystemImage = &common.Image{
 		Registry: ptr.To("reg.example.com"),
 		Name:     ptr.To("goofys"),
 		Tag:      ptr.To("v2"),
 	}
-	wc.RunaiOauth2ProxyImage = &common.Image{
+	aw.RunaiOauth2ProxyImage = &common.Image{
 		Registry: ptr.To("reg.example.com"),
 		Name:     ptr.To("oauth2-proxy"),
 		Tag:      ptr.To("v3"),
@@ -164,15 +164,15 @@ func TestRunaiPublic_InitContainerConstructorInputs(t *testing.T) {
 			Resources: &global.WorkloadInjectedContainerResourceRequirements{},
 		},
 	}
-	wc.RunaiOauth2ProxyUsernameLoaderImage = &common.Image{
+	aw.RunaiOauth2ProxyUsernameLoaderImage = &common.Image{
 		Registry: ptr.To("reg.example.com"),
 		Name:     ptr.To("username-loader"),
 		Tag:      ptr.To("v4"),
 	}
-	wc.RunaiOauth2ProxyRedisFQDN = ptr.To("redis.example.com:6379")
-	wc.RunaiOauth2ProxyWorkloadAuthSecretName = ptr.To("workload-auth-secret")
-	wc.RunaiOauth2ProxySessionStoreType = ptr.To("cookie")
-	wc.ExternalAuthUrlEnabled = ptr.To(false)
+	aw.RunaiOauth2ProxyRedisFQDN = ptr.To("redis.example.com:6379")
+	aw.RunaiOauth2ProxyWorkloadAuthSecretName = ptr.To("workload-auth-secret")
+	aw.RunaiOauth2ProxySessionStoreType = ptr.To("cookie")
+	aw.ExternalAuthUrlEnabled = ptr.To(false)
 
 	runaiConfig.Spec.Global.CustomCAGit = &common.CustomCA{
 		Enabled: ptr.To(true),
@@ -286,9 +286,8 @@ func TestRunaiPublic_GPUNetworkAcceleration(t *testing.T) {
 	dClient := createDynamicClient()
 	kc := kcfake.New(kbClient, kbClient, dClient)
 
-	// Defaults: both workload-controller and inference-workload-controller
-	// default GPUNetworkAccelerationEnabled to false, so both flags are always
-	// reported (never omitted) and behave consistently.
+	// Anyworkload-controller owns the common acceleration setting exposed through
+	// both legacy public configuration fields.
 	defaultConfig := getRunaiConfig()
 	defaultPublic := NewRunaiPublic("test", kc, defaultConfig)
 	defaultObject, err := defaultPublic.Object(&ContextMock{})
@@ -301,34 +300,16 @@ func TestRunaiPublic_GPUNetworkAcceleration(t *testing.T) {
 	assert.NotNil(t, defaultOut.Configuration.DinfGPUNetworkAcceleration)
 	assert.Equal(t, false, *defaultOut.Configuration.DinfGPUNetworkAcceleration)
 
-	// Asymmetric values: workload-controller enabled, inference-workload-controller
-	// disabled. Asserting each output independently guards against a swapped
-	// mapping (Dist <-> Dinf) in the operand.
-	distConfig := getRunaiConfig()
-	distConfig.Spec.WorkloadController.GPUNetworkAccelerationEnabled = ptr.To(true)
-	distConfig.Spec.InferenceWorkloadController.GPUNetworkAccelerationEnabled = ptr.To(false)
-	distPublic := NewRunaiPublic("test", kc, distConfig)
-	distObject, err := distPublic.Object(&ContextMock{})
+	enabledConfig := getRunaiConfig()
+	enabledConfig.Spec.AnyworkloadController.GPUNetworkAccelerationEnabled = ptr.To(true)
+	enabledPublic := NewRunaiPublic("test", kc, enabledConfig)
+	distObject, err := enabledPublic.Object(&ContextMock{})
 	assert.NoError(t, err)
 	distOut := v1.RunaiPublic{}
 	assert.NoError(t, yaml.Unmarshal([]byte(distObject.(*corev1.ConfigMap).Data["runai-public"]), &distOut))
 	assert.NotNil(t, distOut.Configuration)
 	assert.Equal(t, true, *distOut.Configuration.DistGPUNetworkAcceleration)
-	assert.Equal(t, false, *distOut.Configuration.DinfGPUNetworkAcceleration)
-
-	// Reverse asymmetry: inference-workload-controller enabled, workload-controller
-	// disabled.
-	dinfConfig := getRunaiConfig()
-	dinfConfig.Spec.WorkloadController.GPUNetworkAccelerationEnabled = ptr.To(false)
-	dinfConfig.Spec.InferenceWorkloadController.GPUNetworkAccelerationEnabled = ptr.To(true)
-	dinfPublic := NewRunaiPublic("test", kc, dinfConfig)
-	dinfObject, err := dinfPublic.Object(&ContextMock{})
-	assert.NoError(t, err)
-	dinfOut := v1.RunaiPublic{}
-	assert.NoError(t, yaml.Unmarshal([]byte(dinfObject.(*corev1.ConfigMap).Data["runai-public"]), &dinfOut))
-	assert.NotNil(t, dinfOut.Configuration)
-	assert.Equal(t, false, *dinfOut.Configuration.DistGPUNetworkAcceleration)
-	assert.Equal(t, true, *dinfOut.Configuration.DinfGPUNetworkAcceleration)
+	assert.Equal(t, true, *distOut.Configuration.DinfGPUNetworkAcceleration)
 }
 
 func TestFormatImageRef(t *testing.T) {

@@ -20,6 +20,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+//+kubebuilder:rbac:groups="",resources=services;serviceaccounts;secrets,verbs=get
+//+kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=roles;clusterroles;clusterrolebindings,verbs=get
+//+kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=rolebindings,verbs=get;list
+//+kubebuilder:rbac:groups=autoscaling.k8s.io,resources=verticalpodautoscalers,verbs=get
+//+kubebuilder:rbac:groups=admissionregistration.k8s.io,resources=validatingwebhookconfigurations;mutatingwebhookconfigurations,verbs=get
+
 func (r *RunAIConfigReconciler) reconcileLegacyWorkloadCleanup(
 	ctx context.Context,
 	config *runaiv1.RunaiConfig,
@@ -32,46 +38,22 @@ func (r *RunAIConfigReconciler) reconcileLegacyWorkloadCleanup(
 		return false, nil
 	}
 
-	annotations := config.GetAnnotations()
-	sourceVersion := annotations[legacycleanup.SourceVersionAnnotation]
-	if sourceVersion == "" {
-		controllersDisabled, stateErr := legacycleanup.ControllersDisabled(config)
-		if stateErr != nil {
-			return setCleanupCondition(config, metav1.ConditionFalse, runaiv1.LegacyWorkloadCleanupBlocked, stateErr.Error()), nil
-		}
-		if controllersDisabled {
-			return clearCleanupCondition(config), nil
-		}
-		return setCleanupCondition(
-			config,
-			metav1.ConditionFalse,
-			runaiv1.LegacyWorkloadCleanupBlocked,
-			"cleanup source version annotation is missing while legacy controllers are enabled",
-		), nil
-	}
-	shouldRun, err := legacycleanup.SourceRequiresCleanup(sourceVersion)
-	if err != nil {
-		return setCleanupCondition(config, metav1.ConditionFalse, runaiv1.LegacyWorkloadCleanupBlocked, err.Error()), nil
-	}
-	if !shouldRun {
-		return clearCleanupCondition(config), nil
-	}
-
-	if err := legacycleanup.ValidateReadinessMarker(config); err != nil {
-		return setCleanupCondition(
-			config, metav1.ConditionFalse, runaiv1.LegacyWorkloadCleanupWaitingForReady, err.Error(),
-		), nil
-	}
-
-	controllersDisabled, err := legacycleanup.ControllersDisabled(config)
-	if err != nil {
-		return setCleanupCondition(config, metav1.ConditionFalse, runaiv1.LegacyWorkloadCleanupBlocked, err.Error()), nil
-	}
-
 	job := &batchv1.Job{}
 	jobKey := client.ObjectKey{Namespace: runaiv1.DefaultNamespace, Name: legacycleanup.CleanupJobName}
-	err = r.localClusterClient.Get(ctx, jobKey, job)
+	err := r.localClusterClient.Get(ctx, jobKey, job)
 	if apierrors.IsNotFound(err) {
+		resourcesPresent, presenceErr := legacycleanup.LegacyControllerResourcesPresent(ctx, r.remoteClusterClient)
+		if presenceErr != nil {
+			return false, presenceErr
+		}
+		if !resourcesPresent {
+			return clearCleanupCondition(config), nil
+		}
+		if readinessErr := legacycleanup.ValidateReadinessMarker(config); readinessErr != nil {
+			return setCleanupCondition(
+				config, metav1.ConditionFalse, runaiv1.LegacyWorkloadCleanupWaitingForReady, readinessErr.Error(),
+			), nil
+		}
 		return setCleanupCondition(
 			config, metav1.ConditionFalse, runaiv1.LegacyWorkloadCleanupCreating,
 			"Creating legacy workload cleanup Job",
@@ -87,12 +69,6 @@ func (r *RunAIConfigReconciler) reconcileLegacyWorkloadCleanup(
 		), nil
 	}
 	if condition := trueJobCondition(job, batchv1.JobComplete); condition != nil {
-		if !controllersDisabled {
-			return setCleanupCondition(
-				config, metav1.ConditionFalse, runaiv1.LegacyWorkloadCleanupFailed,
-				"cleanup Job completed while legacy controllers remained enabled; delete the Job to retry",
-			), nil
-		}
 		return setCleanupCondition(
 			config, metav1.ConditionTrue, runaiv1.LegacyWorkloadCleanupCompleted,
 			"Legacy workload controller cleanup is complete",

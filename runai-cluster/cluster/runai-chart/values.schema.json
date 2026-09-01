@@ -337,6 +337,12 @@
         "metrics": {
           "$ref": "#/$defs/Service"
         },
+        "gitSyncImage": {
+          "$ref": "#/$defs/Image"
+        },
+        "s3FileSystemImage": {
+          "$ref": "#/$defs/Image"
+        },
         "runaiOauth2ProxyImage": {
           "$ref": "#/$defs/Image"
         },
@@ -351,6 +357,12 @@
         },
         "runaiOauth2ProxyUsernameLoaderImage": {
           "$ref": "#/$defs/Image"
+        },
+        "externalAuthUrlEnabled": {
+          "type": "boolean"
+        },
+        "openshiftRouteConfiguration": {
+          "$ref": "#/$defs/OpenshiftRouteConfiguration"
         },
         "affinity": {
           "$ref": "#/$defs/Affinity"
@@ -2033,95 +2045,6 @@
       },
       "type": "object"
     },
-    "InferenceWorkloadController": {
-      "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
-        "image": {
-          "$ref": "#/$defs/Image"
-        },
-        "resources": {
-          "$ref": "#/$defs/Resources"
-        },
-        "replicas": {
-          "type": "integer"
-        },
-        "k8sClientConfig": {
-          "$ref": "#/$defs/K8sClientConfig"
-        },
-        "useDebugLogLevel": {
-          "type": "boolean"
-        },
-        "gitSyncImage": {
-          "$ref": "#/$defs/Image"
-        },
-        "runaiOauth2ProxyImage": {
-          "$ref": "#/$defs/Image"
-        },
-        "runaiOauth2ProxyRedisImage": {
-          "$ref": "#/$defs/Image"
-        },
-        "runaiOauth2ProxyRedisFQDN": {
-          "type": "string"
-        },
-        "runaiOauth2ProxyWorkloadAuthSecretName": {
-          "type": "string"
-        },
-        "runaiOauth2ProxyUsernameLoaderImage": {
-          "$ref": "#/$defs/Image"
-        },
-        "runaiOauth2ProxySessionStoreType": {
-          "type": "string"
-        },
-        "runaiLlmGatewayImage": {
-          "$ref": "#/$defs/Image"
-        },
-        "runaiLlmGatewayResourcesCpuCore": {
-          "type": "string"
-        },
-        "runaiLlmGatewayResourcesCpuMemory": {
-          "type": "string"
-        },
-        "externalAuthUrlEnabled": {
-          "type": "boolean"
-        },
-        "applyControlPlanePolicies": {
-          "type": "boolean"
-        },
-        "GPUNetworkAccelerationEnabled": {
-          "type": "boolean"
-        },
-        "service": {
-          "$ref": "#/$defs/Service"
-        },
-        "health": {
-          "$ref": "#/$defs/Service"
-        },
-        "metrics": {
-          "$ref": "#/$defs/Service"
-        },
-        "k8sClientBurst": {
-          "type": "string"
-        },
-        "k8sClientQPS": {
-          "type": "string"
-        },
-        "enableTopology": {
-          "type": "boolean"
-        },
-        "enableElasticComputeDomain": {
-          "type": "boolean"
-        },
-        "affinity": {
-          "$ref": "#/$defs/Affinity"
-        },
-        "vpa": {
-          "$ref": "#/$defs/VPASpec"
-        }
-      },
-      "type": "object"
-    },
     "Ingress": {
       "properties": {
         "enabled": {
@@ -2177,35 +2100,6 @@
         "IntVal",
         "StrVal"
       ]
-    },
-    "JobController": {
-      "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
-        "image": {
-          "$ref": "#/$defs/Image"
-        },
-        "args": {
-          "$ref": "#/$defs/Args"
-        },
-        "resources": {
-          "$ref": "#/$defs/Resources"
-        },
-        "k8sClientBurst": {
-          "type": "string"
-        },
-        "k8sClientQPS": {
-          "type": "string"
-        },
-        "affinity": {
-          "$ref": "#/$defs/Affinity"
-        },
-        "vpa": {
-          "$ref": "#/$defs/VPASpec"
-        }
-      },
-      "type": "object"
     },
     "K8sClientConfig": {
       "properties": {
@@ -3493,17 +3387,6 @@
       },
       "type": "object"
     },
-    "ProfilerConfig": {
-      "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
-        "serverAddress": {
-          "type": "string"
-        }
-      },
-      "type": "object"
-    },
     "Profiling": {
       "properties": {
         "enabled": {
@@ -4412,9 +4295,6 @@
         "admission-controller": {
           "$ref": "#/$defs/AdmissionController"
         },
-        "workload-controller": {
-          "$ref": "#/$defs/WorkloadController"
-        },
         "init-ca": {
           "$ref": "#/$defs/InitCA"
         },
@@ -4453,9 +4333,6 @@
         },
         "device-plugin": {
           "$ref": "#/$defs/DevicePlugin"
-        },
-        "job-controller": {
-          "$ref": "#/$defs/JobController"
         },
         "nodepool-controller": {
           "$ref": "#/$defs/NodePoolController"
@@ -4513,9 +4390,6 @@
         },
         "cluster-api": {
           "$ref": "#/$defs/ClusterApi"
-        },
-        "inference-workload-controller": {
-          "$ref": "#/$defs/InferenceWorkloadController"
         },
         "knative": {
           "$ref": "#/$defs/Knative"
@@ -6135,131 +6009,6 @@
         },
         "hostProcess": {
           "type": "boolean"
-        }
-      },
-      "type": "object"
-    },
-    "WorkloadController": {
-      "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
-        "image": {
-          "$ref": "#/$defs/Image"
-        },
-        "replicas": {
-          "type": "integer"
-        },
-        "resources": {
-          "$ref": "#/$defs/Resources"
-        },
-        "gitSyncImage": {
-          "$ref": "#/$defs/Image"
-        },
-        "s3FileSystemImage": {
-          "$ref": "#/$defs/Image"
-        },
-        "runaiOauth2ProxyImage": {
-          "$ref": "#/$defs/Image"
-        },
-        "runaiOauth2ProxyRedisImage": {
-          "$ref": "#/$defs/Image"
-        },
-        "runaiOauth2ProxyRedisFQDN": {
-          "type": "string"
-        },
-        "runaiOauth2ProxyWorkloadAuthSecretName": {
-          "type": "string"
-        },
-        "runaiOauth2ProxyUsernameLoaderImage": {
-          "$ref": "#/$defs/Image"
-        },
-        "runaiOauth2ProxySessionStoreType": {
-          "type": "string"
-        },
-        "k8sClientBurst": {
-          "type": "string"
-        },
-        "k8sClientQPS": {
-          "type": "string"
-        },
-        "jupyterUserIdentity": {
-          "type": "boolean"
-        },
-        "externalAuthUrlEnabled": {
-          "type": "boolean"
-        },
-        "interactiveMaxConcurrentReconciles": {
-          "type": "integer"
-        },
-        "trainingMaxConcurrentReconciles": {
-          "type": "integer"
-        },
-        "distributedMaxConcurrentReconciles": {
-          "type": "integer"
-        },
-        "degradedPhaseDelay": {
-          "type": "integer"
-        },
-        "GPUNetworkAccelerationEnabled": {
-          "type": "boolean"
-        },
-        "enableTopology": {
-          "type": "boolean"
-        },
-        "enableElasticComputeDomain": {
-          "type": "boolean"
-        },
-        "enableDanglingResourceCleanup": {
-          "type": "boolean"
-        },
-        "openshiftRouteConfiguration": {
-          "$ref": "#/$defs/OpenshiftRouteConfiguration"
-        },
-        "type": {
-          "type": "string"
-        },
-        "webhookAddress": {
-          "type": "string"
-        },
-        "service": {
-          "$ref": "#/$defs/Service"
-        },
-        "health": {
-          "$ref": "#/$defs/Service"
-        },
-        "metrics": {
-          "$ref": "#/$defs/Service"
-        },
-        "profiler": {
-          "$ref": "#/$defs/ProfilerConfig"
-        },
-        "skipMigration": {
-          "type": "boolean"
-        },
-        "applyControlPlanePolicies": {
-          "type": "boolean"
-        },
-        "additionalPodLabels": {
-          "additionalProperties": {
-            "type": "string"
-          },
-          "type": "object"
-        },
-        "additionalPodAnnotations": {
-          "additionalProperties": {
-            "type": "string"
-          },
-          "type": "object"
-        },
-        "failureResourceCleanupPolicy": {
-          "type": "string"
-        },
-        "affinity": {
-          "$ref": "#/$defs/Affinity"
-        },
-        "vpa": {
-          "$ref": "#/$defs/VPASpec"
         }
       },
       "type": "object"

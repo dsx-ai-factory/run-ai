@@ -58,6 +58,8 @@ func (h *DistributedInferenceHandler) HandleUpdateItem(key client.ObjectKey) err
 }
 
 func (h *DistributedInferenceHandler) HandleAddUpdate(workload *dinfwv1.DistributedInferenceWorkload) error {
+	workload = workload.DeepCopy()
+
 	zap.S().Debugf("Handling DistributedInferenceWorkload <%s/%s> add/update", workload.Namespace, workload.Name)
 
 	// Check if parser is available

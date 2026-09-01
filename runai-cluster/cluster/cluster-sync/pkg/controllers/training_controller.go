@@ -13,7 +13,6 @@ import (
 	"github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/trainingworkload/v2alpha1"
 	"go.uber.org/zap"
 	"k8s.io/client-go/tools/cache"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func AddTrainingHandlerToCache(backendClient *runaiclient.BackendClient, cachedClient cachedclient.CachedClient,
@@ -48,11 +47,14 @@ func AddTrainingHandlerToCache(backendClient *runaiclient.BackendClient, cachedC
 					constants.AddOperation, "trainingworkload-deprecated", obj)
 			},
 			DeleteFunc: func(object any) {
-				obj := object.(*v2alpha1.TrainingWorkload)
+				obj, ok := deletedObject[*v2alpha1.TrainingWorkload](object)
+				if !ok {
+					return
+				}
 				if handlers.FilterWorkloads(obj.Spec.WorkloadFields) {
 					rateLimitedController.MarkItemDeleted(objectKeyFromObject(obj))
-					genericControllerErrorHandler(workloadHandler.HandleRunaiWorkloadDelete(object.(client.Object)),
-						constants.DeleteOperation, "trainingworkload", object.(client.Object))
+					genericControllerErrorHandler(workloadHandler.HandleRunaiWorkloadDelete(obj),
+						constants.DeleteOperation, "trainingworkload", obj)
 				}
 				deprecatedRLController.MarkItemDeleted(objectKeyFromObject(obj))
 				genericControllerErrorHandler(trainingHandlerDeprecated.HandleDelete(obj),

@@ -29,8 +29,9 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/tree"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/clients/authorization"
 	"github.com/run-ai/runai/runai-application-packages/convutils"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
 	"github.com/run-ai/runai/runai-application-packages/jsonutils/gojsonq"
-	daoUtils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 )
 
 type UrlAndPayload struct {
@@ -139,7 +140,7 @@ var _ = Describe("GetTest", func() {
 			Expect(err).To(BeNil())
 
 			policy := dbmodel.Policy{
-				BaseModel: daoUtils.BaseModel{
+				BaseModel: dbmodels.BaseModel{
 					ID:        uuid.New(),
 					CreatedBy: "test",
 					UpdatedBy: "test",
@@ -152,7 +153,7 @@ var _ = Describe("GetTest", func() {
 				TenantId:     1,
 				RulesV2:      rulesAsJson,
 			}
-			dbErr := dao.AddPolicy(context.Background(), daoUtils.DB(), &policy)
+			dbErr := dao.AddPolicy(context.Background(), runaidb.DB(), &policy)
 			Expect(dbErr).To(BeNil())
 
 			//

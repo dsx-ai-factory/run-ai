@@ -42,7 +42,10 @@ func AddKartaHandlerToCache(backendClient *backendclient.BackendClient, cachedCl
 			}
 		},
 		DeleteFunc: func(obj any) {
-			object := obj.(*kartav1alpha1.Karta)
+			object, ok := deletedObject[*kartav1alpha1.Karta](obj)
+			if !ok {
+				return
+			}
 			genericControllerErrorHandler(kartaHandler.HandleDelete(object), constants.DeleteOperation, constants.KartaResourceName, object)
 		},
 	})

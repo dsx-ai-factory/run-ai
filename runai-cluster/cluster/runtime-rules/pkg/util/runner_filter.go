@@ -27,7 +27,7 @@ const (
 
 // ClassifyRunner runs the four scope checks the design doc §4 demands, in
 // the documented order. On success it returns the legacy workload kind the
-// runner should be treated as. On failure it returns the reason for skipping
+// runner should use for project limits. On failure it returns the reason for skipping
 // so the caller can log a structured drop reason.
 //
 // Order matters: cast-label first (cheapest gate, biggest culling factor),
@@ -87,13 +87,11 @@ func IsPhaseSkip(reason RunnerSkipReason) bool {
 }
 
 // categoryForWrappedKind maps the `workloadKind` label values the control-plane
-// writes during the v1->v2 cast (see iw_tw_to_job.go) back to the legacy CRD
-// kind whose limits should govern this runner.
+// writes during the v1->v2 cast to the project-limit bucket that governs the runner.
 //
 // The Workspace -> Interactive and Training -> Training mappings cover the
 // generic Job-wrapped case. The five distributed-training operator kinds all
-// map to DistributedWorkload because the legacy DistributedWorkload CRD is the
-// only category with their limit semantics.
+// use the distributed-training bucket, which shares the training limits.
 func categoryForWrappedKind(wrappedKind string) (string, bool) {
 	switch wrappedKind {
 	case "Workspace":

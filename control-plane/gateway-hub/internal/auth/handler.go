@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -115,7 +116,7 @@ func setResponseHeaders(w http.ResponseWriter, ctx context.Context, claims *Runa
 	hctx = context.WithValue(hctx, runaictx.CfIsManagementTenant, fmt.Sprintf("%t", isManagement))
 	hctx = context.WithValue(hctx, runaictx.CfClientId, clientId)
 	if len(claims.Groups) > 0 {
-		hctx = context.WithValue(hctx, runaictx.CfGroups, []string{strings.Join(claims.Groups, ",")})
+		hctx = context.WithValue(hctx, runaictx.CfGroups, escapeGroups(claims.Groups))
 	}
 
 	for name, values := range *runaictxhttp.GetHeaders(hctx) {
@@ -123,6 +124,14 @@ func setResponseHeaders(w http.ResponseWriter, ctx context.Context, claims *Runa
 			w.Header().Add(name, v)
 		}
 	}
+}
+
+func escapeGroups(groups []string) []string {
+	escaped := make([]string, len(groups))
+	for i, g := range groups {
+		escaped[i] = url.QueryEscape(g)
+	}
+	return escaped
 }
 
 func extractBearerToken(r *http.Request) (string, error) {

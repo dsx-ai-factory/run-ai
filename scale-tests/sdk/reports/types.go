@@ -43,7 +43,7 @@ type RunaiResources struct {
 	SchedulingServices *ComponentResources `json:"scheduling_services,omitempty"`
 	SyncServices       *ComponentResources `json:"sync_services,omitempty"`
 	WorkloadServices   *ComponentResources `json:"workload_services,omitempty"`
-	WorkloadController *ControllerConfig   `json:"workload_controller,omitempty"`
+	WorkloadExporter   *ComponentResources `json:"workload_exporter,omitempty"`
 }
 
 type ComponentResources struct {
@@ -51,9 +51,4 @@ type ComponentResources struct {
 	CPULimit      string `json:"cpu_limit"`
 	MemoryRequest string `json:"memory_request"`
 	MemoryLimit   string `json:"memory_limit"`
-}
-
-type ControllerConfig struct {
-	MaxConcurrentReconciles int                 `json:"max_concurrent_reconciles"`
-	Resources               *ComponentResources `json:"resources,omitempty"`
 }

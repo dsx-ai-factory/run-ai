@@ -27,7 +27,7 @@ import (
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/clients/orgunit"
 	"github.com/run-ai/runai/runai-application-packages/convutils"
 	"github.com/run-ai/runai/runai-application-packages/testutils"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 )
 
 var (
@@ -442,7 +442,7 @@ var _ = Describe("FormatterTest", Ordered, func() {
 			Expect(dao.CreateFormatter(tenantContextForTest(tenantId), row)).To(BeNil())
 
 			// force invalid-but-permitted jsonb value to mimic legacy/corrupt data and hit row.Fields == nil branch
-			Expect(dao_utils.DB().Exec("update mapping_formatters set fields = 'null'::jsonb where id = ?", row.ID).Error).To(BeNil())
+			Expect(runaidb.DB().Exec("update mapping_formatters set fields = 'null'::jsonb where id = ?", row.ID)).Error().To(BeNil())
 
 			patchBody := api.FormatterUpdateRequest{
 				Fields: map[string]api.FormatterField{

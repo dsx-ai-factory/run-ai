@@ -23,10 +23,11 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/scopes"
 	policyCompliance "github.com/run-ai/runai/control-plane/workloads-and-policies/policy_compliance"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
 	"github.com/run-ai/runai/runai-application-packages/jsonutils/conjungo"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
 	"github.com/run-ai/runai/runai-common-packages/logging"
 	"github.com/run-ai/runai/runai-common-packages/runaictx"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 )
 
 const (
@@ -112,7 +113,7 @@ func (ht *HierarchyTree) HandleApplyRequest(ctx context.Context, request *ApplyP
 		return nil, hierarchyErr
 	}
 
-	db := dao_utils.DB().WithContext(ctx)
+	db := runaidb.DB().WithContext(ctx)
 
 	// we may need to re-calculate the effective in case one of the given policies has changed during the calculation
 	for attempt := 0; attempt < MaxEffectiveCalcAttempts; attempt++ {
@@ -144,7 +145,7 @@ func (ht *HierarchyTree) HandleApplyRequest(ctx context.Context, request *ApplyP
 		if appliedPolicy == nil {
 			appliedPolicy = &dbmodel.PolicyWithOptionalEffective{
 				Policy: dbmodel.Policy{
-					BaseModel: dao_utils.BaseModel{
+					BaseModel: dbmodels.BaseModel{
 						CreatedBy: request.Requester,
 						UpdatedBy: request.Requester,
 					},
@@ -261,9 +262,9 @@ func (ht *HierarchyTree) HandleApplyRequest(ctx context.Context, request *ApplyP
 			return nil, err
 		}
 
-		result := tx.Commit()
-		if result.Error != nil {
-			return nil, database.Error(database.UPSERT, database.Policies).WithDetailsFromDb(result)
+		commitErr := tx.Commit()
+		if commitErr != nil {
+			return nil, database.Error(database.UPSERT, database.Policies).WithDetails(commitErr)
 		}
 		committed = true
 
@@ -297,12 +298,12 @@ func applyRequestedChangesOnGivenPolicy(existingPolicy *dbmodel.PolicyWithOption
 	removeFields(existingPolicy.Policy.DefaultsV2, policyCompliance.FieldsOfDefaults(request.Defaults))
 	removeFields(existingPolicy.Policy.RulesV2, policyCompliance.FieldsWithRules(request.Rules))
 
-	err := conjungo.Merge(&existingPolicy.Policy.DefaultsV2, dao_utils.JsonBMap(request.Defaults), conjungo.NewOptions())
+	err := conjungo.Merge(&existingPolicy.Policy.DefaultsV2, dbmodels.JsonBMap(request.Defaults), conjungo.NewOptions())
 	if err != nil {
 		return api.NewError(http.StatusServiceUnavailable, "failed to apply the new defaults", err)
 	}
 
-	err = conjungo.Merge(&existingPolicy.Policy.RulesV2, dao_utils.JsonBMap(request.Rules), conjungo.NewOptions())
+	err = conjungo.Merge(&existingPolicy.Policy.RulesV2, dbmodels.JsonBMap(request.Rules), conjungo.NewOptions())
 	if err != nil {
 		return api.NewError(http.StatusServiceUnavailable, "failed to apply the new rules", err)
 	}

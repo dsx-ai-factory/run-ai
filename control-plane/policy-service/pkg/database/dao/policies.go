@@ -14,19 +14,22 @@ import (
 
 	"github.com/google/uuid"
 	authApi "github.com/run-ai/runai/control-plane/authorization/pkg/client/generated"
-	"github.com/run-ai/runai/runai-common-packages/dao-utils/validators"
 	"github.com/run-ai/runai/runai-common-packages/logging"
 
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/scopes"
 
 	"github.com/run-ai/runai/runai-application-packages/convutils"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
+	"github.com/run-ai/runai/runai-application-packages/queryapi"
+	querydbenrich "github.com/run-ai/runai/runai-application-packages/queryapi/dbenrich"
 
 	"github.com/run-ai/runai/control-plane/policy-service/generated/pkg/api"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbtables"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/auth"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
+	"github.com/run-ai/runai/runai-common-packages/runaidb/orm"
 	"gorm.io/gorm"
 )
 
@@ -37,27 +40,26 @@ const FallbackPolicyAsType = "Fallback"
 // (in normal condition - one record at the most).
 //
 // Persisted columns include gvk_workload and validation_issues when set on policy (GORM Save).
-func AddPolicy(ctx context.Context, tx *gorm.DB, policy *dbmodel.Policy) *api.Error {
+func AddPolicy(ctx context.Context, tx orm.DB, policy *dbmodel.Policy) *api.Error {
 	//
 	//    now add the new policy
 	//
 	policy.DefaultsV2 = database.CleanMap(policy.DefaultsV2)
 	policy.RulesV2 = database.CleanMap(policy.RulesV2)
 
-	result := tx.Table(dbtables.PoliciesTable).Save(policy)
-	if result.Error != nil {
-		if policy.GvkWorkload && isUniqueViolation(result.Error) {
+	if _, err := tx.Table(dbtables.PoliciesTable).Save(policy); err != nil {
+		if policy.GvkWorkload && isUniqueViolation(err) {
 			return api.NewError(http.StatusConflict, "policy for similar scope and workload type already exists", nil)
 		}
-		dbErr := database.Error(database.CREATE, database.Policies).WithDetailsFromDb(result)
-		logging.Errorf("failed to add policy: %s: %v", dbErr.Message, result.Error)
+		dbErr := database.Error(database.CREATE, database.Policies).WithDetails(err)
+		logging.Errorf("failed to add policy: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 
 	return nil
 }
 
-func UpdatePolicySpec(_ context.Context, tx *gorm.DB, policy *dbmodel.Policy) *api.Error {
+func UpdatePolicySpec(_ context.Context, tx orm.DB, policy *dbmodel.Policy) *api.Error {
 	policy.DefaultsV2 = database.CleanMap(policy.DefaultsV2)
 	policy.RulesV2 = database.CleanMap(policy.RulesV2)
 
@@ -91,13 +93,11 @@ func UpdatePolicySpec(_ context.Context, tx *gorm.DB, policy *dbmodel.Policy) *a
 		updates[dbtables.PoliciesColumnValidationIssues] = nil
 	}
 
-	result := tx.Table(dbtables.PoliciesTable).
+	if _, err := tx.Table(dbtables.PoliciesTable).
 		Where(fmt.Sprintf("%s.%s = ?", dbtables.PoliciesTable, dbtables.PoliciesColumnId), policy.ID).
-		UpdateColumns(updates)
-
-	if result.Error != nil {
-		dbErr := database.Error(database.UPDATE, database.Policies).WithDetailsFromDb(result)
-		logging.Errorf("failed to update policy spec: %s: %v", dbErr.Message, result.Error)
+		UpdateColumns(updates); err != nil {
+		dbErr := database.Error(database.UPDATE, database.Policies).WithDetails(err)
+		logging.Errorf("failed to update policy spec: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 
@@ -107,7 +107,7 @@ func UpdatePolicySpec(_ context.Context, tx *gorm.DB, policy *dbmodel.Policy) *a
 // UpdatePoliciesStatus updates the validation_status and validation_issues columns for multiple policies by their IDs.
 // This is used when mappings or other components change and we need to mark dependent policies
 // as PendingUpdate.
-func UpdatePoliciesStatus(ctx context.Context, tx *gorm.DB, policyIds []string, status *api.PolicyStatus) *api.Error {
+func UpdatePoliciesStatus(ctx context.Context, tx orm.DB, policyIds []string, status *api.PolicyStatus) *api.Error {
 	if len(policyIds) == 0 {
 		return nil
 	}
@@ -135,14 +135,12 @@ func UpdatePoliciesStatus(ctx context.Context, tx *gorm.DB, policyIds []string, 
 		}
 	}
 
-	result := tx.Table(dbtables.PoliciesTable).
+	if _, err := tx.Table(dbtables.PoliciesTable).
 		Where(fmt.Sprintf("%s.%s = ?", dbtables.PoliciesTable, dbtables.PoliciesColumnTenantId), tenantId).
 		Where(fmt.Sprintf("%s.%s IN ?", dbtables.PoliciesTable, dbtables.PoliciesColumnId), policyIds).
-		UpdateColumns(updates)
-
-	if result.Error != nil {
-		dbErr := database.Error(database.UPDATE, database.Policies).WithDetailsFromDb(result)
-		logging.Errorf("failed to update policies status: %s: %v", dbErr.Message, result.Error)
+		UpdateColumns(updates); err != nil {
+		dbErr := database.Error(database.UPDATE, database.Policies).WithDetails(err)
+		logging.Errorf("failed to update policies status: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 
@@ -151,18 +149,16 @@ func UpdatePoliciesStatus(ctx context.Context, tx *gorm.DB, policyIds []string, 
 
 // PatchPolicyScopes is used for migrating policy records that had partial scope to
 // having complete scope ids. It is part of our transition from tree based to non-tree based.
-func PatchPolicyScopes(_ context.Context, tx *gorm.DB, policy *dbmodel.Policy) *api.Error {
-	result := tx.Table(dbtables.PoliciesTable).
+func PatchPolicyScopes(_ context.Context, tx orm.DB, policy *dbmodel.Policy) *api.Error {
+	if _, err := tx.Table(dbtables.PoliciesTable).
 		Where(fmt.Sprintf("%s.%s = ?", dbtables.PoliciesTable, dbtables.PoliciesColumnId), policy.ID).
 		UpdateColumns(map[string]interface{}{
 			dbtables.PoliciesColumnClusterId:    policy.ClusterId,
 			dbtables.PoliciesColumnDepartmentId: policy.DepartmentId,
 			dbtables.PoliciesColumnProjectId:    policy.ProjectId,
-		})
-
-	if result.Error != nil {
-		dbErr := database.Error(database.UPDATE, database.Policies).WithDetailsFromDb(result)
-		logging.Errorf("failed to patch policy scopes: %s: %v", dbErr.Message, result.Error)
+		}); err != nil {
+		dbErr := database.Error(database.UPDATE, database.Policies).WithDetails(err)
+		logging.Errorf("failed to patch policy scopes: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 
@@ -174,8 +170,8 @@ func PatchPolicyScopes(_ context.Context, tx *gorm.DB, policy *dbmodel.Policy) *
 // This function removed everything from memory + mark everything as soft delete in the DB.
 // This function, DeleteObsoletePoliciesByScope, is then invoked to perform hard-delete on
 // all the policies that were soft deleted.
-func DeleteObsoletePoliciesByScope(ctx context.Context, db *gorm.DB, scopeType api.ScopeType, scopeId string) *api.Error {
-	_ = db.Transaction(func(tx *gorm.DB) error {
+func DeleteObsoletePoliciesByScope(ctx context.Context, db orm.DB, scopeType api.ScopeType, scopeId string) *api.Error {
+	_ = db.Transaction(func(tx orm.DB) error {
 		tenantId := auth.TenantIdOf(ctx)
 		var idsToDelete []string
 		scopeIdColumn, err := dbtables.ScopeIdColumnName(scopeType)
@@ -183,13 +179,12 @@ func DeleteObsoletePoliciesByScope(ctx context.Context, db *gorm.DB, scopeType a
 			return err
 		}
 
-		result := tx.Table(dbtables.PoliciesTable).
+		if err := tx.Table(dbtables.PoliciesTable).
 			Where(fmt.Sprintf("%s = ?", dbtables.PoliciesColumnTenantId), tenantId).
 			Where(fmt.Sprintf("%s = ?", scopeIdColumn), scopeId).
-			Pluck(dbtables.PoliciesColumnId, &idsToDelete)
-		if result.Error != nil {
-			apiErr := database.Error(database.LIST, database.Policies).WithDetailsFromDb(result)
-			logging.Errorf("failed to list policies to delete: %s: %v", apiErr.Message, result.Error)
+			Pluck(dbtables.PoliciesColumnId, &idsToDelete); err != nil {
+			apiErr := database.Error(database.LIST, database.Policies).WithDetails(err)
+			logging.Errorf("failed to list policies to delete: %s: %v", apiErr.Message, err)
 			return apiErr
 		}
 
@@ -198,21 +193,19 @@ func DeleteObsoletePoliciesByScope(ctx context.Context, db *gorm.DB, scopeType a
 			return nil
 		}
 
-		result = tx.Table(dbtables.PoliciesTable).
+		if _, err := tx.Table(dbtables.PoliciesTable).
 			Where(fmt.Sprintf("%s IN (?)", dbtables.PoliciesColumnId), idsToDelete).
-			Delete(dbtables.DeleteThisRecord)
-		if result.Error != nil {
-			apiErr := database.Error(database.DELETE, database.Policies).WithDetailsFromDb(result)
-			logging.Errorf("failed to delete policies: %s: %v", apiErr.Message, result.Error)
+			Delete(dbtables.DeleteThisRecord); err != nil {
+			apiErr := database.Error(database.DELETE, database.Policies).WithDetails(err)
+			logging.Errorf("failed to delete policies: %s: %v", apiErr.Message, err)
 			return apiErr
 		}
 
-		result = tx.Table(dbtables.EffectivePoliciesTable).
+		if _, err := tx.Table(dbtables.EffectivePoliciesTable).
 			Where(fmt.Sprintf("%s IN (?)", dbtables.EffectivePoliciesColumnPolicyId), idsToDelete).
-			Delete(dbtables.DeleteThisRecord)
-		if result.Error != nil {
-			apiErr := database.Error(database.DELETE, database.EffectivePolicy).WithDetailsFromDb(result)
-			logging.Errorf("failed to delete effective policies: %s: %v", apiErr.Message, result.Error)
+			Delete(dbtables.DeleteThisRecord); err != nil {
+			apiErr := database.Error(database.DELETE, database.EffectivePolicy).WithDetails(err)
+			logging.Errorf("failed to delete effective policies: %s: %v", apiErr.Message, err)
 			return apiErr
 		}
 
@@ -224,23 +217,22 @@ func DeleteObsoletePoliciesByScope(ctx context.Context, db *gorm.DB, scopeType a
 
 // SoftDeletePolicyById sets deleted_at on the policy row (legacy / non-GVK-workload policies).
 // For gvk_workload policies, use HardDeletePolicyById instead.
-func SoftDeletePolicyById(ctx context.Context, tx *gorm.DB, policy *dbmodel.Policy) *api.Error {
+func SoftDeletePolicyById(ctx context.Context, tx orm.DB, policy *dbmodel.Policy) *api.Error {
 	searchQuery := dbmodel.Policy{
-		BaseModel: dao_utils.BaseModel{
+		BaseModel: dbmodels.BaseModel{
 			ID: policy.ID,
 		},
 		TenantId: auth.TenantIdOf(ctx),
 	}
 
-	result := tx.
+	if _, err := tx.
 		Model(policy).
 		Where(searchQuery).
 		UpdateColumns(map[string]interface{}{
 			dbtables.DeletedAtColumn: time.Now(),
-		})
-	if result.Error != nil {
-		dbErr := database.Error(database.DELETE, database.Policies).WithDetailsFromDb(result)
-		logging.Errorf("failed to soft delete policy: %s: %v", dbErr.Message, result.Error)
+		}); err != nil {
+		dbErr := database.Error(database.DELETE, database.Policies).WithDetails(err)
+		logging.Errorf("failed to soft delete policy: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 
@@ -255,28 +247,28 @@ func SoftDeletePolicyById(ctx context.Context, tx *gorm.DB, policy *dbmodel.Poli
 
 // HardDeletePolicyById permanently removes the policy row and its effective_policies rows.
 // Use this for GVK-workload policies (gvk_workload = true), which do not use soft delete.
-func HardDeletePolicyById(ctx context.Context, tx *gorm.DB, policy *dbmodel.Policy) *api.Error {
+func HardDeletePolicyById(ctx context.Context, tx orm.DB, policy *dbmodel.Policy) *api.Error {
 	searchQuery := dbmodel.Policy{
-		BaseModel: dao_utils.BaseModel{
+		BaseModel: dbmodels.BaseModel{
 			ID: policy.ID,
 		},
 		TenantId: auth.TenantIdOf(ctx),
 	}
 
-	res := tx.Unscoped().Table(dbtables.EffectivePoliciesTable).
+	rowsAffected, err := tx.Unscoped().Table(dbtables.EffectivePoliciesTable).
 		Where(fmt.Sprintf("%s = ?", dbtables.EffectivePoliciesColumnPolicyId), policy.ID).
 		Where(fmt.Sprintf("%s = ?", dbtables.EffectivePoliciesColumnTenantId), auth.TenantIdOf(ctx)).
 		Delete(dbtables.DeleteThisRecord)
-	if res.Error != nil {
-		dbErr := database.Error(database.DELETE, database.EffectivePolicy).WithDetailsFromDb(res)
-		logging.Errorf("failed to delete effective policies: %s: %v", dbErr.Message, res.Error)
+	if err != nil {
+		dbErr := database.Error(database.DELETE, database.EffectivePolicy).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("failed to delete effective policies: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 
-	res = tx.Unscoped().Model(searchQuery).Where(&searchQuery).Delete(dbtables.DeleteThisRecord)
-	if res.Error != nil {
-		dbErr := database.Error(database.DELETE, database.Policies).WithDetailsFromDb(res)
-		logging.Errorf("failed to delete policy: %s: %v", dbErr.Message, res.Error)
+	rowsAffected, err = tx.Unscoped().Model(searchQuery).Where(&searchQuery).Delete(dbtables.DeleteThisRecord)
+	if err != nil {
+		dbErr := database.Error(database.DELETE, database.Policies).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("failed to delete policy: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 
@@ -300,14 +292,14 @@ type FindPolicyOptions struct {
 // excluded; when true, Unscoped() is used. The effective row is filtered
 // independently via IncludeDeletedEffectivePolicies (applied as part of the
 // LEFT JOIN condition so a missing effective row never hides the given one).
-func FindPolicyByID(ctx context.Context, tx *gorm.DB, policyID string, opts FindPolicyOptions) (*dbmodel.PolicyWithOptionalEffective, *api.Error) {
+func FindPolicyByID(ctx context.Context, tx orm.DB, policyID string, opts FindPolicyOptions) (*dbmodel.PolicyWithOptionalEffective, *api.Error) {
 	id, parseErr := uuid.Parse(policyID)
 	if parseErr != nil {
 		return nil, api.NewValidationError("invalid policy id")
 	}
 
 	searchQ := dbmodel.Policy{
-		BaseModel: dao_utils.BaseModel{
+		BaseModel: dbmodels.BaseModel{
 			ID: id,
 		},
 		TenantId: auth.TenantIdOf(ctx),
@@ -318,25 +310,25 @@ func FindPolicyByID(ctx context.Context, tx *gorm.DB, policyID string, opts Find
 	result := tx.Table(dbtables.PoliciesTable)
 
 	// workaround for postgres deletedAt issue
-	selectForOptionalEffective(result)
+	result = selectForOptionalEffective(result)
 
-	result.Where(&searchQ)
+	result = result.Where(&searchQ)
 
 	if !opts.IncludeDeletedGivenPolicies {
-		result.Where(fmt.Sprintf("%s.%s IS NULL", dbtables.PoliciesTable, dbtables.DeletedAtColumn))
+		result = result.Where(fmt.Sprintf("%s.%s IS NULL", dbtables.PoliciesTable, dbtables.DeletedAtColumn))
 	} else {
-		result.Unscoped()
+		result = result.Unscoped()
 	}
 
-	result.
+	rowsAffected, err := result.
 		Joins(searchQ.LeftJoinEffectivePolicy(opts.IncludeDeletedEffectivePolicies)).
 		Scan(&record)
-	if result.Error != nil {
-		dbErr := database.Error(database.LIST, database.Policies).WithDetailsFromDb(result)
-		logging.Errorf("failed to find policy: %s: %v", dbErr.Message, result.Error)
+	if err != nil {
+		dbErr := database.Error(database.LIST, database.Policies).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("failed to find policy: %s: %v", dbErr.Message, err)
 		return nil, dbErr
 	}
-	if result.RowsAffected == 0 {
+	if rowsAffected == 0 {
 		return nil, nil
 	}
 
@@ -360,7 +352,7 @@ type ListByOrgUnitOptions struct {
 	IncludeSystem   bool
 }
 
-func ListPoliciesByOrgUnits(ctx context.Context, tx *gorm.DB, tenantId int32, workloadType string,
+func ListPoliciesByOrgUnits(ctx context.Context, tx orm.DB, tenantId int32, workloadType string,
 	relevantOrgUnits []scopes.OrgUnit, options ListByOrgUnitOptions,
 ) (map[string]*dbmodel.PolicyWithOptionalEffective, *api.Error) {
 	records := make([]*dbmodel.PolicyWithOptionalEffective, 0)
@@ -368,7 +360,7 @@ func ListPoliciesByOrgUnits(ctx context.Context, tx *gorm.DB, tenantId int32, wo
 	result := tx.Table(dbtables.PoliciesTable)
 
 	// workaround for postgres deletedAt issue
-	selectForOptionalEffective(result)
+	result = selectForOptionalEffective(result)
 
 	//
 	//   add to the query where statement that covers all the hierarchy of the policy
@@ -399,28 +391,27 @@ func ListPoliciesByOrgUnits(ctx context.Context, tx *gorm.DB, tenantId int32, wo
 		params = append(params, orgUnit.Id)
 	}
 
-	result.Where(scopesQuery, params...)
+	result = result.Where(scopesQuery, params...)
 
 	if options.IncludeFallback {
-		result.Where(fmt.Sprintf("(%s.%s = ? or %s.%s = ?)", dbtables.PoliciesTable, dbtables.PoliciesColumnWorkloadType, dbtables.PoliciesTable, dbtables.PoliciesColumnWorkloadType),
+		result = result.Where(fmt.Sprintf("(%s.%s = ? or %s.%s = ?)", dbtables.PoliciesTable, dbtables.PoliciesColumnWorkloadType, dbtables.PoliciesTable, dbtables.PoliciesColumnWorkloadType),
 			workloadType, FallbackPolicyAsType)
 	} else {
-		result.Where(fmt.Sprintf("(%s.%s = ?)", dbtables.PoliciesTable, dbtables.PoliciesColumnWorkloadType), workloadType)
+		result = result.Where(fmt.Sprintf("(%s.%s = ?)", dbtables.PoliciesTable, dbtables.PoliciesColumnWorkloadType), workloadType)
 	}
 
 	if !options.IncludeDeleted {
-		result.Where(fmt.Sprintf("%s.%s IS NULL", dbtables.PoliciesTable, dbtables.DeletedAtColumn))
+		result = result.Where(fmt.Sprintf("%s.%s IS NULL", dbtables.PoliciesTable, dbtables.DeletedAtColumn))
 	} else {
-		result.Unscoped()
+		result = result.Unscoped()
 	}
 
 	var policy dbmodel.Policy
-	result.
+	if _, err := result.
 		Joins(policy.LeftJoinEffectivePolicy(options.IncludeDeleted)).
-		Scan(&records)
-	if result.Error != nil {
-		dbErr := database.Error(database.LIST, database.Policies).WithDetailsFromDb(result)
-		logging.Errorf("failed to list policies: %s: %v", dbErr.Message, result.Error)
+		Scan(&records); err != nil {
+		dbErr := database.Error(database.LIST, database.Policies).WithDetails(err)
+		logging.Errorf("failed to list policies: %s: %v", dbErr.Message, err)
 		return nil, dbErr
 	}
 
@@ -457,7 +448,7 @@ func listToMap(records []*dbmodel.PolicyWithOptionalEffective) map[string]*dbmod
 }
 
 func CountGivenPoliciesOfTenant(ctx context.Context) (int64, *api.Error) {
-	tx := dao_utils.DB().WithContext(ctx)
+	tx := runaidb.DB().WithContext(ctx)
 
 	whereClause := dbmodel.Policy{
 		TenantId: auth.TenantIdOf(ctx),
@@ -465,10 +456,9 @@ func CountGivenPoliciesOfTenant(ctx context.Context) (int64, *api.Error) {
 
 	count := int64(0)
 
-	result := tx.Model(&whereClause).Where(whereClause).Unscoped().Count(&count)
-	if result.Error != nil {
-		dbErr := database.Error(database.COUNT, database.Policies).WithDetailsFromDb(result)
-		logging.Errorf("failed to count policies: %s: %v", dbErr.Message, result.Error)
+	if err := tx.Model(&whereClause).Where(whereClause).Unscoped().Count(&count); err != nil {
+		dbErr := database.Error(database.COUNT, database.Policies).WithDetails(err)
+		logging.Errorf("failed to count policies: %s: %v", dbErr.Message, err)
 		return 0, dbErr
 	}
 
@@ -488,7 +478,7 @@ type ListOptions struct {
 func ListGivenPoliciesOfTenant(ctx context.Context, workloadType string, scope string, departmentId string,
 	projectId int32, clusterId string, permittedScopes *authApi.PermittedScopes, options ListOptions,
 ) ([]dbmodel.PolicyWithPartialEffective, *api.Error) {
-	tx := dao_utils.DB().WithContext(ctx)
+	tx := runaidb.DB().WithContext(ctx)
 
 	var policy dbmodel.Policy
 
@@ -513,13 +503,13 @@ func ListGivenPoliciesOfTenant(ctx context.Context, workloadType string, scope s
 		))
 
 	if !options.IncludeDeleted {
-		result.Where(fmt.Sprintf("%s.%s IS NULL", dbtables.PoliciesTable, dbtables.DeletedAtColumn))
+		result = result.Where(fmt.Sprintf("%s.%s IS NULL", dbtables.PoliciesTable, dbtables.DeletedAtColumn))
 	} else {
-		result.Unscoped()
+		result = result.Unscoped()
 	}
 
 	if !options.IncludeFallbackPolicies {
-		result.Where(fmt.Sprintf("%s.%s <> ?", dbtables.PoliciesTable, dbtables.PoliciesColumnWorkloadType), FallbackPolicyAsType)
+		result = result.Where(fmt.Sprintf("%s.%s <> ?", dbtables.PoliciesTable, dbtables.PoliciesColumnWorkloadType), FallbackPolicyAsType)
 	}
 
 	if !options.IncludeNativePolicies && !options.IncludeGvkPolicies {
@@ -527,17 +517,16 @@ func ListGivenPoliciesOfTenant(ctx context.Context, workloadType string, scope s
 	}
 
 	if options.IncludeGvkPolicies != options.IncludeNativePolicies {
-		result.Where(fmt.Sprintf("(%s.%s = ?)", dbtables.PoliciesTable, dbtables.PoliciesColumnGvkWorkload), options.IncludeGvkPolicies)
+		result = result.Where(fmt.Sprintf("(%s.%s = ?)", dbtables.PoliciesTable, dbtables.PoliciesColumnGvkWorkload), options.IncludeGvkPolicies)
 	}
 
-	dbmodel.ApplyPermittedScopes(result, permittedScopes)
+	result = dbmodel.ApplyPermittedScopes(result, permittedScopes)
 
-	result.
+	if err := result.
 		Joins(policy.LeftJoinEffectivePolicy(options.IncludeDeleted)).
-		Find(&records)
-	if result.Error != nil {
-		dbErr := database.Error(database.LIST, database.Policies).WithDetailsFromDb(result)
-		logging.Errorf("failed to list policies: %s: %v", dbErr.Message, result.Error)
+		Find(&records); err != nil {
+		dbErr := database.Error(database.LIST, database.Policies).WithDetails(err)
+		logging.Errorf("failed to list policies: %s: %v", dbErr.Message, err)
 		return nil, dbErr
 	}
 
@@ -545,10 +534,10 @@ func ListGivenPoliciesOfTenant(ctx context.Context, workloadType string, scope s
 }
 
 // ListGvkPoliciesOfTenant returns all non-deleted policies with gvk_workload=true for the current tenant,
-func ListGvkPoliciesOfTenant(ctx context.Context, permittedScopes *authApi.PermittedScopes, filters []validators.ParameterizedFilter,
+func ListGvkPoliciesOfTenant(ctx context.Context, permittedScopes *authApi.PermittedScopes, filters []queryapi.Filter,
 	sortColumn string, sortOrder string, offset int32, limit int32,
 ) ([]dbmodel.PolicyWithOptionalEffective, *api.Error) {
-	tx := dao_utils.DB().WithContext(ctx)
+	tx := runaidb.DB().WithContext(ctx)
 
 	records := make([]dbmodel.PolicyWithOptionalEffective, 0)
 
@@ -568,18 +557,12 @@ func ListGvkPoliciesOfTenant(ctx context.Context, permittedScopes *authApi.Permi
 		Where(fmt.Sprintf("%s.%s IS NULL", dbtables.PoliciesTable, dbtables.DeletedAtColumn)).
 		Joins(policyWhere.LeftJoinEffectivePolicy(dbmodel.NotToIncludeDeletedPolicies))
 
-	dbmodel.ApplyPermittedScopes(res, permittedScopes)
+	res = dbmodel.ApplyPermittedScopes(res, permittedScopes)
 
-	dao_utils.ApplyParameterizedFilters(res, filters)
+	res = res.WithEnricher(querydbenrich.Filters(filters))
 
-	var err error
 	if sortColumn != "" {
-		res, err = dao_utils.ApplySortByParam(res, sortColumn, sortOrder)
-		if err != nil {
-			logging.Errorf("error applying sort by param: %v", err)
-			dbErr := api.NewValidationError(fmt.Sprintf("invalid sort parameters: %v", err.Error()))
-			return nil, dbErr
-		}
+		res = res.Order(querydbenrich.FormatSortClause(sortColumn, sortOrder))
 	}
 
 	res = res.Order("id DESC")
@@ -592,10 +575,9 @@ func ListGvkPoliciesOfTenant(ctx context.Context, permittedScopes *authApi.Permi
 		res = res.Limit(int(limit))
 	}
 
-	res = res.Find(&records)
-	if res.Error != nil {
-		dbErr := database.Error(database.LIST, database.Policies).WithDetailsFromDb(res)
-		logging.Errorf("error listing policies: %s: %v", dbErr.Message, res.Error)
+	if err := res.Find(&records); err != nil {
+		dbErr := database.Error(database.LIST, database.Policies).WithDetails(err)
+		logging.Errorf("error listing policies: %s: %v", dbErr.Message, err)
 		return nil, dbErr
 	}
 
@@ -625,7 +607,7 @@ func ListGvkPoliciesOfTenant(ctx context.Context, permittedScopes *authApi.Permi
 // note that includeDeleted applies only to policies. deleted effective policy we do not need for loading
 // into the tree, unlike deleted policies which we create for scopes that have effective but no given policy.
 func ListPoliciesOfTenant(ctx context.Context, tenantId int32, workloadType string, includeDeleted bool) ([]dbmodel.PolicyWithOptionalEffectiveId, *api.Error) {
-	tx := dao_utils.DB().WithContext(ctx)
+	tx := runaidb.DB().WithContext(ctx)
 
 	records := make([]dbmodel.PolicyWithOptionalEffectiveId, 0)
 
@@ -644,17 +626,16 @@ func ListPoliciesOfTenant(ctx context.Context, tenantId int32, workloadType stri
 		Where(whereClause)
 
 	if !includeDeleted {
-		result.Where(fmt.Sprintf("%s.%s IS NULL", dbtables.PoliciesTable, dbtables.DeletedAtColumn))
+		result = result.Where(fmt.Sprintf("%s.%s IS NULL", dbtables.PoliciesTable, dbtables.DeletedAtColumn))
 	} else {
-		result.Unscoped()
+		result = result.Unscoped()
 	}
 
-	result.
+	if err := result.
 		Joins(whereClause.LeftJoinEffectivePolicy(dbmodel.NotToIncludeDeletedPolicies)).
-		Find(&records)
-	if result.Error != nil {
-		dbErr := database.Error(database.LIST, database.Policies).WithDetailsFromDb(result)
-		logging.Errorf("failed to list policies: %s: %v", dbErr.Message, result.Error)
+		Find(&records); err != nil {
+		dbErr := database.Error(database.LIST, database.Policies).WithDetails(err)
+		logging.Errorf("failed to list policies: %s: %v", dbErr.Message, err)
 		return nil, dbErr
 	}
 
@@ -666,7 +647,7 @@ func ListPoliciesOfTenant(ctx context.Context, tenantId int32, workloadType stri
 	return records, nil
 }
 
-func FindGivenPolicyOfOrgUnit(ctx context.Context, tx *gorm.DB, scope api.ScopeType, clusterId *string, departmentId *string, projectId *int32,
+func FindGivenPolicyOfOrgUnit(ctx context.Context, tx orm.DB, scope api.ScopeType, clusterId *string, departmentId *string, projectId *int32,
 	workloadType string, includeDeleted bool,
 ) (*dbmodel.Policy, *api.Error) {
 	policy := dbmodel.Policy{
@@ -684,18 +665,18 @@ func FindGivenPolicyOfOrgUnit(ctx context.Context, tx *gorm.DB, scope api.ScopeT
 		Where(&policy)
 
 	if !includeDeleted {
-		result.Where(fmt.Sprintf("%s.%s IS NULL", dbtables.PoliciesTable, dbtables.DeletedAtColumn))
+		result = result.Where(fmt.Sprintf("%s.%s IS NULL", dbtables.PoliciesTable, dbtables.DeletedAtColumn))
 	} else {
-		result.Unscoped()
+		result = result.Unscoped()
 	}
 
-	result.Scan(&record)
-	if result.Error != nil {
-		dbErr := database.Error(database.LIST, database.Policies).WithDetailsFromDb(result)
-		logging.Errorf("error FindGivenPolicyOfOrgUnit: %s: %v", dbErr.Message, result.Error)
+	rowsAffected, err := result.Scan(&record)
+	if err != nil {
+		dbErr := database.Error(database.LIST, database.Policies).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("error FindGivenPolicyOfOrgUnit: %s: %v", dbErr.Message, err)
 		return nil, dbErr
 	}
-	if result.RowsAffected == 0 {
+	if rowsAffected == 0 {
 		return nil, nil
 	}
 
@@ -703,7 +684,7 @@ func FindGivenPolicyOfOrgUnit(ctx context.Context, tx *gorm.DB, scope api.ScopeT
 	return &record, nil
 }
 
-func FindGivenPoliciesOfOrgUnitAllTypes(ctx context.Context, tx *gorm.DB, scope api.ScopeType, clusterId *string,
+func FindGivenPoliciesOfOrgUnitAllTypes(ctx context.Context, tx orm.DB, scope api.ScopeType, clusterId *string,
 	departmentId *string, projectId *int32, includeDeleted bool,
 ) ([]dbmodel.Policy, *api.Error) {
 	policy := dbmodel.Policy{
@@ -719,15 +700,14 @@ func FindGivenPoliciesOfOrgUnitAllTypes(ctx context.Context, tx *gorm.DB, scope 
 	result := tx.Table(dbtables.PoliciesTable).Where(&policy)
 
 	if !includeDeleted {
-		result.Where(fmt.Sprintf("%s.%s IS NULL", dbtables.PoliciesTable, dbtables.DeletedAtColumn))
+		result = result.Where(fmt.Sprintf("%s.%s IS NULL", dbtables.PoliciesTable, dbtables.DeletedAtColumn))
 	} else {
-		result.Unscoped()
+		result = result.Unscoped()
 	}
 
-	result.Scan(&records)
-	if result.Error != nil {
-		dbErr := database.Error(database.LIST, database.Policies).WithDetailsFromDb(result)
-		logging.Errorf("error FindGivenPoliciesOfOrgUnitAllTypes: %s: %v", dbErr.Message, result.Error)
+	if _, err := result.Scan(&records); err != nil {
+		dbErr := database.Error(database.LIST, database.Policies).WithDetails(err)
+		logging.Errorf("error FindGivenPoliciesOfOrgUnitAllTypes: %s: %v", dbErr.Message, err)
 		return nil, dbErr
 	}
 
@@ -756,7 +736,7 @@ func sanitizeRecord(record *dbmodel.Policy) {
 	}
 }
 
-func FindPolicyOfOrgUnit(ctx context.Context, tx *gorm.DB, scope api.ScopeType, departmentId *string, projectId *int32,
+func FindPolicyOfOrgUnit(ctx context.Context, tx orm.DB, scope api.ScopeType, departmentId *string, projectId *int32,
 	clusterId *string, workloadType string, includeDeleted bool,
 ) (*dbmodel.PolicyWithOptionalEffective, *api.Error) {
 	policy := dbmodel.Policy{
@@ -773,25 +753,25 @@ func FindPolicyOfOrgUnit(ctx context.Context, tx *gorm.DB, scope api.ScopeType, 
 	result := tx.Table(dbtables.PoliciesTable)
 
 	// workaround for postgres deletedAt issue
-	selectForOptionalEffective(result)
+	result = selectForOptionalEffective(result)
 
-	result.Where(&policy)
+	result = result.Where(&policy)
 
 	if !includeDeleted {
-		result.Where(fmt.Sprintf("%s.%s IS NULL", dbtables.PoliciesTable, dbtables.DeletedAtColumn))
+		result = result.Where(fmt.Sprintf("%s.%s IS NULL", dbtables.PoliciesTable, dbtables.DeletedAtColumn))
 	} else {
-		result.Unscoped()
+		result = result.Unscoped()
 	}
 
-	result.
+	rowsAffected, err := result.
 		Joins(policy.LeftJoinEffectivePolicy(includeDeleted)).
 		Scan(&record)
-	if result.Error != nil {
-		dbErr := database.Error(database.LIST, database.Policies).WithDetailsFromDb(result)
-		logging.Errorf("error FindPolicyOfOrgUnit: %s: %v", dbErr.Message, result.Error)
+	if err != nil {
+		dbErr := database.Error(database.LIST, database.Policies).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("error FindPolicyOfOrgUnit: %s: %v", dbErr.Message, err)
 		return nil, dbErr
 	}
-	if result.RowsAffected == 0 {
+	if rowsAffected == 0 {
 		return nil, nil
 	}
 
@@ -809,7 +789,7 @@ func FindPolicyOfOrgUnit(ctx context.Context, tx *gorm.DB, scope api.ScopeType, 
 	return &record, nil
 }
 
-func FindAllIdsOfOrgUnit(_ context.Context, tx *gorm.DB, policy *dbmodel.Policy, includeDeleted bool) ([]string, *api.Error) {
+func FindAllIdsOfOrgUnit(_ context.Context, tx orm.DB, policy *dbmodel.Policy, includeDeleted bool) ([]string, *api.Error) {
 	searchKey := dbmodel.Policy{
 		TenantId:     policy.TenantId,
 		Scope:        policy.Scope,
@@ -825,15 +805,14 @@ func FindAllIdsOfOrgUnit(_ context.Context, tx *gorm.DB, policy *dbmodel.Policy,
 		Select(fmt.Sprintf("%s.%s", dbtables.PoliciesTable, dbtables.PoliciesColumnId))
 
 	if !includeDeleted {
-		result.Where(fmt.Sprintf("%s.%s IS NULL", dbtables.PoliciesTable, dbtables.DeletedAtColumn))
+		result = result.Where(fmt.Sprintf("%s.%s IS NULL", dbtables.PoliciesTable, dbtables.DeletedAtColumn))
 	} else {
-		result.Unscoped()
+		result = result.Unscoped()
 	}
 
-	result.Where(&searchKey).Scan(&ids)
-	if result.Error != nil {
-		dbErr := database.Error(database.LIST, database.Policies).WithDetailsFromDb(result)
-		logging.Errorf("error FindAllIdsOfOrgUnit: %s: %v", dbErr.Message, result.Error)
+	if _, err := result.Where(&searchKey).Scan(&ids); err != nil {
+		dbErr := database.Error(database.LIST, database.Policies).WithDetails(err)
+		logging.Errorf("error FindAllIdsOfOrgUnit: %s: %v", dbErr.Message, err)
 		return nil, dbErr
 	}
 
@@ -842,7 +821,7 @@ func FindAllIdsOfOrgUnit(_ context.Context, tx *gorm.DB, policy *dbmodel.Policy,
 
 // workaround for postgres issue not filling policies.DeletedAt.
 // we request the two deletion flags specifically and patch the result with their value
-func selectForOptionalEffective(tx *gorm.DB) *gorm.DB {
+func selectForOptionalEffective(tx orm.DB) orm.DB {
 	return tx.Select(fmt.Sprintf("%s.*, %s.*, %s.%s as policy_deleted, %s.%s as effective_deleted",
 		dbtables.PoliciesTable,
 		dbtables.EffectivePoliciesTable,
