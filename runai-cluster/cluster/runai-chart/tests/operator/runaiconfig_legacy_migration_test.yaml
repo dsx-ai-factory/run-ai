@@ -1,0 +1,38 @@
+suite: Test legacy RunaiConfig value migration
+
+templates:
+  - templates/runaiconfig.yaml
+
+tests:
+  - it: moves legacy workload settings to anyworkload-controller
+    set:
+      runai-operator.config.workload-controller.openshiftRouteConfiguration.terminationPolicy: passthrough
+      runai-operator.config.workload-controller.gitSyncImage.name: custom-git-sync
+      runai-operator.config.workload-controller.externalAuthUrlEnabled: false
+      runai-operator.config.inference-workload-controller.GPUNetworkAccelerationEnabled: true
+    asserts:
+      - equal:
+          path: spec.anyworkload-controller.openshiftRouteConfiguration.terminationPolicy
+          value: passthrough
+      - equal:
+          path: spec.anyworkload-controller.gitSyncImage.name
+          value: custom-git-sync
+      - equal:
+          path: spec.anyworkload-controller.externalAuthUrlEnabled
+          value: false
+      - equal:
+          path: spec.anyworkload-controller.GPUNetworkAccelerationEnabled
+          value: true
+      - notExists:
+          path: spec.workload-controller
+      - notExists:
+          path: spec.inference-workload-controller
+
+  - it: preserves explicit anyworkload-controller settings
+    set:
+      runai-operator.config.workload-controller.externalAuthUrlEnabled: false
+      runai-operator.config.anyworkload-controller.externalAuthUrlEnabled: true
+    asserts:
+      - equal:
+          path: spec.anyworkload-controller.externalAuthUrlEnabled
+          value: true

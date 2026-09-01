@@ -12,7 +12,7 @@ import (
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/auth"
 	"github.com/run-ai/runai/runai-application-packages/convutils"
 	"github.com/run-ai/runai/runai-clients/org-unit-service-client/structs"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 	"gorm.io/gorm"
 	"net/http"
 	"slices"
@@ -51,7 +51,7 @@ func (ht *HierarchyTree) InitializeTenant(ctx context.Context, tenantId int32, w
 		return api.NewError(http.StatusServiceUnavailable, "failed to get orgTree", fmt.Errorf("%s", orgTreeErr.Message))
 	}
 
-	db := dao_utils.DB()
+	db := runaidb.DB()
 
 	for _, record := range records {
 		orgUnit, err := scopes.MakeOrgUnit(record.Scope, record.TenantId, record.ClusterId, record.DepartmentId, record.ProjectId)
@@ -140,7 +140,7 @@ func gatherAncestors(mapOrgUnit structs.OrgUnitMap, orgUnitKey structs.OrgUnitKe
 // policy that is missing needs to be created as deleted. we should take into account multiple
 // requests running in parallel and ignore conflicts.
 func (ht *HierarchyTree) makeSureAllPoliciesExist(ctx context.Context, request *GenericPolicyRequest, relevantOrgUnits []scopes.OrgUnit) *api.Error {
-	db := dao_utils.DB()
+	db := runaidb.DB()
 
 	for idx, orgUnit := range relevantOrgUnits {
 		if orgUnit.Scope == api.SCOPETYPE_SYSTEM {

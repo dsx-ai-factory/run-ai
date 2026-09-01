@@ -269,7 +269,6 @@ replace (
 	github.com/run-ai/runai/runai-cluster/cluster/common/topology => ../common/topology
 	github.com/run-ai/runai/runai-cluster/cluster/common/utils => ../common/utils
 	github.com/run-ai/runai/runai-cluster/cluster/go-operator => ../go-operator
-	github.com/run-ai/runai/runai-cluster/cluster/inference-workload-controller => ../inference-workload-controller
 	github.com/run-ai/runai/runai-cluster/cluster/sdk => ../sdk
 	github.com/run-ai/runai/runai-cluster/cluster/workload-common => ../workload-common
 	github.com/run-ai/runai/runai-cluster/cluster/workload-controller => ../workload-controller

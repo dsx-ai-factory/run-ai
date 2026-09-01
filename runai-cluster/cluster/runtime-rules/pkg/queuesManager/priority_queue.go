@@ -24,10 +24,7 @@ type WorkloadTask struct {
 	ProjectName  string
 	Namespace    string
 	WorkloadType string
-	// Category applies only to WorkloadRunner tasks: the legacy workload kind
-	// (InteractiveWorkload / TrainingWorkload / DistributedWorkload) whose project
-	// limits govern the runner. Legacy CRD tasks leave it empty and are governed
-	// by WorkloadType directly.
+	// Category selects the project limit bucket that governs a WorkloadRunner.
 	Category             string
 	JobUuid              types.UID
 	JobName              string

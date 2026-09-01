@@ -13,7 +13,8 @@ import (
 
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/auth"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/itemized"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
+	"github.com/run-ai/runai/runai-common-packages/runaidb/orm"
 
 	"github.com/run-ai/runai/runai-application-packages/convutils"
 	"github.com/run-ai/runai/runai-application-packages/datastructs"
@@ -27,7 +28,6 @@ import (
 	policyCompliance "github.com/run-ai/runai/control-plane/workloads-and-policies/policy_compliance"
 	"github.com/run-ai/runai/runai-common-packages/logging"
 	"github.com/run-ai/runai/runai-common-packages/runaictx"
-	"gorm.io/gorm"
 )
 
 var (
@@ -105,7 +105,7 @@ func NewEffectiveContext(ctx context.Context, workloadType WorkloadType, orgUnit
 	return result
 }
 
-func CalculateEffectiveOfGvkPolicy(ctx context.Context, tx *gorm.DB,
+func CalculateEffectiveOfGvkPolicy(ctx context.Context, tx orm.DB,
 	effectiveContext *EffectiveContext,
 	appliedPolicyId string,
 ) (*dbmodel.EffectivePolicy, *api.Error) {
@@ -121,7 +121,7 @@ func CalculateEffectiveOfGvkPolicy(ctx context.Context, tx *gorm.DB,
 // calculateEffectivePolicy receives list of hierarchy nodes (proj -> dept -> tenant, for example) and
 // calculates the effective policy of the node in "idxToCalculate". the function is recursive, because it is possible
 // that the parent node, from which we inherit our effective policy, needs also to re-calculate its effective policy
-func (ht *HierarchyTree) calculateEffectivePolicy(ctx context.Context, tx *gorm.DB,
+func (ht *HierarchyTree) calculateEffectivePolicy(ctx context.Context, tx orm.DB,
 	appliedPolicyId string, idxToCalculate int,
 	imposedAssets map[string]interface{}, masterImposedAssets map[string]interface{},
 	imposedAssetsRules map[string]interface{}, masterImposedAssetsRules map[string]interface{}) (
@@ -494,7 +494,7 @@ func (ht *HierarchyTree) mergeDefaultsForSection(currentDefaults map[string]inte
 	return err
 }
 
-func (ht *HierarchyTree) MergeGvkRules(effectiveRules dao_utils.JsonBMap, givenRules dao_utils.JsonBMap,
+func (ht *HierarchyTree) MergeGvkRules(effectiveRules dbmodels.JsonBMap, givenRules dbmodels.JsonBMap,
 	currentSourceOfRule map[string]interface{},
 ) (map[string]interface{}, error) {
 	//

@@ -17,9 +17,9 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/tree"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/auth"
 	events "github.com/run-ai/runai/runai-application-packages/async-events"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
 	"github.com/run-ai/runai/runai-common-packages/logging"
 	"github.com/run-ai/runai/runai-common-packages/runaictx"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 )
 
 const noNeedClusterApproval = false
@@ -72,7 +72,7 @@ func HandleDeleteRequest(ctx context.Context, scopeType api.ScopeType, scopeId s
 	// After soft deleting all tenant's policies, need to evacuate them from the db.
 	// in normal flow they evacuate when syncing with the cluster, however in case of cluster deletion, the cluster is
 	// already disconnected, better to evacuate them now.
-	err := dao.DeleteObsoletePoliciesByScope(ctx, dao_utils.DB().WithContext(ctx), scopeType, scopeId)
+	err := dao.DeleteObsoletePoliciesByScope(ctx, runaidb.DB().WithContext(ctx), scopeType, scopeId)
 	if err != nil {
 		return fmt.Errorf("failed to delete policies for %s %s: %s", scopeType, scopeId, err.Message)
 	}
@@ -98,7 +98,7 @@ func HandleTenantDeleteRequest(ctx context.Context, req *events.TenantDelete) er
 	}
 
 	tenantId := auth.TenantIdOf(ctx)
-	db := dao_utils.DB().WithContext(ctx)
+	db := runaidb.DB().WithContext(ctx)
 
 	if apiErr := dao.DeleteMappingsOfTenant(ctx, db, tenantId); apiErr != nil {
 		return fmt.Errorf("failed to delete mappings for tenant %s: %s", req.TenantId, apiErr.Message)
@@ -117,7 +117,7 @@ func HandleTenantDeleteRequest(ctx context.Context, req *events.TenantDelete) er
 // cached will recompute it on the next read.
 func dropTenantCaches(ctx context.Context) error {
 	tenantId := auth.TenantIdOf(ctx)
-	db := dao_utils.DB().WithContext(ctx)
+	db := runaidb.DB().WithContext(ctx)
 	if apiErr := dao.DeleteEntityCachesOfTenant(ctx, db, tenantId); apiErr != nil {
 		return fmt.Errorf("failed to delete entity caches for tenant %d: %s", tenantId, apiErr.Message)
 	}

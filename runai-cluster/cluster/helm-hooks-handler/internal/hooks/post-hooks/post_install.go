@@ -117,7 +117,7 @@ func (p *PostInstallHook) Call(ctx context.Context, resources *clients.Clients) 
 		for attempt := 1; ; attempt++ {
 			logger.Info("attempting to create runaiconfig", "attempt", attempt)
 			err = commitRunaiconfigToCluster(ctx, resources.LocalClusterClient, runaiConfig, p.params,
-				installationConfiguration, false, "", controllerTransitionFreshInstall)
+				installationConfiguration, false, "")
 			if err == nil {
 				break
 			}

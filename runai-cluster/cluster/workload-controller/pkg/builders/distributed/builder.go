@@ -32,7 +32,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-// this struct is facade for old interface  cluster/workload-controller/pkg/builders/factory/interfaces.go
+// this struct is facade for the legacy workload builder interface.
 type interfaceBuilder func(fromObject interface{}, toResources interface{},
 	k8sClient client.Client, options oldFactory.BuilderOptions,
 	existingPodsSpecs map[workloadCommon.ReplicaType]*v1.PodSpec,

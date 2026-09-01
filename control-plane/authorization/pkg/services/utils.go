@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"sort"
 	"strconv"
 	"strings"
@@ -600,6 +601,7 @@ func parseAuthData(ctx context.Context) (uint, string, []string, *api.Error) {
 	if groups, ok = ctx.Value(runaictx.CfGroups).([]string); !ok {
 		groups = []string{}
 	}
+	groups = decodeGroups(groups)
 
 	tenantId, err := parseTenantId(ctx)
 	if err != nil {
@@ -607,6 +609,18 @@ func parseAuthData(ctx context.Context) (uint, string, []string, *api.Error) {
 	}
 
 	return tenantId, subjectId, groups, nil
+}
+
+func decodeGroups(groups []string) []string {
+	decoded := make([]string, len(groups))
+	for i, g := range groups {
+		if unescaped, err := url.QueryUnescape(g); err == nil {
+			decoded[i] = unescaped
+		} else {
+			decoded[i] = g
+		}
+	}
+	return decoded
 }
 
 func parseTenantId(ctx context.Context) (uint, *api.Error) {

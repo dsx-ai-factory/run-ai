@@ -27,8 +27,8 @@ import (
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/clients/authorization"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/clients/orgunit"
 	"github.com/run-ai/runai/runai-application-packages/convutils"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
 	"github.com/run-ai/runai/runai-common-packages/runaictx"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 )
 
 const urlFieldGroups = "/api/v1/policies/field-groups"
@@ -660,7 +660,7 @@ var _ = Describe("Service mapping field groups", Ordered, func() {
 		})
 
 		It("initializes nil fields and itemSelectors maps on patch via jsonb null then applies description", func() {
-			db := dao_utils.DB()
+			db := runaidb.DB()
 
 			ms := MappingApiService{}
 			name := "fgNilMapsPatch"
@@ -675,10 +675,10 @@ var _ = Describe("Service mapping field groups", Ordered, func() {
 
 			dbRow, derr := dao.GetFieldGroupByNameAndScope(tenantCtxA, db, name, api.MAPPINGSCOPE_TENANT)
 			Expect(derr).To(BeNil())
-			Expect(dao_utils.DB().Exec(
+			Expect(runaidb.DB().Exec(
 				"UPDATE mapping_field_groups SET fields = 'null'::jsonb, item_selectors = 'null'::jsonb WHERE id = ?",
 				dbRow.ID,
-			).Error).To(BeNil())
+			)).Error().To(BeNil())
 
 			cv := NewMappingConsistencyValidator(tenantCtxA, api.MAPPINGSCOPE_TENANT)
 
@@ -752,7 +752,7 @@ var _ = Describe("Service mapping field groups", Ordered, func() {
 		})
 
 		It("patches only the system row when both scopes exist (tenant row unchanged)", func() {
-			db := dao_utils.DB()
+			db := runaidb.DB()
 
 			ms := MappingApiService{}
 			name := "fgPatchSystemIgnoresTenant"
@@ -1012,7 +1012,7 @@ var _ = Describe("Service mapping field groups", Ordered, func() {
 		})
 
 		It("initializes nil fields map on deleteFieldGroupFields after jsonb null", func() {
-			db := dao_utils.DB()
+			db := runaidb.DB()
 
 			ms := MappingApiService{}
 			name := "fgDelFieldsNilMap"
@@ -1027,7 +1027,7 @@ var _ = Describe("Service mapping field groups", Ordered, func() {
 
 			dbRow, derr := dao.GetFieldGroupByNameAndScope(tenantCtxA, db, name, api.MAPPINGSCOPE_TENANT)
 			Expect(derr).To(BeNil())
-			Expect(dao_utils.DB().Exec("UPDATE mapping_field_groups SET fields = 'null'::jsonb WHERE id = ?", dbRow.ID).Error).To(BeNil())
+			Expect(runaidb.DB().Exec("UPDATE mapping_field_groups SET fields = 'null'::jsonb WHERE id = ?", dbRow.ID)).Error().To(BeNil())
 
 			_, apiErr := ms.deleteFieldGroupFields(tenantCtxA, name, api.MAPPINGSCOPE_TENANT, &api.FieldGroupDeleteFieldsRequest{
 				Fields: []string{"missingField"},
@@ -1037,7 +1037,7 @@ var _ = Describe("Service mapping field groups", Ordered, func() {
 		})
 
 		It("initializes nil itemSelectors map on deleteFieldGroupItemSelectors after jsonb null", func() {
-			db := dao_utils.DB()
+			db := runaidb.DB()
 
 			ms := MappingApiService{}
 			name := "fgDelSelsNilMap"
@@ -1052,7 +1052,7 @@ var _ = Describe("Service mapping field groups", Ordered, func() {
 
 			dbRow, derr := dao.GetFieldGroupByNameAndScope(tenantCtxA, db, name, api.MAPPINGSCOPE_TENANT)
 			Expect(derr).To(BeNil())
-			Expect(dao_utils.DB().Exec("UPDATE mapping_field_groups SET item_selectors = 'null'::jsonb WHERE id = ?", dbRow.ID).Error).To(BeNil())
+			Expect(runaidb.DB().Exec("UPDATE mapping_field_groups SET item_selectors = 'null'::jsonb WHERE id = ?", dbRow.ID)).Error().To(BeNil())
 
 			_, apiErr := ms.deleteFieldGroupItemSelectors(tenantCtxA, name, api.MAPPINGSCOPE_TENANT, &api.FieldGroupDeleteItemSelectorsRequest{
 				ItemSelectors: []string{"missingSel"},

@@ -34,7 +34,8 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/generated/pkg/api"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/tree"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/clients/authorization"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 )
 
 var (
@@ -283,9 +284,9 @@ var _ = Describe("DeleteTest", func() {
 				TenantId:   tenantId,
 				EntityType: dbmodel.EntityTypeBreakdown,
 				EntityId:   entityId,
-				CachedInfo: dao_utils.JsonBMap{},
+				CachedInfo: dbmodels.JsonBMap{},
 			}
-			Expect(dao_utils.DB().Create(&cache).Error).To(BeNil())
+			Expect(runaidb.DB().Create(&cache)).Error().To(BeNil())
 
 			dep := dbmodel.EntitiesDependency{
 				CacheId:       cacheId,
@@ -293,7 +294,7 @@ var _ = Describe("DeleteTest", func() {
 				ComponentType: dbmodel.ComponentTypeMapping,
 				ComponentId:   uuid.New().String(),
 			}
-			Expect(dao_utils.DB().Create(&dep).Error).To(BeNil())
+			Expect(runaidb.DB().Create(&dep)).Error().To(BeNil())
 
 			return cacheId
 		}
@@ -302,7 +303,7 @@ var _ = Describe("DeleteTest", func() {
 		// mapping_field_groups, one mapping_formatters, and one
 		// mapping_locking row for the given tenant at tenant scope.
 		seedTenantMappings := func(tenantId int32, suffix string) {
-			Expect(dao_utils.DB().Create(&dbmodel.MappingSelectors{
+			Expect(runaidb.DB().Create(&dbmodel.MappingSelectors{
 				ID:            uuid.New(),
 				GvkGroup:      "test." + suffix,
 				GvkKind:       "Kind" + suffix,
@@ -314,9 +315,9 @@ var _ = Describe("DeleteTest", func() {
 				CreatedAt:     time.Now(),
 				UpdatedBy:     "test",
 				UpdatedAt:     time.Now(),
-			}).Error).To(BeNil())
+			})).Error().To(BeNil())
 
-			Expect(dao_utils.DB().Create(&dbmodel.MappingFieldGroups{
+			Expect(runaidb.DB().Create(&dbmodel.MappingFieldGroups{
 				ID:            uuid.New(),
 				Name:          "fg-" + suffix,
 				ScopeType:     api.MAPPINGSCOPE_TENANT,
@@ -327,9 +328,9 @@ var _ = Describe("DeleteTest", func() {
 				CreatedAt:     time.Now(),
 				UpdatedBy:     "test",
 				UpdatedAt:     time.Now(),
-			}).Error).To(BeNil())
+			})).Error().To(BeNil())
 
-			Expect(dao_utils.DB().Create(&dbmodel.MappingFormatters{
+			Expect(runaidb.DB().Create(&dbmodel.MappingFormatters{
 				ID:        uuid.New(),
 				Name:      "fmt-" + suffix,
 				ScopeType: api.MAPPINGSCOPE_TENANT,
@@ -339,19 +340,19 @@ var _ = Describe("DeleteTest", func() {
 				CreatedAt: time.Now(),
 				UpdatedBy: "test",
 				UpdatedAt: time.Now(),
-			}).Error).To(BeNil())
+			})).Error().To(BeNil())
 
-			Expect(dao_utils.DB().Create(&dbmodel.MappingLocking{
+			Expect(runaidb.DB().Create(&dbmodel.MappingLocking{
 				TenantId: tenantId,
 				LockedAt: time.Now(),
-			}).Error).To(BeNil())
+			})).Error().To(BeNil())
 		}
 
 		// seedSystemMappings inserts one row per mapping table at system
 		// scope (tenant_id=0) so the tests can verify they survive a
 		// tenant-deletion cleanup.
 		seedSystemMappings := func() {
-			Expect(dao_utils.DB().Create(&dbmodel.MappingSelectors{
+			Expect(runaidb.DB().Create(&dbmodel.MappingSelectors{
 				ID:            uuid.New(),
 				GvkGroup:      "system.example.com",
 				GvkKind:       "SystemKind",
@@ -363,9 +364,9 @@ var _ = Describe("DeleteTest", func() {
 				CreatedAt:     time.Now(),
 				UpdatedBy:     "system",
 				UpdatedAt:     time.Now(),
-			}).Error).To(BeNil())
+			})).Error().To(BeNil())
 
-			Expect(dao_utils.DB().Create(&dbmodel.MappingFieldGroups{
+			Expect(runaidb.DB().Create(&dbmodel.MappingFieldGroups{
 				ID:            uuid.New(),
 				Name:          "system-fg",
 				ScopeType:     api.MAPPINGSCOPE_SYSTEM,
@@ -376,9 +377,9 @@ var _ = Describe("DeleteTest", func() {
 				CreatedAt:     time.Now(),
 				UpdatedBy:     "system",
 				UpdatedAt:     time.Now(),
-			}).Error).To(BeNil())
+			})).Error().To(BeNil())
 
-			Expect(dao_utils.DB().Create(&dbmodel.MappingFormatters{
+			Expect(runaidb.DB().Create(&dbmodel.MappingFormatters{
 				ID:        uuid.New(),
 				Name:      "runai-system-fmt", // system formatter names must start with "runai-"
 				ScopeType: api.MAPPINGSCOPE_SYSTEM,
@@ -388,45 +389,45 @@ var _ = Describe("DeleteTest", func() {
 				CreatedAt: time.Now(),
 				UpdatedBy: "system",
 				UpdatedAt: time.Now(),
-			}).Error).To(BeNil())
+			})).Error().To(BeNil())
 		}
 
 		// countCachesForTenant returns the number of entities_cache rows for the tenant.
 		countCachesForTenant := func(tenantId int32) int64 {
 			var count int64
-			Expect(dao_utils.DB().Model(&dbmodel.EntitiesCache{}).
+			Expect(runaidb.DB().Model(&dbmodel.EntitiesCache{}).
 				Where(&dbmodel.EntitiesCache{TenantId: tenantId}).
-				Count(&count).Error).To(BeNil())
+				Count(&count)).To(BeNil())
 			return count
 		}
 
 		// countDepsForTenant returns the number of entities_dependency rows for the tenant.
 		countDepsForTenant := func(tenantId int32) int64 {
 			var count int64
-			Expect(dao_utils.DB().Model(&dbmodel.EntitiesDependency{}).
+			Expect(runaidb.DB().Model(&dbmodel.EntitiesDependency{}).
 				Where(&dbmodel.EntitiesDependency{TenantId: tenantId}).
-				Count(&count).Error).To(BeNil())
+				Count(&count)).To(BeNil())
 			return count
 		}
 
 		// countMappingsForTenant returns total tenant-scoped rows across all mapping tables.
 		countMappingsForTenant := func(tenantId int32) int64 {
 			var total, n int64
-			Expect(dao_utils.DB().Model(&dbmodel.MappingSelectors{}).
+			Expect(runaidb.DB().Model(&dbmodel.MappingSelectors{}).
 				Where(&dbmodel.MappingSelectors{TenantId: tenantId, ScopeType: api.MAPPINGSCOPE_TENANT}).
-				Count(&n).Error).To(BeNil())
+				Count(&n)).To(BeNil())
 			total += n
-			Expect(dao_utils.DB().Model(&dbmodel.MappingFieldGroups{}).
+			Expect(runaidb.DB().Model(&dbmodel.MappingFieldGroups{}).
 				Where(&dbmodel.MappingFieldGroups{TenantId: tenantId, ScopeType: api.MAPPINGSCOPE_TENANT}).
-				Count(&n).Error).To(BeNil())
+				Count(&n)).To(BeNil())
 			total += n
-			Expect(dao_utils.DB().Model(&dbmodel.MappingFormatters{}).
+			Expect(runaidb.DB().Model(&dbmodel.MappingFormatters{}).
 				Where(&dbmodel.MappingFormatters{TenantId: tenantId, ScopeType: api.MAPPINGSCOPE_TENANT}).
-				Count(&n).Error).To(BeNil())
+				Count(&n)).To(BeNil())
 			total += n
-			Expect(dao_utils.DB().Model(&dbmodel.MappingLocking{}).
+			Expect(runaidb.DB().Model(&dbmodel.MappingLocking{}).
 				Where(&dbmodel.MappingLocking{TenantId: tenantId}).
-				Count(&n).Error).To(BeNil())
+				Count(&n)).To(BeNil())
 			total += n
 			return total
 		}
@@ -434,17 +435,17 @@ var _ = Describe("DeleteTest", func() {
 		// countSystemMappings returns total system-scoped mapping rows.
 		countSystemMappings := func() int64 {
 			var total, n int64
-			Expect(dao_utils.DB().Model(&dbmodel.MappingSelectors{}).
+			Expect(runaidb.DB().Model(&dbmodel.MappingSelectors{}).
 				Where(&dbmodel.MappingSelectors{ScopeType: api.MAPPINGSCOPE_SYSTEM}).
-				Count(&n).Error).To(BeNil())
+				Count(&n)).To(BeNil())
 			total += n
-			Expect(dao_utils.DB().Model(&dbmodel.MappingFieldGroups{}).
+			Expect(runaidb.DB().Model(&dbmodel.MappingFieldGroups{}).
 				Where(&dbmodel.MappingFieldGroups{ScopeType: api.MAPPINGSCOPE_SYSTEM}).
-				Count(&n).Error).To(BeNil())
+				Count(&n)).To(BeNil())
 			total += n
-			Expect(dao_utils.DB().Model(&dbmodel.MappingFormatters{}).
+			Expect(runaidb.DB().Model(&dbmodel.MappingFormatters{}).
 				Where(&dbmodel.MappingFormatters{ScopeType: api.MAPPINGSCOPE_SYSTEM}).
-				Count(&n).Error).To(BeNil())
+				Count(&n)).To(BeNil())
 			total += n
 			return total
 		}
@@ -1936,13 +1937,11 @@ func listPolicies(ctx context.Context) ([]dbmodel.Policy, error) {
 	records := make([]dbmodel.Policy, 0)
 
 	tenantID, _ := ctx.Value(runaictx.CfTenantId).(string)
-	result := dao_utils.DB().WithContext(ctx).
+	if _, err := runaidb.DB().WithContext(ctx).
 		Table(dbtables.PoliciesTable).
 		Where(fmt.Sprintf("%s = ?", dbtables.PoliciesColumnTenantId), tenantID).
-		Scan(&records)
-
-	if result.Error != nil {
-		return nil, result.Error
+		Scan(&records); err != nil {
+		return nil, err
 	}
 	return records, nil
 }

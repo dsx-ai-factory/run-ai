@@ -10,38 +10,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/utils/ptr"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	runaiv1 "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1"
-	inferencecontroller "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/inference-workload-controller"
-	jobcontroller "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/job-controller"
-	workloadcontroller "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/workload-controller"
 )
 
 var _ = Describe("Legacy workload cleanup safety", func() {
-	DescribeTable("classifies the atomic controller state",
-		func(workload, inference, job *bool, expected controllerState, errorSubstring string) {
-			config := &runaiv1.RunaiConfig{Spec: runaiv1.RunaiConfigSpec{
-				WorkloadController:          &workloadcontroller.WorkloadController{Enabled: workload},
-				InferenceWorkloadController: &inferencecontroller.InferenceWorkloadController{Enabled: inference},
-				JobController:               &jobcontroller.JobController{Enabled: job},
-			}}
-			state, err := classifyControllerState(config)
-			if errorSubstring != "" {
-				Expect(err).To(MatchError(ContainSubstring(errorSubstring)))
-				return
-			}
-			Expect(err).NotTo(HaveOccurred())
-			Expect(state).To(Equal(expected))
-		},
-		Entry("all enabled", ptr.To(true), ptr.To(true), ptr.To(true), controllersEnabled, ""),
-		Entry("all disabled", ptr.To(false), ptr.To(false), ptr.To(false), controllersDisabled, ""),
-		Entry("mixed", ptr.To(false), ptr.To(true), ptr.To(true), controllerState(0), "not atomic"),
-		Entry("missing value", nil, ptr.To(true), ptr.To(true), controllerState(0), "is missing"),
-	)
-
 	It("removes only the exact allowlisted finalizer", func() {
 		remaining, changed := withoutFinalizer(
 			[]string{"foreign.example/finalizer", legacyWorkloadFinalizer, "run.ai.workload/finalizer-extra"},

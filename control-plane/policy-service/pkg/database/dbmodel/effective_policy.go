@@ -12,14 +12,14 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbtables"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
 )
 
 type EffectivePolicy struct {
 	PolicyId      uuid.UUID `gorm:"primaryKey"`
 	TenantId      int32
-	DefaultsV2    dao_utils.JsonBMap
-	RulesV2       dao_utils.JsonBMap
+	DefaultsV2    dbmodels.JsonBMap
+	RulesV2       dbmodels.JsonBMap
 	ImposedAssets *api.DistributedImposedAssets `gorm:"serializer:json; type:jsonb;"`
 	UpdatedAt     time.Time
 	UpdateCount   int64

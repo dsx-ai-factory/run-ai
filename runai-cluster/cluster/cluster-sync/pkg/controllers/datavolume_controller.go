@@ -29,7 +29,10 @@ func AddDatavolumeHandlerToCache(backendClient *backendclient.BackendClient, cac
 				constants.AddOperation, constants.DataVolumeResourceName, obj)
 		},
 		DeleteFunc: func(object any) {
-			obj := object.(*v1alpha1.DataVolume)
+			obj, ok := deletedObject[*v1alpha1.DataVolume](object)
+			if !ok {
+				return
+			}
 			rateLimitedController.MarkItemDeleted(objectKeyFromObject(obj))
 			genericControllerErrorHandler(datavolumeHandler.HandleDelete(obj),
 				constants.DeleteOperation, constants.DataVolumeResourceName, obj)

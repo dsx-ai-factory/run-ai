@@ -53,8 +53,12 @@ func AddNodeHandlerToCache(backendClient *backendclient.BackendClient, cachedCli
 			}
 		},
 		DeleteFunc: func(obj any) {
-			rateLimitedController.MarkItemDeleted(objectKeyFromObject(obj.(*corev1.Node)))
-			genericControllerErrorHandler(nodeHandler.HandleDelete(obj.(*corev1.Node)), constants.DeleteOperation, constants.NodeResourceName, obj.(*corev1.Node))
+			node, ok := deletedObject[*corev1.Node](obj)
+			if !ok {
+				return
+			}
+			rateLimitedController.MarkItemDeleted(objectKeyFromObject(node))
+			genericControllerErrorHandler(nodeHandler.HandleDelete(node), constants.DeleteOperation, constants.NodeResourceName, node)
 		},
 	})
 

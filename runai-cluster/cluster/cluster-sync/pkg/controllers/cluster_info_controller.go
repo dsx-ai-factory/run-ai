@@ -40,7 +40,10 @@ func AddClusterInfoHandlerToCache(backendClient *backendclient.BackendClient, ca
 				rateLimitedController.AddRateLimited(objectKeyFromObject(obj.(*corev1.ConfigMap)))
 			},
 			DeleteFunc: func(obj any) {
-				object := obj.(*corev1.ConfigMap)
+				object, ok := deletedObject[*corev1.ConfigMap](obj)
+				if !ok {
+					return
+				}
 				rateLimitedController.MarkItemDeleted(objectKeyFromObject(object))
 			},
 			UpdateFunc: func(oldObj any, newObj any) {

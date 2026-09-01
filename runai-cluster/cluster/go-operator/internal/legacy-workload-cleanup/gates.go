@@ -8,24 +8,9 @@ package legacycleanup
 import (
 	"fmt"
 
-	semver "github.com/Masterminds/semver/v3"
 	runaiv1 "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-// SourceRequiresCleanup reports whether the running 3.0+ cleanup implementation
-// received upgrade provenance from a release that still used legacy controllers.
-func SourceRequiresCleanup(sourceVersion string) (bool, error) {
-	if sourceVersion == "" {
-		return false, fmt.Errorf("source version is missing")
-	}
-
-	source, err := semver.NewVersion(sourceVersion)
-	if err != nil {
-		return false, fmt.Errorf("parse source version %q: %w", sourceVersion, err)
-	}
-	return source.Major() > 0 && source.Major() < 3, nil
-}
 
 func validateReadinessMarker(config *runaiv1.RunaiConfig) error {
 	if config == nil {

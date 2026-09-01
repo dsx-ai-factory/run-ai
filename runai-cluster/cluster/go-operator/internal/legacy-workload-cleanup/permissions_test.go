@@ -60,13 +60,16 @@ var _ = Describe("Permission preflight", func() {
 		Expect(management.reviewed).To(ConsistOf(
 			requiredPermission{Verb: "create", Group: "authorization.k8s.io", Resource: "selfsubjectaccessreviews"},
 			requiredPermission{Verb: "get", Group: "run.ai", Resource: "runaiconfigs", Namespace: "runai", Name: "runai"},
-			requiredPermission{Verb: "update", Group: "run.ai", Resource: "runaiconfigs", Namespace: "runai", Name: "runai"},
 		))
-		Expect(workload.reviewed).To(HaveLen(9))
 		Expect(workload.reviewed).To(ContainElements(
 			requiredPermission{Verb: "create", Group: "authorization.k8s.io", Resource: "selfsubjectaccessreviews"},
 			requiredPermission{Verb: "list", Group: "admissionregistration.k8s.io", Resource: "validatingwebhookconfigurations"},
 			requiredPermission{Verb: "list", Group: "admissionregistration.k8s.io", Resource: "mutatingwebhookconfigurations"},
+			requiredPermission{Verb: "delete", Group: "apps", Resource: "deployments", Namespace: "runai", Name: "workload-controller"},
+			requiredPermission{Verb: "list", Resource: "pods", Namespace: "runai"},
+			requiredPermission{Verb: "delete", Resource: "services", Namespace: "runai", Name: "workload-controller"},
+			requiredPermission{Verb: "list", Group: "rbac.authorization.k8s.io", Resource: "rolebindings"},
+			requiredPermission{Verb: "delete", Group: "rbac.authorization.k8s.io", Resource: "rolebindings"},
 		))
 		for _, descriptor := range legacyWorkloadResources {
 			Expect(workload.reviewed).To(ContainElement(requiredPermission{

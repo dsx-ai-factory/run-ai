@@ -29,7 +29,7 @@ func TestJobResourceBuildsCleanupJobFromOperatorDeployment(t *testing.T) {
 	job := object.(*batchv1.Job)
 
 	require.Equal(t, legacycleanup.CleanupJobName, job.Name)
-	require.Equal(t, int64(600), *job.Spec.ActiveDeadlineSeconds)
+	require.Nil(t, job.Spec.ActiveDeadlineSeconds)
 	require.Equal(t, int32(3), *job.Spec.BackoffLimit)
 	require.Equal(t, corev1.RestartPolicyNever, job.Spec.Template.Spec.RestartPolicy)
 	require.Equal(t, legacycleanup.CleanupJobName, job.Spec.Template.Spec.ServiceAccountName)

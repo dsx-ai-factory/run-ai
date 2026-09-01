@@ -155,15 +155,7 @@ var _ = Describe("getWebhooksFromFile", func() {
 	Context("getting admission webhooks for cert manager", func() {
 		It("should be able to read the webhooks data", func() {
 			webhookCertificates := &WebhookCertificates{
-				certificates.NewCertificateDetails(cabundleexample),
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-				nil, /* application controller */
-				nil,
-				nil,
+				AdmissionControllerCertificateDetails: certificates.NewCertificateDetails(cabundleexample),
 			}
 			validators, mutators, err := getWebhooksFromFile("./test_input.yaml", deployVersionExample,
 				webhookCertificates)
@@ -179,15 +171,7 @@ var _ = Describe("getWebhooksFromFile", func() {
 	Context("getting admission webhooks for k8s certificates", func() {
 		It("should be able to read the webhooks data", func() {
 			webhookCertificates := &WebhookCertificates{
-				certificates.NewCertificateDetails(cabundleexample),
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
+				AdmissionControllerCertificateDetails: certificates.NewCertificateDetails(cabundleexample),
 			}
 			validators, mutators, err := getWebhooksFromFile("./test_input.yaml", deployVersionExample,
 				webhookCertificates)
@@ -202,94 +186,13 @@ var _ = Describe("getWebhooksFromFile", func() {
 			Expect(len(mutators[0].Annotations)).To(Equal(0))
 		})
 	})
-	Context("webhooks for workload controller", func() {
-		It("skips stale legacy controller webhooks when their serving certificate is disabled", func() {
-			webhookCertificates := &WebhookCertificates{
-				AdmissionControllerCertificateDetails: certificates.NewCertificateDetails(cabundleexample),
-			}
-
-			validators, mutators, err := getWebhooksFromFile(
-				"./disabled_legacy_webhooks_input.yaml", deployVersionExample, webhookCertificates,
-			)
-
-			Expect(err).NotTo(HaveOccurred())
-			Expect(validators).To(BeEmpty())
-			Expect(mutators).To(BeEmpty())
-		})
-
-		It("should use other certificate details for inference workload controller", func() {
-			webhookCertificates := &WebhookCertificates{
-				certificates.NewCertificateDetails(cabundleexample),
-				certificates.NewCertificateDetails(cabundleexample3),
-				certificates.NewCertificateDetails(cabundleexample2),
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-			}
-			validators, mutators, err := getWebhooksFromFile("./test_input_with_workload.yaml", deployVersionExample,
-				webhookCertificates)
-			Expect(err).To(BeNil())
-			Expect(len(validators)).To(Equal(3)) // 2 for workload, 1 for policy
-			Expect(len(mutators)).To(Equal(1))   // 1 for workload
-			for _, validator := range validators {
-				Expect(validator.Labels[deployVersionLabelName]).To(Equal(deployVersionExample))
-				if strings.Contains(validator.Name, "inference-workload") || strings.Contains(validator.Name, "inference-policy") {
-					Expect(validator.Webhooks[0].ClientConfig.CABundle).To(Equal(cabundleexample3))
-				} else if strings.Contains(validator.Name, "workload") || strings.Contains(validator.Name, "policy") {
-					Expect(validator.Webhooks[0].ClientConfig.CABundle).To(Equal(cabundleexample2))
-				} else {
-					Expect(validator.Webhooks[0].ClientConfig.CABundle).To(Equal(cabundleexample))
-				}
-			}
-
-			Expect(mutators[0].Labels[deployVersionLabelName]).To(Equal(deployVersionExample))
-			Expect(mutators[0].Webhooks[0].ClientConfig.CABundle).To(Equal(cabundleexample))
-		})
-		It("should use other certificate details for workload controller", func() {
-			webhookCertificates := &WebhookCertificates{
-				certificates.NewCertificateDetails(cabundleexample),
-				certificates.NewCertificateDetails(cabundleexample3),
-				certificates.NewCertificateDetails(cabundleexample2),
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-			}
-			validators, mutators, err := getWebhooksFromFile("./test_input_with_workload.yaml", deployVersionExample,
-				webhookCertificates)
-			Expect(err).To(BeNil())
-			Expect(len(validators)).To(Equal(3)) // 2 for workload, 1 for policy
-			Expect(len(mutators)).To(Equal(1))   // 1 for workload
-			for _, validator := range validators {
-				Expect(validator.Labels[deployVersionLabelName]).To(Equal(deployVersionExample))
-				if strings.Contains(validator.Name, "workload") || strings.Contains(validator.Name, "policy") {
-					Expect(validator.Webhooks[0].ClientConfig.CABundle).To(Equal(cabundleexample2))
-				} else {
-					Expect(validator.Webhooks[0].ClientConfig.CABundle).To(Equal(cabundleexample))
-				}
-			}
-
-			Expect(mutators[0].Labels[deployVersionLabelName]).To(Equal(deployVersionExample))
-			Expect(mutators[0].Webhooks[0].ClientConfig.CABundle).To(Equal(cabundleexample))
-		})
-	})
 	Context("webhooks for pod group assigner and accessrule controller", func() {
 		It("should use other certificate details for pod group assigner and accessrule controller", func() {
 			webhookCertificates := &WebhookCertificates{
-				certificates.NewCertificateDetails(cabundleexample),
-				certificates.NewCertificateDetails(cabundleexample2),
-				certificates.NewCertificateDetails(cabundleexample2),
-				certificates.NewCertificateDetails(cabundleexample3),
-				certificates.NewCertificateDetails(cabundleexample4),
-				certificates.NewCertificateDetails(cabundleexample4),
-				nil,
-				nil,
-				nil,
+				AdmissionControllerCertificateDetails:   certificates.NewCertificateDetails(cabundleexample),
+				PodGroupAssignerCertificateDetails:      certificates.NewCertificateDetails(cabundleexample3),
+				AccessruleControllerCertificateDetails:  certificates.NewCertificateDetails(cabundleexample4),
+				AnyworkloadControllerCertificateDetails: certificates.NewCertificateDetails(cabundleexample4),
 			}
 			validators, mutators, err := getWebhooksFromFile(
 				"./test_input_with_pod_group_assigner_accessrule_controller.yaml", deployVersionExample,
@@ -299,9 +202,7 @@ var _ = Describe("getWebhooksFromFile", func() {
 			Expect(len(mutators)).To(Equal(2))
 			for _, validator := range validators {
 				Expect(validator.Labels[deployVersionLabelName]).To(Equal(deployVersionExample))
-				if strings.Contains(validator.Name, "workload") || strings.Contains(validator.Name, "policy") {
-					Expect(validator.Webhooks[0].ClientConfig.CABundle).To(Equal(cabundleexample2))
-				} else if validator.Name == "runai-accessrule-validation" {
+				if validator.Name == "runai-accessrule-validation" {
 					Expect(validator.Webhooks[0].ClientConfig.CABundle).To(Equal(cabundleexample4))
 				} else {
 					Expect(validator.Webhooks[0].ClientConfig.CABundle).To(Equal(cabundleexample))
@@ -323,15 +224,7 @@ var _ = Describe("getWebhooksFromFile", func() {
 
 func testApplyWebhooks(kubeClient *fake.Clientset, actions int) {
 	webhookCertificates := &WebhookCertificates{
-		certificates.NewCertificateDetails(cabundleexample),
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
+		AdmissionControllerCertificateDetails: certificates.NewCertificateDetails(cabundleexample),
 	}
 	err := ApplyWebhooks(context.TODO(), kubeClient, "./test_input.yaml", deployVersionExample,
 		webhookCertificates)
@@ -357,15 +250,7 @@ var _ = Describe("ApplyWebhooks", func() {
 	Context("First run / no previous webhooks", func() {
 		It("should be able to create new webhooks", func() {
 			webhookCertificates := &WebhookCertificates{
-				certificates.NewCertificateDetails(cabundleexample),
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
+				AdmissionControllerCertificateDetails: certificates.NewCertificateDetails(cabundleexample),
 			}
 			err := ApplyWebhooks(context.TODO(), kubeClient, "./test_input.yaml", deployVersionExample,
 				webhookCertificates)
@@ -384,15 +269,7 @@ var _ = Describe("ApplyWebhooks", func() {
 	Context("With previous webhooks", func() {
 		BeforeEach(func() {
 			webhookCertificates := &WebhookCertificates{
-				certificates.NewCertificateDetails(cabundleexample),
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
-				nil,
+				AdmissionControllerCertificateDetails: certificates.NewCertificateDetails(cabundleexample),
 			}
 			validators, mutators, err := getWebhooksFromFile("./test_input.yaml", "otherDeployVersion",
 				webhookCertificates)
@@ -435,12 +312,6 @@ type ChoiceTestDetails struct {
 }
 
 func TestCertificateChoice(t *testing.T) {
-	workloadCert := certificates.CertificateDetails{
-		CaBundle: []byte("workloadCaBundle"),
-	}
-	inferenceWorkloadCert := certificates.CertificateDetails{
-		CaBundle: []byte("workloadCaBundle"),
-	}
 	admissionCert := certificates.CertificateDetails{
 		CaBundle: []byte("admissionCaBundle"),
 	}
@@ -468,30 +339,6 @@ func TestCertificateChoice(t *testing.T) {
 		{
 			webhookName:    "runai-inference-workload-ownership-mutation",
 			expectedChoice: anyworkloadControllerCert.CaBundle,
-		},
-		{
-			webhookName:    "run-ai-v1-interactive-policy-validation",
-			expectedChoice: workloadCert.CaBundle,
-		},
-		{
-			webhookName:    "run-ai-v1-training-policy-validation",
-			expectedChoice: workloadCert.CaBundle,
-		},
-		{
-			webhookName:    "run-ai-v1-interactive-workload-validation",
-			expectedChoice: workloadCert.CaBundle,
-		},
-		{
-			webhookName:    "run-ai-v1-training-workload-validation",
-			expectedChoice: workloadCert.CaBundle,
-		},
-		{
-			webhookName:    "run-ai-v1-inference-policy-validation",
-			expectedChoice: inferenceWorkloadCert.CaBundle,
-		},
-		{
-			webhookName:    "run-ai-v1-inference-workload-validation",
-			expectedChoice: inferenceWorkloadCert.CaBundle,
 		},
 		{
 			webhookName:    "something-totally-different-validation",
@@ -525,15 +372,13 @@ func TestCertificateChoice(t *testing.T) {
 
 	for _, curTest := range tests {
 		webhookCertificates := &WebhookCertificates{
-			AdmissionControllerCertificateDetails:         &admissionCert,
-			InferenceWorkloadControllerCertificateDetails: &inferenceWorkloadCert,
-			WorkloadControllerCertificateDetails:          &workloadCert,
-			PodGroupAssignerCertificateDetails:            &podGroupAssignerCert,
-			AccessruleControllerCertificateDetails:        &accessruleControllerCert,
-			AnyworkloadControllerCertificateDetails:       &anyworkloadControllerCert,
-			ApplicationControllerCertificateDetails:       &applicationControllerCert,
-			AdviceRestartControllerCertificateDetails:     nil,
-			AgentCertificateDetails:                       &agentCert,
+			AdmissionControllerCertificateDetails:     &admissionCert,
+			PodGroupAssignerCertificateDetails:        &podGroupAssignerCert,
+			AccessruleControllerCertificateDetails:    &accessruleControllerCert,
+			AnyworkloadControllerCertificateDetails:   &anyworkloadControllerCert,
+			ApplicationControllerCertificateDetails:   &applicationControllerCert,
+			AdviceRestartControllerCertificateDetails: nil,
+			AgentCertificateDetails:                   &agentCert,
 		}
 		actualChoice := chooseCertificateDetails(curTest.webhookName, webhookCertificates)
 		assert.Equal(t, string(actualChoice.CaBundle), string(curTest.expectedChoice), curTest)

@@ -40,7 +40,10 @@ func AddStorageClassHandlerToCache(backendClient *backendclient.BackendClient, c
 					constants.AddOperation, "storageClass", object)
 			},
 			DeleteFunc: func(obj any) {
-				object := obj.(*storagev1.StorageClass)
+				object, ok := deletedObject[*storagev1.StorageClass](obj)
+				if !ok {
+					return
+				}
 				rateLimitedController.MarkItemDeleted(objectKeyFromObject(object))
 				genericControllerErrorHandler(storageClassHandler.HandleStorageClassDelete(object),
 					constants.DeleteOperation, "storageClass", object)

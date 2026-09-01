@@ -167,9 +167,8 @@ func TestResourcesForOperands_VerifyRunaiConfigDoesNotChange(t *testing.T) {
 	assert.Equal(t, runaiConfig, *runaiConfigClone)
 }
 
-func TestManagedOperands_WorkloadsAuthSurvivesWorkloadControllerDisable(t *testing.T) {
+func TestManagedOperands_WorkloadsAuthSurvivesReconciliation(t *testing.T) {
 	runaiConfig := utils.GetDefaultRunaiConfig()
-	runaiConfig.Spec.WorkloadController.Enabled = new(bool)
 
 	workloadsAuth := &v1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -204,12 +203,9 @@ func TestManagedOperands_WorkloadsAuthSurvivesWorkloadControllerDisable(t *testi
 	hybridClient := kc.New(k8sClient, k8sClient, nil)
 	managed := NewManagedOperands(context.Background(), hybridClient, hybridClient, runaiConfig)
 
-	workloadController := findOperandByName(managed.GetRemoteClusterOperands(), "workload-controller")
 	anyworkloadController := findOperandByName(managed.GetRemoteClusterOperands(), "anyworkload-controller")
-	assert.NotNil(t, workloadController)
 	assert.NotNil(t, anyworkloadController)
 
-	assert.Nil(t, findResourceByName(workloadController.Resources(), constants.WorkloadAuthSecretName))
 	createdOrUpdated := findResourceByName(anyworkloadController.Resources(), constants.WorkloadAuthSecretName)
 	if !assert.NotNil(t, createdOrUpdated) {
 		return

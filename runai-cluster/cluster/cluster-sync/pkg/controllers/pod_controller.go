@@ -59,7 +59,10 @@ func AddPodHandlerToCache(backendClient *backendclient.BackendClient, cachedClie
 				genericControllerErrorHandler(podHandler.HandlePodAdd(obj.(*corev1.Pod)), constants.AddOperation, constants.PodResourceName, obj.(*corev1.Pod))
 			},
 			DeleteFunc: func(obj any) {
-				pod := obj.(*corev1.Pod)
+				pod, ok := deletedObject[*corev1.Pod](obj)
+				if !ok {
+					return
+				}
 				if filterPodForNodeUpdateNeeded(pod) {
 					updateNode(pod, cachedClient, nodeHandler)
 					return
@@ -68,8 +71,8 @@ func AddPodHandlerToCache(backendClient *backendclient.BackendClient, cachedClie
 					return
 				}
 
-				rateLimitedController.MarkItemDeleted(objectKeyFromObject(obj.(*corev1.Pod)))
-				genericControllerErrorHandler(podHandler.HandlePodDelete(obj.(*corev1.Pod)), constants.DeleteOperation, constants.PodResourceName, obj.(*corev1.Pod))
+				rateLimitedController.MarkItemDeleted(objectKeyFromObject(pod))
+				genericControllerErrorHandler(podHandler.HandlePodDelete(pod), constants.DeleteOperation, constants.PodResourceName, pod)
 			},
 			UpdateFunc: func(oldObj any, newObj any) {
 				newPod := newObj.(*corev1.Pod)

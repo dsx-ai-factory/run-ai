@@ -29,7 +29,10 @@ func AddApplicationHandlerToCache(backendClient *backendclient.BackendClient, ca
 			genericControllerErrorHandler(applicationHandler.HandleAddUpdate(object), constants.AddOperation, "Application", object)
 		},
 		DeleteFunc: func(obj any) {
-			object := obj.(*v1alpha1.Application)
+			object, ok := deletedObject[*v1alpha1.Application](obj)
+			if !ok {
+				return
+			}
 			rateLimitedController.MarkItemDeleted(objectKeyFromObject(object))
 			genericControllerErrorHandler(applicationHandler.HandleDelete(object), constants.DeleteOperation, "Application", object)
 		},

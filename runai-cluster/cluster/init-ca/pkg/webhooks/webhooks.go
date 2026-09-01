@@ -40,20 +40,16 @@ const (
 	inferenceOwnershipMutationName      = "runai-inference-workload-ownership-mutation"
 )
 
-var workloadWebhookNamePattern = regexp.MustCompile(`(\w+)-(workload|policy)-(\w+)`)
-var inferenceWorkloadWebhookNamePattern = regexp.MustCompile(`(\w+)-(inference-workload|inference-policy)-(\w+)`)
 var anyworkloadControllerWebhookNamePattern = regexp.MustCompile(`(\w+)-(anyworkload)-(\w+)`)
 
 type WebhookCertificates struct {
-	AdmissionControllerCertificateDetails         *certificates.CertificateDetails
-	InferenceWorkloadControllerCertificateDetails *certificates.CertificateDetails
-	WorkloadControllerCertificateDetails          *certificates.CertificateDetails
-	PodGroupAssignerCertificateDetails            *certificates.CertificateDetails
-	AccessruleControllerCertificateDetails        *certificates.CertificateDetails
-	AnyworkloadControllerCertificateDetails       *certificates.CertificateDetails
-	ApplicationControllerCertificateDetails       *certificates.CertificateDetails
-	AdviceRestartControllerCertificateDetails     *certificates.CertificateDetails
-	AgentCertificateDetails                       *certificates.CertificateDetails
+	AdmissionControllerCertificateDetails     *certificates.CertificateDetails
+	PodGroupAssignerCertificateDetails        *certificates.CertificateDetails
+	AccessruleControllerCertificateDetails    *certificates.CertificateDetails
+	AnyworkloadControllerCertificateDetails   *certificates.CertificateDetails
+	ApplicationControllerCertificateDetails   *certificates.CertificateDetails
+	AdviceRestartControllerCertificateDetails *certificates.CertificateDetails
+	AgentCertificateDetails                   *certificates.CertificateDetails
 }
 
 func ApplyWebhooks(
@@ -276,20 +272,6 @@ func chooseCertificateDetails(name string, webhookCertificates *WebhookCertifica
 	case workloadOwnershipValidationName, inferenceOwnershipValidationName,
 		workloadOwnershipMutationName, inferenceOwnershipMutationName:
 		return webhookCertificates.AnyworkloadControllerCertificateDetails
-	}
-	//
-	//   naming of workload-controller webhook
-	//     runai-training-policy-validation
-	//           ---a---- --b--
-	//   where
-	//     (a) is the resource type: training, interactive, deployment, inference
-	//     (b) is either workload or policy
-	//
-	if inferenceWorkloadWebhookNamePattern.FindString(name) != "" {
-		return webhookCertificates.InferenceWorkloadControllerCertificateDetails
-	}
-	if workloadWebhookNamePattern.FindString(name) != "" {
-		return webhookCertificates.WorkloadControllerCertificateDetails
 	}
 	if anyworkloadControllerWebhookNamePattern.FindString(name) != "" {
 		return webhookCertificates.AnyworkloadControllerCertificateDetails

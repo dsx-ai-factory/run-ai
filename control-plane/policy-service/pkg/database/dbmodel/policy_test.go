@@ -11,19 +11,19 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/run-ai/runai/control-plane/policy-service/generated/pkg/api"
 	"github.com/run-ai/runai/runai-application-packages/convutils"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
 )
 
 var _ = Describe("db model", func() {
 	Context("compare policies", func() {
 		It("should return correct result", func() {
 			pol1 := Policy{
-				BaseModel: dao_utils.BaseModel{
+				BaseModel: dbmodels.BaseModel{
 					ID: uuid.New(),
 				},
 			}
 			pol2 := Policy{
-				BaseModel: dao_utils.BaseModel{
+				BaseModel: dbmodels.BaseModel{
 					ID: uuid.New(),
 				},
 			}
@@ -41,12 +41,12 @@ var _ = Describe("db model", func() {
 	Context("compare policies", func() {
 		It("should return correct result", func() {
 			pol1 := Policy{
-				BaseModel: dao_utils.BaseModel{
+				BaseModel: dbmodels.BaseModel{
 					ID: uuid.New(),
 				},
 			}
 			pol2 := Policy{
-				BaseModel: dao_utils.BaseModel{
+				BaseModel: dbmodels.BaseModel{
 					ID: uuid.New(),
 				},
 			}

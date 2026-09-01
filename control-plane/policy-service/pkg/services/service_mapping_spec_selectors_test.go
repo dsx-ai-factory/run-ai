@@ -26,7 +26,7 @@ import (
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/clients/authorization"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/clients/orgunit"
 	"github.com/run-ai/runai/runai-application-packages/convutils"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 )
 
 const (
@@ -783,11 +783,10 @@ var _ = Describe("Service mapping spec selectors (mappings API)", Ordered, func(
 			router.ServeHTTP(respPost, reqPost.WithContext(tenantContextForTest(tenantA)))
 			Expect(respPost.Code).To(Equal(http.StatusOK), respPost.Body.String())
 
-			res := dao_utils.DB().Exec(
+			Expect(runaidb.DB().Exec(
 				`UPDATE mapping_selectors SET spec_selectors = 'null'::jsonb WHERE gvk_group = ? AND gvk_kind = ? AND gvk_version = ? AND scope_type = ? AND tenant_id = ?`,
 				convutils.Deref(gvk.Group, ""), gvk.Kind, gvk.Version, string(api.MAPPINGSCOPE_TENANT), tenantA,
-			)
-			Expect(res.Error).To(BeNil())
+			)).Error().To(BeNil())
 
 			tenantCtx := mappingTestTenantCtx(tenantA)
 			reloaded, derr := dao.GetMappingByGvkAndScope(tenantCtx, gvk, api.MAPPINGSCOPE_TENANT)
@@ -813,7 +812,7 @@ var _ = Describe("Service mapping spec selectors (mappings API)", Ordered, func(
 		})
 
 		It("returns 404 when DELETE specSelectors targets tenant scope but only a system mapping exists for the GVK", func() {
-			db := database.DB()
+			db := runaidb.DB()
 			ms := MappingApiService{}
 			sysCtx := auth.MockAuthContext(systemMappingActor, 0)
 			cvSys := NewMappingConsistencyValidator(sysCtx, api.MAPPINGSCOPE_SYSTEM)
@@ -1052,7 +1051,7 @@ var _ = Describe("Service mapping spec selectors (mappings API)", Ordered, func(
 
 	Context("mapping list merge (system + tenant GVK)", func() {
 		It("returns merged spec selectors with tenant keys and values overriding system for the same key", func() {
-			db := database.DB()
+			db := runaidb.DB()
 			ms := MappingApiService{}
 			sysCtx := auth.MockAuthContext(systemMappingActor, 0)
 			cvSys := NewMappingConsistencyValidator(sysCtx, api.MAPPINGSCOPE_SYSTEM)
@@ -1147,7 +1146,7 @@ var _ = Describe("Service mapping spec selectors (mappings API)", Ordered, func(
 
 	Context("system-scoped updateMapping (service)", func() {
 		It("updates only the system row when both system and tenant mappings exist for the same GVK", func() {
-			db := database.DB()
+			db := runaidb.DB()
 			ms := MappingApiService{}
 			sysCtx := auth.MockAuthContext(systemMappingActor, 0)
 			cvSys := NewMappingConsistencyValidator(sysCtx, api.MAPPINGSCOPE_SYSTEM)

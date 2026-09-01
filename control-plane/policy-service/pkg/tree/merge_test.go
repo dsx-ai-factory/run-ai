@@ -15,9 +15,9 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/runai-application-packages/convutils"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
 	"github.com/run-ai/runai/runai-application-packages/jsonutils/gojsonq"
 	openapi "github.com/run-ai/runai/runai-clients/policy-service-client/generated"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
 )
 
 type EnvVar struct {
@@ -160,8 +160,8 @@ var _ = Describe("merging test", func() {
 			projectMap, err := gojsonq.LoadJson(projectPolicy)
 			Expect(err).To(BeNil())
 
-			departmentJsonMap := dao_utils.JsonBMap(departmentMap)
-			projectJsonMap := dao_utils.JsonBMap(projectMap)
+			departmentJsonMap := dbmodels.JsonBMap(departmentMap)
+			projectJsonMap := dbmodels.JsonBMap(projectMap)
 
 			effectiveDept := dbmodel.EffectivePolicy{
 				DefaultsV2: departmentJsonMap,
@@ -217,8 +217,8 @@ var _ = Describe("merging test", func() {
 			projectMap, err := gojsonq.LoadJson(projectPolicy)
 			Expect(err).To(BeNil())
 
-			emptyJsonMap := dao_utils.JsonBMap(emptyMap)
-			projectJsonMap := dao_utils.JsonBMap(projectMap)
+			emptyJsonMap := dbmodels.JsonBMap(emptyMap)
+			projectJsonMap := dbmodels.JsonBMap(projectMap)
 
 			emptyDept := dbmodel.EffectivePolicy{
 				DefaultsV2: emptyJsonMap,

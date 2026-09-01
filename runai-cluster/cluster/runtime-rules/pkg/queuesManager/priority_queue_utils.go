@@ -15,10 +15,7 @@ import (
 	"github.com/run-ai/runai/runai-cluster/cluster/runtime-rules/pkg/prometheus"
 	"github.com/run-ai/runai/runai-cluster/cluster/runtime-rules/pkg/util"
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
-	dw2 "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/distributedworkload/v2alpha1"
-	iw2 "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/interactiveworkload/v2alpha1"
 	"github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/jobs"
-	tw2 "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/trainingworkload/v2alpha1"
 	"go.uber.org/zap"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -129,125 +126,45 @@ func HandleWorkloadTask(ctx context.Context, workloadCache *util.WorkloadCache, 
 }
 
 func fetchWorkload(ctx context.Context, k8sClient client.Client, workloadTask *WorkloadTask) (*jobs.JobWorkload, error) {
-	var err error
 	jw := &jobs.JobWorkload{}
 
-	// A runner is projected onto JobWorkload so the active-phase guard reads a
-	// fresh Spec.Active; a vanished runner yields an empty (inactive) JobWorkload.
-	if workloadTask.WorkloadType == constants.KindWorkloadRunner {
-		runner, getErr := kubeConfig.GetWLR(ctx, k8sClient, workloadTask.Namespace, workloadTask.WorkloadName)
-		if getErr != nil {
-			if apierrors.IsNotFound(getErr) {
-				// Runner gone: mark inactive so the caller skips it instead of
-				// treating an empty (Active==nil) JobWorkload as active.
-				jw.Spec.Active = field_types.NewOptionalBoolField(ptr.To(false))
-				return jw, nil
-			}
-			return jw, getErr
-		}
-		if convErr := util.NewRunnerConverter(k8sClient).Convert(&runner, jw); convErr != nil {
-			return jw, convErr
-		}
-		return jw, nil
+	if workloadTask.WorkloadType != constants.KindWorkloadRunner {
+		return jw, fmt.Errorf("unknown workload type %s", workloadTask.WorkloadType)
 	}
 
-	switch workloadTask.WorkloadType {
-	case constants.KindInteractiveWorkload:
-		var iw iw2.InteractiveWorkload
-		iw, err = kubeConfig.GetIW(ctx, k8sClient, workloadTask.Namespace, workloadTask.WorkloadName)
-		if err == nil {
-			iw.CopyTo(jw)
+	runner, getErr := kubeConfig.GetWLR(ctx, k8sClient, workloadTask.Namespace, workloadTask.WorkloadName)
+	if getErr != nil {
+		if apierrors.IsNotFound(getErr) {
+			jw.Spec.Active = field_types.NewOptionalBoolField(ptr.To(false))
+			return jw, nil
 		}
-	case constants.KindTrainingWorkload:
-		var tw tw2.TrainingWorkload
-		tw, err = kubeConfig.GetTW(ctx, k8sClient, workloadTask.Namespace, workloadTask.WorkloadName)
-		if err == nil {
-			tw.CopyTo(jw)
-		}
-	case constants.KindDistributedWorkload:
-		var dw dw2.DistributedWorkload
-		dw, err = kubeConfig.GetDW(ctx, k8sClient, workloadTask.Namespace, workloadTask.WorkloadName)
-		if err == nil {
-			dw.CopyTo(jw)
-		}
-	default:
-		err = fmt.Errorf("unknown workload type %s", workloadTask.WorkloadType)
+		return jw, getErr
 	}
-
-	return jw, err
+	if convErr := util.NewRunnerConverter(k8sClient).Convert(&runner, jw); convErr != nil {
+		return jw, convErr
+	}
+	return jw, nil
 }
 
-func updateWorkload(ctx context.Context, k8sClient client.Client, workloadTask *WorkloadTask, jw *jobs.JobWorkload) error {
-	var err error
-
-	// SuspendRunner acts on the runner's template, not on jw; the caller's
-	// jw.Spec.Active = false is irrelevant for runners.
-	if workloadTask.WorkloadType == constants.KindWorkloadRunner {
-		return util.SuspendRunner(ctx, k8sClient, workloadTask.Namespace, workloadTask.WorkloadName)
+func updateWorkload(ctx context.Context, k8sClient client.Client, workloadTask *WorkloadTask, _ *jobs.JobWorkload) error {
+	if workloadTask.WorkloadType != constants.KindWorkloadRunner {
+		return fmt.Errorf("unknown workload type %s", workloadTask.WorkloadType)
 	}
 
-	switch workloadTask.WorkloadType {
-	case constants.KindInteractiveWorkload:
-		iw := iw2.NewFromJobWorkload(jw)
-		err = kubeConfig.UpdateIW(ctx, k8sClient, *iw)
-	case constants.KindTrainingWorkload:
-		tw := tw2.NewFromJobWorkload(jw)
-		err = kubeConfig.UpdateTW(ctx, k8sClient, *tw)
-	case constants.KindDistributedWorkload:
-		dw := dw2.NewFromJobWorkload(jw)
-		err = kubeConfig.UpdateDW(ctx, k8sClient, *dw)
-	default:
-		err = fmt.Errorf("unknown workload type %s", workloadTask.WorkloadType)
-	}
-
-	return err
+	return util.SuspendRunner(ctx, k8sClient, workloadTask.Namespace, workloadTask.WorkloadName)
 }
 
 // PushProjectWorkloadsToProjectQueue pushes workload tasks to the queue if
 // * the workload is not in the cache
 // * the workload is still active
 // PushProjectWorkloadsToProjectQueue takes the project name and its resolved namespace as
-// primitives so it serves both the kai and legacy paths (both expose Name/Status.Namespace
-// identically).
+// primitives so project reconciliation does not depend on the concrete project type.
 func PushProjectWorkloadsToProjectQueue(ctx context.Context, workloadCache *util.WorkloadCache, k8sClient client.Client,
-	prometheusQuerier prometheus.Querier, projectName string, namespace string, projectQueue *ProjectQueue, supportedJobKinds map[string]client.Object, legacyWorkloadsEnabled bool) error {
+	prometheusQuerier prometheus.Querier, projectName string, namespace string, projectQueue *ProjectQueue, supportedJobKinds map[string]client.Object) error {
 	if namespace == "" {
 		return fmt.Errorf("namespace is empty from project status (%s)", projectName)
 	}
 
-	if legacyWorkloadsEnabled {
-		// List and enqueue legacy workload CRs only before the 3.0 cutover.
-		twList, err := kubeConfig.ListTW(ctx, k8sClient, namespace)
-		if err != nil {
-			zap.S().Errorf("Err %+v ", err)
-			return err
-		}
-		for _, tw := range twList.Items {
-			pushWorkloadToQueue(&tw, ctx, workloadCache, k8sClient, prometheusQuerier, projectQueue, supportedJobKinds)
-		}
-
-		iwList, err := kubeConfig.ListIW(ctx, k8sClient, namespace)
-		if err != nil {
-			zap.S().Errorf("err %+v ", err)
-			return err
-		}
-		for _, iw := range iwList.Items {
-			pushWorkloadToQueue(&iw, ctx, workloadCache, k8sClient, prometheusQuerier, projectQueue, supportedJobKinds)
-		}
-
-		dwList, err := kubeConfig.ListDW(ctx, k8sClient, namespace)
-		if err != nil {
-			zap.S().Errorf("err %+v ", err)
-			return err
-		}
-		for _, dw := range dwList.Items {
-			pushWorkloadToQueue(&dw, ctx, workloadCache, k8sClient, prometheusQuerier, projectQueue, supportedJobKinds)
-		}
-	}
-
-	// WorkloadRunner enumeration: the kind is always present at the 3.0+ legacy
-	// workload cutover. Before 3.0, its presence retains the existing disable
-	// flag behavior from NewRuntimeRules.
 	if _, ok := supportedJobKinds[constants.KindWorkloadRunner]; ok {
 		wlrList, listErr := kubeConfig.ListWLR(ctx, k8sClient, namespace)
 		if listErr != nil {
@@ -264,18 +181,19 @@ func PushProjectWorkloadsToProjectQueue(ctx context.Context, workloadCache *util
 
 // convertWorkloadForEnumeration projects an enumerated workload onto a
 // JobWorkload. WorkloadRunners use the runner converter (reads GPU/auto-delete
-// metadata off Spec.Template); legacy CRDs use the kind-agnostic free function.
+// metadata off Spec.Template).
 // Unlike the watch-driven path, the lifecycle annotation helper is NOT invoked
 // here — it runs when the watch fires its first event for each runner.
 func convertWorkloadForEnumeration(k8sClient client.Client, w client.Object) (*jobs.JobWorkload, error) {
-	if runner, ok := w.(*dromosv1alpha1.WorkloadRunner); ok {
-		var jw jobs.JobWorkload
-		if err := util.NewRunnerConverter(k8sClient).Convert(runner, &jw); err != nil {
-			return nil, err
-		}
-		return &jw, nil
+	runner, ok := w.(*dromosv1alpha1.WorkloadRunner)
+	if !ok {
+		return nil, fmt.Errorf("unsupported workload type %T", w)
 	}
-	return util.ConvertToJobWorkload(w)
+	var jw jobs.JobWorkload
+	if err := util.NewRunnerConverter(k8sClient).Convert(runner, &jw); err != nil {
+		return nil, err
+	}
+	return &jw, nil
 }
 
 func pushWorkloadToQueue(w client.Object, ctx context.Context, workloadCache *util.WorkloadCache, k8sClient client.Client,
@@ -412,8 +330,8 @@ func getLimitsByWorkloadType(projectQueue *ProjectQueue, workloadTask *WorkloadT
 	}
 }
 
-// limitsForCategory returns the project time-limit and idle-limit (in seconds)
-// for one of the three legacy workload categories.
+// limitsForCategory returns the project time and idle limits for the runner's
+// classification bucket.
 func limitsForCategory(projectQueue *ProjectQueue, category string, isPreemptible bool) (timeLimitSecs int64, idleLimitSecs int64) {
 	switch category {
 	case constants.KindInteractiveWorkload:

@@ -42,22 +42,17 @@ func (r *Runner) Run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	if err := validateCleanupRequest(config); err != nil {
-		return err
-	}
-	state, err := classifyControllerState(config)
-	if err != nil {
-		return err
-	}
-	if state == controllersDisabled {
-		return nil
-	}
-
 	servedWorkloads, err := discoverServedWorkloads(ctx, r.WorkloadDynamic)
 	if err != nil {
 		return err
 	}
 	if err := r.checkAllPermissions(ctx, servedWorkloads); err != nil {
+		return err
+	}
+	if err := deleteLegacyControllerDeployments(ctx, r.WorkloadClient); err != nil {
+		return err
+	}
+	if err := waitForLegacyControllerPods(ctx, r.WorkloadClient, legacyControllerPodPollInterval); err != nil {
 		return err
 	}
 	if err := validateLegacyWebhookState(
@@ -68,22 +63,7 @@ func (r *Runner) Run(ctx context.Context) error {
 	if err := r.prepareWorkloads(ctx, servedWorkloads); err != nil {
 		return err
 	}
-	return commitControllerDisable(ctx, r.ManagementClient)
-}
-
-func validateCleanupRequest(config *runaiv1.RunaiConfig) error {
-	sourceVersion := config.GetAnnotations()[SourceVersionAnnotation]
-	if sourceVersion == "" {
-		return fmt.Errorf("cleanup source version annotation is missing")
-	}
-	shouldRun, err := SourceRequiresCleanup(sourceVersion)
-	if err != nil {
-		return err
-	}
-	if !shouldRun {
-		return fmt.Errorf("cleanup request source version %s does not require legacy cleanup", sourceVersion)
-	}
-	return nil
+	return deleteRemainingLegacyResources(ctx, r.WorkloadDynamic)
 }
 
 func loadLiveRunaiConfig(ctx context.Context, k8sClient client.Client) (*runaiv1.RunaiConfig, error) {
@@ -117,7 +97,6 @@ func (r *Runner) checkAllPermissions(ctx context.Context, servedWorkloads []reso
 	management := []requiredPermission{
 		{Verb: "create", Group: "authorization.k8s.io", Resource: "selfsubjectaccessreviews"},
 		{Verb: "get", Group: "run.ai", Resource: "runaiconfigs", Namespace: runaiv1.DefaultNamespace, Name: runaiv1.DefaultName},
-		{Verb: "update", Group: "run.ai", Resource: "runaiconfigs", Namespace: runaiv1.DefaultNamespace, Name: runaiv1.DefaultName},
 	}
 	if err := checkPermissions(ctx, r.ManagementReviewer, management); err != nil {
 		return err
@@ -127,7 +106,25 @@ func (r *Runner) checkAllPermissions(ctx context.Context, servedWorkloads []reso
 		{Verb: "create", Group: "authorization.k8s.io", Resource: "selfsubjectaccessreviews"},
 		{Verb: "list", Group: "admissionregistration.k8s.io", Resource: "validatingwebhookconfigurations"},
 		{Verb: "list", Group: "admissionregistration.k8s.io", Resource: "mutatingwebhookconfigurations"},
+		{Verb: "list", Resource: "pods", Namespace: runaiv1.DefaultNamespace},
 	}
+	for _, name := range legacyControllerDeployments {
+		workload = append(workload, requiredPermission{
+			Verb: "delete", Group: "apps", Resource: "deployments", Namespace: runaiv1.DefaultNamespace, Name: name,
+		})
+	}
+	for _, resourceSet := range remainingLegacyResources {
+		for _, name := range resourceSet.names {
+			workload = append(workload, requiredPermission{
+				Verb: "delete", Group: resourceSet.gvr.Group, Resource: resourceSet.gvr.Resource,
+				Namespace: resourceSet.namespace, Name: name,
+			})
+		}
+	}
+	workload = append(workload,
+		requiredPermission{Verb: "list", Group: "rbac.authorization.k8s.io", Resource: "rolebindings"},
+		requiredPermission{Verb: "delete", Group: "rbac.authorization.k8s.io", Resource: "rolebindings"},
+	)
 	for _, descriptor := range legacyWorkloadResources {
 		workload = append(workload, requiredPermission{
 			Verb: "get", Group: "apiextensions.k8s.io", Resource: "customresourcedefinitions", Name: descriptor.CRDName,

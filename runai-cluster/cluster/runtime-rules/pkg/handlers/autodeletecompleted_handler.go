@@ -7,14 +7,12 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/run-ai/runai/runai-cluster/cluster/common/constants"
 	dromosv1alpha1 "github.com/run-ai/runai/runai-cluster/cluster/dromos/api/v1alpha1"
 	"github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/common"
-	dw "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/distributedworkload/v2alpha1"
-	iw "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/interactiveworkload/v2alpha1"
-	tw "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/trainingworkload/v2alpha1"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -92,53 +90,27 @@ func (autoDeleteCompletedHandler *AutoDeleteCompletedHandler) processNextWorkIte
 
 // getDeletionTimestamp returns the DeletionTimestamp field of the workload, according to its specific kind
 func (autoDeleteCompletedHandler *AutoDeleteCompletedHandler) getDeletionTimestamp(key WorkloadKey, workload client.Object) *metav1.Time {
-	var deletionTimestamp *metav1.Time
-
-	switch key.kind {
-	case constants.KindInteractiveWorkload:
-		deletionTimestamp = workload.(*iw.InteractiveWorkload).DeletionTimestamp
-	case constants.KindTrainingWorkload:
-		deletionTimestamp = workload.(*tw.TrainingWorkload).DeletionTimestamp
-	case constants.KindDistributedWorkload:
-		deletionTimestamp = workload.(*dw.DistributedWorkload).DeletionTimestamp
-	case constants.KindWorkloadRunner:
-		deletionTimestamp = workload.(*dromosv1alpha1.WorkloadRunner).DeletionTimestamp
+	if key.kind != constants.KindWorkloadRunner {
+		return nil
 	}
-
-	return deletionTimestamp
+	return workload.(*dromosv1alpha1.WorkloadRunner).DeletionTimestamp
 }
 
 // getPhase returns the Status.Phase field of the workload, according to its specific kind
 func (autoDeleteCompletedHandler *AutoDeleteCompletedHandler) getPhase(key WorkloadKey, workload client.Object) string {
-	switch key.kind {
-	case constants.KindInteractiveWorkload:
-		return workload.(*iw.InteractiveWorkload).Status.Phase
-	case constants.KindTrainingWorkload:
-		return workload.(*tw.TrainingWorkload).Status.Phase
-	case constants.KindDistributedWorkload:
-		return workload.(*dw.DistributedWorkload).Status.Phase
-	case constants.KindWorkloadRunner:
+	if key.kind == constants.KindWorkloadRunner {
 		return string(workload.(*dromosv1alpha1.WorkloadRunner).Status.Phase)
-	default:
-		return ""
 	}
+	return ""
 }
 
 // getWorkload uses the k8s client to get a workload by its key (kind, namespace and name)
 func (autoDeleteCompletedHandler *AutoDeleteCompletedHandler) getWorkload(ctx context.Context, key WorkloadKey) (client.Object, error) {
-	var workload client.Object
-
-	switch key.kind {
-	case constants.KindInteractiveWorkload:
-		workload = &iw.InteractiveWorkload{}
-	case constants.KindTrainingWorkload:
-		workload = &tw.TrainingWorkload{}
-	case constants.KindDistributedWorkload:
-		workload = &dw.DistributedWorkload{}
-	case constants.KindWorkloadRunner:
-		workload = &dromosv1alpha1.WorkloadRunner{}
+	if key.kind != constants.KindWorkloadRunner {
+		return nil, fmt.Errorf("unsupported workload kind %s", key.kind)
 	}
 
+	var workload client.Object = &dromosv1alpha1.WorkloadRunner{}
 	err := autoDeleteCompletedHandler.K8sClient.Get(ctx, types.NamespacedName{Name: key.name, Namespace: key.namespace}, workload)
 
 	return workload, err
@@ -182,8 +154,8 @@ func (autoDeleteCompletedHandler *AutoDeleteCompletedHandler) deleteWorkload(ctx
 	zap.S().Infof("AutoDeleteCompleted handler workload %v deleted successfully", key)
 }
 
-// HandleAddedOrModified is the main entry point of the handler, called with an event type and JobWorkload object,
-// (which generalizes all kinds of workloads, e.g. InteractiveWorkload and TrainingWorkload).
+// HandleAddedOrModified is the main entry point of the handler, called with an event type and the
+// JobWorkload projection of a WorkloadRunner.
 // it first checks if there's anything to do, considering the event type and the workload fields, namely:
 // DeletionTimestamp, CompletionTime and AutoDeletionTimeAfterCompletionSeconds.
 // then, if deletion is relevant, it calculates the remaining time and adds the item (key) to the queue -

@@ -17,7 +17,7 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dao"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/runai-application-packages/datastructs"
-	"gorm.io/gorm"
+	"github.com/run-ai/runai/runai-common-packages/runaidb/orm"
 )
 
 // MappingConsistencyValidator validates that the spec selectors are consistent.
@@ -58,7 +58,7 @@ type mappingSelectorToValidate struct {
 }
 
 // ValidateMappingChange needs to validate all the selectors that are included in this mapping.
-func (fv *MappingConsistencyValidator) ValidateMappingChange(ctx context.Context, tx *gorm.DB, specSelectors map[string]api.SpecSelectorsWithScopeValue) *api.Error {
+func (fv *MappingConsistencyValidator) ValidateMappingChange(ctx context.Context, tx orm.DB, specSelectors map[string]api.SpecSelectorsWithScopeValue) *api.Error {
 	fieldGroupToResolve := datastructs.NewSet[string]()
 
 	for selectorName, specSelector := range specSelectors {
@@ -103,7 +103,7 @@ func (fv *MappingConsistencyValidator) ValidateMappingChange(ctx context.Context
 }
 
 // ValidateFieldGroupChange should validate all the selectors that reference this field group.
-func (fv *MappingConsistencyValidator) ValidateFieldGroupChange(ctx context.Context, tx *gorm.DB, fgName string) *api.Error {
+func (fv *MappingConsistencyValidator) ValidateFieldGroupChange(ctx context.Context, tx orm.DB, fgName string) *api.Error {
 	mappingRows, err := dao.ListMappingsReferencingFieldGroup(ctx, tx, fgName)
 	if err != nil {
 		return err
@@ -163,7 +163,7 @@ func canonicalFieldGroupsCombo(fieldGroups []string) string {
 	return strings.Join(copied, ",")
 }
 
-func (fv *MappingConsistencyValidator) loadRelevantFieldGroups(ctx context.Context, tx *gorm.DB, toLoad datastructs.Set[string], validationKind string) *api.Error {
+func (fv *MappingConsistencyValidator) loadRelevantFieldGroups(ctx context.Context, tx orm.DB, toLoad datastructs.Set[string], validationKind string) *api.Error {
 	if len(toLoad) == 0 {
 		return nil
 	}

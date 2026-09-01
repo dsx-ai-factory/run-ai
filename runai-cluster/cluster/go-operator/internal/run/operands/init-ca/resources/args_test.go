@@ -20,65 +20,9 @@ import (
 )
 
 var _ = Describe("Init CA deployment", func() {
-	tests := []struct {
-		name             string
-		workloadEnabled  bool
-		inferenceEnabled bool
-		want             []string
-	}{
-		{
-			name:             "controllers enabled",
-			workloadEnabled:  true,
-			inferenceEnabled: true,
-			want: []string{
-				"--leader-elect",
-				"--workload-controller-enabled=true",
-				"--inference-workload-controller-enabled=true",
-			},
-		},
-		{
-			name:             "controllers disabled",
-			workloadEnabled:  false,
-			inferenceEnabled: false,
-			want: []string{
-				"--leader-elect",
-				"--workload-controller-enabled=false",
-				"--inference-workload-controller-enabled=false",
-			},
-		},
-		{
-			name:             "only workload controller enabled",
-			workloadEnabled:  true,
-			inferenceEnabled: false,
-			want: []string{
-				"--leader-elect",
-				"--workload-controller-enabled=true",
-				"--inference-workload-controller-enabled=false",
-			},
-		},
-		{
-			name:             "only inference controller enabled",
-			workloadEnabled:  false,
-			inferenceEnabled: true,
-			want: []string{
-				"--leader-elect",
-				"--workload-controller-enabled=false",
-				"--inference-workload-controller-enabled=true",
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		tt := tt
-		It("passes "+tt.name+" to init-ca", func() {
-			runaiConfig := &runv1.RunaiConfig{}
-			runaiConfig.SetDefaultsWhereNeeded()
-			runaiConfig.Spec.WorkloadController.Enabled = ptr.To(tt.workloadEnabled)
-			runaiConfig.Spec.InferenceWorkloadController.Enabled = ptr.To(tt.inferenceEnabled)
-
-			Expect(handleDeploymentArgs(runaiConfig)).To(Equal(tt.want))
-		})
-	}
+	It("enables leader election without legacy controller flags", func() {
+		Expect(handleDeploymentArgs()).To(Equal([]string{"--leader-elect"}))
+	})
 
 	securityTests := []struct {
 		name          string

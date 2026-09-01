@@ -15,9 +15,7 @@ import (
 	dromosv1alpha1 "github.com/run-ai/runai/runai-cluster/cluster/dromos/api/v1alpha1"
 	"github.com/run-ai/runai/runai-cluster/cluster/runtime-rules/pkg/controllers"
 	"github.com/run-ai/runai/runai-cluster/cluster/runtime-rules/pkg/kubeConfig"
-	"github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/common"
 	repoconstants "github.com/run-ai/runai/runai-cluster/common/constants"
-	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	apiruntime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
@@ -25,136 +23,9 @@ import (
 	fakerunaiclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-func initWorkloadsOfAllKinds() []TestWorkload {
-	workloads := []TestWorkload{
-		&TestTrainingWorkload{},
-		&TestInteractiveWorkload{},
-		&TestDistributedWorkload{},
-	}
-
-	return workloads
-}
-
 func sleepToLetControllerHandleEvent() {
 	time.Sleep(200 * time.Millisecond)
 }
-
-var _ = Describe("runtime-rules AutoDeleteCompleted controller tests", Ordered, func() {
-	var stopper chan struct{}
-
-	Context("runtime-rules AutoDeleteCompleted controller tests", func() {
-		ctx, cancel := context.WithCancel(context.TODO())
-
-		var k8sClient client.WithWatch
-		BeforeAll(func() {
-			ns := BuildNamespace(testNamespaceName, map[string]string{RunaiQueueLabel: testProjectName})
-			projects := BuildProjectFixtures(testProjectName, testNamespaceName, 5, 5)
-
-			// init the fake environment
-			scheme := initSchema()
-			k8sClient = fakerunaiclient.NewClientBuilder().WithScheme(scheme).WithObjects(append(projects, ns)...).Build()
-
-			// init and start the AutoDeleteCompleted controller
-			stopper = make(chan struct{})
-			autoDeleteCompletedController := controllers.NewAutoDeleteCompletedController(ctx, k8sClient, record.NewFakeRecorder(10), map[string]client.Object{}, true)
-			go autoDeleteCompletedController.Start(ctx, stopper)
-
-			time.Sleep(1 * time.Second)
-		})
-
-		AfterAll(func() {
-			cancel()
-			close(stopper)
-		})
-
-		It("No auto-delete: should not be deleted after completion", func() {
-			for _, workload := range initWorkloadsOfAllKinds() {
-				zap.S().Infof("Testing %T", workload)
-				SimulateWorkloadLifecycle(ctx, k8sClient, workload, 0, testNoAutoDeletion, true)
-				time.Sleep(1 * time.Second)
-				err := workload.Get(ctx, k8sClient)
-				Expect(err).To(BeNil())
-			}
-		})
-
-		It("auto-delete = 0: should be deleted immediately after completion", func() {
-			for _, workload := range initWorkloadsOfAllKinds() {
-				zap.S().Infof("Testing %T", workload)
-				SimulateWorkloadLifecycle(ctx, k8sClient, workload, 1, 0, true)
-				sleepToLetControllerHandleEvent()
-				err := workload.Get(ctx, k8sClient)
-				Expect(err).NotTo(BeNil())
-			}
-		})
-
-		It("auto-delete > 0: should be deleted only after the time arrives", func() {
-			for _, workload := range initWorkloadsOfAllKinds() {
-				zap.S().Infof("Testing %T", workload)
-				SimulateWorkloadLifecycle(ctx, k8sClient, workload, 1, 2, true)
-				time.Sleep(1 * time.Second)
-				err := workload.Get(ctx, k8sClient)
-				Expect(err).To(BeNil())
-				time.Sleep(1 * time.Second)
-				sleepToLetControllerHandleEvent()
-				err = workload.Get(ctx, k8sClient)
-				Expect(err).NotTo(BeNil())
-			}
-		})
-
-		It("auto-delete = 0, workload completed with failed status: should be deleted immediately after completion", func() {
-			for _, workload := range initWorkloadsOfAllKinds() {
-				zap.S().Infof("Testing %T", workload)
-				SimulateWorkloadLifecycle(ctx, k8sClient, workload, 0, 0, false)
-				sleepToLetControllerHandleEvent()
-				err := workload.Get(ctx, k8sClient)
-				Expect(err).NotTo(BeNil())
-			}
-		})
-
-		It("auto-delete > 0, workload returns to Running before its time has come: should not be deleted", func() {
-			for _, workload := range initWorkloadsOfAllKinds() {
-				zap.S().Infof("Testing %T", workload)
-				// complete the workload with a 3-second TTL — queues a deferred deletion
-				SimulateWorkloadLifecycle(ctx, k8sClient, workload, 0, 3, true)
-				time.Sleep(1 * time.Second)
-
-				// simulate the workload transitioning back to Running (CompletionTime stays
-				// set by the status calculator). The entry guard should skip re-enqueue and
-				// the dequeue guard should skip the pending deletion because phase is no
-				// longer finite.
-				workload.SetPhase(ctx, k8sClient, common.PhaseRunning)
-
-				// wait past the original deletion deadline and confirm survival
-				time.Sleep(3 * time.Second)
-				sleepToLetControllerHandleEvent()
-				err := workload.Get(ctx, k8sClient)
-				Expect(err).To(BeNil())
-			}
-		})
-
-		It("auto-delete > 0, workload deleted manually before its time has come: controller should not panic", func() {
-			workloads2 := initWorkloadsOfAllKinds()
-			for i, workload := range initWorkloadsOfAllKinds() {
-				zap.S().Infof("Testing %T", workload)
-				SimulateWorkloadLifecycle(ctx, k8sClient, workload, 0, 2, true)
-				time.Sleep(1 * time.Second)
-				err := workload.Delete(ctx, k8sClient)
-				Expect(err).To(BeNil())
-				err = workload.Get(ctx, k8sClient)
-				Expect(err).NotTo(BeNil())
-				time.Sleep(1 * time.Second)
-
-				// now simulate another workload and make sure it's deleted, i.e. the controller functions properly
-				workload2 := workloads2[i]
-				SimulateWorkloadLifecycle(ctx, k8sClient, workload2, 1, 0, true)
-				sleepToLetControllerHandleEvent()
-				err = workload2.Get(ctx, k8sClient)
-				Expect(err).NotTo(BeNil())
-			}
-		})
-
-	})
-})
 
 var _ = Describe("runtime-rules AutoDeleteCompleted controller — WorkloadRunner", Ordered, func() {
 	var (
@@ -210,7 +81,7 @@ var _ = Describe("runtime-rules AutoDeleteCompleted controller — WorkloadRunne
 		stopper = make(chan struct{})
 		// KindWorkloadRunner present in supportedJobKinds so the controller watches WorkloadRunners.
 		autoDeleteCompletedController := controllers.NewAutoDeleteCompletedController(ctx, k8sClient, record.NewFakeRecorder(10),
-			map[string]client.Object{constants.KindWorkloadRunner: &dromosv1alpha1.WorkloadRunner{}}, true)
+			map[string]client.Object{constants.KindWorkloadRunner: &dromosv1alpha1.WorkloadRunner{}})
 		go autoDeleteCompletedController.Start(ctx, stopper)
 
 		time.Sleep(1 * time.Second)

@@ -13,7 +13,6 @@ import (
 	dinfwv1 "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/distributedinferenceworkload/v1alpha1"
 	"go.uber.org/zap"
 	"k8s.io/client-go/tools/cache"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func AddDistributedInferenceHandlerToCache(backendClient *runaiclient.BackendClient, cachedClient cachedclient.CachedClient,
@@ -39,10 +38,13 @@ func AddDistributedInferenceHandlerToCache(backendClient *runaiclient.BackendCli
 				}
 			},
 			DeleteFunc: func(object any) {
-				obj := object.(*dinfwv1.DistributedInferenceWorkload)
+				obj, ok := deletedObject[*dinfwv1.DistributedInferenceWorkload](object)
+				if !ok {
+					return
+				}
 				if obj.Spec.Usage == constants.RunaiWorkloadRelevantUsage {
 					rateLimitedController.MarkItemDeleted(objectKeyFromObject(obj))
-					genericControllerErrorHandler(workloadHandler.HandleRunaiWorkloadDelete(object.(client.Object)),
+					genericControllerErrorHandler(workloadHandler.HandleRunaiWorkloadDelete(obj),
 						constants.DeleteOperation, constants.DistributedInferenceWorkloadResourceName, obj)
 				}
 			},

@@ -64,6 +64,8 @@ func (h *WorkloadHandler) HandleUpdate(externalWorkload *v1alpha1.ExternalWorklo
 }
 
 func (h *WorkloadHandler) handleAddUpdate(externalWorkload *v1alpha1.ExternalWorkload) error {
+	externalWorkload = externalWorkload.DeepCopy()
+
 	workloadSyncFields, _, podGroupsOfWorkload, err := h.parser.ParseExternalWorkloadToServerScheme(externalWorkload)
 	if err != nil {
 		return err

@@ -52,6 +52,8 @@ func (h *WorkloadHandler) HandleInteractiveUpdate(workload *iwv2a1.InteractiveWo
 }
 
 func (h *WorkloadHandler) handleInteractiveAddUpdate(workload *iwv2a1.InteractiveWorkload) error {
+	workload = workload.DeepCopy()
+
 	workloadSyncFields, _, err := h.parser.ParseInteractiveWorkloadToServerScheme(workload)
 	if err != nil {
 		return err

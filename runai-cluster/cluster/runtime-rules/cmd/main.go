@@ -24,9 +24,6 @@ import (
 	"github.com/run-ai/runai/runai-cluster/cluster/runtime-rules/pkg/queuesManager"
 	"github.com/run-ai/runai/runai-cluster/cluster/runtime-rules/pkg/util"
 	"github.com/run-ai/runai/runai-cluster/cluster/runtime-rules/pkg/validation"
-	dwv2a1 "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/distributedworkload/v2alpha1"
-	iwv2a1 "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/interactiveworkload/v2alpha1"
-	twv2a1 "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/trainingworkload/v2alpha1"
 	workloadcontroller "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/controller"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -66,11 +63,6 @@ const (
 )
 
 func main() {
-	if err := pkg.ValidateClusterVersion(); err != nil {
-		zap.S().Errorf("Failed validating %s: %v", "CLUSTER_VERSION", err)
-		os.Exit(1)
-	}
-
 	scheme := initSchema()
 
 	// init the kube client
@@ -142,7 +134,7 @@ func runRuntimeRules(watchClient client.WithWatch, scheme *apiruntime.Scheme, ma
 	workloadValidator := validation.NewWorkloadValidator(distributedValidator)
 
 	// init & start the runtime-rules
-	runtimeRules := pkg.NewRuntimeRules(watchClient, qm, promClient, recorder, eventList, workloadValidator, options.disableWorkloadRunnerRules)
+	runtimeRules := pkg.NewRuntimeRules(watchClient, qm, promClient, recorder, eventList, workloadValidator)
 	runtimeRules.Start(managerContext)
 }
 
@@ -182,38 +174,13 @@ func InitArgs(options *Options) {
 		"Enable leader election for runtime-rules. "+
 			"Enabling this will ensure there is only one active runtime-rules.")
 	flag.BoolVar(&options.disableWorkloadRunnerRules, "disable-workload-runner-rules", false,
-		"Disable observation of WorkloadRunner events before cluster version 3.0. "+
-			"Ignored at version 3.0 and later, where runtime-rules watches WorkloadRunner CRDs and enforces project scheduling-rules on WorkloadRunner-backed workloads.")
+		"Deprecated compatibility flag. WorkloadRunner observation is always enabled.")
 	flag.Parse()
 }
 
 func initSchema() *apiruntime.Scheme {
 	scheme := schemeinit.Scheme()
-	err := iwv2a1.AddKnownTypes(scheme)
-	if err != nil {
-		zap.S().Error("Failed to add interactive workload types", err)
-	}
-	err = iwv2a1.AddToScheme(scheme)
-	if err != nil {
-		zap.S().Error("Failed to add interactive workload to scheme", err)
-	}
-	err = twv2a1.AddKnownTypes(scheme)
-	if err != nil {
-		zap.S().Error("Failed to add training workload types", err)
-	}
-	err = twv2a1.AddToScheme(scheme)
-	if err != nil {
-		zap.S().Error("Failed to add training workload to scheme", err)
-	}
-	err = dwv2a1.AddKnownTypes(scheme)
-	if err != nil {
-		zap.S().Error("failed to add distributed workload types", err)
-	}
-	err = dwv2a1.AddToScheme(scheme)
-	if err != nil {
-		zap.S().Error("failed to add distributed workload to scheme", err)
-	}
-	err = dromosv1alpha1.AddToScheme(scheme)
+	err := dromosv1alpha1.AddToScheme(scheme)
 	if err != nil {
 		zap.S().Error("failed to add run.ai/v1alpha1 (WorkloadRunner) to scheme", err)
 	}

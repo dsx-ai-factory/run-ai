@@ -32,11 +32,9 @@ var (
 const certRotationInterval = 30 * 24 * time.Hour
 
 type initCAOptions struct {
-	kubeconfig                         string
-	webhooksPath                       string
-	enableLeaderElection               bool
-	workloadControllerEnabled          bool
-	inferenceWorkloadControllerEnabled bool
+	kubeconfig           string
+	webhooksPath         string
+	enableLeaderElection bool
 }
 
 func (o *initCAOptions) addFlags(fs *pflag.FlagSet) {
@@ -44,10 +42,6 @@ func (o *initCAOptions) addFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&o.webhooksPath, "webhooks", "/webhooks/webhooks.yaml", "Path to the webhooks configuration file")
 	fs.BoolVar(&o.enableLeaderElection, "leader-elect", false,
 		"Enable leader election for init-ca. Enabling this will ensure there is only one active init-ca replica.")
-	fs.BoolVar(&o.workloadControllerEnabled, "workload-controller-enabled", true,
-		"Keep the workload-controller serving certificate while the controller is enabled.")
-	fs.BoolVar(&o.inferenceWorkloadControllerEnabled, "inference-workload-controller-enabled", true,
-		"Keep the inference-workload-controller serving certificate while the controller is enabled.")
 }
 
 func getKubeConfig(kubeconfig string) (*rest.Config, error) {
@@ -102,10 +96,7 @@ func runInitCA(ctx context.Context, opts initCAOptions, conf *rest.Config) error
 		case <-ctx.Done():
 			return nil
 		default:
-			err := initca.InitCA(ctx, conf, opts.webhooksPath, initca.Options{
-				WorkloadControllerEnabled:          opts.workloadControllerEnabled,
-				InferenceWorkloadControllerEnabled: opts.inferenceWorkloadControllerEnabled,
-			})
+			err := initca.InitCA(ctx, conf, opts.webhooksPath)
 			if err != nil {
 				return err
 			}

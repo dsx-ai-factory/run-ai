@@ -17,10 +17,10 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dao"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/scopes"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
 	"github.com/run-ai/runai/runai-common-packages/logging"
 	"github.com/run-ai/runai/runai-common-packages/runaictx"
-	"gorm.io/gorm"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
+	"github.com/run-ai/runai/runai-common-packages/runaidb/orm"
 )
 
 // PolicyNotFoundErrMsg is the error message for a request to delete a policy that doesn't exist
@@ -37,7 +37,7 @@ type DeleteRequestOpt struct {
 func (ht *HierarchyTree) HandleDeleteRequest(ctx context.Context, request *GenericPolicyRequest, opt DeleteRequestOpt) *api.Error {
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("[%s] delete %s policy started", ht.treeId.ToString(), request.WorkloadType)
 
-	db := dao_utils.DB().WithContext(ctx)
+	db := runaidb.DB().WithContext(ctx)
 
 	// attempt to find the policy in the DB
 	policy, err := dao.FindPolicyOfOrgUnit(ctx, db, request.PolicyMeta.Scope, request.PolicyMeta.DepartmentId,
@@ -119,9 +119,9 @@ func (ht *HierarchyTree) HandleDeleteRequest(ctx context.Context, request *Gener
 		// that the effective policy was updated. so no need to calculate it now, it will be
 		// re-calculated on the next update/get
 
-		result := tx.Commit()
-		if result.Error != nil {
-			return database.Error(database.DELETE, database.Policies).WithDetailsFromDb(result)
+		commitErr := tx.Commit()
+		if commitErr != nil {
+			return database.Error(database.DELETE, database.Policies).WithDetails(commitErr)
 		}
 		committed = true
 
@@ -147,7 +147,7 @@ func (ht *HierarchyTree) HandleDeleteRequest(ctx context.Context, request *Gener
 // (e.g. department, project) has been deleted from the backend. Since the scope entity no
 // longer exists, we cannot resolve ancestors or recalculate the hierarchy — we just
 // soft-delete the policy and its effective policies directly.
-func (ht *HierarchyTree) handleOrphanedPolicyDelete(ctx context.Context, db *gorm.DB, policy *dbmodel.PolicyWithOptionalEffective, orgUnit scopes.OrgUnit, workloadType WorkloadType) *api.Error {
+func (ht *HierarchyTree) handleOrphanedPolicyDelete(ctx context.Context, db orm.DB, policy *dbmodel.PolicyWithOptionalEffective, orgUnit scopes.OrgUnit, workloadType WorkloadType) *api.Error {
 	committed := false
 	tx := db.Begin()
 	defer database.FinalizeTransaction(tx, &committed)
@@ -169,9 +169,9 @@ func (ht *HierarchyTree) handleOrphanedPolicyDelete(ctx context.Context, db *gor
 		return err
 	}
 
-	result := tx.Commit()
-	if result.Error != nil {
-		return database.Error(database.DELETE, database.Policies).WithDetailsFromDb(result)
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		return database.Error(database.DELETE, database.Policies).WithDetails(commitErr)
 	}
 	committed = true
 

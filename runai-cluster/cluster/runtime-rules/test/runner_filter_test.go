@@ -152,7 +152,7 @@ var _ = Describe("Runner filter wiring", Serial, func() {
 
 		qm := &queuesManager.QueuesManager{}
 		rr := pkg.NewRuntimeRules(watchClient, qm, promClient, record.NewFakeRecorder(recorderBufferSize),
-			[]int{queuesManager.UnknownEvent, queuesManager.DeactivateEvent}, validation.NewWorkloadValidator(), false)
+			[]int{queuesManager.UnknownEvent, queuesManager.DeactivateEvent}, validation.NewWorkloadValidator())
 
 		workloadCache := util.WorkloadCache{}
 		rr.InitQueueManager(ctx, &workloadCache)

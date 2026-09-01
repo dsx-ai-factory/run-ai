@@ -19,7 +19,6 @@ import (
 	"time"
 
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
-	"github.com/run-ai/runai/scale-tests/unified_tests/internal/scale"
 	kwokopv1beta1 "github.com/run-ai/kwok-operator/api/v1beta1"
 	clusterclient "github.com/run-ai/runai/control-plane/cluster-service/pkg/client/generated"
 	idmclient "github.com/run-ai/runai/control-plane/identity-manager/pkg/client/generated"
@@ -29,6 +28,7 @@ import (
 	dwv2alpha1 "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/distributedworkload/v2alpha1"
 	twv1 "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/trainingworkload/v1"
 	twv2alpha1 "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/trainingworkload/v2alpha1"
+	"github.com/run-ai/runai/scale-tests/unified_tests/internal/scale"
 	"golang.org/x/oauth2"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes/scheme"

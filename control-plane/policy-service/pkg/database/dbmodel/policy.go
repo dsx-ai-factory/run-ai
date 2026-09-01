@@ -12,14 +12,15 @@ import (
 	"strings"
 
 	authApi "github.com/run-ai/runai/control-plane/authorization/pkg/client/generated"
-	"gorm.io/gorm"
 
 	"github.com/run-ai/runai/runai-application-packages/convutils"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
+	"github.com/run-ai/runai/runai-application-packages/queryapi"
+	"github.com/run-ai/runai/runai-common-packages/runaidb/orm"
 
 	"github.com/run-ai/runai/control-plane/policy-service/generated/pkg/api"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbtables"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/scopes"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
 	"github.com/run-ai/runai/runai-common-packages/logging"
 )
 
@@ -30,20 +31,20 @@ const (
 )
 
 type Policy struct {
-	dao_utils.BaseModel // enables soft-delete
-	Name                string
-	WorkloadType        string
-	Scope               api.ScopeType
-	TenantId            int32
-	ClusterId           *string
-	DepartmentId        *string
-	ProjectId           *int32
-	DefaultsV2          dao_utils.JsonBMap
-	RulesV2             dao_utils.JsonBMap
-	ImposedAssets       *api.DistributedImposedAssets `gorm:"serializer:json; type:jsonb;"`
-	GvkWorkload         bool                          `gorm:"default:false"`
-	ValidationStatus    *api.PolicyPhase              `gorm:"column:validation_status;type:text"`
-	ValidationIssues    []string                      `gorm:"serializer:json;type:jsonb;column:validation_issues"`
+	dbmodels.BaseModel // enables soft-delete
+	Name               string
+	WorkloadType       string
+	Scope              api.ScopeType
+	TenantId           int32
+	ClusterId          *string
+	DepartmentId       *string
+	ProjectId          *int32
+	DefaultsV2         dbmodels.JsonBMap
+	RulesV2            dbmodels.JsonBMap
+	ImposedAssets      *api.DistributedImposedAssets `gorm:"serializer:json; type:jsonb;"`
+	GvkWorkload        bool                          `gorm:"default:false"`
+	ValidationStatus   *api.PolicyPhase              `gorm:"column:validation_status;type:text"`
+	ValidationIssues   []string                      `gorm:"serializer:json;type:jsonb;column:validation_issues"`
 }
 
 func (Policy) TableName() string {
@@ -162,27 +163,28 @@ func (EffectivePolicy) JoinWithPolicy() string {
 		dbtables.PoliciesTable, dbtables.PoliciesColumnId)
 }
 
-func ApplyPermittedScopes(tx *gorm.DB, permittedScopes *authApi.PermittedScopes) {
+func ApplyPermittedScopes(tx orm.DB, permittedScopes *authApi.PermittedScopes) orm.DB {
 	if permittedScopes == nil || convutils.BoolIsTrue(permittedScopes.System) {
-		return
+		return tx
 	}
 
 	if len(permittedScopes.Tenants) != 0 {
-		tx.Where(fmt.Sprintf("%s.%s in ?", dbtables.PoliciesTable, dbtables.PoliciesColumnTenantId), permittedScopes.Tenants)
-		return
+		return tx.Where(fmt.Sprintf("%s.%s in ?", dbtables.PoliciesTable, dbtables.PoliciesColumnTenantId), permittedScopes.Tenants)
 	}
 
 	if len(permittedScopes.Clusters) != 0 {
-		tx.Where(fmt.Sprintf("%s.%s in ?", dbtables.PoliciesTable, dbtables.PoliciesColumnClusterId), permittedScopes.Clusters)
+		tx = tx.Where(fmt.Sprintf("%s.%s in ?", dbtables.PoliciesTable, dbtables.PoliciesColumnClusterId), permittedScopes.Clusters)
 	}
 
 	if len(permittedScopes.Departments) != 0 {
-		tx.Where(fmt.Sprintf("%s.%s in ?", dbtables.PoliciesTable, dbtables.PoliciesColumnDepartmentId), permittedScopes.Departments)
+		tx = tx.Where(fmt.Sprintf("%s.%s in ?", dbtables.PoliciesTable, dbtables.PoliciesColumnDepartmentId), permittedScopes.Departments)
 	}
 
 	if len(permittedScopes.Projects) != 0 {
-		tx.Where(fmt.Sprintf("%s.%s in ?", dbtables.PoliciesTable, dbtables.PoliciesColumnProjectId), permittedScopes.Projects)
+		tx = tx.Where(fmt.Sprintf("%s.%s in ?", dbtables.PoliciesTable, dbtables.PoliciesColumnProjectId), permittedScopes.Projects)
 	}
+
+	return tx
 }
 
 func (p *PolicyWithOptionalEffective) ToGvkPolicyApi() (*api.Policy, *api.Error) {
@@ -252,7 +254,7 @@ type GvkPolicyRules interface {
 	api.PolicyRule | api.EffectiveRulesEffectiveRulesInner
 }
 
-func FromGvkRulesApi[T GvkPolicyRules](m dao_utils.JsonBMap) ([]T, *api.Error) {
+func FromGvkRulesApi[T GvkPolicyRules](m dbmodels.JsonBMap) ([]T, *api.Error) {
 	if len(m) == 0 {
 		return nil, nil
 	}
@@ -275,7 +277,7 @@ func FromGvkRulesApi[T GvkPolicyRules](m dao_utils.JsonBMap) ([]T, *api.Error) {
 	return rules, nil
 }
 
-func ToGvkRulesApi[T GvkPolicyRules](rules []T, scope *scopes.OrgUnit) (dao_utils.JsonBMap, *api.Error) {
+func ToGvkRulesApi[T GvkPolicyRules](rules []T, scope *scopes.OrgUnit) (dbmodels.JsonBMap, *api.Error) {
 	if len(rules) == 0 {
 		return nil, nil
 	}
@@ -297,22 +299,22 @@ func ToGvkRulesApi[T GvkPolicyRules](rules []T, scope *scopes.OrgUnit) (dao_util
 	return out, nil
 }
 
-func (p Policy) FilterFieldsToColumn() map[string]string {
-	return map[string]string{
-		"id":    dbtables.PoliciesColumnId,
-		"scope": dbtables.PoliciesColumnScope,
-		"type":  dbtables.PoliciesColumnWorkloadType,
+func (p Policy) FilterFieldsToColumn() queryapi.APIFieldsMapping {
+	return queryapi.APIFieldsMapping{
+		"id":    queryapi.NewFieldMapping(dbtables.PoliciesColumnId),
+		"scope": queryapi.NewFieldMapping(dbtables.PoliciesColumnScope),
+		"type":  queryapi.NewFieldMapping(dbtables.PoliciesColumnWorkloadType),
 	}
 }
 
-func (p Policy) SortFieldsToColumn() map[string]string {
-	return map[string]string{
-		"id":        dbtables.PoliciesColumnId,
-		"scope":     dbtables.PoliciesColumnScope,
-		"type":      dbtables.PoliciesColumnWorkloadType,
-		"createdAt": dbtables.CreatedAtColumn,
-		"createdBy": dbtables.CreatedByColumn,
-		"updatedAt": dbtables.UpdatedAtColumn,
-		"updatedBy": dbtables.UpdatedByColumn,
+func (p Policy) SortFieldsToColumn() queryapi.APIFieldsMapping {
+	return queryapi.APIFieldsMapping{
+		"id":        queryapi.NewFieldMapping(dbtables.PoliciesColumnId),
+		"scope":     queryapi.NewFieldMapping(dbtables.PoliciesColumnScope),
+		"type":      queryapi.NewFieldMapping(dbtables.PoliciesColumnWorkloadType),
+		"createdAt": queryapi.NewFieldMapping(dbtables.CreatedAtColumn),
+		"createdBy": queryapi.NewFieldMapping(dbtables.CreatedByColumn),
+		"updatedAt": queryapi.NewFieldMapping(dbtables.UpdatedAtColumn),
+		"updatedBy": queryapi.NewFieldMapping(dbtables.UpdatedByColumn),
 	}
 }

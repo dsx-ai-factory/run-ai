@@ -60,12 +60,9 @@ var clusterBindings = map[imageKey][]binding{
 	{kartaGroup, "operator"}: {fullReferenceImage{path: "karta.image"}},
 	{clusterGroup, "valkey"}: {runaiConfigImage{path: "cluster-redis.image"}},
 	{clusterGroup, "git-sync"}: {
-		runaiConfigImage{path: "workload-controller.gitSyncImage"},
-		runaiConfigImage{path: "inference-workload-controller.gitSyncImage"},
+		runaiConfigImage{path: "anyworkload-controller.gitSyncImage"},
 	},
 	{clusterGroup, "wait-ubi-minimal"}: {
-		runaiConfigImage{path: "workload-controller.runaiOauth2ProxyUsernameLoaderImage"},
-		runaiConfigImage{path: "inference-workload-controller.runaiOauth2ProxyUsernameLoaderImage"},
 		runaiConfigImage{path: "anyworkload-controller.runaiOauth2ProxyUsernameLoaderImage"},
 	},
 }

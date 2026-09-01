@@ -16,9 +16,9 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/services"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/clients/orgunit"
 	runai_config "github.com/run-ai/runai/runai-common-packages/config"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
 	"github.com/run-ai/runai/runai-common-packages/logging"
 	"github.com/run-ai/runai/runai-common-packages/metrics"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 	"github.com/run-ai/runai/runai-common-packages/runaihttp"
 	"github.com/run-ai/runai/runai-common-packages/runaipubsub"
 	"github.com/run-ai/runai/runai-common-packages/tracing"
@@ -36,7 +36,10 @@ func init() {
 	config.Init()
 	servicesConfig := runai_config.Get[*config.ServicesConfig]()
 
-	dao_utils.Init(config.Database())
+	runaidb.SetLogger(logging.Actual())
+	if err := runaidb.Init(nil); err != nil {
+		logging.Fatalf("Failed to initialize database: %v", err)
+	}
 
 	dao.HandleSystemPolicy()
 

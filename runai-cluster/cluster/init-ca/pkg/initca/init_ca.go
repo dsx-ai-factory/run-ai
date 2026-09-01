@@ -9,8 +9,6 @@ import (
 	"context"
 	"log"
 
-	k8serr "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
@@ -20,45 +18,32 @@ import (
 	cmv1 "github.com/cert-manager/cert-manager/pkg/client/clientset/versioned/typed/certmanager/v1"
 )
 
-type Options struct {
-	WorkloadControllerEnabled          bool
-	InferenceWorkloadControllerEnabled bool
-}
-
 const (
-	namespace                                 = "runai"
-	admissionControllerSecretName             = "runai-tls-secret"
-	workloadControllerSecretName              = "runai-workload-controller-tls-secret"
-	anyworkloadControllerSecretName           = "runai-anyworkload-controller-tls-secret"
-	inferenceWorkloadControllerSecretName     = "runai-inference-workload-controller-tls-secret"
-	podGroupAssignerSecretName                = "runai-pod-group-assigner-tls-secret"        /* #nosec */
-	accessruleControllerSecretName            = "runai-accessrule-controller-tls-secret"     /* #nosec */
-	agentSecretName                           = "runai-agent-tls-secret"                     /* #nosec */
-	applicationControllerSecretName           = "application-controller-tls-secret"          /* #nosec */
-	adviceRestartControllerSecretName         = "runai-advice-restart-controller-tls-secret" /* #nosec */
-	admissionControllerServiceName            = "runai-admission-controller"
-	workloadControllerServiceName             = "workload-controller"
-	anyworkloadControllerServiceName          = "anyworkload-controller"
-	inferenceWorkloadControllerServiceName    = "inference-workload-controller"
-	podGroupAssignerServiceName               = "pod-group-assigner"
-	accessruleControllerServiceName           = "accessrule-controller"
-	agentServiceName                          = "runai-agent"
-	adviceRestartControllerServiceName        = "advice-restart-controller"
-	admissionControllerDeploymentName         = "runai-admission-controller"
-	applicationControllerServiceName          = "application-controller"
-	adviceRestartControllerDeploymentName     = adviceRestartControllerServiceName
-	workloadControllerDeploymentName          = workloadControllerServiceName
-	anyworkloadControllerDeploymentName       = anyworkloadControllerServiceName
-	inferenceWorkloadControllerDeploymentName = inferenceWorkloadControllerServiceName
-	podGroupAssignerDeploymentName            = podGroupAssignerServiceName
-	accessruleControllerDeploymentName        = accessruleControllerServiceName
-	applicationControllerDeploymentName       = applicationControllerServiceName
-	agentDeploymentName                       = agentServiceName
+	namespace                             = "runai"
+	admissionControllerSecretName         = "runai-tls-secret"
+	anyworkloadControllerSecretName       = "runai-anyworkload-controller-tls-secret"
+	podGroupAssignerSecretName            = "runai-pod-group-assigner-tls-secret"        /* #nosec */
+	accessruleControllerSecretName        = "runai-accessrule-controller-tls-secret"     /* #nosec */
+	agentSecretName                       = "runai-agent-tls-secret"                     /* #nosec */
+	applicationControllerSecretName       = "application-controller-tls-secret"          /* #nosec */
+	adviceRestartControllerSecretName     = "runai-advice-restart-controller-tls-secret" /* #nosec */
+	admissionControllerServiceName        = "runai-admission-controller"
+	anyworkloadControllerServiceName      = "anyworkload-controller"
+	podGroupAssignerServiceName           = "pod-group-assigner"
+	accessruleControllerServiceName       = "accessrule-controller"
+	agentServiceName                      = "runai-agent"
+	adviceRestartControllerServiceName    = "advice-restart-controller"
+	admissionControllerDeploymentName     = "runai-admission-controller"
+	applicationControllerServiceName      = "application-controller"
+	adviceRestartControllerDeploymentName = adviceRestartControllerServiceName
+	anyworkloadControllerDeploymentName   = anyworkloadControllerServiceName
+	podGroupAssignerDeploymentName        = podGroupAssignerServiceName
+	accessruleControllerDeploymentName    = accessruleControllerServiceName
+	applicationControllerDeploymentName   = applicationControllerServiceName
+	agentDeploymentName                   = agentServiceName
 )
 
-func InitCA(
-	ctx context.Context, conf *rest.Config, webhooksPath string, options Options,
-) error {
+func InitCA(ctx context.Context, conf *rest.Config, webhooksPath string) error {
 	log.Printf("Run::AI init-ca")
 
 	kbClient := kubernetes.NewForConfigOrDie(conf)
@@ -84,7 +69,7 @@ func InitCA(
 	log.Printf("Signing certificates")
 	certSigner := certificates.NewSigner(conf)
 	webhookCertificates, err := signCertificates(
-		ctx, kbClient, certSigner, options)
+		ctx, kbClient, certSigner)
 	if err != nil {
 		return err
 	}
@@ -96,7 +81,7 @@ func InitCA(
 	)
 }
 
-func signCertificates(ctx context.Context, client kubernetes.Interface, certSigner certificates.CASigner, options Options) (
+func signCertificates(ctx context.Context, client kubernetes.Interface, certSigner certificates.CASigner) (
 	webhookCertificates *webhooks.WebhookCertificates,
 	err error,
 ) {
@@ -110,14 +95,6 @@ func signCertificates(ctx context.Context, client kubernetes.Interface, certSign
 	}
 	log.Printf("Signed certificate for admission controller")
 
-	if webhookCertificates.WorkloadControllerCertificateDetails, err = reconcileLegacyControllerCertificate(
-		ctx, client, certSigner, options.WorkloadControllerEnabled,
-		workloadControllerServiceName, workloadControllerSecretName,
-	); err != nil {
-		log.Printf("Failed to reconcile certificate for workload controller: %v", err)
-		return webhookCertificates, err
-	}
-
 	if webhookCertificates.AnyworkloadControllerCertificateDetails, err = certSigner.Sign(
 		ctx, anyworkloadControllerServiceName, anyworkloadControllerSecretName, namespace, true,
 	); err != nil {
@@ -125,14 +102,6 @@ func signCertificates(ctx context.Context, client kubernetes.Interface, certSign
 		return webhookCertificates, err
 	}
 	log.Printf("Signed certificate for anyworkload controller")
-
-	if webhookCertificates.InferenceWorkloadControllerCertificateDetails, err = reconcileLegacyControllerCertificate(
-		ctx, client, certSigner, options.InferenceWorkloadControllerEnabled,
-		inferenceWorkloadControllerServiceName, inferenceWorkloadControllerSecretName,
-	); err != nil {
-		log.Printf("Failed to reconcile certificate for inference workload controller: %v", err)
-		return webhookCertificates, err
-	}
 
 	if webhookCertificates.PodGroupAssignerCertificateDetails, err = certSigner.Sign(
 		ctx, podGroupAssignerServiceName, podGroupAssignerSecretName, namespace, true,
@@ -180,14 +149,6 @@ func signCertificates(ctx context.Context, client kubernetes.Interface, certSign
 		return webhookCertificates, err
 	}
 
-	if options.WorkloadControllerEnabled {
-		log.Printf("Restarting workload-controller")
-		if err = rolloutRestartDeployment(ctx, client, workloadControllerDeploymentName, namespace); err != nil {
-			log.Printf("Failed to restart deployment: %v", err)
-			return webhookCertificates, err
-		}
-	}
-
 	log.Printf("Restarting anyworkload-controller")
 	if err = rolloutRestartDeployment(ctx, client, anyworkloadControllerDeploymentName, namespace); err != nil {
 		log.Printf("Failed to restart deployment: %v", err)
@@ -198,14 +159,6 @@ func signCertificates(ctx context.Context, client kubernetes.Interface, certSign
 	if err = rolloutRestartDeployment(ctx, client, podGroupAssignerDeploymentName, namespace); err != nil {
 		log.Printf("Failed to restart deployment: %v", err)
 		return webhookCertificates, err
-	}
-
-	if options.InferenceWorkloadControllerEnabled {
-		log.Printf("Restarting inference-workload-controller")
-		if err = rolloutRestartDeployment(ctx, client, inferenceWorkloadControllerDeploymentName, namespace); err != nil {
-			log.Printf("Failed to restart deployment: %v", err)
-			return webhookCertificates, err
-		}
 	}
 
 	log.Printf("Restarting accessrule-controller")
@@ -233,22 +186,4 @@ func signCertificates(ctx context.Context, client kubernetes.Interface, certSign
 	}
 
 	return webhookCertificates, nil
-}
-
-func reconcileLegacyControllerCertificate(
-	ctx context.Context,
-	client kubernetes.Interface,
-	certSigner certificates.CASigner,
-	enabled bool,
-	serviceName, secretName string,
-) (*certificates.CertificateDetails, error) {
-	if !enabled {
-		err := client.CoreV1().Secrets(namespace).Delete(ctx, secretName, metav1.DeleteOptions{})
-		if k8serr.IsNotFound(err) {
-			return nil, nil
-		}
-		return nil, err
-	}
-
-	return certSigner.Sign(ctx, serviceName, secretName, namespace, true)
 }

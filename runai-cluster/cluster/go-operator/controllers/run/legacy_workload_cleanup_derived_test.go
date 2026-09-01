@@ -9,18 +9,22 @@ import (
 	"context"
 	"testing"
 
-	legacycleanup "github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/legacy-workload-cleanup"
 	cleanupoperand "github.com/run-ai/runai/runai-cluster/cluster/go-operator/internal/run/operands/legacy-workload-cleanup"
 	runaiv1 "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1"
 	"github.com/stretchr/testify/require"
+	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestLegacyCleanupCreatesJobFromUpgradeAndLiveState(t *testing.T) {
-	config := cleanupTestConfig("3.0.0", true)
-	config.Annotations = map[string]string{legacycleanup.SourceVersionAnnotation: "2.26.0"}
-	reconciler := cleanupTestReconciler(t, config)
+func TestLegacyCleanupCreatesJobWhenLegacyResourcesExist(t *testing.T) {
+	config := cleanupTestConfig(true)
+	deployment := &appsv1.Deployment{ObjectMeta: metav1.ObjectMeta{
+		Namespace: runaiv1.DefaultNamespace,
+		Name:      "workload-controller",
+	}}
+	reconciler := cleanupTestReconciler(t, config, deployment)
 
 	changed, err := reconciler.reconcileLegacyWorkloadCleanup(context.Background(), config)
 
@@ -30,10 +34,23 @@ func TestLegacyCleanupCreatesJobFromUpgradeAndLiveState(t *testing.T) {
 	require.Len(t, cleanupoperand.Operand(reconciler.localClusterClient, config).Resources(), 1)
 }
 
+func TestLegacyCleanupCreatesJobForRemainingLegacyService(t *testing.T) {
+	config := cleanupTestConfig(true)
+	service := &corev1.Service{ObjectMeta: metav1.ObjectMeta{
+		Namespace: runaiv1.DefaultNamespace,
+		Name:      "workload-controller",
+	}}
+	reconciler := cleanupTestReconciler(t, config, service)
+
+	changed, err := reconciler.reconcileLegacyWorkloadCleanup(context.Background(), config)
+
+	require.NoError(t, err)
+	require.True(t, changed)
+	requireCleanupCondition(t, config, metav1.ConditionFalse, string(runaiv1.LegacyWorkloadCleanupCreating))
+}
+
 func TestLegacyCleanupRestoresCompletionFromSuccessfulJob(t *testing.T) {
-	config := cleanupTestConfig("3.0.0", true)
-	config.Annotations = map[string]string{legacycleanup.SourceVersionAnnotation: "2.26.0"}
-	setCleanupControllerFlags(config, false)
+	config := cleanupTestConfig(true)
 	reconciler := cleanupTestReconciler(t, config, cleanupJob(batchv1.JobComplete, "Completed", "cleanup complete"))
 
 	changed, err := reconciler.reconcileLegacyWorkloadCleanup(context.Background(), config)
@@ -45,9 +62,7 @@ func TestLegacyCleanupRestoresCompletionFromSuccessfulJob(t *testing.T) {
 }
 
 func TestLegacyCleanupDoesNotRecreateDeletedSuccessfulJob(t *testing.T) {
-	config := cleanupTestConfig("3.0.0", true)
-	config.Annotations = map[string]string{legacycleanup.SourceVersionAnnotation: "2.26.0"}
-	setCleanupControllerFlags(config, false)
+	config := cleanupTestConfig(true)
 	job := cleanupJob(batchv1.JobComplete, "Completed", "cleanup complete")
 	reconciler := cleanupTestReconciler(t, config, job)
 

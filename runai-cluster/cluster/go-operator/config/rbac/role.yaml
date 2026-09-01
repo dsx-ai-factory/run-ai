@@ -25,6 +25,13 @@ rules:
   - watch
 - apiGroups:
   - ""
+  resources:
+  - secrets
+  - serviceaccounts
+  verbs:
+  - get
+- apiGroups:
+  - ""
   - serving.knative.dev
   resources:
   - services
@@ -32,6 +39,13 @@ rules:
   - get
   - list
   - watch
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - mutatingwebhookconfigurations
+  - validatingwebhookconfigurations
+  verbs:
+  - get
 - apiGroups:
   - admissionregistration.k8s.io
   resources:
@@ -53,6 +67,12 @@ rules:
   - get
   - list
   - watch
+- apiGroups:
+  - autoscaling.k8s.io
+  resources:
+  - verticalpodautoscalers
+  verbs:
+  - get
 - apiGroups:
   - kai.resources
   resources:
@@ -103,6 +123,21 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterrolebindings
+  - clusterroles
+  - roles
+  verbs:
+  - get
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - rolebindings
+  verbs:
+  - get
+  - list
 - apiGroups:
   - run.ai
   resources:

@@ -14,9 +14,7 @@ import (
 	anyworkload_controller "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/anyworkload-controller"
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/common"
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/global"
-	inference_workload_controller "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/inference-workload-controller"
 	runai_scheduler "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/runai-scheduler"
-	workload_controller "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/workload-controller"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/utils/ptr"
@@ -84,15 +82,11 @@ var _ = Describe("RunaiConfig", func() {
 			Expect(resource.Spec.Global.WorkloadInjectedContainers.S3FileSystem).NotTo(BeNil())
 		})
 
-		It("should use the pinned public username-loader image for all workload controllers", func() {
+		It("should use the pinned public username-loader image for anyworkload-controller", func() {
 			resource := &RunaiConfig{}
 			resource.SetDefaultsWhereNeeded()
 
-			images := []*common.Image{
-				resource.Spec.WorkloadController.RunaiOauth2ProxyUsernameLoaderImage,
-				resource.Spec.InferenceWorkloadController.RunaiOauth2ProxyUsernameLoaderImage,
-				resource.Spec.AnyworkloadController.RunaiOauth2ProxyUsernameLoaderImage,
-			}
+			images := []*common.Image{resource.Spec.AnyworkloadController.RunaiOauth2ProxyUsernameLoaderImage}
 			for _, image := range images {
 				Expect(image.Registry).NotTo(BeNil())
 				Expect(*image.Registry).To(Equal(common.WorkloadRunaiOauth2ProxyUsernameLoaderImageRegistry))
@@ -113,12 +107,6 @@ var _ = Describe("RunaiConfig", func() {
 			}
 			resource := &RunaiConfig{
 				Spec: RunaiConfigSpec{
-					WorkloadController: &workload_controller.WorkloadController{
-						RunaiOauth2ProxyUsernameLoaderImage: customImage(),
-					},
-					InferenceWorkloadController: &inference_workload_controller.InferenceWorkloadController{
-						RunaiOauth2ProxyUsernameLoaderImage: customImage(),
-					},
 					AnyworkloadController: &anyworkload_controller.AnyworkloadController{
 						RunaiOauth2ProxyUsernameLoaderImage: customImage(),
 					},
@@ -126,11 +114,7 @@ var _ = Describe("RunaiConfig", func() {
 			}
 			resource.SetDefaultsWhereNeeded()
 
-			images := []*common.Image{
-				resource.Spec.WorkloadController.RunaiOauth2ProxyUsernameLoaderImage,
-				resource.Spec.InferenceWorkloadController.RunaiOauth2ProxyUsernameLoaderImage,
-				resource.Spec.AnyworkloadController.RunaiOauth2ProxyUsernameLoaderImage,
-			}
+			images := []*common.Image{resource.Spec.AnyworkloadController.RunaiOauth2ProxyUsernameLoaderImage}
 			for _, image := range images {
 				Expect(image.Registry).NotTo(BeNil())
 				Expect(*image.Registry).To(Equal("registry.example.com"))
@@ -256,11 +240,8 @@ var _ = Describe("RunaiConfig", func() {
 						By("for workload services")
 						workloadServicesExpectedResources := v1.ResourceList{v1.ResourceCPU: resource.MustParse(workloadServicesCpu), v1.ResourceMemory: resource.MustParse(workloadServicesMemory)}
 
-						Expect(rc.Spec.WorkloadController.Resources.Requests).To(Equal(workloadServicesExpectedResources))
-						Expect(rc.Spec.WorkloadController.Resources.Limits).To(Equal(workloadServicesExpectedResources))
-
-						Expect(rc.Spec.JobController.Resources.Requests).To(Equal(workloadServicesExpectedResources))
-						Expect(rc.Spec.JobController.Resources.Limits).To(Equal(workloadServicesExpectedResources))
+						Expect(rc.Spec.AnyworkloadController.Resources.Requests).To(Equal(workloadServicesExpectedResources))
+						Expect(rc.Spec.AnyworkloadController.Resources.Limits).To(Equal(workloadServicesExpectedResources))
 
 						Expect(rc.Spec.RuntimeRules.Resources.Requests).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.RuntimeRules.Resources.Limits).To(Equal(workloadServicesExpectedResources))
@@ -273,9 +254,6 @@ var _ = Describe("RunaiConfig", func() {
 
 						Expect(rc.Spec.ClusterApi.Resources.Requests).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.ClusterApi.Resources.Limits).To(Equal(workloadServicesExpectedResources))
-
-						Expect(rc.Spec.InferenceWorkloadController.Resources.Requests).To(Equal(workloadServicesExpectedResources))
-						Expect(rc.Spec.InferenceWorkloadController.Resources.Limits).To(Equal(workloadServicesExpectedResources))
 
 						Expect(rc.Spec.ResearcherService.Resources.ResearcherService.Requests).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.ResearcherService.Resources.ResearcherService.Limits).To(Equal(workloadServicesExpectedResources))
@@ -336,13 +314,11 @@ var _ = Describe("RunaiConfig", func() {
 
 						By("for workload services")
 						workloadServicesExpectedResources := v1.ResourceList{v1.ResourceCPU: resource.MustParse(workloadServicesCpu), v1.ResourceMemory: resource.MustParse(workloadServicesMemory)}
-						Expect(rc.Spec.WorkloadController.Resources.Limits).To(Equal(workloadServicesExpectedResources))
-						Expect(rc.Spec.JobController.Resources.Limits).To(Equal(workloadServicesExpectedResources))
+						Expect(rc.Spec.AnyworkloadController.Resources.Limits).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.RuntimeRules.Resources.Limits).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.ExternalWorkloadIntegrator.Resources.Limits).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.ClusterRedis.Resources.Limits).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.ClusterApi.Resources.Limits).To(Equal(workloadServicesExpectedResources))
-						Expect(rc.Spec.InferenceWorkloadController.Resources.Limits).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.ResearcherService.Resources.ResearcherService.Limits).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.SharedObjectsController.Resources.Limits).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.WorkloadExporter.Resources.Limits).To(Equal(workloadServicesExpectedResources))
@@ -371,10 +347,8 @@ var _ = Describe("RunaiConfig", func() {
 						rc.SetDefaultsWhereNeeded()
 
 						workloadServicesExpectedResources := v1.ResourceList{v1.ResourceCPU: resource.MustParse(workloadServicesCpu), v1.ResourceMemory: resource.MustParse(workloadServicesMemory)}
-						Expect(rc.Spec.WorkloadController.Resources.Requests).To(Equal(workloadServicesExpectedResources))
-						Expect(rc.Spec.WorkloadController.Resources.Limits).To(Equal(workloadServicesExpectedResources))
-						Expect(rc.Spec.JobController.Resources.Requests).To(Equal(workloadServicesExpectedResources))
-						Expect(rc.Spec.JobController.Resources.Limits).To(Equal(workloadServicesExpectedResources))
+						Expect(rc.Spec.AnyworkloadController.Resources.Requests).To(Equal(workloadServicesExpectedResources))
+						Expect(rc.Spec.AnyworkloadController.Resources.Limits).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.RuntimeRules.Resources.Requests).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.RuntimeRules.Resources.Limits).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.ExternalWorkloadIntegrator.Resources.Requests).To(Equal(workloadServicesExpectedResources))
@@ -383,8 +357,6 @@ var _ = Describe("RunaiConfig", func() {
 						Expect(rc.Spec.ClusterRedis.Resources.Limits).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.ClusterApi.Resources.Requests).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.ClusterApi.Resources.Limits).To(Equal(workloadServicesExpectedResources))
-						Expect(rc.Spec.InferenceWorkloadController.Resources.Requests).To(Equal(workloadServicesExpectedResources))
-						Expect(rc.Spec.InferenceWorkloadController.Resources.Limits).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.ResearcherService.Resources.ResearcherService.Requests).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.ResearcherService.Resources.ResearcherService.Limits).To(Equal(workloadServicesExpectedResources))
 						Expect(rc.Spec.SharedObjectsController.Resources.Requests).To(Equal(workloadServicesExpectedResources))
@@ -427,8 +399,8 @@ var _ = Describe("RunaiConfig", func() {
 			})
 
 			It("should override individually set resources with group resources", func() {
-				rc.Spec.WorkloadController = &workload_controller.WorkloadController{
-					Resources: &workload_controller.Resources{
+				rc.Spec.AnyworkloadController = &anyworkload_controller.AnyworkloadController{
+					Resources: &anyworkload_controller.Resources{
 						Requests: v1.ResourceList{v1.ResourceCPU: resource.MustParse("100m"), v1.ResourceMemory: resource.MustParse("128Mi")},
 						Limits:   v1.ResourceList{v1.ResourceCPU: resource.MustParse("100m"), v1.ResourceMemory: resource.MustParse("128Mi")},
 					},
@@ -443,8 +415,8 @@ var _ = Describe("RunaiConfig", func() {
 				rc.SetDefaultsWhereNeeded()
 
 				groupExpected := v1.ResourceList{v1.ResourceCPU: resource.MustParse(groupCpu), v1.ResourceMemory: resource.MustParse(groupMemory)}
-				Expect(rc.Spec.WorkloadController.Resources.Requests).To(Equal(groupExpected))
-				Expect(rc.Spec.WorkloadController.Resources.Limits).To(Equal(groupExpected))
+				Expect(rc.Spec.AnyworkloadController.Resources.Requests).To(Equal(groupExpected))
+				Expect(rc.Spec.AnyworkloadController.Resources.Limits).To(Equal(groupExpected))
 				Expect(rc.Spec.RunAIScheduler.Resources.Requests).To(Equal(groupExpected))
 				Expect(rc.Spec.RunAIScheduler.Resources.Limits).To(Equal(groupExpected))
 			})
@@ -461,8 +433,8 @@ var _ = Describe("RunaiConfig", func() {
 			BeforeEach(func() {
 				rc = &RunaiConfig{
 					Spec: RunaiConfigSpec{
-						WorkloadController: &workload_controller.WorkloadController{
-							Resources: &workload_controller.Resources{
+						AnyworkloadController: &anyworkload_controller.AnyworkloadController{
+							Resources: &anyworkload_controller.Resources{
 								Requests: v1.ResourceList{v1.ResourceCPU: resource.MustParse(individualCpu), v1.ResourceMemory: resource.MustParse(individualMemory)},
 								Limits:   v1.ResourceList{v1.ResourceCPU: resource.MustParse(individualCpu), v1.ResourceMemory: resource.MustParse(individualMemory)},
 							},
@@ -481,8 +453,8 @@ var _ = Describe("RunaiConfig", func() {
 				rc.SetDefaultsWhereNeeded()
 
 				expectedResources := v1.ResourceList{v1.ResourceCPU: resource.MustParse(individualCpu), v1.ResourceMemory: resource.MustParse(individualMemory)}
-				Expect(rc.Spec.WorkloadController.Resources.Requests).To(Equal(expectedResources))
-				Expect(rc.Spec.WorkloadController.Resources.Limits).To(Equal(expectedResources))
+				Expect(rc.Spec.AnyworkloadController.Resources.Requests).To(Equal(expectedResources))
+				Expect(rc.Spec.AnyworkloadController.Resources.Limits).To(Equal(expectedResources))
 				Expect(rc.Spec.RunAIScheduler.Resources.Requests).To(Equal(expectedResources))
 				Expect(rc.Spec.RunAIScheduler.Resources.Limits).To(Equal(expectedResources))
 			})

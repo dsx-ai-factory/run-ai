@@ -9,7 +9,6 @@ import (
 	"context"
 	"fmt"
 	"hash/crc64"
-	"strconv"
 
 	"github.com/run-ai/runai/runai-cluster/cluster/go-operator/pkg/operands"
 	outils "github.com/run-ai/runai/runai-cluster/cluster/go-operator/pkg/operands/utils"
@@ -94,7 +93,7 @@ func DeploymentForRunaiConfig(ctx context.Context, k8sReader client.Reader,
 				Name:            "create-ca",
 				Image:           fmt.Sprintf("%s/%s:%s", *image.Registry, *image.Name, *image.Tag),
 				ImagePullPolicy: image.PullPolicy,
-				Args:            handleDeploymentArgs(runaiConfig),
+				Args:            handleDeploymentArgs(),
 				Resources:       v1.ResourceRequirements(*config.Resources),
 				VolumeMounts: append(outils.GlobalVolumeMounts(runaiConfig),
 					v1.VolumeMount{
@@ -165,12 +164,8 @@ func getWebhooksDataChecksum(ctx context.Context, k8sReader client.Reader, names
 	return fmt.Sprintf("%016x", checksum)
 }
 
-func handleDeploymentArgs(runaiConfig *runaiv1.RunaiConfig) []string {
-	return []string{
-		"--leader-elect",
-		"--workload-controller-enabled=" + strconv.FormatBool(*runaiConfig.Spec.WorkloadController.Enabled),
-		"--inference-workload-controller-enabled=" + strconv.FormatBool(*runaiConfig.Spec.InferenceWorkloadController.Enabled),
-	}
+func handleDeploymentArgs() []string {
+	return []string{"--leader-elect"}
 }
 
 func initCAContainerSecurityContext(runaiConfig *runaiv1.RunaiConfig) *v1.SecurityContext {

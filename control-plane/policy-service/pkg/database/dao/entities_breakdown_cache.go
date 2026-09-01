@@ -17,9 +17,11 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbtables"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/auth"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
 	"github.com/run-ai/runai/runai-application-packages/jsonutils/gojsonq"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
 	"github.com/run-ai/runai/runai-common-packages/logging"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
+	"github.com/run-ai/runai/runai-common-packages/runaidb/orm"
 	"gorm.io/gorm"
 )
 
@@ -29,19 +31,17 @@ import (
 // group, formatter) version bumps, every tenant's cached breakdown could be
 // affected and the cheapest correct response is to drop everything.
 func WipeAllEntityCaches(ctx context.Context) *api.Error {
-	db := dao_utils.DB().WithContext(ctx)
+	db := runaidb.DB().WithContext(ctx).Session(&gorm.Session{AllowGlobalUpdate: true})
 
-	res := db.Where(dao_utils.All).Delete(&dbmodel.EntitiesDependency{})
-	if res.Error != nil {
-		dbErr := database.Error(database.DELETE, database.EntitiesDependency).WithDetailsFromDb(res)
-		logging.Errorf("failed to wipe entities_dependency: %s: %v", dbErr.Message, res.Error)
+	if _, err := db.Delete(&dbmodel.EntitiesDependency{}); err != nil {
+		dbErr := database.Error(database.DELETE, database.EntitiesDependency).WithDetails(err)
+		logging.Errorf("failed to wipe entities_dependency: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 
-	res = db.Where(dao_utils.All).Delete(&dbmodel.EntitiesCache{})
-	if res.Error != nil {
-		dbErr := database.Error(database.DELETE, database.EntitiesCache).WithDetailsFromDb(res)
-		logging.Errorf("failed to wipe entities_cache: %s: %v", dbErr.Message, res.Error)
+	if _, err := db.Delete(&dbmodel.EntitiesCache{}); err != nil {
+		dbErr := database.Error(database.DELETE, database.EntitiesCache).WithDetails(err)
+		logging.Errorf("failed to wipe entities_cache: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 
@@ -52,18 +52,18 @@ func WipeAllEntityCaches(ctx context.Context) *api.Error {
 // the given tenant (in that order, to satisfy the FK). it is used by the
 // tenant/cluster/project deletion handlers, which prefer to drop all of the
 // tenant's caches and let them be recomputed on next read.
-func DeleteEntityCachesOfTenant(ctx context.Context, db *gorm.DB, tenantId int32) *api.Error {
-	res := db.Where(&dbmodel.EntitiesDependency{TenantId: tenantId}).Delete(&dbmodel.EntitiesDependency{})
-	if res.Error != nil {
-		dbErr := database.Error(database.DELETE, database.EntitiesDependency).WithDetailsFromDb(res)
-		logging.Errorf("failed to delete entities_dependency for tenant %d: %s: %v", tenantId, dbErr.Message, res.Error)
+func DeleteEntityCachesOfTenant(ctx context.Context, db orm.DB, tenantId int32) *api.Error {
+	rowsAffected, err := db.Where(&dbmodel.EntitiesDependency{TenantId: tenantId}).Delete(&dbmodel.EntitiesDependency{})
+	if err != nil {
+		dbErr := database.Error(database.DELETE, database.EntitiesDependency).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("failed to delete entities_dependency for tenant %d: %s: %v", tenantId, dbErr.Message, err)
 		return dbErr
 	}
 
-	res = db.Where(&dbmodel.EntitiesCache{TenantId: tenantId}).Delete(&dbmodel.EntitiesCache{})
-	if res.Error != nil {
-		dbErr := database.Error(database.DELETE, database.EntitiesCache).WithDetailsFromDb(res)
-		logging.Errorf("failed to delete entities_cache for tenant %d: %s: %v", tenantId, dbErr.Message, res.Error)
+	rowsAffected, err = db.Where(&dbmodel.EntitiesCache{TenantId: tenantId}).Delete(&dbmodel.EntitiesCache{})
+	if err != nil {
+		dbErr := database.Error(database.DELETE, database.EntitiesCache).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("failed to delete entities_cache for tenant %d: %s: %v", tenantId, dbErr.Message, err)
 		return dbErr
 	}
 
@@ -114,7 +114,7 @@ func GetCachedBreakdown(ctx context.Context, entityId string) (*api.BreakdownBre
 //     would leave them pointing at a non-existing id when the conflict fires.
 //  2. stamp every dependency with the actual id returned by step 1.
 //  3. upsert the dependency edges.
-func CacheBreakdown(ctx context.Context, tx *gorm.DB, entityId string, breakdown *api.BreakdownBreakdown,
+func CacheBreakdown(ctx context.Context, tx orm.DB, entityId string, breakdown *api.BreakdownBreakdown,
 	dependencies []dbmodel.EntitiesDependency,
 ) (uuid.UUID, *api.Error) {
 	cachedInfo, err := gojsonq.LoadJson(breakdown)
@@ -127,7 +127,7 @@ func CacheBreakdown(ctx context.Context, tx *gorm.DB, entityId string, breakdown
 	row := dbmodel.EntitiesCache{
 		EntityType: dbmodel.EntityTypeBreakdown,
 		EntityId:   entityId,
-		CachedInfo: dao_utils.JsonBMap(cachedInfo),
+		CachedInfo: dbmodels.JsonBMap(cachedInfo),
 	}
 
 	// step 1: upsert cache — RETURNING id gives the actual DB id
@@ -161,7 +161,7 @@ func CacheBreakdown(ctx context.Context, tx *gorm.DB, entityId string, breakdown
 //
 // the caller's transaction is reused (db is *gorm.DB) so the cache cleanup
 // commits or rolls back atomically with the surrounding policy change.
-func DeleteBreakdownCachesOfSubtree(ctx context.Context, db *gorm.DB, policyIds []string) *api.Error {
+func DeleteBreakdownCachesOfSubtree(ctx context.Context, db orm.DB, policyIds []string) *api.Error {
 	if len(policyIds) == 0 {
 		return nil
 	}
@@ -172,13 +172,12 @@ func DeleteBreakdownCachesOfSubtree(ctx context.Context, db *gorm.DB, policyIds 
 	// matching dependency rows (cache_id is the FK target). policies that
 	// have no cached breakdown simply contribute no cache_ids — no-op.
 	var cacheIds []uuid.UUID
-	res := db.Model(&dbmodel.EntitiesCache{}).
+	if err := db.Model(&dbmodel.EntitiesCache{}).
 		Where(&dbmodel.EntitiesCache{TenantId: tenantId, EntityType: dbmodel.EntityTypeBreakdown}).
 		Where(fmt.Sprintf("%s IN ?", dbtables.EntitiesCacheColumnEntityId), policyIds).
-		Pluck(dbtables.EntitiesCacheColumnId, &cacheIds)
-	if res.Error != nil {
-		dbErr := database.Error(database.LIST, database.EntitiesCache).WithDetailsFromDb(res)
-		logging.Errorf("failed to list subtree cache ids: %s: %v", dbErr.Message, res.Error)
+		Pluck(dbtables.EntitiesCacheColumnId, &cacheIds); err != nil {
+		dbErr := database.Error(database.LIST, database.EntitiesCache).WithDetails(err)
+		logging.Errorf("failed to list subtree cache ids: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 
@@ -187,22 +186,22 @@ func DeleteBreakdownCachesOfSubtree(ctx context.Context, db *gorm.DB, policyIds 
 	}
 
 	// step 2: drop dependency edges first to honor the FK to entities_cache.
-	res = db.Where(&dbmodel.EntitiesDependency{TenantId: tenantId}).
+	rowsAffected, err := db.Where(&dbmodel.EntitiesDependency{TenantId: tenantId}).
 		Where(fmt.Sprintf("%s IN ?", dbtables.EntitiesDependencyColumnCacheId), cacheIds).
 		Delete(&dbmodel.EntitiesDependency{})
-	if res.Error != nil {
-		dbErr := database.Error(database.DELETE, database.EntitiesDependency).WithDetailsFromDb(res)
-		logging.Errorf("failed to delete subtree dependency rows: %s: %v", dbErr.Message, res.Error)
+	if err != nil {
+		dbErr := database.Error(database.DELETE, database.EntitiesDependency).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("failed to delete subtree dependency rows: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 
 	// step 3: drop the cache rows themselves.
-	res = db.Where(&dbmodel.EntitiesCache{TenantId: tenantId}).
+	rowsAffected, err = db.Where(&dbmodel.EntitiesCache{TenantId: tenantId}).
 		Where(fmt.Sprintf("%s IN ?", dbtables.EntitiesCacheColumnId), cacheIds).
 		Delete(&dbmodel.EntitiesCache{})
-	if res.Error != nil {
-		dbErr := database.Error(database.DELETE, database.EntitiesCache).WithDetailsFromDb(res)
-		logging.Errorf("failed to delete subtree cache rows: %s: %v", dbErr.Message, res.Error)
+	if err != nil {
+		dbErr := database.Error(database.DELETE, database.EntitiesCache).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("failed to delete subtree cache rows: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 

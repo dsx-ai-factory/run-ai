@@ -8,7 +8,7 @@ package dbmodel
 import (
 	"github.com/google/uuid"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbtables"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
 )
 
 // EntityType is the kind of top-level entity whose computation is being cached.
@@ -30,7 +30,7 @@ type EntitiesCache struct {
 	EntityType EntityType
 	EntityId   string
 
-	CachedInfo dao_utils.JsonBMap `gorm:"type:jsonb;not null"`
+	CachedInfo dbmodels.JsonBMap `gorm:"type:jsonb;not null"`
 }
 
 func (EntitiesCache) TableName() string {

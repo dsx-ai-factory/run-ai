@@ -44,8 +44,8 @@ type PodHandler struct {
 	syncedObjectsMutex sync.RWMutex
 
 	// handle pods after their workload is handled.
-	// map of top owner workload uuid -> map of pods
-	enqueuePodsAddition      map[string]map[*coreV1.Pod]bool
+	// map of top owner workload uuid -> pods by key
+	enqueuePodsAddition      map[string]map[client.ObjectKey]*coreV1.Pod
 	enqueuePodsAdditionMutex sync.RWMutex
 	syncFailedProjects       map[string]bool
 	syncFailedProjectsMutex  sync.RWMutex
@@ -62,7 +62,7 @@ func NewPodHandler(runaiBackendClient *runaiBackendClient.BackendClient, cachedC
 		syncedObjectsMutex:       sync.RWMutex{},
 		podParser:                parsers.NewPodParser(cachedClient),
 		maxNumOfPodsPerRequest:   config.Config().MaxNumOfPodsPerRequest,
-		enqueuePodsAddition:      map[string]map[*coreV1.Pod]bool{},
+		enqueuePodsAddition:      map[string]map[client.ObjectKey]*coreV1.Pod{},
 		enqueuePodsAdditionMutex: sync.RWMutex{},
 		syncFailedProjects:       map[string]bool{},
 		syncFailedProjectsMutex:  sync.RWMutex{},
@@ -385,9 +385,9 @@ func (h *PodHandler) enqueuePodsHandlingForLaterIfNeeded(res *http.Response, err
 
 	_, found := h.enqueuePodsAddition[workloadId]
 	if !found {
-		h.enqueuePodsAddition[workloadId] = map[*coreV1.Pod]bool{}
+		h.enqueuePodsAddition[workloadId] = map[client.ObjectKey]*coreV1.Pod{}
 	}
-	h.enqueuePodsAddition[workloadId][pod] = true
+	h.enqueuePodsAddition[workloadId][client.ObjectKeyFromObject(pod)] = pod.DeepCopy()
 }
 
 // HandleAdditionOfWorkloadPodsAfterItWasAdded handles pods after their workload is handled.
@@ -395,10 +395,12 @@ func (h *PodHandler) enqueuePodsHandlingForLaterIfNeeded(res *http.Response, err
 // we will enqueue them and handle them after their workload is synced.
 func (h *PodHandler) HandleAdditionOfWorkloadPodsAfterItWasAdded(workloadId string,
 	podRateLimiter *cachedclient.RateLimitedController) error {
-	h.enqueuePodsAdditionMutex.RLock()
+	// take the batch out of the map before handling it, so no other goroutine can write to
+	// the map we are ranging over, and pods enqueued meanwhile survive for the next drain
+	h.enqueuePodsAdditionMutex.Lock()
 	podsToHandle, found := h.enqueuePodsAddition[workloadId]
-	// unlock read while handling owned objects
-	h.enqueuePodsAdditionMutex.RUnlock()
+	delete(h.enqueuePodsAddition, workloadId)
+	h.enqueuePodsAdditionMutex.Unlock()
 	if !found || len(podsToHandle) == 0 {
 		return nil
 	}
@@ -407,11 +409,11 @@ func (h *PodHandler) HandleAdditionOfWorkloadPodsAfterItWasAdded(workloadId stri
 		len(podsToHandle), workloadId)
 
 	var err error = nil
-	for pod := range podsToHandle {
+	for key, pod := range podsToHandle {
 		zap.S().Infof("Detected <%s/%s> as child of workload <%s>",
-			pod.Namespace, pod.Name, workloadId)
+			key.Namespace, key.Name, workloadId)
 		if podRateLimiter != nil {
-			podRateLimiter.AddRateLimited(client.ObjectKey{Name: pod.Name, Namespace: pod.Namespace})
+			podRateLimiter.AddRateLimited(key)
 		} else {
 			innerErr := h.handleAddUpdate(pod)
 			if innerErr != nil {
@@ -420,9 +422,6 @@ func (h *PodHandler) HandleAdditionOfWorkloadPodsAfterItWasAdded(workloadId stri
 		}
 	}
 
-	h.enqueuePodsAdditionMutex.Lock()
-	defer h.enqueuePodsAdditionMutex.Unlock()
-	delete(h.enqueuePodsAddition, workloadId)
 	return err
 }
 

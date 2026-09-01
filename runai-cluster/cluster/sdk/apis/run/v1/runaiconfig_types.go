@@ -31,7 +31,6 @@ import (
 	device_plugin "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/device-plugin"
 	engine "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/engine"
 	external_workload_integrator "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/external-workload-integrator"
-	inference_workload_controller "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/inference-workload-controller"
 	kai_operator "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/kai-operator"
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/knative"
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/lws"
@@ -48,7 +47,6 @@ import (
 	cluster_sync "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/cluster-sync"
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/global"
 	init_ca "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/init-ca"
-	job_controller "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/job-controller"
 	limit_range "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/limit-range"
 	mpi_opeator "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/mpi-operator"
 	mps_server "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/mps-server"
@@ -65,7 +63,6 @@ import (
 	runai_node_exporter "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/runai-node-exporter"
 	runai_scheduler "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/runai-scheduler"
 	status_updater "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/status-updater"
-	workload_controller "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/workload-controller"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -165,16 +162,14 @@ var ServiceGroupMapping = map[string]ServiceGroup{
 	"ClusterSync": SyncServicesGroup,
 
 	// Workload Services
-	"WorkloadController":          WorkloadServicesGroup,
-	"JobController":               WorkloadServicesGroup,
-	"RuntimeRules":                WorkloadServicesGroup,
-	"ExternalWorkloadIntegrator":  WorkloadServicesGroup,
-	"ClusterRedis":                WorkloadServicesGroup,
-	"ClusterApi":                  WorkloadServicesGroup,
-	"InferenceWorkloadController": WorkloadServicesGroup,
-	"ResearcherService":           WorkloadServicesGroup,
-	"SharedObjectsController":     WorkloadServicesGroup,
-	"WorkloadExporter":            WorkloadServicesGroup,
+	"RuntimeRules":               WorkloadServicesGroup,
+	"AnyworkloadController":      WorkloadServicesGroup,
+	"ExternalWorkloadIntegrator": WorkloadServicesGroup,
+	"ClusterRedis":               WorkloadServicesGroup,
+	"ClusterApi":                 WorkloadServicesGroup,
+	"ResearcherService":          WorkloadServicesGroup,
+	"SharedObjectsController":    WorkloadServicesGroup,
+	"WorkloadExporter":           WorkloadServicesGroup,
 }
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -207,10 +202,6 @@ type RunaiConfigSpec struct {
 	// AdmissionController specifies configuration for the admission-controller
 	// +kubebuilder:validation:Optional
 	AdmissionController *admission_controller.AdmissionController `json:"admission-controller,omitempty"`
-
-	// WorkloadController specifies configuration for the workload-controller
-	// +kubebuilder:validation:Optional
-	WorkloadController *workload_controller.WorkloadController `json:"workload-controller,omitempty"`
 
 	// InitCA specifies configuration for the init-ca job
 	// +kubebuilder:validation:Optional
@@ -263,10 +254,6 @@ type RunaiConfigSpec struct {
 	// Deprecated: retained as inert data for rollback to 2.26.
 	// +kubebuilder:validation:Optional
 	DevicePlugin *device_plugin.DevicePlugin `json:"device-plugin,omitempty"`
-
-	// JobController specifies configuration for the job-controller
-	// +kubebuilder:validation:Optional
-	JobController *job_controller.JobController `json:"job-controller,omitempty"`
 
 	// NodePoolController specifies configuration for the nodepool-controller
 	// +kubebuilder:validation:Optional
@@ -344,10 +331,6 @@ type RunaiConfigSpec struct {
 	// +kubebuilder:validation:Optional
 	ClusterApi *cluster_api.ClusterApi `json:"cluster-api,omitempty"`
 
-	// InferenceWorkloadController specifies configuration for the inference-workload-controller
-	// +kubebuilder:validation:Optional
-	InferenceWorkloadController *inference_workload_controller.InferenceWorkloadController `json:"inference-workload-controller,omitempty"`
-
 	// Knative specifies configuration for knative serving
 	// +kubebuilder:validation:Optional
 	Knative *knative.Knative `json:"knative,omitempty"`
@@ -392,9 +375,6 @@ func (runaiConfig *RunaiConfig) SetDefaultsWhereNeeded() {
 	if spec.AdmissionController == nil {
 		spec.AdmissionController = &admission_controller.AdmissionController{}
 	}
-	if spec.WorkloadController == nil {
-		spec.WorkloadController = &workload_controller.WorkloadController{}
-	}
 	if spec.InitCA == nil {
 		spec.InitCA = &init_ca.InitCA{}
 	}
@@ -421,9 +401,6 @@ func (runaiConfig *RunaiConfig) SetDefaultsWhereNeeded() {
 	}
 	if spec.Binder == nil {
 		spec.Binder = &binder.Binder{}
-	}
-	if spec.JobController == nil {
-		spec.JobController = &job_controller.JobController{}
 	}
 	if spec.NodePoolController == nil {
 		spec.NodePoolController = &nodepool_controller.NodePoolController{}
@@ -473,9 +450,6 @@ func (runaiConfig *RunaiConfig) SetDefaultsWhereNeeded() {
 	if spec.ClusterApi == nil {
 		spec.ClusterApi = &cluster_api.ClusterApi{}
 	}
-	if spec.InferenceWorkloadController == nil {
-		spec.InferenceWorkloadController = &inference_workload_controller.InferenceWorkloadController{}
-	}
 	if spec.Knative == nil {
 		spec.Knative = &knative.Knative{}
 	}
@@ -500,12 +474,10 @@ func (runaiConfig *RunaiConfig) SetDefaultsWhereNeeded() {
 	spec.RunAIScheduler.SetDefaultsWhereNeeded()
 	spec.Agent.SetDefaultsWhereNeeded(spec.Internal, spec.Global.ReplicaCount)
 	spec.AdmissionController.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry, spec.Global.ReplicaCount)
-	spec.WorkloadController.SetDefaultsWhereNeeded(spec.Internal, spec.Global)
 	spec.InitCA.SetDefaultsWhereNeeded(spec.Internal, spec.Global.ReplicaCount)
 	spec.MPSServer.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry)
 	spec.PodGroupAssigner.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry, spec.Global.ReplicaCount)
 	spec.ProjectController.SetDefaultsWhereNeeded(spec.Internal, spec.Internal.Global.ImageRegistry, spec.Global.ReplicaCount)
-	spec.JobController.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry)
 	spec.NodePoolController.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry, spec.Global.ReplicaCount)
 	spec.AccessRuleController.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry, spec.Global.ReplicaCount)
 	spec.ResearcherService.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry, spec.Global.ReplicaCount)
@@ -524,7 +496,6 @@ func (runaiConfig *RunaiConfig) SetDefaultsWhereNeeded() {
 	spec.ApplicationController.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry, spec.Global.ReplicaCount)
 	spec.SharedObjectsController.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry, spec.Global.ReplicaCount)
 	spec.ClusterApi.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry, spec.Global.ReplicaCount)
-	spec.InferenceWorkloadController.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry, spec.Global.ReplicaCount)
 	spec.Knative.SetDefaultsWhereNeeded()
 	spec.LWS.SetDefaultsWhereNeeded()
 	spec.ClusterRedis.SetDefaultsWhereNeeded(spec.Internal, spec.Global)

@@ -37,9 +37,7 @@ import (
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/engine"
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/external-workload-integrator"
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/global"
-	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/inference-workload-controller"
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/init-ca"
-	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/job-controller"
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/kai-operator"
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/knative"
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/limit-range"
@@ -64,7 +62,6 @@ import (
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/runtime-rules"
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/shared-objects-controller"
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/status-updater"
-	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/workload-controller"
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/workload-exporter"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
@@ -984,11 +981,6 @@ func (in *RunaiConfigSpec) DeepCopyInto(out *RunaiConfigSpec) {
 		*out = new(admission_controller.AdmissionController)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.WorkloadController != nil {
-		in, out := &in.WorkloadController, &out.WorkloadController
-		*out = new(workload_controller.WorkloadController)
-		(*in).DeepCopyInto(*out)
-	}
 	if in.InitCA != nil {
 		in, out := &in.InitCA, &out.InitCA
 		*out = new(init_ca.InitCA)
@@ -1052,11 +1044,6 @@ func (in *RunaiConfigSpec) DeepCopyInto(out *RunaiConfigSpec) {
 	if in.DevicePlugin != nil {
 		in, out := &in.DevicePlugin, &out.DevicePlugin
 		*out = new(device_plugin.DevicePlugin)
-		(*in).DeepCopyInto(*out)
-	}
-	if in.JobController != nil {
-		in, out := &in.JobController, &out.JobController
-		*out = new(job_controller.JobController)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.NodePoolController != nil {
@@ -1152,11 +1139,6 @@ func (in *RunaiConfigSpec) DeepCopyInto(out *RunaiConfigSpec) {
 	if in.ClusterApi != nil {
 		in, out := &in.ClusterApi, &out.ClusterApi
 		*out = new(cluster_api.ClusterApi)
-		(*in).DeepCopyInto(*out)
-	}
-	if in.InferenceWorkloadController != nil {
-		in, out := &in.InferenceWorkloadController, &out.InferenceWorkloadController
-		*out = new(inference_workload_controller.InferenceWorkloadController)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.Knative != nil {

@@ -22,29 +22,27 @@ import (
 )
 
 type ProjectHandler struct {
-	K8sClient              client.Client
-	QueuesManager          *queuesManager.QueuesManager
-	PrometheusQuerier      prometheus.Querier
-	workloadCache          *util.WorkloadCache
-	Recorder               record.EventRecorder
-	EventList              []int
-	workloadValidator      *validation.WorkloadValidator
-	supportedJobKinds      map[string]client.Object
-	legacyWorkloadsEnabled bool
+	K8sClient         client.Client
+	QueuesManager     *queuesManager.QueuesManager
+	PrometheusQuerier prometheus.Querier
+	workloadCache     *util.WorkloadCache
+	Recorder          record.EventRecorder
+	EventList         []int
+	workloadValidator *validation.WorkloadValidator
+	supportedJobKinds map[string]client.Object
 }
 
 func NewProjectHandler(k8sClient client.Client, qm *queuesManager.QueuesManager, promQuerier prometheus.Querier, workloadCache *util.WorkloadCache,
-	recorder record.EventRecorder, eventList []int, workloadValidator *validation.WorkloadValidator, supportedJobKinds map[string]client.Object, legacyWorkloadsEnabled bool) *ProjectHandler {
+	recorder record.EventRecorder, eventList []int, workloadValidator *validation.WorkloadValidator, supportedJobKinds map[string]client.Object) *ProjectHandler {
 	return &ProjectHandler{
-		K8sClient:              k8sClient,
-		QueuesManager:          qm,
-		PrometheusQuerier:      promQuerier,
-		workloadCache:          workloadCache,
-		Recorder:               recorder,
-		EventList:              eventList,
-		workloadValidator:      workloadValidator,
-		supportedJobKinds:      supportedJobKinds,
-		legacyWorkloadsEnabled: legacyWorkloadsEnabled,
+		K8sClient:         k8sClient,
+		QueuesManager:     qm,
+		PrometheusQuerier: promQuerier,
+		workloadCache:     workloadCache,
+		Recorder:          recorder,
+		EventList:         eventList,
+		workloadValidator: workloadValidator,
+		supportedJobKinds: supportedJobKinds,
 	}
 }
 
@@ -116,7 +114,7 @@ func (projectHandler *ProjectHandler) HandleUpdate(ctx context.Context, project 
 	// list all workloads in the project
 	// add them to the queue again with the update fields
 	err := queuesManager.PushProjectWorkloadsToProjectQueue(ctx, projectHandler.workloadCache, projectHandler.K8sClient,
-		projectHandler.PrometheusQuerier, project.Name, project.Status.Namespace, projectQueue, projectHandler.supportedJobKinds, projectHandler.legacyWorkloadsEnabled)
+		projectHandler.PrometheusQuerier, project.Name, project.Status.Namespace, projectQueue, projectHandler.supportedJobKinds)
 	if err != nil {
 		zap.S().Errorf("Error while try to update project queue with project workloads, err: %+v ", err)
 		return err
@@ -185,7 +183,7 @@ func (projectHandler *ProjectHandler) HandleAdd(ctx context.Context, project *ka
 	// list all workloads in the project
 	// add them to the queue again with the update fields
 	err := queuesManager.PushProjectWorkloadsToProjectQueue(ctx, projectHandler.workloadCache, projectHandler.K8sClient,
-		projectHandler.PrometheusQuerier, project.Name, project.Status.Namespace, projectQueue, projectHandler.supportedJobKinds, projectHandler.legacyWorkloadsEnabled)
+		projectHandler.PrometheusQuerier, project.Name, project.Status.Namespace, projectQueue, projectHandler.supportedJobKinds)
 	if err != nil {
 		zap.S().Errorf("error while try to init project queue with project workloads, err: %+v ", err)
 		return err

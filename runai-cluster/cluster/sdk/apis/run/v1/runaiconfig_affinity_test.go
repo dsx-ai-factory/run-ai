@@ -111,9 +111,9 @@ var _ = Describe("RunaiConfig CRD Affinity Fields", func() {
 					"Add '// +kubebuilder:pruning:PreserveUnknownFields' marker to the Go type and regenerate CRDs.",
 				missing)
 
-			// Sanity check: we expect at least 29 schemaless affinity fields
-			Expect(len(schemalessAffinityFields)).To(BeNumerically(">=", 29),
-				"Expected at least 29 schemaless affinity fields, found %d", len(schemalessAffinityFields))
+			// Sanity check: all current operand affinity fields should be represented.
+			Expect(len(schemalessAffinityFields)).To(BeNumerically(">=", 26),
+				"Expected at least 26 schemaless affinity fields, found %d", len(schemalessAffinityFields))
 		})
 	})
 })

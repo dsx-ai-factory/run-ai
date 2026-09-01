@@ -1,10 +1,10 @@
 # runtime-rules
 A simple tool to enforce runtime rules on the workloads of a Kubernetes cluster.
-for now we support only the following workloads:
-- InteractiveWorkload
+for now we support only WorkloadRunner-backed workloads:
+- Interactive
   - InteractiveJobMaxIdleDurationSecs
   - InteractiveJobTimeLimitSecs
-- TrainingWokload
+- Training and distributed training
   - TrainingJobMaxIdleDurationSecs
   - TrainingJobTimeLimitSecs
 

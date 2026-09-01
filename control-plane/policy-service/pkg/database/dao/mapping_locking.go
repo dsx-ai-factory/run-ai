@@ -19,8 +19,8 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbtables"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/auth"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
 	"github.com/run-ai/runai/runai-common-packages/logging"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 	"gorm.io/gorm"
 )
 
@@ -38,15 +38,15 @@ func AcquireTenantMappingLock(ctx context.Context) (release func(), apiErr *api.
 	now := time.Now().UTC()
 	staleCutoff := now.Add(-tenantMappingLockStaleDuration)
 
-	db := dao_utils.DB().WithContext(ctx)
+	db := runaidb.DB().WithContext(ctx)
 
 	// delete obsolete entries from a possibly panicked service (5 seconds grace time)
-	delRes := db.Model(&dbmodel.MappingLocking{}).
+	delRows, delErr := db.Model(&dbmodel.MappingLocking{}).
 		Where(fmt.Sprintf("%s = ? AND %s <= ?", dbtables.MappingLockingColumnTenantId, dbtables.MappingLockingColumnLockedAt), tenantID, staleCutoff).
 		Delete(&dbmodel.MappingLocking{})
-	if delRes.Error != nil {
-		dbErr := database.Error(database.DELETE, database.MappingLocking).WithDetailsFromDb(delRes)
-		logging.Errorf("failed to delete stale tenant mapping locks: %s: %v", dbErr.Message, delRes.Error)
+	if delErr != nil {
+		dbErr := database.Error(database.DELETE, database.MappingLocking).WithDetailsFromDbResult(delRows, delErr)
+		logging.Errorf("failed to delete stale tenant mapping locks: %s: %v", dbErr.Message, delErr)
 		return nil, dbErr
 	}
 
@@ -57,23 +57,21 @@ func AcquireTenantMappingLock(ctx context.Context) (release func(), apiErr *api.
 		LockedAt: now,
 	}
 
-	res := db.Model(&row).Create(&row)
-	if res.Error != nil {
-		if isUniqueViolation(res.Error) {
+	if _, createErr := db.Model(&row).Create(&row); createErr != nil {
+		if isUniqueViolation(createErr) {
 			return nil, api.NewError(http.StatusConflict, mappingLockBusyMessage, nil)
 		}
-		dbErr := database.Error(database.CREATE, database.MappingLocking).WithDetailsFromDb(res)
-		logging.Errorf("failed to acquire tenant mapping lock for tenant %d: %s: %v", tenantID, dbErr.Message, res.Error)
+		dbErr := database.Error(database.CREATE, database.MappingLocking).WithDetails(createErr)
+		logging.Errorf("failed to acquire tenant mapping lock for tenant %d: %s: %v", tenantID, dbErr.Message, createErr)
 		return nil, dbErr
 	}
 
 	return func() {
-		res := dao_utils.DB().WithContext(ctx).
+		if _, err := runaidb.DB().WithContext(ctx).
 			Model(&dbmodel.MappingLocking{}).
 			Where(fmt.Sprintf("%s = ?", dbtables.MappingLockingColumnTenantId), tenantID).
-			Delete(&dbmodel.MappingLocking{})
-		if res.Error != nil {
-			logging.Errorf("failed to release tenant mapping lock for tenant %d: %v", tenantID, res.Error)
+			Delete(&dbmodel.MappingLocking{}); err != nil {
+			logging.Errorf("failed to release tenant mapping lock for tenant %d: %v", tenantID, err)
 		}
 	}, nil
 }

@@ -7,6 +7,7 @@ package dao
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -16,9 +17,10 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbtables"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/auth"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
 	"github.com/run-ai/runai/runai-common-packages/logging"
 	"github.com/run-ai/runai/runai-common-packages/runaictx"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
+	"github.com/run-ai/runai/runai-common-packages/runaidb/orm"
 )
 
 func ListApprovedDeletionsByTenant(ctx context.Context) (map[string]*api.SyncConfig, *api.Error) {
@@ -30,10 +32,9 @@ func ListApprovedDeletionsByTenant(ctx context.Context) (map[string]*api.SyncCon
 
 	records := make([]dbmodel.ApprovedDeletions, 0)
 
-	result := dao_utils.DB().WithContext(ctx).Model(&dbmodel.ApprovedDeletions{}).Where(&key).Scan(&records)
-	if result.Error != nil {
-		dbErr := database.Error(database.LIST, database.ApprovedDeletions).WithDetailsFromDb(result)
-		logging.Errorf("failed to list approved deletions: %s: %v", dbErr.Message, result.Error)
+	if _, err := runaidb.DB().WithContext(ctx).Model(&dbmodel.ApprovedDeletions{}).Where(&key).Scan(&records); err != nil {
+		dbErr := database.Error(database.LIST, database.ApprovedDeletions).WithDetails(err)
+		logging.Errorf("failed to list approved deletions: %s: %v", dbErr.Message, err)
 		return nil, dbErr
 	}
 
@@ -63,15 +64,13 @@ func GetApprovedDeletionsInfoOfCluster(ctx context.Context, clusterId string) (*
 
 	var record dbmodel.ApprovedDeletions
 
-	result := dao_utils.DB().WithContext(ctx).Model(&record).Where(&key).Find(&record)
-	if result.Error != nil {
-		dbErr := database.Error(database.GET, database.ApprovedDeletions).WithDetailsFromDb(result)
-		logging.Errorf("failed to get approved deletions info: %s: %v", dbErr.Message, result.Error)
+	if err := runaidb.DB().WithContext(ctx).Model(&record).Where(&key).Take(&record); err != nil {
+		if errors.Is(err, orm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		dbErr := database.Error(database.GET, database.ApprovedDeletions).WithDetails(err)
+		logging.Errorf("failed to get approved deletions info: %s: %v", dbErr.Message, err)
 		return nil, dbErr
-	}
-
-	if result.RowsAffected == 0 {
-		return nil, nil // no info found
 	}
 
 	return &record, nil
@@ -80,7 +79,7 @@ func GetApprovedDeletionsInfoOfCluster(ctx context.Context, clusterId string) (*
 func UpdateApprovedDeletionOfCluster(ctx context.Context, syncConfig api.SyncConfig) (*dbmodel.ApprovedDeletions, *api.Error) {
 	tenantId := auth.TenantIdOf(ctx)
 
-	db := dao_utils.DB().WithContext(ctx)
+	db := runaidb.DB().WithContext(ctx)
 
 	key := dbmodel.ApprovedDeletionsKey{
 		TenantId:  tenantId,
@@ -93,11 +92,9 @@ func UpdateApprovedDeletionOfCluster(ctx context.Context, syncConfig api.SyncCon
 
 	var record dbmodel.ApprovedDeletions
 
-	result := db.Model(&record).Where(&key).Assign(values).FirstOrCreate(&record)
-
-	if result.Error != nil {
-		dbErr := database.Error(database.UPSERT, database.ApprovedDeletions).WithDetailsFromDb(result)
-		logging.Errorf("failed to upsert approved deletions: %s: %v", dbErr.Message, result.Error)
+	if _, err := db.Model(&record).Where(&key).Assign(values).FirstOrCreate(&record); err != nil {
+		dbErr := database.Error(database.UPSERT, database.ApprovedDeletions).WithDetails(err)
+		logging.Errorf("failed to upsert approved deletions: %s: %v", dbErr.Message, err)
 		return nil, dbErr
 	}
 
@@ -105,7 +102,7 @@ func UpdateApprovedDeletionOfCluster(ctx context.Context, syncConfig api.SyncCon
 }
 
 func UpdateApprovedDeletionByIds(ctx context.Context, ids []string, avoidDeletionsOfObsoletePolicies bool) {
-	db := dao_utils.DB().WithContext(ctx)
+	db := runaidb.DB().WithContext(ctx)
 
 	for _, id := range ids {
 		record := dbmodel.ApprovedDeletions{
@@ -116,32 +113,31 @@ func UpdateApprovedDeletionByIds(ctx context.Context, ids []string, avoidDeletio
 			AvoidDeletionsOfObsoletePolicies: avoidDeletionsOfObsoletePolicies,
 		}
 
-		result := db.Model(&record).Create(&record)
-		if result.Error != nil {
+		if _, createErr := db.Model(&record).Create(&record); createErr != nil {
 			// in this case we only want to log the error and not fail the API, because the implication of this
 			// error is that the user will have to keep approving but at least his original request will not fail
-			err := database.Error(database.CREATE, database.ApprovedDeletions).WithDetailsFromDb(result)
+			err := database.Error(database.CREATE, database.ApprovedDeletions).WithDetails(createErr)
 			if err.Code != http.StatusConflict {
 				logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("[%d] failed to update approved deletions for cluster %v: %s: %v",
-					record.TenantId, record.ClusterId, err.Message, result.Error)
+					record.TenantId, record.ClusterId, err.Message, createErr)
 			}
 		}
 	}
 }
 
 func DeleteApprovedDeletionByIds(ctx context.Context, ids []string) {
-	db := dao_utils.DB().WithContext(ctx)
+	db := runaidb.DB().WithContext(ctx)
 
 	tenantKey := dbmodel.ApprovedDeletionsKey{
 		TenantId: auth.TenantIdOf(ctx),
 	}
 
-	result := db.Model(&dbmodel.ApprovedDeletions{}).Where(&tenantKey).Where(fmt.Sprintf("%s in ?", dbtables.ApprovedDeletionsColumnClusterId), ids).Delete(dao_utils.All)
-	if result.Error != nil {
+	rowsAffected, deleteErr := db.Model(&dbmodel.ApprovedDeletions{}).Where(&tenantKey).Where(fmt.Sprintf("%s in ?", dbtables.ApprovedDeletionsColumnClusterId), ids).Delete(&dbmodel.ApprovedDeletions{})
+	if deleteErr != nil {
 		// in this case we only want to log the error and not fail the API, because the implication of this
 		// error is that the cluster will continue to get deletions instead of applies.
-		err := database.Error(database.CREATE, database.ApprovedDeletions).WithDetailsFromDb(result)
+		err := database.Error(database.CREATE, database.ApprovedDeletions).WithDetailsFromDbResult(rowsAffected, deleteErr)
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("[%d] failed to update approved deletions for clusters %s: %s: %v",
-			tenantKey.TenantId, strings.Join(ids, ","), err.Message, result.Error)
+			tenantKey.TenantId, strings.Join(ids, ","), err.Message, deleteErr)
 	}
 }

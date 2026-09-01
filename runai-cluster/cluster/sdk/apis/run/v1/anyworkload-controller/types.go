@@ -58,6 +58,14 @@ type AnyworkloadController struct {
 	// +kubebuilder:validation:Optional
 	Metrics *common.Service `json:"metrics,omitempty"`
 
+	// GitSyncImage specifies the image used by the git-sync injected container.
+	// +kubebuilder:validation:Optional
+	GitSyncImage *common.Image `json:"gitSyncImage,omitempty"`
+
+	// S3FileSystemImage specifies the image used by the S3 filesystem injected container.
+	// +kubebuilder:validation:Optional
+	S3FileSystemImage *common.Image `json:"s3FileSystemImage,omitempty"`
+
 	// RunaiOauth2ProxyImage specifies the image of oauth2-proxy, which is used to authenticate users for external URL workloads.
 	// +kubebuilder:validation:Optional
 	RunaiOauth2ProxyImage *common.Image `json:"runaiOauth2ProxyImage,omitempty"`
@@ -78,12 +86,44 @@ type AnyworkloadController struct {
 	// +kubebuilder:validation:Optional
 	RunaiOauth2ProxyUsernameLoaderImage *common.Image `json:"runaiOauth2ProxyUsernameLoaderImage,omitempty"`
 
+	// ExternalAuthUrlEnabled indicates whether external URL workloads use the OAuth2 proxy.
+	// +kubebuilder:validation:Optional
+	ExternalAuthUrlEnabled *bool `json:"externalAuthUrlEnabled,omitempty"`
+
+	// OpenshiftRouteConfiguration controls defaults for Run:ai-managed OpenShift Route objects.
+	// +kubebuilder:validation:Optional
+	OpenshiftRouteConfiguration *OpenshiftRouteConfiguration `json:"openshiftRouteConfiguration,omitempty"`
+
 	// Affinity specifies the pod's scheduling constraints for the anyworkload-controller
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Schemaless
 	// +kubebuilder:validation:Type=object
 	// +kubebuilder:pruning:PreserveUnknownFields
 	Affinity *v1.Affinity `json:"affinity,omitempty"`
+}
+
+// OpenshiftRouteTerminationPolicy is the OpenShift Route TLS termination policy applied to Run:ai-managed Routes.
+// +kubebuilder:validation:Enum=edge;passthrough
+type OpenshiftRouteTerminationPolicy string
+
+const (
+	OpenshiftRouteTerminationPolicyEdge        OpenshiftRouteTerminationPolicy = "edge"
+	OpenshiftRouteTerminationPolicyPassthrough OpenshiftRouteTerminationPolicy = "passthrough"
+)
+
+// OpenshiftRouteConfiguration configures defaults applied to Run:ai-managed OpenShift Route objects.
+type OpenshiftRouteConfiguration struct {
+	// TerminationPolicy specifies the TLS termination policy for Run:ai-generated OpenShift Routes.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default:=edge
+	TerminationPolicy OpenshiftRouteTerminationPolicy `json:"terminationPolicy,omitempty" jsonschema:"enum=edge,enum=passthrough,default=edge"`
+}
+
+func (o *OpenshiftRouteConfiguration) GetTerminationPolicy() OpenshiftRouteTerminationPolicy {
+	if o == nil || o.TerminationPolicy == "" {
+		return OpenshiftRouteTerminationPolicyEdge
+	}
+	return o.TerminationPolicy
 }
 
 // SetDefaultsWhereNeeded sets default for unset fields
@@ -121,6 +161,13 @@ func (a *AnyworkloadController) SetDefaultsWhereNeeded(globalRegistry string) {
 		a.EnableElasticComputeDomain = ptr.To(false)
 	}
 
+	if a.OpenshiftRouteConfiguration == nil {
+		a.OpenshiftRouteConfiguration = &OpenshiftRouteConfiguration{}
+	}
+	if a.OpenshiftRouteConfiguration.TerminationPolicy == "" {
+		a.OpenshiftRouteConfiguration.TerminationPolicy = OpenshiftRouteTerminationPolicyEdge
+	}
+
 	if a.StoragePluginEnabled == nil {
 		a.StoragePluginEnabled = ptr.To(true)
 	}
@@ -133,6 +180,23 @@ func (a *AnyworkloadController) SetDefaultsWhereNeeded(globalRegistry string) {
 		a.Metrics = &common.Service{}
 	}
 	a.Metrics.SetDefaultsWhereNeeded(9400, 9400, v1.ServiceTypeClusterIP)
+
+	if a.GitSyncImage == nil {
+		a.GitSyncImage = &common.Image{}
+	}
+	a.GitSyncImage.SetDefaultsWhereNeeded(&common.Image{
+		Registry: ptr.To(common.GitSyncImageRegistry),
+		Name:     ptr.To(common.GitSyncImageName),
+		Tag:      ptr.To(common.GitSyncImageTag),
+	})
+
+	if a.S3FileSystemImage == nil {
+		a.S3FileSystemImage = &common.Image{}
+	}
+	a.S3FileSystemImage.SetDefaultsWhereNeeded(&common.Image{
+		Registry: ptr.To(globalRegistry),
+		Name:     ptr.To("goofys"),
+	})
 
 	if a.RunaiOauth2ProxyImage == nil {
 		a.RunaiOauth2ProxyImage = &common.Image{}
@@ -162,6 +226,10 @@ func (a *AnyworkloadController) SetDefaultsWhereNeeded(globalRegistry string) {
 		Name:     ptr.To(common.WorkloadRunaiOauth2ProxyUsernameLoaderImageName),
 		Tag:      ptr.To(common.WorkloadRunaiOauth2ProxyUsernameLoaderImageTag),
 	})
+
+	if a.ExternalAuthUrlEnabled == nil {
+		a.ExternalAuthUrlEnabled = ptr.To(true)
+	}
 }
 
 // Resources specifies container resource requirements

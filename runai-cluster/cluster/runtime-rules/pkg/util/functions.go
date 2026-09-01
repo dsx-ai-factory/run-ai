@@ -16,14 +16,10 @@ import (
 	"github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/workload_fields/field_groups"
 	fields "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
 	gpuvalidator "github.com/run-ai/runai/runai-cluster/cluster/workload-common/gpu-validator"
-	dw "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/distributedworkload/v2alpha1"
-	iw "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/interactiveworkload/v2alpha1"
 	"github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/jobs"
-	tw "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/trainingworkload/v2alpha1"
 	"github.com/run-ai/runai/runai-cluster/common/constants"
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -117,34 +113,6 @@ func GetEnvOrDefaultIntArray(environmentVariableName string, defaultValue []int)
 		ans = append(ans, strInt)
 	}
 	return ans
-}
-
-// ConvertToJobWorkload projects a legacy CRD (Training/Interactive/Distributed)
-// onto the unified JobWorkload shape via its CopyTo method. WorkloadRunner has
-// its own converter (util.RunnerConverter) because the projection reads
-// GPU/auto-delete metadata off the runner's Spec.Template — see runner_converter.go.
-func ConvertToJobWorkload(object runtime.Object) (*jobs.JobWorkload, error) {
-	var (
-		jobWorkload jobs.JobWorkload
-		err         error
-	)
-
-	switch workloadObject := object.(type) {
-	case *tw.TrainingWorkload:
-		workloadObject.CopyTo(&jobWorkload)
-	case *iw.InteractiveWorkload:
-		workloadObject.CopyTo(&jobWorkload)
-	case *dw.DistributedWorkload:
-		workloadObject.CopyTo(&jobWorkload)
-	default:
-		unknownKind := UnknownKind
-		if object != nil && object.GetObjectKind() != nil {
-			unknownKind = object.GetObjectKind().GroupVersionKind().Kind
-		}
-		err = fmt.Errorf(UnknownKindMsg, unknownKind)
-	}
-
-	return &jobWorkload, err
 }
 
 // isRunnerActivePhase maps WorkloadRunnerPhase to the active/inactive split the

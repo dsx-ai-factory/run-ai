@@ -15,7 +15,7 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/runai-application-packages/convutils"
 	"github.com/run-ai/runai/runai-application-packages/datastructs"
-	"gorm.io/gorm"
+	"github.com/run-ai/runai/runai-common-packages/runaidb/orm"
 )
 
 // BreakdownResult is the output of BreakdownGenerator.Generate. it pairs the
@@ -48,10 +48,10 @@ type FieldRef struct {
 type BreakdownGenerator struct {
 	gvk     api.Gvk
 	mapping *api.Mapping
-	tx      *gorm.DB
+	tx      orm.DB
 }
 
-func NewBreakdownGenerator(ctx context.Context, tx *gorm.DB, gvk api.Gvk) (*BreakdownGenerator, *api.Error) {
+func NewBreakdownGenerator(ctx context.Context, tx orm.DB, gvk api.Gvk) (*BreakdownGenerator, *api.Error) {
 	byScope, err := dao.GetMappingByGvk(ctx, gvk)
 	if err != nil {
 		return nil, err

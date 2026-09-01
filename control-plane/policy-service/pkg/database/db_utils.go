@@ -14,8 +14,9 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbtables"
 
 	"github.com/run-ai/runai/control-plane/policy-service/generated/pkg/api"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
 	"github.com/run-ai/runai/runai-application-packages/jsonutils/gojsonq"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 )
 
 type DbOperation int
@@ -68,7 +69,7 @@ func Error(operation DbOperation, entity DbEntity) *api.Error {
 	return api.NewError(http.StatusServiceUnavailable, msg, nil)
 }
 
-func CleanMap(aMap dao_utils.JsonBMap) dao_utils.JsonBMap {
+func CleanMap(aMap dbmodels.JsonBMap) dbmodels.JsonBMap {
 	if aMap != nil {
 		gojsonq.CleanMap(aMap)
 	}
@@ -117,20 +118,20 @@ var tablesWithSystemRows = []struct {
 // surviving system policy (currently none, but that path is preserved from the
 // previous implementation in case future code starts persisting one).
 func DeleteAllTablesForTesting() {
-	db := DB()
+	db := runaidb.DB()
 
-	res := db.Exec(fmt.Sprintf("TRUNCATE TABLE %s RESTART IDENTITY",
+	_, err := db.Exec(fmt.Sprintf("TRUNCATE TABLE %s RESTART IDENTITY",
 		strings.Join(tablesWithoutSystemRows, ", ")))
-	Expect(res.Error).ToNot(HaveOccurred())
+	Expect(err).ToNot(HaveOccurred())
 
 	for _, t := range tablesWithSystemRows {
-		res = db.Exec(fmt.Sprintf("DELETE FROM %s WHERE %s != 'system'", t.table, t.scopeColumn))
-		Expect(res.Error).ToNot(HaveOccurred())
+		_, err = db.Exec(fmt.Sprintf("DELETE FROM %s WHERE %s != 'system'", t.table, t.scopeColumn))
+		Expect(err).ToNot(HaveOccurred())
 	}
 
-	res = db.Exec(fmt.Sprintf(
+	_, err = db.Exec(fmt.Sprintf(
 		"DELETE FROM %s WHERE %s NOT IN (SELECT %s FROM %s)",
 		dbtables.EffectivePoliciesTable, dbtables.EffectivePoliciesColumnPolicyId,
 		dbtables.PoliciesColumnId, dbtables.PoliciesTable))
-	Expect(res.Error).ToNot(HaveOccurred())
+	Expect(err).ToNot(HaveOccurred())
 }

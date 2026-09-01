@@ -13,9 +13,6 @@ import (
 	ra "github.com/run-ai/runai/runai-cluster/cluster/helm-hooks-handler/internal/cluster-actions"
 	testu "github.com/run-ai/runai/runai-cluster/cluster/helm-hooks-handler/internal/test-util"
 	runaiv1 "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1"
-	anyworkload_controller "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/anyworkload-controller"
-	inference_workload_controller "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/inference-workload-controller"
-	workload_controller "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/workload-controller"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -139,27 +136,11 @@ func TestGpuNetworkAcceleration_UpdateRunaiConfig_AnyworkloadSectionPresent(t *t
 // dynamic client, mirroring the nodepool-controller upgrade tests.
 func TestGpuNetworkAcceleration_Upgrade(t *testing.T) {
 	dynamicClient := testu.NewTestDynamicClient(false, false)
-	runaiConf := &runaiv1.RunaiConfig{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: runaiv1.GroupVersion.String(),
-			Kind:       runaiv1.RunaiConfigKind,
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: runaiv1.DefaultNamespace,
-			Name:      runaiv1.DefaultName,
-		},
-		Spec: runaiv1.RunaiConfigSpec{
-			WorkloadController: &workload_controller.WorkloadController{
-				GPUNetworkAccelerationEnabled: ptr.To(true),
-			},
-			InferenceWorkloadController: &inference_workload_controller.InferenceWorkloadController{
-				GPUNetworkAccelerationEnabled: ptr.To(false),
-			},
-			AnyworkloadController: &anyworkload_controller.AnyworkloadController{
-				GPUNetworkAccelerationEnabled: ptr.To(false),
-			},
-		},
-	}
+	runaiConf := newRunaiConfigWithControllers(ptr.To(true), ptr.To(false), ptr.To(false))
+	runaiConf.SetAPIVersion(runaiv1.GroupVersion.String())
+	runaiConf.SetKind(runaiv1.RunaiConfigKind)
+	runaiConf.SetNamespace(runaiv1.DefaultNamespace)
+	runaiConf.SetName(runaiv1.DefaultName)
 	testu.AddToDynamicClient(ra.RunaiConfigResource, runaiConf, dynamicClient)
 
 	ctx := context.TODO()

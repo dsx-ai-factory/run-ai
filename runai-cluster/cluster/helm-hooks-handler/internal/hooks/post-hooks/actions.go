@@ -226,7 +226,7 @@ func (p *PostUpgradeHook) recoverRunaiConfig(ctx context.Context, k8s client.Cli
 		}
 
 		lastErr = commitRunaiconfigToCluster(ctx, k8s, lastPreparedRunaiconfig, p.params, installationConfiguration,
-			found, previousVersion, controllerTransitionUpgrade)
+			found, previousVersion)
 		if lastErr == nil {
 			break
 		}
@@ -242,7 +242,7 @@ func (p *PostUpgradeHook) recoverRunaiConfig(ctx context.Context, k8s client.Cli
 
 func commitRunaiconfigToCluster(ctx context.Context, k8s client.Client, runaiconfig *runaiv1.RunaiConfig,
 	params *hooks.ClusterHookParams, icd *controlplanedetailsdownloader.InstallationConfigurationData,
-	foundInCluster bool, previousVersion string, transitionPath controllerTransitionPath) error {
+	foundInCluster bool, previousVersion string) error {
 	var err error
 	logger := log.FromContext(ctx)
 	logger.Info("updating runaiconfig")
@@ -263,10 +263,6 @@ func commitRunaiconfigToCluster(ctx context.Context, k8s client.Client, runaicon
 	if err != nil {
 		return fmt.Errorf("failed to patch runai config with cluster config: %w", err)
 	}
-	if err := applyControllerTransitionDefaults(runaiconfig, transitionPath, previousVersion); err != nil {
-		return fmt.Errorf("failed to apply controller transition defaults: %w", err)
-	}
-
 	return createOrUpdateRunaiConfig(ctx, k8s, runaiconfig, foundInCluster)
 }
 

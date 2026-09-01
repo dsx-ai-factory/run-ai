@@ -53,7 +53,7 @@ func PolicyRuleRefKey(ref api.PolicyRuleRef) string {
 
 // PolicyRuleRefFromMap extracts the identity of a rule from its JSON map
 // representation. Use this when rules are held as map[string]interface{} (for
-// example inside dao_utils.JsonBMap) rather than as the typed api.PolicyRule
+// example inside dbmodels.JsonBMap) rather than as the typed api.PolicyRule
 // struct.
 func PolicyRuleRefFromMap(ruleMap map[string]interface{}) api.PolicyRuleRef {
 	ref := api.PolicyRuleRef{}

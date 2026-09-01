@@ -77,7 +77,7 @@ the resolved tarballs live in [`charts/`](charts):
 | `postgresql` (bitnami) | 15.5.38 | charts.bitnami.com | `postgresql.enabled` |
 | `keycloakx` (codecentric) | 7.2.0 | codecentric.github.io | `keycloakx.enabled` |
 | `thanos` (bitnami) | 16.0.7 | charts.bitnami.com | `thanos.enabled` |
-| `runai-telemetry` → alias `telemetryService` | 1.1.2 | configured in `Chart.yaml` | `telemetryService.enabled,isEnterprise` |
+| `runai-telemetry` → alias `telemetryService` | 1.1.6 | configured in `Chart.yaml` | `telemetryService.enabled,isEnterprise` |
 | `nats` (bitnami) | 9.0.28 | charts.bitnami.com | `nats.enabled` |
 | `common` (bitnami) | 2.40.0 | charts.bitnami.com | `common.enabled` |
 | `unleash-edge` → alias `unleashEdge` | 2.7.4 | getunleash.io | `unleashEdge.enabled` |

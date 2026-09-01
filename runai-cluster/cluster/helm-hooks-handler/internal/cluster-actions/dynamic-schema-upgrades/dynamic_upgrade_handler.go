@@ -35,6 +35,7 @@ type runaiConfigUpgrade struct {
 func NewRunaiConfigUpgrade() *runaiConfigUpgrade {
 	var specUpgraders []runaiConfigDynamicSchemaUpgrader
 	specUpgraders = append(specUpgraders, newMpsServerUpgrader())
+	specUpgraders = append(specUpgraders, newLegacyWorkloadConfigurationUpgrader())
 	return &runaiConfigUpgrade{specUpgraders}
 }
 

@@ -20,8 +20,8 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/clients/authorization"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/clients/orgunit"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
 	"github.com/run-ai/runai/runai-common-packages/runaictx"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 )
 
 // Must match dao.mappingLockBusyMessage (package-private).
@@ -86,11 +86,10 @@ var _ = Describe("mapping_locking table", func() {
 		ctx := mappingLockTestTenantCtx(7)
 		staleLockedAt := time.Now().UTC().Add(-10 * time.Second)
 
-		res := dao_utils.DB().Create(&dbmodel.MappingLocking{
+		Expect(runaidb.DB().Create(&dbmodel.MappingLocking{
 			TenantId: 7,
 			LockedAt: staleLockedAt,
-		})
-		Expect(res.Error).ToNot(HaveOccurred())
+		})).Error().ToNot(HaveOccurred())
 
 		release, err := dao.AcquireTenantMappingLock(ctx)
 		Expect(err).To(BeNil())

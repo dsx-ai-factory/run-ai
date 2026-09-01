@@ -14,24 +14,6 @@ import (
 )
 
 var _ = Describe("Legacy workload cleanup gates", func() {
-	DescribeTable("evaluates the upgrade boundary",
-		func(source string, shouldRun bool, errorSubstring string) {
-			run, err := SourceRequiresCleanup(source)
-			if errorSubstring != "" {
-				Expect(err).To(MatchError(ContainSubstring(errorSubstring)))
-				return
-			}
-			Expect(err).NotTo(HaveOccurred())
-			Expect(run).To(Equal(shouldRun))
-		},
-		Entry("requires cleanup for 2.26", "2.26.0", true, ""),
-		Entry("does not infer pre-3 provenance from a branch build", "0.0.0-12345.v300-main", false, ""),
-		Entry("does not require cleanup for 3.0", "3.0.0", false, ""),
-		Entry("does not require cleanup for a 3.0 prerelease", "3.0.0-rc.1", false, ""),
-		Entry("fails for a missing source", "", false, "source version is missing"),
-		Entry("fails for an invalid source", "not-a-version", false, "parse source version"),
-	)
-
 	It("accepts one reconciled and available RunaiConfig readiness marker", func() {
 		config := readyRunaiConfig(7)
 		Expect(validateReadinessMarker(config)).To(Succeed())

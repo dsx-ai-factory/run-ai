@@ -27,7 +27,6 @@ const (
 	DeploymentName                     = "runtime-rules"
 	deploymentName                     = "runtime-rules"
 	serviceAccountName                 = "runtime-rules"
-	clusterVersionParam                = "CLUSTER_VERSION"
 	numberOfWorkersPerQueue            = "NUMBER_OF_WORKERS_PER_QUEUE"
 	workerSleepSeconds                 = "WORKER_SLEEP_SECONDS"
 	numberOfWorkersAutoDeleteCompleted = "NUMBER_OF_WORKERS_AUTO_DELETE_COMPLETED"
@@ -108,10 +107,6 @@ func (d *DeploymentResource) Object(ctx context.Context) (client.Object, error) 
 					{
 						Name:  numberOfWorkersAutoDeleteCompleted,
 						Value: strconv.Itoa(*config.NumberOfWorkersAutoDeleteCompleted),
-					},
-					{
-						Name:  clusterVersionParam,
-						Value: d.runaiConfig.Spec.Internal.Global.Version,
 					},
 					{
 						Name:  eventList,

@@ -222,8 +222,6 @@ rules:
       - serviceaccounts
     resourceNames:
       - runai-agent
-      - workload-controller
-      - inference-workload-controller
       - runtime-rules
     verbs:
       - get

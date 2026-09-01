@@ -14,7 +14,6 @@ import (
 
 	kfv1 "github.com/kubeflow/training-operator/pkg/apis/kubeflow.org/v1"
 	"github.com/run-ai/runai/runai-cluster/cluster/common/constants"
-	"github.com/run-ai/runai/runai-cluster/cluster/runtime-rules/test"
 	"github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/jobs"
 	"github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/controller"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,10 +28,16 @@ var _ = Describe("Validation Test Suite", func() {
 	BeforeEach(func() {
 		validator = NewWorkloadValidator(NewDistributedValidator(getTestFrameworksStatus()))
 		jobStartTime := &metav1.Time{Time: time.Now()}
-		iw = &jobs.JobWorkload{}
-		test.BuildInteractiveWorkload("namespace", "iw", jobStartTime).CopyTo(iw)
-		dw = &jobs.JobWorkload{}
-		test.BuildDistributedWorkload("namespace", "dw", jobStartTime).CopyTo(dw)
+		iw = &jobs.JobWorkload{
+			TypeMeta:   metav1.TypeMeta{Kind: constants.KindInteractiveWorkload},
+			ObjectMeta: metav1.ObjectMeta{Namespace: "namespace", Name: "iw"},
+		}
+		iw.Status.StartTime = jobStartTime
+		dw = &jobs.JobWorkload{
+			TypeMeta:   metav1.TypeMeta{Kind: constants.KindDistributedWorkload},
+			ObjectMeta: metav1.ObjectMeta{Namespace: "namespace", Name: "dw"},
+		}
+		dw.Status.StartTime = jobStartTime
 	})
 
 	Context("Distributed", func() {

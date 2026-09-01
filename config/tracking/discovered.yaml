@@ -1,0 +1,5 @@
+CVE-2025-68121:
+  discovered: '2026-03-11'
+  last_scanned: '2026-03-11'
+  origin: base-image
+  severity: critical

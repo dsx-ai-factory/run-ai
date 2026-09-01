@@ -13,7 +13,6 @@ import (
 	diwv2 "github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/distributedworkload/v2alpha1"
 	"go.uber.org/zap"
 	"k8s.io/client-go/tools/cache"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func AddDistributedHandlerToCache(backendClient *runaiclient.BackendClient, cachedClient cachedclient.CachedClient,
@@ -48,11 +47,14 @@ func AddDistributedHandlerToCache(backendClient *runaiclient.BackendClient, cach
 					constants.AddOperation, "distributedworkload-deprecated", obj)
 			},
 			DeleteFunc: func(object any) {
-				obj := object.(*diwv2.DistributedWorkload)
+				obj, ok := deletedObject[*diwv2.DistributedWorkload](object)
+				if !ok {
+					return
+				}
 				if handlers.FilterWorkloads(obj.Spec.WorkloadFields) {
 					rateLimitedController.MarkItemDeleted(objectKeyFromObject(obj))
-					genericControllerErrorHandler(workloadHandler.HandleRunaiWorkloadDelete(object.(client.Object)),
-						constants.DeleteOperation, constants.DistributedWorkloadResourceName, object.(client.Object))
+					genericControllerErrorHandler(workloadHandler.HandleRunaiWorkloadDelete(obj),
+						constants.DeleteOperation, constants.DistributedWorkloadResourceName, obj)
 				}
 				deprecatedRLController.MarkItemDeleted(objectKeyFromObject(obj))
 				genericControllerErrorHandler(distributedHandlerDeprecated.HandleDelete(obj),

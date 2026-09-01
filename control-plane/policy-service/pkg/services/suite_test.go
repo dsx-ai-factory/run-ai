@@ -22,8 +22,9 @@ import (
 	authClient "github.com/run-ai/runai/control-plane/authorization/pkg/client"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/config"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/auth"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-common-packages/integdb"
 	"github.com/run-ai/runai/runai-common-packages/runaictx"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 )
 
 func TestServices(t *testing.T) {
@@ -36,30 +37,36 @@ func TestServices(t *testing.T) {
 
 	authClient.SetMockAuthorizationClient(auth.SimpleMockAuthService{})
 
-	//
-	//   we run the service test with "real" database, so need to start it prior
-	//   to running any services related test
-	//
-	dao_utils.OpenPostgresForTesting(t, config.Database())
+	conf, cleanup, err := integdb.SetupPostgresDB(&integdb.IntegdbConfig{
+		Schema:           "policies",
+		MigrationDirPath: "file://../database/migrations",
+	})
+	if err != nil {
+		t.Fatalf("failed to set up test postgres: %v", err)
+	}
+	t.Cleanup(cleanup)
 
-	dbConf := config.Database()
-	dbConf.MigrationCommand = "upmost"
-	dao_utils.Migrate(dbConf)
+	conf.UseServiceSession = new(bool)
+	conf.LogLevel = "Debug"
+	runaidb.SetLogger(dbgLogger{})
+	if err := runaidb.Init(conf); err != nil {
+		t.Fatalf("failed to init db: %v", err)
+	}
+	t.Cleanup(func() { _ = runaidb.Close() })
 
 	dao.HandleSystemPolicy()
 
-	// Seed the system formatters / field groups / mappings ONCE for the whole suite.
-	// `database.DeleteAllTablesForTesting()` preserves system-scoped rows between specs,
-	// so we don't need to re-seed in BeforeEach (which previously did 17 GET+CREATE+PATCH
-	// round-trips per spec in the GVK Policy Service tests).
 	HandleSystemMapping()
 
 	RunSpecs(t, "Services Suite")
-
-	// No `downmost` migration teardown here: the testcontainers Postgres started by
-	// `OpenPostgresForTesting` is destroyed at suite end, so re-running every migration
-	// down would just be wasted seconds against a container that's about to be killed.
 }
+
+type dbgLogger struct{}
+
+func (dbgLogger) Infof(f string, a ...any)  { fmt.Printf("[db] "+f+"\n", a...) }
+func (dbgLogger) Errorf(f string, a ...any) { fmt.Printf("[db] "+f+"\n", a...) }
+func (dbgLogger) Warnf(f string, a ...any)  { fmt.Printf("[db] "+f+"\n", a...) }
+func (dbgLogger) Debugf(f string, a ...any) { fmt.Printf("[db] "+f+"\n", a...) }
 
 func tenantIdStr(tenantId int32) string {
 	return fmt.Sprintf("%d", tenantId)

@@ -7,15 +7,15 @@ package services
 
 import (
 	"context"
-	"gorm.io/gorm"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
 
 	"github.com/run-ai/runai/runai-application-packages/convutils"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
 	"github.com/run-ai/runai/runai-common-packages/logging"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
+	"github.com/run-ai/runai/runai-common-packages/runaidb/orm"
 
 	"github.com/run-ai/runai/control-plane/policy-service/generated/pkg/api"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dao"
@@ -143,7 +143,7 @@ const (
 // Type aliases for the system_mapping package types.
 func HandleSystemMapping() {
 	ctx := auth.MockAuthContext(systemMappingActor, 0)
-	db := dao_utils.DB().WithContext(ctx)
+	db := runaidb.DB().WithContext(ctx)
 	ms := MappingApiService{}
 	cv := NewMappingConsistencyValidator(ctx, api.MAPPINGSCOPE_SYSTEM)
 
@@ -177,7 +177,7 @@ func handleSystemFormatters(ctx context.Context, ms MappingApiService, _ *Mappin
 	handleSystemFormatter(ctx, ms, sm.SystemNativeSpecFormatterName, systemNativeSpecFormatterDesc, sm.BuildSystemNativeSpecFormatterFields)
 }
 
-func handleSystemFieldGroups(ctx context.Context, db *gorm.DB, ms MappingApiService, cv *MappingConsistencyValidator) {
+func handleSystemFieldGroups(ctx context.Context, db orm.DB, ms MappingApiService, cv *MappingConsistencyValidator) {
 	logging.Infof("handle system mapping field groups")
 
 	handleSystemFieldGroup(ctx, db, ms, sm.SystemPodSpecFgName, systemPodSpecFgDesc, sm.BuildSystemPodSpecFg, cv)
@@ -210,7 +210,7 @@ func handleSystemFieldGroups(ctx context.Context, db *gorm.DB, ms MappingApiServ
 	handleSystemFieldGroup(ctx, db, ms, sm.SystemNativeDistributedSpecFgName, systemNativeDistributedSpecFgDesc, sm.BuildSystemNativeDistributedSpecFg, cv)
 }
 
-func handleSystemMappings(ctx context.Context, db *gorm.DB, ms MappingApiService, cv *MappingConsistencyValidator) {
+func handleSystemMappings(ctx context.Context, db orm.DB, ms MappingApiService, cv *MappingConsistencyValidator) {
 	logging.Infof("handle system mapping and spec selectors")
 
 	handleSystemWorkloadMapping(ctx, db, ms, systemDeploymentMappingName, systemDeploymentMappingDesc, sm.BuildSystemAppsDeploymentV1Mapping, cv)
@@ -240,7 +240,7 @@ func handleSystemMappings(ctx context.Context, db *gorm.DB, ms MappingApiService
 
 // handleSystemWorkloadMapping ensures a system-scoped mapping row exists for the workload GVK returned by builder.
 // mappingName is used only in log lines (DB identity is GVK).
-func handleSystemWorkloadMapping(ctx context.Context, db *gorm.DB, ms MappingApiService, mappingName, wantDescription string,
+func handleSystemWorkloadMapping(ctx context.Context, db orm.DB, ms MappingApiService, mappingName, wantDescription string,
 	builder sm.SystemWorkloadMappingBuilder, cv *MappingConsistencyValidator,
 ) {
 	if builder == nil {
@@ -326,7 +326,7 @@ func handleSystemWorkloadMapping(ctx context.Context, db *gorm.DB, ms MappingApi
 	systemRow.UpdatedAt = time.Now().UTC()
 	systemRow.UpdatedBy = systemMappingActor
 
-	if sErr := dao.SaveMapping(ctx, dao_utils.DB().WithContext(ctx), systemRow); sErr != nil {
+	if sErr := dao.SaveMapping(ctx, runaidb.DB().WithContext(ctx), systemRow); sErr != nil {
 		logging.Errorf("seed system workload mapping %s: %v", mappingName, sErr)
 		return
 	}
@@ -406,7 +406,7 @@ func newEmptySystemFormatterRow(name string) *dbmodel.MappingFormatters {
 	}
 }
 
-func handleSystemFieldGroup(ctx context.Context, db *gorm.DB, ms MappingApiService, fieldGroupName, wantDescription string,
+func handleSystemFieldGroup(ctx context.Context, db orm.DB, ms MappingApiService, fieldGroupName, wantDescription string,
 	builder sm.SystemFieldGroupBuilder, cv *MappingConsistencyValidator,
 ) {
 	if builder == nil {

@@ -10,13 +10,11 @@ import (
 	"fmt"
 	runaiv1 "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1"
 	runaiv1global "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/global"
-	runaiv1wc "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/workload-controller"
 	runaiv1we "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1/workload-exporter"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -113,13 +111,9 @@ func (c *LargeResourceConfig) adjustWorkloadServices(ctx context.Context, runaiC
 			v1.ResourceMemory: resource.MustParse("6Gi"),
 		},
 	}
-	if runaiConfig.Spec.WorkloadController == nil {
-		runaiConfig.Spec.WorkloadController = &runaiv1wc.WorkloadController{}
-	}
 	if runaiConfig.Spec.WorkloadExporter == nil {
 		runaiConfig.Spec.WorkloadExporter = &runaiv1we.WorkloadExporter{}
 	}
-	runaiConfig.Spec.WorkloadController.TrainingMaxConcurrentReconciles = ptr.To(15)
 	runaiConfig.Spec.WorkloadExporter.Resources = &runaiv1we.Resources{
 		Requests: v1.ResourceList{
 			v1.ResourceCPU:    resource.MustParse("300m"),

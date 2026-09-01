@@ -4947,10 +4947,6 @@ telemetryService:
     - PathPrefix(`/api/v1/privacy-policy`)
     - PathPrefix(`/api/v1/diagnostics`)
 
-  image:
-    repository: telemetry-service
-    tag: 1.1.2
-
   serviceAccount:
     name: telemetry-service
 

@@ -20,8 +20,9 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/clients/orgunit"
 	"github.com/run-ai/runai/runai-application-packages/datastructs"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
 	"github.com/run-ai/runai/runai-application-packages/jsonutils/gojsonq"
-	daoUtils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 
 	"github.com/run-ai/runai/runai-application-packages/convutils"
 
@@ -278,7 +279,7 @@ var _ = Describe("ListTest", func() {
 
 				nativeID := uuid.New()
 				native := dbmodel.Policy{
-					BaseModel: daoUtils.BaseModel{
+					BaseModel: dbmodels.BaseModel{
 						ID:        nativeID,
 						CreatedBy: "test",
 						UpdatedBy: "test",
@@ -292,7 +293,7 @@ var _ = Describe("ListTest", func() {
 					RulesV2:      rulesAsJson,
 					GvkWorkload:  false,
 				}
-				Expect(dao.AddPolicy(context.Background(), daoUtils.DB(), &native)).To(BeNil())
+				Expect(dao.AddPolicy(context.Background(), runaidb.DB(), &native)).To(BeNil())
 
 				trainingRules := api.TrainingPolicyRulesV2{
 					Security: &api.SupersetRulesAllOfSecurity{
@@ -305,7 +306,7 @@ var _ = Describe("ListTest", func() {
 				Expect(errTr).To(BeNil())
 
 				gvkOnly := dbmodel.Policy{
-					BaseModel: daoUtils.BaseModel{
+					BaseModel: dbmodels.BaseModel{
 						ID:        uuid.New(),
 						CreatedBy: "test",
 						UpdatedBy: "test",
@@ -319,7 +320,7 @@ var _ = Describe("ListTest", func() {
 					RulesV2:      trainingRulesJson,
 					GvkWorkload:  true,
 				}
-				Expect(dao.AddPolicy(context.Background(), daoUtils.DB(), &gvkOnly)).To(BeNil())
+				Expect(dao.AddPolicy(context.Background(), runaidb.DB(), &gvkOnly)).To(BeNil())
 
 				query := "?workloadType=Workspace&scope=tenant"
 				actualResponse := listPoliciesForTest(router, 2, fmt.Sprintf("%s%s", urlPolicy, query))
@@ -341,7 +342,7 @@ var _ = Describe("ListTest", func() {
 				Expect(err).To(BeNil())
 
 				native := dbmodel.Policy{
-					BaseModel: daoUtils.BaseModel{
+					BaseModel: dbmodels.BaseModel{
 						ID:        uuid.New(),
 						CreatedBy: "test",
 						UpdatedBy: "test",
@@ -355,11 +356,11 @@ var _ = Describe("ListTest", func() {
 					RulesV2:      rulesAsJson,
 					GvkWorkload:  false,
 				}
-				Expect(dao.AddPolicy(context.Background(), daoUtils.DB(), &native)).To(BeNil())
+				Expect(dao.AddPolicy(context.Background(), runaidb.DB(), &native)).To(BeNil())
 
 				degraded := api.POLICYPHASE_DEGRADED
 				gvkDegraded := dbmodel.Policy{
-					BaseModel: daoUtils.BaseModel{
+					BaseModel: dbmodels.BaseModel{
 						ID:        uuid.New(),
 						CreatedBy: "test",
 						UpdatedBy: "test",
@@ -375,11 +376,11 @@ var _ = Describe("ListTest", func() {
 					ValidationStatus: &degraded,
 					ValidationIssues: []string{"specSelector portByName is not defined"},
 				}
-				Expect(dao.AddPolicy(context.Background(), daoUtils.DB(), &gvkDegraded)).To(BeNil())
+				Expect(dao.AddPolicy(context.Background(), runaidb.DB(), &gvkDegraded)).To(BeNil())
 
 				ready := api.POLICYPHASE_READY
 				gvkReady := dbmodel.Policy{
-					BaseModel: daoUtils.BaseModel{
+					BaseModel: dbmodels.BaseModel{
 						ID:        uuid.New(),
 						CreatedBy: "test",
 						UpdatedBy: "test",
@@ -395,7 +396,7 @@ var _ = Describe("ListTest", func() {
 					ValidationStatus: &ready,
 					ValidationIssues: []string{},
 				}
-				Expect(dao.AddPolicy(context.Background(), daoUtils.DB(), &gvkReady)).To(BeNil())
+				Expect(dao.AddPolicy(context.Background(), runaidb.DB(), &gvkReady)).To(BeNil())
 
 				actualResponse := listPoliciesForTest(router, 2, fmt.Sprintf("%s?scope=tenant&includeGvkPolicies=true", urlPolicy))
 				Expect(actualResponse.Policies).To(HaveLen(3))

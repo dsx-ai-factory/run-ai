@@ -41,7 +41,10 @@ func AddSecretHandlerToCache(backendClient *backendclient.BackendClient, cachedC
 				genericControllerErrorHandler(secretHandler.HandleSecretAdd(object), constants.AddOperation, "secret", object)
 			},
 			DeleteFunc: func(obj any) {
-				object := obj.(*corev1.Secret)
+				object, ok := deletedObject[*corev1.Secret](obj)
+				if !ok {
+					return
+				}
 				rateLimitedController.MarkItemDeleted(objectKeyFromObject(object))
 				genericControllerErrorHandler(secretHandler.HandleSecretDelete(object), constants.DeleteOperation, "secret", object)
 			},

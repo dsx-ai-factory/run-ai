@@ -14,7 +14,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/run-ai/runai/runai-application-packages/convutils"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
 
 	"github.com/run-ai/runai/control-plane/policy-service/generated/pkg/api"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
@@ -128,7 +128,7 @@ func (pa *PolicyApiService) DeleteGvkPolicyRules(ctx context.Context, policyId s
 }
 
 func applyCreateReqOnPolicy(ctx context.Context, result *dbmodel.PolicyWithOptionalEffective, req api.CreateGvkPolicyReq,
-	workloadTypeKey string, rulesV2 dao_utils.JsonBMap,
+	workloadTypeKey string, rulesV2 dbmodels.JsonBMap,
 ) *api.Error {
 	tenantId := auth.TenantIdOf(ctx)
 	now := time.Now()
@@ -181,7 +181,7 @@ func applyCreateReqOnPolicy(ctx context.Context, result *dbmodel.PolicyWithOptio
 	}
 
 	(*result).Policy = dbmodel.Policy{
-		BaseModel: dao_utils.BaseModel{
+		BaseModel: dbmodels.BaseModel{
 			ID:        policyId,
 			CreatedAt: now,
 			UpdatedAt: now,

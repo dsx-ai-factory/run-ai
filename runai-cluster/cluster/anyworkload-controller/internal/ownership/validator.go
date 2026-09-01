@@ -178,7 +178,7 @@ func requesterUserID(userInfo authenticationv1.UserInfo) string {
 }
 
 func (v *Validator) isInternalServiceAccount(ctx context.Context, requesterUID string) (bool, error) {
-	for _, name := range []string{"workload-controller", "inference-workload-controller", "runtime-rules"} {
+	for _, name := range []string{"runtime-rules"} {
 		matches, err := v.isServiceAccount(ctx, name, requesterUID)
 		if err != nil {
 			if apierrors.IsNotFound(err) {

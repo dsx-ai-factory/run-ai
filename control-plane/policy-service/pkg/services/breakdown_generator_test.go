@@ -27,7 +27,7 @@ import (
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/clients/authorization"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/clients/orgunit"
 	"github.com/run-ai/runai/runai-application-packages/convutils"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 )
 
 var _ = Describe("BreakdownGenerator", Ordered, func() {
@@ -68,7 +68,7 @@ var _ = Describe("BreakdownGenerator", Ordered, func() {
 
 	seedBreakdownMapping := func() {
 		tenantCtx := auth.MockAuthContext("test-user", tenantId)
-		db := database.DB()
+		db := runaidb.DB()
 
 		setA := `{"a": $ARGS.named.name}`
 		getA := `.a`
@@ -157,7 +157,7 @@ var _ = Describe("BreakdownGenerator", Ordered, func() {
 			UpdatedBy: "test-user",
 			UpdatedAt: time.Now(),
 		}
-		Expect(dao.SaveMapping(tenantCtx, dao_utils.DB().WithContext(tenantCtx), mapping)).To(BeNil())
+		Expect(dao.SaveMapping(tenantCtx, runaidb.DB().WithContext(tenantCtx), mapping)).To(BeNil())
 	}
 
 	//
@@ -421,7 +421,7 @@ var _ = Describe("BreakdownGenerator", Ordered, func() {
 
 		seedChainMapping := func() {
 			tenantCtx := auth.MockAuthContext("test-user", tenantId)
-			db := database.DB()
+			db := runaidb.DB()
 
 			fg := newFieldGroupForTest(fgDepName, api.MAPPINGSCOPE_TENANT, tenantId, "test-user",
 				map[string]api.FieldGroupFieldsWithScopeValue{
@@ -471,7 +471,7 @@ var _ = Describe("BreakdownGenerator", Ordered, func() {
 				UpdatedBy: "test-user",
 				UpdatedAt: time.Now(),
 			}
-			Expect(dao.SaveMapping(tenantCtx, dao_utils.DB().WithContext(tenantCtx), mapping)).To(BeNil())
+			Expect(dao.SaveMapping(tenantCtx, runaidb.DB().WithContext(tenantCtx), mapping)).To(BeNil())
 		}
 
 		It("includes the immediate parent selector when only the child is referenced", func() {

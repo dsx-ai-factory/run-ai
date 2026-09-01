@@ -162,20 +162,18 @@ func (rp *RunaiPublic) Object(ctx context.Context) (client.Object, error) {
 		configuration.GatewayNamespace = &gw.Namespace
 	}
 
-	if wc := rp.runaiConfig.Spec.WorkloadController; wc != nil {
-		configuration.GitSyncImage = formatImageRef(wc.GitSyncImage)
-		configuration.S3FileSystemImage = formatImageRef(wc.S3FileSystemImage)
-		configuration.RunaiOauth2ProxyImage = formatImageRef(wc.RunaiOauth2ProxyImage)
-		configuration.RunaiOauth2ProxyUsernameLoaderImage = formatImageRef(wc.RunaiOauth2ProxyUsernameLoaderImage)
-		configuration.RunaiOauth2ProxyRedisFQDN = wc.RunaiOauth2ProxyRedisFQDN
-		configuration.RunaiOauth2ProxyWorkloadAuthSecretName = wc.RunaiOauth2ProxyWorkloadAuthSecretName
-		configuration.RunaiOauth2ProxySessionStoreType = wc.RunaiOauth2ProxySessionStoreType
-		configuration.ExternalAuthUrlEnabled = wc.ExternalAuthUrlEnabled
-		configuration.OpenshiftRouteTerminationPolicy = ptr.To(string(wc.OpenshiftRouteConfiguration.GetTerminationPolicy()))
-		configuration.DistGPUNetworkAcceleration = wc.GPUNetworkAccelerationEnabled
-	}
-	if iwc := rp.runaiConfig.Spec.InferenceWorkloadController; iwc != nil {
-		configuration.DinfGPUNetworkAcceleration = iwc.GPUNetworkAccelerationEnabled
+	if aw := rp.runaiConfig.Spec.AnyworkloadController; aw != nil {
+		configuration.GitSyncImage = formatImageRef(aw.GitSyncImage)
+		configuration.S3FileSystemImage = formatImageRef(aw.S3FileSystemImage)
+		configuration.RunaiOauth2ProxyImage = formatImageRef(aw.RunaiOauth2ProxyImage)
+		configuration.RunaiOauth2ProxyUsernameLoaderImage = formatImageRef(aw.RunaiOauth2ProxyUsernameLoaderImage)
+		configuration.RunaiOauth2ProxyRedisFQDN = aw.RunaiOauth2ProxyRedisFQDN
+		configuration.RunaiOauth2ProxyWorkloadAuthSecretName = aw.RunaiOauth2ProxyWorkloadAuthSecretName
+		configuration.RunaiOauth2ProxySessionStoreType = aw.RunaiOauth2ProxySessionStoreType
+		configuration.ExternalAuthUrlEnabled = aw.ExternalAuthUrlEnabled
+		configuration.OpenshiftRouteTerminationPolicy = ptr.To(string(aw.OpenshiftRouteConfiguration.GetTerminationPolicy()))
+		configuration.DistGPUNetworkAcceleration = aw.GPUNetworkAccelerationEnabled
+		configuration.DinfGPUNetworkAcceleration = aw.GPUNetworkAccelerationEnabled
 	}
 	configuration.CustomCAGit = customCAToConfig(rp.runaiConfig.Spec.Global.CustomCAGit)
 	configuration.CustomCAS3 = customCAToConfig(rp.runaiConfig.Spec.Global.CustomCAS3)

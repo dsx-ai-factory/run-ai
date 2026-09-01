@@ -174,12 +174,6 @@ var _ = Describe("Legacy ownership validation", func() {
 		Expect(response.Allowed).To(BeTrue())
 	})
 
-	It("allows the legacy controller during the upgrade handoff", func() {
-		validator := ownership.NewValidator(fakeOwnershipClient(false))
-		response := validator.Handle(context.Background(), validationRequest("alice", "workload-controller-uid"))
-
-		Expect(response.Allowed).To(BeTrue())
-	})
 })
 
 var _ = Describe("WorkloadRunner ownership validation", func() {
@@ -336,8 +330,6 @@ func fakeOwnershipClientWithSubjectAccessReview(
 		project,
 		&corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{Name: "runai-agent", Namespace: "runai", UID: types.UID("agent-uid")}},
 		&corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{Name: "runtime-rules", Namespace: "runai", UID: types.UID("runtime-rules-uid")}},
-		&corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{Name: "workload-controller", Namespace: "runai", UID: types.UID("workload-controller-uid")}},
-		&corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{Name: "inference-workload-controller", Namespace: "runai", UID: types.UID("inference-controller-uid")}},
 	}
 	objects = append(objects, extraObjects...)
 

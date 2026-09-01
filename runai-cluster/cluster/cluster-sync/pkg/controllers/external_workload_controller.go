@@ -29,7 +29,10 @@ func AddExternalWorkloadHandlerToCache(backendClient *runaiclient.BackendClient,
 			genericControllerErrorHandler(workloadHandler.HandleAdd(ew), constants.AddOperation, "externalworkload", ew)
 		},
 		DeleteFunc: func(obj any) {
-			ew := obj.(*v1alpha1.ExternalWorkload)
+			ew, ok := deletedObject[*v1alpha1.ExternalWorkload](obj)
+			if !ok {
+				return
+			}
 			rateLimitedController.MarkItemDeleted(objectKeyFromObject(ew))
 			genericControllerErrorHandler(workloadHandler.HandleDelete(ew), constants.DeleteOperation, "externalworkload", ew)
 		},

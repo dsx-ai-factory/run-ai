@@ -30,7 +30,10 @@ func AddPriorityClassHandlerToCache(backendClient *backendclient.BackendClient, 
 			genericControllerErrorHandler(priorityClassHandler.HandleAddUpdate(object), constants.AddOperation, "PriorityClass", object)
 		},
 		DeleteFunc: func(obj any) {
-			object := obj.(*schedulingv1.PriorityClass)
+			object, ok := deletedObject[*schedulingv1.PriorityClass](obj)
+			if !ok {
+				return
+			}
 			rateLimitedController.MarkItemDeleted(objectKeyFromObject(object))
 			genericControllerErrorHandler(priorityClassHandler.HandleDelete(object), constants.DeleteOperation, "PriorityClass", object)
 		},

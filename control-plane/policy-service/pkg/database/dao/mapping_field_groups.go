@@ -7,6 +7,7 @@ package dao
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -15,13 +16,13 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbtables"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/auth"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
 	"github.com/run-ai/runai/runai-common-packages/logging"
-	"gorm.io/gorm"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
+	"github.com/run-ai/runai/runai-common-packages/runaidb/orm"
 )
 
 // the user is allowed to see only system scope field group or tenant scoped field group from his own tenant
-func filterFieldGroupsByTenant(res *gorm.DB, ctx context.Context) *gorm.DB {
+func filterFieldGroupsByTenant(res orm.DB, ctx context.Context) orm.DB {
 	tenantID := auth.TenantIdOf(ctx)
 	query := filterFieldGroupsByTenantQuery()
 	return res.Where(query, string(api.MAPPINGSCOPE_SYSTEM), string(api.MAPPINGSCOPE_TENANT), tenantID)
@@ -35,7 +36,7 @@ func filterFieldGroupsByTenantQuery() string {
 		dbtables.MappingFieldGroupsColumnTenantId)
 }
 
-func CreateFieldGroup(_ context.Context, tx *gorm.DB, row *dbmodel.MappingFieldGroups) *api.Error {
+func CreateFieldGroup(_ context.Context, tx orm.DB, row *dbmodel.MappingFieldGroups) *api.Error {
 	if row.Fields == nil {
 		row.Fields = map[string]api.FieldGroupFieldsWithScopeValue{}
 	}
@@ -43,10 +44,9 @@ func CreateFieldGroup(_ context.Context, tx *gorm.DB, row *dbmodel.MappingFieldG
 		row.ItemSelectors = map[string]api.ItemSelectorsWithScopeValue{}
 	}
 
-	res := tx.Table(dbtables.MappingFieldGroupsTable).Create(row)
-	if res.Error != nil {
-		dbErr := database.Error(database.CREATE, database.MappingFieldGroups).WithDetailsFromDb(res)
-		logging.Errorf("failed to create field group: %s: %v", dbErr.Message, res.Error)
+	if _, err := tx.Table(dbtables.MappingFieldGroupsTable).Create(row); err != nil {
+		dbErr := database.Error(database.CREATE, database.MappingFieldGroups).WithDetails(err)
+		logging.Errorf("failed to create field group: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 
@@ -62,7 +62,7 @@ type FieldGroupByScope map[api.MappingScope]dbmodel.MappingFieldGroups
 type FieldGroupsByNameAndScope map[string]FieldGroupByScope
 
 // GetFieldGroupByName returns every visible row for this name (system and/or tenant) as a map by scope
-func GetFieldGroupByName(ctx context.Context, tx *gorm.DB, name string) (FieldGroupByScope, *api.Error) {
+func GetFieldGroupByName(ctx context.Context, tx orm.DB, name string) (FieldGroupByScope, *api.Error) {
 	query := dbmodel.MappingFieldGroups{
 		Name: name,
 	}
@@ -73,10 +73,9 @@ func GetFieldGroupByName(ctx context.Context, tx *gorm.DB, name string) (FieldGr
 
 	res = filterFieldGroupsByTenant(res, ctx)
 
-	res = res.Find(&rows)
-	if res.Error != nil {
-		dbErr := database.Error(database.GET, database.MappingFieldGroups).WithDetailsFromDb(res)
-		logging.Errorf("failed to get field group: %s: %v", dbErr.Message, res.Error)
+	if err := res.Find(&rows); err != nil {
+		dbErr := database.Error(database.GET, database.MappingFieldGroups).WithDetails(err)
+		logging.Errorf("failed to get field group: %s: %v", dbErr.Message, err)
 		return nil, dbErr
 	}
 	if len(rows) == 0 {
@@ -95,7 +94,7 @@ func GetFieldGroupByName(ctx context.Context, tx *gorm.DB, name string) (FieldGr
 // GetFieldGroupByNameAndScope returns one row for name and scope visible to the current tenant (same
 // visibility rules as GetFieldGroupByName). Tenant scope restricts to auth.TenantIdOf(ctx), matching
 // DeleteFieldGroupByNameAndScope.
-func GetFieldGroupByNameAndScope(ctx context.Context, tx *gorm.DB, name string, scope api.MappingScope) (*dbmodel.MappingFieldGroups, *api.Error) {
+func GetFieldGroupByNameAndScope(ctx context.Context, tx orm.DB, name string, scope api.MappingScope) (*dbmodel.MappingFieldGroups, *api.Error) {
 	query := dbmodel.MappingFieldGroups{
 		Name:      name,
 		ScopeType: scope,
@@ -106,14 +105,13 @@ func GetFieldGroupByNameAndScope(ctx context.Context, tx *gorm.DB, name string, 
 
 	var row dbmodel.MappingFieldGroups
 
-	res := tx.Model(&query).Where(query).Find(&row)
-	if res.Error != nil {
-		dbErr := database.Error(database.GET, database.MappingFieldGroups).WithDetailsFromDb(res)
-		logging.Errorf("failed to get field group: %s: %v", dbErr.Message, res.Error)
+	if err := tx.Model(&query).Where(query).Take(&row); err != nil {
+		if errors.Is(err, orm.ErrRecordNotFound) {
+			return nil, api.NewError(http.StatusNotFound, fmt.Sprintf("%s scoped field group %s not found", scope, name), nil)
+		}
+		dbErr := database.Error(database.GET, database.MappingFieldGroups).WithDetails(err)
+		logging.Errorf("failed to get field group: %s: %v", dbErr.Message, err)
 		return nil, dbErr
-	}
-	if res.RowsAffected == 0 {
-		return nil, api.NewError(http.StatusNotFound, fmt.Sprintf("%s scoped field group %s not found", scope, name), nil)
 	}
 
 	return &row, nil
@@ -127,21 +125,20 @@ func GetFieldGroupByNameAndScope(ctx context.Context, tx *gorm.DB, name string, 
 //	tenant: a1, a2, a6
 //
 // if the caller wants (offset 1, limit 3) we should return a2, a3, a5 as the unified set is (a1, a2, a3, a5, a6)
-func ListFieldGroupNamesPage(ctx context.Context, tx *gorm.DB, offset, limit int) ([]string, *api.Error) {
+func ListFieldGroupNamesPage(ctx context.Context, tx orm.DB, offset, limit int) ([]string, *api.Error) {
 	var names []string
 
 	res := tx.WithContext(ctx).Model(&dbmodel.MappingFieldGroups{})
 
 	res = filterFieldGroupsByTenant(res, ctx)
 
-	res = res.Distinct(dbtables.MappingFieldGroupsColumnName).
+	if err := res.Distinct(dbtables.MappingFieldGroupsColumnName).
 		Order(dbtables.MappingFieldGroupsColumnName).
 		Offset(offset).
 		Limit(limit).
-		Pluck(dbtables.MappingFieldGroupsColumnName, &names)
-	if res.Error != nil {
-		dbErr := database.Error(database.LIST, database.MappingFieldGroups).WithDetailsFromDb(res)
-		logging.Errorf("failed to list field group names: %s: %v", dbErr.Message, res.Error)
+		Pluck(dbtables.MappingFieldGroupsColumnName, &names); err != nil {
+		dbErr := database.Error(database.LIST, database.MappingFieldGroups).WithDetails(err)
+		logging.Errorf("failed to list field group names: %s: %v", dbErr.Message, err)
 		return nil, dbErr
 	}
 
@@ -149,7 +146,7 @@ func ListFieldGroupNamesPage(ctx context.Context, tx *gorm.DB, offset, limit int
 }
 
 // GetFieldGroupsByNames loads every visible row for the given names and groups them as map[name] -> map[scope] -> row.
-func GetFieldGroupsByNames(ctx context.Context, tx *gorm.DB, names []string) (FieldGroupsByNameAndScope, *api.Error) {
+func GetFieldGroupsByNames(ctx context.Context, tx orm.DB, names []string) (FieldGroupsByNameAndScope, *api.Error) {
 	out := make(FieldGroupsByNameAndScope)
 	if len(names) == 0 {
 		return out, nil
@@ -163,10 +160,9 @@ func GetFieldGroupsByNames(ctx context.Context, tx *gorm.DB, names []string) (Fi
 
 	res = filterFieldGroupsByTenant(res, ctx)
 
-	res = res.Find(&rows)
-	if res.Error != nil {
-		dbErr := database.Error(database.LIST, database.MappingFieldGroups).WithDetailsFromDb(res)
-		logging.Errorf("failed to list field groups: %s: %v", dbErr.Message, res.Error)
+	if err := res.Find(&rows); err != nil {
+		dbErr := database.Error(database.LIST, database.MappingFieldGroups).WithDetails(err)
+		logging.Errorf("failed to list field groups: %s: %v", dbErr.Message, err)
 		return nil, dbErr
 	}
 
@@ -181,7 +177,7 @@ func GetFieldGroupsByNames(ctx context.Context, tx *gorm.DB, names []string) (Fi
 	return out, nil
 }
 
-func SaveFieldGroup(_ context.Context, tx *gorm.DB, row *dbmodel.MappingFieldGroups) *api.Error {
+func SaveFieldGroup(_ context.Context, tx orm.DB, row *dbmodel.MappingFieldGroups) *api.Error {
 	if row.Fields == nil {
 		row.Fields = map[string]api.FieldGroupFieldsWithScopeValue{}
 	}
@@ -196,14 +192,14 @@ func SaveFieldGroup(_ context.Context, tx *gorm.DB, row *dbmodel.MappingFieldGro
 		TenantId:  row.TenantId,
 	}
 
-	res := tx.Model(&query).Where(query).Save(row)
-	if res.Error != nil {
-		dbErr := database.Error(database.UPDATE, database.MappingFieldGroups).WithDetailsFromDb(res)
-		logging.Errorf("failed to update field group: %s: %v", dbErr.Message, res.Error)
+	rowsAffected, err := tx.Model(&query).Where(query).Save(row)
+	if err != nil {
+		dbErr := database.Error(database.UPDATE, database.MappingFieldGroups).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("failed to update field group: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 
-	if res.RowsAffected == 0 {
+	if rowsAffected == 0 {
 		return api.NewError(http.StatusNotFound, fmt.Sprintf("field group %s/%s is not found within scope %s/%d", row.Name, row.ID, row.ScopeType, row.TenantId), nil)
 	}
 
@@ -213,7 +209,7 @@ func SaveFieldGroup(_ context.Context, tx *gorm.DB, row *dbmodel.MappingFieldGro
 // DeleteFieldGroupByNameAndScope deletes at most one row for name and scope.
 // Tenant scope adds TenantId so GORM includes it in WHERE (non-zero); system rows match on name + scope only
 // (schema enforces tenant_id = 0 for system).
-func DeleteFieldGroupByNameAndScope(ctx context.Context, tx *gorm.DB, name string, scope api.MappingScope) *api.Error {
+func DeleteFieldGroupByNameAndScope(ctx context.Context, tx orm.DB, name string, scope api.MappingScope) *api.Error {
 	query := dbmodel.MappingFieldGroups{
 		Name:      name,
 		ScopeType: scope,
@@ -222,14 +218,14 @@ func DeleteFieldGroupByNameAndScope(ctx context.Context, tx *gorm.DB, name strin
 		query.TenantId = auth.TenantIdOf(ctx)
 	}
 
-	res := tx.Model(&dbmodel.MappingFieldGroups{}).Where(query).Delete(&dbmodel.MappingFieldGroups{})
-	if res.Error != nil {
-		dbErr := database.Error(database.DELETE, database.MappingFieldGroups).WithDetailsFromDb(res)
-		logging.Errorf("failed to delete field group: %s: %v", dbErr.Message, res.Error)
+	rowsAffected, err := tx.Model(&dbmodel.MappingFieldGroups{}).Where(query).Delete(&dbmodel.MappingFieldGroups{})
+	if err != nil {
+		dbErr := database.Error(database.DELETE, database.MappingFieldGroups).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("failed to delete field group: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 
-	if res.RowsAffected == 0 {
+	if rowsAffected == 0 {
 		return api.NewError(http.StatusNotFound, fmt.Sprintf("field group %s (scope %s) is not found", name, scope), nil)
 	}
 	return nil
@@ -252,16 +248,14 @@ func CheckIfFormatterBeingUsed(ctx context.Context, formatterName string) (bool,
 
 	var count int64
 
-	res := dao_utils.DB().WithContext(ctx).Raw(sql,
+	if _, err := runaidb.DB().WithContext(ctx).Raw(sql,
 		string(api.MAPPINGSCOPE_SYSTEM),
 		string(api.MAPPINGSCOPE_TENANT),
 		tenantID,
 		formatterName,
-	).Scan(&count)
-
-	if res.Error != nil {
-		dbErr := database.Error(database.COUNT, database.MappingFieldGroups).WithDetailsFromDb(res)
-		logging.Errorf("failed to count field groups: %s: %v", dbErr.Message, res.Error)
+	).Scan(&count); err != nil {
+		dbErr := database.Error(database.COUNT, database.MappingFieldGroups).WithDetails(err)
+		logging.Errorf("failed to count field groups: %s: %v", dbErr.Message, err)
 		return false, dbErr
 	}
 

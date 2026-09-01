@@ -328,7 +328,7 @@ subjects:
 ---
 # runtime-rules needs cluster-monitoring-view to query the OpenShift
 # Thanos-querier (https) for metric-based scheduling rules (e.g. idle timeout).
-# Replaces the removed runai-job-controller-monitoring-view binding (PR #2466).
+# This binding grants runtime-rules access to OpenShift monitoring metrics.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:

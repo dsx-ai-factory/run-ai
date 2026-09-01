@@ -22,8 +22,8 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbtables"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/auth"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
-	"gorm.io/gorm"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
+	"github.com/run-ai/runai/runai-common-packages/runaidb/orm"
 )
 
 // UpsertEffectivePolicy creates-or-updates an effective policy record by id.
@@ -34,7 +34,7 @@ import (
 // any step ourselves, with full control of what we're doing and not to trust GORM to
 // understand what we want it to do, because it typically does not understand. At least
 // not in this function. Go find some other places in the code to improve.
-func UpsertEffectivePolicy(ctx context.Context, tx *gorm.DB, effectivePolicy *dbmodel.EffectivePolicy) *api.Error {
+func UpsertEffectivePolicy(ctx context.Context, tx orm.DB, effectivePolicy *dbmodel.EffectivePolicy) *api.Error {
 	//
 	// prepare the effective policy and insert it
 	//
@@ -50,31 +50,30 @@ func UpsertEffectivePolicy(ctx context.Context, tx *gorm.DB, effectivePolicy *db
 	//
 	var existingRecord dbmodel.EffectivePolicy
 
-	result := tx.Table(dbtables.EffectivePoliciesTable).
+	err := tx.Table(dbtables.EffectivePoliciesTable).
 		Where(fmt.Sprintf("%s.%s = ?", dbtables.EffectivePoliciesTable, dbtables.EffectivePoliciesColumnPolicyId), effectivePolicy.PolicyId).
 		First(&existingRecord)
 
-	if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		dbErr := database.Error(database.UPSERT, database.EffectivePolicy).WithDetailsFromDb(result)
-		logging.Errorf("failed to upsert effective policy: %s: %v", dbErr.Message, result.Error)
+	if err != nil && !errors.Is(err, orm.ErrRecordNotFound) {
+		dbErr := database.Error(database.UPSERT, database.EffectivePolicy).WithDetails(err)
+		logging.Errorf("failed to upsert effective policy: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+	if errors.Is(err, orm.ErrRecordNotFound) {
 		//
 		//  if the record does not exist, meaning - hard deleted, create a new one
 		//
-		result = tx.Table(dbtables.EffectivePoliciesTable).Create(&effectivePolicy)
-		if result.Error != nil {
-			dbErr := database.Error(database.CREATE, database.EffectivePolicy).WithDetailsFromDb(result)
-			logging.Errorf("failed to create effective policy: %s: %v", dbErr.Message, result.Error)
+		if _, createErr := tx.Table(dbtables.EffectivePoliciesTable).Create(&effectivePolicy); createErr != nil {
+			dbErr := database.Error(database.CREATE, database.EffectivePolicy).WithDetails(createErr)
+			logging.Errorf("failed to create effective policy: %s: %v", dbErr.Message, createErr)
 			return dbErr
 		}
 	} else {
 		//
 		//   if it is soft deleted - wake it up, don't trust GORM to do it for you
 		//
-		result = tx.Table(dbtables.EffectivePoliciesTable).
+		_, updateErr := tx.Table(dbtables.EffectivePoliciesTable).
 			Where(fmt.Sprintf("%s.%s = ?", dbtables.EffectivePoliciesTable, dbtables.EffectivePoliciesColumnPolicyId), effectivePolicy.PolicyId).
 			UpdateColumns(map[string]interface{}{
 				dbtables.DeletedAtColumn:             nil,
@@ -85,9 +84,9 @@ func UpsertEffectivePolicy(ctx context.Context, tx *gorm.DB, effectivePolicy *db
 				dbtables.EffectivePoliciesColumnDefaultFromOrder: effectivePolicy.DefaultFromOrder,
 				dbtables.EffectivePoliciesColumnValidationError:  effectivePolicy.ValidationError,
 			})
-		if result.Error != nil {
-			dbErr := database.Error(database.UPDATE, database.EffectivePolicy).WithDetailsFromDb(result)
-			logging.Errorf("failed to update effective policy: %s: %v", dbErr.Message, result.Error)
+		if updateErr != nil {
+			dbErr := database.Error(database.UPDATE, database.EffectivePolicy).WithDetails(updateErr)
+			logging.Errorf("failed to update effective policy: %s: %v", dbErr.Message, updateErr)
 			return dbErr
 		}
 	}
@@ -103,20 +102,20 @@ func GetEffectivePolicyById(ctx context.Context, id uuid.UUID, includeDeleted bo
 
 	var record dbmodel.EffectivePolicy
 
-	result := database.DB().Table(dbtables.EffectivePoliciesTable).Where(&effectivePolicy)
+	result := runaidb.DB().Table(dbtables.EffectivePoliciesTable).Where(&effectivePolicy)
 	if !includeDeleted {
-		result.Where(fmt.Sprintf("%s.%s IS NULL", dbtables.EffectivePoliciesTable, dbtables.DeletedAtColumn))
+		result = result.Where(fmt.Sprintf("%s.%s IS NULL", dbtables.EffectivePoliciesTable, dbtables.DeletedAtColumn))
 	} else {
-		result.Unscoped()
+		result = result.Unscoped()
 	}
 
-	result = result.Scan(&record)
-	if result.Error != nil {
-		dbErr := database.Error(database.GET, database.EffectivePolicy).WithDetailsFromDb(result)
-		logging.Errorf("failed to get effective policy by id: %s: %v", dbErr.Message, result.Error)
+	rowsAffected, err := result.Scan(&record)
+	if err != nil {
+		dbErr := database.Error(database.GET, database.EffectivePolicy).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("failed to get effective policy by id: %s: %v", dbErr.Message, err)
 		return nil, dbErr
 	}
-	if result.RowsAffected == 0 {
+	if rowsAffected == 0 {
 		return nil, nil
 	}
 
@@ -126,7 +125,7 @@ func GetEffectivePolicyById(ctx context.Context, id uuid.UUID, includeDeleted bo
 	return &record, nil
 }
 
-func SoftDeleteEffectivePoliciesByOrgUnit(ctx context.Context, tx *gorm.DB, appliedOrgUnit scopes.OrgUnit, workloadType string) *api.Error {
+func SoftDeleteEffectivePoliciesByOrgUnit(ctx context.Context, tx orm.DB, appliedOrgUnit scopes.OrgUnit, workloadType string) *api.Error {
 	result := tx.Table(dbtables.EffectivePoliciesTable)
 
 	sql := fmt.Sprintf("%s.%s in (select %s from %s where %s.%s = %s.%s",
@@ -180,10 +179,10 @@ func SoftDeleteEffectivePoliciesByOrgUnit(ctx context.Context, tx *gorm.DB, appl
 
 	result = result.Where(sql, params...)
 
-	result = result.Update(dbtables.DeletedAtColumn, time.Now())
-	if result.Error != nil {
-		dbErr := database.Error(database.DELETE, database.EffectivePolicy).WithDetailsFromDb(result)
-		logging.Errorf("failed to soft delete effective policies by org unit: %s: %v", dbErr.Message, result.Error)
+	rowsAffected, err := result.Update(dbtables.DeletedAtColumn, time.Now())
+	if err != nil {
+		dbErr := database.Error(database.DELETE, database.EffectivePolicy).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("failed to soft delete effective policies by org unit: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 
@@ -199,7 +198,7 @@ func SoftDeleteEffectivePoliciesByOrgUnit(ctx context.Context, tx *gorm.DB, appl
 // The returned ids can be handed directly to
 // dao.DeleteBreakdownCachesOfSubtree so the cache invalidation step doesn't
 // have to re-traverse the policies table.
-func SoftDeleteEffectivePoliciesOfSubtree(ctx context.Context, tx *gorm.DB, appliedOrgUnit scopes.OrgUnit, workloadType string) ([]string, *api.Error) {
+func SoftDeleteEffectivePoliciesOfSubtree(ctx context.Context, tx orm.DB, appliedOrgUnit scopes.OrgUnit, workloadType string) ([]string, *api.Error) {
 	// no subtree under project
 	if appliedOrgUnit.Scope == api.SCOPETYPE_PROJECT {
 		return nil, nil
@@ -218,12 +217,12 @@ func SoftDeleteEffectivePoliciesOfSubtree(ctx context.Context, tx *gorm.DB, appl
 	}
 
 	// step 2: stamp deleted_at on the matching effective rows.
-	result := tx.Table(dbtables.EffectivePoliciesTable).
+	rows, updErr := tx.Table(dbtables.EffectivePoliciesTable).
 		Where(fmt.Sprintf("%s IN ?", dbtables.EffectivePoliciesColumnPolicyId), descendantIds).
 		Update(dbtables.DeletedAtColumn, time.Now())
-	if result.Error != nil {
-		dbErr := database.Error(database.DELETE, database.EffectivePolicy).WithDetailsFromDb(result)
-		logging.Errorf("failed to soft delete effective policies of subtree: %s: %v", dbErr.Message, result.Error)
+	if updErr != nil {
+		dbErr := database.Error(database.DELETE, database.EffectivePolicy).WithDetailsFromDbResult(rows, updErr)
+		logging.Errorf("failed to soft delete effective policies of subtree: %s: %v", dbErr.Message, updErr)
 		return nil, dbErr
 	}
 
@@ -253,7 +252,7 @@ func SoftDeleteEffectivePoliciesOfSubtree(ctx context.Context, tx *gorm.DB, appl
 //
 // soft-deleted rows are included via Unscoped() so placeholder policies that
 // were just created still appear.
-func listSubtreePolicyIds(ctx context.Context, tx *gorm.DB, appliedOrgUnit scopes.OrgUnit, workloadType string) ([]string, *api.Error) {
+func listSubtreePolicyIds(ctx context.Context, tx orm.DB, appliedOrgUnit scopes.OrgUnit, workloadType string) ([]string, *api.Error) {
 	q := tx.Table(dbtables.PoliciesTable).Unscoped()
 
 	if appliedOrgUnit.Scope == api.SCOPETYPE_SYSTEM {
@@ -291,11 +290,10 @@ func listSubtreePolicyIds(ctx context.Context, tx *gorm.DB, appliedOrgUnit scope
 	}
 
 	var ids []string
-	res := q.Pluck(dbtables.PoliciesColumnId, &ids)
-	if res.Error != nil {
-		dbErr := database.Error(database.LIST, database.Policies).WithDetailsFromDb(res)
+	if err := q.Pluck(dbtables.PoliciesColumnId, &ids); err != nil {
+		dbErr := database.Error(database.LIST, database.Policies).WithDetails(err)
 		logging.Errorf("failed to list subtree policy ids for %s/%s: %s: %v",
-			appliedOrgUnit.Scope, appliedOrgUnit.Id, dbErr.Message, res.Error)
+			appliedOrgUnit.Scope, appliedOrgUnit.Id, dbErr.Message, err)
 		return nil, dbErr
 	}
 
@@ -310,7 +308,7 @@ type ChoiceInfo struct {
 }
 
 func FindPoliciesForSync(ctx context.Context, workloadType string, clusterId string, afterUpdate int64) ([]dbmodel.PolicyAndEffective, *api.Error) {
-	tx := dao_utils.DB().WithContext(ctx)
+	tx := runaidb.DB().WithContext(ctx)
 
 	tenantId := auth.TenantIdOf(ctx)
 
@@ -325,26 +323,26 @@ func FindPoliciesForSync(ctx context.Context, workloadType string, clusterId str
 		Joins(effectivePolicy.JoinWithPolicy())
 
 	// filter by tenant id
-	query.Where(fmt.Sprintf("%s.%s = ?", dbtables.EffectivePoliciesTable, dbtables.PoliciesColumnTenantId), tenantId)
+	query = query.Where(fmt.Sprintf("%s.%s = ?", dbtables.EffectivePoliciesTable, dbtables.PoliciesColumnTenantId), tenantId)
 
 	// filter out records without given rules/defaults, they were only created as placeholders
 	// as part of the "get"
-	query.Where(fmt.Sprintf("(%s.%s is not null or %s.%s is not null or %s.%s is not null)",
+	query = query.Where(fmt.Sprintf("(%s.%s is not null or %s.%s is not null or %s.%s is not null)",
 		dbtables.PoliciesTable, dbtables.PoliciesColumnDefaults,
 		dbtables.PoliciesTable, dbtables.PoliciesColumnRules,
 		dbtables.PoliciesTable, dbtables.PoliciesColumnImposedAssets))
 
 	// filter by cluster ID (and include also tenant-policies which are populated to all the clusters)
-	query.Where(fmt.Sprintf("%s.%s IS NULL OR %s.%s = ?",
+	query = query.Where(fmt.Sprintf("%s.%s IS NULL OR %s.%s = ?",
 		dbtables.PoliciesTable, dbtables.PoliciesColumnClusterId,
 		dbtables.PoliciesTable, dbtables.PoliciesColumnClusterId),
 		clusterId)
 
 	// filter by workload type
-	query.Where(fmt.Sprintf("(%s = ? or %s = ?)", dbtables.PoliciesColumnWorkloadType, dbtables.PoliciesColumnWorkloadType), workloadType, FallbackPolicyAsType)
+	query = query.Where(fmt.Sprintf("(%s = ? or %s = ?)", dbtables.PoliciesColumnWorkloadType, dbtables.PoliciesColumnWorkloadType), workloadType, FallbackPolicyAsType)
 
 	// start from given update count
-	query.Order(dbtables.EffectivePoliciesColumnUpdateCount)
+	query = query.Order(dbtables.EffectivePoliciesColumnUpdateCount)
 
 	if afterUpdate != 0 {
 		query = query.Where(fmt.Sprintf("%s > ?", dbtables.EffectivePoliciesColumnUpdateCount), afterUpdate)
@@ -353,10 +351,9 @@ func FindPoliciesForSync(ctx context.Context, workloadType string, clusterId str
 	query = query.Limit(runai_config.Get[*config.ServerConfig]().PoliciesPerBulk * 2)
 
 	// execute the query unscoped (=include soft deleted records)
-	result := query.Unscoped().Find(&records)
-	if result.Error != nil {
-		dbErr := database.Error(database.LIST, database.EffectivePolicy).WithDetailsFromDb(result)
-		logging.Errorf("failed to list effective policies for sync: %s: %v", dbErr.Message, result.Error)
+	if err := query.Unscoped().Find(&records); err != nil {
+		dbErr := database.Error(database.LIST, database.EffectivePolicy).WithDetails(err)
+		logging.Errorf("failed to list effective policies for sync: %s: %v", dbErr.Message, err)
 		return nil, dbErr
 	}
 

@@ -134,8 +134,8 @@ func parseRunaiResources(metadata map[string]string) *reports.RunaiResources {
 		hasResources = true
 	}
 
-	if controller := parseWorkloadController(metadata); controller != nil {
-		runaiResources.WorkloadController = controller
+	if exporter := parseComponentResources(metadata, "workload_exporter"); exporter != nil {
+		runaiResources.WorkloadExporter = exporter
 		hasResources = true
 	}
 
@@ -160,22 +160,5 @@ func parseComponentResources(metadata map[string]string, prefix string) *reports
 		CPULimit:      cpuLimit,
 		MemoryRequest: memReq,
 		MemoryLimit:   memLimit,
-	}
-}
-
-func parseWorkloadController(metadata map[string]string) *reports.ControllerConfig {
-	maxReconciles := metadata["workload_controller_max_concurrent_reconciles"]
-	if maxReconciles == "" {
-		return nil
-	}
-
-	maxReconcilesInt, err := strconv.Atoi(maxReconciles)
-	if err != nil {
-		return nil
-	}
-
-	return &reports.ControllerConfig{
-		MaxConcurrentReconciles: maxReconcilesInt,
-		Resources:               parseComponentResources(metadata, "workload_exporter"),
 	}
 }

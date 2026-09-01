@@ -9,13 +9,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"gorm.io/gorm"
 	"net/http"
 
 	"github.com/run-ai/runai/runai-application-packages/convutils"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
-	"github.com/run-ai/runai/runai-common-packages/dao-utils/validators"
+	"github.com/run-ai/runai/runai-application-packages/queryapi"
+	querydbenrich "github.com/run-ai/runai/runai-application-packages/queryapi/dbenrich"
 	"github.com/run-ai/runai/runai-common-packages/logging"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
+	"github.com/run-ai/runai/runai-common-packages/runaidb/orm"
 
 	"github.com/run-ai/runai/control-plane/policy-service/generated/pkg/api"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database"
@@ -25,7 +26,7 @@ import (
 )
 
 // the user is allowed to see only system scope or tenant scoped from his own tenant
-func filterMappingSelectorsByTenant(res *gorm.DB, ctx context.Context) *gorm.DB {
+func filterMappingSelectorsByTenant(res orm.DB, ctx context.Context) orm.DB {
 	tenantID := auth.TenantIdOf(ctx)
 	whereSQL := filterMappingSelectorsByTenantQuery()
 	return res.Where(whereSQL, string(api.MAPPINGSCOPE_SYSTEM), string(api.MAPPINGSCOPE_TENANT), tenantID)
@@ -43,10 +44,9 @@ func CreateMapping(ctx context.Context, row *dbmodel.MappingSelectors) *api.Erro
 		row.SpecSelectors = map[string]api.SpecSelectorsWithScopeValue{}
 	}
 
-	res := dao_utils.DB().WithContext(ctx).Table(dbtables.MappingSelectorsTable).Create(row)
-	if res.Error != nil {
-		dbErr := database.Error(database.CREATE, database.MappingSelectors).WithDetailsFromDb(res)
-		logging.Errorf("failed to create mapping: %s: %v", dbErr.Message, res.Error)
+	if _, err := runaidb.DB().WithContext(ctx).Table(dbtables.MappingSelectorsTable).Create(row); err != nil {
+		dbErr := database.Error(database.CREATE, database.MappingSelectors).WithDetails(err)
+		logging.Errorf("failed to create mapping: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 
@@ -82,19 +82,18 @@ func (m MappingsByGvkAndScope) GvkFor(key gvkKey) api.Gvk {
 }
 
 // ListMappings returns all visible mapping rows for the tenant, optionally narrowed by API filters.
-func ListMappings(ctx context.Context, filters []validators.ParameterizedFilter) (MappingsByGvkAndScope, *api.Error) {
+func ListMappings(ctx context.Context, filters []queryapi.Filter) (MappingsByGvkAndScope, *api.Error) {
 	var rows []dbmodel.MappingSelectors
 
-	res := dao_utils.DB().WithContext(ctx).Model(&dbmodel.MappingSelectors{})
+	res := runaidb.DB().WithContext(ctx).Model(&dbmodel.MappingSelectors{})
 
 	res = filterMappingSelectorsByTenant(res, ctx)
 
-	res = dao_utils.ApplyParameterizedFilters(res, filters)
+	res = res.WithEnricher(querydbenrich.Filters(filters))
 
-	res = res.Find(&rows)
-	if res.Error != nil {
-		dbErr := database.Error(database.LIST, database.MappingSelectors).WithDetailsFromDb(res)
-		logging.Errorf("failed to list mappings: %s: %v", dbErr.Message, res.Error)
+	if err := res.Find(&rows); err != nil {
+		dbErr := database.Error(database.LIST, database.MappingSelectors).WithDetails(err)
+		logging.Errorf("failed to list mappings: %s: %v", dbErr.Message, err)
 		return nil, dbErr
 	}
 
@@ -116,7 +115,7 @@ func ListMappings(ctx context.Context, filters []validators.ParameterizedFilter)
 
 // ListMappingsReferencingFieldGroup returns mapping rows visible to ctx whose spec_selectors JSON references
 // the given field group name in at least one selector's fieldGroups array.
-func ListMappingsReferencingFieldGroup(ctx context.Context, tx *gorm.DB, fieldGroupName string) ([]dbmodel.MappingSelectors, *api.Error) {
+func ListMappingsReferencingFieldGroup(ctx context.Context, tx orm.DB, fieldGroupName string) ([]dbmodel.MappingSelectors, *api.Error) {
 	var rows []dbmodel.MappingSelectors
 
 	// spec_selectors: { "<selectorKey>": { "fieldGroups": ["name", ...], ... }, ... }
@@ -130,10 +129,9 @@ func ListMappingsReferencingFieldGroup(ctx context.Context, tx *gorm.DB, fieldGr
 
 	res := tx.Model(&dbmodel.MappingSelectors{}).Where(subq, fieldGroupName)
 	res = filterMappingSelectorsByTenant(res, ctx)
-	res = res.Find(&rows)
-	if res.Error != nil {
-		dbErr := database.Error(database.LIST, database.MappingSelectors).WithDetailsFromDb(res)
-		logging.Errorf("failed to list mappings referencing field group %s: %s: %v", fieldGroupName, dbErr.Message, res.Error)
+	if err := res.Find(&rows); err != nil {
+		dbErr := database.Error(database.LIST, database.MappingSelectors).WithDetails(err)
+		logging.Errorf("failed to list mappings referencing field group %s: %s: %v", fieldGroupName, dbErr.Message, err)
 		return nil, dbErr
 	}
 
@@ -150,14 +148,13 @@ func GetMappingByGvk(ctx context.Context, gvk api.Gvk) (MappingByScope, *api.Err
 		GvkVersion: gvk.Version,
 	}
 
-	res := dao_utils.DB().WithContext(ctx).Model(&dbmodel.MappingSelectors{}).Where(where)
+	res := runaidb.DB().WithContext(ctx).Model(&dbmodel.MappingSelectors{}).Where(where)
 
 	res = filterMappingSelectorsByTenant(res, ctx)
 
-	res = res.Find(&rows)
-	if res.Error != nil {
-		dbErr := database.Error(database.GET, database.MappingSelectors).WithDetailsFromDb(res)
-		logging.Errorf("failed to get mapping: %s: %v", dbErr.Message, res.Error)
+	if err := res.Find(&rows); err != nil {
+		dbErr := database.Error(database.GET, database.MappingSelectors).WithDetails(err)
+		logging.Errorf("failed to get mapping: %s: %v", dbErr.Message, err)
 		return nil, dbErr
 	}
 
@@ -185,21 +182,19 @@ func GetMappingByGvkAndScope(ctx context.Context, gvk api.Gvk, scope api.Mapping
 		where.TenantId = auth.TenantIdOf(ctx)
 	}
 
-	res := dao_utils.DB().WithContext(ctx).Model(&dbmodel.MappingSelectors{}).Where(where).First(&row)
-
-	if res.Error != nil {
-		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+	if err := runaidb.DB().WithContext(ctx).Model(&dbmodel.MappingSelectors{}).Where(where).First(&row); err != nil {
+		if errors.Is(err, orm.ErrRecordNotFound) {
 			return nil, api.NewError(http.StatusNotFound, fmt.Sprintf("%s scoped mapping for %s/%s/%s not found", scope, convutils.Deref(gvk.Group, ""), gvk.Kind, gvk.Version), nil)
 		}
-		dbErr := database.Error(database.GET, database.MappingSelectors).WithDetailsFromDb(res)
-		logging.Errorf("failed to get mapping: %s: %v", dbErr.Message, res.Error)
+		dbErr := database.Error(database.GET, database.MappingSelectors).WithDetails(err)
+		logging.Errorf("failed to get mapping: %s: %v", dbErr.Message, err)
 		return nil, dbErr
 	}
 
 	return &row, nil
 }
 
-func SaveMapping(ctx context.Context, db *gorm.DB, row *dbmodel.MappingSelectors) *api.Error {
+func SaveMapping(ctx context.Context, db orm.DB, row *dbmodel.MappingSelectors) *api.Error {
 	if row.SpecSelectors == nil {
 		row.SpecSelectors = map[string]api.SpecSelectorsWithScopeValue{}
 	}
@@ -212,14 +207,14 @@ func SaveMapping(ctx context.Context, db *gorm.DB, row *dbmodel.MappingSelectors
 		ScopeType:  row.ScopeType,
 		TenantId:   row.TenantId,
 	}
-	res := db.WithContext(ctx).Model(&query).Where(query).Save(row)
-	if res.Error != nil {
-		dbErr := database.Error(database.UPDATE, database.MappingSelectors).WithDetailsFromDb(res)
-		logging.Errorf("failed to update mapping: %s: %v", dbErr.Message, res.Error)
+	rowsAffected, err := db.WithContext(ctx).Model(&query).Where(query).Save(row)
+	if err != nil {
+		dbErr := database.Error(database.UPDATE, database.MappingSelectors).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("failed to update mapping: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 
-	if res.RowsAffected == 0 {
+	if rowsAffected == 0 {
 		return api.NewError(http.StatusNotFound,
 			fmt.Sprintf("mapping %s/%s/%s not found within scope %s/%d", row.GvkGroup, row.GvkKind, row.GvkVersion, row.ScopeType, row.TenantId), nil)
 	}
@@ -228,7 +223,7 @@ func SaveMapping(ctx context.Context, db *gorm.DB, row *dbmodel.MappingSelectors
 }
 
 // DeleteMappingByGvkAndScope deletes the tenant (or system) row for a GVK.
-func DeleteMappingByGvkAndScope(ctx context.Context, db *gorm.DB, gvk api.Gvk, scope api.MappingScope) *api.Error {
+func DeleteMappingByGvkAndScope(ctx context.Context, db orm.DB, gvk api.Gvk, scope api.MappingScope) *api.Error {
 	where := dbmodel.MappingSelectors{
 		GvkGroup:   convutils.Deref(gvk.Group, ""),
 		GvkKind:    gvk.Kind,
@@ -239,14 +234,14 @@ func DeleteMappingByGvkAndScope(ctx context.Context, db *gorm.DB, gvk api.Gvk, s
 		where.TenantId = auth.TenantIdOf(ctx)
 	}
 
-	res := db.WithContext(ctx).Model(&dbmodel.MappingSelectors{}).Where(where).Delete(&dbmodel.MappingSelectors{})
-	if res.Error != nil {
-		dbErr := database.Error(database.DELETE, database.MappingSelectors).WithDetailsFromDb(res)
-		logging.Errorf("failed to delete mapping: %s: %v", dbErr.Message, res.Error)
+	rowsAffected, err := db.WithContext(ctx).Model(&dbmodel.MappingSelectors{}).Where(where).Delete(&dbmodel.MappingSelectors{})
+	if err != nil {
+		dbErr := database.Error(database.DELETE, database.MappingSelectors).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("failed to delete mapping: %s: %v", dbErr.Message, err)
 		return dbErr
 	}
 
-	if res.RowsAffected == 0 {
+	if rowsAffected == 0 {
 		return api.NewError(http.StatusNotFound,
 			fmt.Sprintf("mapping for %s/%s/%s (scope %s) is not found", convutils.Deref(gvk.Group, ""), gvk.Kind, gvk.Version, scope), nil)
 	}

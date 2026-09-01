@@ -15,6 +15,7 @@ import (
 	runaiv1 "github.com/run-ai/runai/runai-cluster/cluster/sdk/apis/run/v1"
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	clientgocache "k8s.io/client-go/tools/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -55,6 +56,38 @@ func genericControllerErrorHandler(err error, operation constants.OperationName,
 		zap.S().Errorf("Had an error while trying to %s %s <%s>: %v \n", operation, resource, resourceName, err)
 		metrics.GetMetricsExporter().AddErrorCounter(err, resource)
 	}
+}
+
+// filteredObject unwraps a delete tombstone for FilteringResourceEventHandler.FilterFunc,
+// which runs before DeleteFunc and would otherwise reject or panic on one.
+func filteredObject(obj any) any {
+	if tombstone, ok := obj.(clientgocache.DeletedFinalStateUnknown); ok {
+		return tombstone.Obj
+	}
+	return obj
+}
+
+// deletedObject unwraps the object of a delete event. The informer delivers a
+// DeletedFinalStateUnknown tombstone instead of the object when it missed the deletion.
+func deletedObject[T client.Object](obj any) (T, bool) {
+	if typed, ok := obj.(T); ok {
+		return typed, true
+	}
+
+	var zero T
+	tombstone, ok := obj.(clientgocache.DeletedFinalStateUnknown)
+	if !ok {
+		zap.S().Errorf("Got a delete event for an unexpected object of type %T, wanted %T", obj, zero)
+		return zero, false
+	}
+
+	typed, ok := tombstone.Obj.(T)
+	if !ok {
+		zap.S().Errorf("Got a delete tombstone <%s> wrapping an unexpected object of type %T, wanted %T",
+			tombstone.Key, tombstone.Obj, zero)
+		return zero, false
+	}
+	return typed, true
 }
 
 func objectKeyFromObject(object client.Object) client.ObjectKey {

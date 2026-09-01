@@ -25,7 +25,7 @@ import (
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/auth"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/clients/authorization"
 	"github.com/run-ai/runai/control-plane/workloads-and-policies/clients/orgunit"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 )
 
 const formattersApiPath = "/api/v1/policies/formatter"
@@ -227,7 +227,7 @@ var _ = Describe("SystemMappingTest", func() {
 
 	Context("system formatter creation", func() {
 		It("seeds apps/Deployment/v1 system mapping after field groups exist", func() {
-			db := database.DB()
+			db := runaidb.DB()
 			ms := MappingApiService{}
 			cv := NewMappingConsistencyValidator(sysAdminCtx, api.MAPPINGSCOPE_SYSTEM)
 
@@ -280,7 +280,7 @@ var _ = Describe("SystemMappingTest", func() {
 
 	Context("system workload mapping description versioning", func() {
 		It("does not update mapping when description is unchanged (skips seed)", func() {
-			db := database.DB()
+			db := runaidb.DB()
 			ms := MappingApiService{}
 			cv := NewMappingConsistencyValidator(sysAdminCtx, api.MAPPINGSCOPE_SYSTEM)
 
@@ -305,11 +305,11 @@ var _ = Describe("SystemMappingTest", func() {
 				restored, rerr := dao.GetMappingByGvkAndScope(sysAdminCtx, gvk, api.MAPPINGSCOPE_SYSTEM)
 				Expect(rerr).To(BeNil())
 				restored.SpecSelectors = originalSelectors
-				Expect(dao.SaveMapping(sysAdminCtx, dao_utils.DB().WithContext(sysAdminCtx), restored)).To(BeNil())
+				Expect(dao.SaveMapping(sysAdminCtx, runaidb.DB().WithContext(sysAdminCtx), restored)).To(BeNil())
 			})
 
 			delete(row.SpecSelectors, "workloadSpec")
-			Expect(dao.SaveMapping(sysAdminCtx, dao_utils.DB().WithContext(sysAdminCtx), row)).To(BeNil())
+			Expect(dao.SaveMapping(sysAdminCtx, runaidb.DB().WithContext(sysAdminCtx), row)).To(BeNil())
 
 			handleSystemMappings(sysAdminCtx, db, ms, cv)
 
@@ -321,7 +321,7 @@ var _ = Describe("SystemMappingTest", func() {
 		})
 
 		It("updates description and spec selectors when description differs", func() {
-			db := database.DB()
+			db := runaidb.DB()
 			ms := MappingApiService{}
 			cv := NewMappingConsistencyValidator(sysAdminCtx, api.MAPPINGSCOPE_SYSTEM)
 
@@ -337,7 +337,7 @@ var _ = Describe("SystemMappingTest", func() {
 			row.Description = &staleDesc
 			delete(row.SpecSelectors, "workloadSpec")
 			delete(row.SpecSelectors, "allContainers")
-			Expect(dao.SaveMapping(sysAdminCtx, dao_utils.DB().WithContext(sysAdminCtx), row)).To(BeNil())
+			Expect(dao.SaveMapping(sysAdminCtx, runaidb.DB().WithContext(sysAdminCtx), row)).To(BeNil())
 
 			handleSystemMappings(sysAdminCtx, db, ms, cv)
 
@@ -358,7 +358,7 @@ var _ = Describe("SystemMappingTest", func() {
 
 	Context("system field group seeding", func() {
 		It("seeds podSpec field groups with inverted systemItemSel refs after runai-podSpec formatter exists", func() {
-			db := database.DB()
+			db := runaidb.DB()
 			ms := MappingApiService{}
 			cv := NewMappingConsistencyValidator(sysAdminCtx, api.MAPPINGSCOPE_SYSTEM)
 
@@ -408,7 +408,7 @@ var _ = Describe("SystemMappingTest", func() {
 
 	Context("system field group description versioning", func() {
 		It("does not update field group when description is unchanged", func() {
-			db := database.DB()
+			db := runaidb.DB()
 
 			ms := MappingApiService{}
 			name := "runai-system-fg-version-noop"
@@ -469,7 +469,7 @@ var _ = Describe("SystemMappingTest", func() {
 		})
 
 		It("updates field group when description changes", func() {
-			db := database.DB()
+			db := runaidb.DB()
 			ms := MappingApiService{}
 			name := "runai-system-fg-version-upgrade"
 			oldDescription := "v-old"

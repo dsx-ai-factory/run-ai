@@ -43,9 +43,13 @@ func registerInteractivePolicy(cachedClient cachedclient.CachedClient, policyHan
 				constants.AddOperationString, constants.LowInteractivePolicyString, obj.(*ipv2.InteractivePolicy))
 		},
 		DeleteFunc: func(obj any) {
-			rateLimitedController.MarkItemDeleted(objectKeyFromObject(obj.(*ipv2.InteractivePolicy)))
-			genericControllerErrorHandler(policyHandler.HandleDelete(obj.(*ipv2.InteractivePolicy)),
-				constants.DeleteOperationString, constants.LowInteractivePolicyString, obj.(*ipv2.InteractivePolicy))
+			policy, ok := deletedObject[*ipv2.InteractivePolicy](obj)
+			if !ok {
+				return
+			}
+			rateLimitedController.MarkItemDeleted(objectKeyFromObject(policy))
+			genericControllerErrorHandler(policyHandler.HandleDelete(policy),
+				constants.DeleteOperationString, constants.LowInteractivePolicyString, policy)
 		},
 		UpdateFunc: func(oldObj any, newObj any) {
 			rateLimitedController.AddRateLimited(objectKeyFromObject(newObj.(*ipv2.InteractivePolicy)))
@@ -73,9 +77,13 @@ func registerTrainingPolicy(cachedClient cachedclient.CachedClient, policyHandle
 				constants.AddOperationString, constants.LowTrainingPolicyString, obj.(*tpv2.TrainingPolicy))
 		},
 		DeleteFunc: func(obj any) {
-			rateLimitedController.MarkItemDeleted(objectKeyFromObject(obj.(*tpv2.TrainingPolicy)))
-			genericControllerErrorHandler(policyHandler.HandleDelete(obj.(*tpv2.TrainingPolicy)),
-				constants.DeleteOperationString, constants.LowTrainingPolicyString, obj.(*tpv2.TrainingPolicy))
+			policy, ok := deletedObject[*tpv2.TrainingPolicy](obj)
+			if !ok {
+				return
+			}
+			rateLimitedController.MarkItemDeleted(objectKeyFromObject(policy))
+			genericControllerErrorHandler(policyHandler.HandleDelete(policy),
+				constants.DeleteOperationString, constants.LowTrainingPolicyString, policy)
 		},
 		UpdateFunc: func(oldObj any, newObj any) {
 			rateLimitedController.AddRateLimited(objectKeyFromObject(newObj.(*tpv2.TrainingPolicy)))
@@ -103,7 +111,10 @@ func registerInferencePolicy(cachedClient cachedclient.CachedClient, policyHandl
 			genericControllerErrorHandler(policyHandler.HandleAdd(object), constants.AddOperationString, constants.LowInferencePolicyString, object)
 		},
 		DeleteFunc: func(obj any) {
-			object := obj.(*infpv2.InferencePolicy)
+			object, ok := deletedObject[*infpv2.InferencePolicy](obj)
+			if !ok {
+				return
+			}
 			rateLimitedController.MarkItemDeleted(objectKeyFromObject(object))
 			genericControllerErrorHandler(policyHandler.HandleDelete(object), constants.DeleteOperationString, constants.LowInferencePolicyString, object)
 		},
@@ -132,7 +143,10 @@ func registerDistributedPolicy(cachedClient cachedclient.CachedClient, policyHan
 			genericControllerErrorHandler(policyHandler.HandleAdd(obj.(*dpv2.DistributedPolicy)), constants.AddOperationString, constants.LowDistributedPolicyString, obj.(*dpv2.DistributedPolicy))
 		},
 		DeleteFunc: func(obj any) {
-			dp := obj.(*dpv2.DistributedPolicy)
+			dp, ok := deletedObject[*dpv2.DistributedPolicy](obj)
+			if !ok {
+				return
+			}
 			rateLimitedController.MarkItemDeleted(objectKeyFromObject(dp))
 			genericControllerErrorHandler(policyHandler.HandleDelete(dp), constants.DeleteOperationString, constants.LowDistributedPolicyString, dp)
 		},

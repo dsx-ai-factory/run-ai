@@ -15,7 +15,7 @@ import (
 	"github.com/run-ai/runai/control-plane/policy-service/generated/pkg/api"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/run-ai/runai/runai-application-packages/convutils"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-application-packages/dbmodels"
 )
 
 const EmptyPolicyCreator = "runai-internal"
@@ -84,7 +84,7 @@ func NewEmptyPolicy(ctx context.Context, request *GenericPolicyRequest, orgUnits
 	name := fmt.Sprintf("empty-policy-%s-%s", request.PolicyMeta.Scope, orgUnits[0].Id)
 
 	record := dbmodel.Policy{
-		BaseModel: dao_utils.BaseModel{
+		BaseModel: dbmodels.BaseModel{
 			CreatedBy: EmptyPolicyCreator,
 			UpdatedBy: EmptyPolicyCreator,
 		},

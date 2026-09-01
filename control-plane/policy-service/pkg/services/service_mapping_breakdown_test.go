@@ -17,7 +17,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/run-ai/runai/runai-application-packages/convutils"
-	dao_utils "github.com/run-ai/runai/runai-common-packages/dao-utils"
+	"github.com/run-ai/runai/runai-common-packages/runaidb"
 
 	"github.com/run-ai/runai/control-plane/policy-service/generated/pkg/api"
 	"github.com/run-ai/runai/control-plane/policy-service/pkg/clients/assets"
@@ -69,7 +69,7 @@ var _ = Describe("Mapping Breakdown APIs", Ordered, func() {
 
 	seedMapping := func() {
 		tenantCtx := auth.MockAuthContext("test-user", tenantId)
-		db := database.DB()
+		db := runaidb.DB()
 
 		setA := `{"a": $ARGS.named.name}`
 		getA := `.a`
@@ -137,7 +137,7 @@ var _ = Describe("Mapping Breakdown APIs", Ordered, func() {
 			UpdatedBy: "test-user",
 			UpdatedAt: time.Now(),
 		}
-		Expect(dao.SaveMapping(tenantCtx, dao_utils.DB().WithContext(tenantCtx), mapping)).To(BeNil())
+		Expect(dao.SaveMapping(tenantCtx, runaidb.DB().WithContext(tenantCtx), mapping)).To(BeNil())
 	}
 
 	Context("mapping minimal", func() {
@@ -291,7 +291,7 @@ var _ = Describe("Mapping Breakdown APIs", Ordered, func() {
 
 		It("accepts empty group for core Kubernetes resources like Pod", func() {
 			tenantCtx := auth.MockAuthContext("test-user", tenantId)
-			db := database.DB()
+			db := runaidb.DB()
 
 			podGvk := api.Gvk{Group: convutils.Ref(""), Kind: "Pod", Version: "v1"}
 			fgName := "fgForPodTest"
@@ -334,7 +334,7 @@ var _ = Describe("Mapping Breakdown APIs", Ordered, func() {
 
 		It("returns spec selector dependency in field-info breakdown response", func() {
 			tenantCtx := auth.MockAuthContext("test-user", tenantId)
-			db := database.DB()
+			db := runaidb.DB()
 
 			fgName := "fgForDepTest"
 			fg := newFieldGroupForTest(fgName, api.MAPPINGSCOPE_TENANT, tenantId, "test-user",
@@ -412,7 +412,7 @@ var _ = Describe("Mapping Breakdown APIs", Ordered, func() {
 
 		It("includes the full transitive dependency chain in field-info breakdown", func() {
 			tenantCtx := auth.MockAuthContext("test-user", tenantId)
-			db := database.DB()
+			db := runaidb.DB()
 
 			fgName := "fgForChainTest"
 			fg := newFieldGroupForTest(fgName, api.MAPPINGSCOPE_TENANT, tenantId, "test-user",

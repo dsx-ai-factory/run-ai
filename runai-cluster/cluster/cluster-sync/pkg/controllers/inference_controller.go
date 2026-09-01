@@ -13,7 +13,6 @@ import (
 	"github.com/run-ai/runai/runai-cluster/cluster/workload-controller/pkg/api/inferenceworkload/v2alpha1"
 	"go.uber.org/zap"
 	"k8s.io/client-go/tools/cache"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func AddInferenceHandlerToCache(backendClient *runaiclient.BackendClient, cachedClient cachedclient.CachedClient,
@@ -28,7 +27,8 @@ func AddInferenceHandlerToCache(backendClient *runaiclient.BackendClient, cached
 
 	_, err := inferenceInformer.AddEventHandler(cache.FilteringResourceEventHandler{
 		FilterFunc: func(object any) bool {
-			return handlers.FilterWorkloads(object.(*v2alpha1.InferenceWorkload).Spec.WorkloadFields)
+			workload, ok := filteredObject(object).(*v2alpha1.InferenceWorkload)
+			return ok && handlers.FilterWorkloads(workload.Spec.WorkloadFields)
 		},
 		Handler: cache.ResourceEventHandlerFuncs{
 			AddFunc: func(object any) {
@@ -39,10 +39,13 @@ func AddInferenceHandlerToCache(backendClient *runaiclient.BackendClient, cached
 				}
 			},
 			DeleteFunc: func(object any) {
-				obj := object.(*v2alpha1.InferenceWorkload)
+				obj, ok := deletedObject[*v2alpha1.InferenceWorkload](object)
+				if !ok {
+					return
+				}
 				if handlers.FilterWorkloads(obj.Spec.WorkloadFields) {
 					rateLimitedController.MarkItemDeleted(objectKeyFromObject(obj))
-					genericControllerErrorHandler(workloadHandler.HandleRunaiWorkloadDelete(object.(client.Object)),
+					genericControllerErrorHandler(workloadHandler.HandleRunaiWorkloadDelete(obj),
 						constants.DeleteOperation, "inferenceworkload", obj)
 				}
 			},
