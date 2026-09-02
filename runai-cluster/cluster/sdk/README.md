@@ -1,4 +1,4 @@
-# RunAI Cluster SDK
+# RunAI Cluster SDK 
 
 ## Adding new CRD version
 * Run `hack/new-crd-version.sh <GROUPNAME> <VERSION> <KIND> [NAMESPACED]` to generate boilerplate for your new CRD or version of one.
