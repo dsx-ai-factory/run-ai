@@ -24,7 +24,7 @@ env:
   GO_VERSION: "1.24.6"
   SCHEMA_PATH: "runai-cluster/cluster/runai-chart/values.schema.json"
   SDK_PATH: "runai-cluster/cluster/sdk"
-  GOPRIVATE: "github.com/run-ai/*"
+  GOPRIVATE: "github.com/run-ai/*,github.com/dsx-ai-factory/*"
 
 jobs:
   validate-schema:
@@ -43,10 +43,9 @@ jobs:
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
       - name: Set Up GitHub Authentication For Go Modules
-        env:
-          GOPRIVATE: "github.com/run-ai/*"
         run: |
           git config --global url."https://${{ secrets.GIT_HUB_OSS }}@github.com/run-ai/".insteadOf "https://github.com/run-ai/"
+          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/dsx-ai-factory/".insteadOf "https://github.com/dsx-ai-factory/"
 
       - name: Set up Go
         uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
@@ -73,8 +72,6 @@ jobs:
       - name: Generate schema to temporary file
         id: generate-schema
         if: steps.check-schema-requirement.outputs.schema_required == 'true'
-        env:
-          GOPRIVATE: "github.com/run-ai/*"
         run: |
           cd ${{ env.SDK_PATH }}
           TEMP_SCHEMA=$(mktemp)
