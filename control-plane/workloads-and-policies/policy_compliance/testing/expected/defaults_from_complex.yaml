@@ -1,0 +1,8 @@
+compute:
+  cpuCoreLimit: 5
+  cpuCoreRequest: 3
+  gpuPortionLimit: 7.5
+  gpuPortionRequest: 10.5
+security:
+  runAsGid: 2.1
+  runAsUid: 10.5

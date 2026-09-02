@@ -1,0 +1,18 @@
+apiVersion: run.ai/v2alpha1
+kind: InteractiveWorkload
+metadata:
+  creationTimestamp: null
+  name: storage-1
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  image:
+    value: ubuntu
+  imagePullPolicy:
+    value: Always
+  mountPropagation:
+    value: true
+  name:
+    value: job-3
+  largeShm:
+    value: true

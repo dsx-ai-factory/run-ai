@@ -1,0 +1,5 @@
+type: string
+description: Specifies the operation to perform. Must be set to "delete".
+enum:
+  - delete
+  - validate_delete

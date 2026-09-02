@@ -1,0 +1,25 @@
+{{- if .Values.orgUnitService.enabled }}
+{{- include "common.configMap" (list . .Values.orgUnitsMigrator "control-plane.orgUnitsMigrator.configmap") }}
+{{- end }}
+
+{{- define "control-plane.orgUnitsMigrator.configmap" -}}
+{{- $top := first . }}
+data:
+  LOG_LEVEL: {{ $top.Values.orgUnitsMigrator.config.logLevel | quote }}
+  DB_MIGRATION_VERSION: {{ $top.Values.orgUnitsMigrator.config.migrationVersion | quote }}
+  DB_NAME: {{ $top.Values.orgUnitsMigrator.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_VERBOSE_LOGGING: {{ $top.Values.orgUnitsMigrator.config.dbVerboseLogging | default $top.Values.global.postgresql.dbVerboseLogging | quote }}
+  DB_HOST: {{ $top.Values.orgUnitsMigrator.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SSL_MODE: {{ $top.Values.orgUnitsMigrator.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_PORT: {{ $top.Values.orgUnitsMigrator.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  DB_SCHEMA_SOURCE: {{ $top.Values.orgUnitsMigrator.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  DB_SCHEMA_TENANTS: {{ $top.Values.tenantsManager.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  DB_SCHEMA_TARGET: {{ $top.Values.orgUnitService.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  SHOULD_MARK_COMPLETED: {{ $top.Values.orgUnitsMigrator.config.markCompleted | default false | quote }}
+  {{- if $top.Values.orgUnitsMigrator.config.tenantsToMigrate }}
+  TENANTS_TO_MIGRATE: {{ $top.Values.orgUnitsMigrator.config.tenantsToMigrate | quote }}
+  {{- end }}
+  {{- if $top.Values.orgUnitsMigrator.config.tenantsToNotMigrate }}
+  TENANTS_TO_NOT_MIGRATE: {{ $top.Values.orgUnitsMigrator.config.tenantsToNotMigrate | quote }}
+  {{- end }}
+{{- end }}

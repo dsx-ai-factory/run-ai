@@ -1,0 +1,17 @@
+type: object
+required:
+  - clusterId
+  - nodePoolIds
+  - action
+properties:
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  nodePoolIds:
+    type: array
+    description: The node pool ids to which the request applies
+    maxItems: 5
+    items:
+      type: string
+      example: "22"
+  action:
+    $ref: "../ResourcesResetAction.yaml"

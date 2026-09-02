@@ -1,0 +1,4 @@
+{
+    "service_name": "patching",
+    "artifact_type": "go"
+  }

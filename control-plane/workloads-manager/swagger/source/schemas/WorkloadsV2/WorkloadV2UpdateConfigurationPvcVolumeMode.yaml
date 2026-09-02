@@ -1,0 +1,8 @@
+type: string
+description: |
+  Volume mode for the PVC. `Filesystem` (default) presents the volume as a
+  mounted filesystem; `Block` presents it as a raw block device.
+enum:
+  - Filesystem
+  - Block
+example: Filesystem

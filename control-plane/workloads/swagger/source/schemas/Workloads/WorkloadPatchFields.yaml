@@ -1,0 +1,12 @@
+type: object
+required:
+  - phase
+properties:
+  phase:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads/Phase.yaml'
+  phaseMessage:
+    type: string
+    example : 'Not enough resources in the requested nodepool'
+  softDelete:
+    type: boolean
+    example : true

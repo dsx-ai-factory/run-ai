@@ -1,0 +1,59 @@
+# Minimal valid ray.io/RayJob/v1 manifest used as the starting point for
+# every Layer 3+4 case under cases/.
+#
+# RayJob wraps a RayCluster under .spec.rayClusterSpec (head + workers) AND
+# adds a submitter pod under .spec.submitterPodTemplate.
+#
+# Schema-required (per components.schemas.io.ray.v1.RayJob):
+#   - .spec has no required fields, but rayClusterSpec.headGroupSpec.template
+#     and rayClusterSpec.workerGroupSpecs[*].{groupName,minReplicas,maxReplicas,template}
+#     are required by the embedded RayClusterSpec.
+#
+# Engine-required stubs (SET cannot create intermediate paths):
+#   - rayClusterSpec.workerGroupSpecs[0].rayStartParams: {} — worker case
+#     SETs entries here
+#   - rayClusterSpec.workerGroupSpecs[0].template.metadata: {} — worker case
+#     SETs labels on the worker pod template
+#   - submitterPodTemplate is present so the submitterPodSpec /
+#     submitterPodMetadata / submitter*Container* selectors resolve in the
+#     other cases.
+#
+# minReplicas: 0 is intentional — see RayCluster skeleton.
+apiVersion: ray.io/v1
+kind: RayJob
+metadata:
+  name: test
+spec:
+  rayClusterSpec:
+    headGroupSpec:
+      template:
+        spec:
+          initContainers:
+            - name: test
+              image: placeholder-head-init
+          containers:
+            - name: test
+              image: placeholder-head
+    workerGroupSpecs:
+      - groupName: test
+        minReplicas: 0
+        maxReplicas: 1
+        rayStartParams: {}
+        template:
+          metadata: {}
+          spec:
+            initContainers:
+              - name: test
+                image: placeholder-worker-init
+            containers:
+              - name: test
+                image: placeholder-worker
+  submitterPodTemplate:
+    spec:
+      restartPolicy: Never
+      initContainers:
+        - name: test
+          image: placeholder-submitter-init
+      containers:
+        - name: test
+          image: placeholder-submitter

@@ -1,0 +1,38 @@
+apiVersion: kubeflow.org/v1
+kind: XGBoostJob
+metadata:
+  annotations:
+    example.com/annotation: test-value
+  labels:
+    app: xgboost-test
+  name: test
+spec:
+  runPolicy:
+    activeDeadlineSeconds: 86400
+    backoffLimit: 3
+    cleanPodPolicy: Running
+    suspend: false
+    ttlSecondsAfterFinished: 3600
+  xgbReplicaSpecs:
+    Master:
+      replicas: 1
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - image: xgboost/xgboost:1.7.0
+            name: xgboost
+          initContainers:
+          - image: xgboost/xgboost:1.7.0
+            name: init
+    Worker:
+      replicas: 2
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - image: xgboost/xgboost:1.7.0
+            name: xgboost
+          initContainers:
+          - image: xgboost/xgboost:1.7.0
+            name: init

@@ -1,0 +1,11 @@
+description: the status of the tenant enabled/disabled
+content:
+  application/json:
+    schema:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Indicates whether the feature is enabled or not.
+      required:
+        - enabled

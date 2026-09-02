@@ -1,0 +1,40 @@
+.hidden-field .q-field__control.row {
+  display: none;
+}
+
+.placeholder-italic {
+  &::placeholder {
+    font-style: italic;
+  }
+}
+
+.q-field__bottom {
+  padding-inline: 0;
+}
+
+.clickable-field {
+  cursor: pointer;
+}
+
+// Placeholder color (60% opacity)
+// Override Quasar's .q-placeholder opacity (0.7) with our design system color
+.q-placeholder::placeholder {
+  opacity: 1;
+  color: var(--b-text-label);
+}
+
+// Label color (60% opacity) - only in default state, not error/warning
+.q-field:not(.q-field--error):not(.q-field--warning) .q-field__label {
+  color: var(--b-text-label);
+}
+
+// Hint/messages color (54% opacity) - only in default state
+.q-field:not(.q-field--error):not(.q-field--warning) .q-field__messages {
+  color: var(--b-text-sub);
+}
+
+// Prefix & suffix (60% opacity)
+.q-field__prefix,
+.q-field__suffix {
+  color: var(--b-text-label);
+}

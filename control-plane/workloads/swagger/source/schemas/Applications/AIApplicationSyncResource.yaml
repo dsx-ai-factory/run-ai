@@ -1,0 +1,14 @@
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+  clusterId:
+    type: string
+    format: uuid
+  name:
+    type: string
+  clusterName:
+    type: string
+  kind:
+    type: string

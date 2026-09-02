@@ -1,0 +1,33 @@
+get:
+      summary: Get the status of a workload
+      description: Get the status of a workload
+      operationId: get_workload_status
+      tags:
+        - Cluster API
+      x-runai-team: Fox
+      x-no-authorization: true  #authorizing internally
+      x-internal: true
+      parameters:
+        - $ref: "../parameters/ProjectName.yaml"
+        - $ref: "../parameters/WorkloadType.yaml"
+        - $ref: "../parameters/WorkloadName.yaml"
+        - $ref: "../parameters/WorkloadFramework.yaml"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "../schemas/WorkloadStatus.yaml"
+        400:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/400BadRequest.yaml'
+        401:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/401Unauthorized.yaml'
+        403:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/403Forbidden.yaml'
+        404:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/404NotFound.yaml'
+        500:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/500InternalServerError.yaml'
+        503:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/503ServiceUnavailable.yaml'

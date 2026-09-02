@@ -1,0 +1,9 @@
+description: |
+  Parameters which apply to the master in a distributed training.
+nullable: true
+type: object
+properties:
+  assets:
+    $ref: "../../Asset/AssetsRefOptional.yaml"
+  specificEnv:
+    $ref: "../SpecificRunParams.yaml"

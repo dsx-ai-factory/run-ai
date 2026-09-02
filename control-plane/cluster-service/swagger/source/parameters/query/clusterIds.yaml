@@ -1,0 +1,12 @@
+name: clusterId
+in: query
+required: true
+schema:
+  type: array
+  minItems: 1
+  maxItems: 20
+  items:
+    type: string
+    format: uuid
+explode: true
+description: The clusters Ids of the current request.

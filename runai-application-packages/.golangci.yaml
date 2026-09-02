@@ -1,0 +1,64 @@
+# golangci-lint config for the runai-application-packages module tree.
+# packages.mk points GOLANG_LINTER_CONFIG_PATH here for every module under
+# runai-application-packages/. Tune linters/settings freely — this tree owns
+# it, independent of runai-common-packages and control-plane.
+version: "2"
+
+run:
+  tests: false
+  timeout: 10m
+  issues-exit-code: 1
+
+output:
+  formats:
+    json:
+      path: linter.json
+    text:
+      path: stdout
+      colors: true
+
+formatters:
+  enable:
+    - gofmt
+
+linters:
+  default: none
+  enable:
+    # Readability
+    - lll
+    - unused
+    - goconst
+
+    # Security
+    - gosec
+    - sqlclosecheck  # sql.Rows/sql.Stmt not closed
+    - rowserrcheck   # sql.Rows.Err() not checked after iteration
+
+    # Safety
+    - noctx  # HTTP client calls without context propagation
+
+    # Quality
+    - govet
+    - ineffassign
+    - staticcheck
+  settings:
+    lll:
+      line-length: 220
+      tab-width: 1
+  exclusions:
+    generated: lax
+    paths:
+      - bin
+      - vendor
+      - generated
+    rules:
+      # Relax security/context linters in test files
+      - path: "_test\\.go"
+        linters: [gosec, noctx]
+
+issues:
+  max-same-issues: 50
+  max-issues-per-linter: 100
+
+severity:
+  default: error

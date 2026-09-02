@@ -1,0 +1,12 @@
+{
+  "service_name": "infra-openapi",
+  "artifact_type": "",
+  "notifications": {
+    "slack": {
+      "mention": "@backend_guild"
+    }
+  },
+  "jira": {
+    "team_name": "Backend Guild"
+  }
+}

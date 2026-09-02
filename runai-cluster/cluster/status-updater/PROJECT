@@ -1,0 +1,14 @@
+domain: run.ai
+layout:
+- go.kubebuilder.io/v4-alpha
+plugins:
+  manifests.sdk.operatorframework.io/v2: {}
+  scorecard.sdk.operatorframework.io/v2: {}
+projectName: status-updater
+repo: github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/status-updater
+resources:
+- controller: true
+  domain: ""
+  kind: Pod
+  version: v1
+version: "3"

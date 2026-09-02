@@ -1,0 +1,835 @@
+# =============================================================================
+# Shared YAML anchors
+# =============================================================================
+# Host for the standard Go-service exclusion globs (test files, integration
+# tests, mocks). The `all:` wrapper with an impossible head-branch regex
+# ensures this label never fires. Do NOT create a real label named
+# "_yaml_anchor_definitions" in this repo.
+
+_yaml_anchor_definitions:
+  - head-branch: '^___yaml_anchor_holder_never_matches___$'
+  - changed-files:
+    - all-globs-to-any-file:
+      - &no-test-go '!**/*_test.go'
+      - &no-tests-dir '!**/tests/**'
+      - &no-integration-tests-dir '!**/integration-tests/**'
+      - &no-integration_tests-dir '!**/integration_tests/**'
+      - &no-mocks-dir '!**/mocks/**'
+      - '!**/*'
+# !**/* is needed to prevent the "no globs" case from matching all files, which would cause all PRs to be labeled with all labels that use these anchors.
+
+# =============================================================================
+# DevOps & Infrastructure
+# =============================================================================
+
+github-config:
+- changed-files:
+  - all-globs-to-any-file:
+    - '.github/**'
+
+# =============================================================================
+# Runai-Cluster Components
+# =============================================================================
+
+accessrule-controller:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/accessrule-controller/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+admission-controller:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/admission-controller/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+agent:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/agent/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+anyworkload-controller:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/anyworkload-controller/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+assets-sync:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/assets-sync/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+cluster-api:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/cluster-api/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+cluster-sync:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/cluster-sync/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+external-workload-integrator:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/external-workload-integrator/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+go-operator:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/go-operator/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+init-ca:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/init-ca/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+metrics-exporter:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/metrics-exporter/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+nodepool-controller:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/nodepool-controller/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+pod-group-assigner:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/pod-group-assigner/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+project-controller:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/project-controller/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+
+runai-chart:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/runai-chart/**/*.{yaml,yml,tpl,json}'
+    - '!**/integration/**'
+
+status-updater:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/status-updater/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+runtime-rules:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/runtime-rules/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+# =============================================================================
+# Control-Plane Services
+# =============================================================================
+
+assets-service:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/assets-service/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+audit-service:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/audit-service/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+authorization:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/authorization/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+authorization-migrator:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/authorization-migrator/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+bff-service:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/bff-service/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+catalog-service:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/catalog-service/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+cluster-migrator:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/cluster-migrator/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+cluster-service:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/cluster-service/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+control-plane-chart:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/control-plane-chart/**/*.{yaml,yml,tpl,json}'
+    - '!**/integration/**'
+
+datavolumes-service:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/datavolumes-service/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+frontend:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/frontend/**/*.{ts,tsx,vue,js,jsx,mjs}'
+    - '!control-plane/frontend/src/swagger-models/**'
+    - '!**/*.spec.{ts,tsx,js,jsx}'
+    - '!**/*.test.{ts,tsx,js,jsx}'
+    - '!**/tests/**'
+    - '!**/integration-tests/**'
+    - '!**/mocks/**'
+
+git-sync:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/workload-common/builders/gitsync*.go'
+    - 'control-plane/runai-cli/internal/controlplane/api/specset/storage/gitsync/**/*.go'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+identity-manager:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/identity-manager/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+k8s-objects-tracker:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/k8s-objects-tracker/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+keycloak-extensions:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/keycloak-extensions/**/*.{ftl,properties,xml,sh,gradle,java}'
+    - '!**/integration/**'
+- changed-files:
+  - any-glob-to-any-file:
+    - 'control-plane/keycloak-extensions/Dockerfile'
+
+metric-stores-migrator:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/metric-stores-migrator/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+metrics-service:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/metrics-service/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+notifications-proxy:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/notifications-proxy/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+notifications-service:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'control-plane/notifications-service/Dockerfile'
+
+org-unit-service:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/org-unit-service/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+org-units-migrator:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/org-units-migrator/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+otel-collector:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/otel-collector/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+policy-service:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/policy-service/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+postgresql-client:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'control-plane/postgresql-client/Dockerfile'
+
+redoc:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/infra/openapi/build/**/*.{py,yaml,yml,json,js}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+runai-cli:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/runai-cli/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+cli-exposer:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/cli-exposer/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+tenants-manager:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/tenants-manager/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+temp-backend-settings:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/temp-backend-settings/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+traefik:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/traefik/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+workloads:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/workloads/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+workloads-and-policies:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/workloads-and-policies/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+workloads-manager:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/workloads-manager/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+# =============================================================================
+# App domains components
+# =============================================================================
+
+
+inference-workload:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/workloads/**/*inference*.{go,sql}'
+    - '!control-plane/workloads/**/*distributed*inference*'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/assets-service/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/policy-service/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/agent/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/workload-common/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/cluster-sync/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+distributed-inference-workload:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/workloads/**/*distributed*inference*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/assets-service/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/policy-service/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/agent/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/workload-common/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/cluster-sync/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+training-workload:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/workloads/**/*training*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/assets-service/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/policy-service/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/agent/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/cluster-sync/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/workload-common/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+distributed-training-workload:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/workloads/**/*distributed*.{go,sql}'
+    - '!control-plane/workloads/**/*distributed*inference*'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/assets-service/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/policy-service/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/agent/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/workload-common/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/cluster-sync/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+nim-service:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/workloads-manager/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/workloads/**/*nim*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/agent/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/anyworkload-controller/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/external-workload-integrator/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/cluster-sync/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+
+workloads-v2:
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/workloads-manager/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'control-plane/workloads/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/agent/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/workload-common/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/anyworkload-controller/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/external-workload-integrator/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir
+- changed-files:
+  - all-globs-to-any-file:
+    - 'runai-cluster/cluster/cluster-sync/**/*.{go,sql}'
+    - *no-test-go
+    - *no-tests-dir
+    - *no-integration-tests-dir
+    - *no-integration_tests-dir
+    - *no-mocks-dir

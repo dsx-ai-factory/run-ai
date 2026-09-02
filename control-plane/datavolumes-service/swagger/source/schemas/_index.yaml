@@ -1,0 +1,70 @@
+# Datavolumes
+Datavolume:
+  $ref: './Datavolumes/Datavolume.yaml'
+DatavolumeCreationFields:
+  $ref: './Datavolumes/DatavolumeCreationFields.yaml'
+DatavolumeInnerFields:
+  $ref: './Datavolumes/DatavolumeInnerFields.yaml'
+DatavolumeInternal:
+  $ref: './Datavolumes/DatavolumeInternal.yaml'
+DatavolumeNoSharedScopes:
+  $ref: './Datavolumes/DatavolumeNoSharedScopes.yaml'
+DatavolumePhase:
+  $ref: './Datavolumes/DatavolumePhase.yaml'
+DatavolumeRequestType:
+  $ref: './Datavolumes/DatavolumeRequestType.yaml'
+DatavolumesInternal:
+  $ref: './Datavolumes/DatavolumesInternal.yaml'
+DatavolumesNoSharedScopes:
+  $ref: './Datavolumes/DatavolumesNoSharedScopes.yaml'
+DatavolumesSyncRequest:
+  $ref: './Datavolumes/DatavolumesSyncRequest.yaml'
+DatavolumeStatus:
+  $ref: './Datavolumes/DatavolumeStatus.yaml'
+DatavolumeStatusForSync:
+  $ref: './Datavolumes/DatavolumeStatusForSync.yaml'
+DatavolumeStatusInternal:
+  $ref: './Datavolumes/DatavolumeStatusInternal.yaml'
+DatavolumePatchFields:
+  $ref: './Datavolumes/DatavolumePatchFields.yaml'
+EnrichmentDataFields:
+  $ref: './Datavolumes/EnrichmentDataFields.yaml'
+DatavolumeSortFilterFields:
+  $ref: './Datavolumes/DatavolumeSortFilterFields.yaml'
+# SharedScopes
+ScopeType:
+  $ref: './SharedScopes/ScopeType.yaml'
+SharedScope:
+  $ref: './SharedScopes/SharedScope.yaml'
+SharedScopeBase:
+  $ref: './SharedScopes/SharedScopeBase.yaml'
+SharedScopes:
+  $ref: './SharedScopes/SharedScopes.yaml'
+SharedScopesPatchRequest:
+  $ref: './SharedScopes/SharedScopesPatchRequest.yaml'
+# Common
+BaseFields:
+  $ref: './Common/BaseFields.yaml'
+Ancestors:
+  $ref: '../../../../infra/openapi/docs/schemas/scopes/Ancestors.yaml'
+TenantId:
+  $ref: '../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml'
+ClusterId:
+  $ref: '../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml'
+ClusterIdOptional:
+  $ref: '../../../../infra/openapi/docs/schemas/scopes/ClusterIdOptional.yaml'
+DepartmentIdOptional:
+  $ref: '../../../../infra/openapi/docs/schemas/scopes/DepartmentIdOptional.yaml'
+Condition:
+  $ref: './Common/Condition.yaml'
+Conditions:
+  $ref: './Common/Conditions.yaml'
+# Settings
+DatavolumesSettingsKeyEnum:
+  $ref: './Settings/DatavolumesSettingsKeyEnum.yaml'
+EnableDataVolumesSetting:
+  $ref: './Settings/EnableDataVolumesSetting.yaml'
+DatavolumesSettingsGetResponse:
+  $ref: './Settings/DatavolumesSettingsGetResponse.yaml'
+UpdateDatavolumesSettingByKeyRequest:
+  $ref: './Settings/UpdateDatavolumesSettingByKeyRequest.yaml'

@@ -1,0 +1,119 @@
+DistributedTarget:
+  Config: {}
+  Framework: XGBoost
+  JaxJob: null
+  MasterSpec: null
+  MpiJob: null
+  ObjectMeta: null
+  PyTorchJob: null
+  RunPolicy: null
+  TFJob: null
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob:
+    apiVersion: kubeflow.org/v1
+    kind: XGBoostJob
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: xgboostjob
+        createdBy: XGBoostJob
+        project: test
+        release: probes_only_required
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: probes_only_required
+      name: probes_only_required
+      namespace: runai-test
+    spec:
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: None
+      xgbReplicaSpecs:
+        Master:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: xgboostjob
+                createdBy: XGBoostJob
+                project: test
+                release: probes_only_required
+                workloadKind: Distributed
+                workloadName: probes_only_required
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: probes_only_required
+                image: ubuntu
+                name: xgboost
+                readinessProbe:
+                  httpGet:
+                    port: 8080
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              priorityClassName: low
+              schedulerName: runai-scheduler
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: xgboostjob
+                createdBy: XGBoostJob
+                project: test
+                release: probes_only_required
+                workloadKind: Distributed
+                workloadName: probes_only_required
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: probes_only_required
+                image: ubuntu
+                name: xgboost
+                readinessProbe:
+                  httpGet:
+                    port: 8080
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              priorityClassName: low
+              schedulerName: runai-scheduler
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: XGBoostJob
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-probes_only_required/, Framework: XGBoost'
+  images:
+  - ubuntu
+  name: 'probes_only_required/, Framework: XGBoost'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

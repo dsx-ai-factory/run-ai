@@ -1,0 +1,25 @@
+properties:
+  datasources:
+    properties:
+      dataVolume:
+        $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/DataVolumesRules.yaml"
+      pvc:
+        $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/PvcsRules.yaml"
+      hostPath:
+        $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/HostPathsRules.yaml"
+      nfs:
+        $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/NfssRules.yaml"
+      git:
+        $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/GitsRules.yaml"
+      configMapVolume:
+        $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/ConfigMapsRules.yaml"
+      secretVolume:
+        $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/SecretsRules.yaml"
+      emptyDirVolume:
+        $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/EmptyDirsRules.yaml"
+      s3:
+        $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/S3sRules.yaml"
+    nullable: true
+    type: object
+nullable: true
+type: object

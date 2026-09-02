@@ -1,0 +1,7 @@
+name: sortBy
+description: Defines the field to sort the results by
+in: query
+required: false
+schema:
+  type: string
+  enum: [name, source, value]

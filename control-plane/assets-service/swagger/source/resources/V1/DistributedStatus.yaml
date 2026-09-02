@@ -1,0 +1,75 @@
+post:
+  summary: Sync distributed status [Obsolete]
+  description: Handle array of distributed status updates sent from cluster sync.
+  operationId: sync_distributed_status
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+  x-authorize:
+    # distributed considered as trainings for the auth system
+    resource-type: trainings
+    action: sync
+  x-internal: true
+  tags:
+    - Trainings
+  parameters:
+    - $ref: '../../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/Workload/V1/WorkloadStatusSync.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/Workload/V1/WorkloadStatusSync.yaml"
+    400:
+      $ref: "../../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+
+put:
+  summary: Update distributed status [Obsolete]
+  description: Handle distributed status updates sent from cluster sync.
+  operationId: update_distributed_status
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+  x-authorize:
+    # distributed considered as trainings for the auth system
+    resource-type: trainings
+    action: sync
+  x-internal: true
+  tags:
+    - Trainings
+  parameters:
+    - $ref: '../../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/Workload/V1/WorkloadStatusUpdate.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/Workload/V1/WorkloadStatusUpdate.yaml"
+    400:
+      $ref: "../../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

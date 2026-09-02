@@ -1,0 +1,24 @@
+description: Custom CA bundle reported by the cluster for a specific consumer (git-sync, S3, oauth2-proxy).
+type: object
+nullable: true
+properties:
+  enabled:
+    type: boolean
+    nullable: true
+    description: indicates if a custom CA bundle is configured for this consumer
+    example: true
+  secretName:
+    type: string
+    nullable: true
+    description: the name of the Secret holding the custom CA bundle
+    example: runai-ca
+  secretKey:
+    type: string
+    nullable: true
+    description: the key within the Secret that holds the custom CA bundle
+    example: runai-ca.pem
+  optional:
+    type: boolean
+    nullable: true
+    description: indicates if the Secret is optional (the consumer should tolerate a missing Secret)
+    example: false

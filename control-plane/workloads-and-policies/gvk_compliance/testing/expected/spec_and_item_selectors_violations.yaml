@@ -1,0 +1,73 @@
+errors:
+- code: 400
+  message: 'field name failed length validation: the length must be no less than 8'
+- code: 400
+  message: 'field name failed length validation: the length must be no less than 5'
+- code: 400
+  message: 'field image failed options validation: value "ubuntu" is not one of [redhat]'
+- code: 400
+  message: 'field environmentVariables-Name failed length validation: the length must
+    be no less than 3'
+- code: 400
+  message: 'field environmentVariables-Name failed options validation: value "BAD_CONFIG"
+    is not one of [MY_CONFIG]'
+policy:
+  effectiveRules:
+  - enforcements:
+    - length:
+        min: 8
+    field: name
+    sourceOfRule: null
+    specSelector: entireWorkload
+  - enforcements:
+    - length:
+        min: 5
+    field: name
+    sourceOfRule: null
+    specSelector: allContainers
+  - enforcements:
+    - options:
+      - redhat
+    field: image
+    selectorParams:
+      containerName: worker
+    sourceOfRule: null
+    specSelector: appContainerByName
+  - enforcements:
+    - length:
+        min: 3
+    field: environmentVariables-Name
+    itemSelector: allEnvVars
+    sourceOfRule: null
+    specSelector: allContainers
+  - enforcements:
+    - options:
+      - MY_CONFIG
+    field: environmentVariables-Name
+    itemSelector: envVarFromConfigMap
+    sourceOfRule: null
+    specSelector: allContainers
+  workloadType:
+    group: apps
+    kind: Deployment
+    version: v1
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: d1
+  spec:
+    template:
+      spec:
+        containers:
+        - env:
+          - name: AB
+            value: x
+          - name: BAD_CONFIG
+            valueFrom:
+              configMapKeyRef:
+                key: k
+                name: cm-x
+          name: a
+        - image: ubuntu
+          name: worker

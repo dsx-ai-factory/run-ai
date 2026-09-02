@@ -1,0 +1,153 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: service-ref-workload-auth-proxy
+    run.ai/workload-runner: service-ref-workload
+  name: service-ref-workload-auth-proxy
+  namespace: runai-test
+  ownerReferences:
+  - apiVersion: run.ai/v1alpha1
+    kind: WorkloadRunner
+    name: service-ref-workload
+    uid: test-uid-12345
+  resourceVersion: "1"
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 4180
+  selector:
+    app: service-ref-workload-auth-proxy
+    run.ai/workload-runner: service-ref-workload
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: service-ref-workload-auth-proxy
+    run.ai/workload-runner: service-ref-workload
+  name: service-ref-workload-auth-proxy
+  namespace: runai-test
+  ownerReferences:
+  - apiVersion: run.ai/v1alpha1
+    kind: WorkloadRunner
+    name: service-ref-workload
+    uid: test-uid-12345
+  resourceVersion: "1"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-ref-workload-auth-proxy
+      run.ai/workload-runner: service-ref-workload
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: service-ref-workload-auth-proxy
+        run.ai/workload-runner: service-ref-workload
+    spec:
+      containers:
+      - args:
+        - --provider=keycloak-oidc
+        - --upstream=http://existing-service.runai-test.svc.cluster.local:8080
+        - --redirect-url=https://service-ref.example.com/oauth2/callback
+        - --oidc-issuer-url=https://auth.example.com
+        - --scope=openid
+        - --http-address=0.0.0.0:4180
+        - --proxy-prefix=/oauth2
+        - --reverse-proxy=true
+        - --skip-provider-button=true
+        - --whitelist-domain=service-ref.example.com
+        - --cookie-domain=service-ref.example.com
+        - --cookie-httponly=true
+        - --cookie-secure=true
+        - --code-challenge-method=S256
+        - --cookie-refresh=10m
+        - --cookie-samesite=lax
+        - --skip-jwt-bearer-tokens=true
+        - --extra-jwt-issuers=https://auth.example.com=runai
+        - --custom-templates-dir=/usr/share/oauth2-proxy
+        - --pass-authorization-header=false
+        - --cookie-name=service-ref-workload-auth-proxy
+        - --authenticated-emails-file=/etc/runai/auth/users/c2VydmljZS1yZWYtd29ya2xvYWQtYXV0aC1wcm94eQ==
+        env:
+        - name: OAUTH2_PROXY_COOKIE_PATH
+          value: /
+        envFrom:
+        - secretRef:
+            name: oauth2-proxy-secret
+        image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0
+        imagePullPolicy: IfNotPresent
+        name: oauth2-proxy
+        ports:
+        - containerPort: 4180
+          name: port-4180
+          protocol: TCP
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+        volumeMounts:
+        - mountPath: /etc/runai/auth/users
+          name: runai-auth
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - echo -e "dXNlcjFAZXhhbXBsZS5jb20KdXNlcjJAZXhhbXBsZS5jb20=" | base64 -d >
+          /etc/runai/auth/users/c2VydmljZS1yZWYtd29ya2xvYWQtYXV0aC1wcm94eQ==
+        image: busybox:latest
+        imagePullPolicy: IfNotPresent
+        name: runai-auth-user-loader
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 50m
+            memory: 50Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 65534
+        volumeMounts:
+        - mountPath: /etc/runai/auth/users
+          name: runai-auth
+      volumes:
+      - emptyDir: {}
+        name: runai-auth
+status: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 8g
+  name: service-ref-ingress
+  namespace: runai-test
+  ownerReferences:
+  - apiVersion: run.ai/v1alpha1
+    kind: WorkloadRunner
+    name: service-ref-workload
+    uid: test-uid-12345
+  resourceVersion: "1"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: service-ref.example.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: service-ref-workload-auth-proxy
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+status:
+  loadBalancer: {}

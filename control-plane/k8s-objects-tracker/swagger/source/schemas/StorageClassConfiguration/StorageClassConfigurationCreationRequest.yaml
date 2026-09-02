@@ -1,0 +1,26 @@
+type: object
+required:
+  - scopeType
+  - scopeId
+  - name
+properties:
+  tenantId:
+    type: integer
+    nullable: true
+    allOf:
+      - $ref: "../../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml"
+  scopeType:
+    type: string
+    description: the scope type of the configuration.
+    enum:
+    - cluster
+    default: cluster
+    example: cluster
+  scopeId:
+    $ref: "../Scopes/ScopeClusterId.yaml"
+  name:
+    $ref: "./StorageClassName.yaml"
+  permissions:
+    $ref: "./StorageClassPermissions.yaml"
+  customization:
+    $ref: "./StorageClassCustomization.yaml"

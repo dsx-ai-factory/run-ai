@@ -1,0 +1,11 @@
+name: filterBy
+in: query
+required: false
+description: Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=.
+schema:
+  type: array
+  items:
+    type: string
+    pattern: "^(name|tenantId|scopeType|scopeId)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
+  example: ["name!=some-name"]
+explode: false

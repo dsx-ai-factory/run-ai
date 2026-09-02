@@ -1,0 +1,26 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package pod_identifier
+
+import (
+	"strconv"
+
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/admission-controller/pkg/types"
+)
+
+func GetSharedGpuPriority(podAnnotations map[string]string) (bool, int, error) {
+	value, found := podAnnotations[types.RunaiGpuPriority]
+	if !found {
+		return false, -1, nil
+	}
+
+	i, err := strconv.Atoi(value)
+	if err != nil {
+		return false, -1, err
+	}
+
+	return true, i, nil
+}

@@ -1,0 +1,14 @@
+{
+  "service_name": "metric-stores-migrator",
+  "artifact_type": "container",
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "notifications": {
+    "slack": {
+      "mention": "@phoenix"
+    }
+  },
+  "jira": {
+    "team_name": "Phoenix"
+  }
+}

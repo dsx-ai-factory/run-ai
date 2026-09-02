@@ -1,0 +1,8 @@
+description: Comma separated list of groups that the user running the container belongs to, in addition to the group
+  indicated by runAsGid.
+  Use only when the source uid/gid of the environment asset is not `fromTheImage`, and
+  `overrideUidGidInWorkspace` is enabled. Using an empty string implies reverting the supplementary groups of the image.
+type: string
+example: "2,3,5,8"
+nullable: true
+pattern: .*

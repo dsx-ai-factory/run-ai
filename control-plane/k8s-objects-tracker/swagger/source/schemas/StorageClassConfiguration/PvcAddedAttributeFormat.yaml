@@ -1,0 +1,7 @@
+type: string
+description: 'Defines the data type the attribute can accept. Enum: "text" "number" "boolean"'
+enum:
+  - text
+  - number
+  - boolean
+nullable: true

@@ -1,0 +1,72 @@
+get:
+  tags:
+    - Credentials
+  summary: List access keys.
+  description: Use to retrieve a list of S3-compatible access key credentials.
+  operationId: list_access_keys
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_credentials_service_test.go
+    - control-plane/assets-service/pkg/services/api_credentials_service_access_keys_test.go
+    - e2e/src/test/suites/advancedSuite/credential/existingSecrestsUI.test.ts
+    - e2e/src/test/suites/advancedSuite/credential/credentialUI.test.ts
+  x-no-authorization: true
+  parameters:
+    - $ref: "../parameters/query/optional/AssetNameFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetScopeFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetProjectFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetDepartmentFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetClusterFilter.yaml"
+    - $ref: "../parameters/query/optional/IncludeUsageInfo.yaml"
+    - $ref: "../parameters/query/optional/IncludeStatus.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/AccessKey/AccessKeyListResponse.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+post:
+  tags:
+    - Credentials
+  summary: Create an access key.
+  description: Use to create an S3-compatible access key credential.
+  operationId: create_access_key
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_credentials_service_test.go
+    - control-plane/assets-service/pkg/services/api_credentials_service_access_keys_test.go
+    - e2e/src/test/suites/advancedSuite/credential/credentialUI.test.ts
+    - e2e/src/test/suites/advancedSuite/credential/existingSecrestsUI.test.ts
+    - e2e/src/test/suites/advancedSuite/credential/existingSecrestsApi.test.ts
+  x-no-authorization: true
+  x-audit: true
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/AccessKey/AccessKeyCreationRequest.yaml"
+  responses:
+    202:
+      description: Request accepted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/AccessKey/AccessKey.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    409:
+      $ref: "../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

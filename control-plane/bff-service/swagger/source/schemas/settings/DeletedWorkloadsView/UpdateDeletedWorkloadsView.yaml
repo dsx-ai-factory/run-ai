@@ -1,0 +1,8 @@
+type: object
+properties:
+  enabled:
+    type: boolean
+    nullable: true
+    description: Whether to view deleted workloads in the Workloads view.
+example:
+  enabled: true

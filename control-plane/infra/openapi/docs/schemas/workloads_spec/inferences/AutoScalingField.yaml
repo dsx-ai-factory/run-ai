@@ -1,0 +1,3 @@
+properties:
+  autoscaling:
+    $ref: "./AutoScaling.yaml"

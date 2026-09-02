@@ -1,0 +1,24 @@
+properties:
+  existingSecretName:
+    description: optional name of existing secret in the cluster from which the docker registry details should
+      be taken. If omitted, you will have to provide those credentials and url in relevant fields.
+      The provided credentials are encrypted into the control plane database and cloned to a kubernetes secret 
+      in the cluster, along with the url.
+    nullable: true
+    type: string
+    minLength: 1
+  user:
+    description: The name of the user, required only when not using existing secret.
+    type: string
+    nullable: true
+    minLength: 1
+  password:
+    description: The password, required only when not using existing secret.
+    type: string
+    nullable: true
+    minLength: 1
+  url:
+    description: The url, required only when not using existing secret.
+    type: string
+    nullable: true
+    minLength: 1

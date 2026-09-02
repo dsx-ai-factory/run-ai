@@ -1,0 +1,89 @@
+suite: Test Karta OpenShift SCC
+
+# The karta subchart pins runAsUser 65532, which restricted-v2 rejects on
+# OpenShift. The UID cannot be unset from this chart (Helm discards null values
+# when coalescing a parent's values.yaml into a subchart), so we grant the SA a
+# dedicated SCC instead. See RUN-41722.
+
+tests:
+  - it: should keep the SCC in sync with the UID the subchart actually pins
+    templates:
+      - charts/karta/templates/deployment.yaml
+    asserts:
+      # If this fails the subchart changed its UID - update runai-karta-operator
+      # in templates/ocp/scc.yaml to match, or the operator will not schedule.
+      - equal:
+          path: spec.template.spec.securityContext.runAsUser
+          value: 65532
+
+  - it: should grant the karta operator an SCC permitting its pinned UID
+    set:
+      openShift.mode: Enabled
+      openShift.securityContextConstraints.create: true
+    templates:
+      - templates/ocp/scc.yaml
+    documentSelector:
+      path: metadata.name
+      value: runai-karta-operator
+    asserts:
+      - equal:
+          path: kind
+          value: SecurityContextConstraints
+      - equal:
+          path: runAsUser.type
+          value: MustRunAs
+      - equal:
+          path: runAsUser.uid
+          value: 65532
+      - equal:
+          path: allowPrivilegeEscalation
+          value: false
+      - contains:
+          path: requiredDropCapabilities
+          content: ALL
+
+  - it: should bind the karta-operator service account to that SCC
+    set:
+      openShift.mode: Enabled
+      openShift.securityContextConstraints.create: true
+    templates:
+      - templates/ocp/scc.yaml
+    documentSelector:
+      path: subjects[0].name
+      value: karta-operator
+    asserts:
+      - equal:
+          path: kind
+          value: RoleBinding
+      - equal:
+          path: roleRef.name
+          value: runai-karta-operator-scc
+      - equal:
+          path: metadata.namespace
+          value: runai
+
+  - it: should not render the karta SCC when OpenShift is disabled
+    set:
+      openShift.mode: Disabled
+      openShift.securityContextConstraints.create: true
+    templates:
+      - templates/ocp/scc.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render the karta SCC when karta is disabled
+    set:
+      openShift.mode: Enabled
+      openShift.securityContextConstraints.create: true
+      karta.enabled: false
+    templates:
+      - templates/ocp/scc.yaml
+    asserts:
+      - notContains:
+          path: subjects
+          content:
+            kind: ServiceAccount
+            name: karta-operator
+            namespace: runai
+          any: true

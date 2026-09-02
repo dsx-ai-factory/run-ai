@@ -1,0 +1,17 @@
+image: ubuntu
+
+storage:
+  nfs:
+    - server: my-server
+      path: /my/nfs
+      mountPath: /mount/path/nfs
+      readOnly: false
+    - name: nf-x
+      exclude: true
+  hostPath:
+    - path: /my/volume/1
+      mountPath: /mount/path/vol/1
+    - path: /my/volume/2
+      mountPath: /mount/path/vol/2
+    - name: hp-x
+      exclude: true

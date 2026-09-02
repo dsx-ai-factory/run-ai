@@ -1,0 +1,52 @@
+training:
+  assets:
+    compute:
+      id: compute
+      name: cpu-only
+    environment:
+      id: environment
+      name: image-only
+  distributed:
+    framework: PyTorch
+    master:
+      assets:
+        compute:
+          id: compute
+          name: master-cpu-only
+        environment:
+          id: environment
+          name: master-image-only
+      policyInfo:
+        rules:
+          assets: {}
+          specificRunParams:
+            command:
+              options:
+              - displayed: command1
+                value: my-command-master-1
+              - displayed: command2
+                value: my-command-master-2
+      specificRunParams:
+        command: command-from-specific-master
+    numWorkers: 3
+  meta:
+    clusterId: ""
+    createdAt: "0001-01-01T00:00:00Z"
+    createdBy: ""
+    desiredPhase: ""
+    name: ""
+    projectId: ""
+    requestedName: ""
+    workloadId: ""
+  policyInfo:
+    rules:
+      assets: {}
+      specificRunParams:
+        command:
+          options:
+          - displayed: command1
+            value: my-command-worker-1
+          - displayed: command2
+            value: my-command-worker-2
+  specificRunParams:
+    command: command-from-specific-worker

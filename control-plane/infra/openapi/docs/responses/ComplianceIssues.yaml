@@ -1,0 +1,17 @@
+properties:
+  complianceIssues:
+    type: array
+    items:
+      type: object
+      required:
+        - details
+        - field
+      properties:
+        field:
+          type: string
+          example: compute.gpuDevicesRequest
+        details:
+          type: string
+          example: value must be no less than 3
+nullable: true
+type: object

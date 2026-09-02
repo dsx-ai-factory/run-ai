@@ -1,0 +1,6 @@
+image: ubuntu
+storage:
+  pvc:
+    - existingPvc: false
+      path: "/path/ro"
+      readOnly: true

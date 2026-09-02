@@ -1,0 +1,30 @@
+get:
+  tags:
+    - Registry
+  summary: Get the repositories in the registry.
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/AssetId.yaml"
+    - $ref: "../parameters/query/optional/SearchName.yaml"
+  description: Retrieve a list of repositories from a registry asset.
+  operationId: get_repositories
+  x-service: assets-service
+  x-no-authorization: true
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_registry_service_test.go
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Registry/Repositories.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

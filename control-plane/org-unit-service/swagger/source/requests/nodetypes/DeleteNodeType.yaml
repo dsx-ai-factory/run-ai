@@ -1,0 +1,30 @@
+summary: Delete node type
+operationId: delete_node_type
+x-service: org-unit-service
+deprecated: true
+description: 'Deprecated: use a workload policy node selector to target node types instead. Delete node types'
+x-test-coverage:
+  - control-plane/org-unit-service/pkg/test/node_type_api_test.go
+x-authorize:
+  resource-type: project
+  action: delete
+x-audit: true
+tags:
+  - Node types
+parameters:
+  - $ref: "../../parameters/NodeTypeId.yaml"
+responses:
+  204:
+    description: Deleted
+  400:
+    $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+  401:
+    $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+  403:
+    $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+  404:
+    $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+  500:
+    $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+  503:
+    $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

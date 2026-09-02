@@ -1,0 +1,18 @@
+type: object
+required:
+- email
+
+properties:
+  email:
+    type: string
+    pattern: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+    description: The email of the user. Must be a valid email address.
+    minLength: 5
+    maxLength: 254
+  resetPassword:
+    type: boolean
+    nullable: true
+
+example:
+  email: "test@run.ai"
+  resetPassword: false

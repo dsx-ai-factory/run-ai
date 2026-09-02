@@ -1,0 +1,6 @@
+description: The desired phase of the workload.
+type: string
+enum:
+  - Running
+  - Stopped
+  - Deleted

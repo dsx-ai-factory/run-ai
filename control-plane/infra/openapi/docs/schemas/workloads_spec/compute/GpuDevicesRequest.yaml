@@ -1,0 +1,7 @@
+description: Requested number of GPU devices. Currently if more than one device is requested,
+  it is not possible to provide values for gpuMemory or gpuPortion.
+type: integer
+format: int32
+example: 1
+nullable: true
+minimum: 0

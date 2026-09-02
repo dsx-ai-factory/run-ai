@@ -1,0 +1,16 @@
+# Minimal apps.nvidia.com/NIMCache/v1alpha1 manifest used as the starting
+# point for every Layer 3+4 case under cases/.
+#
+# Why the skeleton has source:{} and storage:{}:
+#   The CRD schema requires spec.source and spec.storage to be present.
+#   The workload test case uses object-level SET actions (ngcSource, pvcStorage,
+#   etc.) that populate these subtrees entirely from policy. Empty stubs satisfy
+#   the schema requirement without pre-populating any specific fields that would
+#   collide with policy writes.
+apiVersion: apps.nvidia.com/v1alpha1
+kind: NIMCache
+metadata:
+  name: test
+spec:
+  source: {}
+  storage: {}

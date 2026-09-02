@@ -1,0 +1,555 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fern-api/fern/main/product-yml.schema.json
+
+tabs:
+  documentation:
+    display-name: Documentation
+  reference:
+    display-name: Reference
+
+navigation:
+- tab: documentation
+  layout:
+  - page: Home
+    path: ../../docs/README.md
+  - section: Getting Started
+    contents:
+    - page: Overview
+      path: ../../docs/getting-started/overview.md
+    - link: Architecture and Components
+      href: /run-ai/developer/architecture
+      target: _blank
+    - section: Quick Start Guides
+      path: ../../docs/getting-started/quick-starts/README.md
+      contents:
+      - page: Deploy Infrastructure Quick Start
+        path: ../../docs/getting-started/quick-starts/deploy-infrastructure-quick-start.md
+      - page: Configure the Platform Quick Start
+        path: ../../docs/getting-started/quick-starts/configure-the-platform-quick-start.md
+      - page: Run Workloads Quick Start
+        path: ../../docs/getting-started/quick-starts/run-workloads-quick-start.md
+    - section: What's New
+      contents:
+      - page: What's New in Version 3.0
+        path: ../../docs/getting-started/whats-new/whats-new-3-0.md
+      - page: Deprecation Notifications
+        path: ../../docs/getting-started/whats-new/deprecation-notifications.md
+    - section: About NVIDIA Run:ai Enterprise
+      path: ../../docs/about-enterprise/README.md
+      contents:
+      - page: Support, Lifecycle, and Deprecation Policy
+        path: ../../docs/about-enterprise/product-support-policy.md
+  - section: Installation and Configuration
+    contents:
+    - page: Overview
+      path: ../../docs/installation-and-configuration/README.md
+    - page: Support Matrix
+      path: ../../docs/installation-and-configuration/support-matrix.md
+    - page: Before You Install
+      path: ../../docs/installation-and-configuration/installation/before-you-install.md
+    - section: Installation
+      path: ../../docs/installation-and-configuration/installation/README.md
+      contents:
+      - page: Third-Party Services
+        path: ../../docs/installation-and-configuration/installation/third-party-services.md
+      - section: Guided Installation (Installer)
+        path: ../../docs/installation-and-configuration/installation/guided-installation/README.md
+        contents:
+        - page: Install with the Installer
+          path: ../../docs/installation-and-configuration/installation/guided-installation/install-with-the-installer.md
+        - page: Configuration Reference
+          path: ../../docs/installation-and-configuration/installation/guided-installation/configuration-reference.md
+        - page: Example Configurations
+          path: ../../docs/installation-and-configuration/installation/guided-installation/example-configurations.md
+      - section: Install Using Helm
+        contents:
+        - page: Control Plane System Requirements
+          path: ../../docs/installation-and-configuration/installation/install-using-helm/cp-system-requirements.md
+        - page: Preparations
+          path: ../../docs/installation-and-configuration/installation/install-using-helm/preparations.md
+        - page: Network Requirements
+          path: ../../docs/installation-and-configuration/installation/install-using-helm/network-requirements.md
+        - page: Install the Control Plane
+          path: ../../docs/installation-and-configuration/installation/install-using-helm/install-control-plane.md
+        - page: Cluster System Requirements
+          path: ../../docs/installation-and-configuration/installation/install-using-helm/system-requirements.md
+        - page: Install the Cluster
+          path: ../../docs/installation-and-configuration/installation/install-using-helm/helm-install.md
+        - page: Upgrade
+          path: ../../docs/installation-and-configuration/installation/install-using-helm/upgrade.md
+        - page: Uninstall
+          path: ../../docs/installation-and-configuration/installation/install-using-helm/uninstall.md
+      - page: Install Using Base Command Manager (BCM)
+        path: ../../docs/installation-and-configuration/installation/bcm-install.md
+    - section: Post-Installation Configuration
+      path: ../../docs/installation-and-configuration/post-installation-configuration/README.md
+      contents:
+      - page: Node Roles
+        path: ../../docs/installation-and-configuration/post-installation-configuration/node-roles.md
+      - page: Advanced Control Plane Configurations
+        path: ../../docs/installation-and-configuration/post-installation-configuration/control-plane-config.md
+      - page: Advanced Cluster Configurations
+        path: ../../docs/installation-and-configuration/post-installation-configuration/cluster-config.md
+  - section: Infrastructure setup
+    contents:
+    - section: Authentication and Authorization
+      contents:
+      - page: Authentication and Authorization
+        path: ../../docs/infrastructure-setup/authentication/overview.md
+      - page: Users
+        path: ../../docs/infrastructure-setup/authentication/users.md
+      - section: SSO
+        contents:
+        - page: Set Up SSO with SAML
+          path: ../../docs/infrastructure-setup/authentication/sso/saml.md
+        - page: Set Up SSO with OpenID Connect
+          path: ../../docs/infrastructure-setup/authentication/sso/openidconnect.md
+        - page: Set Up SSO with OpenShift
+          path: ../../docs/infrastructure-setup/authentication/sso/openshift.md
+      - page: Permissions
+        path: ../../docs/infrastructure-setup/authentication/permissions.md
+      - page: Roles
+        path: ../../docs/infrastructure-setup/authentication/roles.md
+      - page: Service Accounts (formerly applications)
+        path: ../../docs/infrastructure-setup/authentication/service-accounts.md
+      - page: Access Rules
+        path: ../../docs/infrastructure-setup/authentication/accessrules.md
+      - page: Cluster Authentication
+        path: ../../docs/infrastructure-setup/authentication/cluster-authentication.md
+    - section: Advanced Setup
+      contents:
+      - page: Vertical Pod Autoscaling (VPA)
+        path: ../../docs/infrastructure-setup/advanced-setup/vpa.md
+      - page: Kubernetes Gateway API
+        path: ../../docs/infrastructure-setup/advanced-setup/kubernetes-gateway-api.md
+      - section: Container Access
+        contents:
+        - page: External Access to Containers
+          path: ../../docs/infrastructure-setup/advanced-setup/container-access/external-access-to-containers.md
+        - page: User Identity in Containers
+          path: ../../docs/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers.md
+      - page: Service Mesh
+        path: ../../docs/infrastructure-setup/advanced-setup/service-mesh.md
+      - section: Integrations
+        path: ../../docs/infrastructure-setup/advanced-setup/integrations/README.md
+        contents:
+        - page: Autonomous Job Recovery Integration
+          path: ../../docs/infrastructure-setup/advanced-setup/integrations/autonomous-job-recovery-integration.md
+        - page: Interworking with Karpenter
+          path: ../../docs/infrastructure-setup/advanced-setup/integrations/karpenter.md
+      - page: Security Best Practices
+        path: ../../docs/infrastructure-setup/advanced-setup/security-best-practices.md
+    - section: Infrastructure Procedures
+      contents:
+      - page: NVIDIA Run:ai at Scale
+        path: ../../docs/infrastructure-setup/procedures/scaling.md
+      - page: High Availability
+        path: ../../docs/infrastructure-setup/procedures/high-availability.md
+      - page: Monitoring and Maintenance
+        path: ../../docs/infrastructure-setup/procedures/monitoring.md
+      - page: NVIDIA Run:ai System Monitoring
+        path: ../../docs/infrastructure-setup/procedures/system-monitoring.md
+      - page: Clusters
+        path: ../../docs/infrastructure-setup/procedures/clusters.md
+      - page: Shared Storage
+        path: ../../docs/infrastructure-setup/procedures/shared-storage.md
+      - page: Nodes Maintenance
+        path: ../../docs/infrastructure-setup/procedures/nodes-maintenance.md
+      - page: Backup and Restore
+        path: ../../docs/infrastructure-setup/procedures/cluster-restore.md
+      - page: Secure Your Cluster
+        path: ../../docs/infrastructure-setup/procedures/secure-your-cluster.md
+      - page: Logs Collection
+        path: ../../docs/infrastructure-setup/procedures/logs-collection.md
+      - page: Event History
+        path: ../../docs/infrastructure-setup/procedures/event-history.md
+  - section: Platform management
+    contents:
+    - section: Manage AI Initiatives
+      contents:
+      - page: Adapting AI Initiatives to Your Organization
+        path: ../../docs/platform-management/aiinitiatives/adapting-ai-initiatives.md
+      - section: Managing Your Organization
+        contents:
+        - page: Projects
+          path: ../../docs/platform-management/aiinitiatives/organization/projects.md
+        - page: Departments
+          path: ../../docs/platform-management/aiinitiatives/organization/departments.md
+      - section: Managing Your Resources
+        contents:
+        - page: Nodes
+          path: ../../docs/platform-management/aiinitiatives/resources/nodes.md
+        - page: Configuring NVIDIA MIG Profiles
+          path: ../../docs/platform-management/aiinitiatives/resources/mig-profiles.md
+        - page: Using GB200 NVL72 and Multi-Node NVLink Domains
+          path: ../../docs/platform-management/aiinitiatives/resources/using-gb200.md
+        - page: Accelerating Workloads with Network Topology-Aware Scheduling
+          path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling.md
+        - page: Enabling Spectrum-X Networking for NVIDIA Run:ai Workloads
+          path: ../../docs/platform-management/aiinitiatives/resources/enabling-spectrum-x-networking-for-nvidia-run-ai-workloads.md
+        - page: Configuring NUMA-Aware Scheduling
+          path: ../../docs/platform-management/aiinitiatives/resources/numa-aware-scheduling.md
+        - page: Node Pools
+          path: ../../docs/platform-management/aiinitiatives/resources/node-pools.md
+    - section: Scheduling and Resource Optimization
+      contents:
+      - section: Scheduling
+        contents:
+        - page: 'The NVIDIA Run:ai Scheduler: Concepts and Principles'
+          path: ../../docs/platform-management/runai-scheduler/scheduling/concepts-and-principles.md
+        - page: How the Scheduler Works
+          path: ../../docs/platform-management/runai-scheduler/scheduling/how-the-scheduler-works.md
+        - page: Setting the Default Scheduler
+          path: ../../docs/platform-management/runai-scheduler/scheduling/default-scheduler.md
+        - page: Workload Priority and Preemption
+          path: ../../docs/platform-management/runai-scheduler/scheduling/workload-priority-control.md
+        - section: Quick Starts
+          contents:
+          - page: Over Quota, Fairness and Preemption
+            path: ../../docs/platform-management/runai-scheduler/scheduling/quick-starts/over-quota.md
+      - section: Resource Optimization
+        contents:
+        - page: GPU Fractions
+          path: ../../docs/platform-management/runai-scheduler/resource-optimization/fractions.md
+        - page: Dynamic GPU Fractions
+          path: ../../docs/platform-management/runai-scheduler/resource-optimization/dynamic-fractions.md
+        - page: Optimize Performance with Node Level Scheduler
+          path: ../../docs/platform-management/runai-scheduler/resource-optimization/node-level-scheduler.md
+        - page: GPU Time-Slicing
+          path: ../../docs/platform-management/runai-scheduler/resource-optimization/time-slicing.md
+        - page: GPU Memory Swap
+          path: ../../docs/platform-management/runai-scheduler/resource-optimization/memory-swap.md
+        - page: CPU Compute and Memory Allocation
+          path: ../../docs/platform-management/runai-scheduler/resource-optimization/allocation-of-cpu-and-memory.md
+        - section: Quick Starts
+          contents:
+          - page: Launching Workloads with GPU Fractions
+            path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/gpu-fractions-quickstart.md
+          - page: Launching Workloads with Dynamic GPU Fractions
+            path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/dynamic-gpu-fractions-quickstart.md
+          - page: Launching Workloads with GPU Memory Swap
+            path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/gpu-memory-swap-quickstart.md
+    - section: Policies
+      contents:
+      - page: Policies and Rules
+        path: ../../docs/platform-management/policies/policies-and-rules.md
+      - section: NVIDIA Run:ai Native Workload Policies
+        path: ../../docs/platform-management/policies/native-workload-policies.md
+        contents:
+        - page: Policy YAML Reference
+          path: ../../docs/platform-management/policies/policy-yaml-reference.md
+        - page: Policy YAML Examples
+          path: ../../docs/platform-management/policies/policy-yaml-examples.md
+      - section: Supported Workload Types Policies
+        path: ../../docs/platform-management/policies/supported-workload-type-policies.md
+        contents:
+        - page: Policy YAML Examples
+          path: ../../docs/platform-management/policies/policy-yaml-examples-supported.md
+        - page: Workload Types Policy Mapping
+          path: ../../docs/platform-management/policies/workload-type-policy-mapping.md
+      - page: Scheduling Rules
+        path: ../../docs/platform-management/policies/scheduling-rules.md
+    - section: Monitor Performance and Health
+      contents:
+      - page: Before You Start
+        path: ../../docs/platform-management/monitor-performance/before-you-start.md
+      - page: Monitor Workloads by Category
+        path: ../../docs/platform-management/monitor-performance/workload-categories.md
+      - page: GPU Profiling Metrics
+        path: ../../docs/platform-management/monitor-performance/gpu-profiling-metrics.md
+      - page: Metrics and Telemetry
+        path: ../../docs/platform-management/monitor-performance/metrics.md
+      - page: Reports
+        path: ../../docs/platform-management/monitor-performance/reports.md
+  - section: Workloads in NVIDIA Run:ai
+    contents:
+    - page: Introduction to Workloads
+      path: ../../docs/workloads-in-nvidia-run-ai/introduction-to-workloads.md
+    - section: Workload Types and Features
+      contents:
+      - page: NVIDIA Run:ai Native Workloads
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-types/native-workloads.md
+      - page: Supported Workload Types
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md
+      - section: Extending Workload Support with Karta
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-types/extending-workload-support/README.md
+        contents:
+        - page: Defining a Karta
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-types/extending-workload-support/defining-a-karta.md
+        - page: Quick Start Templates
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-types/extending-workload-support/quick-start-templates.md
+      - page: Supported Features
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-types/supported-features.md
+    - page: Workloads
+      path: ../../docs/workloads-in-nvidia-run-ai/workloads.md
+    - section: Workload Assets
+      contents:
+      - page: Workload Assets
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/overview.md
+      - page: Environments
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/environments.md
+      - page: Data Sources
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/datasources.md
+      - page: Data Volumes
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/data-volumes.md
+      - page: Compute Resources
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/compute-resources.md
+      - page: Credentials
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/credentials.md
+    - section: Workload Templates
+      path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/README.md
+      contents:
+      - section: Workspace Templates
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/workspace-templates/README.md
+        contents:
+        - page: Workspace Templates (Legacy)
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/workspace-templates/workspace-templates-legacy.md
+      - section: Training Templates
+        contents:
+        - page: Standard Training Templates
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/training-templates/standard-training-templates.md
+        - page: Distributed Training Templates
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/training-templates/distributed-training-templates.md
+      - section: Inference Templates
+        contents:
+        - page: NVIDIA NIM Inference Templates
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/inference-templates/nvidia-nim-inference-templates.md
+        - page: vLLM Inference Templates
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/inference-templates/hugging-face-inference-templates.md
+        - page: Custom Inference Templates
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/inference-templates/custom-inference-templates.md
+    - section: Experiment Using Workspaces
+      contents:
+      - page: Running Workspaces
+        path: ../../docs/workloads-in-nvidia-run-ai/using-workspaces/running-workspace.md
+      - section: Quick Starts
+        contents:
+        - page: Running Jupyter Notebooks Using Workspaces
+          path: ../../docs/workloads-in-nvidia-run-ai/using-workspaces/quick-starts/jupyter-quickstart.md
+    - section: Train Models Using Training
+      contents:
+      - page: Train Models Using a Standard Training Workload
+        path: ../../docs/workloads-in-nvidia-run-ai/using-training/train-models.md
+      - page: Train Models Using a Distributed Training Workload
+        path: ../../docs/workloads-in-nvidia-run-ai/using-training/distributed-training-models.md
+      - page: 'Best Practices: Checkpointing Preemptible Training Workloads'
+        path: ../../docs/workloads-in-nvidia-run-ai/using-training/checkpointing-preemptible-workloads.md
+      - section: Quick Starts
+        contents:
+        - page: Run Your First Standard Training
+          path: ../../docs/workloads-in-nvidia-run-ai/using-training/quick-starts/standard-training-quickstart.md
+        - page: Run Your First Distributed Training
+          path: ../../docs/workloads-in-nvidia-run-ai/using-training/quick-starts/distributed-training-quickstart.md
+    - section: Deploy Models Using Inference
+      contents:
+      - page: NVIDIA Run:ai Inference Overview
+        path: ../../docs/workloads-in-nvidia-run-ai/using-inference/nvidia-run-ai-inference-overview.md
+      - page: Deploy Inference Workloads with NVIDIA NIM
+        path: ../../docs/workloads-in-nvidia-run-ai/using-inference/nim-inference.md
+      - page: Deploy Inference Workloads with vLLM
+        path: ../../docs/workloads-in-nvidia-run-ai/using-inference/hugging-face-inference.md
+      - page: Deploy Inference Workloads with Custom Server
+        path: ../../docs/workloads-in-nvidia-run-ai/using-inference/custom-inference.md
+      - page: Deploy Distributed Inference Workloads
+        path: ../../docs/workloads-in-nvidia-run-ai/using-inference/distributed-inference.md
+      - page: Deploy NVIDIA Cloud Functions (NVCF) in NVIDIA Run:ai
+        path: ../../docs/workloads-in-nvidia-run-ai/using-inference/nvcf.md
+      - section: Quick Starts
+        contents:
+        - page: Run Your First Custom Inference Workload
+          path: ../../docs/workloads-in-nvidia-run-ai/using-inference/quick-starts/inference-quickstart.md
+    - page: Submit Supported Workload Types via YAML
+      path: ../../docs/workloads-in-nvidia-run-ai/submit-via-yaml.md
+  - section: AI Applications
+    contents:
+    - page: Introduction to AI Applications
+      path: ../../docs/ai-applications/introduction-to-ai-applications.md
+    - page: AI Applications
+      path: ../../docs/ai-applications/ai-applications.md
+  - section: Tutorials
+    contents:
+    - section: Training Tutorials
+      contents:
+      - page: Distributed Training with PyTorch
+        path: ../../docs/tutorials/training-tutorials/distributed-pytorch.md
+      - page: Validating GPU Cluster Communication with NCCL Tests
+        path: ../../docs/tutorials/training-tutorials/nccl-tests.md
+    - section: Inference Tutorials
+      contents:
+      - page: NVIDIA NIM Distributed Inference Deployment
+        path: ../../docs/tutorials/inference-tutorials/nvidia-nim-distributed.md
+      - page: Hugging Face Distributed Inference Deployment
+        path: ../../docs/tutorials/inference-tutorials/hugging-face-distributed.md
+      - page: NVIDIA Dynamo Aggregated Inference Deployment
+        path: ../../docs/tutorials/inference-tutorials/aggregated-dynamo.md
+      - page: NVIDIA Dynamo Disaggregated Inference Deployment
+        path: ../../docs/tutorials/inference-tutorials/disaggregated-dynamo.md
+      - page: Model-Free NIM Service Deployment
+        path: ../../docs/tutorials/inference-tutorials/nim-service.md
+    - section: Blueprint Tutorials
+      contents:
+      - page: RAG Blueprint Deployment from NGC Catalog
+        path: ../../docs/tutorials/blueprint-tutorials/rag-blueprint-deployment.md
+  - section: Agents
+    contents:
+    - page: Overview
+      path: ../../docs/agents/overview.md
+    - section: MCP Server
+      contents:
+      - page: Deploy the MCP Server
+        path: ../../docs/agents/mcp-server/deploy.md
+      - page: Connect Your AI Tool
+        path: ../../docs/agents/mcp-server/connect.md
+      - page: Tools Reference
+        path: ../../docs/agents/tools-reference.md
+    - page: Agent Skills
+      path: ../../docs/agents/agent-skills.md
+  - section: Settings
+    contents:
+    - section: General Settings
+      path: ../../docs/settings/general-settings/README.md
+      contents:
+      - page: Notifications
+        path: ../../docs/settings/general-settings/notifications.md
+    - section: User Settings
+      contents:
+      - page: Notifications
+        path: ../../docs/settings/user-settings/notifications.md
+      - page: User Access Keys (formerly applications)
+        path: ../../docs/settings/user-settings/user-access-keys.md
+      - page: User Credentials
+        path: ../../docs/settings/user-settings/user-credentials.md
+
+- tab: reference
+  layout:
+  - page: Home
+    path: ../../docs/rest-api/README.md
+  - section: REST API
+    contents:
+    - section: Getting Started
+      contents:
+      - page: About the REST API
+        path: ../../docs/rest-api/about-the-rest-api.md
+      - section: Using the REST API
+        contents:
+        - page: Making REST API Requests
+          path: ../../docs/rest-api/making-rest-api-requests.md
+        - page: Pagination
+          path: ../../docs/rest-api/pagination.md
+        - page: HTTP Status Codes
+          path: ../../docs/rest-api/http-status-codes.md
+      - page: How to Authenticate to the API
+        path: ../../docs/rest-api/how-to-authenticate-to-the-api.md
+      - page: NVIDIA Run:ai API Policy
+        path: ../../docs/rest-api/api-policy.md
+    - api: Endpoints
+      api-name: main-api
+      flattened: true
+      tag-description-pages: true
+      layout:
+      - section: Organizations
+        contents:
+        - clusters
+        - departments
+        - reports
+        - nodePools
+        - nodes
+        - projects
+        - logo
+        - researcherCommandLineInterface
+        - researcherCommandLineInterfaceDeprecated
+        - networkTopologies
+      - section: Authentication and Authorization
+        contents:
+        - accessKeys
+        - accessRules
+        - permissions
+        - applications
+        - serviceAccounts
+        - roles
+        - tokens
+        - users
+        - userApplications
+        - idps
+        - me
+        - settings
+        - orgUnit
+      - section: Audit
+        contents:
+        - auditLogs
+      - section: Datavolumes
+        contents:
+        - datavolumesApi
+      - section: Workloads
+        contents:
+        - events
+        - pods
+        - workloadsApi
+        - workloadsV2
+        - nvidiaNim
+        - workspaces
+        - trainings
+        - inferences
+        - revisions
+        - distributed
+        - workloadsBatch
+        - workloadProperties
+        - workloadTemplates
+        - distributedInferences
+      - section: Workload assets
+        contents:
+        - compute
+        - credentials
+        - datasources
+        - environment
+        - storageClasses
+        - storageClassConfiguration
+        - git
+        - hostPath
+        - nfs
+        - pvc
+        - registry
+        - s3
+        - configMap
+        - secret
+        - template
+      - section: Policies
+        contents:
+        - policy
+      - section: Notifications
+        contents:
+        - notificationState
+        - notificationTypes
+        - notificationChannels
+        - slack
+        - email
+        - subscriptions
+      - section: AI Applications
+        contents:
+        - aiApplicationsApi
+    - section: API Guides
+      contents:
+      - page: Interacting with Workloads Using the Cluster API
+        path: ../../docs/rest-api/api-guides/interacting-with-workloads-using-the-cluster-api.md
+      - page: Configuring Slack Notifications
+        path: ../../docs/rest-api/api-guides/configuring-slack-notifications.md
+      - page: Using Node Affinity via API
+        path: ../../docs/rest-api/api-guides/using-node-affinity-via-api.md
+      - page: NIM Observability Metrics via API
+        path: ../../docs/rest-api/api-guides/nim-observability-metrics-via-api.md
+    - section: API Python Client Reference
+      contents:
+      - page: API Python Client (runapy)
+        path: ../../docs/rest-api/api-python-client-reference/api-python-client-runapy.md
+      - page: Install and Configure the Client
+        path: ../../docs/rest-api/api-python-client-reference/install-and-configure-the-client.md
+  - section: CLI
+    contents:
+    - page: Install and Configure CLI
+      path: ../../docs/reference/cli/install-cli.md
+    - page: Add NVIDIA Run:ai Authorization to Kubeconfig
+      path: ../../docs/reference/cli/set-kubeconfig-parameters.md
+    - page: Auto Update CLI Mechanism
+      path: ../../docs/reference/cli/auto-update-cli-mechanism.md
+    - page: CLI Commands Examples
+      path: ../../docs/reference/cli/cli-examples.md
+

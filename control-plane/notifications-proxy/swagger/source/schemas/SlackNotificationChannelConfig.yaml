@@ -1,0 +1,17 @@
+type: object
+properties:
+  recipients:
+    type: array
+    items:
+      type: string
+    default: []
+    minItems: 0
+    maxItems: 100
+  directNotifications:
+    type: boolean
+    nullable: true
+  apiToken:
+    type: string
+    maxLength: 500
+example:
+  apiToken: <your_api_token>

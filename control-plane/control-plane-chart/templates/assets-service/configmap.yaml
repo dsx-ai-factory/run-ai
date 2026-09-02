@@ -1,0 +1,49 @@
+{{- include "common.configMap" (list . .Values.assetsService "control-plane.assetsService.configmap") }}
+{{- define "control-plane.assetsService.configmap" -}}
+{{- $top := first . }}
+data:
+  SERVICE_PORT: {{ $top.Values.assetsService.service.port | quote }}
+  SERVICE_NAME: {{ $top.Values.assetsService.name | quote }}
+  TRACING_ENABLED: {{ if hasKey $top.Values.assetsService.config "tracingEnabled" }}{{ $top.Values.assetsService.config.tracingEnabled | quote }}{{ else }}{{ $top.Values.global.config.tracingEnabled | quote }}{{ end }}
+  AUDIT_ENABLED: {{ if hasKey $top.Values.assetsService.config "auditEnabled" }}{{ $top.Values.assetsService.config.auditEnabled | quote }}{{ else }}{{ $top.Values.global.config.auditEnabled | quote }}{{ end }}
+  AUDIT_ENABLE_PRINT_TO_STDOUT: {{ if hasKey $top.Values.assetsService.config "auditEnablePrintToStdout" }}{{ $top.Values.assetsService.config.auditEnablePrintToStdout | quote }}{{ else }}{{ $top.Values.global.config.auditEnablePrintToStdout | quote }}{{ end }}
+  POLICY_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.policyService.name ($top.Values.policyService.service.port | toString) | quote }}
+  AUTH_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.authorization.name ($top.Values.authorization.service.port | toString) | quote }}
+  K8S_OBJECTS_TRACKER_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.k8sObjectsTracker.name ($top.Values.k8sObjectsTracker.service.port | toString) | quote }}
+  DATA_VOLUMES_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.datavolumes.name ($top.Values.datavolumes.service.port | toString) | quote }}
+  AUDIT_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.auditService.name ($top.Values.auditService.service.port | toString) | quote }}
+  MIGRATION_FILES: {{ $top.Values.assetsService.config.migrationFiles | quote }}
+  DB_NAME: {{ $top.Values.assetsService.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_VERBOSE_LOGGING: {{ $top.Values.assetsService.config.dbVerboseLogging | default $top.Values.global.postgresql.dbVerboseLogging | quote }}
+  DB_HOST: {{ $top.Values.assetsService.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SSL_MODE: {{ $top.Values.assetsService.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_PORT: {{ $top.Values.assetsService.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  DB_SCHEMA: {{ $top.Values.assetsService.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  DB_MAX_CONNECTIONS: {{ $top.Values.assetsService.config.dbMaxConnections | quote }}
+  DB_MAX_IDLE_CONNECTIONS: {{ $top.Values.assetsService.config.dbMaxIdleConnections | quote }}
+  DB_MAX_IDLE_CONNECTIONS_TIME_DURATION: {{ $top.Values.assetsService.config.dbMaxIdleConnectionsTimeDuration | quote }}
+  DB_USE_SERVICE_SESSION: {{ $top.Values.assetsService.config.dbUseServiceSession | quote }}
+  DB_BACKEND_SCHEMA: {{ $top.Values.tempBackendSettings.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  {{- if or ($top.Values.global.postgresql.auth.readHost) ($top.Values.assetsService.config.dbReadHost) }}
+  DB_READ_HOST: {{ $top.Values.assetsService.config.dbReadHost | default $top.Values.global.postgresql.auth.readHost | quote }}
+  {{- end }}
+  {{- if or ($top.Values.global.postgresql.auth.dbReadPort) ($top.Values.assetsService.config.dbReadPort) }}
+  DB_READ_PORT: {{ $top.Values.assetsService.config.dbReadPort | default $top.Values.global.postgresql.auth.readPort | quote }}
+  {{- end }}
+  WORKLOADS_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.workloads.name ($top.Values.workloads.service.port | toString) | quote }}
+  CLUSTER_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.clusterService.name ($top.Values.clusterService.service.port | toString) | quote }}
+  ORG_UNIT_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.orgUnitService.name ($top.Values.orgUnitService.service.port | toString) | quote }}
+  PUBSUB_URL: {{ $top.Values.global.pubsub.url | quote }}
+  PUBSUB_TYPE: {{ $top.Values.global.pubsub.type | quote }}
+  PUBSUB_ENABLE_ADDITIONAL_SUBSCRIBER: {{ $top.Values.global.pubsub.additionalSubscriber.enabled | quote }}
+  {{- if $top.Values.global.pubsub.additionalSubscriber.enabled }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_TYPE: {{ $top.Values.global.pubsub.additionalSubscriber.type | quote }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_URL: {{ $top.Values.global.pubsub.additionalSubscriber.url | quote }}
+  {{- end }}
+  SYNC_BULK_SIZE: {{ $top.Values.assetsService.config.syncBulkSize | quote }}
+  DAYS_LIMIT_FOR_FIRST_SYNC: {{ $top.Values.assetsService.config.daysLimitForFirstSync | quote }}
+  CLEANUP_REFRESH_RATE_HOURS: {{ $top.Values.assetsService.config.cleanupRefreshRateHours | quote }}
+  CLEANUP_KEEP_ASSETS_DAYS:  {{ $top.Values.assetsService.config.cleanupKeepAssetsDays | quote }}
+  CACHE_MAX_RECORD_SIZE_KB: {{ $top.Values.assetsService.config.cacheMaxRecordSizeKb | quote }}
+  CACHE_MAX_STORE_SIZE_MB: {{ $top.Values.assetsService.config.cacheMaxStoreSizeMb | quote }}
+{{- end }}

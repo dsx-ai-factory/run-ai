@@ -1,0 +1,11 @@
+properties:
+  workers:
+    default: 0
+    description: Specifies the number of worker nodes to run.
+      If set to 0, only the leader node will run, and no worker pods will be created. In this case, worker spec is not required.
+    type: integer
+    format: int32
+    minimum: 0
+    maximum: 1000
+    example: 4
+    nullable: true

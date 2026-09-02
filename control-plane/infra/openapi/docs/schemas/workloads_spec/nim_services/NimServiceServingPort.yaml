@@ -1,0 +1,26 @@
+description: |
+  A port for accessing the inference service.
+  Authorization fields (authorizationType, authorizedUsers, authorizedGroups) are supported for cluster version 2.25 and above.
+properties:
+  serviceType:
+    $ref: "./ServingPortServiceType.yaml"
+  port:
+    $ref: "./ServingPortPort.yaml"
+  grpcPort:
+    $ref: "./ServingPortGrpcPort.yaml"
+  metricsPort:
+    $ref: "./ServingPortMetricsPort.yaml"
+  exposeExternally:
+    $ref: "./ServingPortExposeExternally.yaml"
+  exposedUrl:
+    $ref: "./ServingPortExposedUrl.yaml"
+  exposedProtocol:
+    $ref: "./ServingPortExposedProtocol.yaml"
+  authorizationType:
+    $ref: "./NimServiceServingPortAuthorizationType.yaml"
+  authorizedUsers:
+    $ref: "./NimServiceServingPortAuthorizedUsers.yaml"
+  authorizedGroups:
+    $ref: "./NimServiceServingPortAuthorizedGroups.yaml"
+nullable: true
+type: object

@@ -1,0 +1,14 @@
+image: ubuntu
+ports:
+  - container: 8080
+    external: 32010
+    toolType: jupyter
+    toolName: my-jupyter
+    serviceType: ClusterIP
+  - container: 8081
+    toolType: tensor
+    serviceType: LoadBalancer
+  - container: 8082
+    toolName: my-tool
+    protocol: FTP
+    serviceType: NodePort

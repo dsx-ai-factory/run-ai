@@ -1,0 +1,16 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package assets
+
+import (
+	"context"
+
+	assetsService "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
+)
+
+type ClientInterface interface {
+	ListDatasourcesByIds(ctx context.Context, ids []string) (*assetsService.DatasourceListResponse, *assetsService.Error)
+}

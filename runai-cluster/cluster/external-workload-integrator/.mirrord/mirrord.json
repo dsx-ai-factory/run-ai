@@ -1,0 +1,12 @@
+{
+    "target": {
+        "path": {
+            "deployment": "external-workload-integrator"
+        },
+        "namespace": "runai"
+    },
+    "feature": {
+        "env": true,
+        "fs": "read"
+    }
+}

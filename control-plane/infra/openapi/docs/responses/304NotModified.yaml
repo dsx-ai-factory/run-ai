@@ -1,0 +1,8 @@
+description: The resource was not modified
+content:
+  application/json:
+    schema:
+      $ref: './Error.yaml'
+    example:
+      code: 304
+      message: "Resource was not modified"

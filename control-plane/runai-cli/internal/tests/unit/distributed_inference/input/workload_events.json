@@ -1,0 +1,244 @@
+{
+  "events": [
+    {
+      "createdAt": "2025-12-15T08:58:45Z",
+      "id": "7b704b4f-e708-4a5d-ae66-9a522f6fbdeb",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "PodSchedulingErrors: Resources were found for 0 pods while 3 are required for gang scheduling. Additional pods cannot be scheduled due to: no nodes with enough resources were found: 1 node(s) didn't have enough resources: GPU memory.\n",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "258bd28c-5097-42b0-a15f-cc78b6ec2889",
+        "kind": "PodGroup",
+        "name": "pg-my-dist-inference-full-123-c0a3-686a3a50-b528-46c6-bf3b-ea2e4fbf6bae-group-1",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:45Z",
+      "id": "37b9526c-b7dd-4dfa-be24-912343af652e",
+      "type": "Warning",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "PodSchedulingErrors: Resources were found for 0 pods while 3 are required for gang scheduling. Additional pods cannot be scheduled due to: no nodes with enough resources were found: 1 node(s) didn't have enough resources: GPU memory.\n",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "219eaedd-a3ca-4c88-88eb-31d687f60f80",
+        "kind": "Pod",
+        "name": "my-dist-inference-full-123-c0a3-1-2",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:45Z",
+      "id": "5d459c81-7b29-4d03-85f9-cc0be71e3bda",
+      "type": "Warning",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "PodSchedulingErrors: Resources were found for 0 pods while 3 are required for gang scheduling. Additional pods cannot be scheduled due to: no nodes with enough resources were found: 1 node(s) didn't have enough resources: GPU memory.\n",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "eb54831c-f830-40c7-9952-b52b9dcb50f4",
+        "kind": "Pod",
+        "name": "my-dist-inference-full-123-c0a3-1-1",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:45Z",
+      "id": "57667fd0-29f4-4d90-b61c-18e6b1d9e13b",
+      "type": "Warning",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "\n<runai-cluster-worker-0-0>: Node didn't have enough resources: GPU memory, taking all considerations into account.\nno nodes with enough resources were found.",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "d8abbc2e-d2cc-4831-9375-2bf6292ca0f7",
+        "kind": "Pod",
+        "name": "my-dist-inference-full-123-c0a3-1",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:44Z",
+      "id": "e4841d8f-92dc-4e82-8687-eabe0ec32fd5",
+      "type": "Warning",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "\n<runai-cluster-worker-0-0>: Node didn't have enough resources: GPU memory, taking all considerations into account.\nno nodes with enough resources were found.",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "06846ff7-11cd-40a8-8950-124403277b99",
+        "kind": "Pod",
+        "name": "my-dist-inference-full-123-c0a3-0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:44Z",
+      "id": "d7cacfcb-0f52-4e6a-b42f-7e1540046565",
+      "type": "Warning",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "PodSchedulingErrors: Resources were found for 0 pods while 3 are required for gang scheduling. Additional pods cannot be scheduled due to: no nodes with enough resources were found: 1 node(s) didn't have enough resources: GPU memory.\n",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "9b6cb737-a968-4cb5-9548-86bede306ff5",
+        "kind": "Pod",
+        "name": "my-dist-inference-full-123-c0a3-0-1",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:44Z",
+      "id": "366ca82b-4877-4ca1-bc96-746fdc58a312",
+      "type": "Warning",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "PodSchedulingErrors: Resources were found for 0 pods while 3 are required for gang scheduling. Additional pods cannot be scheduled due to: no nodes with enough resources were found: 1 node(s) didn't have enough resources: GPU memory.\n",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "c0e0d263-c846-4b37-9cc7-1e2359a4b09e",
+        "kind": "Pod",
+        "name": "my-dist-inference-full-123-c0a3-0-2",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:44Z",
+      "id": "c990a805-a430-4aac-b364-0c604839001a",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "PodSchedulingErrors: Resources were found for 0 pods while 3 are required for gang scheduling. Additional pods cannot be scheduled due to: no nodes with enough resources were found: 1 node(s) didn't have enough resources: GPU memory.\n",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "ed7c0c50-3add-4f16-9a10-24ba1df66d9d",
+        "kind": "PodGroup",
+        "name": "pg-my-dist-inference-full-123-c0a3-686a3a50-b528-46c6-bf3b-ea2e4fbf6bae-group-0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:39Z",
+      "id": "b7114369-5a85-4494-872c-44cb7b10de95",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "Job is not ready for scheduling. Waiting for 3 pods, currently 2 exist, 0 are gated",
+      "reason": "NotReady",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "ed7c0c50-3add-4f16-9a10-24ba1df66d9d",
+        "kind": "PodGroup",
+        "name": "pg-my-dist-inference-full-123-c0a3-686a3a50-b528-46c6-bf3b-ea2e4fbf6bae-group-0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:39Z",
+      "id": "ab2a1bda-0201-4737-8c5a-1e88edb4175f",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "Job is not ready for scheduling. Waiting for 3 pods, currently 1 exist, 0 are gated",
+      "reason": "NotReady",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "258bd28c-5097-42b0-a15f-cc78b6ec2889",
+        "kind": "PodGroup",
+        "name": "pg-my-dist-inference-full-123-c0a3-686a3a50-b528-46c6-bf3b-ea2e4fbf6bae-group-1",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:36Z",
+      "id": "5de23bd9-b098-4241-b352-d944aead9d03",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "Created worker statefulset for leader pod my-dist-inference-full-123-c0a3-1",
+      "reason": "GroupsProgressing",
+      "source": "leaderworkerset",
+      "involvedObject": {
+        "uid": "686a3a50-b528-46c6-bf3b-ea2e4fbf6bae",
+        "kind": "LeaderWorkerSet",
+        "name": "my-dist-inference-full-123-c0a3",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:35Z",
+      "id": "9eada71e-9213-459e-a2eb-83b64454427a",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "Created worker statefulset for leader pod my-dist-inference-full-123-c0a3-0",
+      "reason": "GroupsProgressing",
+      "source": "leaderworkerset",
+      "involvedObject": {
+        "uid": "686a3a50-b528-46c6-bf3b-ea2e4fbf6bae",
+        "kind": "LeaderWorkerSet",
+        "name": "my-dist-inference-full-123-c0a3",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:34Z",
+      "id": "6f32deeb-6b7a-43a4-923d-1fbcb0d64300",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "Replicas are progressing, with 0 groups ready of total 2 groups",
+      "reason": "GroupsProgressing",
+      "source": "leaderworkerset",
+      "involvedObject": {
+        "uid": "686a3a50-b528-46c6-bf3b-ea2e4fbf6bae",
+        "kind": "LeaderWorkerSet",
+        "name": "my-dist-inference-full-123-c0a3",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:34Z",
+      "id": "dc8211c9-c70b-4700-8260-31ad18304120",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "Creating revision with key 75c9f7f5bb for a newly created LeaderWorkerSet",
+      "reason": "CreatingRevision",
+      "source": "leaderworkerset",
+      "involvedObject": {
+        "uid": "686a3a50-b528-46c6-bf3b-ea2e4fbf6bae",
+        "kind": "LeaderWorkerSet",
+        "name": "my-dist-inference-full-123-c0a3",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:34Z",
+      "id": "354eaced-8492-46d6-bcb9-59494b837377",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "Created leader statefulset my-dist-inference-full-123-c0a3",
+      "reason": "GroupsProgressing",
+      "source": "leaderworkerset",
+      "involvedObject": {
+        "uid": "686a3a50-b528-46c6-bf3b-ea2e4fbf6bae",
+        "kind": "LeaderWorkerSet",
+        "name": "my-dist-inference-full-123-c0a3",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:34Z",
+      "id": "f336c2b4-7b25-4b7e-b536-233b5ac777bd",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "Scheduled for sync",
+      "reason": "Sync",
+      "source": "nginx-ingress-controller",
+      "involvedObject": {
+        "uid": "48541084-cd2d-4c87-a107-ba34ad1b1df5",
+        "kind": "Ingress",
+        "name": "dinfw-my-dist-inference-full-123-sp-0",
+        "namespace": "runai-team-b"
+      }
+    }
+  ]
+}

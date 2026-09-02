@@ -1,0 +1,8 @@
+properties:
+  servingPortAccess:
+    allOf:
+      - $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/ServingPortAccess.yaml"
+    nullable: true
+    type: object
+nullable: true
+type: object

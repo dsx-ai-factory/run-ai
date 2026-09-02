@@ -1,0 +1,31 @@
+post:
+  summary: Logout a user.
+  description: Use to force a user to logout.
+  x-service: identity-manager
+  x-test-coverage:
+    - src/test/suites/advancedSuite/generalSettings/securityUi.test.ts
+  operationId: logout_user
+  x-authorize:
+    resource-type: users
+    action: update
+    resource-id: userId
+  x-audit: true
+  tags:
+  - Users
+  parameters:
+  - $ref: '../../parameters/userId.yaml'
+  responses:
+    '200':
+      description: Executed successfully.
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

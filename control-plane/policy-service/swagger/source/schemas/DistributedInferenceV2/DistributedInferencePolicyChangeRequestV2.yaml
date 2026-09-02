@@ -1,0 +1,8 @@
+properties:
+  meta:
+    $ref: "../Policy/PolicyCreationFields.yaml"
+  policy:
+    $ref: "./DistributedInferencePolicyDefaultsAndRulesV2.yaml"
+  reset:
+    $ref: "../Policy/FieldsToReset.yaml"
+type: object

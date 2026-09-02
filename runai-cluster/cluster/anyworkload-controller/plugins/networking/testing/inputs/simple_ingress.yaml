@@ -1,0 +1,32 @@
+runner:
+  name: auth-disabled-workload
+  namespace: runai-test
+
+networking:
+  services:
+  - create:
+      metadata:
+        name: my-service
+      spec:
+        type: ClusterIP
+        ports:
+          - port: 8080
+            targetPort: 8080
+        selector:
+          app: my-app
+  externalAccess:
+    ingress:
+      metadata:
+        name: my-ingress
+      spec:
+        rules:
+          - host: my-app.example.com
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: my-service
+                      port:
+                        number: 8080

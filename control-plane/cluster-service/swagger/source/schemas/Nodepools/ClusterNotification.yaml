@@ -1,0 +1,14 @@
+type: object
+required:
+  - operation
+  - id
+properties:
+  operation:
+    $ref: "./NotificationOperation.yaml"
+  id:
+    type: string
+    format: uuid
+  name:
+    type: string
+  schedulingCapabilities:
+    $ref: "../Nodepools/SchedulingCapabilitiesNullable.yaml"

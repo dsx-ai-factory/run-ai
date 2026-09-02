@@ -1,0 +1,33 @@
+type: object
+properties:
+  effectiveRules:
+    description: >-
+      The merged rule set in effect for this policy, including rules inherited
+      from broader scopes (cluster, then department, then project). Each entry
+      adds the sourceOfRule indicating where the rule was defined. Returned in
+      responses only; not accepted in requests.
+    type: array
+    items:
+      allOf:
+        - $ref: "./PolicyRule.yaml"
+        - $ref: "./PolicyRuleSource.yaml"
+example:
+  rules:
+    - field: "environmentVariables-ConfigMapName"
+      specSelector: "appContainerByName"
+      itemSelector: "environmentVariables-FromConfigMap"
+      selectorParams:
+        name: "worker-1"
+      enforcements:
+        - set:
+            containerPort: 1234
+            protocol: TCP
+        - required: true
+      scope: cluster
+
+    - field: "allowPrivilegeEscalation"
+      specSelector: "allAppContainers"
+      enforcements:
+        - set:
+            value: true
+      scope: department

@@ -1,0 +1,9 @@
+type: string
+description: >-
+  Internal, control-plane-derived classification of the source that produced
+  endpoint-array networking. Callers cannot select this value. The agent uses
+  it to preserve the validation contract when creating a WorkloadRunner.
+enum:
+  - direct-v2
+  - generated-native
+  - generated-nim

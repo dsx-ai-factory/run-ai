@@ -1,0 +1,88 @@
+policy:
+  effectiveRules:
+  - enforcements:
+    - set:
+        value: overridden
+    field: scalar
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - default:
+        value: from-default
+    field: presentDefault
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - default:
+        value: from-default
+    field: missingDefault
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - set:
+        value: true
+    field: nested
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - set:
+        configMapName: cm-a
+        key: foo-key
+        name: FOO
+        optional: false
+    field: environmentVariables-FromConfigMap
+    sourceOfRule: null
+    specSelector: allContainers
+  - enforcements:
+    - set:
+        configMapName: cm-shared
+        key: shared-key
+        name: SHARED
+        optional: false
+    field: environmentVariables-FromConfigMap
+    sourceOfRule: null
+    specSelector: allContainers
+  workloadType:
+    group: test
+    kind: Synthetic
+    version: v1
+workload:
+  apiVersion: test/v1
+  containers:
+  - env:
+    - name: FOO
+      valueFrom:
+        configMapKeyRef:
+          key: foo-key
+          name: cm-a
+          optional: false
+    - name: SHARED
+      valueFrom:
+        configMapKeyRef:
+          key: shared-key
+          name: cm-shared
+          optional: false
+    name: worker-1
+  - env:
+    - name: EXISTING
+      value: keep-me
+    - name: FOO
+      valueFrom:
+        configMapKeyRef:
+          key: foo-key
+          name: cm-a
+          optional: false
+    - name: SHARED
+      valueFrom:
+        configMapKeyRef:
+          key: shared-key
+          name: cm-shared
+          optional: false
+    name: worker-2
+  kind: Synthetic
+  missingDefault: from-default
+  nested:
+    security:
+      allowRoot: true
+  presentDefault: keep-me
+  scalar: overridden

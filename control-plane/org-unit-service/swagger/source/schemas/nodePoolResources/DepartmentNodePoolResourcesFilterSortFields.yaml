@@ -1,0 +1,2 @@
+type: string
+enum: [nodePoolName, nodePoolId, orgUnitId, orgUnitName, clusterId, gpuDeserved, gpuOverQuotaWeight]

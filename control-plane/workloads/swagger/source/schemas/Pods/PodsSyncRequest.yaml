@@ -1,0 +1,30 @@
+type: object
+required:
+  - pods
+  - projectId
+properties:
+  projectId:
+    type: string
+    example: "1"
+  clusterId:
+    type: string
+    format: uuid
+    example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  pods:
+    type: array
+    items:
+      $ref: './PodSyncFields.yaml'
+  from:
+    type: string
+    format: uuid
+    description: the first pod id to sync. if empty, all pods before the first one sent will be deleted.
+  to:
+    type: string
+    format: uuid
+    description: the last pod to sync. if empty, all pods after the last one sent will be deleted.
+  idsToIgnore:
+    type: array
+    description: pod ids to ignore when deleting.
+    items:
+      type: string
+      format: uuid

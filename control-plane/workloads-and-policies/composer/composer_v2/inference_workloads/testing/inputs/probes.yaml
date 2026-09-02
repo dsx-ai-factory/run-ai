@@ -1,0 +1,12 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+probes:
+  readiness:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    handler:
+      httpGet:
+        path: /healthz
+        port: 8080

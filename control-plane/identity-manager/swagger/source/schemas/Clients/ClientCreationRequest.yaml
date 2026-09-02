@@ -1,0 +1,30 @@
+ClientCreationRequest:
+  type: object
+  x-internal: true
+  required:
+  - type
+  - clientId
+
+  properties:
+    type:
+      $ref: '#/ClientType'
+    clientId:
+      type: string
+    tenantId:
+      type: string
+    attributes:
+      $ref: './ClientAttributeCreationRequest.yaml'
+
+
+  example:
+    clientId: "Agent123"
+    type: "Agent"
+    tenantId: "1234567"
+    attributes: {"runai.cluster_id": "123"}
+
+ClientType:
+  type: string
+  enum:
+  - Agent
+  - WorkloadsAuth
+  - Application

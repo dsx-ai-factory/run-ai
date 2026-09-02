@@ -1,0 +1,8 @@
+name: summary
+in: query
+required: false
+description: True to fetch datavolumes summary data - without shared scopes.
+schema:
+  type: boolean
+  example: false
+  default: false

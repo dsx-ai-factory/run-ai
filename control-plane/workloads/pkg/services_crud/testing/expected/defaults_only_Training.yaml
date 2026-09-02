@@ -1,0 +1,47 @@
+policyInfo:
+  worker:
+    defaults:
+      compute:
+        cpuCoreLimit: 5
+        extendedResources:
+          attributes:
+            quantity: 20M
+          instances:
+          - resource: aaa/bbb
+          - quantity: 10M
+            resource: ccc/ddd
+      environmentVariables:
+        instances:
+        - name: name_from_the_policy
+          value: value_from_the_policy
+      image: ubuntu
+      storage:
+        pvc:
+          attributes:
+            claimInfo:
+              size: 1M
+              storageClass: standard
+          instances:
+          - path: /aaa/bbb
+projectInfo:
+  name: project-1
+spec:
+  worker:
+    compute:
+      cpuCoreLimit: 5
+      extendedResources:
+      - quantity: 20M
+        resource: aaa/bbb
+      - quantity: 10M
+        resource: ccc/ddd
+    environmentVariables:
+    - name: name_from_the_policy
+      value: value_from_the_policy
+    image: ubuntu
+    storage:
+      pvc:
+      - claimInfo:
+          size: 1M
+          storageClass: standard
+        name: pol-0
+        path: /aaa/bbb

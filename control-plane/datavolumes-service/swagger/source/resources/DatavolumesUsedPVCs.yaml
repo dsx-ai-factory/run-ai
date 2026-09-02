@@ -1,0 +1,31 @@
+get:
+  summary: Get list of PVC names used by DataVolumes in the specified project.
+  description: Returns a list of PVCs that are currently referenced by at least one DataVolume within the specified project scope.
+  operationId: get_used_pvcs_from_datavolumes
+  x-service: datavolumes-service
+  x-test-coverage:
+    - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+  x-internal: true
+  x-authorize:
+    resource-type: pvc-assets
+    action: read
+  tags:
+    - Datavolumes
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ProjectIdRequired.yaml"
+  responses:
+    '200':
+      description: List of PVC names used by DataVolumes in the specified project.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              usedPVCs:
+                type: array
+                items:
+                  type: string
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'

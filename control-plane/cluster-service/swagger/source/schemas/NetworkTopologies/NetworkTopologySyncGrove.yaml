@@ -1,0 +1,19 @@
+type: object
+nullable: true
+description: The linked Grove topology definition. Null if no Grove topology has been linked to this network topology
+required:
+  - name
+properties:
+  name:
+    type: string
+    description: Name of the linked Grove ClusterTopology
+  domains:
+    type: array
+    items:
+      type: string
+    description: List of domains associated with the grove topology
+  conditions:
+    type: array
+    items:
+      $ref: './NetworkTopologySyncGroveCondition.yaml'
+    description: A list of conditions that describe the current state of the Grove ClusterTopology

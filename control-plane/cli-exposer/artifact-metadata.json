@@ -1,0 +1,22 @@
+{
+  "service_name": "cli-exposer",
+  "artifact_type": "container",
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "notifications": {
+    "slack": {
+      "mention": "@viper"
+    }
+  },
+  "make": {
+    "test": {
+      "runs_on": "ubuntu-latest-4-cores"
+    },
+    "build": {
+      "runs_on": "ubuntu-latest-8-cores"
+    }
+  },
+  "jira": {
+    "team_name": "Viper Team"
+  }
+}

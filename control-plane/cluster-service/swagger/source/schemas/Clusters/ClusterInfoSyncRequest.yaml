@@ -1,0 +1,27 @@
+type: object
+required:
+  - domain
+  - version
+properties:
+  domain:
+    type: string
+    description: the cluster domain
+    minLength: 1  # Must have a value
+    maxLength: 253  # DNS domain name limit (RFC 1035)
+  version:
+    type: string
+    description: the cluster version
+    minLength: 1  # Must have a value
+    maxLength: 50  # Supports semantic version + metadata
+  dependencies:
+    nullable: true
+    type: object
+    deprecated: true
+    description: Deprecated. Use status.dependencies instead.
+    allOf:
+      - $ref: './ClusterDependenciesStatus.yaml'
+  status:
+    nullable: true
+    type: object
+    allOf:
+      - $ref: './ClusterReportedStatus.yaml'

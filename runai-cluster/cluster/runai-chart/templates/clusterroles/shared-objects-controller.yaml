@@ -1,0 +1,175 @@
+{{- if .Values.operands.rbac.base.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-shared-objects-controller-project
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - persistentvolumeclaims
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - servicemonitors
+    verbs:
+      - create
+      - patch
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+      - configmaps
+      - persistentvolumeclaims
+    verbs:
+      - create
+      - delete
+      - patch
+      - update
+  - apiGroups:
+      - ""
+    resourceNames:
+      - default
+    resources:
+      - serviceaccounts
+    verbs:
+      - update
+      - create
+---
+
+# Run:AI SharedObjectsController
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-shared-objects-controller
+rules:
+  - apiGroups:
+      - run.ai
+    resources:
+      - datavolumes
+      - datavolumes/status
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - run.ai
+      - scheduling.run.ai
+    resources:
+      - projects
+      - departments
+    verbs:
+      - get
+      - list
+      - watch
+  # kai.resources projects/departments are read when UseKaiOrgUnits is enabled
+  # (temporary dev-period flag). Read-only, same as the legacy projects/departments above.
+  - apiGroups:
+      - kai.resources
+    resources:
+      - projects
+      - departments
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - persistentvolumeclaims
+      - namespaces
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - persistentvolumes
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - create
+      - get
+      - list
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+      - update
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - servicemonitors
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+      - configmaps
+      - persistentvolumeclaims
+      - serviceaccounts
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-shared-objects-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-shared-objects-controller
+subjects:
+  - kind: ServiceAccount
+    name: shared-objects-controller
+    namespace: runai
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: runai-shared-objects-controller-project
+  namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-shared-objects-controller-project
+subjects:
+  - kind: ServiceAccount
+    name: shared-objects-controller
+    namespace: runai
+{{- end }}

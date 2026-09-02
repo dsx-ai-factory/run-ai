@@ -1,0 +1,51 @@
+post:
+  x-authorize:
+    resource-type: notification-settings
+    action: update
+  x-service: notifications-proxy
+  x-audit: true
+  x-test-coverage: not-applicable
+  tags:
+    - Slack
+  operationId: connectSlackWorkspace
+  summary: Connect Slack workspace
+  description: Connect Slack workspace
+  responses:
+    200:
+      description: Slack OAuth redirect URL
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              redirectUrl:
+                type: string
+                format: uri
+                example: "https://slack.com/oauth/v2/authorize?..."
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+delete:
+  x-authorize:
+    resource-type: notification-settings
+    action: delete
+  x-service: notifications-proxy
+  x-audit: true
+  x-test-coverage: not-applicable
+  tags:
+    - Slack
+  operationId: disconnectSlackWorkspace
+  summary: Disconnect Slack workspace
+  description: Disconnect Slack workspace
+  responses:
+    '200':
+      description: Disconnected Slack workspace
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'

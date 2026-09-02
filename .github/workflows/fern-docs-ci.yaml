@@ -1,0 +1,89 @@
+# Validates the Fern docs workspace on PRs that touch docs/ or fern/.
+#
+# Deliberately holds NO secrets, so it runs for fork PRs too. The privileged
+# lanes (preview, publish) live in run-ai/saas-configuration and are reached by
+# cross-repo dispatch — see fern-docs-preview.yaml and publish-fern-docs.yaml.
+#
+# This is NOT wired into branch protection. A paths-filtered pull_request
+# workflow never runs on merge_group events, so it could never be satisfied in
+# the merge queue. The required check remains the Validate Successful Run
+# commit status posted from saas-configuration.
+
+name: Fern Docs CI
+
+on:
+  pull_request:
+    branches: [master, main, "v*.*", "release-*.*"]
+    paths:
+      - 'docs/**'
+      - 'fern/**'
+      - 'tools/check-fern-nav.py'
+      - '.github/workflows/fern-docs-ci.yaml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fern-check:
+    name: Fern Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      # Sparse, filtered checkout: the repo carries ~2.5 GB of history and the
+      # Fern build only needs fern/ + docs/ (~27 MB). Non-cone mode is
+      # deliberate — cone mode always materializes every top-level file.
+      - name: Checkout
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /fern/
+            /docs/
+            /tools/
+
+      # Catches nav entries pointing at files that were moved, renamed, or never
+      # migrated — which `fern check` does not validate (see docs/AGENTS.md:310).
+      #
+      # NON-BLOCKING FOR NOW: docs/reference/cli/runai/** (262 paths) was not
+      # carried over from run-ai/runai-docs during the monorepo migration, so
+      # this currently reports 263 missing. Flip to blocking (drop
+      # continue-on-error) once that gap is closed.
+      - name: Check Fern nav paths resolve
+        continue-on-error: false
+        run: python3 ./tools/check-fern-nav.py fern
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 'lts/*'
+
+      # The version is read from the committed config, but validated as semver
+      # before it reaches npm: `npm install <pkg>@<spec>` also accepts URL specs,
+      # so an unvalidated value from a PR-modified file could install an
+      # arbitrary tarball.
+      - name: Install Fern CLI
+        run: |
+          set -euo pipefail
+          VERSION=$(jq -r .version fern/fern.config.json)
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.]+)?$ ]]; then
+            echo "::error::fern/fern.config.json .version '$VERSION' is not a valid semver"
+            exit 1
+          fi
+          npm install -g --ignore-scripts "fern-api@${VERSION}"
+
+      - name: Fern check
+        working-directory: ./fern
+        run: fern check

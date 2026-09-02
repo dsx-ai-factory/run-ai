@@ -1,0 +1,5 @@
+allOf:
+  - $ref: "../../policy_rules/StringRulesCommon.yaml"
+  - $ref: "./ServingPortExposedProtocolOptions.yaml"
+nullable: true
+type: object

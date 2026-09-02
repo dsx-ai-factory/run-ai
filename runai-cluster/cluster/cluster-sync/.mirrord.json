@@ -1,0 +1,13 @@
+{
+    "target": {
+        "path": {
+            "deployment": "cluster-sync",
+            "container": "cluster-sync"
+        },
+        "namespace": "runai"
+    },
+    "feature": {
+        "env": true,
+        "fs": "read"
+    }
+}

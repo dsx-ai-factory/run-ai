@@ -1,0 +1,33 @@
+type: object
+description: >-
+  A single variation of a field in the breakdown: the spec selectors it appears
+  under, how it is read and written (formatter details or a direct specRef), its
+  data type, and the item-selector queries that apply to it.
+properties:
+  specSelectors:
+    description: The spec selectors under which this variation of the field appears.
+    type: array
+    items:
+      $ref: "./SpecSelectorName.yaml"
+  formatter:
+    $ref: "./BreakdownFormatter.yaml"
+  specRef:
+    description: >-
+      A direct dotted path into the workload spec, used in place of a formatter
+      for simple fields.
+    allOf:
+      - $ref: "./SpecReference.yaml"
+  type:
+    description: The data type of the field.
+    allOf:
+      - $ref: "./MappingFieldType.yaml"
+  itemSelectors:
+    $ref: "./BreakdownItemSelectors.yaml"
+  possibleEnforcements:
+    description: >-
+      The enforcement types that may be applied to this variation of the
+      field. Derived from the field's data type, with `items` added when the
+      field is itemized (has an itemSelector).
+    type: array
+    items:
+      $ref: "./MappingPossibleEnforcement.yaml"

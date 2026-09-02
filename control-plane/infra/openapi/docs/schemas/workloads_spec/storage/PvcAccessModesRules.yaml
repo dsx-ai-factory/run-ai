@@ -1,0 +1,10 @@
+description: Rules for access mode(s) for a newly created PVC.
+properties:
+  readWriteOnce:
+    $ref: "../../policy_rules/BooleanRules.yaml"
+  readOnlyMany:
+    $ref: "../../policy_rules/BooleanRules.yaml"
+  readWriteMany:
+    $ref: "../../policy_rules/BooleanRules.yaml"
+nullable: true
+type: object

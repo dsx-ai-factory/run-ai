@@ -1,0 +1,33 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+nullable: true
+properties:
+  master:
+    $ref: ./ReplicaDefaultsV2.yaml
+  worker:
+    allOf:
+    - $ref: ./ReplicaDefaultsV2.yaml
+    - nullable: true
+      properties:
+        cleanPodPolicy:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/distributed/CleanPodPolicy.yaml
+        distributedFramework:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/distributed/DistributedFramework.yaml
+        maxReplicas:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/distributed/MaxReplicas.yaml
+        minReplicas:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/distributed/MinReplicas.yaml
+        mpiLauncherCreationPolicy:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/distributed/MpiLauncherCreationPolicy.yaml
+        numWorkers:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/distributed/NumWorkers.yaml
+        slotsPerWorker:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/distributed/SlotsPerWorker.yaml
+        sshAuthMountPath:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/distributed/SshAuthMountPath.yaml
+      type: object
+    nullable: true
+    type: object
+type: object

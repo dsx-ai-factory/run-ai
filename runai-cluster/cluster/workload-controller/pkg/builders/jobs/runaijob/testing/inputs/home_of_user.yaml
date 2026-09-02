@@ -1,0 +1,17 @@
+apiVersion: run.ai/v2alpha1
+kind: InteractiveWorkload
+metadata:
+  name: home-of-user
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  createHomeDir:
+    value: true
+  namePrefix:
+    value: testing
+  name:
+    value: testing-0
+  environment:
+    HOME: /my/home
+  image:
+    value: ubuntu

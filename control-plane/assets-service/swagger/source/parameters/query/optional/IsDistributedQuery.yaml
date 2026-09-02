@@ -1,0 +1,7 @@
+name: isDistributed
+in: query
+required: false
+description: Filter results to workload of type distributed.
+schema:
+  type: boolean
+allowReserved: true

@@ -1,0 +1,414 @@
+// https://quasar.dev/style/sass-scss-variables#variables-list
+
+// =============================================================================
+// Foundation color variables (Figma design system)
+// =============================================================================
+
+// Grey scale (Figma design system)
+$grey-0: #ffffff;
+$grey-1: #fafafa;
+$grey-2: #f5f5f5;
+$grey-3: #eeeeee;
+$grey-4: #e0e0e0;
+$grey-5: #bdbdbd;
+$grey-6: #9e9e9e;
+$grey-7: #757575;
+$grey-8: #616161;
+$grey-9: #424242;
+$grey-9-5: #333333;
+$grey-10-5: #f0f0f0;
+$grey-12-5: #c7c7c7;
+$grey-13-5: #939398;
+$grey-13-6: #646464;
+$grey-14: #616161;
+$grey-14-5: #4a4a4a;
+$grey-15: #000000;
+$grey-40: rgba(51, 51, 51, 0.4);
+
+// Light green scale (Figma design system)
+$light-green-1: #f1f8e9;
+$light-green-2: #dcedc8;
+$light-green-3-5: #c3dda8;
+$light-green-4: #aed581;
+$light-green-4-5: #b2d380;
+$light-green-5: #9ccc65;
+$light-green-8: #689f38;
+
+// Red scale (Figma design system)
+$red-1: #ffebee;
+$red-5: #ef5350;
+$red-6: #f44336;
+
+// Green scale (Figma design system)
+$green-1: #e8f5e9;
+$green-6: #4caf50;
+
+// Blue scale (Figma design system)
+$blue-1: #e3f2fd;
+$blue-6: #2196f3;
+
+// Amber scale (Figma design system)
+$amber-1-5: #ffeecc;
+$amber-14: #ffab00;
+
+// Orange scale (Figma design system)
+$orange-6: #ff9800;
+
+// Brand (Figma design system)
+$nvidia-1: #65a800;
+$indigo-14: #304ffe;
+
+// Opacity variants — white (Figma design system)
+$white-0: rgba(255, 255, 255, 0);
+$white-54: rgba(255, 255, 255, 0.54);
+
+// Opacity variants — black (Figma design system)
+$black-60: rgba(0, 0, 0, 0.6);
+
+// Light grey with opacity (Figma design system)
+$light-grey-40: rgba(241, 243, 244, 0.4);
+
+// Decorative / chart colors
+$decorative-1: #2caffe;
+$decorative-2: #fe6a35;
+$decorative-3: #00e272;
+$decorative-4: #544fc5;
+$decorative-5: #91e8e1;
+$decorative-6: #e560ff;
+$decorative-7: #ffb15a;
+$decorative-8: #6b8abc;
+$decorative-9: #00e4ca;
+$decorative-10: #cccccc;
+
+// =============================================================================
+// Existing variables
+// =============================================================================
+
+$runai-orange: #fc774a;
+
+$accent: #9c27b0;
+
+$dark: #1d1d1d;
+$dark-gray: #555555;
+$positive: #616161;
+$negative: #ef5350;
+$info: #2196f3;
+$warning: #ffab00;
+$navy: #00263e;
+
+$success: #4caf50;
+
+// colors
+$white: #ffffff;
+$white-05: rgba(255, 255, 255, 0.05);
+$white-10: rgba(255, 255, 255, 0.1);
+$white-12: rgba(255, 255, 255, 0.12);
+$white-20: rgba(255, 255, 255, 0.2);
+$white-30: rgba(255, 255, 255, 0.3);
+$white-60: rgba(255, 255, 255, 0.6);
+$white-70: rgba(255, 255, 255, 0.7);
+$white-80: rgba(255, 255, 255, 0.8);
+
+$black-10: rgba(0, 0, 0, 0.1);
+$black-12: rgba(0, 0, 0, 0.12);
+$black-15: rgba(0, 0, 0, 0.15);
+$black-20: rgba(0, 0, 0, 0.2);
+$black-25: rgba(0, 0, 0, 0.25);
+$black-30: rgba(0, 0, 0, 0.3);
+$black-35: rgba(0, 0, 0, 0.35);
+$black-40: rgba(0, 0, 0, 0.4);
+$black-45: rgba(0, 0, 0, 0.45);
+$black-54: rgba(0, 0, 0, 0.54);
+$black-87: rgba(0, 0, 0, 0.87);
+$black-default-chart: rgba(51, 51, 51, 1);
+
+$light-turquoise-10: rgba(47, 198, 176, 0.1);
+$light-turquoise-100: rgba(47, 198, 176, 1);
+
+$blue-primary: #0654fe;
+$light-blue-10: rgba(76, 148, 252, 0.1);
+$light-blue-10-2: rgba(33, 150, 243, 0.1);
+$light-blue-100: rgba(76, 148, 252);
+$light-blue-primary-opacity: rgba(6, 84, 254, 0.07);
+$dark-blue-1: rgba(0, 38, 62, 1);
+$soft-blue: rgba(96, 117, 175, 1);
+$light-navy-0: rgba(0, 38, 62, 0);
+$light-navy-70: rgba(0, 38, 62, 0.7);
+
+$yellow-20: rgba(255, 171, 0, 0.2);
+$warning-bg: #ffeecc;
+$lighter-green: #3dd37a;
+
+// Diagram resource icon / search highlight colors (shared across architecture graphs)
+$diagram-workload-icon-bg: #a9def9;
+$diagram-endpoint-icon-bg: #ffc9dc;
+$search-highlight-bg: #fff59d; // Quasar $yellow-3
+
+$light-grey: #fafafa;
+$dark-purple: rgba(93, 81, 121);
+
+$main-font-color: $black-87;
+$section-title-color: #333;
+$body-background-color: #f1f3f4;
+
+$table-selected-background: rgba(6, 84, 254, 0.05); // primary color
+
+$header-height: 60px;
+$sidebar-mini-width: 60px;
+$distributed-gpu-summary-width: 290px;
+
+// runai variables
+$runai-select-card-checkmark-size: 21px;
+$runai-select-card-checkmark-position: 3px;
+$grey-input-color: #e8e8e8;
+
+// chart variables
+$hc-table-caption: #555;
+$hc-table-border: #ebebeb;
+$hc-table-background: #f8f8f8;
+$hc-table-hover: #f1f7ff;
+
+$tree-icon: #9e9e9e;
+
+// side nav
+$side-nav-selected-issue-background: rgba(255, 255, 255, 0.2);
+$runai-table-shadow: 0px 2px 5px -2px $black-15;
+
+// =============================================================================
+// Semantic token CSS custom properties (Figma design system)
+// Naming convention: --b-{category}-{name}
+// =============================================================================
+
+:root {
+  --primary-color: #65a800;
+  --primary-color-rgb: 101, 168, 0;
+  --secondary-color: #65a800;
+  --secondary-color-rgb: 101, 168, 0;
+  --secondary-color-opacity: 0.15;
+  --menu-color: #000000;
+  --menu-separator-color: 255, 255, 255;
+  --menu-separator-opacity: 0.3;
+
+  // --- Text (--b-text-main/sub/label kept for backward compat) ---
+  --b-text-main: #{$black-87};
+  --b-text-sub: #{$black-54};
+  --b-text-label: #{$black-60};
+  --text-tertiary: #{$grey-13-5};
+  --text-inverse: #{$grey-0};
+  --text-inverse-edit: #{$white-54};
+  --text-inverse-disabled: #{$light-green-2};
+  --text-hint: #{$grey-13-6};
+  --text-placeholder: #{$black-60};
+  --text-disabled: #{$black-54};
+  --text-error: #{$red-6};
+  --text-warning: #{$orange-6};
+  --text-success: #{$green-6};
+  --text-brand: #{$nvidia-1};
+  --text-link-default: #{$indigo-14};
+
+  // --- Background ---
+  --bg-primary-default: #{$grey-0};
+  --bg-primary-hover: #{$grey-3};
+  --bg-primary-pressed: #{$light-green-1};
+  --bg-primary-disabled: #{$grey-4};
+  --bg-primary-info: #{$blue-1};
+  --bg-primary-error: #{$red-1};
+  --bg-primary-warning: #{$amber-1-5};
+  --bg-primary-success: #{$green-1};
+  --bg-overlay: #{$grey-40};
+  --bg-secondary: #{$light-grey-40};
+  --b-bg-secondary-default: #{$body-background-color};
+  --bg-subtle: #{$grey-2};
+  --bg-inverse-default: #46465b;
+  --bg-code-surface: #{$grey-9-5};
+
+  // --- Border ---
+  --border-default: #{$grey-5};
+  --border-strong: #{$grey-7};
+  --border-subtle: #{$grey-4};
+  --border-inverse: #{$light-green-5};
+  --border-hover: #{$grey-9};
+  --border-pressed: #{$nvidia-1};
+  --border-error: #{$red-5};
+  --border-warning: #{$amber-14};
+
+  // --- Interactive: Primary ---
+  --interactive-primary-default-bg: #{$nvidia-1};
+  --interactive-primary-default-text: #{$grey-0};
+
+  // --- Interactive: Secondary ---
+  --interactive-secondary-default-bg: #{$white-0};
+  --interactive-secondary-default-text: #{$nvidia-1};
+  --interactive-secondary-default-icon: #{$nvidia-1};
+  --interactive-secondary-default-border: #{$grey-7};
+  --interactive-secondary-hover-bg: #{$white-0};
+  --interactive-secondary-hover-bg-inverse: #{$nvidia-1};
+  --interactive-secondary-hover-text: #{$nvidia-1};
+  --interactive-secondary-hover-icon: #{$nvidia-1};
+  --interactive-secondary-hover-border: #{$grey-4};
+  --interactive-secondary-pressed-bg: #{$grey-4};
+  --interactive-secondary-pressed-border: #{$nvidia-1};
+  --interactive-secondary-pressed-text: #{$nvidia-1};
+  --interactive-secondary-selected-bg: #{$light-green-8};
+  --interactive-secondary-selected-disabled-bg: #{$light-green-4};
+  --interactive-secondary-selected-text: #{$grey-0};
+  --interactive-secondary-disabled-bg: #{$white-0};
+  --interactive-secondary-disabled-border: #{$grey-5};
+  --interactive-secondary-disabled-text: #{$light-green-4-5};
+  --interactive-secondary-disabled-icon: #{$light-green-4-5};
+
+  // --- Interactive: Tertiary ---
+  --interactive-tertiary-default-bg: #{$white-0};
+  --interactive-tertiary-default-text: #{$black-54};
+  --interactive-tertiary-hover-bg: #{$grey-3};
+  --interactive-tertiary-hover-text: #{$black-54};
+  --interactive-tertiary-disabled-bg: #{$white-0};
+  --interactive-tertiary-disabled-text: #{$black-35};
+
+  // --- Interactive: Standard ---
+  --interactive-standard-default-bg: #{$grey-4};
+  --interactive-standard-default-text: #{$black-87};
+  --interactive-standard-hover-bg: #{$grey-5};
+  --interactive-standard-hover-text: #{$black-87};
+  --interactive-standard-disabled-bg: #{$grey-3};
+  --interactive-standard-disabled-text: #{$black-54};
+
+  // --- Interactive: Naked ---
+  --interactive-naked-default-bg: #{$grey-4};
+  --interactive-naked-default-text: #{$black-54};
+  --interactive-naked-hover-bg: #{$grey-5};
+  --interactive-naked-hover-text: #{$black-54};
+
+  // --- Navigation: Primary ---
+  --nav-primary-bg-default: #{$grey-15};
+  --nav-primary-bg-selected: #{$grey-9};
+  --nav-primary-icon-default: #{$grey-5};
+  --nav-primary-icon-selected: #{$grey-1};
+  --nav-primary-text-default: #{$grey-5};
+  --nav-primary-text-selected: #{$grey-1};
+  --nav-primary-button-default: #{$grey-9};
+  --nav-primary-button-hover: #{$grey-6};
+  --nav-primary-button-pressed: #{$grey-5};
+  --nav-primary-breadcrumbs: #{$black-40};
+
+  // --- Navigation: Secondary ---
+  --nav-secondary-bg-default: #{$grey-1};
+  --nav-secondary-bg-selected: #{$light-green-2};
+  --nav-secondary-bg-hover: #{$grey-4};
+  --nav-secondary-icon-default: #{$grey-9};
+  --nav-secondary-icon-selected: #{$grey-9};
+  --nav-secondary-text-default: #{$grey-9};
+  --nav-secondary-text-selected: #{$grey-9};
+
+  // --- Stepper ---
+  --stepper-default-icon: #{$grey-6};
+  --stepper-default-text: #{$grey-6};
+  --stepper-hover-bg: #{$grey-4};
+  --stepper-hover-icon: #{$grey-6};
+  --stepper-hover-text: #{$grey-6};
+  --stepper-selected-icon: #{$light-green-8};
+  --stepper-completed-icon: #{$light-green-8};
+  --stepper-completed-text: #{$grey-14-5};
+  --stepper-disabled-icon: #{$grey-12-5};
+  --stepper-disabled-text: #{$grey-12-5};
+  --stepper-error-icon: #{$red-5};
+  --stepper-error-text: #{$red-5};
+
+  // --- Icon ---
+  --icon-default: #707070;
+  --icon-interactive: #{$grey-8};
+  --icon-tertiary: #{$grey-13-5};
+  --icon-inverse: #{$grey-1};
+  --icon-inverse-disabled: #{$light-green-3-5};
+  --icon-disabled: #{$black-35};
+  --icon-hover: #{$grey-1};
+  --icon-error: #{$red-6};
+  --icon-warning: #{$amber-14};
+  --icon-info: #{$blue-6};
+
+  // --- Feedback ---
+  --feedback-default-bg: #{$grey-14};
+  --feedback-text: #{$grey-0};
+  --feedback-success: #{$green-6};
+  --feedback-warning: #{$amber-14};
+  --feedback-error: #{$red-5};
+  --feedback-info: #{$blue-6};
+
+  // --- Table ---
+  --table-bg: #{$grey-0};
+  --table-hover: #{$grey-2};
+  --table-selected: #{$grey-10-5};
+  --table-disabled: #{$grey-1};
+
+  // --- Border Radius ---
+  --b-border-radius-radius-0: 0px;
+  --b-border-radius-radius-xs: 3px;
+  --b-border-radius-radius-s: 5px;
+  --b-border-radius-radius-m: 10px;
+  --b-border-radius-radius-l: 16px;
+  --b-border-radius-radius-full: 9999px;
+
+  // --- Spacing ---
+  --space-3xs: 3px;
+  --space-2xs: 5px;
+  --space-xs: 7px;
+  --space-s: 10px;
+  --space-m: 16px;
+  --space-l: 20px;
+  --space-xl: 26px;
+  --space-2xl: 40px;
+
+  // --- Shadows ---
+  --shadow-s: -1px 0px 7px 0px rgba(0, 0, 0, 0.15);
+  --shadow-m: 0px 4px 12px 0px rgba(0, 0, 0, 0.2);
+  --shadow-l: 0px 2px 6px 25px rgba(0, 0, 0, 0.26);
+
+  // --- Decorative ---
+  --decorative-dark: #{$grey-15};
+
+  // --- Charts ---
+  --charts-blue: #{$decorative-1};
+  --charts-orange: #{$decorative-2};
+  --charts-lime: #{$decorative-3};
+  --charts-purple: #{$decorative-4};
+  --charts-light-green: #{$decorative-5};
+  --charts-pink: #{$decorative-6};
+  --charts-mustard: #{$decorative-7};
+  --charts-lavender: #{$decorative-8};
+  --charts-cyan: #{$decorative-9};
+  --charts-grey: #{$decorative-10};
+}
+
+// =============================================================================
+// SCSS variable aliases for key semantic tokens
+// =============================================================================
+$b-text-main: var(--b-text-main);
+$b-text-sub: var(--b-text-sub);
+$b-text-label: var(--b-text-label);
+$text-disabled: var(--text-disabled);
+$text-error: var(--text-error);
+$text-brand: var(--text-brand);
+$text-link-default: var(--text-link-default);
+$bg-primary-default: var(--bg-primary-default);
+$bg-primary-hover: var(--bg-primary-hover);
+$bg-overlay: var(--bg-overlay);
+$border-default: var(--border-default);
+$border-subtle: var(--border-subtle);
+$border-error: var(--border-error);
+$icon-default: var(--icon-default);
+$icon-disabled: var(--icon-disabled);
+$feedback-error: var(--feedback-error);
+$feedback-success: var(--feedback-success);
+
+// =============================================================================
+// Quasar theme variables (must use $primary/$secondary after :root defines --primary-color)
+// =============================================================================
+$primary: var(--primary-color);
+$secondary: var(--secondary-color);
+$runai-page-actions-min-height: 62px;
+$option-selected: rgba(var(--primary-color-rgb), 0.1);
+
+//background
+.light-blue-primary-opacity-background {
+  background-color: $light-blue-primary-opacity !important;
+}

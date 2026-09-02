@@ -1,0 +1,79 @@
+{
+  "events": [
+    {
+      "createdAt": "2025-12-15T08:58:39Z",
+      "id": "6b891b05-4548-4c48-a50b-a5b7d5487dce",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "PodSchedulingErrors: Resources were not found for pod runai-team-b/my-workspace-demo-123-0-0 due to: no nodes with enough resources were found: 1 node(s) didn't match Pod's node affinity/selector. \n3 node(s) didn't have enough resources: GPUs.\n",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "15dc8efe-d782-435a-af50-53f06f82002c",
+        "kind": "PodGroup",
+        "name": "pg-my-workspace-demo-123-0-4229a79c-e60f-43be-a713-30a1dd3a71f0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:39Z",
+      "id": "404bdd91-e5dc-4bd1-bfbe-85c88ac48d92",
+      "type": "Warning",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "\n<runai-cluster-control-plane>: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.\n<runai-cluster-system-0-0>: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.\n<runai-cluster-system-0-1>: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.\n<runai-cluster-worker-0-0>: node(s) didn't match Pod's node affinity/selector.\nno nodes with enough resources were found.",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "481e81be-add5-45d3-984f-6c140eb5eff9",
+        "kind": "Pod",
+        "name": "my-workspace-demo-123-0-0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:36Z",
+      "id": "f196f573-25b3-4623-bc89-78a79d777b69",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "Job status is Pending",
+      "reason": "Pending",
+      "source": "status-updater",
+      "involvedObject": {
+        "uid": "15dc8efe-d782-435a-af50-53f06f82002c",
+        "kind": "PodGroup",
+        "name": "pg-my-workspace-demo-123-0-4229a79c-e60f-43be-a713-30a1dd3a71f0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:34Z",
+      "id": "f3252690-6324-4cb3-879e-db1bede73715",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "Created pod: my-workspace-demo-123-0-0",
+      "reason": "SuccessfulCreate",
+      "source": "runaijobcontroller",
+      "involvedObject": {
+        "uid": "4229a79c-e60f-43be-a713-30a1dd3a71f0",
+        "kind": "RunaiJob",
+        "name": "my-workspace-demo-123",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:34Z",
+      "id": "f29ff3a9-cc24-4de6-9600-f3b8b6be1013",
+      "type": "Normal",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "message": "Scheduled for sync",
+      "reason": "Sync",
+      "source": "nginx-ingress-controller",
+      "involvedObject": {
+        "uid": "502cffec-099f-4605-a0cf-af6f50a9b50f",
+        "kind": "Ingress",
+        "name": "iw-my-workspace-demo-123-0",
+        "namespace": "runai-team-b"
+      }
+    }
+  ]
+}

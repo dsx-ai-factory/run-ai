@@ -1,0 +1,8 @@
+in: query
+required: true
+description: The org unit unique identifiers, seperated by ','.
+name: orgUnitIds
+schema:
+  type: string
+  maxLength: 5000
+  example: "7"

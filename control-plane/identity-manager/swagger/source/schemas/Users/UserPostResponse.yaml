@@ -1,0 +1,16 @@
+type: object
+required:
+- id
+- username
+- tempPassword
+properties:
+  id:
+    type: string
+  username:
+    type: string
+  tempPassword:
+    type: string
+example:
+  id: 0eeaf222-e503-4f35-9d9c-c419816272e3
+  username: test@run.ai
+  tempPassword: asdasidjn9d

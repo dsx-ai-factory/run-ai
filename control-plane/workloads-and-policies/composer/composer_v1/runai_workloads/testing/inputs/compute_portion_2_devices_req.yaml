@@ -1,0 +1,5 @@
+image: ubuntu
+compute:
+  gpuPortionRequest: 0.7
+  gpuRequestType: portion
+  gpuDevicesRequest: 2

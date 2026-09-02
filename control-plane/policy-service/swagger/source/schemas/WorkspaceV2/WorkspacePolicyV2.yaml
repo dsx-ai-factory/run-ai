@@ -1,0 +1,11 @@
+properties:
+  meta:
+    $ref: "../Policy/PolicyMeta.yaml"
+  policy:
+    $ref: "./WorkspacePolicyDefaultsAndRulesV2.yaml"
+  effective:
+    $ref: "./WorkspacePolicyDefaultsAndRulesV2.yaml"
+  effectiveUpdatedAt:
+    $ref: "../General/Timestamp.yaml"
+nullable: true
+type: object

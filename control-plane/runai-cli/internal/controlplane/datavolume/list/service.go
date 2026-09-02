@@ -1,0 +1,37 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package list
+
+import (
+	"context"
+	"fmt"
+
+	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client/generated"
+)
+
+const (
+	APIError = "datavolume API call error: %w"
+)
+
+type Service struct {
+	client Lister
+}
+
+type Lister interface {
+	List(ctx context.Context, projectID *string) (*openapi.GetDatavolumes200Response, error)
+}
+
+func NewService(client Lister) *Service {
+	return &Service{client: client}
+}
+
+func (s *Service) List(ctx context.Context, projectID *string) (*Output, error) {
+	list, err := s.client.List(ctx, projectID)
+	if err != nil {
+		return nil, fmt.Errorf(APIError, err)
+	}
+	return ParseListResponse(list)
+}

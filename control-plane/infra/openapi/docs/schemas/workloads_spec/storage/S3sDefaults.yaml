@@ -1,0 +1,7 @@
+properties:
+  attributes:
+    $ref: "./S3Instance.yaml"
+  instances:
+    $ref: "./S3Items.yaml"
+nullable: true
+type: object

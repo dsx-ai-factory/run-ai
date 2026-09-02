@@ -1,0 +1,23 @@
+type: object
+description: A reference to a single field within a workload type's mapping.
+properties:
+  fieldName:
+    description: The name of the field to retrieve the breakdown for.
+    allOf:
+      - $ref: "./MappingFieldName.yaml"
+  specSelector:
+    description: >-
+      The name of the spec selector that exposes the field. Optional; when
+      omitted, the breakdown includes all spec selectors that expose the field.
+    allOf:
+      - $ref: "./SpecSelectorName.yaml"
+    nullable: true
+    type: string
+  itemSelector:
+    description: >-
+      The name of the item selector that applies to the field. Optional; omit
+      for non-itemized fields.
+    type: string
+    nullable: true
+    allOf:
+      - $ref: "./ItemSelectorName.yaml"

@@ -1,0 +1,5 @@
+properties:
+  instances:
+    $ref: "./ItemRules.yaml"
+nullable: true
+type: object

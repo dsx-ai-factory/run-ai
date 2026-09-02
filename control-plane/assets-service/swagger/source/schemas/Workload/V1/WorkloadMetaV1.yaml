@@ -1,0 +1,35 @@
+description: Metadata of the workspace and training.
+required:
+  - id
+  - tenantId
+  - clusterId
+  - projectId
+  - name
+  - workload
+  - currentState
+  - desiredState
+  - createdBy
+  - updatedBy
+properties:
+  id:
+    $ref: "../../../../../../infra/openapi/docs/schemas/workloads/WorkloadId.yaml"
+  tenantId:
+    $ref: "../../../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml"
+  projectId:
+    $ref: "../../General/ProjectIdAsNumber.yaml"
+  clusterId:
+    $ref: "../../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  name:
+    $ref: "../../../../../../infra/openapi/docs/schemas/workloads/WorkloadName.yaml"
+  desiredState:
+    $ref: "./WorkloadState.yaml"
+  currentState:
+    $ref: "./WorkloadState.yaml"
+  createdBy:
+    description: The user who created the workspace or training.
+    type: string
+    minLength: 1
+  updatedBy:
+    description: The recent user who updated the workspace or training.
+    type: string
+    minLength: 1

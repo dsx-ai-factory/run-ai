@@ -1,0 +1,8 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: authorizedUsersOrGroups
+  authorizedUsers:
+    - alice@example.com
+  authorizedGroups:
+    - ml-eng

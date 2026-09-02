@@ -1,0 +1,16 @@
+type: object
+properties:
+  origin:
+    $ref: "../Common/Origin.yaml"
+  issues:
+    $ref: "../Common/Issues.yaml"
+  phase:
+    $ref: "./PvcPhaseOptional.yaml"
+  requestedCapacity:
+    $ref: "./PvcCapacityOptional.yaml"
+  actualCapacity:
+    $ref: "./PvcCapacityOptional.yaml"
+  storageClassName:
+    $ref: "../StorageClassConfiguration/StorageClassNameOptional.yaml"
+  dataSharing:
+    $ref: "./PvcDataSharingOptional.yaml"

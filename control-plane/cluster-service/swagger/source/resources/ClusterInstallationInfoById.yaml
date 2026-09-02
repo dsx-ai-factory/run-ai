@@ -1,0 +1,37 @@
+get:
+  summary: Retrieve the installation instructions of a cluster by ID.
+  description:  |
+    Use to retrieve installation instruction for a cluster by Universally Unique Identifier (UUID). 
+    Supports clusters version 2.15 or above.
+  x-service: cluster-service
+  x-test-coverage:
+    - src/test/suites/advancedSuite/clusterService/clusterServiceApi.test.ts
+    - cluster-service/pkg/services/api_clusters_service_test.go
+  operationId: get_cluster_install_info_by_uuid
+  x-authorize:
+    resource-type: cluster
+    action: create
+    resource-id: clusterUuid
+  tags:
+    - Clusters
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+    - $ref: "../parameters/query/ClusterVersion.yaml"
+    - $ref: "../parameters/query/ClusterRemoteURL.yaml"
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Clusters/ClusterInstallationInfoResponse.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

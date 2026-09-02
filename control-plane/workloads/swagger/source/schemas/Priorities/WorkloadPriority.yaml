@@ -1,0 +1,21 @@
+allOf:
+  - type: object
+  - properties:
+      aggregatedPhase:
+        type: string
+        example: "Ready"
+        description: Combined status of the priority across all clusters
+      status:
+        type: array
+        description: Per-cluster status details
+        items:
+          $ref: "./PriorityStatus.yaml"
+      scopeType:
+        description: The type of scope the workload priority applies to.
+        type: string
+        example: "tenant"
+      scopeId:
+        description: The unique identifier of the scope the workload priority applies to.
+        type: string
+        example: "1"
+  - $ref: "./BasePriority.yaml"

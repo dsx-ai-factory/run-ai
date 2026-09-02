@@ -1,0 +1,3 @@
+{{- if and .Values.telemetryService.enabled (not .Values.isEnterprise) }}
+{{- fail "telemetryService (call-home) is a premium feature; set isEnterprise=true to enable it" }}
+{{- end }}

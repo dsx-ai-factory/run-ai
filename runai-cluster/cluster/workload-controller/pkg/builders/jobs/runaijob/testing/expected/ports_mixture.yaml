@@ -1,0 +1,145 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      template: job-5
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      kai.scheduler/preemptibility: non-preemptible
+      priorityClassName: build
+      project: team-a
+      release: job-5
+      workloadKind: InteractiveWorkload
+      workloadName: job-5
+    name: job-5
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 0
+    completions: 1
+    maxIdleDurationSeconds: 1200
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          user: user.name
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          kai.scheduler/preemptibility: non-preemptible
+          priorityClassName: build
+          project: team-a
+          release: job-5
+          run.ai/top-owner-uid: ""
+          workloadKind: InteractiveWorkload
+          workloadName: job-5
+      spec:
+        containers:
+        - image: zembutsu/docker-sample-nginx
+          imagePullPolicy: IfNotPresent
+          name: job-5
+          ports:
+          - containerPort: 8080
+            name: port-8080
+            protocol: TCP
+          - containerPort: 31081
+            name: port-31081
+            protocol: TCP
+          - containerPort: 8000
+            name: port-8000
+            protocol: TCP
+          - containerPort: 8001
+            name: port-8001
+            protocol: TCP
+          resources: {}
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+        restartPolicy: Never
+        schedulerName: runai-scheduler
+  status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    priorityClassName: build
+    project: team-a
+    release: job-5
+    workloadKind: InteractiveWorkload
+    workloadName: job-5
+  name: iw-job-5-0-clusterip
+  namespace: runai-team-a
+spec:
+  ports:
+  - name: port-job-5-8001-3
+    port: 9001
+    protocol: TCP
+    targetPort: 8001
+  selector:
+    release: job-5
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    priorityClassName: build
+    project: team-a
+    release: job-5
+    workloadKind: InteractiveWorkload
+    workloadName: job-5
+  name: iw-job-5-1-loadbalancer
+  namespace: runai-team-a
+spec:
+  ports:
+  - name: port-job-5-8000-2
+    port: 9000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    release: job-5
+  type: LoadBalancer
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    priorityClassName: build
+    project: team-a
+    release: job-5
+    workloadKind: InteractiveWorkload
+    workloadName: job-5
+  name: iw-job-5-2-nodeport
+  namespace: runai-team-a
+spec:
+  ports:
+  - name: port-job-5-8080-0
+    nodePort: 30080
+    port: 8080
+    targetPort: 8080
+  - name: port-job-5-31081-1
+    port: 31081
+    targetPort: 31081
+  selector:
+    release: job-5
+  type: NodePort
+status:
+  loadBalancer: {}

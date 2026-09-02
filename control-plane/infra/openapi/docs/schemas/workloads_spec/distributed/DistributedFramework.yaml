@@ -1,0 +1,11 @@
+description: |
+  The distributed training framework used in the workload.
+  Note: The TF, XGBoost and JAX frameworks are deprecated and will be removed in a future release.
+type: string
+enum:
+  - MPI
+  - PyTorch
+  - TF
+  - XGBoost
+  - JAX
+nullable: true

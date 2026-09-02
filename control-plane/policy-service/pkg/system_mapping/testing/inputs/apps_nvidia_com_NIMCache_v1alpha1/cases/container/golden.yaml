@@ -1,0 +1,36 @@
+apiVersion: apps.nvidia.com/v1alpha1
+kind: NIMCache
+metadata:
+  name: test
+spec:
+  env:
+  - name: AS_VALUE
+    value: somevalue
+  - name: FROM_CM
+    valueFrom:
+      configMapKeyRef:
+        key: key
+        name: cm
+        optional: false
+  - name: FROM_FIELD
+    valueFrom:
+      fieldRef:
+        apiVersion: v1
+        fieldPath: metadata.name
+  - name: FROM_RESOURCE
+    valueFrom:
+      resourceFieldRef:
+        containerName: test
+        divisor: "1"
+        resource: limits.cpu
+  - name: FROM_SECRET
+    valueFrom:
+      secretKeyRef:
+        key: key
+        name: secret
+        optional: false
+  resources:
+    cpu: "4"
+    memory: 16Gi
+  source: {}
+  storage: {}

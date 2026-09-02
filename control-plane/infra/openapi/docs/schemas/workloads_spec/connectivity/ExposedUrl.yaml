@@ -1,0 +1,45 @@
+description: A URL for accessing the workload.
+properties:
+  container:
+    description: The port that the container running the workload exposes. (mandatory)
+    type: integer
+    format: int32
+    example: 8080
+    nullable: true
+  url:
+    $ref: "./Url.yaml"
+  authorizationType:
+    $ref: "./AuthorizationType.yaml"
+  authorizedUsers:
+    $ref: "./AuthorizedUsers.yaml"
+  authorizedGroups:
+    $ref: "./AuthorizedGroups.yaml"
+  toolType:
+    description: The tool type that runs on this container port.
+    type: string
+    example: jupyter
+    nullable: true
+    pattern: .*
+  toolName:
+    description: A name describing the tool that runs on this url.
+    type: string
+    example: my-pytorch
+    nullable: true
+    pattern: .*
+    ##WAIT_FOR_35331## minLength: 1
+    maxLength: 253
+  name:
+    description: Unique name to identify the instance. primarily used for policy locked rules.
+    type: string
+    minLength: 1
+    maxLength: 253
+    example: url-instance-a
+    nullable: true
+    pattern: .*
+  exclude:
+    description: Use 'true' in case the instance is defined in defaults of the policy, and you wish to exclude it from the workload.
+    type: boolean
+    example: false
+    nullable: true
+nullable: true
+type: object

@@ -1,0 +1,17 @@
+type: object
+required:
+  - nodesForSync
+properties:
+  nodesForSync:
+    type: array
+    items:
+      $ref: './NodeForSync.yaml'
+  from:
+    type: string
+    description: The first node to sync. Will delete all nodes that don't exist in the request, after this node. If empty, all nodes before the first one sent will be deleted.
+    example: worker-node-0
+  to:
+    type: string
+    description: The last node to sync. Will delete all nodes that don't exist in the request, before this node. If empty, all nodes after the last one sent will be deleted.
+    example: worker-node-3
+x-schema-name: NodeSyncRequest

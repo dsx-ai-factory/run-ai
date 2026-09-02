@@ -1,0 +1,27 @@
+type: object
+properties:
+  value:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        nullable: true
+      idpAlias:
+        type: string
+        pattern: ^[a-z0-9_-]*$
+        nullable: true
+        maxLength: 255
+  displayName:
+    type: string
+    description: Human-readable name for this setting
+    readOnly: true
+  description:
+    type: string
+    description: Description of what this setting controls
+    readOnly: true
+example:
+  value:
+    enabled: false
+    idpAlias: oidc
+  displayName: Auto Redirect SSO
+  description: Automatically redirect users to the SSO login page after logging in to the application

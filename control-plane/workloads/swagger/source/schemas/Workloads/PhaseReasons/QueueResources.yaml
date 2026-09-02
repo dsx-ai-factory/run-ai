@@ -1,0 +1,22 @@
+type: object
+x-internal: true
+required:
+  - gpu
+  - cpu
+  - memory
+properties:
+  gpu:
+    type: number
+    format: double
+    description: The number of GPUs (allocated/requested/...).
+    example: 1
+  cpu:
+    type: number
+    format: double
+    description: CPU in Cores (allocated/requested/...).
+    example: 10
+  memory:
+    type: number
+    format: double
+    description: Memory in Bytes (allocated/requested/...).
+    example: 1000000

@@ -1,0 +1,51 @@
+apiVersion: run.ai/v2alpha1
+kind: DistributedWorkload
+metadata:
+  annotations:
+    workloadId: b5efa366-77be-4da3-1234-b59483d02a99
+  name: job-0-20220125-034942
+  namespace: runai-team-a
+  uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+spec:
+  jobType: TFJob
+  allowPrivilegeEscalation:
+    value: false
+  environment:
+    items:
+      ENV_0:
+        value: env0
+      ENV_1:
+        value: env1
+  image:
+    value: ubuntu
+  imagePullPolicy:
+    value: Always
+  runPolicy:
+    values:
+      backoffLimit:
+        value: 5
+  name:
+    value: job-0
+  gpuMemory:
+    value: 120M
+  nodePools:
+    value: mnnvl-node-2 mnnvl-node-1
+  username:
+    value: user.name
+  tolerations:
+    items:
+      tol-a:
+        value:
+          tolerationKey: aaa
+  workers:
+    value: 3
+  runAsNonRoot:
+    value: true
+  seccompProfileType:
+    value: Unconfined
+  podAffinity:
+    value: true
+  podAffinityTopology:
+    value: pod_affinity_topology_value
+  podAffinitySchedulingRule:
+    value: preferredDuringSchedulingIgnoredDuringExecution

@@ -1,0 +1,11 @@
+name: filterBy
+in: query
+required: false
+schema:
+  type: array
+  maxItems: 10
+  items:
+    type: string
+    pattern: "^(name|source|value|phase)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
+  example: ["name!=some-name"]
+explode: false

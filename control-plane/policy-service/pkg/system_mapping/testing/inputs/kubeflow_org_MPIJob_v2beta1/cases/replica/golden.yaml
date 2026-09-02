@@ -1,0 +1,38 @@
+apiVersion: kubeflow.org/v2beta1
+kind: MPIJob
+metadata:
+  name: test
+spec:
+  mpiReplicaSpecs:
+    Launcher:
+      replicas: 2
+      restartPolicy: OnFailure
+      template:
+        metadata:
+          annotations:
+            replica.example.com/role: launcher
+          labels:
+            replica.type: launcher
+        spec:
+          containers:
+          - image: mpioperator/mpi-horovod:2.0
+            name: mpi
+          initContainers:
+          - image: mpioperator/mpi-horovod:2.0
+            name: init
+    Worker:
+      replicas: 3
+      restartPolicy: OnFailure
+      template:
+        metadata:
+          annotations:
+            replica.example.com/role: worker
+          labels:
+            replica.type: worker
+        spec:
+          containers:
+          - image: mpioperator/mpi-horovod:2.0
+            name: mpi
+          initContainers:
+          - image: mpioperator/mpi-horovod:2.0
+            name: init

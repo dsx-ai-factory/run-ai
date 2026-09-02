@@ -1,0 +1,53 @@
+description: |
+  Layer 3 case "workload" for ray.io/RayCluster/v1. SETs workload-level
+  rayClusterSpec FG fields (rayVersion, enableInTreeAutoscaling, managedBy,
+  suspend, autoscalerOptions.*, headServiceAnnotations, gcsFaultToleranceOptions)
+  plus workloadMetadata (labels, annotations on the RayCluster resource itself).
+  Also exercises the three custom rayClusterSpec formatters
+  (autoscalerOptions-UpscalingMode / ImagePullPolicy / Version).
+effectiveRules:
+  # ----- workloadMetadata (RayCluster labels/annotations) -----
+  - field: labels
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "app", value: "ray-test" } }]
+  - field: annotations
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "example.com/annotation", value: "test-value" } }]
+
+  # ----- rayClusterSpec FG scalar fields -----
+  - field: rayVersion
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "2.11.0" } }]
+  - field: enableInTreeAutoscaling
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: true } }]
+  - field: managedBy
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "ray.io/raycluster-controller" } }]
+  - field: suspend
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: false } }]
+
+  # ----- autoscalerOptions builtin scalars -----
+  - field: autoscalerOptions-Image
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "gcr.io/test/autoscaler:v1" } }]
+  - field: autoscalerOptions-IdleTimeoutSeconds
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 60 } }]
+
+  # ----- autoscalerOptions enum-validated (custom formatter) -----
+  - field: autoscalerOptions-UpscalingMode
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: Default } }]
+  - field: autoscalerOptions-ImagePullPolicy
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: IfNotPresent } }]
+  - field: autoscalerOptions-Version
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: v2 } }]
+
+  # ----- headServiceAnnotations (keyValueMap) -----
+  - field: headServiceAnnotations
+    specSelector: workloadSpec
+    enforcements: [{ set: { key: "example.com/head-ann", value: "head-value" } }]

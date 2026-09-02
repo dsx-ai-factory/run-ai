@@ -1,0 +1,15 @@
+version = "1.0.0"
+
+[oss.excluded]
+
+[[oss.excluded.directories]]
+paths = ['runai-cluster/cluster/integration-tests/', 'control-plane/db-mechanic/src/test/']
+comment = 'integration tests'
+
+[[oss.excluded.directories]]
+paths = ['.github/', 'control-plane/infra/']
+comment = 'repo internal tools'
+
+[[oss.excluded.directories]]
+paths = ['control-plane/infra/openapi/build/scripts/']
+comment = 'openapi upload scripts'

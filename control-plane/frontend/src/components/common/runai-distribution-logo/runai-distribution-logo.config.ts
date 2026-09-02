@@ -1,0 +1,59 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+export const DISTRIBUTION_LOGO_PRESETS = {
+  fullPageHeader: {
+    width: "156px",
+    height: "17px",
+    vendorHeight: "20.3px",
+    vendorCanvasTop: "calc(-133.24% + 1px)",
+    productWidth: "52px",
+    productHeight: "15px",
+    ccVendorHeight: "14px",
+    ccProductWidth: "52px",
+    ccProductHeight: "15px",
+    omitCcVendorViewportHeight: true,
+    disableProductOffset: true,
+  },
+  systemPage: {
+    width: "156px",
+    height: "17px",
+    vendorHeight: "20.3px",
+    vendorCanvasHeight: "374.49%",
+    productWidth: "53px",
+    productHeight: "15px",
+    ccVendorHeight: "14px",
+    ccProductWidth: "53px",
+    ccProductHeight: "15px",
+    disableProductOffset: true,
+  },
+  onboardingSidebar: {
+    width: "167px",
+    height: "19px",
+    vendorWidth: "97px",
+    vendorHeight: "20.3px",
+    productWidth: "53px",
+    productHeight: "15px",
+    ccProductHeight: "15px",
+    ccVendorHeight: "14px",
+    gap: "6px",
+    textColor: "white",
+    disableProductOffset: true,
+    omitCcWidth: true,
+  },
+  delegatedOnboarding: {
+    width: "200px",
+    height: "23.4px",
+    vendorWidth: "124px",
+    vendorHeight: "20.3px",
+    productWidth: "63px",
+    productHeight: "15px",
+    ccProductWidth: "63px",
+    ccProductHeight: "15px",
+    ccVendorHeight: "14px",
+    gap: "6px",
+    disableProductOffset: true,
+  },
+} as const;

@@ -1,0 +1,7 @@
+type: string
+nullable: true
+enum:
+  - Nodepool
+  - Project
+  - Department
+  - Cluster

@@ -1,0 +1,18 @@
+suite: cluster-service helm registry validation
+templates:
+  - templates/cluster-service/configmap.yaml
+
+tests:
+  - it: fails when an explicit username has no password placeholder
+    set:
+      fullnameOverride: runai-backend
+      clusterService:
+        enabled: true
+        name: cluster-service
+        config:
+          clusterInstallation:
+            helmRegistryUsername: my-user
+            helmRegistryPasswordPlaceholder: ""
+    asserts:
+      - failedTemplate:
+          errorMessage: "helmRegistryPasswordPlaceholder is required when helmRegistryUsername is set"

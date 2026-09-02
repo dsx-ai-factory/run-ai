@@ -1,0 +1,9 @@
+x-enum-internal:
+  - app_token
+enum:
+  - client_credentials
+  - refresh_token
+  - exchange_token
+  - password
+  - external_token_exchange
+  - app_token

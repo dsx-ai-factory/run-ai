@@ -1,0 +1,6 @@
+description: Probes are used to determine if the container is healthy and ready to accept traffic.
+type: object
+properties:
+  readiness:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/container/Probe.yaml"
+nullable: true

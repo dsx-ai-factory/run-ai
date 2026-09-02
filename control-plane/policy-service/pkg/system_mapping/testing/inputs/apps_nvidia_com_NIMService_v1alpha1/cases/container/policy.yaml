@@ -1,0 +1,89 @@
+description: |
+  Layer 3 case "container" for apps.nvidia.com/NIMService/v1alpha1. SETs every
+  field reachable through the nimServiceContainer field group — image
+  (repository/tag/pullPolicy/pullSecrets), command/args, env (reused
+  runai-podSpec formatters), and resources (corev1.ResourceRequirements shape
+  so we can reuse runai-podSpec's resource* formatters).
+
+  Custom formatters used here:
+    * image-PullPolicy uses runai-nimServiceSpec (enum-enforced).
+    * environmentVariables-* use runai-podSpec (reused).
+    * resourceRequests, resourceLimits, resourceClaims use runai-podSpec
+      (reused — one rule per entry, merged by key/name).
+
+  Read together with cases/container/golden.yaml.
+effectiveRules:
+  # ----- image -----
+  - field: image-Repository
+    specSelector: allContainers
+    enforcements: [{ set: { value: "nvcr.io/nim/llm" } }]
+  - field: image-Tag
+    specSelector: allContainers
+    enforcements: [{ set: { value: "1.0.0" } }]
+  - field: image-PullPolicy
+    specSelector: allContainers
+    enforcements: [{ set: { value: IfNotPresent } }]
+  - field: image-PullSecrets
+    specSelector: allContainers
+    enforcements: [{ set: { value: ["my-pull-secret"] } }]
+
+  # ----- command / args -----
+  - field: command
+    specSelector: allContainers
+    enforcements: [{ set: { value: ["/opt/nim/start.sh"] } }]
+  - field: args
+    specSelector: allContainers
+    enforcements: [{ set: { value: ["--config=/etc/nim/config.yaml"] } }]
+
+  # ----- env (runai-podSpec, reused) -----
+  - field: environmentVariables-AsValue
+    specSelector: allContainers
+    enforcements: [{ set: { name: AS_VALUE, value: somevalue } }]
+  - field: environmentVariables-FromConfigMap
+    specSelector: allContainers
+    enforcements:
+      - set:
+          name: FROM_CM
+          configMapName: cm
+          key: key
+          optional: false
+  - field: environmentVariables-FromField
+    specSelector: allContainers
+    enforcements:
+      - set:
+          name: FROM_FIELD
+          apiVersion: v1
+          fieldPath: metadata.name
+  - field: environmentVariables-FromResource
+    specSelector: allContainers
+    enforcements:
+      - set:
+          name: FROM_RESOURCE
+          containerName: test
+          divisor: "1"
+          resource: limits.cpu
+  - field: environmentVariables-FromSecret
+    specSelector: allContainers
+    enforcements:
+      - set:
+          name: FROM_SECRET
+          secretName: secret
+          key: key
+          optional: false
+
+  # ----- resources (runai-podSpec, reused; shape is corev1.ResourceRequirements) -----
+  - field: resourceRequests
+    specSelector: allContainers
+    enforcements: [{ set: { key: cpu, value: "1" } }]
+  - field: resourceRequests
+    specSelector: allContainers
+    enforcements: [{ set: { key: memory, value: "4Gi" } }]
+  - field: resourceLimits
+    specSelector: allContainers
+    enforcements: [{ set: { key: cpu, value: "2" } }]
+  - field: resourceLimits
+    specSelector: allContainers
+    enforcements: [{ set: { key: memory, value: "8Gi" } }]
+  - field: resourceClaims
+    specSelector: allContainers
+    enforcements: [{ set: { name: myclaim, request: shared-request } }]

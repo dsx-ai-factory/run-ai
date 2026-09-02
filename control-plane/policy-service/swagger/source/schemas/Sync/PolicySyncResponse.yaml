@@ -1,0 +1,48 @@
+properties:
+  requestInfo:
+    properties:
+      after:
+        type: integer
+        format: int64
+        description: after parameter as requested by the agent
+  responseInfo:
+    properties:
+      lowestUpdate:
+        type: integer
+        format: int64
+        description: lowest update count included in this bulk. zero if the bulk is empty.
+      highestUpdate:
+        type: integer
+        format: int64
+        description: highest update count included in this bulk. zero if the bulk is empty.
+  systemInfo:
+    properties:
+      highestUpdate:
+        type: integer
+        format: int64
+        description: the highest update count in the system.
+      updatesPerBulk:
+        type: integer
+        description: number of policy updates the system is configured to include in every bulk.
+  policies:
+    type: array
+    items:
+      required:
+        - meta
+        - updatedCounter
+      properties:
+        meta:
+          $ref: "../Policy/PolicyCreationFields.yaml"
+        effective:
+          $ref: "../Policy/SupersetPolicy.yaml"
+        distributed:
+          $ref: "../DistributedV2/DistributedPolicyDefaultsAndRulesV2.yaml"
+        isDeleted:
+          type: boolean
+          nullable: true
+        updateCounter:
+          description: number which uniquely identifies each update.
+          type: integer
+          format: int64
+nullable: true
+type: object

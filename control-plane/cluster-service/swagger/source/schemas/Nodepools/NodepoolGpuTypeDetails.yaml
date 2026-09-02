@@ -1,0 +1,24 @@
+type: object
+x-internal: true
+required:
+  - type
+  - totalDevices
+properties:
+  type:
+    type: string
+    description: The GPU model, as reported by the GPU vendor labels on the node pool's nodes.
+    example: NVIDIA-H100-80GB-HBM3
+  gpuMemoryBytes:
+    type: integer
+    format: int64
+    minimum: 0
+    description: >-
+      Memory of a single GPU device of this type, in bytes. Omitted when the node pool's
+      nodes do not report GPU memory.
+    example: 85899345920
+  totalDevices:
+    type: integer
+    minimum: 0
+    description: Total number of GPU devices of this type across the node pool's nodes.
+    example: 16
+x-schema-name: NodepoolGpuTypeDetails

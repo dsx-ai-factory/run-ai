@@ -1,0 +1,4 @@
+{
+  "service_name": "cluster-service-client",
+  "artifact_type": "go"
+}

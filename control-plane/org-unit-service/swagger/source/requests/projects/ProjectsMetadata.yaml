@@ -1,0 +1,45 @@
+get:
+  summary: Get projects metadata
+  operationId: get_projects_metadata
+  x-service: org-unit-service
+  description: List projects metadata
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/project_api_test.go
+  x-authorize:
+    resource-type: project
+    action: read
+  tags:
+    - Projects
+  parameters:
+    - $ref: "../../parameters/ProjectsMetadataFilterBy.yaml"
+    - $ref: "../../parameters/ProjectsMetadataSortBy.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/Search.yaml'
+  responses:
+    200:
+      description: ok
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - projects
+            properties:
+              projects:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "../../schemas/projects/ProjectMetadata.yaml"
+              next:
+                type: integer
+                example: 1
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

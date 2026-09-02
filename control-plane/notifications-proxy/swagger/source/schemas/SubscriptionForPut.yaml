@@ -1,0 +1,21 @@
+
+type: object
+required:
+  - events
+  - channels
+properties:
+  events:
+    $ref: './SubscriptionEvents.yaml'
+  channels:
+    type: array
+    items:
+      type: string
+    minItems: 0
+    maxItems: 100
+example:
+  events:
+    - category: cat1
+      types: [type1, type2]
+    - category: cat2
+      types: [type3, type4]
+  channels: [email, email1]

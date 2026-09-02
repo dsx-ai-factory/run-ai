@@ -1,0 +1,9 @@
+type: object
+description: project id
+required:
+  - id
+properties:
+  id:
+    type: string
+    example: 33
+    minLength: 1

@@ -1,0 +1,1793 @@
+apiVersion: run.ai/v1
+kind: RunaiConfig
+metadata:
+  creationTimestamp: null
+  namespace: runai
+  name: runai
+spec:
+  __internal:
+    global:
+      customCA:
+        configMap:
+          key: runai-ca.pem
+          name: runai-ca
+          optional: true
+        enabled: false
+  accessrule-controller:
+    args: {}
+    enabled: true
+    image:
+      env: prod
+      name: accessrule-controller
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    resources:
+      limits:
+        cpu: 100m
+        memory: 512Mi
+      requests:
+        cpu: 50m
+        memory: 256Mi
+    service:
+      webhook:
+        port: 443
+        targetPort: 8443
+  admission-controller:
+    args:
+      runaiMpsDirectoryHostPath: /tmp/runai-mps/
+      runaiSharedDirectoryHostPath: /var/lib/runai/shared
+    enabled: true
+    image:
+      env: prod
+      name: admission-controller
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    replicas: 1
+    resources:
+      limits:
+        cpu: "1"
+        memory: 512Mi
+      requests:
+        cpu: 500m
+        memory: 256Mi
+    server:
+      readTimeout: 10
+      writeTimeout: 10
+  agent:
+    accessRulesLimit: 400
+    apiVersion: v1
+    clientId: <nil>
+    clientName: <nil>
+    clientSecret: <nil>
+    enabled: true
+    endpoint: https://app.run.ai.
+    image:
+      env: prod
+      name: agent
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    k8sClientConfig:
+      burst: 300
+      qps: 50
+    metrics:
+      port: 9400
+      portName: metrics
+    rejectUnauthorized: true
+    resources:
+      limits:
+        cpu: 700m
+        memory: 2Gi
+      requests:
+        cpu: 350m
+        memory: 1Gi
+    syncIntervalMillis: 10000
+    useDebugLogLevel: false
+  assets-sync:
+    SSLCertificateVerification: true
+    debugLogLevel: 0
+    enabled: true
+    endpoint: https://app.run.ai.
+    image:
+      env: prod
+      name: assets-sync
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    resources:
+      limits:
+        cpu: 700m
+        memory: 2Gi
+      requests:
+        cpu: 350m
+        memory: 1Gi
+    syncAllEveryXMinutes: 1
+    syncChangesEveryXSeconds: 20
+  binder:
+    args:
+      runaiMpsDirectoryHostPath: /tmp/runai-mps/
+      runaiSharedDirectoryHostPath: /var/lib/runai/shared
+      verbosity: 0
+    enableWebhook: true
+    enabled: true
+    image:
+      env: prod
+      name: binder
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    resources:
+      limits:
+        cpu: 100m
+        memory: 512Mi
+      requests:
+        cpu: 50m
+        memory: 256Mi
+    service:
+      metrics:
+        port: 8080
+        targetPort: 8080
+      type: ClusterIP
+      webhook:
+        port: 443
+        probePort: 8081
+        targetPort: 9443
+  cluster-sync:
+    SSLCertificateVerification: true
+    enabled: true
+    endpoint: https://app.run.ai.
+    existingSecretToSyncLabel: run.ai/resource
+    image:
+      env: prod
+      name: cluster-sync
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    k8sClientConfig:
+      burst: 300
+      qps: 50
+    livenessIntervalSeconds: 10
+    logLevel: 0
+    maxNumOfEventsPerRequest: 1000
+    maxNumOfPodGroupsPerRequest: 900
+    maxNumOfPodsPerRequest: 1800
+    maxNumOfWorkloadsPerRequest: 1000
+    maxNumberOfRetries: 10
+    metrics:
+      port: 9400
+      portName: metrics
+    nvidiaGPULabel: feature.node.kubernetes.io/pci-10de.present
+    profiling:
+      apiPort: "8182"
+      enabled: false
+    resources:
+      limits:
+        cpu: 1500m
+        memory: 2Gi
+      requests:
+        cpu: 750m
+        memory: 1Gi
+    retriesIntervalSeconds: 10
+    syncEventsIntervalSeconds: 10
+    syncIntervalMinutes: 180
+    useDeprecatedWorkloadsApi: true
+    useNewWorkloadsApi: true
+  engine:
+    config:
+      namespace: runai-engine
+    enabled: true
+  external-workload-integrator:
+    enabled: true
+    image:
+      env: prod
+      name: external-workload-integrator
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    k8sClientConfig:
+      burst: 300
+      qps: 50
+    resources:
+      limits:
+        cpu: 200m
+        memory: 1Gi
+      requests:
+        cpu: 100m
+        memory: 512Mi
+    useDebugLogLevel: false
+  global:
+    certMangerIssuerEmail: support@run.ai
+    controlPlanePoliciesEnabled: false
+    core:
+      analytics: {}
+      debug:
+        file: /runai/logs/core.log
+        hostPath: /var/lib/runai/logs
+        level: DEBUG
+      dynamicFraction: {}
+      metrics:
+        enabled: true
+      timeSlicing: {}
+    db: {}
+    enableWorkloadOwnershipProtection: false
+    httpProxy:
+      configMapName: http-proxy-crt
+      proxyUrl: http://proxy-url:port
+    idleGpuInactiveDuration: 300000
+    ingress:
+      ingressClass: nginx
+    kubevirtCluster: {}
+    labeluser:
+      enabled: true
+    nodeAffinity:
+      nfdGpuLabel: nvidia.com/gpu.present
+    nvidiaDcgmExporter:
+      installedFromGpuOperator: true
+      namespace: gpu-operator
+      serviceMonitor:
+        enabled: true
+    overProvisioning:
+      route: {}
+      swap: {}
+    prometheusService:
+      address: http://prometheus-operated.runai.svc:9090
+    runtime: docker
+    scheduleWorkflowPods:
+      enabled: true
+    schedulingServices: {}
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      runAsNonRoot: true
+      runAsUser: 10000
+      seccompProfile:
+        type: RuntimeDefault
+    syncServices: {}
+    useCertManager: false
+    version: set-by-ldflags
+    workloadServices: {}
+  grafanaLab: {}
+  init-ca:
+    deleteSucceededHook: true
+    enabled: true
+    image:
+      env: prod
+      name: init-ca-base
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    resources:
+      limits:
+        cpu: 400m
+        memory: 512Mi
+      requests:
+        cpu: 200m
+        memory: 256Mi
+  job-controller:
+    args:
+      verbosity: 4
+    enabled: true
+    image:
+      env: prod
+      name: runaijob-controller
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    resources:
+      limits:
+        cpu: "1"
+        memory: 512Mi
+      requests:
+        cpu: 500m
+        memory: 256Mi
+  limitRange:
+    cpuDefaultRequestCpuLimitFactorNoGpu: 0.1
+    cpuDefaultRequestGpuFactor: 100m
+    memoryDefaultRequestGpuFactor: 100Mi
+    memoryDefaultRequestMemoryLimitFactorNoGpu: 0.1
+  metrics-exporter:
+    enabled: true
+    image:
+      env: prod
+      name: metrics-exporter
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    resources:
+      limits:
+        cpu: 100m
+        memory: 512Mi
+      requests:
+        cpu: 50m
+        memory: 256Mi
+    service:
+      port: 8080
+      targetPort: 8080
+      type: ClusterIP
+  mig-parted:
+    enabled: true
+    image:
+      env: prod
+      name: mig-parted
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+  mps-server:
+    image: registry.access.redhat.com/ubi8/ubi-minimal:8.9
+    runAIMPSDirectoryHostPath: /tmp/runai-mps/
+  node-scale-adjuster:
+    enabled: false
+    image:
+      env: prod
+      name: node-scale-adjuster
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    resources:
+      limits:
+        cpu: 100m
+        memory: 512Mi
+      requests:
+        cpu: 50m
+        memory: 256Mi
+  nodepool-controller:
+    args: {}
+    enabled: true
+    image:
+      env: prod
+      name: nodepool-controller
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    resources:
+      limits:
+        cpu: 700m
+        memory: 2Gi
+      requests:
+        cpu: 350m
+        memory: 1Gi
+    service:
+      port: 8080
+      targetPort: 8080
+      type: ClusterIP
+  pod-group-assigner:
+    args: {}
+    enabled: true
+    image:
+      env: prod
+      name: pod-group-assigner
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    k8sClientConfig:
+      burst: 300
+      qps: 50
+    resources:
+      limits:
+        cpu: 300m
+        memory: 512Mi
+      requests:
+        cpu: 150m
+        memory: 256Mi
+    service:
+      webhook:
+        port: 443
+        targetPort: 8443
+  pod-grouper:
+    args:
+      allowNonSupportedTypes: false
+      verbosity: 0
+    enabled: true
+    image:
+      env: prod
+      name: pod-grouper
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    resources:
+      limits:
+        cpu: 300m
+        memory: 512Mi
+      requests:
+        cpu: 150m
+        memory: 256Mi
+    service:
+      metrics:
+        port: 8080
+        targetPort: 8080
+      type: ClusterIP
+      webhook:
+        port: 9443
+        targetPort: 9443
+  project-controller:
+    args:
+      verbosity: 0
+    clusterWidePvc: true
+    clusterWideSecret: true
+    createNamespaces: true
+    createRoleBindings: true
+    createServiceMonitors: true
+    enabled: true
+    image:
+      env: prod
+      name: project-controller
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    k8sClientConfig:
+      burst: 300
+      qps: 50
+    limitRange: false
+    profiling:
+      apiPort: "8182"
+      enabled: false
+    resources:
+      limits:
+        cpu: 300m
+        memory: 512Mi
+      requests:
+        cpu: 150m
+        memory: 256Mi
+    service:
+      metrics:
+        port: 8080
+        targetPort: 8080
+      type: ClusterIP
+      webhook:
+        port: 9443
+        targetPort: 9443
+  prometheus:
+    agentPullPushRateMinForAlert: 0.05
+    config:
+      advancedMetricsEnabled: false
+    enabled: true
+    ruleGroups:
+      - name: scheduler-metrics-reduction
+        rules:
+          - expr: topk by(pod_uuid) (1,runai_pod_info)
+            record: runai_pod_info_unique
+          - expr: topk by(pod_group_uuid) (1,runai_pod_group_info)
+            record: runai_pod_group_info_unique
+          - expr: topk by(pod_uuid) (1,runai_scheduler_allocated_gpus_per_pod)
+            record: runai_scheduler_allocated_gpus_per_pod_unique
+          - expr: topk by(pod_uuid) (1,runai_scheduler_allocated_millicpus_per_pod)
+            record: runai_scheduler_allocated_millicpus_per_pod_unique
+          - expr: topk by(pod_uuid) (1,runai_scheduler_allocated_memory_per_pod)
+            record: runai_scheduler_allocated_memory_per_pod_unique
+          - expr: topk by(pod_group_uuid) (1,runai_allocated_gpus)
+            record: runai_allocated_gpus_unique
+          - expr: topk by(pod_uuid,phase) (1,runai_pod_phase)
+            record: runai_pod_phase_unique
+          - expr: topk by(pod_group_uuid,phase) (1,runai_pod_group_phase)
+            record: runai_pod_group_phase_unique
+      - name: new-gen-rules
+        rules:
+          - expr: sum by(node, nodepool, modelName, ready, schedulable) (kube_node_info
+              * on(node) group_left(nodepool) (runai_node_nodepool==1 or on(node) kube_node_info))
+              * on(node) group_left(modelName) (group(runai_dcgm_gpu_total_mebibytes)
+              by(node, modelName) or on(node) kube_node_info) * on(node) group_left(ready)
+              (group(label_replace(kube_node_status_condition{condition="Ready"}, "ready",
+              "$1", "status", "(.*)")==1) by(node, ready)) * on(node) group_left(schedulable)
+              (group(label_replace(kube_node_spec_unschedulable == 0, "schedulable", "true",
+              "schedulable", "(.*)") or on(node) label_replace(kube_node_spec_unschedulable
+              == 1, "schedulable", "false", "schedulable", "(.*)")) by(node,schedulable))
+            record: runai_node_info_enriched
+          - expr: runai_pod_info_unique * on (node) group_left(modelName) runai_node_info_enriched
+              or on(pod_uuid) runai_pod_info_unique
+            record: runai_pod_info_enriched
+          - expr: (runai_pod_info_enriched * on(job_uuid, nodepool) group_left() topk(1,
+              group(runai_pod_info_enriched) by(nodepool, job_uuid)) by(job_uuid))
+            record: runai_pod_info_enriched_nodepool_unique
+          - expr: group(runai_pod_info_enriched_nodepool_unique) by(job_uuid, job_name,
+              job_type, project, department, workload_name, workload_type, workload_id,
+              user, nodepool, queue_name, is_gpu, detailed_status) * on(job_uuid) group_left(user,
+              is_gpu, detailed_status) group(runai_pod_group_info_unique) by (user, job_uuid,
+              is_gpu, detailed_status)
+            record: runai_workload_info_enriched
+          - expr: sum by (node, nodepool, modelName, ready, schedulable) ((count by (node)
+              (runai_gpu_memory_total_mebibytes_per_gpu) or on(node) kube_node_info*0)
+              * on(node) group_right() runai_node_info_enriched)
+            record: runai_gpu_count_per_node
+          - expr: sum(runai_gpu_count_per_node) by (nodepool)
+            record: runai_total_gpus_per_nodepool
+          - expr: sum(runai_gpu_count_per_node) by (nodepool)
+            record: runai_gpu_count_per_nodepool
+          - expr: sum(runai_gpu_count_per_node{ready="true",schedulable="true"}) by (nodepool)
+            record: runai_ready_gpu_count_per_nodepool
+          - expr: sum(runai_gpu_count_per_nodepool)
+            record: runai_gpu_count_per_cluster
+          - expr: sum(runai_ready_gpu_count_per_nodepool)
+            record: runai_ready_gpu_count_per_cluster
+          - expr: count(runai_gpu_count_per_node>0) by (nodepool)
+            record: runai_gpu_nodes_count_per_nodepool
+          - expr: count(runai_gpu_count_per_node{ready="true",schedulable="true"}>0) by
+              (nodepool)
+            record: runai_ready_gpu_nodes_count_per_nodepool
+          - expr: sum(runai_gpu_nodes_count_per_nodepool)
+            record: runai_gpu_nodes_count_per_cluster
+          - expr: sum(runai_ready_gpu_nodes_count_per_nodepool)
+            record: runai_ready_gpu_nodes_count_per_cluster
+          - expr: sum(runai_requested_gpus) by(job_uuid) * on(job_uuid) group_right()
+              runai_workload_info_enriched{detailed_status="Pending"}
+            record: runai_pending_requested_gpu_count_per_workload
+          - expr: sum(runai_pending_requested_gpu_count_per_workload) by (queue_name,
+              project, department, nodepool)
+            record: runai_pending_requested_gpu_count_per_queue
+          - expr: sum(runai_pending_requested_gpu_count_per_queue) by (nodepool)
+            record: runai_pending_requested_gpu_count_per_nodepool
+          - expr: sum(runai_pending_requested_gpu_count_per_nodepool)
+            record: runai_pending_requested_gpu_count_per_cluster
+          - expr: sum by(gpu, modelName, service, job_name, job_type, job_uuid, node,
+              nodepool, pod_name, pod_uuid, pod_namespace, project, department, pod_group_uuid,
+              queue_name, workload_name, workload_type, workload_id) (runai_scheduler_allocated_gpus_per_pod_unique)
+              * on (pod_uuid) group_right() runai_pod_info_enriched_nodepool_unique
+            record: runai_allocated_gpu_count_per_pod
+          - expr: sum(runai_allocated_gpu_count_per_pod) by (job_uuid, job_name, job_type,
+              project, department, workload_name, workload_type, workload_id, user, nodepool,
+              queue_name, is_gpu, detailed_status) * on(job_uuid) group_left(user, is_gpu,
+              detailed_status) runai_workload_info_enriched
+            record: runai_allocated_gpu_count_per_workload
+          - expr: sum(runai_allocated_gpu_count_per_workload>0) by (workload_type, queue_name,
+              project, department, nodepool)
+            record: runai_allocated_gpu_count_per_queue_per_workload_type
+          - expr: sum(runai_allocated_gpu_count_per_workload) by (queue_name, project,
+              department, nodepool) or on(queue_name) group(runai_queue_info) by(queue_name,
+              project, department, nodepool)*0
+            record: runai_allocated_gpu_count_per_queue
+          - expr: sum(runai_allocated_gpu_count_per_pod) by (project, department, nodepool)
+              or on(project) (group(label_replace(runai_queue_info{project!=""}, "department",
+              "$1", "department_name", "(.*)")) by(project, department)*0)
+            record: runai_allocated_gpu_count_per_project_nodepool
+          - expr: sum(runai_allocated_gpu_count_per_queue_per_workload_type) by (workload_type,
+              project, department)
+            record: runai_allocated_gpu_count_per_project_per_workload_type
+          - expr: sum(runai_allocated_gpu_count_per_queue) by (project, department)
+            record: runai_allocated_gpu_count_per_project
+          - expr: sum(runai_allocated_gpu_count_per_queue) by (department)
+            record: runai_allocated_gpu_count_per_department
+          - expr: sum(((sum(runai_allocated_gpu_count_per_pod{gpu!=""}) by(gpu, node)
+              or count(runai_gpu_memory_used_mebibytes_per_pod_per_gpu) by(node, gpu))
+              * on(gpu, node) group_right() group(runai_dcgm_gpu_total_mebibytes*0+1)
+              by(UUID, gpu, node, nodepool, modelName)) or on(UUID) runai_dcgm_gpu_total_mebibytes*0)
+              by(UUID, gpu, node, nodepool, modelName)
+            record: runai_allocated_gpu_count_per_gpu
+          - expr: ((sum by (node) (runai_allocated_gpu_count_per_pod>0)) * on (node) group_right()
+              runai_node_info_enriched) or on(node) runai_node_info_enriched*0
+            record: runai_allocated_gpu_count_per_node
+          - expr: sum(runai_allocated_gpu_count_per_node) by (nodepool)
+            record: runai_allocated_gpu_count_per_nodepool
+          - expr: sum(runai_allocated_gpu_count_per_nodepool)
+            record: runai_allocated_gpu_count_per_cluster
+          - expr: 100*(runai_allocated_gpu_count_per_node / runai_gpu_count_per_node>0)
+            record: runai_gpu_allocation_percentage_per_node
+          - expr: 100*(runai_allocated_gpu_count_per_nodepool / runai_gpu_count_per_nodepool>0)
+            record: runai_gpu_allocation_percentage_per_nodepool
+          - expr: 100*(runai_allocated_gpu_count_per_cluster / runai_gpu_count_per_cluster>0)
+            record: runai_gpu_allocation_percentage_per_cluster
+          - expr: sum by(queue_name, project, department, nodepool) (runai_queue_deserved_gpus)
+            record: runai_deserved_gpu_count_per_queue
+          - expr: min(runai_deserved_gpu_count_per_queue{project!=""}<0) by(project, department)
+              or on(project) sum(runai_deserved_gpu_count_per_queue{project!=""}>=0) by(project,
+              department)
+            record: runai_deserved_gpu_count_per_project
+          - expr: min(runai_deserved_gpu_count_per_queue{project=""}<0) by(department)
+              or on(department) sum(runai_deserved_gpu_count_per_queue{project=""}>=0)
+              by(department)
+            record: runai_deserved_gpu_count_per_department
+          - expr: sum by(UUID, gpu, node, nodepool, modelName) (label_replace(runai_gpu_oomkill_burst_count,
+              "pod_ip", "$1", "instance", "(.*):(.*)") * on (pod_ip) group_left(node)
+              topk(1, kube_pod_info{pod_ip!=""}) by (pod_ip) * on (node) group_left(nodepool,
+              modelName) runai_node_info_enriched)
+            record: runai_gpu_oomkill_burst_count_per_gpu
+          - expr: sum by(node, nodepool, modelName, ready, schedulable) (runai_gpu_oomkill_burst_count_per_gpu)
+            record: runai_gpu_oomkill_burst_count_per_node
+          - expr: sum by(nodepool) (runai_gpu_oomkill_burst_count_per_node)
+            record: runai_gpu_oomkill_burst_count_per_nodepool
+          - expr: sum by(UUID, gpu, node, nodepool, modelName) (label_replace(runai_gpu_oomkill_idle_count,
+              "pod_ip", "$1", "instance", "(.*):(.*)") * on (pod_ip) group_left(node)
+              topk(1, kube_pod_info{pod_ip!=""}) by (pod_ip) * on (node) group_left(nodepool,
+              modelName) runai_node_info_enriched)
+            record: runai_gpu_oomkill_idle_count_per_gpu
+          - expr: sum by(node, nodepool, modelName, ready, schedulable) (runai_gpu_oomkill_idle_count_per_gpu)
+            record: runai_gpu_oomkill_idle_count_per_node
+          - expr: sum by(nodepool) (runai_gpu_oomkill_idle_count_per_node)
+            record: runai_gpu_oomkill_idle_count_per_nodepool
+          - expr: sum by(UUID, gpu, node, nodepool, modelName) (label_replace(runai_gpu_oomkill_priority_count,
+              "pod_ip", "$1", "instance", "(.*):(.*)") * on (pod_ip) group_left(node)
+              topk(1, kube_pod_info{pod_ip!=""}) by (pod_ip) * on (node) group_left(nodepool,
+              modelName) runai_node_info_enriched)
+            record: runai_gpu_oomkill_priority_count_per_gpu
+          - expr: sum by(node, nodepool, modelName, ready, schedulable) (runai_gpu_oomkill_priority_count_per_gpu)
+            record: runai_gpu_oomkill_priority_count_per_node
+          - expr: sum by(nodepool) (runai_gpu_oomkill_priority_count_per_node)
+            record: runai_gpu_oomkill_priority_count_per_nodepool
+          - expr: "label_replace(label_replace(label_replace(label_replace(DCGM_FI_DEV_GPU_UTIL
+          or ceil(DCGM_FI_PROF_GR_ENGINE_ACTIVE{GPU_I_ID!=\"\"}*100), \"pod_ip\",
+          \"$1\", \"instance\", \"(.*):(.*)\"), \"pod_name\", \"$1\", \"exported_pod\",
+          \"(.+)\"), \"pod_namespace\", \"$1\", \"exported_namespace\", \"(.+)\"),
+          \"gpu_instance_id\",\n\t\"$1\", \"GPU_I_ID\", \"(.+)\") * on (pod_ip) group_left(node)
+          kube_pod_info{created_by_name=~\".*dcgm-exporter\", pod_ip!=\"\"} * on(node)
+          group_left(nodepool) (runai_node_nodepool==1 or on(node) kube_node_info)"
+            record: runai_dcgm_gpu_utilization
+          - expr: runai_pod_info_enriched_nodepool_unique{gpu!="", gpu_instance_id=""}
+              * on (pod_uuid) group_right(modelName, job_name, job_type, job_uuid, node,
+              nodepool, pod_name, pod_namespace, project, department, pod_group_uuid,
+              queue_name, workload_name, workload_type, workload_id) runai_pod_gpu_utilization
+              or on(pod_uuid) runai_pod_info_enriched_nodepool_unique{gpu!="", gpu_instance_id=""}*0
+            record: runai_gpu_utilization_per_fractional_pod
+          - expr: runai_pod_info_enriched_nodepool_unique{gpu!="", gpu_instance_id!=""}
+              * on(node, gpu, gpu_instance_id) group_right(pod_name, pod_namespace, job_name,
+              job_type, job_uuid, workload_name, workload_type, workload_id, pod_uuid,
+              project, department, queue_name, pod_group_uuid, pod_group_name) runai_dcgm_gpu_utilization
+            record: runai_gpu_utilization_per_mig_pod
+          - expr: runai_pod_info_enriched_nodepool_unique{gpu="", gpu_instance_id=""}
+              * on(pod_name, pod_namespace) group_right(job_name, job_type, job_uuid,
+              workload_name, workload_type, workload_id, pod_uuid, project, department,
+              queue_name, pod_group_uuid, pod_group_name) runai_dcgm_gpu_utilization
+            record: runai_gpu_utilization_per_whole_pod_per_gpu
+          - expr: sum by(gpu, modelName, service, job_name, job_type, job_uuid, node,
+              nodepool, pod_name, pod_uuid, pod_namespace, project, department, pod_group_uuid,
+              queue_name, workload_name, workload_type, workload_id) (runai_gpu_utilization_per_fractional_pod
+              or on (pod_uuid) runai_gpu_utilization_per_mig_pod or on (pod_uuid) runai_gpu_utilization_per_whole_pod_per_gpu)
+            record: runai_gpu_utilization_per_pod_per_gpu
+          - expr: avg(runai_gpu_utilization_per_pod_per_gpu) by (job_uuid, job_name, job_type,
+              project, department, workload_name, workload_type, workload_id, user, nodepool,
+              queue_name, is_gpu, detailed_status) * on(job_uuid) group_left(user, is_gpu,
+              detailed_status) runai_workload_info_enriched
+            record: runai_gpu_utilization_per_workload
+          - expr: timestamp(runai_gpu_utilization_per_workload > 2) or on(job_uuid) (runai_last_gpu_utilization_time_per_workload
+              * on(job_uuid) group_left() clamp(runai_allocated_gpu_count_per_workload>0,1,1))
+              or on(job_uuid) timestamp(runai_gpu_utilization_per_workload)
+            record: runai_last_gpu_utilization_time_per_workload
+          - expr: time() - runai_last_gpu_utilization_time_per_workload
+            record: runai_gpu_idle_seconds_per_workload
+          - expr: sum(avg(runai_gpu_utilization_per_pod_per_gpu) by(pod_uuid, workload_type,
+              queue_name, project, department, nodepool) * on(pod_uuid, workload_type,
+              queue_name, project, department, nodepool) runai_allocated_gpu_count_per_pod)
+              by (workload_type, queue_name, project, department, nodepool) / on(workload_type,
+              queue_name, project, department, nodepool) (runai_allocated_gpu_count_per_queue_per_workload_type>0)
+            record: runai_gpu_utilization_per_queue_per_workload_type
+          - expr: sum(avg(runai_gpu_utilization_per_pod_per_gpu) by(pod_uuid, queue_name,
+              project, department, nodepool) * on(pod_uuid, queue_name, project, department,
+              nodepool) runai_allocated_gpu_count_per_pod) by (queue_name, project, department,
+              nodepool) / on(queue_name, project, department, nodepool) (runai_allocated_gpu_count_per_queue>0)
+            record: runai_gpu_utilization_per_queue
+          - expr: sum(avg(runai_gpu_utilization_per_pod_per_gpu) by(pod_uuid, workload_type,
+              project, department) * on(pod_uuid, workload_type, project, department)
+              runai_allocated_gpu_count_per_pod) by (workload_type, project, department)
+              / on(workload_type, project, department) (runai_allocated_gpu_count_per_project_per_workload_type>0)
+            record: runai_gpu_utilization_per_project_per_workload_type
+          - expr: sum(avg(runai_gpu_utilization_per_pod_per_gpu) by(pod_uuid, project,
+              department) * on(pod_uuid, project, department) runai_allocated_gpu_count_per_pod)
+              by (project, department) / on(project, department) (runai_allocated_gpu_count_per_project>0)
+            record: runai_gpu_utilization_per_project
+          - expr: sum(avg(runai_gpu_utilization_per_pod_per_gpu) by(pod_uuid, department)
+              * on(pod_uuid, department) runai_allocated_gpu_count_per_pod) by (department)
+              / on(department) (runai_allocated_gpu_count_per_department>0)
+            record: runai_gpu_utilization_per_department
+          - expr: sum by (UUID, gpu, node, nodepool, modelName) (runai_gpu_utilization_per_mig_pod
+              * on(pod_uuid) group_left() runai_allocated_gpu_count_per_pod) or on(UUID)
+              avg by (UUID, gpu, node, nodepool, modelName) (runai_dcgm_gpu_utilization)
+            record: runai_gpu_utilization_per_gpu
+          - expr: timestamp(runai_gpu_utilization_per_gpu > 2) or on(UUID) runai_last_gpu_utilization_time_per_gpu
+              or on(UUID) timestamp(runai_gpu_utilization_per_gpu)
+            record: runai_last_gpu_utilization_time_per_gpu
+          - expr: time() - runai_last_gpu_utilization_time_per_gpu
+            record: runai_gpu_idle_seconds_per_gpu
+          - expr: avg by(node, nodepool, modelName, ready, schedulable) (runai_gpu_utilization_per_gpu)
+            record: runai_gpu_utilization_per_node
+          - expr: avg by(nodepool) (runai_gpu_utilization_per_gpu)
+            record: runai_gpu_utilization_per_nodepool
+          - expr: avg(runai_gpu_utilization_per_gpu)
+            record: runai_gpu_utilization_per_cluster
+          - expr: "label_replace(label_replace(label_replace(label_replace(DCGM_FI_DEV_FB_USED,
+          \"pod_ip\", \"$1\", \"instance\", \"(.*):(.*)\"), \"pod_name\", \"$1\",
+          \"exported_pod\", \"(.+)\"), \"pod_namespace\", \"$1\", \"exported_namespace\",
+          \"(.+)\"), \"gpu_instance_id\",\n\t\"$1\", \"GPU_I_ID\", \"(.+)\") * on
+          (pod_ip) group_left(node) kube_pod_info{created_by_name=~\".*dcgm-exporter\",
+          pod_ip!=\"\"} * on(node) group_left(nodepool) (runai_node_nodepool==1 or
+          on(node) kube_node_info)"
+            record: runai_dcgm_gpu_used_mebibytes
+          - expr: runai_pod_info_enriched_nodepool_unique{gpu!="", gpu_instance_id=""}
+              * on (pod_uuid) group_right(modelName, job_name, job_type, job_uuid, node,
+              nodepool, pod_name, pod_namespace, project, department, pod_group_uuid,
+              queue_name, workload_name, workload_type, workload_id) runai_pod_gpu_memory_used_bytes/(1024*1024)
+              or on(pod_uuid) runai_pod_info_enriched_nodepool_unique{gpu!="", gpu_instance_id=""}*0
+            record: runai_gpu_memory_used_mebibytes_per_fractional_pod
+          - expr: runai_pod_info_enriched_nodepool_unique{gpu="", gpu_instance_id=""}
+              * on(pod_name, pod_namespace) group_right(job_name, job_type, job_uuid,
+              workload_name, workload_type, workload_id, pod_uuid, project, department,
+              queue_name, pod_group_uuid, pod_group_name) runai_dcgm_gpu_used_mebibytes
+            record: runai_gpu_memory_used_mebibytes_per_whole_pod_per_gpu
+          - expr: runai_pod_info_enriched_nodepool_unique{gpu!="", gpu_instance_id!=""}
+              * on(node, gpu, gpu_instance_id) group_right(pod_name, pod_namespace, job_name,
+              job_type, job_uuid, workload_name, workload_type, workload_id, pod_uuid,
+              project, department, queue_name, pod_group_uuid, pod_group_name) runai_dcgm_gpu_used_mebibytes
+            record: runai_gpu_memory_used_mebibytes_per_mig_pod
+          - expr: sum by(gpu, modelName, service, job_name, job_type, job_uuid, node,
+              nodepool, pod_name, pod_uuid, pod_namespace, project, department, pod_group_uuid,
+              queue_name, workload_name, workload_type, workload_id) (runai_gpu_memory_used_mebibytes_per_fractional_pod
+              or on (pod_uuid) runai_gpu_memory_used_mebibytes_per_mig_pod or on (pod_uuid)
+              runai_gpu_memory_used_mebibytes_per_whole_pod_per_gpu)
+            record: runai_gpu_memory_used_mebibytes_per_pod_per_gpu
+          - expr: sum(runai_gpu_memory_used_mebibytes_per_pod_per_gpu) by (job_uuid, job_name,
+              job_type, project, department, workload_name, workload_type, workload_id,
+              user, nodepool, queue_name, is_gpu, detailed_status) * on(job_uuid) group_left(user,
+              is_gpu, detailed_status) runai_workload_info_enriched
+            record: runai_gpu_memory_used_mebibytes_per_workload
+          - expr: sum(runai_gpu_memory_used_mebibytes_per_workload) by (workload_type,
+              queue_name, project, department, nodepool)
+            record: runai_gpu_memory_used_mebibytes_per_queue_per_workload_type
+          - expr: sum by (UUID, gpu, node, nodepool, modelName) (runai_dcgm_gpu_used_mebibytes)
+            record: runai_gpu_memory_used_mebibytes_per_gpu
+          - expr: sum by(node, nodepool, modelName, ready, schedulable) (runai_gpu_memory_used_mebibytes_per_gpu)
+            record: runai_gpu_memory_used_mebibytes_per_node
+          - expr: sum by(nodepool) (runai_gpu_memory_used_mebibytes_per_node)
+            record: runai_gpu_memory_used_mebibytes_per_nodepool
+          - expr: sum(runai_gpu_memory_used_mebibytes_per_nodepool)
+            record: runai_gpu_memory_used_mebibytes_per_cluster
+          - expr: "label_replace(label_replace(label_replace(label_replace(DCGM_FI_DEV_FB_USED+DCGM_FI_DEV_FB_FREE,
+          \"pod_ip\", \"$1\", \"instance\", \"(.*):(.*)\"), \"pod_name\", \"$1\",
+          \"exported_pod\", \"(.+)\"), \"pod_namespace\", \"$1\", \"exported_namespace\",
+          \"(.+)\"), \"gpu_instance_id\",\n\t\"$1\", \"GPU_I_ID\", \"(.+)\") * on
+          (pod_ip) group_left(node) kube_pod_info{created_by_name=~\".*dcgm-exporter\",
+          pod_ip!=\"\"} * on(node) group_left(nodepool) (runai_node_nodepool==1 or
+          on(node) kube_node_info)"
+            record: runai_dcgm_gpu_total_mebibytes
+          - expr: (group by (UUID, gpu, node, nodepool, modelName) (runai_dcgm_gpu_total_mebibytes{gpu_instance_id!="",
+              modelName=~".*H100.*"}))*80000 or (group by (UUID, gpu, node, nodepool,
+              modelName) (runai_dcgm_gpu_total_mebibytes{gpu_instance_id!="", modelName=~".*40GB"}))*40000
+              or (group by (UUID, gpu, node, nodepool, modelName) (runai_dcgm_gpu_total_mebibytes{gpu_instance_id!="",
+              modelName=~".*80GB"}))*80000
+            record: runai_gpu_memory_total_mebibytes_per_mig_mode_gpu
+          - expr: runai_gpu_memory_total_mebibytes_per_mig_mode_gpu or on(UUID) sum by
+              (UUID, gpu, node, nodepool, modelName) (runai_dcgm_gpu_total_mebibytes)
+            record: runai_gpu_memory_total_mebibytes_per_gpu
+          - expr: sum by(node, nodepool, modelName, ready, schedulable) (runai_gpu_memory_total_mebibytes_per_gpu)
+            record: runai_gpu_memory_total_mebibytes_per_node
+          - expr: sum by(nodepool) (runai_gpu_memory_total_mebibytes_per_node)
+            record: runai_gpu_memory_total_mebibytes_per_nodepool
+          - expr: sum(runai_gpu_memory_total_mebibytes_per_nodepool)
+            record: runai_gpu_memory_total_mebibytes_per_cluster
+          - expr: 100*(runai_gpu_memory_used_mebibytes_per_node / runai_gpu_memory_total_mebibytes_per_node)
+            record: runai_gpu_memory_utilization_per_node
+          - expr: 100*(runai_gpu_memory_used_mebibytes_per_nodepool / runai_gpu_memory_total_mebibytes_per_nodepool)
+            record: runai_gpu_memory_utilization_per_nodepool
+          - expr: 100*(runai_gpu_memory_used_mebibytes_per_cluster / runai_gpu_memory_total_mebibytes_per_cluster)
+            record: runai_gpu_memory_utilization_per_cluster
+          - expr: sum by(job_uuid, job_name, job_type, project, department, workload_name,
+              workload_type, workload_id, user, nodepool, queue_name, is_gpu, detailed_status)
+              (sum(label_replace(sum(kube_pod_container_resource_requests{resource='cpu'})
+              by(uid), "pod_uuid" , "$1", "uid", "(.*)") * on(pod_uuid) group_right()
+              runai_pod_info_enriched_nodepool_unique or on(pod_uuid) runai_pod_info_enriched_nodepool_unique*0)
+              by(job_uuid) * on(job_uuid) group_right() runai_workload_info_enriched{detailed_status="Pending"})
+            record: runai_pending_requested_cpu_cores_per_workload
+          - expr: sum(runai_pending_requested_cpu_cores_per_workload) by (queue_name,
+              project, department, nodepool)
+            record: runai_pending_requested_cpu_cores_per_queue
+          - expr: sum(runai_pending_requested_cpu_cores_per_queue) by (project, department)
+            record: runai_pending_requested_cpu_cores_per_project
+          - expr: sum(runai_pending_requested_cpu_cores_per_queue) by (department)
+            record: runai_pending_requested_cpu_cores_per_department
+          - expr: sum(runai_pending_requested_cpu_cores_per_queue) by (nodepool)
+            record: runai_pending_requested_cpu_cores_per_nodepool
+          - expr: sum(runai_pending_requested_cpu_cores_per_nodepool)
+            record: runai_pending_requested_cpu_cores_per_cluster
+          - expr: sum by(gpu, modelName, service, job_name, job_type, job_uuid, node,
+              nodepool, pod_name, pod_uuid, pod_namespace, project, department, pod_group_uuid,
+              queue_name, workload_name, workload_type, workload_id) (runai_scheduler_allocated_millicpus_per_pod_unique)
+              * on (pod_uuid) group_right() runai_pod_info_enriched_nodepool_unique
+            record: runai_allocated_millicpus_per_pod
+          - expr: sum by(gpu, modelName, service, job_name, job_type, job_uuid, node,
+              nodepool, pod_name, pod_uuid, pod_namespace, project, department, pod_group_uuid,
+              queue_name, workload_name, workload_type, workload_id) ((runai_scheduler_allocated_millicpus_per_pod_unique/1000)
+              * on (pod_uuid) group_right() runai_pod_info_enriched_nodepool_unique)
+            record: runai_allocated_cpu_cores_per_pod
+          - expr: sum(runai_allocated_cpu_cores_per_pod) by (job_uuid, job_name, job_type,
+              project, department, workload_name, workload_type, workload_id, user, nodepool,
+              queue_name, is_gpu, detailed_status) * on(job_uuid) group_left(user, is_gpu,
+              detailed_status) runai_workload_info_enriched
+            record: runai_allocated_cpu_cores_per_workload
+          - expr: sum(runai_allocated_cpu_cores_per_workload) by (queue_name, project,
+              department, nodepool) or on(queue_name) group(runai_queue_info) by(queue_name,
+              project, department, nodepool)*0
+            record: runai_allocated_cpu_cores_per_queue
+          - expr: sum(runai_allocated_cpu_cores_per_queue) by (project, department)
+            record: runai_allocated_cpu_cores_per_project
+          - expr: sum(runai_allocated_cpu_cores_per_queue) by (department)
+            record: runai_allocated_cpu_cores_per_department
+          - expr: sum by(node, nodepool, modelName, ready, schedulable) (sum by (node)
+              (kube_pod_container_resource_requests{resource="cpu",unit="core",node!=""}
+              * on(pod, namespace) group_left() (kube_pod_status_phase{phase=~"Pending|Running|Unknown"}==1))
+              * on(node) group_right() runai_node_info_enriched)
+            record: runai_allocated_cpu_cores_per_node
+          - expr: sum(runai_allocated_cpu_cores_per_node) by (nodepool)
+            record: runai_allocated_cpu_cores_per_nodepool
+          - expr: sum(runai_allocated_cpu_cores_per_nodepool)
+            record: runai_allocated_cpu_cores_per_cluster
+          - expr: sum by(gpu, modelName, service, job_name, job_type, job_uuid, node,
+              nodepool, pod_name, pod_uuid, pod_namespace, project, department, pod_group_uuid,
+              queue_name, workload_name, workload_type, workload_id) (label_replace(label_replace(sum(rate(container_cpu_usage_seconds_total{container!=""}[2m]))
+              by (pod, namespace),"pod_name" , "$1", "pod", "(.*)"), "pod_namespace" ,
+              "$1", "namespace", "(.*)") * on(pod_name, pod_namespace) group_right() runai_pod_info_enriched_nodepool_unique)
+            record: runai_used_cpu_cores_per_pod
+          - expr: sum(runai_used_cpu_cores_per_pod) by (job_uuid, job_name, job_type,
+              project, department, workload_name, workload_type, workload_id, user, nodepool,
+              queue_name, is_gpu, detailed_status) * on(job_uuid) group_left(user, is_gpu,
+              detailed_status) runai_workload_info_enriched
+            record: runai_used_cpu_cores_per_workload
+          - expr: sum(runai_used_cpu_cores_per_workload) by (queue_name, project, department,
+              nodepool)
+            record: runai_used_cpu_cores_per_queue
+          - expr: sum(runai_used_cpu_cores_per_queue) by (project, department)
+            record: runai_used_cpu_cores_per_project
+          - expr: sum(runai_used_cpu_cores_per_queue) by (department)
+            record: runai_used_cpu_cores_per_department
+          - expr: sum by(node, nodepool, modelName, ready, schedulable) ((runai_cpu_cores_count_per_node
+              - on(node) sum(rate(node_cpu_seconds_total{job="node-exporter",mode=~"idle|iowait|steal"}[1m]))
+              by(pod, namespace) * on(pod, namespace) group_left(node) kube_pod_info)
+              * on(node) group_right() runai_node_info_enriched)
+            record: runai_used_cpu_cores_per_node
+          - expr: sum(runai_used_cpu_cores_per_node) by (nodepool)
+            record: runai_used_cpu_cores_per_nodepool
+          - expr: sum(runai_used_cpu_cores_per_nodepool)
+            record: runai_used_cpu_cores_per_cluster
+          - expr: sum(runai_queue_quota_cpu_cores) by (queue_name, project, department,
+              nodepool)
+            record: runai_deserved_cpu_cores_per_queue
+          - expr: min(runai_deserved_cpu_cores_per_queue{project!=""}<0) by(project, department)
+              or on(project) sum(runai_deserved_cpu_cores_per_queue{project!=""}>=0) by(project,
+              department)
+            record: runai_deserved_cpu_cores_per_project
+          - expr: min(runai_deserved_cpu_cores_per_queue{project=""}<0) by(department)
+              or on(department) sum(runai_deserved_cpu_cores_per_queue{project=""}>=0)
+              by(department)
+            record: runai_deserved_cpu_cores_per_department
+          - expr: sum by (node, nodepool, modelName, ready, schedulable) (kube_node_status_capacity{resource='cpu'}
+              * on(node) group_right() runai_node_info_enriched)
+            record: runai_cpu_cores_count_per_node
+          - expr: sum(runai_cpu_cores_count_per_node) by (nodepool)
+            record: runai_cpu_cores_count_per_nodepool
+          - expr: sum(runai_cpu_cores_count_per_node{ready="true",schedulable="true"})
+              by (nodepool)
+            record: runai_ready_cpu_cores_count_per_nodepool
+          - expr: sum(runai_cpu_cores_count_per_nodepool)
+            record: runai_cpu_cores_count_per_cluster
+          - expr: sum(runai_ready_cpu_cores_count_per_nodepool)
+            record: runai_ready_cpu_cores_count_per_cluster
+          - expr: 100*(runai_allocated_cpu_cores_per_node / runai_cpu_cores_count_per_node>0)
+            record: runai_cpu_cores_allocation_percentage_per_node
+          - expr: 100*(runai_allocated_cpu_cores_per_nodepool / runai_cpu_cores_count_per_nodepool>0)
+            record: runai_cpu_cores_allocation_percentage_per_nodepool
+          - expr: 100*(runai_allocated_cpu_cores_per_cluster / runai_cpu_cores_count_per_cluster>0)
+            record: runai_cpu_cores_allocation_percentage_per_cluster
+          - expr: 100*(runai_used_cpu_cores_per_pod / (runai_allocated_cpu_cores_per_pod>0))
+              or on(pod_uuid) (runai_used_cpu_cores_per_pod*0)+100
+            record: runai_cpu_utilization_per_pod
+          - expr: 100*(runai_used_cpu_cores_per_workload / (runai_allocated_cpu_cores_per_workload>0))
+              or on(job_uuid) (runai_used_cpu_cores_per_workload*0)+100
+            record: runai_cpu_utilization_per_workload
+          - expr: 100*(runai_used_cpu_cores_per_queue / (runai_allocated_cpu_cores_per_queue>0))
+              or on(queue_name) (runai_used_cpu_cores_per_queue*0)+100
+            record: runai_cpu_utilization_per_queue
+          - expr: 100*(runai_used_cpu_cores_per_project / (runai_allocated_cpu_cores_per_project>0))
+              or on(project) (runai_used_cpu_cores_per_project*0)+100
+            record: runai_cpu_utilization_per_project
+          - expr: 100*(runai_used_cpu_cores_per_department / (runai_allocated_cpu_cores_per_department>0))
+              or on(department) (runai_used_cpu_cores_per_department*0)+100
+            record: runai_cpu_utilization_per_department
+          - expr: 100*(runai_used_cpu_cores_per_node / runai_cpu_cores_count_per_node)
+            record: runai_cpu_utilization_per_node
+          - expr: 100*(runai_used_cpu_cores_per_nodepool / runai_cpu_cores_count_per_nodepool)
+            record: runai_cpu_utilization_per_nodepool
+          - expr: 100*(runai_used_cpu_cores_per_cluster / runai_cpu_cores_count_per_cluster)
+            record: runai_cpu_utilization_per_cluster
+          - expr: sum by(job_uuid, job_name, job_type, project, department, workload_name,
+              workload_type, workload_id, user, nodepool, queue_name, is_gpu, detailed_status)
+              (sum(label_replace(sum(kube_pod_container_resource_requests{resource='memory'})
+              by(uid), "pod_uuid" , "$1", "uid", "(.*)") * on(pod_uuid) group_right()
+              runai_pod_info_enriched_nodepool_unique or on(pod_uuid) runai_pod_info_enriched_nodepool_unique*0)
+              by(job_uuid) * on(job_uuid) group_right() runai_workload_info_enriched{detailed_status="Pending"})
+            record: runai_pending_requested_memory_bytes_per_workload
+          - expr: sum(runai_pending_requested_memory_bytes_per_workload) by (queue_name,
+              project, department, nodepool)
+            record: runai_pending_requested_memory_bytes_per_queue
+          - expr: sum(runai_pending_requested_memory_bytes_per_queue) by (project, department)
+            record: runai_pending_requested_memory_bytes_per_project
+          - expr: sum(runai_pending_requested_memory_bytes_per_queue) by (department)
+            record: runai_pending_requested_memory_bytes_per_department
+          - expr: sum(runai_pending_requested_memory_bytes_per_queue) by (nodepool)
+            record: runai_pending_requested_memory_bytes_per_nodepool
+          - expr: sum(runai_pending_requested_memory_bytes_per_nodepool)
+            record: runai_pending_requested_memory_bytes_per_cluster
+          - expr: sum by(gpu, modelName, service, job_name, job_type, job_uuid, node,
+              nodepool, pod_name, pod_uuid, pod_namespace, project, department, pod_group_uuid,
+              queue_name, workload_name, workload_type, workload_id) (runai_scheduler_allocated_memory_per_pod_unique)
+              * on (pod_uuid) group_right() runai_pod_info_enriched_nodepool_unique
+            record: runai_allocated_memory_per_pod
+          - expr: sum by(node, nodepool, modelName, ready, schedulable) (sum by (node)
+              (kube_pod_container_resource_requests{resource="memory",unit="byte",node!=""}
+              * on(pod, namespace) group_left() (kube_pod_status_phase{phase=~"Pending|Running|Unknown"}==1))
+              * on(node) group_right() runai_node_info_enriched)
+            record: runai_allocated_memory_bytes_per_node
+          - expr: sum(runai_allocated_memory_bytes_per_node) by (nodepool)
+            record: runai_allocated_memory_bytes_per_nodepool
+          - expr: sum(runai_allocated_memory_bytes_per_nodepool)
+            record: runai_allocated_memory_bytes_per_cluster
+          - expr: sum by(gpu, modelName, service, job_name, job_type, job_uuid, node,
+              nodepool, pod_name, pod_uuid, pod_namespace, project, department, pod_group_uuid,
+              queue_name, workload_name, workload_type, workload_id) (label_replace(label_replace(sum(container_memory_usage_bytes{
+              container!=""}) by (pod, namespace),"pod_name" , "$1", "pod", "(.*)"), "pod_namespace"
+              , "$1", "namespace", "(.*)") * on(pod_name, pod_namespace) group_right()
+              runai_pod_info_enriched_nodepool_unique)
+            record: runai_used_memory_bytes_per_pod
+          - expr: sum by(node, nodepool, modelName, ready, schedulable) ((node_memory_MemTotal_bytes{job="node-exporter"}
+              - (node_memory_MemAvailable_bytes{job="node-exporter"} or (node_memory_Cached_bytes{job="node-exporter"}
+              + node_memory_Buffers_bytes{job="node-exporter"} + node_memory_MemFree_bytes{job="node-exporter"}
+              + node_memory_Slab_bytes{job="node-exporter"}))) * on(pod, namespace) group_left(node)
+              kube_pod_info * on(node) group_right() runai_node_info_enriched)
+            record: runai_used_memory_bytes_per_node
+          - expr: sum(runai_used_memory_bytes_per_node) by (nodepool)
+            record: runai_used_memory_bytes_per_nodepool
+          - expr: sum(runai_used_memory_bytes_per_nodepool)
+            record: runai_used_memory_bytes_per_cluster
+          - expr: sum by(queue_name, project, department, nodepool) (runai_queue_quota_memory_bytes)
+            record: runai_deserved_memory_bytes_per_queue
+          - expr: min(runai_deserved_memory_bytes_per_queue{project!=""}<0) by(project,
+              department) or on(project) sum(runai_deserved_memory_bytes_per_queue{project!=""}>=0)
+              by(project, department)
+            record: runai_deserved_memory_bytes_per_project
+          - expr: min(runai_deserved_memory_bytes_per_queue{project=""}<0) by(department)
+              or on(department) sum(runai_deserved_memory_bytes_per_queue{project=""}>=0)
+              by(department)
+            record: runai_deserved_memory_bytes_per_department
+          - expr: sum by (node, nodepool, modelName, ready, schedulable) (kube_node_status_capacity{resource='memory'}
+              * on(node) group_right() runai_node_info_enriched)
+            record: runai_total_memory_bytes_per_node
+          - expr: sum(runai_total_memory_bytes_per_node) by (nodepool)
+            record: runai_total_memory_bytes_per_nodepool
+          - expr: sum(runai_total_memory_bytes_per_nodepool)
+            record: runai_total_memory_bytes_per_cluster
+          - expr: 100*(runai_allocated_memory_bytes_per_node / runai_total_memory_bytes_per_node>0)
+            record: runai_memory_allocation_percentage_per_node
+          - expr: 100*(runai_allocated_memory_bytes_per_nodepool / runai_total_memory_bytes_per_nodepool>0)
+            record: runai_memory_allocation_percentage_per_nodepool
+          - expr: 100*(runai_allocated_memory_bytes_per_cluster / runai_total_memory_bytes_per_cluster>0)
+            record: runai_memory_allocation_percentage_per_cluster
+          - expr: 100*(runai_used_memory_bytes_per_node / runai_total_memory_bytes_per_node)
+            record: runai_memory_utilization_per_node
+          - expr: 100*(runai_used_memory_bytes_per_nodepool / runai_total_memory_bytes_per_nodepool)
+            record: runai_memory_utilization_per_nodepool
+          - expr: 100*(runai_used_memory_bytes_per_cluster / runai_total_memory_bytes_per_cluster)
+            record: runai_memory_utilization_per_cluster
+          - expr: count(runai_workload_info_enriched) by(detailed_status, is_gpu, workload_type,
+              queue_name, project, department, nodepool)
+            record: runai_workload_count_per_type_per_phase_per_queue
+          - expr: sum(runai_workload_count_per_type_per_phase_per_queue) by(detailed_status,
+              is_gpu, workload_type, nodepool)
+            record: runai_workload_count_per_type_per_phase_per_nodepool
+          - expr: sum(runai_workload_count_per_type_per_phase_per_nodepool) by(detailed_status,
+              is_gpu, workload_type)
+            record: runai_workload_count_per_type_per_phase_per_cluster
+          - expr: max by(uuid, name, status) (label_replace(label_replace(runai_pod_group_workload_info,
+              "uuid", "$1", "workload_internal_uuid", "(.*)"), "name", "$1", "workload_name",
+              "(.*)"))
+            record: runai_workload_info
+          - expr: sum(runai_pod_mig_used_memory) by (node_name)
+            record: runai_mig_gpu_used_memory
+          - expr: count(runai_allocated_gpu_count_per_workload{workload_type=~"Interactive|interactive|Interactive-Preemptible"}>0)
+              by(nodepool)
+            record: runai_workloads_count_gpu_interactive
+          - expr: count(runai_allocated_gpu_count_per_workload{workload_type=~"Train|train"}>0)
+              by(nodepool)
+            record: runai_workloads_count_gpu_train
+          - expr: count(runai_allocated_gpu_count_per_workload{workload_type=~"Inference|inference"}>0)
+              by(nodepool)
+            record: runai_workloads_count_gpu_inference
+          - expr: count((runai_allocated_gpu_count_per_workload==0) * on(job_uuid) (group(runai_pod_group_phase_with_info{phase=~"Running",detailed_status=~"^$|Running"}==1)
+              by(job_uuid))) by(nodepool)
+            record: runai_workloads_count_cpu_only
+          - expr: (node_cpu_seconds_total * on(pod, namespace) group_left(node) kube_pod_info)
+              * on(node) group_left(nodepool) (runai_node_nodepool == 1 or on(node) kube_node_info)
+            record: runai_node_cpu_seconds_total
+          - expr: (node_memory_MemAvailable_bytes * on(pod, namespace) group_left(node)
+              kube_pod_info) * on(node) group_left(nodepool) (runai_node_nodepool == 1
+              or on(node) kube_node_info)
+            record: runai_node_memory_mem_available_bytes
+          - expr: (node_memory_MemTotal_bytes * on(pod, namespace) group_left(node) kube_pod_info)
+              * on(node) group_left(nodepool) (runai_node_nodepool == 1 or on(node) kube_node_info)
+            record: runai_node_memory_mem_total_bytes
+      - name: runai-dashboard-rules
+        rules:
+          - expr: sum(runai_allocated_gpu_count_per_queue>0) by(queue_name, project)
+            record: runai_dashboard:overview:allocated_gpus_per_project:queue_name
+          - expr: (runai_gpu_idle_seconds_per_workload > 300)*0 + on(job_uuid) group_left()
+              (runai_allocated_gpu_count_per_workload > 0)
+            record: runai_idle_allocated_gpu_count_per_workload
+          - expr: sum(runai_idle_allocated_gpu_count_per_workload) by (queue_name, project,
+              department, nodepool)
+            record: runai_idle_allocated_gpu_count_per_queue
+          - expr: sum(runai_idle_allocated_gpu_count_per_workload) by (nodepool)
+            record: runai_idle_allocated_gpu_count_per_nodepool
+          - expr: runai_gpu_idle_seconds_per_workload > 300
+            record: runai_dashboard:overview:workloads_with_idle_allocated_gpus:idle_time
+          - expr: 100*(sum(runai_scheduler_allocated_gpus_per_pod_unique)/clamp_min(sum(runai_gpu_count_per_node),
+              1)) or vector(0)
+            record: runai_dashboard:analytics:gpu_allocation
+          - expr: 100*(sum(runai_scheduler_allocated_gpus_per_pod_unique)/clamp_min(sum(runai_gpu_count_per_node),
+              1)) or vector(0)
+            record: runai_dashboard:analytics:gpu_memory_allocation
+          - expr: avg(runai_gpu_utilization_per_gpu) or vector(0)
+            record: runai_dashboard:analytics:gpu_compute_utilization
+          - expr: 100*(sum(runai_gpu_memory_used_mebibytes_per_gpu)/sum(runai_gpu_memory_total_mebibytes_per_gpu))
+              or vector(0)
+            record: runai_dashboard:analytics:gpu_memory_utilization
+          - expr: sum(runai_gpu_count_per_node) or vector(0)
+            record: runai_dashboard:analytics:allocated_gpus_per_project:total
+          - expr: sum(runai_allocated_gpu_count_per_workload) or vector(0)
+            record: runai_dashboard:analytics:allocated_gpus_per_project:total_allocated
+          - expr: sum(runai_allocated_gpu_count_per_project>0) by(project)
+            record: runai_dashboard:analytics:allocated_gpus_per_project:project
+          - expr: sum(runai_allocated_gpu_count_per_queue>0) by (queue_name, project)
+            record: runai_dashboard:analytics:allocated_gpus_per_project:queue_name
+          - expr: runai_gpu_utilization_per_project
+            record: runai_dashboard:analytics:gpu_compute_utilization_per_project:project
+          - expr: sum(runai_gpu_utilization_per_queue) by (queue_name, project)
+            record: runai_dashboard:analytics:gpu_compute_utilization_per_project:queue_name
+          - expr: runai_gpu_utilization_per_node
+            record: runai_dashboard:analytics:gpu_compute_utilization_per_node:node
+          - expr: 100*(runai_allocated_gpu_count_per_node / on(node) (runai_gpu_count_per_node>0))
+            record: runai_dashboard:analytics:gpu_allocation_per_node:node
+          - expr: runai_gpu_count_per_node>0
+            record: runai_dashboard:analytics:gpu_count_per_node:node
+          - expr: sum(runai_gpu_count_per_node) or vector(0)
+            record: runai_dashboard:analytics:gpu_count_per_node:total
+          - expr: runai_gpu_memory_total_mebibytes_per_node
+            record: runai_dashboard:analytics:gpu_memory_size_per_node:node
+          - expr: sum(runai_gpu_memory_total_mebibytes_per_node) or vector(0)
+            record: runai_dashboard:analytics:gpu_memory_size_per_node:total
+          - expr: 100*(runai_allocated_gpu_count_per_node / on(node, nodepool) (runai_gpu_count_per_node>0))
+            record: runai_dashboard:analytics:gpu_memory_allocation_per_node:node
+          - expr: 100*(runai_gpu_memory_used_mebibytes_per_node / on(node, nodepool) runai_gpu_memory_total_mebibytes_per_node)
+            record: runai_dashboard:analytics:gpu_memory_utilization_per_node:node
+      - name: runai-rules
+        rules:
+          - expr: 1 -  avg without(cpu, mode) (rate(node_cpu_seconds_total{job="node-exporter",mode="idle"}[5m]))
+            record: runai_node_cpu_utilisation:rate5m
+          - expr: label_replace(label_replace(label_replace(kube_pod_info, "pod_uuid",
+              "$1", "uid", "(.*)"),"pod_name", "$1", "pod", "(.*)"), "pod_namespace",
+              "$1", "namespace", "(.*)")
+            record: runai_kube_pod_info
+          - expr: (sum(runai_pod_group_info_unique) by (pod_group_uuid, detailed_status,
+              node_name, node, nodepool, queue_name, user, workload_name, workload_type,
+              job_name, project, job_type, job_uuid, is_gpu)) * on (pod_group_uuid) group_right(detailed_status,
+              node_name, node, nodepool, queue_name, user, workload_name, workload_type,
+              job_name, project, job_type, job_uuid, is_gpu) (sum(runai_pod_group_phase_unique)
+              by (pod_group_uuid, job_uuid, phase, status))
+            record: runai_pod_group_phase_with_info
+          - expr: runai_pod_info_unique * on (pod_uuid) group_right(queue_name, pod_group_name,
+              workload_name, workload_type, workload_id, node_name, node, gpu_index, gpu,
+              job_name, job_uuid, job_type, node, project, detailed_status) (sum(runai_pod_phase_unique)
+              by (pod_uuid, phase, status, pod_namespace, pod_name, pod_group_uuid, job_uuid))
+            record: runai_pod_phase_with_info
+          - expr: sum by ( gpu, node, pod_name, pod_namespace) ((label_replace(runai_dcgm_gpu_utilization,
+              "pod_ip", "$1", "instance", "(.*):(.*)")) * on (pod_ip) group_left(node)
+              kube_pod_info{created_by_name=~".*dcgm-exporter", pod_ip!=""})
+            record: runai_node_gpu_utilization
+          - expr: (sum without (container, job, namespace, pod, service, endpoint, instance)
+              (runai_node_cpu_utilisation:rate5m * on (pod, namespace) group_left(node)
+              (kube_pod_info{pod_ip!=""} *0+1))) * on (node) group_left(nodepool) (runai_node_nodepool==1
+              or on(node) kube_node_info)
+            record: runai_node_cpu_utilization
+          - expr: avg(1-  (rate(runai_node_cpu_seconds_total{job="node-exporter",mode="idle"}[1m])))
+              by (nodepool)
+            record: runai_cpu_utilization
+          - expr: sum by (workload_name, workload_id, pod_group_uuid, job_name, job_uuid
+              , pod_namespace, project) (label_replace(label_replace(sum(rate(container_cpu_usage_seconds_total{
+              container!=""}[2m])) by (pod, namespace),"pod_name" , "$1", "pod", "(.*)"),
+              "pod_namespace" , "$1", "namespace", "(.*)") * on(pod_name, pod_namespace)
+              group_left(workload_name, workload_id, pod_group_uuid, job_name, job_uuid,
+              project) (runai_pod_phase_with_info{phase="Running"} ==1))
+            record: runai_job_cpu_usage
+          - expr: sum by (pod, namespace) (rate(container_cpu_usage_seconds_total{container=""}[2m]))
+              * on (pod, namespace) group_right() label_replace(label_replace(runai_pod_phase_with_info{phase="Running"}
+              == 1, "pod" , "$1", "pod_name", "(.*)"), "namespace", "$1", "pod_namespace",
+              "(.*)")
+            record: runai_pod_cpu_usage
+          - expr: (sum without (container, device, endpoint, instance, job, namespace,
+              pod, pod_ip, service) (instance:node_memory_utilisation:ratio * on (pod,
+              namespace) group_left(node) (kube_pod_info{pod_ip!=""} *0+1))) * on(node)
+              group_left(nodepool) (runai_node_nodepool==1 or on(node) kube_node_info)
+            record: runai_node_memory_utilization
+          - expr: 1 - (sum (runai_node_memory_mem_available_bytes{job="node-exporter"})
+              by (nodepool))  / (sum(runai_node_memory_mem_total_bytes{job="node-exporter"})
+              by (nodepool))
+            record: runai_memory_utilization
+          - expr: sum without (container, endpoint,instance, job,namespace,pod,service)
+              ((node_memory_MemTotal_bytes{job="node-exporter"} - node_memory_MemAvailable_bytes{job="node-exporter"}
+              ) * on (pod, namespace) group_left(node) kube_pod_info{pod_ip!=""})
+            record: runai_node_memory_used_bytes
+          - expr: sum(runai_node_memory_used_bytes)
+            record: runai_memory_used_bytes
+          - expr: sum(label_replace(label_replace(sum(container_memory_usage_bytes{ container!=""})
+              by (pod, namespace),"pod_name" , "$1", "pod", "(.*)"), "pod_namespace" ,
+              "$1", "namespace", "(.*)") * on(pod_namespace, pod_name) group_left(workload_name,
+              workload_id, pod_group_uuid, job_name, job_uuid, project) (runai_pod_info_unique
+              * 0 + 1)) by (workload_name, workload_id, pod_group_uuid, job_name, job_uuid,
+              project)
+            record: runai_job_memory_used_bytes
+          - expr: max(max( label_replace(label_replace(kube_pod_container_info ,"pod_name"
+              , "$1", "pod", "(.*)"), "pod_namespace" , "$1", "namespace", "(.*)")) by
+              (pod_name, pod_namespace, image) * on(pod_name, pod_namespace) group_left(workload_name,
+              pod_group_uuid, job_name, job_uuid) (runai_pod_info_unique * 0 + 1) ) by
+              (image, workload_name, pod_group_uuid , job_name, job_uuid)
+            record: runai_pod_group_image
+          - expr: sum by (pod, namespace) (container_memory_usage_bytes{container=""})
+              * on (pod, namespace)  group_right() label_replace(label_replace(runai_pod_phase_with_info{phase="Running"}
+              == 1, "pod" , "$1", "pod_name", "(.*)"), "namespace", "$1", "pod_namespace",
+              "(.*)")
+            record: runai_pod_memory_used_bytes
+          - expr: (sum(kube_pod_container_resource_requests{resource="memory",unit="byte",node!=""}
+              * on(pod, namespace) group_left() (kube_pod_status_phase{phase=~"Pending|Running|Unknown"}==1))
+              by (node)) * on(node) group_left(nodepool) (runai_node_nodepool==1 or on(node)
+              kube_node_info)
+            record: runai_node_requested_memory_bytes
+          - expr: sum(sum(label_replace(label_replace(kube_pod_container_resource_requests{resource="memory",unit="byte"}
+              * on(pod, namespace) group_left() (kube_pod_status_phase{phase=~"Running"}==1),
+              "pod_name" , "$1", "pod", "(.*)"), "pod_namespace" , "$1", "namespace",
+              "(.*)")) by (pod_name, pod_namespace) * on(pod_name, pod_namespace) group_left(workload_name,
+              pod_group_uuid, job_name, job_uuid) (runai_pod_info_unique * 0 + 1) ) by
+              (workload_name, pod_group_uuid, job_name, job_uuid)
+            record: runai_active_job_memory_allocated_bytes
+          - expr: sum(sum(label_replace(label_replace(kube_pod_container_resource_requests{resource="memory",unit="byte"}
+              * on(pod, namespace) group_left() (kube_pod_status_phase{phase=~"Pending|Running|Unknown"}==1),
+              "pod_name" , "$1", "pod", "(.*)"), "pod_namespace" , "$1", "namespace",
+              "(.*)")) by (pod_name, pod_namespace) * on(pod_name, pod_namespace) group_left(workload_name,
+              pod_group_uuid, job_name, job_uuid, workload_id) (runai_pod_info_unique
+              * 0 + 1) ) by (workload_name, pod_group_uuid, job_name, job_uuid, workload_id)
+            record: runai_active_job_memory_requested_bytes
+          - expr: (sum(kube_pod_container_resource_requests{resource="cpu",unit="core",node!=""}
+              * on(pod, namespace) group_left() (kube_pod_status_phase{phase=~"Pending|Running|Unknown"}==1))
+              by (node)) * on(node) group_left(nodepool) (runai_node_nodepool==1 or on(node)
+              kube_node_info)
+            record: runai_node_cpu_requested
+          - expr: kube_node_status_capacity * on(node) group_left(nodepool) (runai_node_nodepool==1
+              or on(node) kube_node_info)
+            record: runai_node_cpu_capacity
+          - expr: sum(sum(label_replace(label_replace(kube_pod_container_resource_requests{resource="cpu",unit="core"}
+              * on(pod, namespace) group_left() (kube_pod_status_phase{phase=~"Running"}==1),"pod_name"
+              , "$1", "pod", "(.*)"), "pod_namespace" , "$1", "namespace", "(.*)")) by
+              (pod_name, pod_namespace) * on(pod_name, pod_namespace) group_left(workload_name,
+              pod_group_uuid, job_name, job_uuid) (runai_pod_info_unique * 0 + 1) ) by
+              (workload_name, pod_group_uuid, job_name, job_uuid)
+            record: runai_active_job_cpu_allocated_cores
+          - expr: sum(sum(label_replace(label_replace(kube_pod_container_resource_requests{resource="cpu",unit="core"}
+              * on(pod, namespace) group_left() (kube_pod_status_phase{phase=~"Pending|Running|Unknown"}==1),"pod_name"
+              , "$1", "pod", "(.*)"), "pod_namespace" , "$1", "namespace", "(.*)")) by
+              (pod_name, pod_namespace) * on(pod_name, pod_namespace) group_left(workload_name,
+              pod_group_uuid, job_name, job_uuid, workload_id) (runai_pod_info_unique
+              * 0 + 1) ) by (workload_name, pod_group_uuid, job_name, job_uuid, workload_id)
+            record: runai_active_job_cpu_requested_cores
+          - expr: sum(sum(label_replace(label_replace(kube_pod_container_resource_limits{resource="cpu"}
+              * on(pod, namespace) group_left() (kube_pod_status_phase{phase=~"Pending|Running|Unknown"}==1),"pod_name"
+              , "$1", "pod", "(.*)"), "pod_namespace" , "$1", "namespace", "(.*)")) by
+              (pod_name, pod_namespace) * on(pod_name, pod_namespace) group_left(workload_name,
+              pod_group_uuid, job_name, job_uuid, workload_id) (runai_pod_info_unique
+              * 0 + 1) ) by (workload_name, pod_group_uuid, job_name, job_uuid, workload_id)
+            record: runai_active_job_cpu_limits
+          - expr: sum(sum(label_replace(label_replace(kube_pod_container_resource_limits{resource="memory"}
+              * on(pod, namespace) group_left() (kube_pod_status_phase{phase=~"Pending|Running|Unknown"}==1),"pod_name"
+              , "$1", "pod", "(.*)"), "pod_namespace" , "$1", "namespace", "(.*)")) by
+              (pod_name, pod_namespace) * on(pod_name, pod_namespace) group_left(workload_name,
+              pod_group_uuid, job_name, job_uuid, workload_id) (runai_pod_info_unique
+              * 0 + 1) ) by (workload_name, pod_group_uuid, job_name, job_uuid, workload_id)
+            record: runai_active_job_memory_limits
+          - expr: avg(runai_cpu_utilization)
+            record: runai_cluster_cpu_utilization
+          - expr: (runai_memory_used_bytes)
+            record: runai_cluster_memory_used_bytes
+          - expr: (runai_memory_utilization)
+            record: runai_cluster_memory_utilization
+          - expr: (runai_node_cpu_requested)
+            record: runai_node_cpu_requested_cores
+          - expr: sum without(container, endpoint, instance, job, namespace, pod, service,
+              exporter_container) (runai_node_memory_used_bytes)
+            record: runai_node_used_memory_bytes
+          - expr: sum without(pod_group_name, pod_group_uuid, workload_name) (runai_pod_group_image)
+            record: runai_job_image
+          - expr: sum without(pod_group_uuid, queue_name, workload_name, workload_type,
+              node_name, phase, detailed_status)(runai_pod_group_phase_with_info{detailed_status!~'Succeeded|Failed|Deleted|Timeout'})
+            record: runai_job_status_with_info
+          - expr: sum without(namespace, pod_group_uuid)(runai_pod_group_total_runtime)
+            record: runai_job_total_runtime
+          - expr: sum without(namespace, pod_group_uuid)(runai_pod_group_total_wait_time)
+            record: runai_job_total_wait_time
+          - expr: sum without(endpoint, instance, job,namespace, pod, queue_name, service)(runai_queue_deserved_gpus{project!=""})
+            record: runai_project_nodepool_guaranteed_gpus
+          - expr: sum(runai_project_nodepool_guaranteed_gpus) by (project)
+            record: runai_project_guaranteed_gpus
+          - expr: sum without(endpoint, instance, job,namespace, pod, queue_name, service,
+              deserved_cpu, deserved_gpu, deserved_memory, nodepool)(runai_queue_info{project!=""})
+            record: runai_project_info
+          - expr: sum without(endpoint, instance, job,namespace, pod, pod_group_name,
+              pod_group_uuid,queue_name,service, workload_name, workload_type, detailed_status)(runai_requested_gpus
+              {detailed_status!~'Succeeded|Failed|Deleted|Timeout'})
+            record: runai_job_requested_gpus
+          - expr: (sum without(endpoint, instance, job,namespace, pod, pod_group_name,
+              pod_group_uuid,queue_name, service, workload_name, workload_type, detailed_status)(runai_requested_gpus_memory
+              {detailed_status!~'Succeeded|Failed|Deleted|Timeout'})) * on (job_uuid)
+              group_left(workload_id) (count(runai_pod_info_unique) by (workload_id, job_uuid))
+            record: runai_job_requested_gpu_memory
+          - expr: sum(max(runai_requested_gpus) by (pod_group_uuid) * on (pod_group_uuid)
+              group_left (queue_name, nodepool, workload_type) (runai_pod_group_phase_with_info{phase="Pending",workload_type!~"Inference|inference|"}==1))
+              by (nodepool, workload_type, queue_name)
+            record: runai_requested_gpus_per_workload_type_per_queue
+          - expr: sum without (revision_name) (label_replace((sum by(clusterId, revision_name,
+              namespace_name) (rate(revision_app_request_count[1m]))),"deployment_name",
+              "$1-deployment", "revision_name", "(.+)"))
+            record: runai_deployment_request_rate
+          - expr: sum without (revision_name) (label_replace( (sum by (clusterId, namespace_name,
+              revision_name, le) (rate (revision_app_request_latencies_bucket[60s])))
+              , "deployment_name", "$1-deployment", "revision_name", "(.+)"))
+            record: runai_deployment_request_latencies
+      - interval: 30s
+        name: runai-rules-short-interval
+        rules:
+          - expr: sum_over_time(avg(runai_pod_group_info_unique{detailed_status="Running"})
+              by (workload_name, job_name, job_uuid, namespace, pod_group_uuid)[30s:1s])
+            record: runai_pod_group_run_time_per_30second
+          - expr: ((runai_pod_group_total_runtime + runai_pod_group_run_time_per_30second)
+              or runai_pod_group_total_runtime or (runai_pod_group_run_time_per_30second
+              * 0)) and last_over_time(runai_pod_group_run_time_per_30second[120s])
+            record: runai_pod_group_total_runtime
+          - expr: sum_over_time(avg(runai_pod_group_info_unique{detailed_status=~"Pending|Swapped"})
+              by (workload_name, job_name, job_uuid, namespace, pod_group_uuid)[30s:1s])
+            record: runai_pod_group_wait_time_per_30second
+          - expr: ((runai_pod_group_total_wait_time + runai_pod_group_wait_time_per_30second)
+              or runai_pod_group_total_wait_time or (runai_pod_group_wait_time_per_30second
+              * 0)) and last_over_time(runai_pod_group_wait_time_per_30second[120s])
+            record: runai_pod_group_total_wait_time
+          - expr: sum_over_time(avg(runai_workload_info{status="Running"}) by (uuid)[30s:1s])
+            record: runai_workload_run_time_per_30second
+          - expr: sum without(instance, pod) (runai_pod_group_wait_time_per_30second)
+              + (max_over_time(runai_pod_group_total_wait_time[5m:1s]) or runai_pod_group_wait_time_per_30second
+              * 0)
+            record: runai_workload_total_run_time
+          - expr: sum_over_time(avg(runai_workload_info{status=~"Pending|Swapped"}) by
+              (uuid)[30s:1s])
+            record: runai_workload_wait_time_per_30second
+          - expr: runai_workload_wait_time_per_30second + (runai_workload_total_wait_time
+              or runai_workload_wait_time_per_30second * 0)
+            record: runai_workload_total_wait_time
+      - interval: 1h
+        name: runai-rules-hourly-interval
+        rules:
+          - expr: sum_over_time(runai_allocated_gpu_count_per_pod[1h:1s])
+            record: runai_allocated_gpu_count_per_pod:hourly
+          - expr: sum_over_time(runai_allocated_millicpus_per_pod[1h:1s])
+            record: runai_allocated_millicpus_per_pod:hourly
+          - expr: sum_over_time(runai_allocated_memory_per_pod[1h:1s])
+            record: runai_allocated_memory_per_pod:hourly
+          - expr: sum_over_time(runai_used_cpu_cores_per_pod[1h:1s])
+            record: runai_used_cpu_cores_per_pod:hourly
+          - expr: sum_over_time(runai_used_memory_bytes_per_pod[1h:1s])
+            record: runai_used_memory_bytes_per_pod:hourly
+          - expr: sum_over_time(runai_idle_allocated_gpu_count_per_queue[1h:1s])
+            record: runai_gpu_idle_hours_per_queue:hourly
+      - name: runai-alerts
+        rules:
+          - alert: RunaiAgentPullRateLow
+            annotations:
+              summary: Runai Agent fails pulling configuration from the backend (instance
+                {{ $labels.instance }})
+            expr: (rate(successful_backend_sync_count{type="Pull"}[5m]) < 0.05 or absent(successful_backend_sync_count{type="Pull"}))
+            for: 10m
+            labels:
+              severity: critical
+          - alert: RunaiAgentClusterInfoPushRateLow
+            annotations:
+              summary: Runai cluster-sync fails pushing cluster info the backend (instance
+                {{ $labels.instance }})
+            expr: (rate(successful_backend_sync_count{type="ClusterInfoPush"}[5m]) < 0.05
+              or absent(successful_backend_sync_count{type="ClusterInfoPush"}))
+            for: 10m
+            labels:
+              severity: critical
+          - alert: RunaiDeploymentInsufficientReplicas
+            annotations:
+              summary: Runai Deployment has not matched the expected number of replicas.
+            expr: sum(min_over_time(kube_deployment_status_replicas_available{namespace=~"runai|runai-backend"}[30s]))
+              < sum(min_over_time(kube_deployment_spec_replicas{namespace=~"runai|runai-backend"}[30s]))
+            for: 5m
+            labels:
+              severity: critical
+          - alert: RunaiProjectControllerReconcileFailure
+            annotations:
+              summary: Runai project controller service had a runtime error while reconciling
+            expr: increase(controller_runtime_reconcile_errors_total{controller="project"}[10m])
+              > 0
+            labels:
+              severity: critical
+          - alert: RunaiStatefulSetInsufficientReplicas
+            annotations:
+              summary: Runai StatefulSet has not matched the expected number of replicas.
+            expr: sum(min_over_time(kube_statefulset_status_replicas_ready{namespace=~"runai|runai-backend"}[30s]))
+              < sum(min_over_time(kube_statefulset_status_replicas{namespace=~"runai|runai-backend"}[30s]))
+            for: 5m
+            labels:
+              severity: critical
+          - alert: RunaiCriticalProblem
+            annotations:
+              summary: Runai platform has a critical problem
+            expr: sum(ALERTS{alertname=~"Runai.*", severity="critical"} unless ALERTS{alertname="RunaiCriticalProblem"})>
+              0
+            for: 5m
+            labels:
+              severity: critical
+          - alert: RunaiDaemonSetRolloutStuck
+            annotations:
+              description: Runai DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset
+                }} has not finished or progressed for at least 5 minutes.
+              summary: Runai DaemonSet rollout is stuck.
+            expr: ((kube_daemonset_status_current_number_scheduled{namespace=~"runai|runai-backend"}!=kube_daemonset_status_desired_number_scheduled{namespace=~"runai|runai-backend"})
+              or (kube_daemonset_status_number_misscheduled{namespace=~"runai|runai-backend"}!=0)
+              or (kube_daemonset_status_updated_number_scheduled{namespace=~"runai|runai-backend"}!=kube_daemonset_status_desired_number_scheduled{namespace=~"runai|runai-backend"})
+              or (kube_daemonset_status_number_available{namespace=~"runai|runai-backend"}!=kube_daemonset_status_desired_number_scheduled{namespace=~"runai|runai-backend"}))
+            for: 5m
+            labels:
+              severity: critical
+          - alert: RunaiDeploymentUnavailableReplicas
+            annotations:
+              description: Runai Deployment {{ $labels.namespace }}/{{ $labels.deployment
+                }} has unavailable replicas.
+              summary: Runai Deployment has unavailable replicas.
+            expr: kube_deployment_status_replicas_unavailable{namespace=~"runai|runai-backend"}
+              > 0
+            for: 5m
+            labels:
+              severity: warning
+          - alert: RunaiDeploymentNoAvailableReplicas
+            annotations:
+              description: Runai Deployment {{ $labels.namespace }}/{{ $labels.deployment
+                }} has no available replicas.
+              summary: Runai Deployment has no available replicas.
+            expr: (kube_deployment_status_replicas_available{namespace=~"runai|runai-backend"}==0)
+              and (kube_deployment_spec_replicas{namespace=~"runai|runai-backend"}>0)
+            for: 5m
+            labels:
+              severity: critical
+          - alert: RunaiDaemonSetUnavailableOnNodes
+            annotations:
+              description: Runai Daemonset {{ $labels.namespace }}/{{ $labels.daemonset
+                }} is unavailable on certain nodes.
+              summary: Runai Daemonset is unavailable on nodes.
+            expr: kube_daemonset_status_number_unavailable{namespace=~"runai|runai-backend"}
+              > 0
+            for: 5m
+            labels:
+              severity: critical
+          - alert: RunaiStatefulSetNoAvailableReplicas
+            annotations:
+              description: Runai StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset
+                }} has no available replicas.
+              summary: Runai StatefulSet has no available replicas.
+            expr: (kube_statefulset_status_replicas_available{namespace=~"runai|runai-backend"}==0)
+              and (kube_statefulset_replicas{namespace=~"runai|runai-backend"}>0)
+            for: 5m
+            labels:
+              severity: critical
+          - alert: RunaiContainerRestarting
+            annotations:
+              description: Runai container {{ $labels.namespace }}/{{ $labels.pod }}/{{
+                $labels.container }} has restarted more than two times in the last 10
+                min.
+              summary: Runai container is restarting.
+            expr: delta(kube_pod_container_status_restarts_total{namespace=~"runai|runai-backend"}[10m])
+              >= 2
+            for: 10s
+            labels:
+              severity: warning
+          - alert: RunaiContainerMemoryUsageWarning
+            annotations:
+              description: Runai container {{ $labels.namespace }}/{{ $labels.pod }}/{{
+                $labels.container }} is using more than 80% of its memory limit.
+              summary: Runai container is using more than 80% of its memory limit.
+            expr: ((container_memory_usage_bytes{namespace=~"runai|runai-backend"}>0)
+              / on(container, pod, namespace) (kube_pod_container_resource_limits{namespace=~"runai|runai-backend",
+              unit='byte'}>0)) > 0.8
+            for: 2m
+            labels:
+              severity: warning
+          - alert: RunaiContainerMemoryUsageCritical
+            annotations:
+              description: Runai container {{ $labels.namespace }}/{{ $labels.pod }}/{{
+                $labels.container }} is using more than 90% of its memory limit.
+              summary: Runai container is using more than 90% of its memory limit.
+            expr: ((container_memory_usage_bytes{namespace=~"runai|runai-backend"}>0)
+              / on(container, pod, namespace) (kube_pod_container_resource_limits{namespace=~"runai|runai-backend",
+              unit="byte"}>0)) > 0.9
+            for: 30s
+            labels:
+              severity: critical
+          - alert: RunaiCpuUsageWarning
+            annotations:
+              description: Runai container {{ $labels.namespace }}/{{ $labels.pod }}/{{
+                $labels.container }} is using more than 80% of its CPU limit.
+              summary: Runai container is using more than 80% of its CPU limit.
+            expr: ((rate(container_cpu_usage_seconds_total{namespace=~"runai|runai-backend"}[2m])>0)
+              / on(container, pod, namespace) (kube_pod_container_resource_limits{namespace=~"runai|runai-backend",
+              unit="core"}>0)) > 0.8
+            for: 2m
+            labels:
+              severity: warning
+    secret:
+      name: runai-grafana-secret
+    spec:
+      arbitraryFSAccessThroughSMs: {}
+      evaluationInterval: 30s
+      podMonitorNamespaceSelector:
+        matchLabels:
+          name: runai
+      podMonitorSelector:
+        matchExpressions:
+          - key: release
+            operator: In
+            values:
+              - runai
+              - runai-cluster
+      remoteWrite:
+        - basicAuth:
+            password:
+              key: remoteWritePassword
+              name: runai-grafana-secret
+            username:
+              key: remoteWriteUsername
+              name: runai-grafana-secret
+          remoteTimeout: 30s
+          url: "https://aaa.runailabs.com/api/v1/receive"
+          writeRelabelConfigs:
+            - action: keep
+              regex: (kube_pod_info|kube_node_status_capacity|runai_node_nodepool|reporter_push_gateway_.*|kube_node_status_condition|runai_node_gpu_utilization|runai_requested_gpus|runai_pod_phase_with_info|runai_pod_group_phase_with_info|runai_queue_info|runai_queue_deserved_gpus|runai_queue_quota_cpu_cores|runai_queue_quota_memory_bytes|runai_pod_group_total_runtime|runai_pod_group_total_wait_time|runai_node_cpu_utilization|runai_cpu_utilization|runai_job_cpu_usage|runai_node_memory_utilization|runai_memory_utilization|runai_node_memory_used_bytes|runai_memory_used_bytes|runai_job_memory_used_bytes|runai_node_requested_memory_bytes|runai_active_job_memory_requested_bytes|runai_node_cpu_requested|runai_node_cpu_capacity|runai_active_job_cpu_requested_cores|runai_pod_group_image|runai_active_job_cpu_limits|runai_active_job_memory_limits|runai_allocated_gpus|runai_mig_mode_gpu_count|runai_requested_gpus_memory|runai_cluster_name|runai_requested_mig_devices|runai_cluster_cpu_utilization|runai_cluster_memory_used_bytes|runai_cluster_memory_utilization|runai_node_cpu_requested_cores|runai_node_total_memory_bytes|runai_node_used_memory_bytes|runai_job_image|runai_job_status_with_info|runai_job_total_runtime|runai_job_total_wait_time|runai_job_status_with_info|runai_project_guaranteed_gpus|runai_project_info|runai_job_requested_gpus|runai_job_requested_gpu_memory|runai_requested_gpus_per_workload_type_per_queue|runai_pod_group_swap_memory_used_bytes|runai_pod_cpu_usage|runai_pod_memory_used_bytes|revision_app_request_count|revision_app_request_latencies_sum|revision_app_request_latencies_count|revision_app_request_latencies_bucket|runai_deployment_request_rate|runai_deployment_request_latencies|kube_node_labels|runai_dashboard:overview:gpu_nodes|runai_dashboard:overview:total_gpus|runai_dashboard:overview:allocated_gpus|runai_dashboard:overview:running_workloads:interactive_on_gpu|runai_dashboard:overview:running_workloads:training_on_gpu|runai_dashboard:overview:running_workloads:inference_on_gpu|runai_dashboard:overview:running_workloads:cpu_only|runai_dashboard:overview:allocated_gpus_per_project:project|runai_dashboard:overview:allocated_gpus_per_project:unallocated|runai_dashboard:overview:gpu_compute_utilization|runai_dashboard:overview:gpu_memory_utilization|runai_dashboard:overview:idle_allocated_gpus|runai_idle_allocated_gpu_count_per_workload|runai_idle_allocated_gpu_count_per_nodepool|runai_dashboard:overview:workloads_with_idle_allocated_gpus:idle_time|runai_dashboard:analytics:gpu_allocation|runai_dashboard:analytics:gpu_memory_allocation|runai_dashboard:analytics:gpu_compute_utilization|runai_dashboard:analytics:gpu_memory_utilization|runai_dashboard:analytics:allocated_gpus_per_project:total|runai_dashboard:analytics:allocated_gpus_per_project:total_allocated|runai_dashboard:analytics:allocated_gpus_per_project:project|runai_dashboard:analytics:gpu_compute_utilization_per_project:project|runai_dashboard:analytics:gpu_compute_utilization_per_node:node|runai_dashboard:analytics:gpu_allocation_per_node:node|runai_dashboard:analytics:gpu_count_per_node:node|runai_dashboard:analytics:gpu_count_per_node:total|runai_dashboard:analytics:gpu_memory_size_per_node:node|runai_dashboard:analytics:gpu_memory_size_per_node:total|runai_dashboard:analytics:gpu_memory_allocation_per_node:node|runai_dashboard:analytics:gpu_memory_utilization_per_node:node|runai_gpu_count_per_node|runai_total_gpus_per_nodepool|runai_gpu_count_per_nodepool|runai_ready_gpu_count_per_nodepool|runai_gpu_count_per_cluster|runai_ready_gpu_count_per_cluster|runai_gpu_nodes_count_per_nodepool|runai_ready_gpu_nodes_count_per_nodepool|runai_gpu_nodes_count_per_cluster|runai_ready_gpu_nodes_count_per_cluster|runai_pending_requested_gpu_count_per_queue|runai_pending_requested_gpu_count_per_nodepool|runai_pending_requested_gpu_count_per_cluster|runai_allocated_gpu_count_per_pod|runai_allocated_gpu_count_per_pod:hourly|runai_allocated_gpu_count_per_workload|runai_allocated_gpu_count_per_queue_per_workload_type|runai_allocated_gpu_count_per_queue|runai_allocated_gpu_count_per_project_nodepool|runai_allocated_gpu_count_per_project|runai_allocated_gpu_count_per_department|runai_allocated_gpu_count_per_gpu|runai_allocated_gpu_count_per_node|runai_allocated_gpu_count_per_nodepool|runai_allocated_gpu_count_per_cluster|runai_gpu_allocation_percentage_per_node|runai_gpu_allocation_percentage_per_nodepool|runai_gpu_allocation_percentage_per_cluster|runai_deserved_gpu_count_per_queue|runai_deserved_gpu_count_per_project|runai_deserved_gpu_count_per_department|runai_gpu_utilization_per_pod_per_gpu|runai_gpu_utilization_per_workload|runai_last_gpu_utilization_time_per_workload|runai_gpu_idle_seconds_per_workload|runai_gpu_idle_hours_per_queue:hourly|runai_gpu_utilization_per_queue_per_workload_type|runai_gpu_utilization_per_queue|runai_gpu_utilization_per_project_per_workload_type|runai_gpu_utilization_per_project|runai_gpu_utilization_per_department|runai_gpu_utilization_per_gpu|runai_last_gpu_utilization_time_per_gpu|runai_gpu_idle_seconds_per_gpu|runai_gpu_utilization_per_node|runai_gpu_utilization_per_nodepool|runai_gpu_utilization_per_cluster|runai_gpu_memory_used_mebibytes_per_pod_per_gpu|runai_gpu_memory_used_mebibytes_per_workload|runai_gpu_memory_used_mebibytes_per_queue_per_workload_type|runai_gpu_memory_used_mebibytes_per_gpu|runai_gpu_memory_used_mebibytes_per_node|runai_gpu_memory_used_mebibytes_per_nodepool|runai_gpu_memory_used_mebibytes_per_cluster|runai_gpu_memory_total_mebibytes_per_gpu|runai_gpu_memory_total_mebibytes_per_node|runai_gpu_memory_total_mebibytes_per_nodepool|runai_gpu_memory_total_mebibytes_per_cluster|runai_gpu_memory_utilization_per_node|runai_gpu_memory_utilization_per_nodepool|runai_gpu_memory_utilization_per_cluster|runai_pending_requested_cpu_cores_per_workload|runai_pending_requested_cpu_cores_per_queue|runai_pending_requested_cpu_cores_per_nodepool|runai_pending_requested_cpu_cores_per_cluster|runai_allocated_millicpus_per_pod|runai_allocated_millicpus_per_pod:hourly|runai_allocated_cpu_cores_per_workload|runai_allocated_cpu_cores_per_queue|runai_allocated_cpu_cores_per_project|runai_allocated_cpu_cores_per_department|runai_allocated_cpu_cores_per_node|runai_allocated_cpu_cores_per_nodepool|runai_allocated_cpu_cores_per_cluster|runai_used_cpu_cores_per_pod|runai_used_cpu_cores_per_pod:hourly|runai_used_cpu_cores_per_node|runai_used_cpu_cores_per_nodepool|runai_used_cpu_cores_per_cluster|runai_deserved_cpu_cores_per_queue|runai_deserved_cpu_cores_per_project|runai_deserved_cpu_cores_per_department|runai_cpu_cores_count_per_node|runai_cpu_cores_count_per_nodepool|runai_ready_cpu_cores_count_per_nodepool|runai_cpu_cores_count_per_cluster|runai_ready_cpu_cores_count_per_cluster|runai_cpu_cores_allocation_percentage_per_node|runai_cpu_cores_allocation_percentage_per_nodepool|runai_cpu_cores_allocation_percentage_per_cluster|runai_cpu_utilization_per_pod|runai_cpu_utilization_per_workload|runai_cpu_utilization_per_queue|runai_cpu_utilization_per_project|runai_cpu_utilization_per_department|runai_cpu_utilization_per_node|runai_cpu_utilization_per_nodepool|runai_cpu_utilization_per_cluster|runai_pending_requested_memory_bytes_per_workload|runai_pending_requested_memory_bytes_per_queue|runai_pending_requested_memory_bytes_per_nodepool|runai_pending_requested_memory_bytes_per_cluster|runai_allocated_memory_per_pod|runai_allocated_memory_per_pod:hourly|runai_allocated_memory_bytes_per_node|runai_allocated_memory_bytes_per_nodepool|runai_allocated_memory_bytes_per_cluster|runai_used_memory_bytes_per_pod|runai_used_memory_bytes_per_pod:hourly|runai_used_memory_bytes_per_node|runai_used_memory_bytes_per_nodepool|runai_used_memory_bytes_per_cluster|runai_deserved_memory_bytes_per_queue|runai_deserved_memory_bytes_per_project|runai_deserved_memory_bytes_per_department|runai_total_memory_bytes_per_node|runai_total_memory_bytes_per_nodepool|runai_total_memory_bytes_per_cluster|runai_memory_allocation_percentage_per_node|runai_memory_allocation_percentage_per_nodepool|runai_memory_allocation_percentage_per_cluster|runai_memory_utilization_per_node|runai_memory_utilization_per_nodepool|runai_memory_utilization_per_cluster|runai_workload_count_per_type_per_phase_per_queue|runai_workload_count_per_type_per_phase_per_nodepool|runai_workload_count_per_type_per_phase_per_cluster|runai_workloads_count_gpu_interactive|runai_workloads_count_gpu_train|runai_workloads_count_gpu_inference|runai_workloads_count_cpu_only|runai_node_memory_mem_available_bytes|runai_node_memory_mem_total_bytes|runai_gpu_oomkill_burst_count_per_gpu|runai_gpu_oomkill_burst_count_per_node|runai_gpu_oomkill_burst_count_per_nodepool|runai_gpu_oomkill_idle_count_per_gpu|runai_gpu_oomkill_idle_count_per_node|runai_gpu_oomkill_idle_count_per_nodepool|runai_gpu_oomkill_priority_count_per_gpu|runai_gpu_oomkill_priority_count_per_node|runai_gpu_oomkill_priority_count_per_nodepool|runai_gpu_gr_engine_active_per_pod_per_gpu|runai_gpu_gr_engine_active_per_workload|runai_gpu_gr_engine_active_per_gpu|runai_gpu_gr_engine_active_per_node|runai_gpu_dram_active_per_pod_per_gpu|runai_gpu_dram_active_per_workload|runai_gpu_dram_active_per_gpu|runai_gpu_dram_active_per_node|runai_gpu_sm_active_per_pod_per_gpu|runai_gpu_sm_active_per_workload|runai_gpu_sm_active_per_gpu|runai_gpu_sm_active_per_node|runai_gpu_sm_occupancy_per_pod_per_gpu|runai_gpu_sm_occupancy_per_workload|runai_gpu_sm_occupancy_per_gpu|runai_gpu_sm_occupancy_per_node|runai_gpu_pipe_tensor_active_per_pod_per_gpu|runai_gpu_pipe_tensor_active_per_workload|runai_gpu_pipe_tensor_active_per_gpu|runai_gpu_pipe_tensor_active_per_node|runai_gpu_pipe_fp64_active_per_pod_per_gpu|runai_gpu_pipe_fp64_active_per_workload|runai_gpu_pipe_fp64_active_per_gpu|runai_gpu_pipe_fp64_active_per_node|runai_gpu_pipe_fp32_active_per_pod_per_gpu|runai_gpu_pipe_fp32_active_per_workload|runai_gpu_pipe_fp32_active_per_gpu|runai_gpu_pipe_fp32_active_per_node|runai_gpu_pipe_fp16_active_per_pod_per_gpu|runai_gpu_pipe_fp16_active_per_workload|runai_gpu_pipe_fp16_active_per_gpu|runai_gpu_pipe_fp16_active_per_node|runai_gpu_nvlink_tx_bytes_per_pod_per_gpu|runai_gpu_nvlink_tx_bytes_per_workload|runai_gpu_nvlink_tx_bytes_per_gpu|runai_gpu_nvlink_tx_bytes_per_node|runai_gpu_nvlink_rx_bytes_per_pod_per_gpu|runai_gpu_nvlink_rx_bytes_per_workload|runai_gpu_nvlink_rx_bytes_per_gpu|runai_gpu_nvlink_rx_bytes_per_node|runai_gpu_pcie_tx_bytes_per_pod_per_gpu|runai_gpu_pcie_tx_bytes_per_workload|runai_gpu_pcie_tx_bytes_per_gpu|runai_gpu_pcie_tx_bytes_per_node|runai_gpu_pcie_rx_bytes_per_pod_per_gpu|runai_gpu_pcie_rx_bytes_per_workload|runai_gpu_pcie_rx_bytes_per_gpu|runai_gpu_pcie_rx_bytes_per_node|runai_e2e_scheduling_latency_milliseconds|runai_plugin_scheduling_latency_microseconds|runai_action_scheduling_latency_microseconds|runai_task_scheduling_latency_microseconds|runai_total_preemption_attempts|node_memory_MemFree_bytes|machine_cpu_cores);.*|(up|kube_pod_container_resource_limits|kube_pod_container_resource_requests|container_cpu_usage_seconds_total|container_memory_usage_bytes|container_network_transmit_bytes_total|container_network_receive_bytes_total|kube_pod_container_status_restarts_total);runai
+              sourceLabels:
+                - __name__
+                - namespace
+            - action: drop
+              regex: (runai_requested_gpus|runai_pod_phase_with_info|runai_pod_group_phase_with_info|runai_allocated_gpus|runai_requested_gpus_memory|runai_job_requested_gpu_memory|runai_job_requested_gpus|runai_job_status_with_info);(Succeeded|Failed|Deleted|Timeout)
+              sourceLabels:
+                - __name__
+                - detailed_status
+      replicas: 1
+      resources: {}
+      retention: 2h
+      rules:
+        alert: {}
+      scrapeInterval: 30s
+      serviceMonitorSelector:
+        matchExpressions:
+          - key: app
+            operator: In
+            values:
+              - runai-scheduler
+              - nvidia-dcgm-exporter
+              - dcgm-exporter
+              - runai-project-controller
+              - kube-prometheus-stack-node-exporter
+              - kube-prometheus-stack-kube-state-metrics
+              - kube-prometheus-stack-kubelet
+              - runai-knative-serving
+              - runai-node-exporter
+              - runai-agent
+  queue-controller:
+    args:
+      verbosity: 0
+    enableWebhook: true
+    enabled: true
+    image:
+      env: prod
+      name: queue-controller
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    resources:
+      limits:
+        cpu: 100m
+        memory: 512Mi
+      requests:
+        cpu: 50m
+        memory: 256Mi
+    service:
+      metrics:
+        port: 8080
+        targetPort: 8080
+      type: ClusterIP
+      webhook:
+        port: 443
+        targetPort: 9443
+  researcher-service:
+    args:
+      authEnabled: true
+      verbosity: 4
+    enabled: true
+    image:
+      env: prod
+      name: researcher-service
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    ingress:
+      annotations:
+        nginx.ingress.kubernetes.io/cors-allow-headers: Accept, Content-Type, Content-Length,
+          Accept-Encoding, X-CSRF-Token, Authorization, authinfo
+        nginx.ingress.kubernetes.io/enable-cors: "true"
+      enabled: true
+      tls-secret: runai-cluster-domain-tls-secret
+    oauthProxy:
+      clientID: clientId
+      clientSecret: clientSecret
+      cookieSecret: test-cookie-secret-placeholder
+      image:
+        name: oauth2-proxy
+        pullPolicy: IfNotPresent
+        repository: nvcr.io/nvidia/runai
+        tag: v7.7.1
+    resources:
+      oauthProxy:
+        limits:
+          cpu: 200m
+          memory: 512Mi
+        requests:
+          cpu: 100m
+          memory: 256Mi
+      researcherService:
+        limits:
+          cpu: "1"
+          memory: 1Gi
+        requests:
+          cpu: 500m
+          memory: 512Mi
+    route: {}
+    runaiSharedDirectoryHostPath: /runai/shared
+    service:
+      nodePort: 32282
+  runai-container-toolkit:
+    additionalNodeAffinityMatchExpressions:
+      - key: node-role.kubernetes.io/runai-dynamic-mig
+        operator: NotIn
+        values:
+          - "true"
+    allocator: {}
+    compute: {}
+    enabled: true
+    memory: {}
+    metrics: {}
+    pid: {}
+    resources:
+      limits:
+        cpu: "2"
+        memory: 512Mi
+      requests:
+        cpu: 50m
+        memory: 256Mi
+    route: {}
+    runaiProcDirectoryHostPath: /var/lib/runai/proc
+    runaiSharedDirectoryHostPath: /var/lib/runai/shared
+    swap: {}
+    waitForNvidiaToolkit: true
+  runai-container-toolkit-exporter:
+    additionalNodeAffinityMatchExpressions:
+      - key: node-role.kubernetes.io/runai-dynamic-mig
+        operator: NotIn
+        values:
+          - "true"
+    enabled: false
+    image:
+      env: prod
+      name: runai-container-toolkit-exporter
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    metrics:
+      port: 9101
+      portName: metrics
+    resources:
+      limits:
+        cpu: 100m
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 128Mi
+    runaiProcDirectoryHostPath: /var/lib/runai/proc
+  runai-node-exporter:
+    args:
+      collectInterval: 5s
+    enabled: true
+    image:
+      env: prod
+      name: runai-node-exporter
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    resources:
+      limits:
+        cpu: 1500m
+        memory: 4Gi
+      requests:
+        cpu: "1"
+        memory: 2Gi
+    runaiProcDirectoryHostPath: /var/lib/runai/proc
+    runaiProcDirectoryMountPath: /runai/proc
+    service:
+      port: 9101
+      portName: metrics
+      type: ClusterIP
+    serviceMonitor:
+      path: /metrics
+  runai-scheduler:
+    GOGC: 400
+    advancedCSIScheduling: false
+    args:
+      clientBurst: 300
+      clientQPS: 50
+      defaultPriority: 50
+      defaultSchedulerName: runai-scheduler
+      defaultSchedulerPeriod: 5s
+      useSchedulingSignatures: true
+      verbosity: 4
+    cpuPlacementStrategy: binpack
+    detailedFitErrors: true
+    enabled: false
+    gpuPlacementStrategy: binpack
+    image:
+      env: prod
+      name: runai-scheduler
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    inferencePreemptible: false
+    isOverProvisioning: false
+    logging: {}
+    migProvisioner:
+      image:
+        env: prod
+        name: mig-provisioner
+        pullPolicy: Always
+        repository: nvcr.io/nvidia/runai
+        tag: set-by-ldflags
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 200m
+          memory: 256Mi
+    profiling: {}
+    replicaCount: 1
+    resourceReservation:
+      createNamespace: true
+      image:
+        name: sleep
+        tag: 1.0.0
+      namespace: runai-reservation
+      serviceAccountName: runai-reservation-engine
+    resourceReservationBc:
+      image:
+        env: prod
+        name: resource-reservation-bc
+        pullPolicy: Always
+        repository: nvcr.io/nvidia/runai
+        tag: set-by-ldflags
+    resources:
+      limits:
+        cpu: "2"
+        memory: 2Gi
+      requests:
+        cpu: 500m
+        memory: 1Gi
+    service:
+      port: 8080
+      targetPort: 8080
+      type: ClusterIP
+  runaiBackend:
+    clusterId: <Cluster ID generated by the run:ai onboarding process>
+    clusterName: <Cluster Name defined by the admin user onboarding process>
+    password: <Password for runai>
+    username: <Username for runai>
+  status-updater:
+    args:
+      verbosity: 0
+    enabled: true
+    image:
+      env: prod
+      name: status-updater
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    resources:
+      limits:
+        cpu: 700m
+        memory: 512Mi
+      requests:
+        cpu: 350m
+        memory: 256Mi
+  workload-controller:
+    enabled: true
+    externalAuthUrlEnabled: true
+    gitSyncImage:
+      name: git-sync
+      repository: registry.k8s.io/git-sync
+      tag: v4.2.1
+    health:
+      port: 8081
+      targetPort: 8081
+    image:
+      env: prod
+      name: workload-controller
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    jupyterUserIdentity: true
+    metrics:
+      enabled: false
+      port: 8383
+      targetPort: 8383
+    profiler:
+      enabled: false
+      serverAddress: localhost:6060
+    replicas: 1
+    resources:
+      limits:
+        cpu: "2"
+        memory: 2Gi
+      requests:
+        cpu: "1"
+        memory: 1Gi
+    runaiOauth2ProxyImage:
+      name: oauth2-proxy
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: v7.7.1
+    runaiOauth2ProxyRedisImage:
+      name: redis
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: 7.2.4-alpine
+    s3FileSystemImage:
+      name: goofys
+      repository: nvcr.io/nvidia/runai
+      tag: master
+    service:
+      port: 443
+      targetPort: 9443
+    type: ClusterIP
+  runtime-rules:
+    enabled: true
+    eventList:
+      - 50
+    image:
+      env: prod
+      name: runtime-rules
+      pullPolicy: Always
+      repository: nvcr.io/nvidia/runai
+      tag: set-by-ldflags
+    logLevel: 0
+    numberOfWorkersAutoDeleteCompleted: 4
+    numberOfWorkersPerQueue: 20
+    resources:
+      limits:
+        cpu: 750m
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+    workerSleepSeconds: 5
+status:
+  conditions:
+    - lastTransitionTime: null
+      message: ""
+      reason: ""
+      status: ""
+      type: runai_test

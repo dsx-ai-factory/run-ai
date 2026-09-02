@@ -1,0 +1,9 @@
+image: ubuntu
+
+storage:
+  s3:
+    - bucket: included-bucket
+      path: /container/included
+      url: "https://s3.amazonaws.com"
+    - name: s3-excluded
+      exclude: true

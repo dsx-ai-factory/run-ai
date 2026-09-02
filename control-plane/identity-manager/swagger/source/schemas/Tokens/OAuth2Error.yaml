@@ -1,0 +1,25 @@
+type: object
+description: OAuth 2.0 error response (RFC 6749 Section 5.2)
+required:
+  - error
+properties:
+  error:
+    type: string
+    description: A single ASCII error code
+    enum:
+      - invalid_request
+      - invalid_client
+      - invalid_grant
+      - unauthorized_client
+      - unsupported_grant_type
+      - invalid_scope
+      - server_error
+      - temporarily_unavailable
+    example: "invalid_client"
+  error_description:
+    type: string
+    description: Human-readable ASCII text providing additional information
+    example: "Client authentication failed"
+  error_uri:
+    type: string
+    description: URI identifying a human-readable web page with information about the error

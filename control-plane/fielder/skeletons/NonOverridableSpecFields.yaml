@@ -1,0 +1,17 @@
+allOf:
+  - replace: me
+  - properties:
+      connections:
+        description: List of connections that either expose ports from the container (each port is associated with a tool that the container runs), or URL's to be used for connecting to an external tool that is related to the action of the container (such as Weights & Biases).
+        type: array
+        items:
+          $ref: "./Connection.yaml"
+      overrideUidGidInWorkspace:
+        description: Allow specifying uid/gid as part of create workspace. This is relevant only for custom uigGidSource.
+        type: boolean
+        default: false
+      routingMethod:
+        description: Indicates the supported routing method (host-base, path-base or agnostic)
+        type: string
+        default: agnostic
+        x-internal: true

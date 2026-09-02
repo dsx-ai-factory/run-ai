@@ -1,0 +1,6 @@
+description: Set of annotations to populate into the container running the workload.
+type: array
+items:
+  $ref: "./Annotation.yaml"
+maxItems: 1000
+nullable: true

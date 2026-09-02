@@ -1,0 +1,59 @@
+type: object
+required:
+  - createdAt
+  - updatedAt
+  - createdBy
+  - updatedBy
+  - scopeType
+  - id
+  - name
+  - url
+  - isPrivate
+properties:
+  createdAt:
+    type: string
+    format: date-time
+    description: The date and time the helm repo was created.
+  updatedAt:
+    type: string
+    format: date-time
+    description: The date and time the helm repo was updated.
+  createdBy:
+    type: string
+    description: The user who created the helm repo.
+  updatedBy:
+    type: string
+    description: The user who updated the helm repo.
+  scopeType:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/ScopeType.yaml'
+  scopeId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/ScopeId.yaml'
+    nullable: true
+  tenantId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml'
+    nullable: true
+  clusterId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml'
+    nullable: true
+  departmentId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/DepartmentId.yaml'
+    nullable: true
+  projectId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/ProjectId.yaml'
+    nullable: true
+  id:
+    type: string
+    format: uuid
+    description: The ID of the helm repo.
+  name:
+    type: string
+    description: The name of the helm repo.
+  url:
+    type: string
+    description: The URL of the helm repo.
+  isPrivate:
+    type: boolean
+    description: Whether the helm repo requires authentication to browse.
+  description:
+    type: string
+    description: The description of the helm repo.

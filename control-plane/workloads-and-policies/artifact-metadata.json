@@ -1,0 +1,12 @@
+{
+  "service_name": "workloads-and-policies",
+  "artifact_type": "",
+  "notifications": {
+    "slack": {
+      "mention": "@viper"
+    }
+  },
+  "jira": {
+    "team_name": "Viper Team"
+  }
+}

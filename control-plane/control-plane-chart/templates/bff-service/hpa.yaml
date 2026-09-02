@@ -1,0 +1,1 @@
+{{- include "common.hpa" (list . .Values.bffService.autoscaling .Values.bffService) -}}

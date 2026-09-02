@@ -1,0 +1,28 @@
+type: object
+x-internal: true
+required:
+  - realm_name
+  - tenant_id
+properties:
+  realm_name:
+    type: string
+    pattern: "^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$"
+    minLength: 2
+    maxLength: 255
+  tenant_id:
+    type: string
+    pattern: "^[0-9]{1,}$"
+    minLength: 1
+    maxLength: 64
+  external_redirect_uri:
+    items:
+      type: string
+      minLength: 1
+      maxLength: 2048
+    type: array
+    minItems: 0
+    maxItems: 100
+example:
+  realm_name: runai
+  tenant_id: 1
+  

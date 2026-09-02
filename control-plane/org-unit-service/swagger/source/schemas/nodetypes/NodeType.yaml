@@ -1,0 +1,9 @@
+properties:
+  id:
+    type: string
+    example: "8aa2ca8b-85b2-4169-9e71-fd2ee05e4cb3"
+  name:
+    type: string
+    example: "type-a"
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"

@@ -1,0 +1,36 @@
+post:
+  summary: Create a workload from internal v1-to-v2 conversion.
+  description: |
+    Internal endpoint for creating workloads that were converted from v1 native types.
+    This endpoint is trusted and sets the translated_from_v1 flag, which skips GVK policy
+    (since the original native policy already ran on v1).
+  operationId: create_workload_internal
+  x-service: workloads-manager
+  x-test-coverage:
+    - control-plane/workloads-manager/pkg/services/api_workloads_v2_impl_test.go
+  x-internal: true
+  x-no-authorization: true
+  tags:
+    - Workloads V2
+  parameters:
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/DryRun.yaml'
+  requestBody:
+    description: Workload metadata and manifest
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/WorkloadsV2/WorkloadV2CreateRequest.yaml"
+  responses:
+    202:
+      description: Workload creation request accepted.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/WorkloadsV2/WorkloadV2.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

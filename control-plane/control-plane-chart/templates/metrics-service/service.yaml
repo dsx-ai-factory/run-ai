@@ -1,0 +1,3 @@
+{{- if .Values.metricsService.enabled }}
+{{- include "common.service" (list . .Values.metricsService.service .Values.metricsService) }}
+{{- end }}

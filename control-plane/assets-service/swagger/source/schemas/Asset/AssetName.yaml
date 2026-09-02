@@ -1,0 +1,4 @@
+description: The name of the asset.
+type: string
+minLength: 1
+example: my-asset

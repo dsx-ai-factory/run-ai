@@ -1,0 +1,10 @@
+{{- include "common.job" (list . .Values.secretGenerator .Values.secretGenerator.serviceAccount "control-plane.secretGenerator.job") }}
+
+{{- define "control-plane.secretGenerator.job" -}}
+spec:
+  template:
+    spec:
+      containers:
+      - {{- include "common.container" . | nindent 8 }}
+      restartPolicy: OnFailure
+{{- end }}

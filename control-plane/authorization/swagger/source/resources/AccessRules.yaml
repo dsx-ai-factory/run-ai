@@ -1,0 +1,98 @@
+post:
+  summary: Create an access rule. 
+  description: Use to bind a predefined role to a subject (user, group or application) in a scope.
+  operationId: create_access_rule
+  x-service: authorization
+  x-test-coverage:
+    - e2e/src/test/suites/advancedSuite/permissions/applicationAggregatedApi.test.ts
+    - e2e/src/test/suites/advancedSuite/permissions/accessRuleUserV2.test.ts
+    - e2e/src/test/suites/advancedSuite/permissions/accessRulesApi.test.ts
+    - e2e/src/test/suites/advancedSuite/authorization/authorizationUI.test.ts
+  x-authorize:
+    resource-type: access_rules
+    action: create
+  x-audit: true
+  tags:
+    - Access rules
+  requestBody:
+    description: The access rule to create.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/AccessRules/AccessRuleCreationFields.yaml'
+  responses:
+    '201':
+      description: Created
+      content:
+        application/json:
+          schema:
+              $ref: '../schemas/AccessRules/AccessRule.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+get:
+  summary: List the access rules.
+  description: Retrieve a list of access rules.
+  operationId: get_access_rules
+  x-service: authorization
+  x-test-coverage:
+    - e2e/src/test/suites/advancedSuite/permissions/applicationAggregatedApi.test.ts
+    - e2e/src/test/suites/advancedSuite/permissions/accessRuleUserV2.test.ts
+    - e2e/src/test/suites/advancedSuite/permissions/accessRulesApi.test.ts
+    - e2e/src/test/suites/advancedSuite/authorization/authorizationUI.test.ts
+  x-authorize:
+    resource-type: access_rules
+    action: read
+  tags:
+    - Access rules
+  parameters:
+    - $ref: "../parameters/query/SubjectTypeOptional.yaml"
+    - $ref: '../parameters/query/SubjectIds.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../parameters/query/LastUpdated.yaml'
+    - $ref: '../parameters/query/IncludeDeleted.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml'
+    - $ref: '../parameters/query/ScopeIdOptional.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+    - $ref: '../parameters/query/AccessRulesSort.yaml'
+    - $ref: '../parameters/query/AccessRulesFilter.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Search.yaml'
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - totalRecords
+              - displayRecords
+              - accessRules
+            properties:
+              totalRecords:
+                type: integer
+                example: 1
+              displayRecords:
+                type: integer
+                example: 1
+              accessRules:
+                $ref: '../schemas/AccessRules/AccessRules.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

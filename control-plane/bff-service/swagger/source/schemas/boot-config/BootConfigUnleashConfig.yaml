@@ -1,0 +1,18 @@
+type: object
+required:
+  - url
+  - clientKey
+  - appName
+  - environment
+properties:
+  url:
+    type: string
+  clientKey:
+    type: string
+    description: Browser-public Unleash frontend token.
+  appName:
+    type: string
+  environment:
+    type: string
+  project:
+    type: string

@@ -1,0 +1,23 @@
+.form-hint {
+  .q-field__control.row {
+    display: none;
+  }
+
+  .q-field__bottom--animated {
+    transform: translateY(50%);
+    padding: 0;
+    align-items: center;
+  }
+}
+
+.form-hint-translate-y-100 {
+  .q-field__control.row {
+    display: none;
+  }
+
+  .q-field__bottom--animated {
+    transform: translateY(100%);
+    padding: 0;
+    align-items: center;
+  }
+}

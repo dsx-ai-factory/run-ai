@@ -1,0 +1,6 @@
+apiVersion: run.run.ai/v2alpha1
+kind: Project
+metadata:
+  name: project-sample
+spec:
+  # TODO(user): Add fields here

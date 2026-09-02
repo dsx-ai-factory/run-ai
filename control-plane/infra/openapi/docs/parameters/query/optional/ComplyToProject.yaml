@@ -1,0 +1,8 @@
+name: complyToProject
+in: query
+required: false
+description: Include workload creation compliance information of an asset, for a given project, as part of the response.
+  To check compliance, you need to provide both project id and workload type.
+schema:
+  type: integer
+  format: int32

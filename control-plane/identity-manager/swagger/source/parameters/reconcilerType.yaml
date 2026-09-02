@@ -1,0 +1,9 @@
+type: string
+nullable: true
+enum:
+- realms
+- clients
+- apps
+- internalApps
+- userApps
+- workloadAuth

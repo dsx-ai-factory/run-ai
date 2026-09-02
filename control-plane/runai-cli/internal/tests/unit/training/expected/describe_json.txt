@@ -1,0 +1,310 @@
+{
+  "general": {
+    "name": "my-training-demo-123",
+    "id": "0586e34b-6c17-419b-9cc6-c091cb4d72f5",
+    "type": "Training",
+    "phase": "Pending",
+    "project": "team-b",
+    "department": "default",
+    "createdAt": "2025-12-15T08:58:28.012976Z",
+    "updatedAt": "2025-12-15T08:59:24.401794Z",
+    "submittedBy": "test@run.ai",
+    "priority": "low (40)",
+    "category": "Train",
+    "environmentVariables": {
+      "BATCH_SIZE": "32",
+      "EPOCHS": "100",
+      "LEARNING_RATE": "0.001",
+      "RUNAI_JOB_NAME": "${RUNAI_JOB_NAME}",
+      "RUNAI_PROJECT": "${RUNAI_PROJECT}"
+    },
+    "command": "sh -c 'echo \"Training simulation\"; sleep 30'",
+    "cliCommand": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai training submit my-training-demo-123 --project team-b --image gcr.io/knative-samples/helloworld-go --image-pull-policy IfNotPresent --working-dir /app -g 1 --runs 5 --parallelism 2 --backoff-limit 3 --restart-policy OnFailure --environment-variable BATCH_SIZE=32 --environment-variable EPOCHS=100 --environment-variable LEARNING_RATE=0.001 --label experiment=demo --label framework=custom --annotation owner=data-science-team --existing-pvc claimname=my-simple-pvc,path=/data --external-url container=8080,authgroups=ml-team:data-scientists:platform-ops --auto-deletion-time-after-completion 1h --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 1000 --supplemental-groups 2000,3000 --capability SYS_PTRACE --capability NET_ADMIN --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --command -- sh -c 'echo \"Training simulation\"; sleep 30'"
+  },
+  "workloadDetails": {
+    "preemptible": true,
+    "images": [
+      "gcr.io/knative-samples/helloworld-go"
+    ],
+    "imagePullPolicy": "IfNotPresent",
+    "workingDir": "/app",
+    "nodeType": "gpu-nodes",
+    "runAsUser": 1000,
+    "runAsGroup": 1000,
+    "capabilities": [
+      "SYS_PTRACE",
+      "NET_ADMIN"
+    ],
+    "tolerations": [
+      "nvidia.com/gpu=true:NoSchedule"
+    ]
+  },
+  "compute": {
+    "requestedResources": {
+      "gpuCompute": {
+        "requested": 1
+      },
+      "cpuCores": {
+        "requested": 0
+      },
+      "gpuMemory": {
+        "request": "",
+        "limit": ""
+      },
+      "cpuMemory": {
+        "request": "",
+        "limit": ""
+      }
+    },
+    "allocatedResources": {
+      "gpuCompute": 0,
+      "cpuCores": 0,
+      "gpuMemory": "",
+      "cpuMemory": ""
+    },
+    "requestedNodePools": [
+      "default"
+    ]
+  },
+  "storage": {
+    "pvcs": [
+      {
+        "name": "my-simple-pvc",
+        "mountPath": "/local/pvc",
+        "readOnly": false
+      },
+      {
+        "name": "claim-24mqhfjj7j",
+        "mountPath": "/local/vol",
+        "size": "1G",
+        "ephemeral": false,
+        "storageClass": "standard"
+      }
+    ],
+    "gits": [
+      {
+        "name": "https://github.com/run-ai",
+        "mountPath": "/git"
+      }
+    ],
+    "hostPaths": [
+      {
+        "name": "/host/path",
+        "mountPath": "/hostpath"
+      }
+    ],
+    "s3s": [
+      {
+        "name": "bucket-name",
+        "mountPath": "/s3"
+      }
+    ]
+  },
+  "networks": [
+    {
+      "name": "url",
+      "toolType": "custom",
+      "connectionType": "ExternalUrl",
+      "url": "https://nael-env-001.runailabs.com/team-b/my-training-demo-123",
+      "authorizedGroups": [
+        "ml-team",
+        "data-scientists",
+        "platform-ops"
+      ],
+      "port": 8080
+    }
+  ],
+  "events": [
+    {
+      "createdAt": "2025-12-15T08:58:39Z",
+      "id": "a4674fd4-2b2a-4eff-8ebd-a7d81413ba7f",
+      "message": "\n\u003crunai-cluster-control-plane\u003e: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.\n\u003crunai-cluster-system-0-0\u003e: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.\n\u003crunai-cluster-system-0-1\u003e: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.\n\u003crunai-cluster-worker-0-0\u003e: node(s) didn't match Pod's node affinity/selector.\nno nodes with enough resources were found.",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "0261a663-48d6-4d26-ac71-6ae7d883f531",
+        "kind": "Pod",
+        "name": "my-training-demo-123-0-0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:39Z",
+      "id": "7fb0e89c-782b-47be-8a5d-fbe38e110557",
+      "message": "PodSchedulingErrors: Resources were not found for pod runai-team-b/my-training-demo-123-0-0 due to: no nodes with enough resources were found: 1 node(s) didn't match Pod's node affinity/selector. \n3 node(s) didn't have enough resources: GPUs.\n",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "4e55ff63-55f6-4b10-87fa-f6e073469c38",
+        "kind": "PodGroup",
+        "name": "pg-my-training-demo-123-0-2019b712-da03-4170-b236-b27cd5356a13",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:39Z",
+      "id": "526aa6c1-8176-4eea-8e95-88c8d8292039",
+      "message": "\n\u003crunai-cluster-control-plane\u003e: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.\n\u003crunai-cluster-system-0-0\u003e: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.\n\u003crunai-cluster-system-0-1\u003e: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.\n\u003crunai-cluster-worker-0-0\u003e: node(s) didn't match Pod's node affinity/selector.\nno nodes with enough resources were found.",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "8715fb16-1ed4-4046-a8da-a2881e623d06",
+        "kind": "Pod",
+        "name": "my-training-demo-123-1-0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:39Z",
+      "id": "e657a850-b569-49d5-9dc4-f7779ef4e5a3",
+      "message": "PodSchedulingErrors: Resources were not found for pod runai-team-b/my-training-demo-123-1-0 due to: no nodes with enough resources were found: 1 node(s) didn't match Pod's node affinity/selector. \n3 node(s) didn't have enough resources: GPUs.\n",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "a010e068-5aff-4f48-b7d9-2e65adfaec3c",
+        "kind": "PodGroup",
+        "name": "pg-my-training-demo-123-1-2019b712-da03-4170-b236-b27cd5356a13",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:37Z",
+      "id": "94b454aa-dca2-4fef-a3bb-fbb7c11391f2",
+      "message": "Operation cannot be fulfilled on podgroups.scheduling.run.ai \"pg-my-training-demo-123-1-2019b712-da03-4170-b236-b27cd5356a13\": the object has been modified; please apply your changes to the latest version and try again",
+      "reason": "PodGrouperWarning",
+      "source": "pod-grouper",
+      "involvedObject": {
+        "uid": "8715fb16-1ed4-4046-a8da-a2881e623d06",
+        "kind": "Pod",
+        "name": "my-training-demo-123-1-0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:36Z",
+      "id": "320384a0-a83c-4606-b48c-9c39deaa8ead",
+      "message": "Job status is Pending",
+      "reason": "Pending",
+      "source": "status-updater",
+      "involvedObject": {
+        "uid": "a010e068-5aff-4f48-b7d9-2e65adfaec3c",
+        "kind": "PodGroup",
+        "name": "pg-my-training-demo-123-1-2019b712-da03-4170-b236-b27cd5356a13",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:36Z",
+      "id": "e72abac3-1e0a-4b49-9f27-37475e1aa023",
+      "message": "Job status is Pending",
+      "reason": "Pending",
+      "source": "status-updater",
+      "involvedObject": {
+        "uid": "4e55ff63-55f6-4b10-87fa-f6e073469c38",
+        "kind": "PodGroup",
+        "name": "pg-my-training-demo-123-0-2019b712-da03-4170-b236-b27cd5356a13",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:35Z",
+      "id": "a1cd6bb0-5a01-4d21-9f81-b025816ebfc9",
+      "message": "Created pod: my-training-demo-123-1-0",
+      "reason": "SuccessfulCreate",
+      "source": "runaijobcontroller",
+      "involvedObject": {
+        "uid": "2019b712-da03-4170-b236-b27cd5356a13",
+        "kind": "RunaiJob",
+        "name": "my-training-demo-123",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:34Z",
+      "id": "bdec7379-4579-4c84-8a0f-4829660d1b6d",
+      "message": "Scheduled for sync",
+      "reason": "Sync",
+      "source": "nginx-ingress-controller",
+      "involvedObject": {
+        "uid": "bac99484-857d-4fd0-9342-5ccc5192d0f6",
+        "kind": "Ingress",
+        "name": "tw-my-training-demo-123-0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:34Z",
+      "id": "2c410ea7-eb27-4550-9e7f-6d3a0c76a460",
+      "message": "Created pod: my-training-demo-123-0-0",
+      "reason": "SuccessfulCreate",
+      "source": "runaijobcontroller",
+      "involvedObject": {
+        "uid": "2019b712-da03-4170-b236-b27cd5356a13",
+        "kind": "RunaiJob",
+        "name": "my-training-demo-123",
+        "namespace": "runai-team-b"
+      }
+    }
+  ],
+  "podsInfo": {
+    "pods": [
+      {
+        "name": "my-training-demo-123-0-0",
+        "k8sPhase": "Pending",
+        "containers": [
+          {
+            "name": "my-training-demo-123",
+            "image": "gcr.io/knative-samples/helloworld-go"
+          }
+        ]
+      },
+      {
+        "name": "my-training-demo-123-1-0",
+        "k8sPhase": "Pending",
+        "containers": [
+          {
+            "name": "my-training-demo-123",
+            "image": "gcr.io/knative-samples/helloworld-go"
+          }
+        ]
+      }
+    ],
+    "runningPods": 0
+  },
+  "spec": {
+    "podLabels": [
+      {
+        "name": "experiment",
+        "value": "demo"
+      },
+      {
+        "name": "framework",
+        "value": "custom"
+      }
+    ],
+    "annotations": [
+      {
+        "name": "owner",
+        "value": "data-science-team"
+      },
+      {
+        "name": "runai-submit-command",
+        "value": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai training submit my-training-demo-123 --project team-b --image gcr.io/knative-samples/helloworld-go --image-pull-policy IfNotPresent --working-dir /app -g 1 --runs 5 --parallelism 2 --backoff-limit 3 --restart-policy OnFailure --environment-variable BATCH_SIZE=32 --environment-variable EPOCHS=100 --environment-variable LEARNING_RATE=0.001 --label experiment=demo --label framework=custom --annotation owner=data-science-team --existing-pvc claimname=my-simple-pvc,path=/data --external-url container=8080,authgroups=ml-team:data-scientists:platform-ops --auto-deletion-time-after-completion 1h --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 1000 --supplemental-groups 2000,3000 --capability SYS_PTRACE --capability NET_ADMIN --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --command -- sh -c 'echo \"Training simulation\"; sleep 30'"
+      }
+    ],
+    "autoScaling": {},
+    "runaiCliCommand": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai training submit my-training-demo-123 --project team-b --image gcr.io/knative-samples/helloworld-go --image-pull-policy IfNotPresent --working-dir /app -g 1 --runs 5 --parallelism 2 --backoff-limit 3 --restart-policy OnFailure --environment-variable BATCH_SIZE=32 --environment-variable EPOCHS=100 --environment-variable LEARNING_RATE=0.001 --label experiment=demo --label framework=custom --annotation owner=data-science-team --existing-pvc claimname=my-simple-pvc,path=/data --external-url container=8080,authgroups=ml-team:data-scientists:platform-ops --auto-deletion-time-after-completion 1h --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 1000 --supplemental-groups 2000,3000 --capability SYS_PTRACE --capability NET_ADMIN --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --command -- sh -c 'echo \"Training simulation\"; sleep 30'",
+    "servingConfiguration": {},
+    "exposedUrls": [
+      {
+        "authorizedGroups": [
+          "ml-team",
+          "data-scientists",
+          "platform-ops"
+        ],
+        "container": 8080
+      }
+    ]
+  },
+  "GPUAcceleration": null
+}

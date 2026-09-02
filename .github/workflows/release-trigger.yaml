@@ -1,0 +1,44 @@
+name: Release lane (trigger)
+
+on:
+  push:
+    branches:
+      - master
+      - main
+      - "v[0-9]+.[0-9]+"
+      - "release-[0-9]+.[0-9]+"
+
+permissions:
+  contents: read
+  actions:  write
+
+concurrency:
+  group: release-trigger-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@4d991eb9b905ef189e4c376166672c3f2f230481
+        with:
+          egress-policy: audit
+
+      - name: Cross-repo dispatch to saas-configuration/release.yaml
+        uses: benc-uk/workflow-dispatch@31e2b3319479a63f0ab15bf800eff9e913504e26
+        with:
+          workflow: release.yaml
+          repo: run-ai/saas-configuration
+          # saas-configuration has no `main`; its default is `master`. An unmapped
+          # `ref: main` dies with "No ref found for: main" before the target starts.
+          ref: ${{ (github.ref_name == 'main' || github.ref_name == 'master') && 'master' || github.ref_name }}
+          token: ${{ secrets.GIT_HUB_OSS }}
+          inputs: |
+            {
+              "sha": "${{ github.sha }}",
+              "ref": "${{ github.ref }}",
+              "commit_message": ${{ toJSON(github.event.head_commit.message) }},
+              "source_run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+              "caller_repo": "${{ github.repository }}"
+            }

@@ -1,0 +1,32 @@
+get:
+  summary: Get a node by ID.
+  description: Retrieve a node by its id.
+  operationId: get_node
+  x-internal: true
+  x-service: cluster-service
+  x-test-coverage:
+    - control-plane/cluster-service/pkg/test/api_nodes_service_test.go
+  x-authorize:
+    resource-type: nodes
+    action: read
+  tags:
+    - Nodes
+  parameters:
+    - $ref: "../parameters/path/NodeId.yaml"
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Nodes/NodeExtended.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

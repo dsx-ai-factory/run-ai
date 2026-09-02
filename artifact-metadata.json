@@ -1,0 +1,8 @@
+{
+  "service_name": "github-root",
+  "artifact_type": "workflow",
+  "cache_artifacts": false,
+  "jira": {
+    "team_name": "Devops Team"
+  }
+}

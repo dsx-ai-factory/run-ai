@@ -1,0 +1,51 @@
+type: object
+required:
+  - name
+  - id
+  - allocationValue
+  - utilizationValue
+properties:
+  name:
+    type: string
+    description: The name of the department
+    example: "Default"
+  id:
+    type: string
+    description: The id of the department
+    example: "1234"
+  allocationValue:
+    nullable: true
+    type: number
+    format: double
+    description: The metric value for the department. For allocation/utilization metrics this is the average GPU count; for gpuAllocationRatio it is a ratio (0–1+, e.g. 0.75 means 75% allocated).
+    example: 100
+  utilizationValue:
+    nullable: true
+    type: number
+    format: double
+    description: The utilization value of the department
+    example: 50
+  memoryUtilizationValue:
+    nullable: true
+    type: number
+    format: double
+    description: The memory utilization value of the department
+    example: 50
+  gpuQuota:
+    nullable: true
+    type: number
+    format: double
+    description: The GPU quota of the department
+    example: 8
+  runningWorkloadsCount:
+    nullable: true
+    type: integer
+    format: int32
+    description: The number of currently running workloads in the department (aggregated from all projects)
+    example: 12
+  pendingWorkloadsCount:
+    nullable: true
+    type: integer
+    format: int32
+    description: The number of currently pending workloads in the department (aggregated from all projects)
+    example: 7

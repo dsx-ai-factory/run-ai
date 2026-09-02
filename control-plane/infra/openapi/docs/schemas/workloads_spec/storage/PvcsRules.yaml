@@ -1,0 +1,7 @@
+properties:
+  attributes:
+    $ref: "./PvcRules.yaml"
+  instances:
+    $ref: "../../policy_rules/ItemRules.yaml"
+nullable: true
+type: object

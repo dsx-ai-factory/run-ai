@@ -1,0 +1,308 @@
+# Required for GitHub to recognize this file as the codeowners file
+# https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners
+# Every new service require every team to approve PRs by default.
+
+# Default codeowners every team
+/* @run-ai/resource-mgmt @run-ai/dev-team-leads @run-ai/workloads @run-ai/observability @run-ai/auth @run-ai/ops
+
+# Team Leaders
+/.nspect-vuln-allowlist.toml @run-ai/dev-team-leads
+/CODEOWNERS @run-ai/dev-team-leads
+/renovate.json @run-ai/dev-team-leads
+/.gitignore @run-ai/dev-team-leads
+
+# DevOps GitHub-Actions
+/.github/ @run-ai/ops
+/runai-cluster/cluster/runai-dgxc-chart/ @run-ai/ops
+/**/artifact-metadata.json @run-ai/ops
+
+# Code Rabbit
+.coderabbit.yaml @run-ai/workloads
+code-rabbit/ @run-ai/workloads
+
+### Control-Plane: ###
+
+# Suricata
+/control-plane/authorization/ @run-ai/resource-mgmt
+/control-plane/authorization-migrator/ @run-ai/resource-mgmt
+/control-plane/org-unit-service/ @run-ai/resource-mgmt
+/control-plane/org-units-migrator/ @run-ai/resource-mgmt
+
+# Viper
+/control-plane/assets-service/ @run-ai/workloads
+/control-plane/k8s-objects-tracker/ @run-ai/workloads
+/control-plane/policy-service/ @run-ai/workloads
+/control-plane/datavolumes-service/ @run-ai/workloads
+/control-plane/infra/openapi/docs/schemas/workloads_spec @run-ai/workloads
+/control-plane/fielder/ @run-ai/workloads
+/control-plane/workloads-manager/ @run-ai/workloads
+/control-plane/runai-cli/ @run-ai/workloads
+/control-plane/cli-exposer/ @run-ai/workloads
+/.github/instructions/runai-cli @run-ai/workloads
+/plugins/viper-design-docs/ @run-ai/workloads
+/plugins/viper-dev/ @run-ai/workloads
+/plugins/viper-e2e/ @run-ai/workloads
+/plugins/viper-refresh/ @run-ai/workloads
+/plugins/viper-setup/ @run-ai/workloads
+
+# Phoenix
+/control-plane/grafana/ @run-ai/observability
+/control-plane/metrics-service/ @run-ai/observability
+/control-plane/metric-stores-migrator/ @run-ai/observability
+/control-plane/audit-service/ @run-ai/observability
+/control-plane/postgresql-client/ @run-ai/observability
+/control-plane/notifications-proxy/ @run-ai/observability
+/control-plane/notifications-service/ @run-ai/observability
+/control-plane/*/pkg/runaimetrics/ @run-ai/observability
+
+# Sphinx
+/control-plane/tenants-manager/ @run-ai/auth
+/control-plane/identity-manager/ @run-ai/auth
+/control-plane/grafana-proxy/ @run-ai/auth
+/control-plane/keycloak-extensions/ @run-ai/auth
+/control-plane/gateway-hub/ @run-ai/auth
+/control-plane/traefik/ @run-ai/auth
+/control-plane/bff-service/ @run-ai/auth
+/control-plane/temp-backend-settings/ @run-ai/auth
+/runai-mcp-server/ @run-ai/auth
+
+# Settings - Sphinx
+/control-plane/frontend/src/views/settings/ @run-ai/auth
+/control-plane/frontend/src/components/settings/ @run-ai/auth
+/control-plane/backend/js/backend/service/SettingsService @run-ai/auth
+/control-plane/backend/js/backend/service/SettingService.ts @run-ai/auth
+/control-plane/backend/ @run-ai/auth
+
+# DevOps
+/common/opa-policies/ @run-ai/ops
+
+# Tech Docs
+/docs/** @run-ai/tech-docs
+/fern/** @run-ai/tech-docs
+
+
+
+### Groups
+
+# Backend Guild
+/control-plane/infra/ @run-ai/backend-devs
+/control-plane/test-service/ @run-ai/backend-devs
+/runai-clients/Makefile @run-ai/backend-devs
+
+# Sphinx - infra override (must be after the /control-plane/infra/ rule above — last match wins)
+/control-plane/infra/openapi/build/ @run-ai/auth
+
+# Frontend Guild
+/control-plane/frontend/ @run-ai/frontend-devs
+/control-plane/frontend/src/swagger-models/
+
+# Appsec Guild
+control-plane/infra/openapi/scripts/openapi-scanner @run-ai/appsec-guild-members
+
+# Cluster Teams
+/control-plane/cluster-migrator/ @run-ai/installer
+/control-plane/cluster-service/ @run-ai/installer
+/control-plane/control-plane-chart/ @run-ai/installer
+/control-plane/control-plane-chart/Chart.yaml @run-ai/installer @run-ai/observability
+
+# DB Furom
+/control-plane/**/*.sql @run-ai/db
+
+# Workloads Service
+/control-plane/workloads/ @run-ai/resource-mgmt
+/control-plane/workloads/pkg/clients  @run-ai/workloads
+/control-plane/workloads/pkg/clients/backend  @run-ai/resource-mgmt
+/control-plane/workloads/pkg/database/dao_crud  @run-ai/workloads
+/control-plane/workloads/pkg/database/models_crud  @run-ai/workloads
+/control-plane/workloads/pkg/services_crud  @run-ai/workloads
+/control-plane/workloads/pkg/testing_crud  @run-ai/workloads
+/control-plane/workloads/pkg/services/ai_applications_service_test.go  @run-ai/workloads
+/control-plane/workloads/pkg/services/ai_applications_service.go  @run-ai/workloads
+
+# Workloads and policies
+/control-plane/workloads-and-policies/ @run-ai/workloads
+
+# Everyone
+/control-plane/ubi/
+/control-plane/**/generated/
+/control-plane/infra/openapi/build/_build/
+/.gitattributes
+
+### Runai-Cluster: ###
+
+# Suricata
+/runai-cluster/cluster/cluster-sync/ @run-ai/resource-mgmt
+/runai-cluster/cluster/project-controller/ @run-ai/resource-mgmt
+/runai-cluster/cluster/agent/ @run-ai/resource-mgmt
+/runai-cluster/cluster/pod-group-assigner/ @run-ai/resource-mgmt
+/runai-cluster/cluster/nodepool-controller/ @run-ai/resource-mgmt
+/runai-cluster/cluster/accessrule-controller/ @run-ai/resource-mgmt
+/runai-cluster/cluster/external-workload-integrator/ @run-ai/resource-mgmt
+/runai-cluster/cluster/workload-exporter/ @run-ai/resource-mgmt
+/runai-cluster/cluster/cluster-api/internal/k8sobject/ @run-ai/resource-mgmt
+
+# Viper
+/runai-cluster/cluster/application-controller/ @run-ai/workloads
+/runai-cluster/cluster/assets-sync/ @run-ai/workloads
+/runai-cluster/cluster/oauth2-proxy/ @run-ai/workloads
+/runai-cluster/cluster/application-controller/pkg/deployers/ @run-ai/workloads
+/runai-cluster/common/flat-workloads/ @run-ai/workloads
+/runai-cluster/cluster/workload-common/ @run-ai/workload-runtime @run-ai/workloads
+/runai-cluster/cluster/shared-objects-controller/ @run-ai/workloads
+/runai-cluster/cluster/anyworkload-controller/ @run-ai/workloads
+/runai-cluster/cluster/workload-controller/ @run-ai/workloads
+/runai-cluster/cluster/cluster-api/ @run-ai/workloads
+
+# Fox
+/runai-cluster/cluster/runtime-rules/ @run-ai/workload-runtime
+/runai-cluster/cluster/advice-restart-controller/ @run-ai/workload-runtime
+/runai-cluster/cluster/dromos/ @run-ai/workload-runtime
+
+# Phoenix
+
+# Griffin
+/runai-cluster/cluster/cluster-installer/ @run-ai/installer
+/runai-cluster/cluster/cluster-installer-helm/ @run-ai/installer
+/runai-cluster/cluster/ocp-cluster-installer/ @run-ai/installer
+/runai-cluster/cluster/runai-chart @run-ai/installer
+/runai-cluster/cluster/runai-crd-upgrader/ @run-ai/installer
+/runai-installer/ @run-ai/installer
+
+# KAI Dependency Updaters
+/runai-cluster/cluster/runai-chart/Chart.yaml @run-ai/ops @run-ai/dev-team-leads @run-ai/scheduler @run-ai/core
+
+### Groups
+
+
+# Everyone
+/runai-cluster/common/
+/runai-cluster/redoc/
+/runai-cluster/cluster/go-operator/
+/runai-cluster/cluster/init-ca/
+/runai-cluster/cluster/common/
+/runai-cluster/cluster/admission-controller/
+/runai-cluster/cluster/new-service-template/
+/runai-cluster/cluster/status-updater/
+
+# Suricata - go-operator operands
+/runai-cluster/cluster/go-operator/internal/run/operands/accessrule-controller/ @run-ai/resource-mgmt
+/runai-cluster/cluster/go-operator/internal/run/operands/agent/ @run-ai/resource-mgmt
+/runai-cluster/cluster/go-operator/internal/run/operands/cluster-sync/ @run-ai/resource-mgmt
+/runai-cluster/cluster/go-operator/internal/run/operands/external-workload-integrator/ @run-ai/resource-mgmt
+/runai-cluster/cluster/go-operator/internal/run/operands/managed-nodes-config/ @run-ai/resource-mgmt
+/runai-cluster/cluster/go-operator/internal/run/operands/nodepool-controller/ @run-ai/resource-mgmt
+/runai-cluster/cluster/go-operator/internal/run/operands/pod-group-assigner/ @run-ai/resource-mgmt
+/runai-cluster/cluster/go-operator/internal/run/operands/project-controller/ @run-ai/resource-mgmt
+/runai-cluster/cluster/go-operator/internal/run/operands/workload-exporter/ @run-ai/resource-mgmt
+
+# Suricata - SDK CRD types for Suricata services
+/runai-cluster/cluster/sdk/apis/run/v1/accessrule-controller/ @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1/agent/ @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1/cluster-sync/ @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1/external-workload-integrator/ @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1/nodepool-controller/ @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1/pod-group-assigner/ @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1/project-controller/ @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1/workload-exporter/ @run-ai/resource-mgmt
+
+# Suricata - SDK run.ai CRD type source.
+/runai-cluster/cluster/sdk/apis/run/v1alpha1/accessrule_types.go @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1alpha1/externalworkload_types.go @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1alpha1/managed_nodes_config_types.go @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1alpha1/nodepool_types.go @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1alpha1/nodepool_types_test.go @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1/project_types.go @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v1/project_types_test.go @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v2/ @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v2alpha1/ @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/apis/run/v2alpha2/ @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/apis/scheduling/ @run-ai/resource-mgmt
+
+# Suricata - generated run.ai CRD manifests for Suricata services.
+/runai-cluster/cluster/sdk/config/crd/bases/run.ai_accessrules.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/config/crd/bases/run.ai_externalworkloads.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/config/crd/bases/run.ai_managednodesconfigs.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/config/crd/bases/run.ai_nodepools.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/config/crd/bases/run.ai_projects.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/config/crd/bases/scheduling.run.ai_departments.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-crd-upgrader/crds/run_ai_accessrule.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-crd-upgrader/crds/run_ai_externalworkload.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-crd-upgrader/crds/run.ai_managednodesconfigs.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-crd-upgrader/crds/run_ai_nodepool.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-chart/charts/crds/crds/run_ai_accessrule.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-chart/charts/crds/crds/run_ai_externalworkload.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-chart/charts/crds/crds/run.ai_managednodesconfigs.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-chart/charts/crds/crds/run_ai_nodepool.yaml @run-ai/resource-mgmt
+
+# Suricata - SDK KAI CRDs
+/runai-cluster/cluster/sdk/apis/kai/ @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/config/crd/bases/kai.resources_departments.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/config/crd/bases/kai.resources_managednodesconfigs.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/config/crd/bases/kai.resources_nodepools.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/sdk/config/crd/bases/kai.resources_projects.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-crd-upgrader/crds/kai.resources_departments.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-crd-upgrader/crds/kai.resources_managednodesconfigs.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-crd-upgrader/crds/kai.resources_nodepools.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-crd-upgrader/crds/kai.resources_projects.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-chart/charts/crds/crds/kai.resources_departments.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-chart/charts/crds/crds/kai.resources_managednodesconfigs.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-chart/charts/crds/crds/kai.resources_nodepools.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-chart/charts/crds/crds/kai.resources_projects.yaml @run-ai/resource-mgmt
+
+# Suricata - runai-chart ClusterRoles for Suricata services
+/runai-cluster/cluster/runai-chart/templates/clusterroles/accessrule-controller.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/agent.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/cluster-sync.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/external-workload-integrator.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/nodepool-controller.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/pod-group-assigner.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/project-controller-cluster-wide-resources.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/project-controller-limit-range.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/project-controller-ns-creation.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/project-controller-rb-creation.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/project-controller-resources-patcher.yaml @run-ai/resource-mgmt
+/runai-cluster/cluster/runai-chart/templates/clusterroles/workload-exporter.yaml @run-ai/resource-mgmt
+
+
+# runai-common-chart
+/runai-common-chart/** @run-ai/ops
+
+# runai-application-packages
+/runai-application-packages/async-events @run-ai/observability
+/runai-application-packages/concurrency @run-ai/observability
+/runai-application-packages/convutils @run-ai/workloads
+/runai-application-packages/client-utils @run-ai/observability
+/runai-application-packages/datastructs @run-ai/workloads
+/runai-application-packages/dbmodels @run-ai/observability
+/runai-application-packages/jsonutils @run-ai/workloads
+/runai-application-packages/patching @run-ai/workloads
+/runai-application-packages/old-auth-token-middleware @run-ai/auth
+/runai-application-packages/testutils @run-ai/workloads
+/runai-application-packages/telemetry @run-ai/resource-mgmt
+/runai-application-packages/versions @run-ai/observability
+/runai-application-packages/scopeinfo @run-ai/workloads
+/runai-application-packages/validation @run-ai/workloads
+
+# runai-common-packages
+/runai-common-packages/** @run-ai/observability
+
+### E2E: ###
+
+/.github/workflows/e2e* @run-ai/e2e
+
+/scale-tests/unified_tests/ @run-ai/e2e
+/scale-tests/sdk/** @run-ai/e2e
+
+## Exclude pkgs folders for renovate
+**/dockerfile 
+**/Dockerfile
+**/go.mod
+**/go.sum
+**/package.json
+**/package-lock.json
+**/docker-compose.yaml
+**/docker-compose.yml
+
+# Build folders
+/build @run-ai/backend-devs
+**/Makefile  @run-ai/backend-devs 

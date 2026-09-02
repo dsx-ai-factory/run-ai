@@ -1,0 +1,73 @@
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+  name:
+    $ref: "./AIApplicationName.yaml"
+  source:
+    type: string
+  type:
+    type: string
+  desiredPhase:
+    type: string
+    description: The desired phase of the application.
+    nullable: true
+  phase:
+    type: string
+    description: The actual status of the release in the cluster.
+  projectId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ProjectId.yaml"
+  projectName:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ProjectName.yaml"
+  departmentId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/DepartmentId.yaml"
+  departmentName:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/DepartmentName.yaml"
+  resources:
+    type: array
+    items:
+      $ref: "./AIApplicationResource.yaml"
+  allocatedResources:
+    $ref: "./AIApplicationAllocatedResources.yaml"
+  requestedResources:
+    $ref: "./AIApplicationRequestResources.yaml"
+  createdAt:
+    type: string
+    format: date-time
+  createdBy:
+    description: The user who created the application.
+    type: string
+    minLength: 1
+  updatedAt:
+    type: string
+    format: date-time
+  updatedBy:
+    description: The user who created the application.
+    type: string
+    minLength: 1
+  updateCount:
+    type: integer
+    format: int64
+    description: The sync update counter for this application.
+  actionStatus:
+    type: string
+    description: The status of the recent action preformed on the application.
+    nullable: true
+  actionMessage:
+    type: string
+    description: The message of the recent action preformed on the application.
+    nullable: true
+  endpoints:
+    description: List of network endpoints through which the workloads associated with the AI application is exposed.
+    type: array
+    items:
+      $ref: "./AiApplicationEndpoint.yaml"
+  resourceConnections:
+    description: Links between the application's workloads and the referenced resources (PersistentVolumeClaims, Secrets, ConfigMaps). Each entry connects one workload to one resource, so a resource shared by several workloads appears once per workload.
+    type: array
+    items:
+      $ref: "./AiApplicationResourceConnection.yaml"
+  spec:
+    $ref: "./AIApplicationSpec.yaml"
+    nullable: true

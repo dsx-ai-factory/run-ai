@@ -1,0 +1,5 @@
+properties:
+  allowOverQuota:
+    description: Whether to allow the workload to exceed the quota of the project.
+    type: boolean
+    nullable: true

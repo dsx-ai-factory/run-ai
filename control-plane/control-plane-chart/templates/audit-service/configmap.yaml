@@ -1,0 +1,36 @@
+{{- if .Values.auditService.enabled }}
+  {{- include "common.configMap" (list . .Values.auditService "control-plane.auditService.configmap") }}
+{{- end }}
+
+{{- define "control-plane.auditService.configmap" -}}
+{{- $top := first . }}
+data:
+  LOG_LEVEL: {{ $top.Values.auditService.config.logLevel | quote }}
+  SERVICE_PORT: {{ $top.Values.auditService.service.port | quote }}
+  SERVICE_NAME: {{ $top.Values.auditService.name | quote }}
+  TRACING_ENABLED: {{ if hasKey $top.Values.auditService.config "tracingEnabled" }}{{ $top.Values.auditService.config.tracingEnabled | quote }}{{ else }}{{ $top.Values.global.config.tracingEnabled | quote }}{{ end }}
+  AUDIT_ENABLED: {{ if hasKey $top.Values.auditService.config "auditEnabled" }}{{ $top.Values.auditService.config.auditEnabled | quote }}{{ else }}{{ $top.Values.global.config.auditEnabled | quote }}{{ end }}
+  AUDIT_ENABLE_PRINT_TO_STDOUT: {{ if hasKey $top.Values.auditService.config "auditEnablePrintToStdout" }}{{ $top.Values.auditService.config.auditEnablePrintToStdout | quote }}{{ else }}{{ $top.Values.global.config.auditEnablePrintToStdout | quote }}{{ end }}
+  PUBSUB_URL: {{ $top.Values.global.pubsub.url | quote }}
+  PUBSUB_TYPE: {{ $top.Values.global.pubsub.type | quote }}
+  PUBSUB_ENABLE_ADDITIONAL_SUBSCRIBER: {{ $top.Values.global.pubsub.additionalSubscriber.enabled | quote }}
+  {{- if $top.Values.global.pubsub.additionalSubscriber.enabled }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_TYPE: {{ $top.Values.global.pubsub.additionalSubscriber.type | quote }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_URL: {{ $top.Values.global.pubsub.additionalSubscriber.url | quote }}
+  {{- end }}
+  DB_MIGRATION_FILES: {{ $top.Values.auditService.config.migrationFiles | quote }}
+  DB_NAME: {{ $top.Values.auditService.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_HOST: {{ $top.Values.auditService.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SCHEMA: {{ $top.Values.auditService.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  DB_SSL_MODE: {{ $top.Values.auditService.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_PORT: {{ $top.Values.auditService.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  {{- if or ($top.Values.global.postgresql.auth.readHost) ($top.Values.auditService.config.dbReadHost) }}
+  DB_READ_HOST: {{ $top.Values.auditService.config.dbReadHost | default $top.Values.global.postgresql.auth.readHost | quote }}
+  {{- end }}
+  {{- if or ($top.Values.global.postgresql.auth.dbReadPort) ($top.Values.auditService.config.dbReadPort) }}
+  DB_READ_PORT: {{ $top.Values.auditService.config.dbReadPort | default $top.Values.global.postgresql.auth.readPort | quote }}
+  {{- end }}
+  AUDIT_RECORED_CLEANER_ENABLED: {{ $top.Values.auditService.config.auditRecordCleanerEnabled | quote }}
+  AUDIT_RECORD_CLEANER_INTERVAL_HOURS: {{ $top.Values.auditService.config.auditRecordCleanerIntervalHours | quote }}
+  AUDIT_RECORD_TTL_DAYS: {{ $top.Values.auditService.config.auditRecordTtlDays | quote }}
+{{- end }}

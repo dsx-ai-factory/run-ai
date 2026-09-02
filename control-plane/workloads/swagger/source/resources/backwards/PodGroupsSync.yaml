@@ -1,0 +1,36 @@
+post:
+  summary: Sync pod groups.
+  operationId: post_sync_podgroups_backwards
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/workloads_backwards_api_test.go
+  x-authorize:
+    resource-type: workloads
+    action: sync
+  tags:
+    - Workloads
+  parameters:
+    - $ref: '../../../../../infra/openapi/docs/parameters/path/ClusterId.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            additionalProperties:
+              type: string
+  responses:
+    200:
+      description: ok.
+      content:
+        application/json:
+          schema:
+            type: string
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

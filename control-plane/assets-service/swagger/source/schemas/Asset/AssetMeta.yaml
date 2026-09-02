@@ -1,0 +1,18 @@
+allOf:
+  - $ref: "./AssetUpdatableFields.yaml"
+  - $ref: "./AssetCreationFields.yaml"
+  - $ref: "./AssetReadOnlyFields.yaml"
+example:
+  name: my-asset
+  scope: tenant
+  id: "a418ed33-9399-48c0-a890-122cadd13bfd"
+  kind: s3
+  createdBy: "test@run.ai"
+  createdAt: "2023-02-23T14:25:36.707685Z"
+  updatedBy: "test@run.ai"
+  updatedAt: "2023-02-23T14:25:36.707685Z"
+  workloadSupportedTypes:
+    workspace: false
+    training: false
+    distributed: true
+    distFramework: "TF"

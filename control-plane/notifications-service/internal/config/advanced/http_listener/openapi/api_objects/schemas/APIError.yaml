@@ -1,0 +1,15 @@
+required:
+  - code
+  - message
+properties:
+  code:
+    type: integer
+    minimum: 100
+    maximum: 599
+  message:
+    type: string
+  details:
+    type: string
+example:
+  code: 400
+  message: "Bad request - Resource should have a name"

@@ -1,0 +1,15 @@
+description: Indicates which validation rule (e.g., min, max, step, options, required, 
+  canEdit, canAdd) conflicted with policy restrictions, causing the asset or template 
+  to be rejected.
+type: string
+nullable: true
+enum:
+  - min
+  - max
+  - step
+  - options
+  - required
+  - canEdit
+  - canAdd
+  - locked
+  - blocked

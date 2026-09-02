@@ -1,0 +1,113 @@
+errors:
+- code: 400
+  message: 'field arrRangeMax failed range validation: must be no greater than 10'
+- code: 400
+  message: 'field arrRangeMin failed range validation: must be no less than 10'
+- code: 400
+  message: 'field arrRangeStep failed range validation: value 3 must be a multiple
+    of 5 from 0'
+- code: 400
+  message: 'field arrMatch failed match validation: value "123baz" does not match
+    pattern "^[a-z]+$"'
+- code: 400
+  message: 'field arrOptions failed options validation: value "purple" is not one
+    of [red, blue, green]'
+- code: 400
+  message: 'field arrQtyRangeMax failed quantityRange validation: value 5Gi exceeds
+    maximum 1Gi'
+- code: 400
+  message: 'field arrQtyRangeMin failed quantityRange validation: value 500Mi is below
+    minimum 1Gi'
+- code: 400
+  message: 'field arrQtyRangeStep failed quantityRange validation: value 150m must
+    be a multiple of 100m from 0'
+policy:
+  effectiveRules:
+  - enforcements:
+    - range:
+        max: 10
+    field: arrRangeMax
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        min: 10
+    field: arrRangeMin
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        step: 5
+    field: arrRangeStep
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - match: ^[a-z]+$
+    field: arrMatch
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - options:
+      - red
+      - blue
+      - green
+    field: arrOptions
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - quantityRange:
+        max: 1Gi
+    field: arrQtyRangeMax
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - quantityRange:
+        min: 1Gi
+    field: arrQtyRangeMin
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - quantityRange:
+        step: 100m
+    field: arrQtyRangeStep
+    sourceOfRule: null
+    specSelector: self
+  workloadType:
+    group: test
+    kind: Synthetic
+    version: v1
+workload:
+  apiVersion: test/v1
+  arrMatch:
+  - foo
+  - bar
+  - 123baz
+  arrOptions:
+  - red
+  - blue
+  - purple
+  arrQtyRangeMax:
+  - 100Mi
+  - 500Mi
+  - 5Gi
+  arrQtyRangeMin:
+  - 2Gi
+  - 1Gi
+  - 500Mi
+  arrQtyRangeStep:
+  - 100m
+  - 200m
+  - 150m
+  arrRangeMax:
+  - 1
+  - 5
+  - 99
+  arrRangeMin:
+  - 50
+  - 60
+  - 1
+  arrRangeStep:
+  - 10
+  - 20
+  - 3
+  kind: Synthetic

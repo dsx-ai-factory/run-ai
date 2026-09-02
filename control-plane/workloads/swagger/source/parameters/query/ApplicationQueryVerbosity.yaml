@@ -1,0 +1,7 @@
+name: verbosity
+in: query
+required: false
+description: response verbosity level.
+example: full
+schema:
+  $ref : "../../schemas/Applications/AIApplicationVerbosity.yaml"

@@ -1,0 +1,4 @@
+{{- if .Values.global.gatewayAPI.enabled }}
+{{- $serviceName := printf "%s-traefik" (include "common.fullname" $) }}
+{{- include "control-plane.httproute" (list $ (dict "name" "httproute" "serviceName" $serviceName "servicePort" ($.Values.traefik.service.port | default 8080) "domain" $.Values.global.domain "extraDomains" $.Values.global.ingress.extraDomains "parentRefs" $.Values.global.gatewayAPI.parentRefs "multiTenancy" $.Values.global.multiTenancy.enabled)) }}
+{{- end }}

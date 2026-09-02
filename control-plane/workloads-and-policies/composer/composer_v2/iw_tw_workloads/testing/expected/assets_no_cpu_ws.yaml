@@ -1,0 +1,173 @@
+BatchJobTarget:
+  Config:
+    networking:
+    - externalAccess:
+        ingress:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: job-assets_no_cpu-url
+          spec:
+            rules:
+            - host: test.run.ai
+              http:
+                paths:
+                - backend:
+                    service:
+                      name: job-assets_no_cpu-url
+                      port:
+                        number: 80
+                  path: /test/assets_no_cpu
+                  pathType: Prefix
+      services:
+      - spec:
+          name: job-assets_no_cpu-url
+          ports:
+          - name: port-4180
+            port: 80
+            protocol: TCP
+            targetPort: 4180
+          selector:
+            release: assets_no_cpu
+          type: ClusterIP
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: assets_no_cpu
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: assets_no_cpu
+      name: assets_no_cpu
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: assets_no_cpu
+            workloadKind: Workspace
+            workloadName: assets_no_cpu
+        spec:
+          containers:
+          - args:
+            - --NotebookApp.base_url=/test/assets_no_cpu
+            - --NotebookApp.token=
+            command:
+            - start-notebook.sh
+            env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: assets_no_cpu
+            - name: JUPYTER_PORT
+              value: "8888"
+            image: jupyter/scipy-notebook
+            imagePullPolicy: IfNotPresent
+            name: assets_no_cpu
+            ports:
+            - containerPort: 8888
+              name: port-8888
+              protocol: TCP
+            resources:
+              requests:
+                cpu: 100m
+                memory: 100M
+          initContainers:
+          - args:
+            - --provider=keycloak-oidc
+            - --upstream=http://localhost:8888
+            - --redirect-url=https://test.run.ai/test/assets_no_cpu/oauth2/callback
+            - --oidc-issuer-url=/auth/realms/runai
+            - --scope=openid
+            - --http-address=0.0.0.0:4180
+            - --proxy-prefix=/test/assets_no_cpu/oauth2
+            - --skip-provider-button=true
+            - --whitelist-domain=test.run.ai
+            - --cookie-domain=test.run.ai
+            - --cookie-httponly=true
+            - --cookie-secure=true
+            - --code-challenge-method=S256
+            - --cookie-refresh=10m
+            - --cookie-samesite=lax
+            - --skip-jwt-bearer-tokens=true
+            - --extra-jwt-issuers=/auth/realms/runai=runai
+            - --custom-templates-dir=/usr/share/oauth2-proxy
+            - --pass-authorization-header=false
+            - --cookie-name=assets_no_cpu-url-auth-proxy
+            - --email-domain=*
+            env:
+            - name: OAUTH2_PROXY_COOKIE_PATH
+              value: /test/assets_no_cpu
+            envFrom:
+            - secretRef: {}
+            image: test.registry/oauth2-proxy:test
+            imagePullPolicy: IfNotPresent
+            name: runai-oauth2-proxy-0
+            ports:
+            - containerPort: 4180
+              name: port-4180
+              protocol: TCP
+            resources: {}
+            restartPolicy: Always
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+            volumeMounts:
+            - mountPath: /etc/runai/auth/users
+              name: runai-auth
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+          volumes:
+          - emptyDir: {}
+            name: runai-auth
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections:
+    - connectionType: ExternalUrl
+      containerPort: 8888
+      correlationName: url
+      exposedUrlPath: /test/assets_no_cpu
+      exposedUrlSubDomain: test-assets_no_cpu
+      name: Jupyter
+      serviceResourceName: job-assets_no_cpu-url
+      toolType: jupyter-notebook
+    id: 7299cbff-120d-4bcd-9cb6-0b2769de7b7e
+    name: jupyter-lab
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: assets_no_cpu, Rules: , Type: Workspace'
+  images:
+  - jupyter/scipy-notebook
+  name: 'Value: assets_no_cpu, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  requestedResources:
+    cpu:
+      request: 0.1
+    cpuMemory:
+      request: 100M
+    gpu:
+      request: 0
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Success</title>
+    <style>
+      @font-face {
+        font-family: "Roboto";
+        src: url("fonts/Roboto-Regular.ttf") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      body {
+        background: #000;
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Roboto", Arial, sans-serif;
+      }
+
+      .container {
+        height: 380px;
+        width: 350px;
+        background: #fff;
+        border-radius: 3px;
+        padding: 48px 32px 32px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .distribution-assets-logo {
+        width: 200px;
+        height: 27px;
+        flex: 0 0 27px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        overflow: hidden;
+        visibility: hidden;
+      }
+
+      .distribution-assets-logo.is-ready {
+        visibility: visible;
+      }
+
+      .vendor-logo-viewport {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        width: 122px;
+        height: 20.3px;
+        flex: 0 0 122px;
+        overflow: hidden;
+      }
+
+      .vendor-logo-canvas {
+        display: block;
+        width: auto;
+        max-width: none;
+        margin-left: auto;
+      }
+
+      .vendor-logo-canvas.profile-ce {
+        height: 20.3px;
+      }
+
+      .vendor-logo-canvas.profile-cc {
+        height: 15px;
+      }
+
+      .vendor-logo-viewport:has(.vendor-logo-canvas.profile-cc) {
+        width: auto;
+        height: 15px;
+        flex: 0 0 auto;
+      }
+
+      .product-logo {
+        display: block;
+        width: 59px;
+        height: 15px;
+        flex: 0 0 59px;
+        object-fit: contain;
+      }
+
+      .success-icon {
+        margin-bottom: 31px;
+      }
+
+      .main-content {
+        text-align: center;
+      }
+
+      .message {
+        color: rgba(0, 0, 0, 0.7);
+        font-size: 1.15rem;
+        margin-bottom: 40px;
+        line-height: 1.5;
+      }
+
+      .help {
+        color: rgba(0, 0, 0, 0.7);
+        font-size: 12px;
+      }
+
+      .help a {
+        color: #0654fe;
+        text-decoration: none;
+        margin-left: 4px;
+      }
+
+      .container.support-unavailable::after {
+        content: "";
+        height: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="login-success-container" class="container support-unavailable">
+      <div
+        id="distribution-assets-logo"
+        class="distribution-assets-logo"
+        role="img"
+        aria-label="NVIDIA Run:ai"
+        aria-busy="true"
+      >
+        <span class="vendor-logo-viewport">
+          <img id="vendor-logo" class="vendor-logo-canvas" alt="" draggable="false" />
+        </span>
+        <img id="product-logo" class="product-logo" alt="" draggable="false" />
+      </div>
+
+      <main class="main-content">
+        <div class="success-icon">
+          <svg
+            width="30"
+            height="30"
+            viewBox="0 0 256 256"
+            fill="#4CAF50"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              d="M176.49,95.51a12,12,0,0,1,0,17l-56,56a12,12,0,0,1-17,0l-24-24a12,12,0,1,1,17-17L112,143l47.51-47.52A12,12,0,0,1,176.49,95.51ZM236,128A108,108,0,1,1,128,20,108.12,108.12,0,0,1,236,128Zm-24,0a84,84,0,1,0-84,84A84.09,84.09,0,0,0,212,128Z"
+            />
+          </svg>
+        </div>
+        <div class="message">
+          You were authenticated<br />
+          and can now go back to the CLI
+        </div>
+      </main>
+
+      <footer id="support-footer" class="help" hidden>
+        Having troubles?
+        <a id="support-link" href="" target="_blank" rel="noopener noreferrer">Get help</a>
+      </footer>
+    </div>
+    <script>
+      const CC_PROFILE = "cc";
+      const CE_PROFILE = "ce";
+      const VENDOR_LOGO_PATH = "vendor-logo-on-light.svg";
+      const PRODUCT_LOGO_PATH = "/distribution-assets/product-logo.svg";
+      const BOOT_CONFIG_TIMEOUT_MS = 4500;
+      const supportLink = document.getElementById("support-link");
+      const supportFooter = document.getElementById("support-footer");
+      const loginSuccessContainer = document.getElementById("login-success-container");
+      const distributionLogo = document.getElementById("distribution-assets-logo");
+      const vendorLogo = document.getElementById("vendor-logo");
+      const productLogo = document.getElementById("product-logo");
+      const controller = new AbortController();
+      let didResolveProfile = false;
+
+      function getVendorLogoUrl(profile) {
+        return `/distribution-assets/${profile}/${VENDOR_LOGO_PATH}`;
+      }
+
+      function loadImage(source, fallbackSource) {
+        return new Promise((resolve, reject) => {
+          const image = new Image();
+          let currentSource = source;
+          let didFallBack = false;
+
+          image.onload = () => resolve(currentSource);
+          image.onerror = () => {
+            if (!didFallBack && fallbackSource && source !== fallbackSource) {
+              didFallBack = true;
+              currentSource = fallbackSource;
+              image.src = fallbackSource;
+              return;
+            }
+
+            reject(new Error("Distribution logo failed to load"));
+          };
+          image.src = source;
+        });
+      }
+
+      function applyDistributionLogo(profile) {
+        const resolvedProfile = profile === CE_PROFILE ? CE_PROFILE : CC_PROFILE;
+
+        Promise.all([
+          loadImage(
+            getVendorLogoUrl(resolvedProfile),
+            resolvedProfile === CE_PROFILE ? getVendorLogoUrl(CC_PROFILE) : "",
+          ),
+          loadImage(PRODUCT_LOGO_PATH, ""),
+        ])
+          .then(([vendorSource, productSource]) => {
+            const renderedProfile = vendorSource === getVendorLogoUrl(CC_PROFILE) ? CC_PROFILE : CE_PROFILE;
+            vendorLogo.className = `vendor-logo-canvas profile-${renderedProfile}`;
+            vendorLogo.src = vendorSource;
+            productLogo.src = productSource;
+            distributionLogo.classList.add("is-ready");
+            distributionLogo.setAttribute("aria-busy", "false");
+          })
+          .catch(() => {
+            // Keep the fixed-size logo slot empty when an image is unavailable.
+          });
+      }
+
+      function finishProfileResolution(profile) {
+        if (didResolveProfile) return;
+
+        didResolveProfile = true;
+        clearTimeout(timeout);
+        applyDistributionLogo(profile);
+      }
+
+      function isSafeSupportUrl(value) {
+        if (typeof value !== "string" || !value || value.trim() !== value) return false;
+        if (value.startsWith("/") && !value.startsWith("//")) return true;
+
+        try {
+          const url = new URL(value);
+          return url.protocol === "http:" || url.protocol === "https:";
+        } catch {
+          return false;
+        }
+      }
+
+      const timeout = setTimeout(() => {
+        controller.abort();
+        finishProfileResolution(CC_PROFILE);
+      }, BOOT_CONFIG_TIMEOUT_MS);
+
+      fetch("/api/v1/boot-config", { credentials: "omit", signal: controller.signal })
+        .then((response) => {
+          if (!response.ok) throw new Error("boot config request failed");
+          return response.json();
+        })
+        .then((config) => {
+          if (didResolveProfile) return;
+
+          finishProfileResolution(config.distributionAssets && config.distributionAssets.profile);
+          if (config.support && isSafeSupportUrl(config.support.url)) {
+            supportLink.href = config.support.url;
+            supportFooter.hidden = false;
+            loginSuccessContainer.classList.remove("support-unavailable");
+          }
+        })
+        .catch(() => finishProfileResolution(CC_PROFILE))
+        .finally(() => clearTimeout(timeout));
+    </script>
+  </body>
+</html>

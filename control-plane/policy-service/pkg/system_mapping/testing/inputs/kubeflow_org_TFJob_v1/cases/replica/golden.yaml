@@ -1,0 +1,60 @@
+apiVersion: kubeflow.org/v1
+kind: TFJob
+metadata:
+  name: test
+spec:
+  tfReplicaSpecs:
+    Chief:
+      replicas: 2
+      restartPolicy: OnFailure
+      template:
+        metadata:
+          annotations:
+            replica.example.com/role: chief
+          labels:
+            replica.type: chief
+        spec:
+          containers:
+          - image: tensorflow/tensorflow:2.12.0
+            name: tensorflow
+          initContainers:
+          - image: tensorflow/tensorflow:2.12.0
+            name: init
+    Evaluator:
+      replicas: 1
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - image: tensorflow/tensorflow:2.12.0
+            name: tensorflow
+          initContainers:
+          - image: tensorflow/tensorflow:2.12.0
+            name: init
+    PS:
+      replicas: 3
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - image: tensorflow/tensorflow:2.12.0
+            name: tensorflow
+          initContainers:
+          - image: tensorflow/tensorflow:2.12.0
+            name: init
+    Worker:
+      replicas: 4
+      restartPolicy: OnFailure
+      template:
+        metadata:
+          annotations:
+            replica.example.com/role: worker
+          labels:
+            replica.type: worker
+        spec:
+          containers:
+          - image: tensorflow/tensorflow:2.12.0
+            name: tensorflow
+          initContainers:
+          - image: tensorflow/tensorflow:2.12.0
+            name: init

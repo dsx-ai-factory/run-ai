@@ -1,0 +1,721 @@
+{
+  "general": {
+    "name": "my-dist-inference-full-123",
+    "id": "78c1c79e-81fa-484e-961c-b2168ec5c0a3",
+    "type": "DistributedInference",
+    "phase": "Pending",
+    "phaseMessage": "Replicas: 2; Pending: 2",
+    "project": "team-b",
+    "department": "default",
+    "createdAt": "2025-12-15T08:58:27.277697Z",
+    "updatedAt": "2025-12-15T08:59:44.717168Z",
+    "submittedBy": "test@run.ai",
+    "priority": "very-high (150)",
+    "category": "Deploy",
+    "environmentVariables": {
+      "MASTER_ADDR": "localhost",
+      "MODEL_NAME": "llama-2-7b",
+      "RUNAI_JOB_NAME": "${RUNAI_JOB_NAME}",
+      "RUNAI_PROJECT": "${RUNAI_PROJECT}",
+      "TENSOR_PARALLEL_SIZE": "1",
+      "WORKER_ID": "${POD_INDEX}"
+    },
+    "arguments": "--model meta-llama/Llama-2-7b --port 8080",
+    "command": "python -m vllm.entrypoints.openai.api_server",
+    "cliCommand": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai inference distributed submit my-dist-inference-full-123 --project team-b --replicas 2 --workers 2 --image vllm/vllm-openai:latest --image-pull-policy Always --working-dir /app --command 'python -m vllm.entrypoints.openai.api_server' --arguments '--model meta-llama/Llama-2-7b --port 8080' -g 1 --gpu-memory-request 20G --environment-variable MODEL_NAME=llama-2-7b --environment-variable TENSOR_PARALLEL_SIZE=1 --environment-variable MASTER_ADDR=localhost --label role=leader --label version=v1.0 --label framework=vllm --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 1000 --capability NET_BIND_SERVICE --capability SYS_NICE --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --worker-image vllm/vllm-openai:latest --worker-image-pull-policy Always --worker-working-dir /app --worker-command 'python -m vllm.entrypoints.worker' --worker-arguments '--model meta-llama/Llama-2-7b' --worker-gpu-devices-request 1 --worker-environment WORKER_ID=${POD_INDEX} --worker-environment MASTER_ADDR=leader-0 --worker-label role=worker --worker-label version=v1.0 --worker-label framework=vllm --worker-node-type gpu-nodes --worker-run-as-uid 1000 --worker-run-as-gid 1000 --worker-capability NET_BIND_SERVICE --worker-capability SYS_NICE --worker-toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --existing-pvc claimname=my-simple-pvc,path=/models --worker-existing-pvc claimname=my-simple-pvc,path=/models --serving-port=container=8080,authorization-type=authenticatedUsers,protocol=http,authorized-users=admin:developer:tester:reviewer --restart-policy RecreateGroupOnPodRestart --startup-policy LeaderCreated"
+  },
+  "workloadDetails": {
+    "preemptible": false,
+    "images": [
+      "vllm/vllm-openai:latest"
+    ]
+  },
+  "compute": {
+    "requestedResources": {
+      "gpuCompute": {
+        "requested": 0
+      },
+      "cpuCores": {
+        "requested": 0
+      },
+      "gpuMemory": {
+        "request": "120G",
+        "limit": "120G"
+      },
+      "cpuMemory": {
+        "request": "",
+        "limit": ""
+      }
+    },
+    "allocatedResources": {
+      "gpuCompute": 0,
+      "cpuCores": 0,
+      "gpuMemory": "",
+      "cpuMemory": ""
+    },
+    "requestedNodePools": [
+      "default"
+    ]
+  },
+  "networks": [
+    {
+      "name": "ServingPort",
+      "toolType": "custom",
+      "connectionType": "ServingPort",
+      "authorizationType": "authenticatedUsers",
+      "port": 8080
+    }
+  ],
+  "events": [
+    {
+      "createdAt": "2025-12-15T08:58:45Z",
+      "id": "7b704b4f-e708-4a5d-ae66-9a522f6fbdeb",
+      "message": "PodSchedulingErrors: Resources were found for 0 pods while 3 are required for gang scheduling. Additional pods cannot be scheduled due to: no nodes with enough resources were found: 1 node(s) didn't have enough resources: GPU memory.\n",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "258bd28c-5097-42b0-a15f-cc78b6ec2889",
+        "kind": "PodGroup",
+        "name": "pg-my-dist-inference-full-123-c0a3-686a3a50-b528-46c6-bf3b-ea2e4fbf6bae-group-1",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:45Z",
+      "id": "37b9526c-b7dd-4dfa-be24-912343af652e",
+      "message": "PodSchedulingErrors: Resources were found for 0 pods while 3 are required for gang scheduling. Additional pods cannot be scheduled due to: no nodes with enough resources were found: 1 node(s) didn't have enough resources: GPU memory.\n",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "219eaedd-a3ca-4c88-88eb-31d687f60f80",
+        "kind": "Pod",
+        "name": "my-dist-inference-full-123-c0a3-1-2",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:45Z",
+      "id": "5d459c81-7b29-4d03-85f9-cc0be71e3bda",
+      "message": "PodSchedulingErrors: Resources were found for 0 pods while 3 are required for gang scheduling. Additional pods cannot be scheduled due to: no nodes with enough resources were found: 1 node(s) didn't have enough resources: GPU memory.\n",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "eb54831c-f830-40c7-9952-b52b9dcb50f4",
+        "kind": "Pod",
+        "name": "my-dist-inference-full-123-c0a3-1-1",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:45Z",
+      "id": "57667fd0-29f4-4d90-b61c-18e6b1d9e13b",
+      "message": "\n\u003crunai-cluster-worker-0-0\u003e: Node didn't have enough resources: GPU memory, taking all considerations into account.\nno nodes with enough resources were found.",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "d8abbc2e-d2cc-4831-9375-2bf6292ca0f7",
+        "kind": "Pod",
+        "name": "my-dist-inference-full-123-c0a3-1",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:44Z",
+      "id": "e4841d8f-92dc-4e82-8687-eabe0ec32fd5",
+      "message": "\n\u003crunai-cluster-worker-0-0\u003e: Node didn't have enough resources: GPU memory, taking all considerations into account.\nno nodes with enough resources were found.",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "06846ff7-11cd-40a8-8950-124403277b99",
+        "kind": "Pod",
+        "name": "my-dist-inference-full-123-c0a3-0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:44Z",
+      "id": "d7cacfcb-0f52-4e6a-b42f-7e1540046565",
+      "message": "PodSchedulingErrors: Resources were found for 0 pods while 3 are required for gang scheduling. Additional pods cannot be scheduled due to: no nodes with enough resources were found: 1 node(s) didn't have enough resources: GPU memory.\n",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "9b6cb737-a968-4cb5-9548-86bede306ff5",
+        "kind": "Pod",
+        "name": "my-dist-inference-full-123-c0a3-0-1",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:44Z",
+      "id": "366ca82b-4877-4ca1-bc96-746fdc58a312",
+      "message": "PodSchedulingErrors: Resources were found for 0 pods while 3 are required for gang scheduling. Additional pods cannot be scheduled due to: no nodes with enough resources were found: 1 node(s) didn't have enough resources: GPU memory.\n",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "c0e0d263-c846-4b37-9cc7-1e2359a4b09e",
+        "kind": "Pod",
+        "name": "my-dist-inference-full-123-c0a3-0-2",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:44Z",
+      "id": "c990a805-a430-4aac-b364-0c604839001a",
+      "message": "PodSchedulingErrors: Resources were found for 0 pods while 3 are required for gang scheduling. Additional pods cannot be scheduled due to: no nodes with enough resources were found: 1 node(s) didn't have enough resources: GPU memory.\n",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "ed7c0c50-3add-4f16-9a10-24ba1df66d9d",
+        "kind": "PodGroup",
+        "name": "pg-my-dist-inference-full-123-c0a3-686a3a50-b528-46c6-bf3b-ea2e4fbf6bae-group-0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:39Z",
+      "id": "b7114369-5a85-4494-872c-44cb7b10de95",
+      "message": "Job is not ready for scheduling. Waiting for 3 pods, currently 2 exist, 0 are gated",
+      "reason": "NotReady",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "ed7c0c50-3add-4f16-9a10-24ba1df66d9d",
+        "kind": "PodGroup",
+        "name": "pg-my-dist-inference-full-123-c0a3-686a3a50-b528-46c6-bf3b-ea2e4fbf6bae-group-0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:39Z",
+      "id": "ab2a1bda-0201-4737-8c5a-1e88edb4175f",
+      "message": "Job is not ready for scheduling. Waiting for 3 pods, currently 1 exist, 0 are gated",
+      "reason": "NotReady",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "258bd28c-5097-42b0-a15f-cc78b6ec2889",
+        "kind": "PodGroup",
+        "name": "pg-my-dist-inference-full-123-c0a3-686a3a50-b528-46c6-bf3b-ea2e4fbf6bae-group-1",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:36Z",
+      "id": "5de23bd9-b098-4241-b352-d944aead9d03",
+      "message": "Created worker statefulset for leader pod my-dist-inference-full-123-c0a3-1",
+      "reason": "GroupsProgressing",
+      "source": "leaderworkerset",
+      "involvedObject": {
+        "uid": "686a3a50-b528-46c6-bf3b-ea2e4fbf6bae",
+        "kind": "LeaderWorkerSet",
+        "name": "my-dist-inference-full-123-c0a3",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:35Z",
+      "id": "9eada71e-9213-459e-a2eb-83b64454427a",
+      "message": "Created worker statefulset for leader pod my-dist-inference-full-123-c0a3-0",
+      "reason": "GroupsProgressing",
+      "source": "leaderworkerset",
+      "involvedObject": {
+        "uid": "686a3a50-b528-46c6-bf3b-ea2e4fbf6bae",
+        "kind": "LeaderWorkerSet",
+        "name": "my-dist-inference-full-123-c0a3",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:34Z",
+      "id": "6f32deeb-6b7a-43a4-923d-1fbcb0d64300",
+      "message": "Replicas are progressing, with 0 groups ready of total 2 groups",
+      "reason": "GroupsProgressing",
+      "source": "leaderworkerset",
+      "involvedObject": {
+        "uid": "686a3a50-b528-46c6-bf3b-ea2e4fbf6bae",
+        "kind": "LeaderWorkerSet",
+        "name": "my-dist-inference-full-123-c0a3",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:34Z",
+      "id": "dc8211c9-c70b-4700-8260-31ad18304120",
+      "message": "Creating revision with key 75c9f7f5bb for a newly created LeaderWorkerSet",
+      "reason": "CreatingRevision",
+      "source": "leaderworkerset",
+      "involvedObject": {
+        "uid": "686a3a50-b528-46c6-bf3b-ea2e4fbf6bae",
+        "kind": "LeaderWorkerSet",
+        "name": "my-dist-inference-full-123-c0a3",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:34Z",
+      "id": "354eaced-8492-46d6-bcb9-59494b837377",
+      "message": "Created leader statefulset my-dist-inference-full-123-c0a3",
+      "reason": "GroupsProgressing",
+      "source": "leaderworkerset",
+      "involvedObject": {
+        "uid": "686a3a50-b528-46c6-bf3b-ea2e4fbf6bae",
+        "kind": "LeaderWorkerSet",
+        "name": "my-dist-inference-full-123-c0a3",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:34Z",
+      "id": "f336c2b4-7b25-4b7e-b536-233b5ac777bd",
+      "message": "Scheduled for sync",
+      "reason": "Sync",
+      "source": "nginx-ingress-controller",
+      "involvedObject": {
+        "uid": "48541084-cd2d-4c87-a107-ba34ad1b1df5",
+        "kind": "Ingress",
+        "name": "dinfw-my-dist-inference-full-123-sp-0",
+        "namespace": "runai-team-b"
+      }
+    }
+  ],
+  "podsInfo": {
+    "pods": [
+      {
+        "name": "my-dist-inference-full-123-c0a3-0",
+        "k8sPhase": "Pending",
+        "containers": [
+          {
+            "name": "runai-oauth2-proxy-0",
+            "image": "runai.jfrog.io/op-containers-test-virt/oauth2-proxy:0.0.0-20000585.master-e840618"
+          }
+        ],
+        "role": "Leader"
+      },
+      {
+        "name": "my-dist-inference-full-123-c0a3-0-1",
+        "k8sPhase": "Pending",
+        "containers": [
+          {
+            "name": "worker",
+            "image": "vllm/vllm-openai:latest"
+          }
+        ],
+        "role": "Worker"
+      },
+      {
+        "name": "my-dist-inference-full-123-c0a3-0-2",
+        "k8sPhase": "Pending",
+        "containers": [
+          {
+            "name": "worker",
+            "image": "vllm/vllm-openai:latest"
+          }
+        ],
+        "role": "Worker"
+      },
+      {
+        "name": "my-dist-inference-full-123-c0a3-1",
+        "k8sPhase": "Pending",
+        "containers": [
+          {
+            "name": "runai-oauth2-proxy-0",
+            "image": "runai.jfrog.io/op-containers-test-virt/oauth2-proxy:0.0.0-20000585.master-e840618"
+          }
+        ],
+        "role": "Leader"
+      },
+      {
+        "name": "my-dist-inference-full-123-c0a3-1-1",
+        "k8sPhase": "Pending",
+        "containers": [
+          {
+            "name": "worker",
+            "image": "vllm/vllm-openai:latest"
+          }
+        ],
+        "role": "Worker"
+      },
+      {
+        "name": "my-dist-inference-full-123-c0a3-1-2",
+        "k8sPhase": "Pending",
+        "containers": [
+          {
+            "name": "worker",
+            "image": "vllm/vllm-openai:latest"
+          }
+        ],
+        "role": "Worker"
+      }
+    ],
+    "runningPods": 0
+  },
+  "spec": {
+    "autoScaling": {},
+    "runaiCliCommand": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai inference distributed submit my-dist-inference-full-123 --project team-b --replicas 2 --workers 2 --image vllm/vllm-openai:latest --image-pull-policy Always --working-dir /app --command 'python -m vllm.entrypoints.openai.api_server' --arguments '--model meta-llama/Llama-2-7b --port 8080' -g 1 --gpu-memory-request 20G --environment-variable MODEL_NAME=llama-2-7b --environment-variable TENSOR_PARALLEL_SIZE=1 --environment-variable MASTER_ADDR=localhost --label role=leader --label version=v1.0 --label framework=vllm --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 1000 --capability NET_BIND_SERVICE --capability SYS_NICE --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --worker-image vllm/vllm-openai:latest --worker-image-pull-policy Always --worker-working-dir /app --worker-command 'python -m vllm.entrypoints.worker' --worker-arguments '--model meta-llama/Llama-2-7b' --worker-gpu-devices-request 1 --worker-environment WORKER_ID=${POD_INDEX} --worker-environment MASTER_ADDR=leader-0 --worker-label role=worker --worker-label version=v1.0 --worker-label framework=vllm --worker-node-type gpu-nodes --worker-run-as-uid 1000 --worker-run-as-gid 1000 --worker-capability NET_BIND_SERVICE --worker-capability SYS_NICE --worker-toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --existing-pvc claimname=my-simple-pvc,path=/models --worker-existing-pvc claimname=my-simple-pvc,path=/models --serving-port=container=8080,authorization-type=authenticatedUsers,protocol=http,authorized-users=admin:developer:tester:reviewer --restart-policy RecreateGroupOnPodRestart --startup-policy LeaderCreated",
+    "servingConfiguration": {},
+    "distributedInferenceSpec": {
+      "category": "Deploy",
+      "leader": {
+        "annotations": [
+          {
+            "name": "runai-submit-command",
+            "value": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai inference distributed submit my-dist-inference-full-123 --project team-b --replicas 2 --workers 2 --image vllm/vllm-openai:latest --image-pull-policy Always --working-dir /app --command 'python -m vllm.entrypoints.openai.api_server' --arguments '--model meta-llama/Llama-2-7b --port 8080' -g 1 --gpu-memory-request 20G --environment-variable MODEL_NAME=llama-2-7b --environment-variable TENSOR_PARALLEL_SIZE=1 --environment-variable MASTER_ADDR=localhost --label role=leader --label version=v1.0 --label framework=vllm --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 1000 --capability NET_BIND_SERVICE --capability SYS_NICE --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --worker-image vllm/vllm-openai:latest --worker-image-pull-policy Always --worker-working-dir /app --worker-command 'python -m vllm.entrypoints.worker' --worker-arguments '--model meta-llama/Llama-2-7b' --worker-gpu-devices-request 1 --worker-environment WORKER_ID=${POD_INDEX} --worker-environment MASTER_ADDR=leader-0 --worker-label role=worker --worker-label version=v1.0 --worker-label framework=vllm --worker-node-type gpu-nodes --worker-run-as-uid 1000 --worker-run-as-gid 1000 --worker-capability NET_BIND_SERVICE --worker-capability SYS_NICE --worker-toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --existing-pvc claimname=my-simple-pvc,path=/models --worker-existing-pvc claimname=my-simple-pvc,path=/models --serving-port=container=8080,authorization-type=authenticatedUsers,protocol=http,authorized-users=admin:developer:tester:reviewer --restart-policy RecreateGroupOnPodRestart --startup-policy LeaderCreated"
+          }
+        ],
+        "args": "--model meta-llama/Llama-2-7b --port 8080",
+        "command": "python -m vllm.entrypoints.openai.api_server",
+        "compute": {
+          "gpuDevicesRequest": 1,
+          "gpuMemoryRequest": "20G"
+        },
+        "createHomeDir": false,
+        "environmentVariables": [
+          {
+            "name": "MODEL_NAME",
+            "value": "llama-2-7b"
+          },
+          {
+            "name": "TENSOR_PARALLEL_SIZE",
+            "value": "1"
+          },
+          {
+            "name": "MASTER_ADDR",
+            "value": "localhost"
+          }
+        ],
+        "image": "vllm/vllm-openai:latest",
+        "imagePullPolicy": "Always",
+        "labels": [
+          {
+            "name": "role",
+            "value": "leader"
+          },
+          {
+            "name": "version",
+            "value": "v1.0"
+          },
+          {
+            "name": "framework",
+            "value": "vllm"
+          }
+        ],
+        "nodeType": "gpu-nodes",
+        "security": {
+          "capabilities": [
+            "NET_BIND_SERVICE",
+            "SYS_NICE"
+          ],
+          "privileged": false,
+          "runAsGid": 1000,
+          "runAsUid": 1000,
+          "uidGidSource": "custom"
+        },
+        "storage": {
+          "emptyDirVolume": [
+            {
+              "path": "/emptydir",
+              "sizeLimit": "1G"
+            }
+          ],
+          "pvc": [
+            {
+              "claimName": "my-simple-pvc",
+              "existingPvc": true,
+              "path": "/local/pvc",
+              "readOnly": false
+            },
+            {
+              "claimInfo": {
+                "accessModes": {
+                  "readWriteOnce": true
+                },
+                "size": "1G",
+                "storageClass": "standard",
+                "volumeMode": "Filesystem"
+              },
+              "claimName": "claim-24mqhfjj7j",
+              "ephemeral": false,
+              "path": "/local/vol"
+            }
+          ]
+        },
+        "tolerations": [
+          {
+            "effect": "NoSchedule",
+            "key": "nvidia.com/gpu",
+            "operator": "Equal",
+            "value": "true"
+          }
+        ],
+        "workingDir": "/app"
+      },
+      "nodePools": [
+        "default"
+      ],
+      "replicas": 2,
+      "restartPolicy": "RecreateGroupOnPodRestart",
+      "servingPort": {
+        "authorizationType": "authenticatedUsers",
+        "authorizedUsers": [
+          "admin",
+          "developer",
+          "tester",
+          "reviewer"
+        ],
+        "exposeExternally": true,
+        "port": 8080,
+        "protocol": "http"
+      },
+      "startupPolicy": "LeaderCreated",
+      "worker": {
+        "annotations": [
+          {
+            "name": "runai-submit-command",
+            "value": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai inference distributed submit my-dist-inference-full-123 --project team-b --replicas 2 --workers 2 --image vllm/vllm-openai:latest --image-pull-policy Always --working-dir /app --command 'python -m vllm.entrypoints.openai.api_server' --arguments '--model meta-llama/Llama-2-7b --port 8080' -g 1 --gpu-memory-request 20G --environment-variable MODEL_NAME=llama-2-7b --environment-variable TENSOR_PARALLEL_SIZE=1 --environment-variable MASTER_ADDR=localhost --label role=leader --label version=v1.0 --label framework=vllm --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 1000 --capability NET_BIND_SERVICE --capability SYS_NICE --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --worker-image vllm/vllm-openai:latest --worker-image-pull-policy Always --worker-working-dir /app --worker-command 'python -m vllm.entrypoints.worker' --worker-arguments '--model meta-llama/Llama-2-7b' --worker-gpu-devices-request 1 --worker-environment WORKER_ID=${POD_INDEX} --worker-environment MASTER_ADDR=leader-0 --worker-label role=worker --worker-label version=v1.0 --worker-label framework=vllm --worker-node-type gpu-nodes --worker-run-as-uid 1000 --worker-run-as-gid 1000 --worker-capability NET_BIND_SERVICE --worker-capability SYS_NICE --worker-toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --existing-pvc claimname=my-simple-pvc,path=/models --worker-existing-pvc claimname=my-simple-pvc,path=/models --serving-port=container=8080,authorization-type=authenticatedUsers,protocol=http,authorized-users=admin:developer:tester:reviewer --restart-policy RecreateGroupOnPodRestart --startup-policy LeaderCreated"
+          }
+        ],
+        "args": "--model meta-llama/Llama-2-7b",
+        "command": "python -m vllm.entrypoints.worker",
+        "compute": {
+          "gpuDevicesRequest": 1,
+          "gpuMemoryRequest": "20G"
+        },
+        "createHomeDir": false,
+        "environmentVariables": [
+          {
+            "name": "MODEL_NAME",
+            "value": "llama-2-7b"
+          },
+          {
+            "name": "TENSOR_PARALLEL_SIZE",
+            "value": "1"
+          },
+          {
+            "name": "MASTER_ADDR",
+            "value": "leader-0"
+          },
+          {
+            "name": "WORKER_ID",
+            "value": "${POD_INDEX}"
+          }
+        ],
+        "image": "vllm/vllm-openai:latest",
+        "imagePullPolicy": "Always",
+        "labels": [
+          {
+            "name": "role",
+            "value": "worker"
+          },
+          {
+            "name": "version",
+            "value": "v1.0"
+          },
+          {
+            "name": "framework",
+            "value": "vllm"
+          }
+        ],
+        "nodeType": "gpu-nodes",
+        "security": {
+          "capabilities": [
+            "NET_BIND_SERVICE",
+            "SYS_NICE"
+          ],
+          "privileged": false,
+          "runAsGid": 1000,
+          "runAsUid": 1000,
+          "uidGidSource": "custom"
+        },
+        "storage": {
+          "emptyDirVolume": [
+            {
+              "path": "/emptydir",
+              "sizeLimit": "1G"
+            }
+          ],
+          "pvc": [
+            {
+              "claimName": "my-simple-pvc",
+              "existingPvc": true,
+              "path": "/local/pvc",
+              "readOnly": false
+            },
+            {
+              "claimInfo": {
+                "accessModes": {
+                  "readWriteOnce": true
+                },
+                "size": "1G",
+                "storageClass": "standard",
+                "volumeMode": "Filesystem"
+              },
+              "claimName": "claim-24mqhfjj7j",
+              "ephemeral": false,
+              "path": "/local/vol"
+            }
+          ]
+        },
+        "tolerations": [
+          {
+            "effect": "NoSchedule",
+            "key": "nvidia.com/gpu",
+            "operator": "Equal",
+            "value": "true"
+          }
+        ],
+        "workingDir": "/app"
+      },
+      "workers": 2
+    }
+  },
+  "GPUAcceleration": null,
+  "distributedInference": {
+    "restartPolicy": "RecreateGroupOnPodRestart",
+    "startupPolicy": "LeaderCreated",
+    "replicas": 2,
+    "workers": 2,
+    "servingPort": 8080,
+    "authorizationType": "authenticatedUsers",
+    "authorizedUsers": [
+      "admin",
+      "developer",
+      "tester",
+      "reviewer"
+    ],
+    "protocol": "http",
+    "exposeExternally": true,
+    "leader": {
+      "image": "vllm/vllm-openai:latest",
+      "imagePullPolicy": "Always",
+      "command": "python -m vllm.entrypoints.openai.api_server",
+      "arguments": "--model meta-llama/Llama-2-7b --port 8080",
+      "workingDir": "/app",
+      "environmentVariables": {
+        "MASTER_ADDR": "localhost",
+        "MODEL_NAME": "llama-2-7b",
+        "TENSOR_PARALLEL_SIZE": "1"
+      },
+      "nodeType": "gpu-nodes",
+      "tolerations": [
+        "nvidia.com/gpu=true:NoSchedule"
+      ],
+      "runAsUser": 1000,
+      "runAsGroup": 1000,
+      "capabilities": [
+        "NET_BIND_SERVICE",
+        "SYS_NICE"
+      ],
+      "compute": {
+        "requestedResources": {
+          "gpuCompute": {
+            "requested": 1
+          },
+          "cpuCores": {
+            "requested": 0
+          },
+          "gpuMemory": {
+            "request": "20G",
+            "limit": ""
+          },
+          "cpuMemory": {
+            "request": "",
+            "limit": ""
+          }
+        },
+        "allocatedResources": {
+          "gpuCompute": 0,
+          "cpuCores": 0,
+          "gpuMemory": "",
+          "cpuMemory": ""
+        }
+      },
+      "storage": {
+        "pvcs": [
+          {
+            "name": "my-simple-pvc",
+            "mountPath": "/local/pvc",
+            "readOnly": false
+          },
+          {
+            "name": "claim-24mqhfjj7j",
+            "mountPath": "/local/vol",
+            "size": "1G",
+            "ephemeral": false,
+            "storageClass": "standard"
+          }
+        ]
+      },
+      "labels": {
+        "framework": "vllm",
+        "role": "leader",
+        "version": "v1.0"
+      }
+    },
+    "worker": {
+      "image": "vllm/vllm-openai:latest",
+      "imagePullPolicy": "Always",
+      "command": "python -m vllm.entrypoints.worker",
+      "arguments": "--model meta-llama/Llama-2-7b",
+      "workingDir": "/app",
+      "environmentVariables": {
+        "MASTER_ADDR": "leader-0",
+        "MODEL_NAME": "llama-2-7b",
+        "TENSOR_PARALLEL_SIZE": "1",
+        "WORKER_ID": "${POD_INDEX}"
+      },
+      "nodeType": "gpu-nodes",
+      "tolerations": [
+        "nvidia.com/gpu=true:NoSchedule"
+      ],
+      "runAsUser": 1000,
+      "runAsGroup": 1000,
+      "capabilities": [
+        "NET_BIND_SERVICE",
+        "SYS_NICE"
+      ],
+      "compute": {
+        "requestedResources": {
+          "gpuCompute": {
+            "requested": 1
+          },
+          "cpuCores": {
+            "requested": 0
+          },
+          "gpuMemory": {
+            "request": "20G",
+            "limit": ""
+          },
+          "cpuMemory": {
+            "request": "",
+            "limit": ""
+          }
+        },
+        "allocatedResources": {
+          "gpuCompute": 0,
+          "cpuCores": 0,
+          "gpuMemory": "",
+          "cpuMemory": ""
+        }
+      },
+      "storage": {
+        "pvcs": [
+          {
+            "name": "my-simple-pvc",
+            "mountPath": "/local/pvc",
+            "readOnly": false
+          },
+          {
+            "name": "claim-24mqhfjj7j",
+            "mountPath": "/local/vol",
+            "size": "1G",
+            "ephemeral": false,
+            "storageClass": "standard"
+          }
+        ]
+      },
+      "labels": {
+        "framework": "vllm",
+        "role": "worker",
+        "version": "v1.0"
+      }
+    }
+  }
+}

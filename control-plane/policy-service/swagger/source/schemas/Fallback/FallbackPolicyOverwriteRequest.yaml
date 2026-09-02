@@ -1,0 +1,6 @@
+properties:
+  meta:
+    $ref: "../Policy/PolicyCreationFields.yaml"
+  policy:
+    $ref: "./FallbackPolicyDefaultsAndRules.yaml"
+type: object

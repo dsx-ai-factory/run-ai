@@ -1,0 +1,5 @@
+description: A chosen name for the policy.
+type: string
+minLength: 1
+example: my-policy
+pattern: .*

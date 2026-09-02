@@ -1,0 +1,7 @@
+properties:
+  attributes:
+    $ref: "./DataVolumeInstance.yaml"
+  instances:
+    $ref: "./DataVolumeItems.yaml"
+nullable: true
+type: object

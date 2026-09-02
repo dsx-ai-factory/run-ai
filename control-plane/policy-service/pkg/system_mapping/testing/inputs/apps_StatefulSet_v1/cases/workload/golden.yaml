@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: test
+spec:
+  minReadySeconds: 0
+  ordinals:
+    start: 0
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  podManagementPolicy: OrderedReady
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchExpressions:
+    - key: test
+      operator: In
+      values:
+      - v1
+      - v2
+    matchLabels:
+      app: test
+  serviceName: my-headless-svc
+  template:
+    metadata:
+      annotations:
+        example.com/annotation: test-value
+      labels:
+        app: test
+    spec:
+      containers:
+      - image: placeholder
+        name: test
+      initContainers:
+      - image: placeholder
+        name: test
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 25%
+      partition: 0
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: standard
+      volumeMode: Filesystem

@@ -1,0 +1,224 @@
+# Common
+RequestResourceCores:
+  $ref: './Common/RequestResourceCores.yaml'
+RequestResourceQuantity:
+  $ref: './Common/RequestResourceQuantity.yaml'
+AllocatedResources:
+  $ref: './Common/AllocatedResources.yaml'
+ActionsSupport:
+  $ref: './Common/ActionsSupport.yaml'
+Condition:
+  $ref: './Common/Condition.yaml'
+Conditions:
+  $ref: './Common/Conditions.yaml'
+# Pods
+Container:
+  $ref: './Pods/Container.yaml'
+Pod:
+  $ref: './Pods/Pod.yaml'
+Toleration:
+  $ref: './Pods/PodToleration.yaml'
+Tolerations:
+  $ref: './Pods/PodTolerations.yaml'
+PodComputedFields:
+  $ref: './Pods/PodComputedFields.yaml'
+Pods:
+  $ref: './Pods/Pods.yaml'
+PodsSyncRequest:
+  $ref: './Pods/PodsSyncRequest.yaml'
+PodSyncFields:
+  $ref: './Pods/PodSyncFields.yaml'
+PodRequestResources:
+  $ref: './Pods/PodRequestResources.yaml'
+PodSortFilterFields:
+  $ref: './Pods/PodSortFilterFields.yaml'
+PodMetricType:
+  $ref: "./Pods/PodMetricType.yaml"
+# Workloads
+Workload:
+  $ref: './Workloads/Workload.yaml'
+WorkloadDetailed:
+  $ref: './Workloads/WorkloadDetailed.yaml'
+Workloads:
+  $ref: './Workloads/Workloads.yaml'
+Environment:
+  $ref: './Workloads/Environment.yaml'
+Datasource:
+  $ref: './Workloads/Datasource.yaml'
+Source:
+  $ref: './Workloads/Source.yaml'
+WorkloadsSyncRequest:
+  $ref: './Workloads/WorkloadsSyncRequest.yaml'
+InternalWorkloadsSyncRequest:
+  $ref: './Workloads/InternalWorkloadsSyncRequest.yaml'
+WorkloadSyncFields:
+  $ref: './Workloads/WorkloadSyncFields.yaml'
+WorkloadTelemetryType:
+  $ref: "./Workloads/WorkloadTelemetryType.yaml"
+WorkloadPatchFields:
+  $ref: './Workloads/WorkloadPatchFields.yaml'
+RequestedPods:
+  $ref: "./Workloads/RequestedPods.yaml"
+WorkloadRequestResources:
+  $ref: './Workloads/WorkloadRequestResources.yaml'
+WorkloadAllocatedResources:
+  $ref: './Workloads/WorkloadAllocatedResources.yaml'
+WorkloadMetricType:
+  $ref: "./Workloads/WorkloadMetricType.yaml"
+WorkloadNetworkStatus:
+  $ref: "./Workloads/WorkloadNetworkStatus.yaml"
+ReplicaType:
+  $ref: './Workloads/ReplicaType.yaml'
+Ancestors:
+  $ref: '../../../../infra/openapi/docs/schemas/scopes/Ancestors.yaml'
+WorkloadSortFilterFields:
+  $ref: './Workloads/WorkloadSortFilterFields.yaml'
+# PhaseReasons
+OrgType:
+  $ref: './Workloads/PhaseReasons/OrgType.yaml'
+PendingSchedulingMessage:
+  $ref: './Workloads/PhaseReasons/PendingSchedulingMessage.yaml'
+QueueResources:
+  $ref: './Workloads/PhaseReasons/QueueResources.yaml'
+SchedulingCondition:
+  $ref: './Workloads/PhaseReasons/SchedulingCondition.yaml'
+PhaseReason:
+  $ref: './Workloads/PhaseReasons/PhaseReason.yaml'
+Endpoint:
+  $ref: "./Workloads/Endpoint.yaml"
+EndpointSync:
+  $ref: "./Workloads/EndpointSync.yaml"
+ResourceRef:
+  $ref: "./Common/ResourceRef.yaml"
+ResourceRefKind:
+  $ref: "./Common/ResourceRefKind.yaml"
+# Events
+Event:
+  $ref: './Events/Event.yaml'
+EventComputedFields:
+  $ref: './Events/EventComputedFields.yaml'
+Events:
+  $ref: './Events/Events.yaml'
+EventsSyncRequest:
+  $ref: './Events/EventsSyncRequest.yaml'
+EventSyncFields:
+  $ref: './Events/EventSyncFields.yaml'
+InvolvedObject:
+  $ref: "./Events/InvolvedObject.yaml"
+HistoryRecord:
+  $ref: './Events/HistoryRecord.yaml'
+HistoryRecords:
+  $ref: './Events/HistoryRecords.yaml'
+PhaseUpdate:
+  $ref: './Events/PhaseUpdate.yaml'
+HistoryRecordMeta:
+  $ref: "./Events/HistoryRecordMeta.yaml"
+HistoryRecordType:
+  $ref: "./Events/HistoryRecordType.yaml"
+Priority:
+  $ref: "./Priorities/WorkloadPriority.yaml"
+Priorities:
+  $ref: "./Priorities/Priorities.yaml"
+SyncPriority:
+  $ref: "./Priorities/SyncPriority.yaml"
+SyncPriorities:
+  $ref: "./Priorities/SyncPriorities.yaml"
+BasePriority:
+  $ref: "./Priorities/BasePriority.yaml"
+BasePriorities:
+  $ref: "./Priorities/BasePriorities.yaml"
+PriorityStatus:
+  $ref: "./Priorities/PriorityStatus.yaml"
+PrioritiesForStatus:
+  $ref: "./Priorities/PrioritiesForStatus.yaml"
+TelemetryResponse:
+  $ref: '../../../../infra/openapi/docs/schemas/metrics/TelemetryResponse.yaml'
+SupersetWorkloadSpec:
+  $ref: "../../../../infra/openapi/docs/schemas/workloads_spec/SupersetSpec.yaml"
+SupersetWorkload:
+  $ref: "../../../../infra/openapi/docs/schemas/workloads/SupersetWorkload.yaml"
+MetricsResponse:
+  $ref: '../../../../infra/openapi/docs/schemas/metrics/MetricsResponse.yaml'
+MeasurementResponse:
+  $ref: '../../../../infra/openapi/docs/schemas/metrics/MeasurementResponse.yaml'
+SupersetTemplate:
+  $ref: "../../../../infra/openapi/docs/schemas/templates/SupersetTemplate.yaml"
+# WorkloadProperties
+WorkloadTypeConfigs:
+  $ref: "./WorkloadProperties/WorkloadTypeConfigs.yaml"
+WorkloadTypeConfig:
+  $ref: "./WorkloadProperties/WorkloadTypeConfig.yaml"
+WorkloadTypeForSync:
+  $ref: "./WorkloadProperties/WorkloadTypeForSync.yaml"
+WorkloadTypesForSync:
+  $ref: "./WorkloadProperties/WorkloadTypesForSync.yaml"
+WorkloadTypeCreateFields:
+  $ref: "./WorkloadProperties/WorkloadTypeCreateFields.yaml"
+WorkloadTypeStatus:
+  $ref: "./WorkloadProperties/WorkloadTypeStatus.yaml"
+WorkloadTypeStatusFields:
+  $ref: "./WorkloadProperties/WorkloadTypeStatusFields.yaml"
+WorkloadTypeUpdateFields:
+  $ref: "./WorkloadProperties/WorkloadTypeUpdateFields.yaml"
+WorkloadTypeCreateUpdateInnerFields:
+  $ref: "./WorkloadProperties/WorkloadTypeCreateUpdateInnerFields.yaml"
+WorkloadTypeAdditionalResponseFields:
+  $ref: "./WorkloadProperties/WorkloadTypeAdditionalResponseFields.yaml"
+WorkloadTypeAdditionalCreateFields:
+  $ref: "./WorkloadProperties/WorkloadTypeAdditionalCreateFields.yaml"
+WorkloadTypeResourceInterface:
+  $ref: "./WorkloadProperties/WorkloadTypeResourceInterface.yaml"
+WorkloadTypeResourceInterfaces:
+  $ref: "./WorkloadProperties/WorkloadTypeResourceInterfaces.yaml"
+WorkloadTypeResourceInterfacesWithVersion:
+  $ref: "./WorkloadProperties/WorkloadTypeResourceInterfacesWithVersion.yaml"
+WorkloadCategory:
+  $ref: "./WorkloadProperties/WorkloadCategory.yaml"
+WorkloadCategories:
+  $ref: "./WorkloadProperties/WorkloadCategories.yaml"
+AIApplications:
+  $ref: "./Applications/AIApplications.yaml"
+AIApplication:
+  $ref: "./Applications/AIApplication.yaml"
+AIApplicationResource:
+  $ref: "./Applications/AIApplicationResource.yaml"
+AIApplicationSyncResource:
+  $ref: "./Applications/AIApplicationSyncResource.yaml"
+AIApplicationVerbosity:
+  $ref: "./Applications/AIApplicationVerbosity.yaml"
+AIApplicationsForSync:
+  $ref: "./Applications/AIApplicationsForSync.yaml"
+AIApplicationForSync:
+  $ref: "./Applications/AIApplicationForSync.yaml"
+AIApplicationSyncAction:
+  $ref: "./Applications/AIApplicationSyncAction.yaml"
+AIApplicationRequestResources:
+  $ref: "./Applications/AIApplicationRequestResources.yaml"
+AIApplicationAllocatedResources:
+  $ref: "./Applications/AIApplicationAllocatedResources.yaml"
+AiApplicationEndpoint:
+  $ref: "./Applications/AiApplicationEndpoint.yaml"
+AiApplicationResourceConnection:
+  $ref: "./Applications/AiApplicationResourceConnection.yaml"
+# Applications
+AIApplicationsSortFilterFields:
+  $ref: './Applications/AIApplicationsSortFilterFields.yaml'
+# Settings
+WorkloadsSettingsKeyEnum:
+  $ref: './Settings/WorkloadsSettingsKeyEnum.yaml'
+UpdateWorkloadsSettingByKeyRequest:
+  $ref: './Settings/UpdateWorkloadsSettingByKeyRequest.yaml'
+WorkloadsSettingsGetResponse:
+  $ref: './Settings/WorkloadsSettingsGetResponse.yaml'
+EnablePoliciesSetting:
+  $ref: './Settings/EnablePoliciesSetting.yaml'
+WorkloadSubmissionV2EnabledSetting:
+  $ref: './Settings/WorkloadSubmissionV2EnabledSetting.yaml'
+EnableTemplatesV2Setting:
+  $ref: './Settings/EnableTemplatesV2Setting.yaml'
+EnableHybridSubmissionSetting:
+  $ref: './Settings/EnableHybridSubmissionSetting.yaml'
+GpuOverProvisioningSetting:
+  $ref: './Settings/GpuOverProvisioningSetting.yaml'
+ApplicationSubmissionSetting:
+  $ref: './Settings/ApplicationSubmissionSetting.yaml'

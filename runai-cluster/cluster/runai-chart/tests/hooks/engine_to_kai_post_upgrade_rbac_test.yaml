@@ -1,0 +1,42 @@
+suite: Test Engine-to-KAI post-upgrade cleanup permissions
+
+templates:
+  - templates/hooks/post-upgrade-rbac.yaml
+
+tests:
+  - it: should allow the post-upgrade hook to delete legacy resources without reading KAI Config
+    set:
+      helmHooksHandler.enabled: true
+    asserts:
+      - notContains:
+          path: rules
+          content:
+            apiGroups:
+              - kai.scheduler
+            resources:
+              - configs
+            verbs:
+              - get
+        documentIndex: 3
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - engine.run.ai
+            resources:
+              - configs
+            verbs:
+              - get
+              - delete
+        documentIndex: 3
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - monitoring.coreos.com
+            resources:
+              - servicemonitors
+            verbs:
+              - get
+              - delete
+        documentIndex: 3

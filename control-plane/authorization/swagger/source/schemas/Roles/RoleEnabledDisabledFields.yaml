@@ -1,0 +1,9 @@
+type: object
+properties:
+  scopeType:
+    type: string
+    default: tenant
+    x-scope: [ system ]
+    enum:
+      - system
+      - tenant

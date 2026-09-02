@@ -1,0 +1,3 @@
+{{- if .Values.tenantsManager.enabled }}
+{{- include "common.hpa" (list . .Values.tenantsManager.autoscaling .Values.tenantsManager) -}}
+{{- end }}

@@ -1,0 +1,13 @@
+type: object
+required:
+  - key
+  - value
+properties:
+  key:
+    type: string
+    example: Nodepool
+    description: The grouping key
+  value:
+    type: string
+    example: 'gpu-pool-1'
+    description: The grouping value

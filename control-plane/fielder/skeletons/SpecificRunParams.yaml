@@ -1,0 +1,10 @@
+description: |
+  Parameters which apply to a specific workload. They complement the information gathered from the assets comprising the workload.
+allOf:
+  - $ref: "./SpecificRunConnections.yaml"
+  - replace: me
+  - $ref: "./AllowOverQuota.yaml"
+  - $ref: "./SpecificRunAutoScaling.yaml"
+  - $ref: "./SpecificRunServingPortAccess.yaml"
+nullable: true
+type: object

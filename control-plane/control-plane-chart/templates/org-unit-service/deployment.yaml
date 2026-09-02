@@ -1,0 +1,14 @@
+{{- if .Values.orgUnitService.enabled }}
+{{- include "common.deployment" (list . .Values.orgUnitService .Values.orgUnitService.autoscaling .Values.orgUnitService.serviceAccount "control-plane.orgUnitService.deployment" ) }}
+{{- end }}
+
+{{- define "control-plane.orgUnitService.deployment" -}}
+spec:
+  template:
+    spec:
+      initContainers:
+        {{- include "awaitingPostgresReadinessContainer" . | nindent 8 }}
+        {{- include "common.initContainer" . | nindent 8 }}
+      containers:
+      - {{- include "common.container" . | nindent 8 }}
+{{- end }}

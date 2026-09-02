@@ -1,0 +1,19 @@
+content:
+  application/json:
+    schema:
+      type: object
+      properties:
+        succeed:
+          type: integer
+          example: 1
+        failed:
+          type: integer
+          example: 1
+        total:
+          type: integer
+          example: 2
+      required:
+        - succeed
+        - failed
+        - total
+description: OK

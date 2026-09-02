@@ -1,0 +1,106 @@
+get:
+  summary: Get a user by id.
+  description: Retrieve a user's details by id.
+  x-service: identity-manager
+  x-test-coverage:
+  - src/test/suites/parallel/users/userTableViewApi.test.ts
+  operationId: get_user_by_id
+  x-authorize:
+    resource-type: users
+    action: read
+    resource-id: userId
+  tags:
+  - Users
+  parameters:
+  - $ref: "../../parameters/userId.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Users/User.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+patch:
+  summary: Update a user by id.
+  description: Use to update a local user's details by id. SSO users cannot be updated.
+  x-service: identity-manager
+  x-test-coverage:
+  - src/test/suites/parallel/users/userTableViewApi.test.ts
+  operationId: patch_user_by_id
+  x-authorize:
+    resource-type: users
+    action: update
+    resource-id: userId
+  x-audit: true
+  tags:
+  - Users
+  parameters:
+  - $ref: "../../parameters/userId.yaml"
+  requestBody:
+    description: User patch object with fields to update.
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/Users/UserPatchRequest.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Users/User.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+delete:
+  summary: Delete a user by id.
+  description: Use to delete a user by id.
+  x-service: identity-manager
+  x-test-coverage:
+  - src/test/suites/parallel/users/userTableViewApi.test.ts
+  operationId: delete_user_by_id
+  x-authorize:
+    resource-type: users
+    action: delete
+    resource-id: userId
+  x-audit: true
+  tags:
+  - Users
+  parameters:
+  - $ref: "../../parameters/userId.yaml"
+  responses:
+    204:
+      description: Executed successfully.
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

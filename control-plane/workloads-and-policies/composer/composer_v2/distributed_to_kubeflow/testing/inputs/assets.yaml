@@ -1,0 +1,30 @@
+image: ubuntu
+ports:
+  - container: 8081
+    toolType: tensor
+    serviceType: NodePort
+exposedUrls:
+  - container: 8081
+    toolType: tensor
+  - container: 8081
+    toolType: custom
+    toolName: my-tool
+relatedUrls:
+  - url: http://google.com/search
+    type: google
+  - url: http://wandb.com/stats
+    type: wandb
+    name: stats
+storage:
+  git:
+    - repository: "http://runai.public.github.com"
+      revision: "12345678"
+      path: /container/my-repository
+      passwordSecret: my-password-secret
+    - repository: "https://runai.public.github.com"
+      path: /mount/git-defaults
+  hostPath:
+  - path: /my/volume/1
+    mountPath: /mount/path/vol/1
+  - path: /my/volume/2
+    mountPath: /mount/path/vol/2

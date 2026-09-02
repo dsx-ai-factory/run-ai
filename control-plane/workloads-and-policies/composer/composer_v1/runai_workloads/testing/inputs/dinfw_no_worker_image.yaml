@@ -1,0 +1,8 @@
+servingPort:
+  port: 8081
+  protocol: http
+workers: 1
+leader:
+    image: python:3.8
+worker:
+    command: python

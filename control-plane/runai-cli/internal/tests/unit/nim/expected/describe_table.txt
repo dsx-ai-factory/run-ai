@@ -1,0 +1,57 @@
+Name:                               my-nim-service
+ID:                                 a22ecd44-f863-444d-b69d-0cc0d26bbc55
+Type:                               NIMService
+Phase:                              Running
+Phase Message:                      deployment "my-nim-service" successfully rolled out
+Created At:                         2025-12-15T08:58:24Z
+Updated At:                         2025-12-15T09:07:57Z
+Project:                            test-nim
+Department:                         default
+Submitted By:                       test@run.ai
+Priority:                           very-high (150)
+Category:                           Deploy
+Preemptible:                        false
+Image:                              gcr.io/run-ai-lab/nim-cpu:latest
+Labels:                             [app:nim-service,
+                                     env:production]
+Annotations:                        [runai-submit-command:runai inference nim submit my-nim-service -p test-nim]
+Environment Variables:              [MODEL_NAME: llama-2-7b,
+                                    NIM_MODE  : inference]
+CLI Command:                        runai inference nim submit my-nim-service -p test-nim
+
+
+NIM Service Configuration
+
+ NGC Auth Secret:                    my-ngc
+ Replicas (Ready):                   1
+ Multi-Node:                         Disabled
+
+
+Model Store
+
+ Type:                               PVC
+ Access Mode:                        ReadOnlyMany
+
+
+Serving Configuration
+
+ Serving Port:                       8000
+ Expose Externally:                  true
+ Service Type:                       ClusterIP
+
+
+Compute Resources
+
+ Resource              Requested   Limit       Allocated  
+──────────────────────────────────────────────────────────
+ GPU Compute           0.00                    0.00       
+ CPU Cores             0.00                    0.00       
+ GPU Memory                                               
+ CPU Memory            10M                                
+
+
+Network
+
+ Name             Tool Type        Connection Type  Container Port   URL                                                       
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ NIMService       NIMService       ExternalUrl      8080             https://aviados-dev.runailabs.com/test-nim/my-nim-service 

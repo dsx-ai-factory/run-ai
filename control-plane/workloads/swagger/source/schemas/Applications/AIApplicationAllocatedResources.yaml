@@ -1,0 +1,25 @@
+type: object
+nullable: true
+properties:
+  gpu:
+    type: number
+    nullable: true
+    format: double
+    example: 1.5
+    description: "States the number of GPUs allocated for the created workloads."
+  gpuMemory:
+    type: string
+    pattern: "^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+    nullable: true
+    example: "200Mi"
+  cpu:
+    type: number
+    nullable: true
+    format: double
+    description: States the amount of CPU cores used by the workloads running.
+    example: 0.5
+  cpuMemory:
+    type: string
+    pattern: "^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+    nullable: true
+    example: "0B"

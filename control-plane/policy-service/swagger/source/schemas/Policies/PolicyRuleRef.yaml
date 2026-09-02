@@ -1,0 +1,30 @@
+type: object
+description: >-
+  The identity of a policy rule: the policy-controllable field it enforces, the
+  spec selector that picks which subtree of the workload spec it applies to, and
+  the optional item selector and selector parameters that narrow the target for
+  itemized fields.
+required:
+  - field
+  - specSelector
+properties:
+  field:
+    $ref: "../Mapping/MappingFieldName.yaml"
+  specSelector:
+    $ref: "../Mapping/SpecSelectorName.yaml"
+  itemSelector:
+    description: >-
+      The name of the item selector that picks specific items of an itemized
+      field. Omit for non-itemized fields.
+    allOf:
+      - $ref: "../Mapping/ItemSelectorName.yaml"
+    type: string
+    nullable: true
+  selectorParams:
+    $ref: "./SelectorParams.yaml"
+example:
+  field: "environmentVariables-ConfigMapName"
+  specSelector: "appContainerByName"
+  itemSelector: "environmentVariables-FromConfigMap"
+  selectorParams:
+    name: "worker-1"

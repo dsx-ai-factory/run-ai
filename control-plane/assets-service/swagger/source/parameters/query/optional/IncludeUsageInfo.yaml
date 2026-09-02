@@ -1,0 +1,6 @@
+name: usageInfo
+in: query
+required: false
+description: Whether the query should include asset usage information as part of the response.
+schema:
+  type: boolean

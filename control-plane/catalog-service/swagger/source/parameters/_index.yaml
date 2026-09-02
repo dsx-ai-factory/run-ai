@@ -1,0 +1,12 @@
+#query
+RegistryIntegrationId:
+  $ref: './path/RegistryIntegrationId.yaml'
+HelmRepoId:
+  $ref: './path/HelmRepoId.yaml'
+
+#optional
+Search:
+  $ref: '../../../../infra/openapi/docs/parameters/query/optional/Search.yaml'
+
+CatalogSettingsKey:
+  $ref: './path/CatalogSettingsKey.yaml'

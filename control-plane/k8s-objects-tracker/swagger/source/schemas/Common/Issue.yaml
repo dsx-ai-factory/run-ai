@@ -1,0 +1,12 @@
+type: object
+description: an issue that was found while syncing the resource
+required:
+  - namespace
+  - issue
+properties:
+    namespace:
+        type: string
+        description: the namespace of the resource
+    issue:
+        type: string
+        description: the issue found

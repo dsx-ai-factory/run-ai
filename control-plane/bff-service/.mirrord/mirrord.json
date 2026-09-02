@@ -1,0 +1,22 @@
+{
+    "target": {
+        "path": {
+            "deployment": "runai-backend-bff-service"
+        },
+        "namespace": "runai-backend"
+    },
+    "feature": {
+        "env": true,
+        "fs": {
+            "mode": "read",
+            "read_only": [
+                "/etc/secrets.*"
+            ]
+        },
+        "network": {
+            "incoming": {
+                "mode": "steal"
+            }
+        }
+    }
+}

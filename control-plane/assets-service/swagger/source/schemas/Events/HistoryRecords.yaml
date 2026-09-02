@@ -1,0 +1,4 @@
+type: array
+items:
+  $ref: './HistoryRecord.yaml'
+x-schema-name: HistoryRecords

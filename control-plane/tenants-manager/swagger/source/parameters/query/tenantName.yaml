@@ -1,0 +1,6 @@
+name: tenantName
+in: query
+required: true
+description: The name of the tenant to retrieve
+schema:
+  type: string

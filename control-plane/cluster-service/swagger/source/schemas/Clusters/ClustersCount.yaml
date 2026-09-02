@@ -1,0 +1,16 @@
+type: object
+required:
+  - key
+  - count
+properties:
+  key:
+    type: string
+    minLength: 1  # Must have a value
+    maxLength: 253  # Grouped property value (typically <50 chars like "true"/"false"); limit for consistency, not actual constraint
+  count:
+    type: integer
+    minimum: 0  # Counts cannot be negative
+    maximum: 2147483647  # int32 max value
+example:
+  key: subdomain
+  count: 7

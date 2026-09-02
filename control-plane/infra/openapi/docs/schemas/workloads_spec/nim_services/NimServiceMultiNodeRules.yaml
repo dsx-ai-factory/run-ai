@@ -1,0 +1,5 @@
+properties:
+  workers:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+nullable: true
+type: object

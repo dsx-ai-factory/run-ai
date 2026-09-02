@@ -1,0 +1,119 @@
+openapi: '3.0.3'
+info:
+  title: Authorization
+  version: '1.0'
+  description: An API for managing RunAi authorization objects and perform as the RunAi authorization layer.
+  contact:
+    name: 'Run.AI'
+    url: 'https://www.run.ai/'
+    email: 'support@run.ai'
+servers:
+  - url: https://app.run.ai
+  - url: https://staging.run.ai
+  - url: https://test.run.ai
+  - url: http://localhost:8080
+paths:
+  /:
+    x-internal: true
+    x-runai-team: Suricata
+    get:
+      summary: health check
+      x-no-authorization: true
+      x-test-coverage: not-applicable
+      x-runai-team: Suricata
+      operationId: health
+      tags:
+        - Health
+      responses:
+        200:
+          description: Executed successfully.
+  /api/v1/authorization/roles:
+    x-scope: [system, tenant]
+    $ref: './resources/RolesV1.yaml'
+  /api/v1/authorization/roles/{roleIdPath}:
+    x-scope: [system, tenant]
+    $ref: './resources/RoleByIdV1.yaml'
+  /api/v2/authorization/roles:
+    x-scope: [system, tenant]
+    $ref: './resources/Roles.yaml'
+  /api/v2/authorization/roles/{roleIdPath}:
+    x-scope: [system, tenant]
+    $ref: './resources/RoleById.yaml'
+  /api/v2/authorization/roles/{roleIdPath}/active:
+    $ref: './resources/RoleActive.yaml'
+  /api/v2/authorization/roles/{roleIdPath}/enable:
+    x-scope: [system, tenant]
+    $ref: './resources/RoleEnable.yaml'
+  /api/v2/authorization/roles/{roleIdPath}/disable:
+    x-scope: [system, tenant]
+    $ref: './resources/RoleDisable.yaml'
+  /api/v1/authorization/permission-sets:
+    x-scope: [system, tenant]
+    $ref: './resources/PermissionSets.yaml'
+  /api/v1/authorization/permission-sets/{permissionSetId}:
+    x-scope: [system, tenant]
+    $ref: './resources/PermissionSetsById.yaml'
+  /api/v1/authorization/access-rules:
+    x-scope: [system, tenant]
+    $ref: './resources/AccessRules.yaml'
+  /api/v1/authorization/access-rules/sync:
+    $ref: './resources/AccessRulesAgentSync.yaml'
+  /api/v1/authorization/access-rules/{accessRuleId}:
+    x-scope: [system, tenant]
+    $ref: './resources/AccessRuleById.yaml'
+  /api/v1/authorization/access-rules/count:
+    x-scope: [system, tenant]
+    $ref: './resources/AccessRulesCount.yaml'
+  /api/v1/authorization/access-rules/{accessRuleId}/{clusterUuid}/status:
+    x-internal: true
+    $ref: './resources/AccessRuleStatus.yaml'
+  /api/v1/authorization/access-rules/{clusterUuid}/sync:
+    x-internal: true
+    $ref: './resources/AccessRulesSync.yaml'
+  /api/v1/authorization/access-rules/batch:
+    x-scope: [system, tenant]
+    $ref: "./resources/AccessRulesBatch.yaml"
+  /api/v1/authorization/access-rules/batch-create:
+    x-scope: [system, tenant]
+    $ref: "./resources/AccessRulesBatchCreate.yaml"
+  /api/v1/authorization/permissions:
+    x-scope: [system, tenant]
+    $ref: './resources/Permissions.yaml'
+  /api/v1/authorization/permitted-scopes:
+    x-scope: [system, tenant]
+    $ref: './resources/PermittedScopes.yaml'
+  /api/v1/authorization/evaluate:
+    x-internal: true
+    $ref: './resources/Evaluation.yaml'
+  /api/v1/authorization/me/access-rules:
+    x-scope: [system, tenant]
+    $ref: './resources/MeAccessRules.yaml'
+  /api/v1/authorization/me/access-rules/count:
+    x-scope: [system, tenant]
+    $ref: './resources/MeAccessRulesCount.yaml'
+  /internal/authorization/access-rules:
+    x-internal: true
+    $ref: './resources/InternalAccessRules.yaml'
+  /internal/authorization/subject-access-rules:
+    x-internal: true
+    $ref: './resources/SubjectAccessRules.yaml'
+  /internal/authorization/scope-access-rules:
+    x-internal: true
+    $ref: './resources/ScopeAccessRules.yaml'
+  /internal/authorization/groups:
+    x-internal: true
+    $ref: './resources/InternalGroups.yaml'
+  /internal/authorization/privilege-escalation/evaluate:
+    x-internal: true
+    $ref: './resources/PrivilegeEscalationEvaluate.yaml'
+components:
+  parameters:
+    $ref: "./parameters/_index.yaml"
+  schemas:
+    $ref: "./schemas/_index.yaml"
+  responses:
+    $ref: "../../../infra/openapi/docs/responses/_index.yaml"
+  securitySchemes:
+    $ref: "./securitySchemes/_index.yaml"
+security:
+  - bearerAuth: []

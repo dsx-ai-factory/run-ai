@@ -1,0 +1,39 @@
+policy:
+  effectiveRules:
+  - enforcements:
+    - set:
+        key: role
+        value: worker
+    field: annotations
+    selectorParams:
+      containerName: worker
+    sourceOfRule: null
+    specSelector: containerMeta
+  - enforcements:
+    - set:
+        key: role
+        value: main
+    field: annotations
+    selectorParams:
+      containerName: main
+    sourceOfRule: null
+    specSelector: containerMeta
+  workloadType:
+    group: test
+    kind: TestWorkload
+    version: v1
+workload:
+  apiVersion: test/v1
+  kind: TestWorkload
+  spec:
+    containers:
+    - image: worker:latest
+      metadata:
+        annotations:
+          role: worker
+      name: worker
+    - image: main:latest
+      metadata:
+        annotations:
+          role: main
+      name: main

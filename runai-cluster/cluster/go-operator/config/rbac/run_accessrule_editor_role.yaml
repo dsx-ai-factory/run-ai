@@ -1,0 +1,24 @@
+# permissions for end users to edit accessrules.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: accessrule-editor-role
+rules:
+- apiGroups:
+  - run.ai
+  resources:
+  - accessrules
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - run.ai
+  resources:
+  - accessrules/status
+  verbs:
+  - get

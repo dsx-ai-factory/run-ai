@@ -1,0 +1,11 @@
+properties:
+  status:
+    $ref: "./AssetSyncStatusEnum.yaml"
+  issues:
+    $ref: "./AssetClusterStatusIssues.yaml"
+  message:
+    type: string
+  url:
+    type: string
+nullable: true
+type: object

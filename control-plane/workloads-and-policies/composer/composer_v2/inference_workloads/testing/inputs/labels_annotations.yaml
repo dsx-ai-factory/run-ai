@@ -1,0 +1,14 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+labels:
+  - name: team
+    value: ml-platform
+  - name: owner
+    value: alice
+annotations:
+  - name: example.com/owner
+    value: alice@example.com
+  - name: example.com/cost-center
+    value: research

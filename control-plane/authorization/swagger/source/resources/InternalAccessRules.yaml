@@ -1,0 +1,29 @@
+post:
+  summary: Create internal access rule with out privileged escalation validation.
+  x-no-authorization: true
+  x-service: authorization
+  x-internal: true
+  x-test-coverage: not-applicable
+  operationId: create_internal_access_rule
+  tags:
+    - Internal
+  requestBody:
+    description: The request parameters.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/InternalCreateAccessRule/InternalCreateAccessRuleRequest.yaml'
+  responses:
+    '201':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/AccessRules/AccessRule.yaml'
+    '409':
+      $ref: '../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

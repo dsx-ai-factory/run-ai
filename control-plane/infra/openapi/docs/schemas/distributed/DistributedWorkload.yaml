@@ -1,0 +1,3 @@
+allOf:
+  - $ref: "../workloads/WorkloadMeta.yaml"
+  - $ref: "./DistributedSpec.yaml"

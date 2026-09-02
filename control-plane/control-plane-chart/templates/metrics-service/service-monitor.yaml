@@ -1,0 +1,1 @@
+{{- include "common.serviceMonitor" (list . .Values.metricsService.serviceMonitor .Values.metricsService) }}

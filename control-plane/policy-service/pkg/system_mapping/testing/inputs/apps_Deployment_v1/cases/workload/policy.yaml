@@ -1,0 +1,67 @@
+description: |
+  Layer 3 case "workload" for apps/Deployment/v1. SETs every field reachable
+  through the deploymentSpec and selector field groups (i.e. everything in
+  .spec at or above the pod template). Custom formatters used here:
+
+    * strategy-Type uses runai-deploymentSpec (enum-validated value).
+    * matchExprSelector uses runai-selector (one rule per match expression).
+
+  The parent `strategy` object is not modeled as a settable field — it's an
+  intermediate wrapper (like `selector`). Policies set the meaningful children
+  (strategy-Type, strategy-MaxSurge, strategy-MaxUnavailable) directly.
+
+  All other deploymentSpec / selector fields are KeyValue. Read together
+  with cases/workload/golden.yaml.
+effectiveRules:
+  # ----- deploymentSpec scalar fields -----
+  - field: replicas
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 1 } }]
+  - field: minReadySeconds
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 0 } }]
+  - field: revisionHistoryLimit
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 10 } }]
+  - field: progressDeadlineSeconds
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 600 } }]
+  - field: paused
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: false } }]
+
+  # ----- deploymentSpec strategy (sub-field SETs) -----
+  # strategy-Type is a custom formatter (runai-deploymentSpec) that
+  # constrains the value to the {Recreate, RollingUpdate} enum.
+  - field: strategy-Type
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: RollingUpdate } }]
+  - field: strategy-MaxSurge
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "25%" } }]
+  - field: strategy-MaxUnavailable
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "25%" } }]
+
+  # ----- selector ----
+  # matchLabelsSelector uses KeyValueMap to add entries to selector.matchLabels.
+  # matchExprSelector uses runai-selector (one rule per match expression).
+  - field: matchLabelsSelector
+    specSelector: workloadSpec
+    enforcements: [{ set: { key: "app", value: "test" } }]
+  - field: matchExprSelector
+    specSelector: workloadSpec
+    enforcements:
+      - set:
+          key: test
+          operator: In
+          values: ["v1", "v2"]
+
+  # ----- pod template metadata -----
+  # Add a label via policy (must match selector.matchLabels for K8s validation)
+  - field: labels
+    specSelector: podMetadata
+    enforcements: [{ set: { key: "app", value: "test" } }]
+  - field: annotations
+    specSelector: podMetadata
+    enforcements: [{ set: { key: "example.com/annotation", value: "test-value" } }]

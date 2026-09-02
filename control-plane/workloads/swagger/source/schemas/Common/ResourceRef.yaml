@@ -1,0 +1,12 @@
+type: object
+description: A reference to an existing Kubernetes resource (PersistentVolumeClaim, Secret, or ConfigMap) used by a workload's pod template.
+required:
+  - name
+  - kind
+properties:
+  uid:
+    $ref: "./K8sResourceId.yaml"
+  name:
+    $ref: "./K8sResourceName.yaml"
+  kind:
+    $ref: "./ResourceRefKind.yaml"

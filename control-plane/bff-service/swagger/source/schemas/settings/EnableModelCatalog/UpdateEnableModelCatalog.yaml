@@ -1,0 +1,8 @@
+type: object
+properties:
+  enabled:
+    type: boolean
+    nullable: true
+    description: Whether to enable the model catalog (Hugging Face models).
+example:
+  enabled: true

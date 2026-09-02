@@ -1,0 +1,18 @@
+properties:
+  options:
+    description: Limit the permitted values for imagePullPolicy to a given set of values.
+    type: array
+    items:
+      required:
+        - value
+      properties:
+        value:
+          $ref: "./ImagePullPolicy.yaml"
+        displayed:
+          description: Textual description of the value
+          type: string
+          nullable: true
+          pattern: .*
+    nullable: true
+nullable: true
+type: object

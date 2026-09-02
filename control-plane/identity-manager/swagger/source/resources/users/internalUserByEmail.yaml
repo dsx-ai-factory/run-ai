@@ -1,0 +1,21 @@
+delete:
+  summary: Delete a user by email (internal).
+  description: Delete a user by email for internal service use.
+  x-service: identity-manager
+  x-test-coverage: not-applicable
+  operationId: delete_internal_user_by_email
+  x-no-authorization: true
+  tags:
+  - Users
+  parameters:
+    - $ref: "../../parameters/realm.yaml"
+    - $ref: "../../parameters/email.yaml"
+  responses:
+    '200':
+      description: Deleted successfully.
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '404':
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'

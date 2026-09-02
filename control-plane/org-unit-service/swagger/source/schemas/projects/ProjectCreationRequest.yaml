@@ -1,0 +1,34 @@
+allOf:
+  - $ref: "../DataUpdatableFields.yaml"
+  - type: object
+    required:
+      - name
+      - clusterId
+      - resources
+    properties:
+      name:
+        description: The unique name of the project within the cluster. Must be a valid Kubernetes name (lowercase, alphanumeric, hyphens allowed).
+        type: string
+        maxLength: 63
+        example: organization1
+      clusterId:
+        $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+      requestedNamespace:
+        type: string
+        description: The custom Kubernetes namespace name for the project. If not specified, a namespace will be auto-generated using the pattern runai-<project-name>.
+        example: runai-proj1
+      enforceRunaiScheduler:
+        type: boolean
+        description: When set to true, enforces that all pods in this project's namespace are scheduled using the NVIDIA Run:ai Scheduler (runai-scheduler). Supported for cluster version 2.21 and later.
+        nullable: true
+        default: true
+      parentId:
+        type: string
+        description: The ID of the parent department. When specified, the project is created as a child of this department and inherits its quota, the quota of other projects within the department and its scheduling rules.
+        example: 35000
+        nullable: true
+      resources:
+        type: array
+        items:
+          $ref: "../ResourcesNullable.yaml"
+        description: An array of resource configurations for the project. Each entry defines GPU, CPU, and CPU memory assigned to a specific node pool.

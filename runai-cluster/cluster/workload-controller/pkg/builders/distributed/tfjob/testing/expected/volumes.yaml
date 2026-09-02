@@ -1,0 +1,368 @@
+apiVersion: kubeflow.org/v1
+kind: TFJob
+metadata:
+  annotations:
+    image: ""
+    template: job-1
+    user: user.name
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: tfjob
+    createdBy: TFJob
+    project: team-a
+    release: job-1
+    run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+    workloadKind: DistributedWorkload
+    workloadName: job-1
+  name: job-1
+  namespace: runai-team-a
+spec:
+  runPolicy:
+    backoffLimit: 6
+    cleanPodPolicy: Running
+  tfReplicaSpecs:
+    Chief:
+      replicas: 1
+      template:
+        metadata:
+          annotations:
+            totalGPUs: "0"
+            totalGPUsMemory: "0"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-1
+        spec:
+          containers:
+          - imagePullPolicy: IfNotPresent
+            name: tensorflow
+            resources: {}
+            securityContext:
+              seccompProfile:
+                type: RuntimeDefault
+            volumeMounts:
+            - mountPath: /mypath
+              name: host-path-volume-0
+              readOnly: true
+            - mountPath: /tmp/ofer
+              name: pvc-volume-0
+            - mountPath: /tmp/repoc
+              name: code-sync-0
+            - mountPath: /tmp/repoa
+              name: code-sync-1
+            - mountPath: /tmp/repob
+              name: code-sync-2
+            - mountPath: /tmp/repod
+              name: code-sync-3
+          initContainers:
+          - env:
+            - name: GITSYNC_REPO
+              value: http://github.com/repoc
+            - name: GITSYNC_REF
+              value: custom
+            - name: GITSYNC_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: user-key
+                  name: k8s-secret-c
+            - name: GITSYNC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: pass-key
+                  name: k8s-secret-c
+            - name: GITSYNC_ROOT
+              value: /code-git-password-repo
+            - name: GITSYNC_ONE_TIME
+              value: "true"
+            - name: HOME
+              value: /tmp
+            image: registry.k8s.io/git-sync/git-sync:v4.7.0
+            name: git-sync-git-password-repo
+            resources: {}
+            volumeMounts:
+            - mountPath: /code-git-password-repo
+              name: code-sync-0
+          - env:
+            - name: GITSYNC_REPO
+              value: http://github.com/repoa
+            - name: GITSYNC_REF
+              value: custom
+            - name: GITSYNC_ROOT
+              value: /code-git-public-repo
+            - name: GITSYNC_ONE_TIME
+              value: "true"
+            - name: HOME
+              value: /tmp
+            image: registry.k8s.io/git-sync/git-sync:v4.7.0
+            name: git-sync-git-public-repo
+            resources: {}
+            volumeMounts:
+            - mountPath: /code-git-public-repo
+              name: code-sync-1
+          - env:
+            - name: GITSYNC_REPO
+              value: http://github.com/repob
+            - name: GITSYNC_REF
+              value: custom
+            - name: GITSYNC_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: user-key
+                  name: k8s-secret-b
+            - name: GITSYNC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: pass-key
+                  name: k8s-secret-b
+            - name: GITSYNC_ROOT
+              value: /code-git-secret-repo
+            - name: GITSYNC_ONE_TIME
+              value: "true"
+            - name: HOME
+              value: /tmp
+            image: registry.k8s.io/git-sync/git-sync:v4.7.0
+            name: git-sync-git-secret-repo
+            resources: {}
+            volumeMounts:
+            - mountPath: /code-git-secret-repo
+              name: code-sync-2
+          - env:
+            - name: GITSYNC_REPO
+              value: http://github.com/repod
+            - name: GITSYNC_REF
+              value: custom
+            - name: GITSYNC_ROOT
+              value: /code-git-ssh-repo
+            - name: GITSYNC_ONE_TIME
+              value: "true"
+            - name: HOME
+              value: /tmp
+            - name: GITSYNC_SSH
+              value: "true"
+            - name: GITSYNC_SSH_KNOWN_HOSTS
+              value: "false"
+            image: registry.k8s.io/git-sync/git-sync:v4.7.0
+            name: git-sync-git-ssh-repo
+            resources: {}
+            volumeMounts:
+            - mountPath: /etc/git-secret
+              name: git-ssh-secret-3
+            - mountPath: /code-git-ssh-repo
+              name: code-sync-3
+          schedulerName: runai-scheduler
+          volumes:
+          - hostPath:
+              path: /myvol
+            name: host-path-volume-0
+          - name: pvc-volume-0
+            persistentVolumeClaim:
+              claimName: pvc-job-1-1-0
+          - emptyDir: {}
+            name: code-sync-0
+          - emptyDir: {}
+            name: code-sync-1
+          - emptyDir: {}
+            name: code-sync-2
+          - emptyDir: {}
+            name: code-sync-3
+          - name: git-ssh-secret-3
+            secret:
+              secretName: k8s-secret-d
+    Worker:
+      replicas: 1
+      template:
+        metadata:
+          annotations:
+            totalGPUs: "0"
+            totalGPUsMemory: "0"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-1
+        spec:
+          containers:
+          - imagePullPolicy: IfNotPresent
+            name: tensorflow
+            resources: {}
+            securityContext:
+              seccompProfile:
+                type: RuntimeDefault
+            volumeMounts:
+            - mountPath: /mypath
+              name: host-path-volume-0
+              readOnly: true
+            - mountPath: /tmp/ofer
+              name: pvc-volume-0
+            - mountPath: /tmp/repoc
+              name: code-sync-0
+            - mountPath: /tmp/repoa
+              name: code-sync-1
+            - mountPath: /tmp/repob
+              name: code-sync-2
+            - mountPath: /tmp/repod
+              name: code-sync-3
+          initContainers:
+          - env:
+            - name: GITSYNC_REPO
+              value: http://github.com/repoc
+            - name: GITSYNC_REF
+              value: custom
+            - name: GITSYNC_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: user-key
+                  name: k8s-secret-c
+            - name: GITSYNC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: pass-key
+                  name: k8s-secret-c
+            - name: GITSYNC_ROOT
+              value: /code-git-password-repo
+            - name: GITSYNC_ONE_TIME
+              value: "true"
+            - name: HOME
+              value: /tmp
+            image: registry.k8s.io/git-sync/git-sync:v4.7.0
+            name: git-sync-git-password-repo
+            resources: {}
+            volumeMounts:
+            - mountPath: /code-git-password-repo
+              name: code-sync-0
+          - env:
+            - name: GITSYNC_REPO
+              value: http://github.com/repoa
+            - name: GITSYNC_REF
+              value: custom
+            - name: GITSYNC_ROOT
+              value: /code-git-public-repo
+            - name: GITSYNC_ONE_TIME
+              value: "true"
+            - name: HOME
+              value: /tmp
+            image: registry.k8s.io/git-sync/git-sync:v4.7.0
+            name: git-sync-git-public-repo
+            resources: {}
+            volumeMounts:
+            - mountPath: /code-git-public-repo
+              name: code-sync-1
+          - env:
+            - name: GITSYNC_REPO
+              value: http://github.com/repob
+            - name: GITSYNC_REF
+              value: custom
+            - name: GITSYNC_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: user-key
+                  name: k8s-secret-b
+            - name: GITSYNC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: pass-key
+                  name: k8s-secret-b
+            - name: GITSYNC_ROOT
+              value: /code-git-secret-repo
+            - name: GITSYNC_ONE_TIME
+              value: "true"
+            - name: HOME
+              value: /tmp
+            image: registry.k8s.io/git-sync/git-sync:v4.7.0
+            name: git-sync-git-secret-repo
+            resources: {}
+            volumeMounts:
+            - mountPath: /code-git-secret-repo
+              name: code-sync-2
+          - env:
+            - name: GITSYNC_REPO
+              value: http://github.com/repod
+            - name: GITSYNC_REF
+              value: custom
+            - name: GITSYNC_ROOT
+              value: /code-git-ssh-repo
+            - name: GITSYNC_ONE_TIME
+              value: "true"
+            - name: HOME
+              value: /tmp
+            - name: GITSYNC_SSH
+              value: "true"
+            - name: GITSYNC_SSH_KNOWN_HOSTS
+              value: "false"
+            image: registry.k8s.io/git-sync/git-sync:v4.7.0
+            name: git-sync-git-ssh-repo
+            resources: {}
+            volumeMounts:
+            - mountPath: /etc/git-secret
+              name: git-ssh-secret-3
+            - mountPath: /code-git-ssh-repo
+              name: code-sync-3
+          schedulerName: runai-scheduler
+          volumes:
+          - hostPath:
+              path: /myvol
+            name: host-path-volume-0
+          - name: pvc-volume-0
+            persistentVolumeClaim:
+              claimName: pvc-job-1-0-0
+          - emptyDir: {}
+            name: code-sync-0
+          - emptyDir: {}
+            name: code-sync-1
+          - emptyDir: {}
+            name: code-sync-2
+          - emptyDir: {}
+            name: code-sync-3
+          - name: git-ssh-secret-3
+            secret:
+              secretName: k8s-secret-d
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: tfjob
+    createdBy: TFJob
+    project: team-a
+    release: job-1
+    workloadKind: DistributedWorkload
+    workloadName: job-1
+  name: pvc-job-1-0-0
+  namespace: runai-team-a
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  storageClassName: storage
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: tfjob
+    createdBy: TFJob
+    project: team-a
+    release: job-1
+    workloadKind: DistributedWorkload
+    workloadName: job-1
+  name: pvc-job-1-1-0
+  namespace: runai-team-a
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  storageClassName: storage
+status: {}

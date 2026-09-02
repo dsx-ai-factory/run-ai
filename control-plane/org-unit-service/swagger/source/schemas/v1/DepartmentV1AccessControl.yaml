@@ -1,0 +1,11 @@
+properties:
+  departmentId:
+    type: integer
+    format: int32
+    description: The unique id identifying the department.
+    example: 2
+  departmentAdmins:
+    type: array
+    items:
+      type: string
+    description: Id's of users with department admin role that are assigned to managed the department

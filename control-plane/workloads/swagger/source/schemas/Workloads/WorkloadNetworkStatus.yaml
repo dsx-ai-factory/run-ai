@@ -1,0 +1,77 @@
+type: object
+properties:
+  services:
+    type: array
+    description: List of services associated with the workload.
+    items:
+      type: object
+      description: Service object containing details about the service.
+      properties:
+        name:
+          type: string
+          example: "service1"
+          description: Name of the service.
+        type:
+          type: string
+          example: "ClusterIP"
+          description: Type of the service (e.g., ClusterIP, NodePort, etc.).
+        ports:
+          type: array
+          description: List of ports exposed by the service.
+          items:
+            type: object
+            description: Port object containing details about the port.
+            properties:
+              name:
+                type: string
+                example: "port1"
+                description: Name of the port.
+              targetPort:
+                type: string
+                example: "80"
+                description: Target port on the pod.
+              port:
+                type: integer
+                format: int32
+                example: 80
+                description: Port number exposed by the service.
+              protocol:
+                type: string
+                example: "TCP"
+                description: Protocol used by the port (e.g., TCP, UDP).
+        loadBalancer:
+          type: object
+          description: Load balancer configuration for the service.
+          properties:
+            ingress:
+              type: array
+              description: List of ingress points for the load balancer.
+              items:
+                type: object
+                description: Ingress object containing IP or hostname.
+                properties:
+                  ip:
+                    type: string
+                    description: IP address of the ingress point.
+                  hostname:
+                    type: string
+                    description: Hostname of the ingress point.
+        urls:
+          type: array
+          description: URLs reachable through this service.
+          items:
+            type: object
+            description: URL object containing the reachable URL and its source resource.
+            properties:
+              url:
+                type: string
+                example: "https://service1.example.com/"
+                description: URL reachable through this service.
+              sourceKind:
+                type: string
+                example: "Ingress"
+                description: Kubernetes resource kind that produced the URL.
+              sourceName:
+                type: string
+                example: "service1-ingress"
+                description: Kubernetes resource name that produced the URL.

@@ -1,0 +1,4 @@
+image: ubuntu
+compute:
+  gpuPortionRequest: 2.5
+  gpuRequestType: portion

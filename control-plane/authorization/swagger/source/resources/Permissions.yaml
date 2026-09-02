@@ -1,0 +1,23 @@
+get:
+  summary: Get a summary of user permissions.
+  description: Retrieve a summary of user permissions. 
+  x-no-authorization: true
+  operationId: get_permissions
+  x-service: authorization
+  x-test-coverage:
+    - e2e/src/test/suites/advancedSuite/authorization/authorizationUI.test.ts
+  tags:
+    - Permissions
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Roles/Permissions.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

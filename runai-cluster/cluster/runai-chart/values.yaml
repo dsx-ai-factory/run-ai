@@ -1,0 +1,233 @@
+global:
+  fipsMode: "off"
+  customCA:
+    enabled: false
+    secret:
+      name: runai-ca-cert
+      key: runai-ca.pem
+      optional: true
+  additionalImagePullSecrets: []
+  image: {}
+  #registry:
+  affinity: {}
+  tolerations: []
+  additionalJobLabels: {}
+  additionalJobAnnotations: {}
+  # Metrics configuration
+  metrics:
+    # Enable or disable remote writing of infrastructure metrics
+    # Infrastructure metrics include cluster resource usage, node metrics, and system-level monitoring data
+    disableInfrastructureMetricsRemoteWrite: false
+  # !!! INTERNAL USE ONLY !!!
+  # Changing this value may cause undefined behavior.
+  # If set, used by all helm-managed components.
+  serviceAccountName: ""
+# Cluster configuration applied to RunaiConfig using JSON Merge Patch (RFC 7396).
+# Allows overriding specific fields without replacing the entire configuration.
+# Null values will delete the corresponding field.
+# 
+# Example:
+# global:
+#   runtime: containerd
+clusterConfig: {}
+crdUpgrader:
+  enabled: true
+  establishedTimeout: 5m
+  image:
+    registry: nvcr.io/nvidia/runai
+    name: runai-crd-upgrader
+    tag: 0.0.0-dev
+    pullPolicy: Always
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+    limits:
+      cpu: 100m
+      memory: 512Mi
+helmHooksHandler:
+  enabled: true
+  image:
+    registry: nvcr.io/nvidia/runai
+    name: helm-hooks-handler
+    tag: 0.0.0-dev
+    pullPolicy: Always
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+      ephemeral-storage: 1Gi
+    limits:
+      cpu: 100m
+      memory: 512Mi
+      ephemeral-storage: 2Gi
+openShift:
+  # Mode controls OpenShift-specific resource rendering:
+  #   AutoDetect (default): Automatically detects OpenShift via CRD lookup (only works with 'helm install', not ArgoCD)
+  #   Enabled: Force enable OpenShift resources (required for ArgoCD deployments on OpenShift)
+  #   Disabled: Force disable OpenShift resources (for non-OpenShift clusters)
+  mode: AutoDetect
+  securityContextConstraints:
+    create: true
+runai-operator:
+  image:
+    name: go-operator
+    registry: nvcr.io/nvidia/runai
+    # Overrides the image tag during creation
+    tag: 0.0.0-dev
+    pullPolicy: Always
+  resources:
+    limits:
+      cpu: 200m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  replicas: 1
+  enabled: true
+  config: {}
+  networkPolicy:
+    ## @param runai-operator.networkPolicy.enabled Specifies whether a NetworkPolicy should be created
+    ##
+    enabled: true
+  metrics:
+    serviceMonitor:
+      enabled: false
+trainingOperatorImageTags:
+  v1-d6eb98e: 1.9.3
+  v1-3f15cb8: 1.9.2
+  v1-5c0e763: 1.9.1
+  v1-5170a36: 1.9.0
+  v1-04f9f13: 1.8.1
+  v1-9e52eb7: 1.8.0
+  v1-855e096: 1.7.0
+# Run:AI Control Plane configuration.
+controlPlane:
+  # URL of the Run:AI control plane (e.g. tenant-name.run.ai).
+  url: ""
+  # Client ID used to authenticate with the control plane.
+  clientID: "runai-internal.installer"
+  # Client Secret used to authenticate with the control plane.
+  # Ignored if existingSecret is set.
+  clientSecret: ""
+  # Bootstrap token used to authenticate with the control plane.
+  # Takes precedence over clientSecret when both are set.
+  # Ignored if existingSecret is set.
+  bootstrapToken: ""
+  # Name of an existing secret to use for the client secret
+  existingSecret: ""
+  # Key names in the existingSecret (only used if existingSecret is set)
+  secretKeys:
+    clientSecret: client-secret
+cluster:
+  uid: ""
+  rbac:
+    escalate: true
+operands:
+  trainingOperator:
+    enabled: true
+  rbac:
+    base:
+      create: true
+    researcherService:
+      create: true
+    clusterAPI:
+      create: true
+    prometheus:
+      create: true
+userAuth:
+  rbac:
+    # Create RBAC entities for Run:AI user kubectl access
+    create: true
+# Development flags, only used for development reasons, should not be used in production
+development:
+  # Install a cluster without control-plane communication
+  headless: false
+  # Include CRDs in the release manifest
+  includeCRDsInReleaseManifest: false
+  # Skip dependency checks
+  skipDependeciesChecks: false
+  # Enable profiling in the runai-operator
+  enableProfiling: false
+kai-scheduler:
+  enabled: true
+  global:
+    # RunAI owns node-scale enablement and its scaling namespace. Keep KAI's
+    # chart-level autoscaling switch off so it does not imply enablement.
+    clusterAutoscaling: false
+    # Keep resource reservation aligned with the chart-owned service account,
+    # RBAC, and pull-secret propagation.
+    resourceReservation:
+      namespace: runai-reservation
+      serviceAccount: runai-reservation
+  operator:
+    resources:
+      limits:
+        cpu: 100m
+        memory: 512Mi
+      requests:
+        cpu: 50m
+        memory: 256Mi
+  defaultQueue:
+    createDefaultQueue: false
+  defaultShard:
+    enabled: false
+  defaultPriorityClasses:
+    enabled: false
+  kaiConfigDeployer:
+    enabled: false
+  nodescaleadjuster:
+    scalingPodNamespace: runai-scale-adjust
+karta:
+  enabled: true
+  operator:
+    enabled: true
+  # The operator pins runAsUser 65532 upstream. Do not try to unset it from here:
+  # Helm discards null values when coalescing a parent chart's values.yaml into a
+  # subchart, so the subchart default always wins (RUN-41722). On OpenShift the UID
+  # is allowed by the runai-karta-operator SCC in templates/ocp/scc.yaml.
+# Karta migration job: runs as Helm pre/post-upgrade hooks to copy
+# legacy ResourceInterface CRs into Karta CRs and (post-upgrade) clean up RIs.
+# Skipped on fresh installs (RI CRD not present).
+kartaMigrate:
+  enabled: true
+  removeRid: false
+  activeDeadlineSeconds: 600
+  # Pod retries on failure (default 3 = 4 total attempts: initial + 3 retries,
+  # with exponential backoff between them: 10s, 20s, 40s, ...). The migration is
+  # idempotent on rerun - already-converged Kartas are skipped, stale ones are
+  # reconciled.
+  backoffLimit: 3
+  image:
+    registry: nvcr.io/nvidia/runai
+    name: karta-migrate
+    tag: 0.0.0-dev
+    pullPolicy: Always
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+# Engine -> KAI scheduler migration. When enabled, the pre-crd-upgrade
+# hook tears down leftover engine SchedulingShards (and their schedulers) before
+# the upgrade brings up the KAI scheduler, so the two never run at once. Set to
+# true only by the cutover release; the hook self-gates on engine SchedulingShards
+# still existing, so it runs once and no-ops thereafter.
+engineToKaiMigration:
+  enabled: true
+
+# Gates the pre-resource-management-upgrade hook, which migrates legacy departments
+# (scheduling.run.ai/v2alpha2) to kai departments (kai.resources/v1alpha1). Set
+# true only by the release performing the resource-management migration; the
+# hook self-gates on the legacy department CRD still being installed, so it runs
+# once and no-ops thereafter. Not a customer-facing toggle.
+resourceManagementMigration:
+  enabled: true
+  cleanup: true
+  # nodepoolsEnabled / nodepoolsCleanup gate the legacy nodepool migration
+  # independently of the department/project migration above, so it can be rolled out
+  # on its own. Self-gating: no-op when the legacy nodepool CRD is absent.
+  nodepoolsEnabled: true
+  nodepoolsCleanup: true

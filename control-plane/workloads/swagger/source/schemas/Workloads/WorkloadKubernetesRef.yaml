@@ -1,0 +1,10 @@
+type: object
+nullable: true
+description: Reference to the underlying Kubernetes object's API group and version. Null when not set.
+properties:
+  group:
+    type: string
+    description: The API group of the Kubernetes resource (for example, "ray.io").
+  version:
+    type: string
+    description: The API version of the Kubernetes resource (for example, "v1").

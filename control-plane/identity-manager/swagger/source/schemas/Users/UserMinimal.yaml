@@ -1,0 +1,27 @@
+type: object
+required:
+- id
+- username
+properties:
+  id:
+    type: string
+    description: The user's unique identifier.
+  username:
+    type: string
+    description: The user's login name. Typically an email address.
+  firstName:
+    type: string
+    nullable: true
+    maxLength: 255
+    description: The user's first name.
+  lastName:
+    type: string
+    nullable: true
+    maxLength: 255
+    description: The user's last name.
+
+example:
+  id: 3434c-12323ab-4ce2ea6-b44fc-db344d
+  username: test@run.ai
+  firstName: John
+  lastName: Doe

@@ -1,0 +1,84 @@
+training:
+  assets:
+    compute:
+      id: compute
+      name: memory
+    datasources:
+    - id: datasource
+      kind: nfs
+      name: basic
+    environment:
+      id: environment
+      name: basic
+  distributed:
+    framework: TF
+    master:
+      sameAsWorker: true
+    numWorkers: 3
+  meta:
+    clusterId: ""
+    createdAt: "0001-01-01T00:00:00Z"
+    createdBy: ""
+    desiredPhase: ""
+    name: ""
+    projectId: ""
+    requestedName: ""
+    workloadId: ""
+  policyInfo:
+    attributeDefaults:
+      assets:
+        datasources:
+          pvc: {}
+          s3:
+            bucket: bucket1-worker
+          secretVolume: {}
+      specificRunParams:
+        tolerations:
+          effect: NoSchedule
+          key: key1-worker
+          operator: Exists
+    rules:
+      assets:
+        datasources:
+          nfs:
+            instances:
+              canAdd: false
+          s3:
+            attributes:
+              bucket:
+                options:
+                - value: bucket1-worker
+                - value: bucket2-worker
+      specificRunParams:
+        command:
+          options:
+          - displayed: command1
+            value: my-command-worker-1
+          - displayed: command2
+            value: my-command-worker-2
+        runAsUid:
+          min: 10
+        tolerations:
+          instances:
+            locked:
+            - tolerations2
+  specificRunParams:
+    args: -x worker-command
+    command: python
+    environmentVariables:
+    - name: LOG_DIR
+      value: policy-worker-to-be-ignored
+    - name: ADDED_VAR
+      value: policy-worker-added
+    - name: HOME
+      value: /home/worker
+    runAsUid: 500
+    tolerations:
+    - effect: NoSchedule
+      key: key1-worker
+      name: pol-0
+      operator: Exists
+    - effect: NoSchedule
+      key: key2-worker
+      name: tolerations2
+      operator: Exists

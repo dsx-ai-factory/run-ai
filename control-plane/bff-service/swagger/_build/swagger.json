@@ -1,0 +1,2021 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Backend for Frontend Service",
+    "version": "1.0",
+    "description": "Backend for Frontend Service API",
+    "contact": {
+      "name": "Run.AI",
+      "url": "https://www.run.ai/",
+      "email": "support@run.ai"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/health": {
+      "x-internal": true,
+      "x-service": "bff-service",
+      "get": {
+        "summary": "health check",
+        "operationId": "health",
+        "x-no-authorization": true,
+        "x-service": "bff-service",
+        "tags": [
+          "Health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully."
+          }
+        }
+      }
+    },
+    "/_version": {
+      "x-internal": true,
+      "get": {
+        "tags": [
+          "Version"
+        ],
+        "x-no-authorization": true,
+        "x-test-coverage": "not-applicable",
+        "x-service": "bff-service",
+        "summary": "get version",
+        "description": "Get version.\n",
+        "operationId": "get_version",
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/boot-config": {
+      "x-internal": true,
+      "get": {
+        "tags": [
+          "BootConfig"
+        ],
+        "x-no-authorization": true,
+        "x-test-coverage": [
+          "integration-tests/tests/main_test.go"
+        ],
+        "x-service": "bff-service",
+        "summary": "Get frontend boot configuration",
+        "description": "Returns deployment-resolved, browser-safe configuration required before the frontend mounts.",
+        "operationId": "get_boot_config",
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BootConfig"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/notifications/settings": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "summary": "Get notifications settings",
+        "description": "Returns all notifications-related settings for the tenant.",
+        "x-service": "bff-service",
+        "x-test-coverage": "not-applicable",
+        "operationId": "get_notifications_settings",
+        "x-authorize": {
+          "resource-type": "settings",
+          "action": "read"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TenantId"
+          }
+        ],
+        "tags": [
+          "Settings"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationsSettingsGetAllResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/system-notification": {
+      "x-scope": [
+        "system"
+      ],
+      "put": {
+        "summary": "Update system notification",
+        "x-service": "bff-service",
+        "x-test-coverage": "not-applicable",
+        "operationId": "update_system_notification",
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "update"
+        },
+        "tags": [
+          "System Notification"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSystemNotification"
+              },
+              "example": {
+                "systemMessage": {
+                  "$ref": "../examples/notifications_setting_examples.yaml"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "System setting successfully updated"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get system notification",
+        "x-service": "bff-service",
+        "x-test-coverage": "not-applicable",
+        "operationId": "get_system_notification",
+        "x-no-authorization": true,
+        "tags": [
+          "System Notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSystemNotification"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete system notification",
+        "x-service": "bff-service",
+        "x-test-coverage": "not-applicable",
+        "operationId": "delete_system_notification",
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "update"
+        },
+        "tags": [
+          "System Notification"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully."
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/notifications/settings/{key}": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "put": {
+        "summary": "Update notifications setting by key",
+        "description": "Updates a single notifications setting identified by the path key.",
+        "x-service": "bff-service",
+        "x-test-coverage": "not-applicable",
+        "operationId": "update_notifications_setting_by_key",
+        "x-authorize": {
+          "resource-type": "settings",
+          "action": "update"
+        },
+        "tags": [
+          "Settings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/notificationsSettingsKey"
+          },
+          {
+            "$ref": "#/components/parameters/TenantId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/UpdateAdminMessage"
+                  }
+                ]
+              },
+              "examples": {
+                "adminMessage": {
+                  "$ref": "#/components/examples/notifications_setting_examples"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Setting successfully updated"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get notifications setting by key",
+        "description": "Returns a single notifications setting identified by the path key.",
+        "x-service": "bff-service",
+        "x-test-coverage": "not-applicable",
+        "operationId": "get_notifications_setting_by_key",
+        "x-authorize": {
+          "resource-type": "settings",
+          "action": "read"
+        },
+        "tags": [
+          "Settings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/notificationsSettingsKey"
+          },
+          {
+            "$ref": "#/components/parameters/TenantId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSettingResponse"
+                },
+                "examples": {
+                  "adminMessage": {
+                    "value": {
+                      "value": {
+                        "id": "550e8400-e29b-41d4-a716-446655440000",
+                        "msg": "System maintenance scheduled",
+                        "createdAt": 1706886400000,
+                        "enableDismiss": true
+                      },
+                      "displayName": "Admin message",
+                      "description": "Write a message that will be displayed to all users"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/ui-workloads/settings": {
+      "x-internal": true,
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "summary": "Get workloads settings",
+        "x-service": "bff-service",
+        "x-test-coverage": "not-applicable",
+        "operationId": "get_workloads_settings",
+        "x-authorize": {
+          "resource-type": "settings",
+          "action": "read"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TenantId"
+          }
+        ],
+        "tags": [
+          "Settings"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkloadsSettingsGetAllResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/ui-workloads/settings/{key}": {
+      "x-internal": true,
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "put": {
+        "summary": "Update workloads setting by key",
+        "x-service": "bff-service",
+        "x-test-coverage": "not-applicable",
+        "operationId": "update_workloads_setting_by_key",
+        "x-authorize": {
+          "resource-type": "settings",
+          "action": "update"
+        },
+        "tags": [
+          "Settings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/workloadsSettingsKey"
+          },
+          {
+            "$ref": "#/components/parameters/TenantId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/UpdateEnableNIM"
+                  },
+                  {
+                    "$ref": "#/components/schemas/UpdateDeletedWorkloadsView"
+                  },
+                  {
+                    "$ref": "#/components/schemas/UpdateAllowGPT2Model"
+                  },
+                  {
+                    "$ref": "#/components/schemas/UpdateEnableModelCatalog"
+                  }
+                ]
+              },
+              "examples": {
+                "enableNIM": {
+                  "$ref": "#/components/examples/workloads_setting_examples"
+                },
+                "deletedWorkloadsView": {
+                  "$ref": "#/components/examples/workloads_setting_examples"
+                },
+                "allowGPT2Model": {
+                  "$ref": "#/components/examples/workloads_setting_examples"
+                },
+                "enableModelCatalog": {
+                  "$ref": "#/components/examples/workloads_setting_examples"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Setting successfully updated"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get workloads setting by key",
+        "x-service": "bff-service",
+        "x-test-coverage": "not-applicable",
+        "operationId": "get_workloads_setting_by_key",
+        "x-authorize": {
+          "resource-type": "settings",
+          "action": "read"
+        },
+        "tags": [
+          "Settings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/workloadsSettingsKey"
+          },
+          {
+            "$ref": "#/components/parameters/TenantId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSettingResponse"
+                },
+                "examples": {
+                  "enableNIM": {
+                    "value": {
+                      "value": {
+                        "enabled": true
+                      },
+                      "displayName": "NIM models",
+                      "description": "Enable instant deployment of NIM models via the workload submission form"
+                    }
+                  },
+                  "deletedWorkloadsView": {
+                    "value": {
+                      "value": {
+                        "enabled": true
+                      },
+                      "displayName": "Deleted workloads view",
+                      "description": "Enable to view deleted workloads in the Workloads view."
+                    }
+                  },
+                  "allowGPT2Model": {
+                    "value": {
+                      "value": {
+                        "enabled": true
+                      },
+                      "displayName": "Allow GPT-2 model",
+                      "description": "Enable to allow GPT-2 model."
+                    }
+                  },
+                  "enableModelCatalog": {
+                    "value": {
+                      "value": {
+                        "enabled": true
+                      },
+                      "displayName": "Hugging face models",
+                      "description": "Enable instant deployment of Hugging Face models via the Models view or the workload submission form."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/ui-appearance/settings": {
+      "x-internal": true,
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "summary": "Get appearance settings",
+        "x-service": "bff-service",
+        "x-test-coverage": "not-applicable",
+        "operationId": "get_appearance_settings",
+        "x-authorize": {
+          "resource-type": "settings",
+          "action": "read"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TenantId"
+          }
+        ],
+        "tags": [
+          "Settings"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppearanceSettingsGetAllResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/ui-appearance/settings/{key}": {
+      "x-internal": true,
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "put": {
+        "summary": "Update appearance setting by key",
+        "x-service": "bff-service",
+        "x-test-coverage": "not-applicable",
+        "operationId": "update_appearance_setting_by_key",
+        "x-authorize": {
+          "resource-type": "settings",
+          "action": "update"
+        },
+        "tags": [
+          "Settings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/appearanceSettingsKey"
+          },
+          {
+            "$ref": "#/components/parameters/TenantId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/UpdateBannerConfig"
+                  }
+                ]
+              },
+              "examples": {
+                "bannerConfig": {
+                  "$ref": "#/components/examples/appearance_setting_examples"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Setting successfully updated"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get appearance setting by key",
+        "x-service": "bff-service",
+        "x-test-coverage": "not-applicable",
+        "operationId": "get_appearance_setting_by_key",
+        "x-authorize": {
+          "resource-type": "settings",
+          "action": "read"
+        },
+        "tags": [
+          "Settings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/appearanceSettingsKey"
+          },
+          {
+            "$ref": "#/components/parameters/TenantId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSettingResponse"
+                },
+                "examples": {
+                  "bannerConfig": {
+                    "value": {
+                      "value": {
+                        "enabled": true,
+                        "text": "PRODUCTION ENVIRONMENT",
+                        "backgroundColor": "#D32F2F",
+                        "fontColor": "#FFFFFF"
+                      },
+                      "displayName": "Banner configuration",
+                      "description": "Configure a persistent banner displayed at the top of the Run:ai UI for all authenticated users."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/branding/settings": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "summary": "Get branding settings",
+        "description": "Returns all branding-related settings for the tenant.",
+        "x-service": "bff-service",
+        "x-test-coverage": [
+          "integration-tests/tests/api_branding_settings_service_test.go"
+        ],
+        "operationId": "get_branding_settings",
+        "x-no-authorization": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TenantId"
+          }
+        ],
+        "tags": [
+          "Settings"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrandingSettingsGetAllResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/branding/settings/{key}": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "summary": "Get branding setting by key",
+        "description": "Returns a single branding setting identified by the path key.",
+        "x-service": "bff-service",
+        "x-test-coverage": [
+          "integration-tests/tests/api_branding_settings_service_test.go"
+        ],
+        "operationId": "get_branding_setting_by_key",
+        "x-no-authorization": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/brandingSettingsKey"
+          },
+          {
+            "$ref": "#/components/parameters/TenantId"
+          }
+        ],
+        "tags": [
+          "Settings"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSettingResponse"
+                },
+                "examples": {
+                  "logo": {
+                    "value": {
+                      "value": {
+                        "logo": "<base64-encoded-image>"
+                      },
+                      "displayName": "Logo",
+                      "description": "Retrieve the base64 logo file."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update branding setting by key",
+        "description": "Updates a single branding setting identified by the path key.",
+        "x-service": "bff-service",
+        "x-test-coverage": [
+          "integration-tests/tests/api_branding_settings_service_test.go"
+        ],
+        "operationId": "update_branding_setting_by_key",
+        "x-authorize": {
+          "resource-type": "branding-settings",
+          "action": "update"
+        },
+        "tags": [
+          "Settings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/brandingSettingsKey"
+          },
+          {
+            "$ref": "#/components/parameters/TenantId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/UpdateLogo"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Setting successfully updated."
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "413": {
+            "$ref": "#/components/responses/413RequestEntityTooLarge"
+          },
+          "415": {
+            "$ref": "#/components/responses/415UnsupportedMediaType"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "VersionResponse": {
+        "type": "object",
+        "required": [
+          "version"
+        ],
+        "properties": {
+          "version": {
+            "type": "string",
+            "example": "0.0.0",
+            "description": "The version of the BFF service"
+          }
+        },
+        "example": {
+          "version": "0.0.0"
+        }
+      },
+      "Error": {
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "code": 400,
+          "message": "Bad request - Resource should have a name"
+        }
+      },
+      "BootConfigDistributionAssets": {
+        "type": "object",
+        "required": [
+          "profile"
+        ],
+        "properties": {
+          "profile": {
+            "type": "string",
+            "enum": [
+              "cc",
+              "ce"
+            ],
+            "description": "Selects the distribution-specific asset folder used by the frontend. `cc` and `ce` are the currently agreed profile identifiers and may be renamed when the final product terminology is defined."
+          }
+        }
+      },
+      "BootConfigVersion": {
+        "type": "object",
+        "required": [
+          "display"
+        ],
+        "properties": {
+          "display": {
+            "type": "string",
+            "description": "Deployment-resolved version text shown in the UI.",
+            "example": "2.25.9"
+          }
+        }
+      },
+      "BootConfigWhatsNew": {
+        "type": "object",
+        "required": [
+          "label",
+          "url"
+        ],
+        "properties": {
+          "label": {
+            "type": "string",
+            "example": "What's New in 2.25"
+          },
+          "url": {
+            "type": "string",
+            "example": "https://run-ai-docs.nvidia.com/self-hosted/getting-started/whats-new/whats-new-2-25"
+          }
+        }
+      },
+      "BootConfigDocs": {
+        "type": "object",
+        "required": [
+          "baseUrl",
+          "whatsNew"
+        ],
+        "properties": {
+          "baseUrl": {
+            "type": "string",
+            "description": "Base URL used to resolve documentation links.",
+            "example": "https://run-ai-docs.nvidia.com/self-hosted"
+          },
+          "whatsNew": {
+            "$ref": "#/components/schemas/BootConfigWhatsNew"
+          }
+        }
+      },
+      "BootConfigSupport": {
+        "type": "object",
+        "required": [
+          "label"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Support destination. Omitted when the deployment does not provide a support link.",
+            "example": "https://www.nvidia.com/en-eu/support/enterprise/#contact-us"
+          },
+          "label": {
+            "type": "string",
+            "example": "NVIDIA Run:ai support"
+          }
+        }
+      },
+      "BootConfigCapabilities": {
+        "type": "object",
+        "required": [
+          "showsClusterLocationStep"
+        ],
+        "properties": {
+          "showsClusterLocationStep": {
+            "type": "boolean",
+            "description": "Whether onboarding should ask the user for the cluster location.",
+            "example": true
+          }
+        }
+      },
+      "BootConfigUnleashConfig": {
+        "type": "object",
+        "required": [
+          "url",
+          "clientKey",
+          "appName",
+          "environment"
+        ],
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "clientKey": {
+            "type": "string",
+            "description": "Browser-public Unleash frontend token."
+          },
+          "appName": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "project": {
+            "type": "string"
+          }
+        }
+      },
+      "BootConfig": {
+        "type": "object",
+        "required": [
+          "distributionAssets",
+          "version",
+          "docs",
+          "support",
+          "capabilities",
+          "unleashConfig"
+        ],
+        "properties": {
+          "distributionAssets": {
+            "$ref": "#/components/schemas/BootConfigDistributionAssets"
+          },
+          "version": {
+            "$ref": "#/components/schemas/BootConfigVersion"
+          },
+          "docs": {
+            "$ref": "#/components/schemas/BootConfigDocs"
+          },
+          "support": {
+            "$ref": "#/components/schemas/BootConfigSupport"
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/BootConfigCapabilities"
+          },
+          "unleashConfig": {
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BootConfigUnleashConfig"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "GetAdminMessage": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique identifier for the admin message"
+              },
+              "msg": {
+                "type": "string",
+                "description": "The message content displayed to users. Supports a limited HTML subset for basic formatting"
+              },
+              "createdAt": {
+                "type": "integer",
+                "format": "int64",
+                "description": "Time the message was created, as a Unix timestamp"
+              },
+              "enableDismiss": {
+                "type": "boolean",
+                "description": "When true, users can dismiss the message from; when false, the message persists until it is updated or removed"
+              }
+            }
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Human-readable name for this setting",
+            "readOnly": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Short explanation of what this setting controls, shown alongside the setting",
+            "readOnly": true
+          }
+        },
+        "example": {
+          "value": {
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "msg": "System maintenance scheduled for this weekend",
+            "createdAt": 1706886400000,
+            "enableDismiss": true
+          },
+          "displayName": "Admin message",
+          "description": "Write a message that will be displayed to all users"
+        }
+      },
+      "NotificationsSettingsGetAllResponse": {
+        "type": "object",
+        "description": "Aggregated response containing all notifications settings configured for the tenant",
+        "properties": {
+          "adminMessage": {
+            "$ref": "#/components/schemas/GetAdminMessage"
+          }
+        }
+      },
+      "GetSystemNotification": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the admin message"
+          },
+          "msg": {
+            "type": "string",
+            "description": "The message content displayed to users. Supports a limited HTML subset for basic formatting"
+          },
+          "createdAt": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Time the message was created, as a Unix timestamp"
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Human-readable name for this setting",
+            "readOnly": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Short explanation of what this setting controls, shown alongside the setting",
+            "readOnly": true
+          }
+        },
+        "example": {
+          "id": "550e8400-e29b-41d4-a716-446655440000",
+          "msg": "System maintenance scheduled for this weekend",
+          "createdAt": 1706886400000,
+          "enableDismiss": true,
+          "displayName": "System notification",
+          "description": "A notification that will be displayed to all users"
+        }
+      },
+      "UpdateSystemNotification": {
+        "type": "object",
+        "properties": {
+          "msg": {
+            "type": "string",
+            "nullable": true,
+            "description": "The message content to display to all users (supports limited HTML)"
+          }
+        },
+        "example": {
+          "msg": "We are currently experiencing an unexpected outage affecting service-x. We're actively investigating the issue. We apologize for the disruption."
+        }
+      },
+      "notificationsSettingsKeyEnum": {
+        "type": "string",
+        "enum": [
+          "adminMessage"
+        ]
+      },
+      "GetSettingResponse": {
+        "type": "object",
+        "description": "Dynamic settings response that varies by setting key"
+      },
+      "UpdateAdminMessage": {
+        "type": "object",
+        "properties": {
+          "msg": {
+            "type": "string",
+            "nullable": true,
+            "description": "The message content displayed to users. Supports a limited HTML subset for basic formatting"
+          },
+          "enableDismiss": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "When true, users can dismiss the message from; when false, the message persists until it is updated or removed"
+          }
+        },
+        "example": {
+          "msg": "System maintenance scheduled for this weekend",
+          "enableDismiss": true
+        }
+      },
+      "GetEnableNIM": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "nullable": true,
+                "description": "Whether NIM models deployment is enabled"
+              }
+            }
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Human-readable name for this setting",
+            "readOnly": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Short explanation of what this setting controls, shown alongside the setting",
+            "readOnly": true
+          }
+        },
+        "example": {
+          "value": {
+            "enabled": true
+          },
+          "displayName": "NIM models",
+          "description": "Enable instant deployment of NIM models via the workload submission form"
+        }
+      },
+      "GetDeletedWorkloadsView": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "nullable": true,
+                "description": "Whether to view deleted workloads in the Workloads view."
+              }
+            }
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Human-readable name for this setting",
+            "readOnly": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Short explanation of what this setting controls, shown alongside the setting",
+            "readOnly": true
+          }
+        },
+        "example": {
+          "value": {
+            "enabled": true
+          },
+          "displayName": "Deleted workloads view",
+          "description": "Enable to view deleted workloads in the Workloads view."
+        }
+      },
+      "GetAllowGPT2Model": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "nullable": true,
+                "description": "Whether to allow GPT-2 model."
+              }
+            }
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Human-readable name for this setting",
+            "readOnly": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Short explanation of what this setting controls, shown alongside the setting",
+            "readOnly": true
+          },
+          "stage": {
+            "type": "string",
+            "readOnly": true
+          }
+        },
+        "example": {
+          "value": {
+            "enabled": true
+          },
+          "displayName": "Allow GPT-2 model",
+          "description": "Enable to allow GPT-2 model.",
+          "stage": "Alpha"
+        }
+      },
+      "GetEnableModelCatalog": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "nullable": true,
+                "description": "Whether to enable the model catalog (Hugging Face models)."
+              }
+            }
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Human-readable name for this setting",
+            "readOnly": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Short explanation of what this setting controls, shown alongside the setting",
+            "readOnly": true
+          },
+          "stage": {
+            "type": "string",
+            "readOnly": true
+          }
+        },
+        "example": {
+          "value": {
+            "enabled": true
+          },
+          "displayName": "Hugging face models",
+          "description": "Enable instant deployment of Hugging Face models via the Models view or the workload submission form."
+        }
+      },
+      "WorkloadsSettingsGetAllResponse": {
+        "type": "object",
+        "properties": {
+          "enableNim": {
+            "$ref": "#/components/schemas/GetEnableNIM"
+          },
+          "deletedWorkloadsView": {
+            "$ref": "#/components/schemas/GetDeletedWorkloadsView"
+          },
+          "allowGPT2Model": {
+            "$ref": "#/components/schemas/GetAllowGPT2Model"
+          },
+          "enableModelCatalog": {
+            "$ref": "#/components/schemas/GetEnableModelCatalog"
+          }
+        }
+      },
+      "workloadsSettingsKeyEnum": {
+        "type": "string",
+        "enum": [
+          "enableNIM",
+          "deletedWorkloadsView",
+          "allowGPT2Model",
+          "enableModelCatalog"
+        ]
+      },
+      "UpdateEnableNIM": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Whether NIM models deployment is enabled"
+          }
+        },
+        "example": {
+          "enabled": true
+        }
+      },
+      "UpdateDeletedWorkloadsView": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Whether to view deleted workloads in the Workloads view."
+          }
+        },
+        "example": {
+          "enabled": true
+        }
+      },
+      "UpdateAllowGPT2Model": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Whether to allow GPT-2 model."
+          }
+        },
+        "example": {
+          "enabled": true
+        }
+      },
+      "UpdateEnableModelCatalog": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Whether to enable the model catalog (Hugging Face models)."
+          }
+        },
+        "example": {
+          "enabled": true
+        }
+      },
+      "GetBannerConfig": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "nullable": true,
+                "description": "Whether the banner is displayed at the top of the UI for all authenticated users."
+              },
+              "text": {
+                "type": "string",
+                "nullable": true,
+                "description": "Message displayed in the banner. Required when `enabled` is `true`. Maximum 500 characters."
+              },
+              "backgroundColor": {
+                "type": "string",
+                "nullable": true,
+                "description": "Background color of the banner. Accepts any valid CSS color value (hex, rgb, named). Maximum 50 characters."
+              },
+              "fontColor": {
+                "type": "string",
+                "nullable": true,
+                "description": "Text color of the banner. Accepts any valid CSS color value (hex, rgb, named). Maximum 50 characters."
+              },
+              "fontSize": {
+                "type": "integer",
+                "nullable": true,
+                "description": "Font size in pixels. Maximum 20. Defaults to 14 if omitted or null."
+              }
+            }
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Human-readable name for this setting",
+            "readOnly": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Short explanation of what this setting controls, shown alongside the setting",
+            "readOnly": true
+          }
+        },
+        "example": {
+          "value": {
+            "enabled": true,
+            "text": "PRODUCTION ENVIRONMENT",
+            "backgroundColor": "#D32F2F",
+            "fontColor": "#FFFFFF"
+          },
+          "displayName": "Banner configuration",
+          "description": "Configure a persistent banner displayed at the top of the Run:ai UI for all authenticated users."
+        }
+      },
+      "AppearanceSettingsGetAllResponse": {
+        "type": "object",
+        "description": "Response containing all appearance settings",
+        "properties": {
+          "bannerConfig": {
+            "$ref": "#/components/schemas/GetBannerConfig"
+          }
+        }
+      },
+      "appearanceSettingsKeyEnum": {
+        "type": "string",
+        "enum": [
+          "bannerConfig"
+        ]
+      },
+      "UpdateBannerConfig": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Whether the banner is displayed at the top of the UI for all authenticated users."
+          },
+          "text": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 500,
+            "description": "Message displayed in the banner. Required when `enabled` is `true`. Maximum 500 characters."
+          },
+          "backgroundColor": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 50,
+            "description": "Background color of the banner. Accepts any valid CSS color value (hex, rgb, named). Maximum 50 characters."
+          },
+          "fontColor": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 50,
+            "description": "Text color of the banner. Accepts any valid CSS color value (hex, rgb, named). Maximum 50 characters."
+          },
+          "fontSize": {
+            "type": "integer",
+            "nullable": true,
+            "minimum": 1,
+            "maximum": 20,
+            "description": "Font size in pixels. Maximum 20. Defaults to 14 if omitted or null."
+          }
+        },
+        "example": {
+          "enabled": true,
+          "text": "PRODUCTION ENVIRONMENT",
+          "backgroundColor": "#D32F2F",
+          "fontColor": "#FFFFFF",
+          "fontSize": 14
+        }
+      },
+      "GetLogo": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "object",
+            "properties": {
+              "logo": {
+                "type": "string",
+                "description": "Logo image returned as a base64-encoded string. PNG and SVG formats are supported"
+              }
+            }
+          },
+          "displayName": {
+            "type": "string",
+            "description": "Human-readable name for this setting",
+            "readOnly": true
+          },
+          "description": {
+            "type": "string",
+            "description": "Short explanation of what this setting controls, shown alongside the setting",
+            "readOnly": true
+          }
+        },
+        "example": {
+          "value": {
+            "logo": "<base64-encoded-image>"
+          },
+          "displayName": "Logo",
+          "description": "Retrieve the base64 logo file."
+        }
+      },
+      "BrandingSettingsGetAllResponse": {
+        "type": "object",
+        "description": "Aggregated response containing all branding settings configured for the tenant",
+        "properties": {
+          "logo": {
+            "$ref": "#/components/schemas/GetLogo"
+          }
+        }
+      },
+      "brandingSettingsKeyEnum": {
+        "type": "string",
+        "enum": [
+          "logo"
+        ]
+      },
+      "UpdateLogo": {
+        "type": "object",
+        "required": [
+          "logo"
+        ],
+        "properties": {
+          "logo": {
+            "type": "string",
+            "description": "Logo image as a base64-encoded string. Accepts PNG or SVG up to 128 KB. Send an empty string to reset the logo"
+          }
+        },
+        "example": {
+          "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+V4nEAAAAASUVORK5CYII="
+        }
+      },
+      "AdminMessage": {
+        "$ref": "#/components/schemas/GetAdminMessage"
+      },
+      "EnableNIM": {
+        "$ref": "#/components/schemas/GetEnableNIM"
+      },
+      "BannerConfig": {
+        "$ref": "#/components/schemas/GetBannerConfig"
+      },
+      "Logo": {
+        "$ref": "#/components/schemas/GetLogo"
+      },
+      "ComplianceIssues": {
+        "properties": {
+          "complianceIssues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "details",
+                "field"
+              ],
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "example": "compute.gpuDevicesRequest"
+                },
+                "details": {
+                  "type": "string",
+                  "example": "value must be no less than 3"
+                }
+              }
+            }
+          }
+        },
+        "nullable": true,
+        "type": "object"
+      },
+      "SubmissionError": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "$ref": "#/components/schemas/ComplianceIssues"
+          }
+        ]
+      }
+    },
+    "responses": {
+      "400BadRequest": {
+        "description": "Bad request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 400,
+              "message": "Required parameter is missing"
+            }
+          }
+        }
+      },
+      "500InternalServerError": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 500,
+              "message": "Something went wrong."
+            }
+          }
+        }
+      },
+      "503ServiceUnavailable": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 503,
+              "message": "Please try again in few minutes."
+            }
+          }
+        }
+      },
+      "401Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 401,
+              "message": "Issuer is not familiar."
+            }
+          }
+        }
+      },
+      "403Forbidden": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 403,
+              "message": "You do not have sufficient permissions."
+            }
+          }
+        }
+      },
+      "404NotFound": {
+        "description": "The specified resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 404,
+              "message": "Resource id not found."
+            }
+          }
+        }
+      },
+      "413RequestEntityTooLarge": {
+        "description": "Request entity too large",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "415UnsupportedMediaType": {
+        "description": "Unsupported media type",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "204NoContent": {
+        "description": "No Content."
+      },
+      "400BadSubmissionRequest": {
+        "description": "Bad submission request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SubmissionError"
+            },
+            "example": {
+              "code": 400,
+              "message": "The workload request does not comply with the policy set by the administrator"
+            }
+          }
+        }
+      },
+      "406NotAcceptable": {
+        "description": "Not acceptable request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "409Conflict": {
+        "description": "The specified resource already exists",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 409,
+              "message": "Resource with this name already exists"
+            }
+          }
+        }
+      },
+      "412PreconditionFailed": {
+        "description": "The specified resource was not found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 412,
+              "message": "Precondition failed"
+            }
+          }
+        }
+      },
+      "501NotImplemented": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 501,
+              "message": "Not implemented"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "bearerFormat": "JWT",
+        "description": "Bearer authentication",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    },
+    "parameters": {
+      "TenantId": {
+        "name": "tenantId",
+        "in": "query",
+        "required": false,
+        "x-scope": [
+          "system"
+        ],
+        "description": "If exists will return the relevant resource for the tenant ID",
+        "example": "1008",
+        "schema": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "notificationsSettingsKey": {
+        "name": "key",
+        "in": "path",
+        "required": true,
+        "description": "Identifier of the notifications setting to retrieve or update.",
+        "schema": {
+          "$ref": "#/components/schemas/notificationsSettingsKeyEnum"
+        }
+      },
+      "workloadsSettingsKey": {
+        "name": "key",
+        "in": "path",
+        "required": true,
+        "description": "The workloads setting key",
+        "schema": {
+          "$ref": "#/components/schemas/workloadsSettingsKeyEnum"
+        }
+      },
+      "appearanceSettingsKey": {
+        "name": "key",
+        "in": "path",
+        "required": true,
+        "description": "The appearance setting key",
+        "schema": {
+          "$ref": "#/components/schemas/appearanceSettingsKeyEnum"
+        }
+      },
+      "brandingSettingsKey": {
+        "name": "key",
+        "in": "path",
+        "required": true,
+        "description": "Identifier of the branding setting to retrieve or update",
+        "schema": {
+          "$ref": "#/components/schemas/brandingSettingsKeyEnum"
+        }
+      }
+    },
+    "examples": {
+      "notifications_setting_examples": {
+        "value": {
+          "msg": "System maintenance scheduled for this weekend",
+          "enableDismiss": true
+        }
+      },
+      "workloads_setting_examples": {
+        "value": {
+          "enabled": true
+        }
+      },
+      "appearance_setting_examples": {
+        "value": {
+          "enabled": true,
+          "text": "PRODUCTION ENVIRONMENT",
+          "backgroundColor": "#D32F2F",
+          "fontColor": "#FFFFFF"
+        }
+      }
+    }
+  }
+}

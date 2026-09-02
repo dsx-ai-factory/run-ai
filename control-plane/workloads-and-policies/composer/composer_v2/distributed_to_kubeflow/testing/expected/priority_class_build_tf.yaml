@@ -1,0 +1,113 @@
+DistributedTarget:
+  Config: {}
+  Framework: TF
+  JaxJob: null
+  MasterSpec: null
+  MpiJob: null
+  ObjectMeta: null
+  PyTorchJob: null
+  RunPolicy: null
+  TFJob:
+    apiVersion: kubeflow.org/v1
+    kind: TFJob
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: tfjob
+        createdBy: TFJob
+        project: test
+        release: priority_class_build
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: priority_class_build
+      name: priority_class_build
+      namespace: runai-test
+    spec:
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: Running
+      tfReplicaSpecs:
+        Chief:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: tfjob
+                createdBy: TFJob
+                project: test
+                release: priority_class_build
+                workloadKind: Distributed
+                workloadName: priority_class_build
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: priority_class_build
+                image: ubuntu
+                name: tensorflow
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              priorityClassName: build
+              schedulerName: runai-scheduler
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: tfjob
+                createdBy: TFJob
+                project: test
+                release: priority_class_build
+                workloadKind: Distributed
+                workloadName: priority_class_build
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: priority_class_build
+                image: ubuntu
+                name: tensorflow
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              priorityClassName: build
+              schedulerName: runai-scheduler
+    status: {}
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: TFJob
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-priority_class_build/, Framework: TF'
+  images:
+  - ubuntu
+  name: 'priority_class_build/, Framework: TF'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

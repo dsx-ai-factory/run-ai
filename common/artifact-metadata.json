@@ -1,0 +1,13 @@
+{
+  "service_name": "common",
+  "artifact_type": "workflow",
+  "cache_artifacts": false,
+  "notifications": {
+    "slack": {
+      "mention": "@devops-team"
+    }
+  },
+  "jira": {
+    "team_name": "Devops Team"
+  }
+}

@@ -1,0 +1,283 @@
+Dinfw: null
+JobSpec:
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  environment:
+    items:
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  exposedUrls:
+    items:
+      url-worker-name-url-auto:
+        value:
+          containerPort: 443
+  image:
+    value: nginx:alpine
+  imagePullPolicy:
+    value: IfNotPresent
+  jobType: PyTorchJob
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  nodePools:
+    value: default
+  ports:
+    items:
+      port-worker:
+        value:
+          autoGenerate: true
+          container: 80
+          serviceType: NodePort
+      port-worker-1:
+        value:
+          container: 443
+          external: 30041
+          serviceType: NodePort
+      port-worker-2:
+        value:
+          autoGenerate: true
+          container: 80
+          serviceType: LoadBalancer
+      port-worker-4:
+        value:
+          autoGenerate: true
+          container: 8081
+          serviceType: NodePort
+      port-worker-name-lb:
+        value:
+          autoGenerate: true
+          container: 8080
+          serviceType: LoadBalancer
+      port-worker-name-np-auto:
+        value:
+          autoGenerate: true
+          container: 8080
+          serviceType: NodePort
+  priorityClassName:
+    value: low
+  username:
+    value: test
+  workers:
+    value: 3
+MasterSpec:
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  environment:
+    items:
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  exposedUrls:
+    items:
+      url-master-1:
+        value:
+          containerPort: 80
+      url-master-3:
+        value:
+          containerPort: 8082
+      url-master-name-url-cust:
+        value:
+          containerPort: 443
+          customUrl: true
+          url: https://ofer-test-f.runailabs.com/secret
+      url-master-name-url-mauto:
+        value:
+          containerPort: 8080
+  image:
+    value: nginx:alpine
+  imagePullPolicy:
+    value: IfNotPresent
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  nodePools:
+    value: default
+  ports:
+    items:
+      port-master:
+        value:
+          autoGenerate: true
+          container: 80
+          serviceType: NodePort
+      port-master-1:
+        value:
+          container: 443
+          external: 30050
+          serviceType: NodePort
+      port-master-2:
+        value:
+          autoGenerate: true
+          container: 80
+          serviceType: LoadBalancer
+      port-master-4:
+        value:
+          autoGenerate: true
+          container: 8081
+          serviceType: NodePort
+      port-master-name-lb:
+        value:
+          autoGenerate: true
+          container: 8080
+          serviceType: LoadBalancer
+      port-master-name-np-auto:
+        value:
+          autoGenerate: true
+          container: 8080
+          serviceType: NodePort
+  priorityClassName:
+    value: low
+  username:
+    value: test
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: PyTorchJob
+  environments:
+  - connections:
+    - connectionType: ExternalUrl
+      containerPort: 443
+      correlationName: url-worker-name-url-auto
+      exposedUrlPath: /project/test
+      exposedUrlSubDomain: project-test
+      name: tool-url-cust
+      toolType: custom
+    - connectionType: NodePort
+      containerPort: 80
+      correlationName: port-worker
+      name: tool-np-auto
+      portResourceName: port-test-80-0
+      serviceResourceName: dw-test-1-nodeport
+      toolType: custom
+    - connectionType: NodePort
+      containerPort: 443
+      correlationName: port-worker-1
+      name: tool-np-cust
+      portResourceName: port-test-443-1
+      serviceResourceName: dw-test-1-nodeport
+      toolType: jupyter
+    - connectionType: LoadBalancer
+      containerPort: 80
+      correlationName: port-worker-2
+      name: tool-lb
+      portResourceName: port-test-80-2
+      serviceResourceName: dw-test-0-loadbalancer
+      toolType: custom
+    - connectionType: NodePort
+      containerPort: 8080
+      correlationName: port-worker-name-np-auto
+      name: port-worker-name-np-auto
+      portResourceName: port-test-8080-5
+      serviceResourceName: dw-test-1-nodeport
+      toolType: ""
+    - connectionType: NodePort
+      containerPort: 8081
+      correlationName: port-worker-4
+      name: port-worker-4
+      portResourceName: port-test-8081-3
+      serviceResourceName: dw-test-1-nodeport
+      toolType: ""
+    - connectionType: LoadBalancer
+      containerPort: 8080
+      correlationName: port-worker-name-lb
+      name: port-worker-name-lb
+      portResourceName: port-test-8080-4
+      serviceResourceName: dw-test-0-loadbalancer
+      toolType: matlab
+    id: ""
+    name: Worker
+    replicaType: Worker
+  - connections:
+    - connectionType: ExternalUrl
+      containerPort: 80
+      correlationName: url-master-1
+      exposedUrlPath: /project/test
+      exposedUrlSubDomain: project-test
+      name: tool-url-mauto
+      toolType: jupyter
+    - connectionType: ExternalUrl
+      containerPort: 8082
+      correlationName: url-master-3
+      exposedUrlPath: /project/test/url-master-3
+      exposedUrlSubDomain: project-test-url-master-3
+      name: url-master-3
+      toolType: custom
+    - connectionType: ExternalUrl
+      containerPort: 443
+      correlationName: url-master-name-url-cust
+      name: tool-url-mcust
+      toolType: custom
+      url: https://ofer-test-f.runailabs.com/secret
+    - connectionType: ExternalUrl
+      containerPort: 8080
+      correlationName: url-master-name-url-mauto
+      exposedUrlPath: /project/test/url-master-name-url-mauto
+      exposedUrlSubDomain: project-test-url-master-name-url-mauto
+      name: url-master-name-url-mauto
+      toolType: custom
+    - connectionType: NodePort
+      containerPort: 80
+      correlationName: port-master
+      name: tool-np-mauto
+      portResourceName: port-test-80-0
+      serviceResourceName: dw-test-1-nodeport
+      toolType: custom
+    - connectionType: NodePort
+      containerPort: 443
+      correlationName: port-master-1
+      name: tool-np-mcust
+      portResourceName: port-test-443-1
+      serviceResourceName: dw-test-1-nodeport
+      toolType: jupyter
+    - connectionType: LoadBalancer
+      containerPort: 80
+      correlationName: port-master-2
+      name: tool-lb
+      portResourceName: port-test-80-2
+      serviceResourceName: dw-test-0-loadbalancer
+      toolType: custom
+    - connectionType: NodePort
+      containerPort: 8080
+      correlationName: port-master-name-np-auto
+      name: port-master-name-np-auto
+      portResourceName: port-test-8080-5
+      serviceResourceName: dw-test-1-nodeport
+      toolType: ""
+    - connectionType: NodePort
+      containerPort: 8081
+      correlationName: port-master-4
+      name: port-master-4
+      portResourceName: port-test-8081-3
+      serviceResourceName: dw-test-1-nodeport
+      toolType: ""
+    - connectionType: LoadBalancer
+      containerPort: 8080
+      correlationName: port-master-name-lb
+      name: port-master-name-lb
+      portResourceName: port-test-8080-4
+      serviceResourceName: dw-test-0-loadbalancer
+      toolType: matlab
+    id: ""
+    name: Master
+    replicaType: Master
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: dist_ports_urls_worker, Rules: , Type: Distributed'
+  images:
+  - nginx:alpine
+  - nginx:alpine
+  name: 'Value: dist_ports_urls_worker, Rules: , Type: Distributed'
+  projectId: project-654-321
+  requestedNodePools:
+  - default
+  - default
+  requestedPods:
+    number: 4
+  submittedBy: test
+  type: Distributed
+  version: v2alpha1

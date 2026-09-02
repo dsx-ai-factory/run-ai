@@ -1,0 +1,42 @@
+properties:
+  train:
+    required:
+      - selectedTypes
+    properties:
+      affinityType:
+        type: string
+        enum:
+          - no_limit
+          - only_selected
+        description: The type of affinity of the jobs on the nodes.
+      selectedTypes:
+          type: array
+          items:
+            properties:
+              id:
+                type: number
+              name:
+                type: string
+    description: Node affinity configuration for training jobs.
+  interactive:
+    required:
+      - selectedTypes
+    properties:
+      affinityType:
+        type: string
+        enum:
+          - no_limit
+          - only_selected
+        description: The type of affinity of the jobs on the nodes.
+      selectedTypes:
+          type: array
+          items:
+            properties:
+              id:
+                type: number
+              name:
+                type: string
+    description: Node affinity configuration for interactive jobs.
+description: Node affinity configuration for jobs in the project.
+type: object
+nullable: true

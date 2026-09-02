@@ -1,0 +1,6 @@
+type: string
+description: The unique name of the field group
+example: podSpec
+minLength: 1
+maxLength: 63
+pattern: ^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?$

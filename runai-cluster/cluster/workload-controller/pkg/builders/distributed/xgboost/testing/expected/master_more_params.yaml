@@ -1,0 +1,136 @@
+apiVersion: kubeflow.org/v1
+kind: XGBoostJob
+metadata:
+  annotations:
+    image: ubuntu
+    template: dist-0
+    user: user.name
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: xgboostjob
+    createdBy: XGBoostJob
+    project: team-a
+    release: job-0
+    run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+    workloadKind: DistributedWorkload
+    workloadName: dist-0
+  name: job-0
+  namespace: runai-team-a
+spec:
+  runPolicy:
+    backoffLimit: 3
+    cleanPodPolicy: None
+  xgbReplicaSpecs:
+    Master:
+      replicas: 1
+      template:
+        metadata:
+          annotations:
+            totalGPUs: "1.5"
+            totalGPUsMemory: "0"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: dist-0
+        spec:
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: key1
+                    operator: In
+                    values:
+                    - a
+                - matchExpressions:
+                  - key: key2
+                    operator: Exists
+          containers:
+          - env:
+            - name: HOME
+              value: /home/runai-home
+            - name: LDAP_UID
+              value: "601"
+            - name: LDAP_GID
+              value: "30"
+            image: ubuntu
+            imagePullPolicy: IfNotPresent
+            name: xgboost
+            resources:
+              requests:
+                cpu: "1"
+            securityContext:
+              allowPrivilegeEscalation: true
+              runAsGroup: 30
+              runAsUser: 601
+              seccompProfile:
+                type: RuntimeDefault
+            volumeMounts:
+            - mountPath: /home/runai-home
+              name: user-data
+          dnsPolicy: ClusterFirstWithHostNet
+          hostIPC: true
+          hostNetwork: true
+          schedulerName: runai-scheduler
+          securityContext:
+            fsGroup: 30
+          volumes:
+          - emptyDir: {}
+            name: user-data
+    Worker:
+      replicas: 3
+      template:
+        metadata:
+          annotations:
+            gpu-fraction: "0.5"
+            gpu-fraction-num-devices: "1"
+            totalGPUs: "1.5"
+            totalGPUsMemory: "0"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: dist-0
+        spec:
+          containers:
+          - env:
+            - name: HOME
+              value: /home/runai-home
+            - name: LDAP_UID
+              value: "501"
+            - name: LDAP_GID
+              value: "20"
+            image: ubuntu
+            imagePullPolicy: IfNotPresent
+            name: xgboost
+            resources:
+              requests:
+                cpu: "3"
+            securityContext:
+              allowPrivilegeEscalation: true
+              runAsGroup: 20
+              runAsUser: 501
+              seccompProfile:
+                type: RuntimeDefault
+            stdin: true
+            tty: true
+            volumeMounts:
+            - mountPath: /home/runai-home
+              name: user-data
+            workingDir: /tmp/work
+          schedulerName: runai-scheduler
+          securityContext:
+            fsGroup: 20
+            supplementalGroups:
+            - 20
+            - 30
+            - 40
+          volumes:
+          - emptyDir: {}
+            name: user-data
+status: {}

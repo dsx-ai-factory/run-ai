@@ -1,0 +1,12 @@
+type: object
+properties:
+  name:
+    type: string
+    example: "Deployment"
+    description: The unique name of the workload type. This value must exactly match the Kubernetes Kind that represents the workload type.
+    pattern: "^[A-Z][a-z0-9]*([A-Z][a-z0-9]*)*$"
+  group:
+    type: string
+    example: "apps"
+    description: The Kubernetes group associated with the workload resource.
+    pattern: "^[a-z](?:[a-z0-9.-]*[a-z0-9])?$"

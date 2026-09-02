@@ -1,0 +1,4 @@
+description: The time at which an event occurred. e.g. the time an effective policy has been updated
+type: string
+minLength: 1
+format: date-time

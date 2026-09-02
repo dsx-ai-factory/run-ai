@@ -1,0 +1,6 @@
+description: Limitations on the number of CPUs consumed by the workload (0.5, 1, .etc). The system guarantees that this workload will not be able to consume more than this amount of CPUs.
+format: double
+type: number
+example: 2
+nullable: true
+minimum: 0

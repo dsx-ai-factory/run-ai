@@ -1,0 +1,4 @@
+type: array
+description: The list of images.
+items:
+  $ref: './Image.yaml'

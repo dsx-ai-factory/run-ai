@@ -1,0 +1,9 @@
+persistent:
+  customization:
+    claimSize:
+      min: 100M
+      step: 100M
+    accessMode:
+      supportedValues:
+        readWriteOnce: false
+

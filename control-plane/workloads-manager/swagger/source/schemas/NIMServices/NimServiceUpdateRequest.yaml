@@ -1,0 +1,16 @@
+type: object
+required:
+  - spec
+properties:
+  spec:
+    $ref: "../../../../../infra/openapi/docs/schemas/nim_services/NimServiceSpec.yaml"
+  fieldsToRemove:
+    type: array
+    description: |
+      List of field names to remove from the NIM service spec.
+      Note: replicas and autoscaling are mutually exclusive - adding one automatically removes the other.
+    items:
+      $ref: "./NimServiceRemovableFields.yaml"
+    example:
+      - autoscaling
+      - environmentVariables

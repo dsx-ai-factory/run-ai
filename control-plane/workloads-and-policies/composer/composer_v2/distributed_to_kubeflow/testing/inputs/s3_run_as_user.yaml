@@ -1,0 +1,14 @@
+image: ubuntu
+
+security:
+  uidGidSource: custom
+  runAsUid: 1000
+  runAsGid: 2000
+
+storage:
+  s3:
+    - bucket: private-bucket-with-token
+      path: /container/my-very-secret-bucket
+      url: "https://s3.amazonaws.com"
+      accessKeySecret: my-access-key-secret
+      awsSessionToken: my-session-token

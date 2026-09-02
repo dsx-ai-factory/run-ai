@@ -1,0 +1,25 @@
+properties:
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  scopeType:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ScopeType.yaml"
+  scopeId:
+    $ref: "../General/ScopeId.yaml"
+  updateCounter:
+    description: number which uniquely identifies the update. For deletion, the updateCounter holds the 
+      update count of the recent applied policy, rather than of the deletion.
+    type: integer
+    format: int64
+  action:
+    description: The action that the agent performed
+    type: string
+    enum:
+      - apply
+      - delete
+  errorMessage:
+    description: optional error indicating the update has failed.
+    type: string
+    nullable: true
+    minLength: 1
+
+

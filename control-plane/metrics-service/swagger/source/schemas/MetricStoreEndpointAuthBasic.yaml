@@ -1,0 +1,12 @@
+type: object
+nullable: true
+required:
+  - username
+  - password
+properties:
+  username:
+    type: string
+    maxLength: 250
+  password:
+    type: string
+    maxLength: 1000

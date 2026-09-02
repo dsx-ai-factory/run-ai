@@ -1,0 +1,440 @@
+{{- if .Values.operands.rbac.base.create }}
+# Run:AI ExternalWorkloadIntegrator
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-external-workload-integrator
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - create
+      - get
+      - update
+      - patch
+  - apiGroups:
+      - run.ai
+    resources:
+      - externalworkloads
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - externalworkloads/status
+    verbs:
+      - get
+      - update
+      - patch
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - externalworkloads/finalizers
+    verbs:
+      - update
+      - patch
+  - apiGroups:
+      - run.ai
+    resources:
+      - projects
+      - nodepools
+    verbs:
+      - get
+      - list
+      - watch
+  # kai.resources projects are read when UseKaiOrgUnits is enabled, and nodepools when
+  # UseKaiNodePools is (both temporary dev-period flags).
+  - apiGroups:
+      - kai.resources
+    resources:
+      - projects
+      - nodepools
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - clusterroles
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - scheduling.run.ai
+    resources:
+      - departments
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - configmaps
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - scheduling.k8s.io
+    resources:
+      - priorityclasses
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - kartas
+      - kartas/status
+      - kartas/finalizers
+    verbs:
+      - list
+      - get
+      - watch
+      - patch
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - watch
+      - list
+  - apiGroups:
+      - run.ai
+    resources:
+      - trainingworkloads
+      - interactiveworkloads
+      - inferenceworkloads
+      - distributedinferenceworkloads
+      - distributedinferenceworkloads/status
+      - distributedinferenceworkloads/scale
+      - distributedworkloads
+      - workloadrunners
+      - workloadrunners/status
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - "workspace.devfile.io"
+    resources:
+      - devworkspaces
+      - devworkspaces/finalizers
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ray.io
+    resources:
+      - rayclusters
+      - rayjobs
+      - rayservices
+      - rayclusters/finalizers
+      - rayjobs/finalizers
+      - rayservices/finalizers
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+      - apps
+      - machinelearning.seldon.io
+      - kubevirt.io
+      - kubeflow.org
+      - run.ai
+      - amlarc.azureml.com
+      - serving.knative.dev
+      - knative.dev
+      - batch
+    resources:
+      - deployments
+      - jobs
+      - runaijobs
+      - mpijobs
+      - pytorchjobs
+      - tfjobs
+      - jaxjobs
+      - xgboostjobs
+      - notebooks
+      - seldondeployments
+      - virtualmachines
+      - virtualmachineinstances
+      - statefulsets
+      - replicasets
+      - pods
+      - amljobs
+      - revisions
+      - configurations
+      - services
+      - cronjobs
+      - scheduledworkflows
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+      - apps
+      - machinelearning.seldon.io
+      - kubevirt.io
+      - kubeflow.org
+      - run.ai
+      - amlarc.azureml.com
+      - serving.knative.dev
+      - knative.dev
+      - batch
+    resources:
+      - deployments/finalizers
+      - jobs/finalizers
+      - runaijobs/finalizers
+      - mpijobs/finalizers
+      - pytorchjobs/finalizers
+      - tfjobs/finalizers
+      - xgboostjobs/finalizers
+      - seldondeployments/finalizers
+      - virtualmachines/finalizers
+      - virtualmachineinstances/finalizers
+      - statefulsets/finalizers
+      - replicasets/finalizers
+      - pods/finalizers
+      - amljobs/finalizers
+      - revisions/finalizers
+      - configurations/finalizers
+      - services/finalizers
+      - cronjobs/finalizers
+      - scheduledworkflows/finalizers
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - workflows
+      - workflows/finalizers
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - tekton.dev
+    resources:
+      - pipelineruns
+      - taskruns
+      - pipelineruns/finalizers
+      - taskruns/finalizers
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - scheduling.run.ai
+    resources:
+      - podgroups
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+      - ingresses/finalizers
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apiextensions.k8s.io
+    resources:
+      - customresourcedefinitions
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apps.nvidia.com
+    resources:
+      - nimcaches
+      - nimcaches/finalizers
+      - nimservices
+      - nimservices/finalizers
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - leaderworkerset.x-k8s.io
+    resources:
+      - leaderworkersets
+      - leaderworkersets/finalizers
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - egx.nvidia.io
+    resources:
+      - spotrequests
+      - spotrequests/finalizers
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - nodes
+      - persistentvolumeclaims
+      - secrets
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - resource.k8s.io
+    resources:
+      - resourceclaims
+      - resourceclaimtemplates
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - gateway.networking.k8s.io
+    resources:
+      - httproutes
+      - grpcroutes
+      - tlsroutes
+      - gateways
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - inference.networking.k8s.io
+    resources:
+      - inferencepools
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - route.openshift.io
+    resources:
+      - routes
+    verbs:
+      - get
+      - list
+      - watch
+{{- if .Values.cluster.rbac.escalate }}
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - clusterroles
+    resourceNames:
+      - runai-additional-workload-gvks-read
+      - runai-additional-workload-gvks-crud
+    verbs:
+      - patch
+      - update
+      - bind
+      - escalate
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - clusterroles
+    verbs:
+      - create
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-external-workload-integrator-project
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - update
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-external-workload-integrator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-external-workload-integrator
+subjects:
+  - kind: ServiceAccount
+    name: external-workload-integrator
+    namespace: runai
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-external-workload-integrator-additional-workload-gvks
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-additional-workload-gvks-read
+subjects:
+  - kind: ServiceAccount
+    name: external-workload-integrator
+    namespace: runai
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-pod-grouper-additional-workload-gvks
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-additional-workload-gvks-read
+subjects:
+  - kind: ServiceAccount
+    name: pod-grouper
+    namespace: runai
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-agent-additional-workload-gvks
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-additional-workload-gvks-read
+subjects:
+  - kind: ServiceAccount
+    name: runai-agent
+    namespace: runai
+{{- end }}

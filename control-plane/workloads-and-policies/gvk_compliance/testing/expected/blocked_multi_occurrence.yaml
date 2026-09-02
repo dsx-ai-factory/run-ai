@@ -1,0 +1,26 @@
+errors:
+- code: 400
+  message: 'field image failed blocked validation: must not be set (path=".spec.template.spec.containers[1].image")'
+policy:
+  effectiveRules:
+  - enforcements:
+    - blocked: true
+    field: image
+    sourceOfRule: null
+    specSelector: allContainers
+  workloadType:
+    group: apps
+    kind: Deployment
+    version: v1
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: blocked-image-multi
+  spec:
+    template:
+      spec:
+        containers:
+        - name: no-image
+        - image: ubuntu
+          name: with-image

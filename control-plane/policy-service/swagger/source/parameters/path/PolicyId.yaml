@@ -1,0 +1,7 @@
+name: PolicyId
+in: path
+required: true
+description: The unique identifier for the policy.
+schema:
+  type: string
+  format: uuid

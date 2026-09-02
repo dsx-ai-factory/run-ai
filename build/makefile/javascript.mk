@@ -1,0 +1,32 @@
+# Uses base.mk file from infra/makefile
+
+## Versions
+NODEJS_VERSION=20-alpine3.17
+REDOCLY_AUTHORIZATION?=""
+
+## Commands
+
+# Base NodeJS
+DOCKER_NODEJS_COMMAND=${DOCKER_COMMAND} -i -e npm_config_cache=/tmp/.npmcache -e CYPRESS_CACHE_FOLDER=/tmp/.cypresscache -e REDOCLY_AUTHORIZATION="${REDOCLY_AUTHORIZATION}" ${DOCKERHUB_PROXY}library/node:${NODEJS_VERSION}
+
+DOCKER_NODEJS_BUILD_COMMAND=${DOCKER_NODEJS_COMMAND} /bin/sh -c 'npm i --save-dev && npm run build' || ${FAILURE_MESSAGE_HANDLER}
+DOCKER_NODEJS_TEST_COMMAND=${DOCKER_NODEJS_COMMAND} /bin/sh -c 'npm i --save-dev && npm run test' || ${FAILURE_MESSAGE_HANDLER}
+DOCKER_NODEJS_LINT_COMMAND=${DOCKER_NODEJS_COMMAND} /bin/sh -c 'npm i --save-dev && npm run lint' || ${FAILURE_MESSAGE_HANDLER}
+
+test-js:
+	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Running unit-tests on service ${SERVICE_NAME}" ${BASE_CONSOLE}
+	${DOCKER_NODEJS_TEST_COMMAND}	
+	${SUCCESS_MESSAGE_HANDLER}
+.PHONY: test-js
+
+lint-js:
+	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Running linter on service ${SERVICE_NAME}" ${BASE_CONSOLE}
+	${DOCKER_NODEJS_LINT_COMMAND}
+	${SUCCESS_MESSAGE_HANDLER}
+.PHONY: lint-js
+
+build-js:
+	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Building service ${SERVICE_NAME}" ${BASE_CONSOLE}
+	${DOCKER_NODEJS_BUILD_COMMAND}
+	${SUCCESS_MESSAGE_HANDLER}
+.PHONY: build-js

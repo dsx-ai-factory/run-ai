@@ -1,0 +1,7 @@
+type: object
+x-internal: true
+nullable: true
+properties:
+  topologyManagerPolicy:
+    $ref: './TopologyManagerPolicy.yaml'
+x-schema-name: NumaInfo

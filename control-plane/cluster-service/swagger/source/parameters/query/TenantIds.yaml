@@ -1,0 +1,11 @@
+name: tenantId
+x-internal: true
+in: query
+required: false
+schema:
+  type: array
+  maxItems: 20
+  items:
+    type: string
+explode: true
+description: The tenant Ids of the current request.

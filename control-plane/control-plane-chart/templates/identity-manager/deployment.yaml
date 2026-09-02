@@ -1,0 +1,18 @@
+{{- include "common.deployment" (list . .Values.identityManager .Values.identityManager.autoscaling .Values.identityManager.serviceAccount "control-plane.identityManager.deployment" ) }}
+
+{{- define "control-plane.identityManager.deployment" -}}
+{{- $top := first . }}
+spec:
+  template:
+    spec:
+      initContainers:
+        {{- include "awaitingPostgresReadinessContainer" . | nindent 8 }}
+        {{- if $top.Values.tempBackendSettings.enabled }}
+        {{- include "awaitingTempBackendSettingsReadiness" . | nindent 8 }}
+        {{- end }}
+        {{- if $top.Values.notificationsService.enabled }}
+        {{- include "awaitingNotificationServiceReadiness" . | nindent 8 }}
+        {{- end }}
+      containers:
+      - {{- include "common.container" . | nindent 8 }}
+{{- end }}

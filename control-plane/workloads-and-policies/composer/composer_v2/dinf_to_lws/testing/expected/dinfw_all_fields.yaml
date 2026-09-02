@@ -1,0 +1,488 @@
+Config:
+  mnnvl: None
+  networking:
+  - externalAccess:
+      ingress:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: dinfw-test-lws-sp-0
+        spec:
+          rules:
+          - host: my-distributed-inference.example.com
+            http:
+              paths:
+              - backend:
+                  service:
+                    name: dinfw-test-lws-sp-0
+                    port:
+                      number: 80
+                path: /
+                pathType: Prefix
+    services:
+    - spec:
+        name: dinfw-test-lws-sp-0
+        ports:
+        - name: serving-port
+          port: 80
+          protocol: TCP
+          targetPort: 4180
+        selector:
+          leaderworkerset.sigs.k8s.io/name: test-lws-1234
+          leaderworkerset.sigs.k8s.io/worker-index: "0"
+        type: ClusterIP
+  pvcs:
+  - metadata:
+      name: generated-pvc-1
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: fast-ssd
+  - metadata:
+      name: generated-pvc-2
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 2Gi
+      storageClassName: standard-ssd
+  userCredentials:
+    sources:
+    - ref: leader-user-credential
+    - ref: wrk-user-credential
+LeaderWorkerSet:
+  apiVersion: leaderworkerset.x-k8s.io/v1
+  kind: LeaderWorkerSet
+  metadata:
+    annotations:
+      run.ai/submitted-by: tester
+    labels:
+      app: leaderworkerset
+      createdBy: LeaderWorkerSet
+      project: team-a
+      release: test-lws
+      run.ai/category: Train
+      run.ai/control-plane-managed: "true"
+      run.ai/converted-from-native: "true"
+      workloadKind: DistributedInference
+      workloadName: test-lws
+    name: test-lws-1234
+    namespace: runai-team-a
+  spec:
+    leaderWorkerTemplate:
+      leaderTemplate:
+        metadata:
+          annotations:
+            deployment.kubernetes.io/revision: "1"
+            distributed-inference/role: leader
+            gpu-fraction: "0.5"
+            gpu-fraction-num-devices: "2"
+          labels:
+            app: leaderworkerset
+            component: distributed-inference-leader
+            createdBy: LeaderWorkerSet
+            project: team-a
+            release: test-lws
+            run.ai/category: Train
+            version: v1.0.0
+            workloadKind: DistributedInference
+            workloadName: test-lws
+        spec:
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: disktype
+                    operator: In
+                    values:
+                    - ssd
+                  - key: region
+                    operator: In
+                    values:
+                    - us-west1
+                    - us-west2
+                  - key: gpu-type
+                    operator: In
+                    values:
+                    - nvidia-a100
+                    - nvidia-v100
+                  - key: run.ai/node-pool
+                    operator: In
+                    values:
+                    - gpu-pool-a
+                - matchExpressions:
+                  - key: disktype
+                    operator: In
+                    values:
+                    - ssd
+                  - key: region
+                    operator: In
+                    values:
+                    - us-west1
+                    - us-west2
+                  - key: gpu-type
+                    operator: In
+                    values:
+                    - nvidia-a100
+                    - nvidia-v100
+                  - key: run.ai/node-pool
+                    operator: In
+                    values:
+                    - gpu-pool-b
+                - matchExpressions:
+                  - key: disktype
+                    operator: In
+                    values:
+                    - ssd
+                  - key: region
+                    operator: In
+                    values:
+                    - us-west1
+                    - us-west2
+                  - key: gpu-type
+                    operator: In
+                    values:
+                    - nvidia-a100
+                    - nvidia-v100
+                  - key: run.ai/node-pool
+                    operator: In
+                    values:
+                    - cpu-pool
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchLabels:
+                    release: test-lws
+                topologyKey: distributed-inference-group
+          containers:
+          - args:
+            - -x
+            - my-script.py
+            command:
+            - python
+            env:
+            - name: HOME
+              value: /home/runai-home
+            - name: RUNAI_PROJECT
+              value: team-a
+            - name: RUNAI_JOB_NAME
+              value: test-lws
+            - name: LDAP_UID
+              value: "1000"
+            - name: LDAP_GID
+              value: "1000"
+            - name: LEADER_ID
+              value: leader-001
+            - name: DISTRIBUTED_ROLE
+              value: leader
+            image: python:3.8
+            imagePullPolicy: IfNotPresent
+            name: leader
+            ports:
+            - containerPort: 8081
+              name: port-8081
+              protocol: TCP
+            readinessProbe:
+              httpGet:
+                port: 8080
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "1"
+                memory: 2Gi
+            securityContext:
+              capabilities:
+                add:
+                - KILL
+                - CHOWN
+                - DAC_OVERRIDE
+              runAsGroup: 1000
+              runAsUser: 1000
+            volumeMounts:
+            - mountPath: /config/leader
+              name: config-map-leader-leader-app-config
+            - mountPath: /tmp/leader-scratch
+              name: empty-dir-leader-leader-temp-storage
+            - mountPath: /secrets/leader
+              name: secret-leader-leader-credentials
+            - mountPath: /data/leader-pvc
+              name: pvc-leader
+            - mountPath: /home/runai-home
+              name: user-data
+            workingDir: /home/leader-folder
+          - args:
+            - --provider=keycloak-oidc
+            - --upstream=http://localhost:8081
+            - --redirect-url=https://my-distributed-inference.example.com/oauth2/callback
+            - --oidc-issuer-url=https://test.run.ai/auth/realms/runai
+            - --scope=openid
+            - --http-address=0.0.0.0:4180
+            - --proxy-prefix=/oauth2
+            - --skip-provider-button=true
+            - --whitelist-domain=my-distributed-inference.example.com
+            - --cookie-domain=my-distributed-inference.example.com
+            - --cookie-httponly=true
+            - --cookie-secure=true
+            - --code-challenge-method=S256
+            - --cookie-refresh=10m
+            - --cookie-samesite=lax
+            - --skip-jwt-bearer-tokens=true
+            - --extra-jwt-issuers=https://test.run.ai/auth/realms/runai=runai
+            - --custom-templates-dir=/usr/share/oauth2-proxy
+            - --pass-authorization-header=false
+            - --cookie-name=dinfw-test-lws-sp-0
+            - --session-store-type=redis
+            - --redis-connection-url=redis://redis.runai-backend.svc.cluster.local
+            - --force-json-errors=true
+            - --authenticated-emails-file=/etc/runai/auth/users/c2VydmluZy1wb3J0
+            env:
+            - name: OAUTH2_PROXY_COOKIE_PATH
+            envFrom:
+            - secretRef:
+                name: runai-auth-secret
+            image: test.registry/oauth2-proxy:latest
+            imagePullPolicy: IfNotPresent
+            name: runai-oauth2-proxy-0
+            ports:
+            - containerPort: 4180
+            resources: {}
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+            volumeMounts:
+            - mountPath: /etc/runai/auth/users
+              name: runai-auth
+          imagePullSecrets:
+          - name: registry-secret
+          - name: pc-test-lws-leader-user-credential
+          - name: shared-registry
+          initContainers:
+          - command:
+            - sh
+            - -c
+            - echo -e "dXNlci1hQGV4YW1wbGUuY29tCnVzZXItYkBleGFtcGxlLmNvbQ==" | base64
+              -d > /etc/runai/auth/users/c2VydmluZy1wb3J0
+            image: test.registry/username-loader:latest
+            imagePullPolicy: IfNotPresent
+            name: runai-auth-user-loader
+            resources:
+              limits:
+                cpu: 100m
+                memory: 100Mi
+              requests:
+                cpu: 50m
+                memory: 50Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 65534
+            volumeMounts:
+            - mountPath: /etc/runai/auth/users
+              name: runai-auth
+          nodeSelector:
+            run.ai/node-type: my-node-type
+          priorityClassName: low
+          schedulerName: runai-scheduler
+          securityContext:
+            fsGroup: 1000
+          tolerations:
+          - effect: NoSchedule
+            key: nvidia.com/gpu
+            operator: Equal
+            value: "true"
+          - effect: NoExecute
+            key: distributed-inference/leader
+            operator: Exists
+          volumes:
+          - configMap:
+              name: leader-config
+            name: config-map-leader-leader-app-config
+          - emptyDir:
+              sizeLimit: 1Gi
+            name: empty-dir-leader-leader-temp-storage
+          - name: secret-leader-leader-credentials
+            secret:
+              secretName: leader-secret
+          - name: pvc-leader
+            persistentVolumeClaim:
+              claimName: generated-pvc-1
+          - emptyDir: {}
+            name: user-data
+          - emptyDir: {}
+            name: runai-auth
+      restartPolicy: RecreateGroupOnPodRestart
+      size: 4
+      workerTemplate:
+        metadata:
+          annotations:
+            deployment.kubernetes.io/revision: "1"
+            distributed-inference/role: worker
+            gpu-memory: "8589"
+          labels:
+            app: leaderworkerset
+            component: distributed-inference-worker
+            createdBy: LeaderWorkerSet
+            project: team-a
+            release: test-lws
+            run.ai/category: Train
+            version: v1.0.0
+            workloadKind: DistributedInference
+            workloadName: test-lws
+        spec:
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: wrk-type
+                    operator: In
+                    values:
+                    - gpu-worker
+                    - compute-worker
+                  - key: zone
+                    operator: In
+                    values:
+                    - zone-a
+                    - zone-b
+                  - key: run.ai/node-pool
+                    operator: In
+                    values:
+                    - gpu-pool-a
+                - matchExpressions:
+                  - key: wrk-type
+                    operator: In
+                    values:
+                    - gpu-worker
+                    - compute-worker
+                  - key: zone
+                    operator: In
+                    values:
+                    - zone-a
+                    - zone-b
+                  - key: run.ai/node-pool
+                    operator: In
+                    values:
+                    - gpu-pool-b
+                - matchExpressions:
+                  - key: wrk-type
+                    operator: In
+                    values:
+                    - gpu-worker
+                    - compute-worker
+                  - key: zone
+                    operator: In
+                    values:
+                    - zone-a
+                    - zone-b
+                  - key: run.ai/node-pool
+                    operator: In
+                    values:
+                    - cpu-pool
+            podAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+              - podAffinityTerm:
+                  labelSelector:
+                    matchLabels:
+                      release: test-lws
+                  topologyKey: distributed-inference-wrk-group
+                weight: 100
+          containers:
+          - args:
+            - -x
+            - wrk-script.py
+            command:
+            - python
+            env:
+            - name: HOME
+              value: /home/runai-home
+            - name: RUNAI_PROJECT
+              value: team-a
+            - name: RUNAI_JOB_NAME
+              value: test-lws
+            - name: LDAP_UID
+              value: "1001"
+            - name: LDAP_GID
+              value: "1001"
+            - name: WORKER_ID
+              value: wrk-${POD_NAME}
+            - name: DISTRIBUTED_ROLE
+              value: worker
+            - name: LEADER_ADDRESS
+              value: ${LEADER_SERVICE_HOST}
+            image: python:2.7
+            imagePullPolicy: Always
+            name: worker
+            readinessProbe:
+              httpGet:
+                port: 9090
+            resources:
+              limits:
+                cpu: "2"
+                memory: 4Gi
+              requests:
+                cpu: 500m
+                memory: 1Gi
+            securityContext:
+              capabilities:
+                add:
+                - NET_BIND_SERVICE
+                - SYS_TIME
+              runAsGroup: 1001
+              runAsUser: 1001
+            volumeMounts:
+            - mountPath: /config/worker
+              name: config-map-worker-wrk-app-config
+            - mountPath: /tmp/wrk-scratch
+              name: empty-dir-worker-wrk-temp-storage
+            - mountPath: /secrets/worker
+              name: secret-worker-wrk-credentials
+            - mountPath: /data/wrk-pvc
+              name: pvc-worker
+            - mountPath: /home/runai-home
+              name: user-data
+            workingDir: /home/wrk-folder
+          imagePullSecrets:
+          - name: registry-secret
+          - name: pc-test-lws-wrk-user-credential
+          - name: shared-registry
+          nodeSelector:
+            run.ai/node-type: wrk-node-type
+          priorityClassName: low
+          schedulerName: runai-scheduler
+          securityContext:
+            fsGroup: 1001
+          tolerations:
+          - effect: NoSchedule
+            key: nvidia.com/gpu
+            operator: Equal
+            value: "true"
+          - effect: PreferNoSchedule
+            key: distributed-inference/worker
+            operator: Exists
+          volumes:
+          - configMap:
+              name: wrk-config
+            name: config-map-worker-wrk-app-config
+          - emptyDir:
+              sizeLimit: 512Mi
+            name: empty-dir-worker-wrk-temp-storage
+          - name: secret-worker-wrk-credentials
+            secret:
+              secretName: wrk-secret
+          - name: pvc-worker
+            persistentVolumeClaim:
+              claimName: generated-pvc-2
+          - emptyDir: {}
+            name: user-data
+    replicas: 2
+    rolloutStrategy:
+      type: RollingUpdate
+    startupPolicy: LeaderReady
+  status: {}

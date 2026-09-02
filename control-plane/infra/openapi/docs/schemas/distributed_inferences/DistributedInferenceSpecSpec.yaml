@@ -1,0 +1,4 @@
+allOf:
+  - $ref: "../workloads_spec/distributed_inferences/DistributedInferenceCommonSpec.yaml"
+  - $ref: "../workloads_spec/distributed_inferences/DistributedInferenceLeaderSpecFields.yaml"
+  - $ref: "../workloads_spec/distributed_inferences/DistributedInferenceWorkerSpecFields.yaml"

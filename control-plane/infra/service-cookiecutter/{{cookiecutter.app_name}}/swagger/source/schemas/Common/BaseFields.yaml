@@ -1,0 +1,23 @@
+type: object
+required:
+  - id
+  - createdAt
+  - updatedAt
+  - createdBy
+properties:
+  id:
+    type: string
+    format: uuid
+    example: 71f69d83-ba66-4822-adf5-55ce55efd210
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time
+  createdBy:
+    type: string
+    example: "user@run.ai"
+  updatedBy:
+    type: string
+    example: "user@run.ai"

@@ -1,0 +1,16 @@
+type: object
+description: |
+          Optional on create requests; always populated on responses. When null on create,
+          the metrics-service generates the metric store via the configured datasource provider.
+nullable: true
+required:
+  - type
+  - read
+  - write
+properties:
+  type:
+    $ref: './MetricStoreType.yaml'
+  read:
+    $ref: './MetricStoreEndpoint.yaml'
+  write:
+    $ref: './MetricStoreEndpoint.yaml'

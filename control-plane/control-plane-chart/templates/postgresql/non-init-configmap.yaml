@@ -1,0 +1,7 @@
+{{- include "common.configMap" (list . (dict "name" "postgresql" "argoRollouts" false) "control-plane.postgresql.non-init-configmap") }}
+
+{{- define "control-plane.postgresql.non-init-configmap" -}}
+{{- $top := first . }}
+data:
+  IS_EXTERNAL_POSTGRES: {{ $top.Values.postgresql.enabled | not | quote }}
+{{- end }}

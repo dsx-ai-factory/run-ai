@@ -1,0 +1,7 @@
+in: path
+name: nodepoolName
+required: true
+description: The unique nodepool name.
+schema:
+  type: string
+  example: 'default'

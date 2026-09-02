@@ -1,0 +1,10 @@
+type: object
+properties:
+  enableNim:
+    $ref: './EnableNIM/GetEnableNIM.yaml'
+  deletedWorkloadsView:
+    $ref: './DeletedWorkloadsView/GetDeletedWorkloadsView.yaml'
+  allowGPT2Model:
+    $ref: './AllowGPT2Model/GetAllowGPT2Model.yaml'
+  enableModelCatalog:
+    $ref: './EnableModelCatalog/GetEnableModelCatalog.yaml'

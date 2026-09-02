@@ -1,0 +1,45 @@
+Config: {}
+Service:
+  apiVersion: serving.knative.dev/v1
+  kind: Service
+  metadata:
+    annotations:
+      run.ai/submitted-by: tester
+    labels:
+      app: service
+      createdBy: Service
+      project: team-a
+      release: my-llm
+      run.ai/control-plane-managed: "true"
+      run.ai/converted-from-native: "true"
+      workloadKind: Inference
+      workloadName: my-llm
+    name: my-llm
+    namespace: runai-team-a
+  spec:
+    template:
+      metadata:
+        annotations:
+          autoscaling.knative.dev/class: kpa.autoscaling.knative.dev
+          autoscaling.knative.dev/max-scale: "5"
+          autoscaling.knative.dev/metric: rps
+          autoscaling.knative.dev/min-scale: "0"
+          autoscaling.knative.dev/scale-to-zero-pod-retention-period: 200s
+          autoscaling.knative.dev/target: "100"
+        labels:
+          app: service
+          createdBy: Service
+          project: team-a
+          release: my-llm
+          workloadKind: Inference
+          workloadName: my-llm
+      spec:
+        containerConcurrency: 50
+        containers:
+        - image: my-llm:latest
+          name: my-llm
+          ports:
+          - containerPort: 8080
+          resources: {}
+        schedulerName: runai-scheduler
+  status: {}

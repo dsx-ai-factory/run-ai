@@ -1,0 +1,12 @@
+{
+  "service_name": "dromos",
+  "artifact_type": "",
+  "notifications": {
+    "slack": {
+      "mention": "@fox"
+    }
+  },
+  "jira": {
+    "team_name": "Fox Team"
+  }
+}

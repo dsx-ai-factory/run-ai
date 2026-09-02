@@ -1,0 +1,7 @@
+allOf:
+  - $ref: "../templates/TemplateUpdateMeta.yaml"
+  - type: object
+    properties:
+      spec:
+        $ref: "InferenceTemplateSpec.yaml"
+  - $ref: "../templates/TemplateAssets.yaml"

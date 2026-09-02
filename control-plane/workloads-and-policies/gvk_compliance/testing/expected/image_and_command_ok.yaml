@@ -1,0 +1,37 @@
+policy:
+  effectiveRules:
+  - enforcements:
+    - options:
+      - ubuntu
+      - redhat
+    field: image
+    sourceOfRule: null
+    specSelector: allContainers
+  - enforcements:
+    - length:
+        min: 5
+    field: command
+    sourceOfRule: null
+    specSelector: allContainers
+  workloadType:
+    group: apps
+    kind: Deployment
+    version: v1
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: test-deployment
+  spec:
+    template:
+      spec:
+        containers:
+        - command:
+          - echo
+          - a
+          - b
+          - c
+          - d
+          - e
+          image: ubuntu
+          name: main

@@ -1,0 +1,64 @@
+allOf:
+  - $ref: "../DataUpdatableFields.yaml"
+  - type: object
+    required:
+      - id
+      - name
+      - parentId
+      - createdAt
+      - updatedAt
+      - totalResources
+      - effective
+      - status
+      - description
+      - enforceRunaiScheduler
+      - clusterId
+      - resources
+    properties:
+      id:
+        type: string
+        example: 33
+      name:
+        type: string
+        example: organization1
+      clusterId:
+        $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+      parentId:
+        type: string
+        description: department parent uuid
+        example: 53a9228e-a722-420d-a102-9dc90da2efca
+      requestedNamespace:
+        type: string
+        description: the project's namespace only if requested
+        nullable: true
+        example: runai-proj1
+      enforceRunaiScheduler:
+        type: boolean
+        description: a flag to enforce that all pods in this namespace will be scheduled with runai-scheduler. Supported for cluster v2.21+
+      status:
+        $ref: "./ProjectStatus.yaml"
+      totalResources:
+        $ref: "../TotalResources.yaml"
+      createdAt:
+        type: string
+        format: date-time
+      updatedAt:
+        type: string
+        format: date-time
+      createdBy:
+        type: string
+      updatedBy:
+        type: string
+      parent:
+        $ref: "../DepartmentProjectParent.yaml"
+      effective:
+        $ref: "./ProjectEffective.yaml"
+      overtimeData:
+        $ref: "../OvertimeData.yaml"
+      deletion:
+        $ref: "./Deletion.yaml"
+      resources:
+        type: array
+        items:
+          $ref: "../../schemas/Resources.yaml"
+        description: Resources assigned to this Organization per Node Pool

@@ -1,0 +1,11 @@
+image: ubuntu
+storage:
+  pvc:
+    - existingPvc: false
+      claimName: claim-rw
+      path: "/path/rw"
+      readOnly: false
+      claimInfo:
+        size: 10M
+        storageClass: my-storage
+      ephemeral: false

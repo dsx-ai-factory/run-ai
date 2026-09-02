@@ -1,0 +1,16 @@
+type: object
+required:
+  - phase
+properties:
+  phase:
+    $ref: "../Datavolumes/DatavolumePhase.yaml"
+  phaseMessage:
+    type: string
+    description: Message explaining the phase of the Datavolume in the cluster
+    example: Failed to copy pvc to project 'project-a'
+  conditions:
+    $ref: "../Common/Conditions.yaml"
+  datavolumePvcName:
+    type: string
+    description: The name of the PVC that is created in the cluster in the project namespace
+    example: datavolume-pvc-1

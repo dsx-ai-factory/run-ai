@@ -1,0 +1,8 @@
+description: >-
+  The detailed breakdown of fields, keyed by field name. Each field maps to the
+  list of its variations across the requested spec selectors and item selectors.
+type: object
+additionalProperties:
+  type: array
+  items:
+    $ref: "./BreakdownFieldVariation.yaml"

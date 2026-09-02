@@ -1,0 +1,10 @@
+type: object
+required:
+  - status
+properties:
+  status:
+    $ref: "WorkloadV2SyncStatus.yaml"
+  message:
+    type: string
+    maxLength: 250
+    pattern: ".*"

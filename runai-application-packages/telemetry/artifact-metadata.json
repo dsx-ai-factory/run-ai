@@ -1,0 +1,4 @@
+{
+    "service_name": "telemetry",
+    "artifact_type": "go"
+  }

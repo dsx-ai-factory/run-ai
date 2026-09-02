@@ -1,0 +1,188 @@
+{{- if .Values.notificationsService.enabled }}
+{{- $svc := .Values.notificationsService }}
+{{- $fullname := include "control-plane.notificationsService.fullname" . }}
+{{- $genSecretName := include "control-plane.notificationsService.gen.secret.name" . }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  {{- include "common.metadata" (list . $svc) | nindent 2 }}
+  name: {{ $fullname }}
+spec:
+  {{- if and (not ($svc.autoscaling).enabled) (not .Values.global.config.hpaEnabled) }}
+  replicas: {{ $svc.replicaCount | default (.Values.global.replicaCount | default 1) }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: {{ $svc.name }}
+  template:
+    metadata:
+      labels:
+        {{- include "common.labels" . | nindent 8 }}
+        {{- include "common.selectorLabelName" $svc | nindent 8 }}
+      {{- with $svc.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with ($svc.imagePullSecrets | default .Values.global.imagePullSecrets) }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "common.serviceAccountName" (list . $svc.serviceAccount) }}
+      securityContext:
+        {{- toYaml ($svc.podSecurityContext | default dict) | nindent 8 }}
+      {{- if $svc.extraInitContainers }}
+      initContainers:
+        {{- tpl $svc.extraInitContainers $ | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ $svc.name }}
+          securityContext:
+            {{- toYaml $svc.securityContext | nindent 12 }}
+          image: "{{ .Values.global.image.registry }}/{{ $svc.image.repository }}:{{ $svc.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ $svc.image.pullPolicy | default .Values.global.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ $svc.service.port }}
+              protocol: TCP
+            {{- range $svc.service.extraPorts }}
+            - name: {{ .name }}
+              containerPort: {{ .port }}
+              protocol: TCP
+            {{- end }}
+          resources:
+            {{- toYaml $svc.resources | nindent 12 }}
+          env:
+            {{- if (.Values.global.customCA).enabled | default false }}
+            {{- .Values.global.customCA.env | toYaml | nindent 12 }}
+            {{- end }}
+            {{- $fipsMode := (.Values.global).fipsMode | default "off" }}
+            {{- if kindIs "bool" $fipsMode }}
+            {{- $fipsMode = ternary "on" "off" $fipsMode }}
+            {{- end }}
+            - name: GODEBUG
+              value: fips140={{ $fipsMode }}
+            - name: CONF_PATH
+              value: /etc/notifications-service/config/config.yaml
+            - name: ENV_CONFIG_PROVIDER
+              value: {{ $svc.settings.configProvider }}
+            {{- with $svc.env }}
+            {{- tpl (toYaml .) $ | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+            - name: secret
+              mountPath: /etc/notifications-service/secret
+              readOnly: true
+            - name: config
+              mountPath: /etc/notifications-service/config
+              readOnly: true
+            {{- if $svc.extraVolumeMounts }}
+            {{- tpl $svc.extraVolumeMounts $ | nindent 12 }}
+            {{- end }}
+          {{- if and $svc.config (hasKey $svc.config "app") }}
+          {{- with $svc.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $svc.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ $fullname }}
+        - name: secret
+          projected:
+            sources:
+              - secret:
+                  name: {{ $genSecretName }}
+                  items:
+                    - key: ENCRYPT_DECRYPT_KEY
+                      path: ENCRYPT_DECRYPT_KEY
+              {{- $extractedSecrets := include "control-plane.notificationsService.extractedSinkSecrets" . | fromJson }}
+              {{- range $sinkName, $sinkFields := $extractedSecrets }}
+              {{- range $fieldName, $fieldValue := $sinkFields }}
+              - secret:
+                  name: {{ $fullname }}
+                  items:
+                    - key: {{ $sinkName }}-{{ $fieldName }}
+                      path: sinks/{{ $sinkName }}/{{ $fieldName }}
+              {{- end }}
+              {{- end }}
+              {{- if and $svc.config (hasKey $svc.config "sinks") }}
+              {{- range $sinkName, $sinkConfig := $svc.config.sinks }}
+              {{- if and $sinkConfig.existingSecret $sinkConfig.secretKeys }}
+              - secret:
+                  name: {{ $sinkConfig.existingSecret }}
+                  items:
+                    {{- range $fieldName, $secretKey := $sinkConfig.secretKeys }}
+                    - key: {{ $secretKey }}
+                      path: sinks/{{ $sinkName }}/{{ $fieldName }}
+                    {{- end }}
+              {{- end }}
+              {{- end }}
+              {{- end }}
+        {{- if $svc.extraVolumes }}
+        {{- tpl $svc.extraVolumes $ | nindent 8 }}
+        {{- end }}
+      {{- with $svc.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      affinity:
+        nodeAffinity:
+          {{- with (($svc.affinity).nodeAffinity | default .Values.global.affinity.nodeAffinity) }}
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
+        {{- with (($svc.affinity).podAffinity | default .Values.global.affinity.podAffinity) }}
+        podAffinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            {{- if .Values.global.requireDefaultPodAntiAffinity }}
+            - labelSelector:
+                matchLabels:
+                  {{- include "common.selectorLabelName" $svc | nindent 18 }}
+              topologyKey: "kubernetes.io/hostname"
+            {{- end }}
+            {{- with ($svc.affinity).podAntiAffinity }}
+            {{- with .requiredDuringSchedulingIgnoredDuringExecution }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- end }}
+            {{- with .Values.global.affinity.podAntiAffinity }}
+            {{- with .requiredDuringSchedulingIgnoredDuringExecution }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- end }}
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    {{- include "common.selectorLabelName" $svc | nindent 20 }}
+                topologyKey: "kubernetes.io/hostname"
+            {{- with ($svc.affinity).podAntiAffinity }}
+            {{- with .preferredDuringSchedulingIgnoredDuringExecution }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- end }}
+            {{- with .Values.global.affinity.podAntiAffinity }}
+            {{- with .preferredDuringSchedulingIgnoredDuringExecution }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- end }}
+      {{- if or $svc.tolerations .Values.global.tolerations }}
+      tolerations:
+        {{- with $svc.tolerations }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.global.tolerations }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+{{- end }}

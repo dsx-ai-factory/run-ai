@@ -1,0 +1,8 @@
+allOf:
+  - $ref: "./DataDepartmentFields.yaml"
+  - properties:
+      resources:
+        type: array
+        items:
+          $ref: "../ResourcesNullable.yaml"
+        description: An array of resource configurations for the department. Each entry defines GPU, CPU, and CPU memory assigned to a specific node pool.

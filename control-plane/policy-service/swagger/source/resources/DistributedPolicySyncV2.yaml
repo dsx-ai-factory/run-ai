@@ -1,0 +1,70 @@
+get:
+  summary: Get distributed policies that needs to be synced to the cluster
+  operationId: sync_distributed_policies
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/sync_test.go
+  x-internal: true
+  x-authorize:
+    resource-type: policies
+    action: sync
+  tags:
+    - Synchronization
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/SyncAfter.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Sync/PolicySyncResponse.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+
+post:
+  summary: Request distributed policies that needs to be synced to the cluster and allow the cluster to report success/failure of previous updates
+  operationId: sync_request_distributed_policies
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/sync_test.go
+  x-internal: true
+  x-authorize:
+    resource-type: policies
+    action: sync
+  tags:
+    - Synchronization
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/SyncAfter.yaml"
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../../../infra/openapi/docs/schemas/sync/ClusterSyncReport.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Sync/PolicySyncResponse.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

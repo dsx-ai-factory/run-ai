@@ -1,0 +1,5 @@
+in: query
+name: limitBytes
+description: If set, the number of bytes to read from the server before terminating the log output.
+schema:
+  type: integer

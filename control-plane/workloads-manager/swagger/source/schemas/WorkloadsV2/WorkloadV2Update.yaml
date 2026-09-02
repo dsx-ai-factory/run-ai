@@ -1,0 +1,55 @@
+type: object
+required:
+  - id
+  - name
+  - createdBy
+  - gvk
+  - updateCount
+  - desiredPhase
+properties:
+  id:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads/WorkloadId.yaml'
+  name:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads/WorkloadName.yaml'
+  createdBy:
+    type: string
+    description: Immutable subject ID of the user who created the workload
+  projectId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/ProjectId.yaml'
+  gvk:
+    $ref: "./GVK.yaml"
+  updateCount:
+    type: integer
+    format: int64
+    description: Number of updates made to the workload
+    example: 1
+    default: 0
+  desiredPhase:
+    $ref: "./DesiredPhase.yaml"
+  configuration:
+    $ref: "./WorkloadV2UpdateConfiguration.yaml"
+  workloadManifest:
+    type: object
+    additionalProperties: true
+    description: The full Kubernetes YAML manifest for the workload (only present in some updates)
+    example: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: my-app
+        labels:
+          runai.ai/workload-id: "550e8400-e29b-41d4-a716-446655440000"
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: my-app
+        template:
+          metadata:
+            labels:
+              app: my-app
+          spec:
+            schedulerName: runai-scheduler
+            containers:
+            - name: app
+              image: nginx:latest

@@ -1,0 +1,386 @@
+DistributedTarget:
+  Config:
+    networking:
+    - externalAccess:
+        ingress:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: kf-assets-url-worker
+          spec:
+            rules:
+            - host: test.run.ai
+              http:
+                paths:
+                - backend:
+                    service:
+                      name: kf-assets-url-worker
+                      port:
+                        number: 80
+                  path: /test/assets/url-worker
+                  pathType: Prefix
+      services:
+      - spec:
+          name: kf-assets-url-worker
+          ports:
+          - name: port-4180
+            port: 80
+            protocol: TCP
+            targetPort: 4180
+          selector:
+            training.kubeflow.org/job-name: assets
+            training.kubeflow.org/replica-index: "0"
+            training.kubeflow.org/replica-type: worker
+          type: ClusterIP
+    - externalAccess:
+        ingress:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: kf-assets-url-worker-1
+          spec:
+            rules:
+            - host: test.run.ai
+              http:
+                paths:
+                - backend:
+                    service:
+                      name: kf-assets-url-worker-1
+                      port:
+                        number: 80
+                  path: /test/assets/url-worker-1
+                  pathType: Prefix
+      services:
+      - spec:
+          name: kf-assets-url-worker-1
+          ports:
+          - name: port-4181
+            port: 80
+            protocol: TCP
+            targetPort: 4181
+          selector:
+            training.kubeflow.org/job-name: assets
+            training.kubeflow.org/replica-index: "0"
+            training.kubeflow.org/replica-type: worker
+          type: ClusterIP
+    - services:
+      - spec:
+          name: kf-assets-np-worker
+          ports:
+          - name: port-8081
+            port: 8081
+            protocol: TCP
+            targetPort: 8081
+          selector:
+            training.kubeflow.org/job-name: assets
+            training.kubeflow.org/replica-index: "0"
+            training.kubeflow.org/replica-type: worker
+          type: NodePort
+  Framework: TF
+  JaxJob: null
+  MasterSpec: null
+  MpiJob: null
+  ObjectMeta: null
+  PyTorchJob: null
+  RunPolicy: null
+  TFJob:
+    apiVersion: kubeflow.org/v1
+    kind: TFJob
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: tfjob
+        createdBy: TFJob
+        project: test
+        release: assets
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: assets
+      name: assets
+      namespace: runai-test
+    spec:
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: Running
+      tfReplicaSpecs:
+        Chief:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: tfjob
+                createdBy: TFJob
+                project: test
+                release: assets
+                workloadKind: Distributed
+                workloadName: assets
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: assets
+                image: ubuntu
+                name: tensorflow
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /mount/path/vol/master
+                  name: host-path-master
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - hostPath:
+                  path: /my/volume/master
+                name: host-path-master
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: tfjob
+                createdBy: TFJob
+                project: test
+                release: assets
+                workloadKind: Distributed
+                workloadName: assets
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: assets
+                image: ubuntu
+                name: tensorflow
+                ports:
+                - containerPort: 8081
+                  name: port-8081
+                  protocol: TCP
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /container/my-repository
+                  name: code-sync-0
+                - mountPath: /mount/git-defaults
+                  name: code-sync-1
+                - mountPath: /mount/path/vol/1
+                  name: host-path-worker
+                - mountPath: /mount/path/vol/2
+                  name: host-path-worker-1
+              initContainers:
+              - args:
+                - --provider=keycloak-oidc
+                - --upstream=http://localhost:8081
+                - --redirect-url=https://test.run.ai/test/assets/url-worker/oauth2/callback
+                - --oidc-issuer-url=/auth/realms/runai
+                - --scope=openid
+                - --http-address=0.0.0.0:4180
+                - --proxy-prefix=/test/assets/url-worker/oauth2
+                - --skip-provider-button=true
+                - --whitelist-domain=test.run.ai
+                - --cookie-domain=test.run.ai
+                - --cookie-httponly=true
+                - --cookie-secure=true
+                - --code-challenge-method=S256
+                - --cookie-refresh=10m
+                - --cookie-samesite=lax
+                - --skip-jwt-bearer-tokens=true
+                - --extra-jwt-issuers=/auth/realms/runai=runai
+                - --custom-templates-dir=/usr/share/oauth2-proxy
+                - --pass-authorization-header=false
+                - --cookie-name=assets-url-worker-auth-proxy
+                - --email-domain=*
+                env:
+                - name: OAUTH2_PROXY_COOKIE_PATH
+                  value: /test/assets/url-worker
+                envFrom:
+                - secretRef: {}
+                image: test.registry/oauth2-proxy:test
+                imagePullPolicy: IfNotPresent
+                name: runai-oauth2-proxy-0
+                ports:
+                - containerPort: 4180
+                  name: port-4180
+                  protocol: TCP
+                resources: {}
+                restartPolicy: Always
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  runAsNonRoot: true
+                volumeMounts:
+                - mountPath: /etc/runai/auth/users
+                  name: runai-auth
+              - args:
+                - --provider=keycloak-oidc
+                - --upstream=http://localhost:8081
+                - --redirect-url=https://test.run.ai/test/assets/url-worker-1/oauth2/callback
+                - --oidc-issuer-url=/auth/realms/runai
+                - --scope=openid
+                - --http-address=0.0.0.0:4181
+                - --proxy-prefix=/test/assets/url-worker-1/oauth2
+                - --skip-provider-button=true
+                - --whitelist-domain=test.run.ai
+                - --cookie-domain=test.run.ai
+                - --cookie-httponly=true
+                - --cookie-secure=true
+                - --code-challenge-method=S256
+                - --cookie-refresh=10m
+                - --cookie-samesite=lax
+                - --skip-jwt-bearer-tokens=true
+                - --extra-jwt-issuers=/auth/realms/runai=runai
+                - --custom-templates-dir=/usr/share/oauth2-proxy
+                - --pass-authorization-header=false
+                - --cookie-name=assets-url-worker-1-auth-proxy
+                - --email-domain=*
+                env:
+                - name: OAUTH2_PROXY_COOKIE_PATH
+                  value: /test/assets/url-worker-1
+                envFrom:
+                - secretRef: {}
+                image: test.registry/oauth2-proxy:test
+                imagePullPolicy: IfNotPresent
+                name: runai-oauth2-proxy-1
+                ports:
+                - containerPort: 4181
+                  name: port-4181
+                  protocol: TCP
+                resources: {}
+                restartPolicy: Always
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  runAsNonRoot: true
+                volumeMounts:
+                - mountPath: /etc/runai/auth/users
+                  name: runai-auth
+              - env:
+                - name: GITSYNC_REPO
+                  value: http://runai.public.github.com
+                - name: GITSYNC_REF
+                  value: "12345678"
+                - name: GITSYNC_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      key: User
+                      name: my-password-secret
+                - name: GITSYNC_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: Password
+                      name: my-password-secret
+                - name: GITSYNC_ROOT
+                  value: /code-git-worker
+                - name: GITSYNC_ONE_TIME
+                  value: "true"
+                - name: HOME
+                  value: /tmp
+                image: registry.k8s.io/git-sync/git-sync:v4.7.0
+                name: git-sync-git-worker
+                resources: {}
+                volumeMounts:
+                - mountPath: /code-git-worker
+                  name: code-sync-0
+              - env:
+                - name: GITSYNC_REPO
+                  value: https://runai.public.github.com
+                - name: GITSYNC_ROOT
+                  value: /code-git-worker-1
+                - name: GITSYNC_ONE_TIME
+                  value: "true"
+                - name: HOME
+                  value: /tmp
+                image: registry.k8s.io/git-sync/git-sync:v4.7.0
+                name: git-sync-git-worker-1
+                resources: {}
+                volumeMounts:
+                - mountPath: /code-git-worker-1
+                  name: code-sync-1
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - emptyDir: {}
+                name: runai-auth
+              - emptyDir: {}
+                name: code-sync-0
+              - emptyDir: {}
+                name: code-sync-1
+              - hostPath:
+                  path: /my/volume/1
+                name: host-path-worker
+              - hostPath:
+                  path: /my/volume/2
+                name: host-path-worker-1
+    status: {}
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  datasources:
+  - id: hp1-id
+    name: hp1-name
+    type: hostPath
+  - id: hp2-id
+    name: hp2-name
+    type: hostPath
+  departmentId: department-456-123
+  distributedFramework: TFJob
+  environments:
+  - connections:
+    - connectionType: ExternalUrl
+      containerPort: 8081
+      correlationName: url
+      exposedUrlPath: /project/assets
+      exposedUrlSubDomain: project-assets
+      name: url
+      toolType: tensor
+    - connectionType: ExternalUrl
+      containerPort: 8081
+      correlationName: url-1
+      exposedUrlPath: /project/assets/url-1
+      exposedUrlSubDomain: project-assets-url-1
+      name: my-tool
+      toolType: custom
+    - connectionType: NodePort
+      containerPort: 8081
+      correlationName: port
+      name: port
+      portResourceName: port-8081
+      serviceResourceName: kf-assets-np-worker
+      toolType: tensor
+    id: assets-worker-id
+    name: assets-worker-name
+    replicaType: null
+  externalConnections:
+  - connectionType: ""
+    name: ""
+    toolType: google
+    url: http://google.com/search
+  - connectionType: ""
+    name: stats
+    toolType: wandb
+    url: http://wandb.com/stats
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-assets/assets_master, Framework: TF'
+  images:
+  - ubuntu
+  name: 'assets/assets_master, Framework: TF'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

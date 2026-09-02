@@ -1,0 +1,24 @@
+# permissions for end users to edit runaiconfigs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runaiconfig-editor-role
+rules:
+- apiGroups:
+  - run.ai
+  resources:
+  - runaiconfigs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - run.ai
+  resources:
+  - runaiconfigs/status
+  verbs:
+  - get

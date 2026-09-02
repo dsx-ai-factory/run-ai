@@ -1,0 +1,4 @@
+type: object
+properties:
+  enableNgcIntegration:
+    $ref: "./GetEnableNgcIntegration.yaml"

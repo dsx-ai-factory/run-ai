@@ -1,0 +1,35 @@
+{{- define "common.virtualservice.tpl" -}}
+{{- $top := first . }}
+{{- $service := index . 1 }}
+{{- $obj := index . 2 }}
+{{- if ($top.Values.global.config).istioVirtualService }}
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  {{- include "common.metadata" (list $top $obj) | nindent 2 }}
+  name: {{ include "common.fullname" $top }}-{{ $obj.name }}-virtual-service
+  {{- with $obj.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  hosts:
+  - {{ include "common.fullname" $top }}-{{ $obj.name }}
+  http:
+  - match:
+    - sourceLabels:
+        role: preview
+    route:
+    - destination:
+        host: {{ include "common.fullname" $top }}-{{ $obj.name }}-preview
+  - match:
+    - sourceLabels:
+        role: active
+    route:
+    - destination:
+        host: {{ include "common.fullname" $top }}-{{ $obj.name }}
+{{- end }}
+{{- end }}
+
+

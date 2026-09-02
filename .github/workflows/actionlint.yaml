@@ -1,0 +1,59 @@
+name: actionlint
+
+# Called from pr-fast.yaml, which runs on fork PRs only. Internal PRs are
+# covered by NVIDIA NSPECT and deliberately do not run this.
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6
+        with:
+          persist-credentials: false
+
+      # Pin actionlint to an exact version and verify the downloaded binary
+      # against the upstream-published checksum. The upstream one-liner
+      # installer (`bash <(curl ... main ...)`) executes a mutable script from
+      # the default branch and fetches the binary with no verification.
+      - name: Install actionlint
+        env:
+          ACTIONLINT_VERSION: '1.7.12'
+        run: |
+          set -euo pipefail
+          BASE="https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}"
+          TAR="actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          TMP="$(mktemp -d)"
+          curl -fsSL -o "${TMP}/${TAR}" "${BASE}/${TAR}"
+          curl -fsSL -o "${TMP}/checksums.txt" "${BASE}/actionlint_${ACTIONLINT_VERSION}_checksums.txt"
+          EXPECTED=$(awk -v t="${TAR}" '$2 == t {print $1}' "${TMP}/checksums.txt")
+          if [ -z "${EXPECTED}" ]; then
+            echo "::error::no checksum entry for ${TAR} in upstream checksums.txt"
+            exit 1
+          fi
+          ACTUAL=$(sha256sum "${TMP}/${TAR}" | awk '{print $1}')
+          if [ "${ACTUAL}" != "${EXPECTED}" ]; then
+            echo "::error::actionlint checksum mismatch: expected ${EXPECTED}, got ${ACTUAL}"
+            exit 1
+          fi
+          tar -xzf "${TMP}/${TAR}" -C "${TMP}" actionlint
+          mv "${TMP}/actionlint" "${PWD}/actionlint"
+          rm -rf "${TMP}"
+          echo "${PWD}" >> "$GITHUB_PATH"
+
+      # shellcheck and pyflakes integrations are disabled so this gate stays
+      # focused on workflow correctness. Enabling shellcheck today surfaces 31
+      # pre-existing style findings in `run:` bodies (27x SC2086 unquoted
+      # variable, 2x SC1083, 2x style) — worth fixing, but as its own change
+      # rather than as the price of admission for this gate.
+      - name: Run actionlint
+        run: actionlint -color -shellcheck= -pyflakes=

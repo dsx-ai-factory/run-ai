@@ -1,0 +1,48 @@
+post:
+  summary: Migrate Access Rules From a Deprecated Role
+  description: |
+    Migrates access rules from a deprecated role to a non-deprecated role within the current tenant.
+    For each access rule tied to the old (deprecated) role, a new rule is created under the new
+    role (copying the subject, scope, and cluster) and then the old rule is deleted. If a matching
+    new-role rule already exists for the same subject and scope, no new rule is created, but the
+    old (deprecated-role) rule is still deleted and the pre-existing new rule is returned in the
+    `succeeded.preExisting` bucket of the response. Each migration is performed in its own
+    transaction - if either the create/lookup or the delete fails, the transaction is rolled back
+    and the old access rule remains in place. Up to 100 access rules are migrated per call; callers
+    should invoke repeatedly until all rules are migrated. The response lists the newly-created
+    rules, the pre-existing rules that were reused, the IDs of old rules that were successfully
+    deleted, and per-rule failures.
+  operationId: access_rules_migrate_deprecated
+  x-service: authorization
+  x-audit: true
+  x-test-coverage:
+    - control-plane/authorization/pkg/services/access_rules_migrate_deprecated_api_test.go
+  x-authorize:
+    resource-type: access_rules
+    action: create
+  tags:
+    - Access rules
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/AccessRules/AccessRulesMigrateDeprecatedFields.yaml'
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/AccessRules/AccessRulesMigrateDeprecatedResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,8 @@
+type: object
+required:
+  - podGroups
+properties:
+  podGroups:
+    type: array
+    items:
+      $ref: './PodGroupsSyncFields.yaml'

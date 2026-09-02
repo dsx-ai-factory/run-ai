@@ -1,0 +1,16 @@
+x-internal: true
+type: object
+required:
+- status
+properties:
+  status:
+    type: object
+    required:
+    - conditions
+    properties:
+      actualConfig:
+        $ref: "ClusterFullConfigData.yaml"
+      conditions:
+        type: array
+        items:
+          $ref: "../../../../../../infra/openapi/docs/schemas/common/Condition.yaml"

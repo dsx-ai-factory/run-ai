@@ -1,0 +1,25 @@
+type: object
+required:
+- accessKeys
+properties:
+  accessKeys:
+    type: array
+    minItems: 0
+    maxItems: 100
+    items:
+      $ref: './AccessKeyAdministration.yaml'
+example:
+  accessKeys:
+  - name: my-access-key
+    id: 3434c-12323ab-4ce2ea6-b44fc-db344d
+    clientId: 1434c-123233ab-4ce2ea6-b44fc-db344d
+    createdBy: test@run.ai
+    createdAt: 2020-01-01T00:00:00Z
+    lastLogin: 2020-01-01T00:00:00Z
+  - name: another-access-key
+    id: 5656d-45645cd-6de3fb7-c55gd-ef455e
+    clientId: 2545e-234344bc-5df4gc8-d66he-fg566f
+    createdBy: user@run.ai
+    createdAt: 2020-01-01T00:00:00Z
+    lastLogin: 2020-01-01T00:00:00Z
+

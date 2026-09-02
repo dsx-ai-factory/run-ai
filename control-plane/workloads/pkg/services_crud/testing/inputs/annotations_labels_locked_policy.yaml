@@ -1,0 +1,21 @@
+defaults:
+  image: ubuntu
+  annotations:
+    instances:
+      - name: test-ant-var
+        value: test-ant-value
+  labels:
+    instances:
+      - name: test-lbl-var
+        value: test-lbl-value
+rules:
+  annotations:
+    instances:
+      canAdd: false
+      locked:
+        - test-ant-var
+  labels:
+    instances:
+      canAdd: false
+      locked:
+        - test-lbl-var

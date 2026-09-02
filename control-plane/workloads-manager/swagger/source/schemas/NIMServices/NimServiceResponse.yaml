@@ -1,0 +1,12 @@
+type: object
+required:
+- spec
+- metadata
+- desiredPhase
+properties:
+  metadata:
+    $ref: "../WorkloadsV2/WorkloadV2Metadata.yaml"
+  desiredPhase:
+    $ref: "../WorkloadsV2/DesiredPhase.yaml"
+  spec:
+    $ref: "../../../../../infra/openapi/docs/schemas/nim_services/NimServiceSpec.yaml"

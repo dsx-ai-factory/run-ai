@@ -1,0 +1,112 @@
+description: Holds cluster configuration values.
+type: object
+properties:
+  workloadOwnershipProtection:
+    type: boolean
+    nullable: true
+    description: indicates if the cluster workload ownership protection is enabled
+    example: false
+  subdomainEnabled:
+    type: boolean
+    nullable: true
+    description: indicates if the cluster subdomain is enabled
+    example: false
+  ingressClass:
+    type: string
+    nullable: true
+    description: the ingress class that is configured for the cluster
+    example: nginx
+  ingressEnabled:
+    type: boolean
+    nullable: true
+    description: indicates if Ingress or Route resources should be created for workload external URLs
+    example: true
+  gatewayName:
+    type: string
+    nullable: true
+    description: the name of the Gateway API gateway resource configured for the cluster
+    example: my-gateway
+  gatewayNamespace:
+    type: string
+    nullable: true
+    description: the namespace of the Gateway API gateway resource configured for the cluster
+    example: gateway-system
+  gatewayAPIEnabled:
+    type: boolean
+    nullable: true
+    description: indicates if Gateway API HTTPRoute resources should be created for workload external URLs
+    example: false
+  gitSyncImage:
+    type: string
+    nullable: true
+    description: the fully qualified git-sync image reference used by init containers (format "registry/name:tag")
+    example: gcr.io/runai/git-sync:v4.2.0
+  gitSyncResources:
+    $ref: ./ClusterReportedResourceRequirements.yaml
+  s3FileSystemImage:
+    type: string
+    nullable: true
+    description: the fully qualified s3 file-system image reference used by init containers (format "registry/name:tag")
+    example: gcr.io/runai/goofys:v0.24.0
+  s3FileSystemResources:
+    $ref: ./ClusterReportedResourceRequirements.yaml
+  fipsMode:
+    $ref: ./FipsModeEnum.yaml
+  runaiOauth2ProxyImage:
+    type: string
+    nullable: true
+    description: the fully qualified runai oauth2-proxy image reference used by init containers (format "registry/name:tag")
+    example: gcr.io/runai/oauth2-proxy:v7.5.1
+  runaiOauth2ProxyResources:
+    $ref: ./ClusterReportedResourceRequirements.yaml
+  runaiOauth2ProxyUsernameLoaderImage:
+    type: string
+    nullable: true
+    description: the fully qualified runai oauth2-proxy username loader image reference used by init containers (format "registry/name:tag")
+    example: gcr.io/runai/oauth2-proxy-username-loader:v1.0.0
+  usernameLoaderResources:
+    $ref: ./ClusterReportedResourceRequirements.yaml
+  runaiOauth2ProxyRedisFQDN:
+    type: string
+    nullable: true
+    description: the FQDN of the Redis backing oauth2-proxy
+    example: cluster-redis.runai.svc.cluster.local:6379
+  runaiOauth2ProxyWorkloadAuthSecretName:
+    type: string
+    nullable: true
+    description: the name of the Secret holding the oauth2-proxy workload auth credentials
+    example: runai-workload-auth
+  runaiOauth2ProxySessionStoreType:
+    type: string
+    nullable: true
+    description: the session store type used by oauth2-proxy
+    example: cookie
+  runaiOauth2ProxyOidcIssuerUrl:
+    type: string
+    nullable: true
+    description: the absolute OIDC issuer URL oauth2-proxy uses to discover the OpenID provider
+    example: https://app.run.ai/auth/realms/runai
+  customCAGit:
+    $ref: ./ClusterReportedCustomCA.yaml
+  customCAS3:
+    $ref: ./ClusterReportedCustomCA.yaml
+  customCAOauth2Proxy:
+    $ref: ./ClusterReportedCustomCA.yaml
+  externalAuthUrlEnabled:
+    type: boolean
+    nullable: true
+    description: indicates if OAuth2 proxy is used when submitting workloads with an external URL
+    example: true
+  openshiftRouteTerminationPolicy:
+    $ref: ./OpenshiftRouteTerminationPolicy.yaml
+  distGPUNetworkAcceleration:
+    type: boolean
+    nullable: true
+    description: indicates if GPU network acceleration (MNNVL) is enabled for the workload-controller (distributed-training)
+    example: false
+  dinfGPUNetworkAcceleration:
+    type: boolean
+    nullable: true
+    description: indicates if GPU network acceleration (MNNVL) is enabled for the inference-workload-controller (distributed-inference)
+    example: false
+nullable: true

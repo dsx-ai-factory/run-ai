@@ -1,0 +1,65 @@
+apiVersion: ray.io/v1
+kind: RayJob
+metadata:
+  annotations:
+    example.com/annotation: test-value
+  labels:
+    app: ray-job-test
+  name: test
+spec:
+  activeDeadlineSeconds: 86400
+  backoffLimit: 3
+  clusterSelector:
+    ray.io/cluster: shared-cluster
+  deletionPolicy: DeleteCluster
+  entrypoint: python -c 'print(1)'
+  entrypointNumCpus: 1.5
+  entrypointNumGpus: 1
+  entrypointResources: '{"custom": 1}'
+  managedBy: ray.io/rayjob-controller
+  metadata:
+    owner: team-a
+  rayClusterSpec:
+    enableInTreeAutoscaling: true
+    headGroupSpec:
+      template:
+        spec:
+          containers:
+          - image: placeholder-head
+            name: test
+          initContainers:
+          - image: placeholder-head-init
+            name: test
+    rayVersion: 2.11.0
+    workerGroupSpecs:
+    - groupName: test
+      maxReplicas: 1
+      minReplicas: 0
+      rayStartParams: {}
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - image: placeholder-worker
+            name: test
+          initContainers:
+          - image: placeholder-worker-init
+            name: test
+  runtimeEnvYAML: |
+    pip:
+      - requests==2.32.0
+  shutdownAfterJobFinishes: true
+  submissionMode: K8sJobMode
+  submitterConfig:
+    backoffLimit: 2
+  submitterPodTemplate:
+    spec:
+      containers:
+      - image: placeholder-submitter
+        name: test
+      initContainers:
+      - image: placeholder-submitter-init
+        name: test
+      restartPolicy: Never
+  suspend: false
+  ttlSecondsAfterFinished: 3600

@@ -1,0 +1,6 @@
+properties:
+  meta:
+    $ref: "../Policy/PolicyCreationFields.yaml"
+  policy:
+    $ref: "./DistributedPolicyDefaultsAndRulesV2.yaml"
+type: object

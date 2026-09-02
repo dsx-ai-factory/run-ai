@@ -1,0 +1,41 @@
+flatWorkloads:
+  Distributed: null
+  Inferences: null
+  Trainings: null
+  Workspaces:
+  - actualPhase: Creating
+    clusterId: ""
+    createdAt: "0001-01-01T00:00:00Z"
+    createdBy: ""
+    desiredPhase: Running
+    name: jupyter_tensor_ws
+    projectId: ""
+    requestedName: jupyter_tensor_ws
+    spec:
+      annotations:
+      - name: run.ai/assets-info
+        value: ""
+      compute:
+        cpuCoreLimit: 2
+        cpuCoreRequest: 0.5
+        cpuMemoryLimit: 30M
+        cpuMemoryRequest: 20M
+        gpuDevicesRequest: 0
+      environmentVariables:
+      - name: LOG_DIR
+        value: log-dir-from-specific-run-params
+      exposedUrls:
+      - container: 8888
+        toolName: Jupyter
+        toolType: jupyter-notebook
+      - container: 6006
+        toolName: TensorBoard
+        toolType: tensorboard
+      image: gcr.io/run-ai-demo/jupyter-tensorboard-new
+      imagePullPolicy: IfNotPresent
+      ports: []
+      relatedUrls: []
+      security:
+        uidGidSource: fromTheImage
+      storage: {}
+    workloadId: ""

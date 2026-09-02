@@ -1,0 +1,70 @@
+BatchJobTarget:
+  Config: {}
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        ADDED1: added1
+        Lbl1: lbl1
+        NO_VALUE: ""
+        app: job
+        createdBy: Job
+        project: test
+        release: labels
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Training
+        workloadName: labels
+      name: labels
+      namespace: runai-test
+    spec:
+      backoffLimit: 6
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: labels
+            workloadKind: Training
+            workloadName: labels
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: labels
+            image: ubuntu
+            name: labels
+            resources: {}
+          priorityClassName: low
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: labels, Rules: , Type: Training'
+  images:
+  - ubuntu
+  name: 'Value: labels, Rules: , Type: Training'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Training
+  version: v2alpha1

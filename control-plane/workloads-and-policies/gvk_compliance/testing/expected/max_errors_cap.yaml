@@ -1,0 +1,49 @@
+errors:
+- code: 400
+  message: 'field a failed range validation: must be no greater than 5'
+- code: 400
+  message: 'field b failed range validation: must be no greater than 5'
+policy:
+  effectiveRules:
+  - enforcements:
+    - range:
+        max: 5
+    field: a
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        max: 5
+    field: b
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        max: 5
+    field: c
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        max: 5
+    field: d
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        max: 5
+    field: e
+    sourceOfRule: null
+    specSelector: self
+  workloadType:
+    group: test
+    kind: Synthetic
+    version: v1
+workload:
+  a: 10
+  apiVersion: test/v1
+  b: 10
+  c: 10
+  d: 10
+  e: 10
+  kind: Synthetic

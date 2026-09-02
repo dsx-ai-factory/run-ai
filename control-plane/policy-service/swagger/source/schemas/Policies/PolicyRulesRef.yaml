@@ -1,0 +1,12 @@
+type: object
+required:
+  - rules
+properties:
+  rules:
+    description: >-
+      References to the rules to remove from the policy. Each entry identifies
+      a rule by its identity fields only (field, spec selector, and optional
+      item selector and selector parameters).
+    type: array
+    items:
+      $ref: "./PolicyRuleRef.yaml"

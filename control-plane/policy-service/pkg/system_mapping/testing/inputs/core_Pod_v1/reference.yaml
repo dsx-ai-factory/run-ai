@@ -1,0 +1,223 @@
+# Kitchen-sink reference manifest for /Pod/v1. Contains every field
+# covered by the podSpec, podSpecContainer, podSpecAndContainer, and
+# metadata field groups — used by Layer 1/2 tests to verify that every
+# mapped field resolves correctly from the JQ spec selectors.
+#
+# Paths here are direct (no .spec.template wrapping) because Pod IS the
+# template: .metadata for podMetadata, .spec for podSpec.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test
+  labels:
+    app: test
+  annotations:
+    example.com/annotation: "test-value"
+spec:
+  # podSpec field group -----------------------------------------
+  activeDeadlineSeconds: 60
+  automountServiceAccountToken: true
+  dnsConfig:
+    nameservers: ["1.1.1.1"]
+    searches: ["example.com"]
+    options:
+      - name: ndots
+        value: "5"
+  hostAliases:
+    - ip: "127.0.0.1"
+      hostnames: ["foo"]
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  hostIPC: false
+  hostNetwork: false
+  hostPID: false
+  hostUsers: true
+  hostname: test
+  setHostnameAsFQDN: false
+  shareProcessNamespace: false
+  subdomain: test
+  terminationGracePeriodSeconds: 30
+  affinity:
+    nodeAffinity: {}
+    podAffinity: {}
+    podAntiAffinity: {}
+  tolerations:
+    - key: test
+      operator: Equal
+      value: somevalue
+      effect: NoSchedule
+      tolerationSeconds: 60
+  nodeSelector:
+    test: somevalue
+  overhead:
+    cpu: "100m"
+    memory: "256Mi"
+  imagePullSecrets:
+    - name: test
+  readinessGates:
+    - conditionType: ContainersReady
+  schedulingGates:
+    - name: example.com/gate
+  resourceClaims:
+    - name: claimRefByName
+      resourceClaimName: shared-claim
+    - name: templateBasedClaim
+      resourceClaimTemplateName: my-template
+  nodeName: node-1
+  preemptionPolicy: PreemptLowerPriority
+  priority: 1000
+  priorityClassName: high-priority
+  restartPolicy: Never
+  runtimeClassName: gvisor
+  serviceAccountName: default
+  securityContext:
+    fsGroup: 1000
+    fsGroupChangePolicy: OnRootMismatch
+    supplementalGroups: [2000, 3000]
+    supplementalGroupsPolicy: Merge
+    runAsGroup: 1000
+    runAsNonRoot: true
+    runAsUser: 1000
+    seccompProfile:
+      type: RuntimeDefault
+      localhostProfile: profiles/custom.json
+    appArmorProfile:
+      type: RuntimeDefault
+      localhostProfile: profiles/custom
+
+  volumes:
+    - name: config-vol
+      configMap:
+        name: my-config
+        defaultMode: 420
+        items:
+          - key: config.yaml
+            path: config.yaml
+        optional: false
+    - name: empty-vol
+      emptyDir:
+        medium: Memory
+        sizeLimit: "1Gi"
+    - name: host-vol
+      hostPath:
+        path: /data
+        type: Directory
+    - name: nfs-vol
+      nfs:
+        server: nfs.example.com
+        path: /exports/data
+        readOnly: true
+    - name: pvc-vol
+      persistentVolumeClaim:
+        claimName: my-pvc
+        readOnly: false
+    - name: secret-vol
+      secret:
+        secretName: my-secret
+        defaultMode: 256
+        items:
+          - key: credentials
+            path: credentials
+        optional: false
+
+  # podSpecContainer field group (per-container fields) ----------
+  containers:
+    - name: test
+      args: ["--config=/etc/app/config.yaml"]
+      command: ["/app/run"]
+      env:
+        - name: ENV_VALUE
+          value: "direct"
+        - name: ENV_CONFIGMAP
+          valueFrom:
+            configMapKeyRef:
+              name: my-config
+              key: config-key
+              optional: false
+        - name: ENV_FIELD
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: ENV_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: my-secret
+              key: secret-key
+              optional: true
+        - name: ENV_RESOURCE
+          valueFrom:
+            resourceFieldRef:
+              containerName: test
+              divisor: "1"
+              resource: limits.cpu
+      envFrom:
+        - configMapRef:
+            name: bulk-config
+            optional: false
+          prefix: CFG_
+        - secretRef:
+            name: bulk-secret
+            optional: true
+          prefix: SEC_
+      image: nginx:latest
+      imagePullPolicy: IfNotPresent
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          add: ["NET_BIND_SERVICE"]
+          drop: ["ALL"]
+        privileged: false
+        procMount: Default
+        readOnlyRootFilesystem: true
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+        appArmorProfile:
+          type: RuntimeDefault
+      ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+          hostPort: 8080
+          hostIP: "0.0.0.0"
+      volumeMounts:
+        - name: config-vol
+          mountPath: /etc/app
+          mountPropagation: None
+          readOnly: true
+          recursiveReadOnly: Enabled
+          subPath: ""
+          subPathExpr: ""
+      stdin: false
+      stdinOnce: false
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      tty: false
+      workingDir: /app
+
+      # podSpecAndContainer field group (resources, shared with pod-level)
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "128Mi"
+        limits:
+          cpu: "500m"
+          memory: "512Mi"
+        claims:
+          - name: claimRefByName
+            request: shared-claim
+
+  initContainers:
+    - name: test
+      image: busybox:latest
+      command: ["sh", "-c", "echo init"]
+      resources:
+        requests:
+          cpu: "50m"
+          memory: "64Mi"
+        limits:
+          cpu: "100m"
+          memory: "128Mi"

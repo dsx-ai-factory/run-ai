@@ -1,0 +1,6 @@
+description: Rules which apply to specific workload.
+allOf:
+  - replace: me
+  - $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/InferenceFieldsRules.yaml"
+nullable: true
+type: object

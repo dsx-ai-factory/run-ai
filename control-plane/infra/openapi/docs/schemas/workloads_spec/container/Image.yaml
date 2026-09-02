@@ -1,0 +1,8 @@
+description: Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images).
+  The image name is mandatory for creating a workload.
+type: string
+minLength: 1
+maxLength: 253
+example: python:3.8
+nullable: true
+pattern: .*

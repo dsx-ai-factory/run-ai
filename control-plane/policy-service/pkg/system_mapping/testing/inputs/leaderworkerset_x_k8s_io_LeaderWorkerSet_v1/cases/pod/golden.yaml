@@ -1,0 +1,38 @@
+apiVersion: leaderworkerset.x-k8s.io/v1
+kind: LeaderWorkerSet
+metadata:
+  name: test
+spec:
+  leaderWorkerTemplate:
+    leaderTemplate:
+      metadata:
+        annotations:
+          pod.example.com/role: leader
+        labels:
+          role: leader
+      spec:
+        containers:
+        - image: lws/worker:v1
+          name: leader
+        initContainers:
+        - image: lws/worker:v1
+          name: init
+        serviceAccountName: lws-sa
+        terminationGracePeriodSeconds: 60
+    size: 1
+    workerTemplate:
+      metadata:
+        annotations:
+          pod.example.com/role: worker
+        labels:
+          role: worker
+      spec:
+        containers:
+        - image: lws/worker:v1
+          name: worker
+        initContainers:
+        - image: lws/worker:v1
+          name: init
+        serviceAccountName: lws-sa
+        terminationGracePeriodSeconds: 60
+  replicas: 1

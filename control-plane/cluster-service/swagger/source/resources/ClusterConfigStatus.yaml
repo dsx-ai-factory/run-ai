@@ -1,0 +1,35 @@
+put:
+  summary: Put the status of the cluster configuration. This endpoint will be used by the cluster to sync its remote configuration status.
+  operationId: put_cluster_config_status
+  x-service: cluster-service
+  x-test-coverage:
+    - cluster-service/pkg/services/api_cluster_config_service_test.go
+  x-authorize:
+    resource-type: cluster-config
+    action: sync
+    resource-id: clusterUuid
+  tags:
+    - ClusterConfig
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Clusters/ClusterConfig/PutClusterConfigStatusRequest.yaml'
+  responses:
+    "204":
+      description: Cluster configuration status updated successfully.
+    "400":
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    "401":
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    "403":
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    "404":
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    "500":
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    "503":
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

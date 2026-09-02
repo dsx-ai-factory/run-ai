@@ -1,0 +1,3 @@
+allOf:
+  - $ref: "./RoleCreationFields.yaml"
+  - $ref: "./RoleCalculatedFields.yaml"

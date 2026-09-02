@@ -1,0 +1,8 @@
+properties:
+  scaleToZeroRetentionSeconds:
+    description: The minimum amount of time (in seconds) that the last replica will remain active after a scale-to-zero decision. Defaults to 0. Available only if minReplicas is set to 0
+    type: integer
+    format: int32
+    minimum: 0
+    maximum: 3600
+    nullable: true

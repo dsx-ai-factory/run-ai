@@ -1,0 +1,85 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package prometheus
+
+import (
+	"context"
+
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands/utils"
+
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/common/shared_data"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/prometheus/resources"
+	kc "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/kube-client"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
+	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
+)
+
+const (
+	// name specifies the name of this operand for logging purposes.
+	name = "prometheus"
+)
+
+var (
+	// resourceFunctions is a slice of functions that return resources.
+	// Update this variable when adding resources to an operand.
+	resourceFunctions = []operands.ResourceFunction{
+		// All resources now use the Resource interface pattern.
+	}
+
+	// resourceStatusFunctions is a slice of functions that know how to calculate
+	// the status of resources.
+	// Update this slice when a resource has a status to report.
+	resourceStatusFunctions = []operands.ResourceStatusFunction{
+		// All resources now use the Resource interface pattern.
+	}
+)
+
+// RBAC permissions the operand requires for resource management
+//+kubebuilder:rbac:namespace=runai,groups=monitoring.coreos.com,resources=prometheuses,verbs=create;get;update;watch;patch;list;delete
+//+kubebuilder:rbac:namespace=runai,groups=monitoring.coreos.com,resources=prometheusrules,verbs=create;get;update;watch;patch;list;delete
+//+kubebuilder:rbac:namespace=openshift-monitoring,groups="",resources=configmaps,verbs=get;update;watch
+//+kubebuilder:rbac:namespace=openshift-monitoring,groups="",resources=secrets,verbs=get;create;list;watch
+//+kubebuilder:rbac:namespace=openshift-monitoring,groups="",resources=secrets,resourceNames=runai-prometheus,verbs=delete
+
+type operand struct {
+	k8sReader   kc.HybridClient
+	runaiConfig *runv1.RunaiConfig
+	resources   []operands.Resource
+	sharedData  *shared_data.SharedData
+}
+
+func (o *operand) Name() string {
+	return name
+}
+
+func (o *operand) Resources() []operands.Resource {
+	return o.resources
+}
+
+func (o *operand) Status(ctx context.Context) (operands.Status, error) {
+	return utils.Status(ctx, o.resources)
+}
+
+func (o *operand) Enabled() bool {
+	return *o.runaiConfig.Spec.Prometheus.Enabled && !o.runaiConfig.Spec.Internal.Development.Headless
+}
+
+func Operand(kbClient kc.HybridClient, runaiConfig *runv1.RunaiConfig, sharedData *shared_data.SharedData) operands.Operand {
+	return &operand{
+		k8sReader:   kbClient,
+		runaiConfig: runaiConfig,
+		resources: []operands.Resource{
+			resources.NewConfigMap(name, kbClient, runaiConfig),
+			resources.NewServiceAccountResource(name, kbClient, runaiConfig),
+			resources.NewRWAuthSecretResource(name, kbClient, runaiConfig),
+			resources.NewCaSecretResource(name, kbClient, runaiConfig, sharedData),
+			resources.NewPrometheusResource(name, kbClient, runaiConfig),
+			resources.NewPrometheusRuleResource(name, kbClient, runaiConfig),
+			resources.NewServiceResource(name, kbClient, runaiConfig),
+		},
+		sharedData: sharedData,
+	}
+}

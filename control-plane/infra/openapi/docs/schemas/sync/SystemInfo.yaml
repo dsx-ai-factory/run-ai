@@ -1,0 +1,7 @@
+description: the highest update count that was assigned to the data being synchronized.
+  for example, it is possible that the agent sent afterUpdate=12 and received a bulk containing
+  only four updates (13, 15, 18, 19) but in the system there is already update 21 which was 
+  not included in this bulk and can be received in the following bulk.
+properties:
+  highestUpdate:
+    $ref: "./UpdateCount.yaml"

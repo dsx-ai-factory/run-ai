@@ -1,0 +1,33 @@
+post:
+  summary: Create model-inference.
+  description: Creates a model-inference workload from a given set of assets. The set must include one model and one compute asset.
+  operationId: create_model_inference
+  x-service: assets-service
+  x-test-coverage:  null
+  x-no-authorization: true
+  x-internal: true
+  tags:
+    - ModelInference
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/ModelInference/ModelInferenceCreationRequest.yaml"
+  responses:
+    202:
+      description: Request accepted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/ModelInference/ModelInference.yaml"
+    400:
+      $ref: "../../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    409:
+      $ref: "../../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: "../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+

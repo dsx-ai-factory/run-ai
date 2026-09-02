@@ -1,0 +1,10 @@
+image: ubuntu
+servingPort:
+  container: 8081
+  protocol: http
+autoscaling:
+  metric: concurrency
+  metricThreshold: 10
+  minReplicas: 2
+  maxReplicas: 4
+  initialReplicas: 5

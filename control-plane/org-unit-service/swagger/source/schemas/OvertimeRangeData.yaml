@@ -1,0 +1,23 @@
+type: object
+description: Average data for the specified time range, or for the lifetime of the project/department if it exists for less than the time range.
+properties:
+  averageGpuAllocation:
+    type: number
+    format: double
+    example: 10
+    description: The average gpu devices allocation of the project/department.
+  averageGpuUtilization:
+    type: number
+    format: double
+    example: 95
+    description: The average gpu utilization percentage of the project/department.
+  averageGpuMemoryUtilization:
+    type: number
+    format: double
+    example: 95
+    description: The average gpu memory utilization percentage of the project/department. Only available for cluster versions >= 2.22.
+    nullable: true
+  updatedAt:
+    type: string
+    format: date-time
+    example: "2021-08-01T00:00:00Z"

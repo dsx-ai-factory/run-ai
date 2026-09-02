@@ -1,0 +1,118 @@
+# DistributedInferenceTemplatePatchRequest
+
+## Properties
+
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**Meta** | Pointer to [**NullableTemplatePatchMetaFields**](TemplatePatchMetaFields.md) |  | [optional] 
+**FieldsToClear** | Pointer to **[]string** |  | [optional] 
+**Spec** | Pointer to [**DistributedInferenceTemplateSpec**](DistributedInferenceTemplateSpec.md) |  | [optional] 
+
+## Methods
+
+### NewDistributedInferenceTemplatePatchRequest
+
+`func NewDistributedInferenceTemplatePatchRequest() *DistributedInferenceTemplatePatchRequest`
+
+NewDistributedInferenceTemplatePatchRequest instantiates a new DistributedInferenceTemplatePatchRequest object
+This constructor will assign default values to properties that have it defined,
+and makes sure properties required by API are set, but the set of arguments
+will change when the set of required properties is changed
+
+### NewDistributedInferenceTemplatePatchRequestWithDefaults
+
+`func NewDistributedInferenceTemplatePatchRequestWithDefaults() *DistributedInferenceTemplatePatchRequest`
+
+NewDistributedInferenceTemplatePatchRequestWithDefaults instantiates a new DistributedInferenceTemplatePatchRequest object
+This constructor will only assign default values to properties that have it defined,
+but it doesn't guarantee that properties required by API are set
+
+### GetMeta
+
+`func (o *DistributedInferenceTemplatePatchRequest) GetMeta() TemplatePatchMetaFields`
+
+GetMeta returns the Meta field if non-nil, zero value otherwise.
+
+### GetMetaOk
+
+`func (o *DistributedInferenceTemplatePatchRequest) GetMetaOk() (*TemplatePatchMetaFields, bool)`
+
+GetMetaOk returns a tuple with the Meta field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetMeta
+
+`func (o *DistributedInferenceTemplatePatchRequest) SetMeta(v TemplatePatchMetaFields)`
+
+SetMeta sets Meta field to given value.
+
+### HasMeta
+
+`func (o *DistributedInferenceTemplatePatchRequest) HasMeta() bool`
+
+HasMeta returns a boolean if a field has been set.
+
+### SetMetaNil
+
+`func (o *DistributedInferenceTemplatePatchRequest) SetMetaNil(b bool)`
+
+ SetMetaNil sets the value for Meta to be an explicit nil
+
+### UnsetMeta
+`func (o *DistributedInferenceTemplatePatchRequest) UnsetMeta()`
+
+UnsetMeta ensures that no value is present for Meta, not even an explicit nil
+### GetFieldsToClear
+
+`func (o *DistributedInferenceTemplatePatchRequest) GetFieldsToClear() []string`
+
+GetFieldsToClear returns the FieldsToClear field if non-nil, zero value otherwise.
+
+### GetFieldsToClearOk
+
+`func (o *DistributedInferenceTemplatePatchRequest) GetFieldsToClearOk() (*[]string, bool)`
+
+GetFieldsToClearOk returns a tuple with the FieldsToClear field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetFieldsToClear
+
+`func (o *DistributedInferenceTemplatePatchRequest) SetFieldsToClear(v []string)`
+
+SetFieldsToClear sets FieldsToClear field to given value.
+
+### HasFieldsToClear
+
+`func (o *DistributedInferenceTemplatePatchRequest) HasFieldsToClear() bool`
+
+HasFieldsToClear returns a boolean if a field has been set.
+
+### GetSpec
+
+`func (o *DistributedInferenceTemplatePatchRequest) GetSpec() DistributedInferenceTemplateSpec`
+
+GetSpec returns the Spec field if non-nil, zero value otherwise.
+
+### GetSpecOk
+
+`func (o *DistributedInferenceTemplatePatchRequest) GetSpecOk() (*DistributedInferenceTemplateSpec, bool)`
+
+GetSpecOk returns a tuple with the Spec field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetSpec
+
+`func (o *DistributedInferenceTemplatePatchRequest) SetSpec(v DistributedInferenceTemplateSpec)`
+
+SetSpec sets Spec field to given value.
+
+### HasSpec
+
+`func (o *DistributedInferenceTemplatePatchRequest) HasSpec() bool`
+
+HasSpec returns a boolean if a field has been set.
+
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

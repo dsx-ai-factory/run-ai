@@ -1,0 +1,137 @@
+DistributedTarget:
+  Config: {}
+  Framework: XGBoost
+  JaxJob: null
+  MasterSpec: null
+  MpiJob: null
+  ObjectMeta: null
+  PyTorchJob: null
+  RunPolicy: null
+  TFJob: null
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob:
+    apiVersion: kubeflow.org/v1
+    kind: XGBoostJob
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: xgboostjob
+        createdBy: XGBoostJob
+        project: test
+        release: host_path_multiple
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: host_path_multiple
+      name: host_path_multiple
+      namespace: runai-test
+    spec:
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: None
+      xgbReplicaSpecs:
+        Master:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: xgboostjob
+                createdBy: XGBoostJob
+                project: test
+                release: host_path_multiple
+                workloadKind: Distributed
+                workloadName: host_path_multiple
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: host_path_multiple
+                image: ubuntu
+                name: xgboost
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /mount/path/vol/1
+                  name: host-path-master
+                - mountPath: /mount/path/vol/2
+                  name: host-path-master-1
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - hostPath:
+                  path: /my/volume/1
+                name: host-path-master
+              - hostPath:
+                  path: /my/volume/2
+                name: host-path-master-1
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: xgboostjob
+                createdBy: XGBoostJob
+                project: test
+                release: host_path_multiple
+                workloadKind: Distributed
+                workloadName: host_path_multiple
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: host_path_multiple
+                image: ubuntu
+                name: xgboost
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /mount/path/vol/1
+                  name: host-path-worker
+                - mountPath: /mount/path/vol/2
+                  name: host-path-worker-1
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - hostPath:
+                  path: /my/volume/1
+                name: host-path-worker
+              - hostPath:
+                  path: /my/volume/2
+                name: host-path-worker-1
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: XGBoostJob
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-host_path_multiple/, Framework: XGBoost'
+  images:
+  - ubuntu
+  name: 'host_path_multiple/, Framework: XGBoost'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

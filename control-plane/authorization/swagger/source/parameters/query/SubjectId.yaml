@@ -1,0 +1,7 @@
+name: subjectId
+in: query
+required: true
+description: The subject id that we want to filter by.
+schema:
+  type: string
+  example: "some.user@run.ai"

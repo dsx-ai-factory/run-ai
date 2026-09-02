@@ -1,0 +1,15 @@
+properties:
+  options:
+    type: array
+    items:
+      required:
+        - value
+      properties:
+        value:
+          $ref: "./HostPathMountPropagation.yaml"
+        displayed:
+          description: Textual description of the value
+          type: string
+          nullable: true
+          pattern: .*
+    nullable: true

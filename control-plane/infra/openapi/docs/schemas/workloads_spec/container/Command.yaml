@@ -1,0 +1,7 @@
+description: A command to the server as the entry point of the container running the workload.
+type: string
+minLength: 1
+maxLength: 10000
+nullable: true
+example: python
+pattern: .*

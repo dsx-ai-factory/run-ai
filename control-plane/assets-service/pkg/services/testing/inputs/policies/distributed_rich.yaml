@@ -1,0 +1,104 @@
+defaults:
+  worker:
+    command: my-command-worker-1
+    environmentVariables:
+      instances:
+        - name: LOG_DIR
+          value: policy-worker-to-be-ignored
+        - name: ADDED_VAR
+          value: policy-worker-added
+    tolerations:
+      attributes:
+        operator: Exists
+        key: key1-worker
+        effect: NoSchedule
+      instances:
+        - operator: Exists
+          key: key1-worker
+          effect: NoSchedule
+        - name: tolerations2
+          operator: Exists
+          key: key2-worker
+          effect: NoSchedule
+    security:
+      runAsUid: 500
+    storage:
+      s3:
+        attributes:
+          bucket: bucket1-worker
+  master:
+    command: my-command-master-2
+    environmentVariables:
+      instances:
+        - name: LOG_DIR
+          value: policy-master-to-be-ignored
+        - name: ADDED_VAR
+          value: policy-master-added
+    tolerations:
+      attributes:
+        operator: Exists
+        key: key1-master
+        effect: NoSchedule
+      instances:
+        - operator: Exists
+          key: key1-master
+          effect: NoSchedule
+        - name: tolerations2
+          operator: Exists
+          key: key2-master
+          effect: NoSchedule
+    security:
+      runAsUid: 800
+    storage:
+      s3:
+        attributes:
+          bucket: bucket1-master
+rules:
+  worker:
+    command:
+      options:
+        - value: my-command-worker-1
+          displayed: command1
+        - value: my-command-worker-2
+          displayed: command2
+    tolerations:
+      instances:
+        locked:
+          - tolerations2
+    security:
+      runAsUid:
+        min: 10
+    storage:
+      nfs:
+        instances:
+          canAdd: false
+      s3:
+        attributes:
+          bucket:
+            options:
+              - value: bucket1-worker
+              - value: bucket2-worker
+  master:
+    command:
+      options:
+        - value: my-command-master-1
+          displayed: command1
+        - value: my-command-master-2
+          displayed: command2
+    tolerations:
+      instances:
+        locked:
+          - tolerations2
+    security:
+      runAsUid:
+        min: 10
+    storage:
+      nfs:
+        instances:
+          canAdd: false
+      s3:
+        attributes:
+          bucket:
+            options:
+              - value: bucket1-master
+              - value: bucket2-master

@@ -1,0 +1,54 @@
+flatWorkloads:
+  Distributed: null
+  Inferences: null
+  Trainings: null
+  Workspaces:
+  - actualPhase: Creating
+    clusterId: ""
+    createdAt: "0001-01-01T00:00:00Z"
+    createdBy: ""
+    desiredPhase: Running
+    name: private_git_with_ssh_ws
+    projectId: ""
+    requestedName: private_git_with_ssh_ws
+    spec:
+      annotations:
+      - name: run.ai/assets-info
+        value: ""
+      args: -x myscript.py
+      command: python3
+      compute:
+        gpuDevicesRequest: 1
+        gpuMemoryLimit: 20M
+        gpuMemoryRequest: 10M
+        gpuRequestType: memory
+      createHomeDir: true
+      environmentVariables:
+      - name: HOME
+        value: /my/home
+      - name: USER
+        value: my-user
+      exposedUrls: []
+      image: ubuntu
+      ports: []
+      relatedUrls: []
+      security:
+        allowPrivilegeEscalation: false
+        hostIpc: true
+        hostNetwork: true
+        runAsGid: 30
+        runAsNonRoot: true
+        runAsUid: 500
+        seccompProfileType: RuntimeDefault
+        supplementalGroups: 2,3,5,8
+        uidGidSource: custom
+      storage:
+        git:
+        - branch: master
+          path: /my/path
+          repository: my.repository
+          secretRef:
+            authenticationMethod: ssh-key
+            name: my-existing-generic-secret
+      workingDir: /my/home
+    workloadId: ""

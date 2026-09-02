@@ -1,0 +1,18 @@
+{{- if .Values.datavolumes.enabled }}
+{{- include "common.deployment" (list . .Values.datavolumes .Values.datavolumes.autoscaling .Values.datavolumes.serviceAccount "control-plane.datavolumes.deployment" ) }}
+{{- end }}
+
+{{- define "control-plane.datavolumes.deployment" -}}
+{{- $top := first . }}
+spec:
+  template:
+    spec:
+      initContainers:
+        {{- include "awaitingPostgresReadinessContainer" . | nindent 8 }}
+        {{- if $top.Values.tempBackendSettings.enabled }}
+        {{- include "awaitingTempBackendSettingsReadiness" . | nindent 8 }}
+        {{- end }}
+        {{- include "common.initContainer" . | nindent 8 }}
+      containers:
+      - {{- include "common.container" . | nindent 8 }}
+{{- end }}

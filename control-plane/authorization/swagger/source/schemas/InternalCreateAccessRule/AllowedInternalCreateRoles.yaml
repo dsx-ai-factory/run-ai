@@ -1,0 +1,6 @@
+type: string
+enum:
+  - System administrator
+  - Cluster application
+  - Installer application
+  - Cloud operator
