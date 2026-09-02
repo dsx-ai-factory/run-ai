@@ -1,4 +1,4 @@
-# Assets Service
+# Assets Service 
 
 Assets Service is the control-plane service (owned by the **Viper** team) that
 manages **workload assets** for Run:ai — the reusable building blocks users
