@@ -1,7 +1,7 @@
 get:
   summary: Download Mac installer script
   description: |
-    This endpoint returns a Mac script that can be used to install the Run:AI CLI.
+    This endpoint returns a Mac script that can be used to install the Run:ai CLI.
   operationId: get_installer_mac
   x-service: cli-exposer
   x-test-coverage:

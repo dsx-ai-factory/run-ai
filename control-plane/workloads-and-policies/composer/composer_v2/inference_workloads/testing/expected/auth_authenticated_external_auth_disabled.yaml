@@ -1,0 +1,84 @@
+Config: {}
+Service:
+  apiVersion: serving.knative.dev/v1
+  kind: Service
+  metadata:
+    annotations:
+      run.ai/submitted-by: tester
+    labels:
+      app: service
+      createdBy: Service
+      project: team-a
+      release: my-llm
+      run.ai/control-plane-managed: "true"
+      run.ai/converted-from-native: "true"
+      workloadKind: Inference
+      workloadName: my-llm
+    name: my-llm
+    namespace: runai-team-a
+  spec:
+    template:
+      metadata:
+        labels:
+          app: service
+          createdBy: Service
+          project: team-a
+          release: my-llm
+          workloadKind: Inference
+          workloadName: my-llm
+      spec:
+        containers:
+        - image: my-llm:latest
+          name: my-llm
+          resources: {}
+        - args:
+          - --provider=keycloak-oidc
+          - --upstream=http://localhost:8080
+          - --redirect-url=https://team-a-my-llm.test.run.ai/oauth2/callback
+          - --oidc-issuer-url=https://test.run.ai/auth/realms/runai
+          - --scope=openid
+          - --http-address=0.0.0.0:4180
+          - --proxy-prefix=/oauth2
+          - --skip-provider-button=true
+          - --whitelist-domain=team-a-my-llm.test.run.ai
+          - --cookie-domain=team-a-my-llm.test.run.ai
+          - --cookie-httponly=true
+          - --cookie-secure=true
+          - --code-challenge-method=S256
+          - --cookie-refresh=10m
+          - --cookie-samesite=lax
+          - --skip-jwt-bearer-tokens=true
+          - --extra-jwt-issuers=https://test.run.ai/auth/realms/runai=runai
+          - --custom-templates-dir=/usr/share/oauth2-proxy
+          - --pass-authorization-header=false
+          - --cookie-name=InferenceWorkload-runai-team-a-my-llm-0
+          - --session-store-type=redis
+          - --redis-connection-url=redis://redis.runai-backend.svc.cluster.local
+          - --force-json-errors=true
+          - --email-domain=*
+          env:
+          - name: OAUTH2_PROXY_COOKIE_PATH
+            value: /
+          envFrom:
+          - secretRef:
+              name: runai-auth-secret
+          image: test.registry/oauth2-proxy:latest
+          imagePullPolicy: IfNotPresent
+          name: runai-oauth2-proxy-0
+          ports:
+          - containerPort: 4180
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+          resources: {}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+          volumeMounts:
+          - mountPath: /etc/runai/auth/users
+            name: runai-auth
+        schedulerName: runai-scheduler
+        volumes:
+        - emptyDir: {}
+          name: runai-auth
+  status: {}

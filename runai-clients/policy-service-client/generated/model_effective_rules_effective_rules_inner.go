@@ -30,7 +30,7 @@ type EffectiveRulesEffectiveRulesInner struct {
 	ItemSelector NullableString `json:"itemSelector,omitempty" validate:"regexp=^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?$"`
 	// The parameter values supplied to the spec selector and item selector at evaluation time, as a key-value map.
 	SelectorParams map[string]interface{} `json:"selectorParams,omitempty"`
-	// when false, a child scope cannot override this rule. default to true.
+	// when false, a child scope cannot override this rule. default to false.
 	AllowOverride NullableBool `json:"allowOverride,omitempty"`
 	// The set of enforcements that define the rule's behavior. Each enforcement pairs an enforcement type with its value, and multiple enforcements may combine on a single rule to constrain the targeted field.
 	Enforcements []PolicyRuleEnforcement `json:"enforcements"`

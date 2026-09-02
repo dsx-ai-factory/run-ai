@@ -792,7 +792,7 @@
                         "fontColor": "#FFFFFF"
                       },
                       "displayName": "Banner configuration",
-                      "description": "Configure a persistent banner displayed at the top of the Run:AI UI for all authenticated users."
+                      "description": "Configure a persistent banner displayed at the top of the Run:ai UI for all authenticated users."
                     }
                   }
                 }
@@ -1591,7 +1591,7 @@
             "fontColor": "#FFFFFF"
           },
           "displayName": "Banner configuration",
-          "description": "Configure a persistent banner displayed at the top of the Run:AI UI for all authenticated users."
+          "description": "Configure a persistent banner displayed at the top of the Run:ai UI for all authenticated users."
         }
       },
       "AppearanceSettingsGetAllResponse": {

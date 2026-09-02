@@ -7,4 +7,4 @@ properties:
     maxLength: 200
     minLength: 1
     example: "runai version"
-    description: The commands that can be used to install the Run:AI CLI.
+    description: The commands that can be used to install the Run:ai CLI.

@@ -30,7 +30,7 @@ type ResearcherCommandLineInterfaceDeprecatedAPI interface {
 	/*
 		GetBinaryDeprecated Download RunAI Researcher command line binary
 
-		This endpoint returns a binary file that run the Run:AI CLI.
+		This endpoint returns a binary file that run the Run:ai CLI.
 
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -50,7 +50,7 @@ type ResearcherCommandLineInterfaceDeprecatedAPI interface {
 	/*
 		GetInstallerLinuxCommandsDeprecated Get Linux installer script commands
 
-		This endpoint returns a linux script commands that can be used to install the Run:AI CLI.
+		This endpoint returns a linux script commands that can be used to install the Run:ai CLI.
 
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -68,7 +68,7 @@ type ResearcherCommandLineInterfaceDeprecatedAPI interface {
 	/*
 		GetInstallerLinuxDeprecated Download Linux installer script
 
-		This endpoint returns a Linux script that can be used to install the Run:AI CLI.
+		This endpoint returns a Linux script that can be used to install the Run:ai CLI.
 
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -86,7 +86,7 @@ type ResearcherCommandLineInterfaceDeprecatedAPI interface {
 	/*
 		GetInstallerMacCommandsDeprecated Get Mac installer script commands
 
-		This endpoint returns a Mac script commands that can be used to install the Run:AI CLI.
+		This endpoint returns a Mac script commands that can be used to install the Run:ai CLI.
 
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -104,7 +104,7 @@ type ResearcherCommandLineInterfaceDeprecatedAPI interface {
 	/*
 		GetInstallerMacDeprecated Download Mac installer script
 
-		This endpoint returns a Mac script that can be used to install the Run:AI CLI.
+		This endpoint returns a Mac script that can be used to install the Run:ai CLI.
 
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -122,7 +122,7 @@ type ResearcherCommandLineInterfaceDeprecatedAPI interface {
 	/*
 		GetInstallerUnixCommandsDeprecated Get Unix installer script commands
 
-		This endpoint returns a unix script commands that can be used to install the Run:AI CLI.
+		This endpoint returns a unix script commands that can be used to install the Run:ai CLI.
 
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -140,7 +140,7 @@ type ResearcherCommandLineInterfaceDeprecatedAPI interface {
 	/*
 		GetInstallerUnixDeprecated Download Unix installer script
 
-		This endpoint returns a unix script that can be used to install the Run:AI CLI.
+		This endpoint returns a unix script that can be used to install the Run:ai CLI.
 
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -158,7 +158,7 @@ type ResearcherCommandLineInterfaceDeprecatedAPI interface {
 	/*
 		GetInstallerWindowsCommandsDeprecated Get Windows MSI installer script commands
 
-		This endpoint returns a windows script commands that can be used to install the Run:AI CLI.
+		This endpoint returns a windows script commands that can be used to install the Run:ai CLI.
 
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -176,7 +176,7 @@ type ResearcherCommandLineInterfaceDeprecatedAPI interface {
 	/*
 		GetManualDocumentDeprecated Get CLI document by name
 
-		This endpoint returns a document of help for the Run:AI CLI.
+		This endpoint returns a document of help for the Run:ai CLI.
 
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -229,7 +229,7 @@ func (r ApiGetBinaryDeprecatedRequest) Execute() (**os.File, *http.Response, err
 /*
 GetBinaryDeprecated Download RunAI Researcher command line binary
 
-This endpoint returns a binary file that run the Run:AI CLI.
+This endpoint returns a binary file that run the Run:ai CLI.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param operatingSystem The operating system name.
@@ -394,7 +394,7 @@ func (r ApiGetInstallerLinuxCommandsDeprecatedRequest) Execute() (*Command, *htt
 /*
 GetInstallerLinuxCommandsDeprecated Get Linux installer script commands
 
-This endpoint returns a linux script commands that can be used to install the Run:AI CLI.
+This endpoint returns a linux script commands that can be used to install the Run:ai CLI.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiGetInstallerLinuxCommandsDeprecatedRequest
@@ -552,7 +552,7 @@ func (r ApiGetInstallerLinuxDeprecatedRequest) Execute() (string, *http.Response
 /*
 GetInstallerLinuxDeprecated Download Linux installer script
 
-This endpoint returns a Linux script that can be used to install the Run:AI CLI.
+This endpoint returns a Linux script that can be used to install the Run:ai CLI.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiGetInstallerLinuxDeprecatedRequest
@@ -710,7 +710,7 @@ func (r ApiGetInstallerMacCommandsDeprecatedRequest) Execute() (*Command, *http.
 /*
 GetInstallerMacCommandsDeprecated Get Mac installer script commands
 
-This endpoint returns a Mac script commands that can be used to install the Run:AI CLI.
+This endpoint returns a Mac script commands that can be used to install the Run:ai CLI.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiGetInstallerMacCommandsDeprecatedRequest
@@ -868,7 +868,7 @@ func (r ApiGetInstallerMacDeprecatedRequest) Execute() (string, *http.Response, 
 /*
 GetInstallerMacDeprecated Download Mac installer script
 
-This endpoint returns a Mac script that can be used to install the Run:AI CLI.
+This endpoint returns a Mac script that can be used to install the Run:ai CLI.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiGetInstallerMacDeprecatedRequest
@@ -1026,7 +1026,7 @@ func (r ApiGetInstallerUnixCommandsDeprecatedRequest) Execute() (*Command, *http
 /*
 GetInstallerUnixCommandsDeprecated Get Unix installer script commands
 
-This endpoint returns a unix script commands that can be used to install the Run:AI CLI.
+This endpoint returns a unix script commands that can be used to install the Run:ai CLI.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiGetInstallerUnixCommandsDeprecatedRequest
@@ -1184,7 +1184,7 @@ func (r ApiGetInstallerUnixDeprecatedRequest) Execute() (string, *http.Response,
 /*
 GetInstallerUnixDeprecated Download Unix installer script
 
-This endpoint returns a unix script that can be used to install the Run:AI CLI.
+This endpoint returns a unix script that can be used to install the Run:ai CLI.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiGetInstallerUnixDeprecatedRequest
@@ -1342,7 +1342,7 @@ func (r ApiGetInstallerWindowsCommandsDeprecatedRequest) Execute() (*Command, *h
 /*
 GetInstallerWindowsCommandsDeprecated Get Windows MSI installer script commands
 
-This endpoint returns a windows script commands that can be used to install the Run:AI CLI.
+This endpoint returns a windows script commands that can be used to install the Run:ai CLI.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiGetInstallerWindowsCommandsDeprecatedRequest
@@ -1501,7 +1501,7 @@ func (r ApiGetManualDocumentDeprecatedRequest) Execute() (string, *http.Response
 /*
 GetManualDocumentDeprecated Get CLI document by name
 
-This endpoint returns a document of help for the Run:AI CLI.
+This endpoint returns a document of help for the Run:ai CLI.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param documentName The manual document name.

@@ -41,14 +41,12 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-        with:
-          persist-credentials: false
 
       - name: Set Up GitHub Authentication For Go Modules
         env:
           GOPRIVATE: "github.com/run-ai/*"
         run: |
-          git config --global url."https://${{ secrets.GIT_HUB_OSS }}@github.com/".insteadOf "https://github.com/"
+          git config --global url."https://${{ secrets.GIT_HUB_OSS }}@github.com/run-ai/".insteadOf "https://github.com/run-ai/"
 
       - name: Set up Go
         uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5

@@ -9,14 +9,17 @@ import (
 	"context"
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/rand"
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"io"
 	"reflect"
 
 	"gorm.io/gorm/schema"
+)
+
+const (
+	gcmNonceSize = 12
+	gcmTagSize   = 16
 )
 
 // SymmetricEncryptionSerializer implements GORM's serializer.Interface interface
@@ -32,7 +35,7 @@ func NewSymmetricEncryptionSerializer(encryptionKey string) (*SymmetricEncryptio
 	if err != nil {
 		return nil, fmt.Errorf("failed to create cipher block: %w", err)
 	}
-	gcm, err := cipher.NewGCM(block)
+	gcm, err := cipher.NewGCMWithRandomNonce(block)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create GCM: %w", err)
 	}
@@ -87,11 +90,7 @@ func (s *SymmetricEncryptionSerializer) Value(ctx context.Context, field *schema
 }
 
 func (s *SymmetricEncryptionSerializer) encrypt(plaintext string) (string, error) {
-	nonce := make([]byte, s.gcm.NonceSize())
-	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		return "", fmt.Errorf("failed to generate nonce: %w", err)
-	}
-	ciphertext := s.gcm.Seal(nonce, nonce, []byte(plaintext), nil)
+	ciphertext := s.gcm.Seal(nil, nil, []byte(plaintext), nil)
 	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
 
@@ -101,13 +100,11 @@ func (s *SymmetricEncryptionSerializer) decrypt(ciphertext string) (string, erro
 		return "", fmt.Errorf("failed to decode base64: %w", err)
 	}
 
-	nonceSize := s.gcm.NonceSize()
-	if len(data) < nonceSize {
+	if len(data) < gcmNonceSize+gcmTagSize {
 		return "", errors.New("ciphertext too short")
 	}
 
-	nonce, encryptedData := data[:nonceSize], data[nonceSize:]
-	plaintext, err := s.gcm.Open(nil, nonce, encryptedData, nil)
+	plaintext, err := s.gcm.Open(nil, nil, data, nil)
 	if err != nil {
 		return "", fmt.Errorf("decryption failed: %w", err)
 	}

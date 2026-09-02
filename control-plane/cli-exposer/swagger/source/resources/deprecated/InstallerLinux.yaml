@@ -2,7 +2,7 @@ get:
   deprecated: true
   summary: Download Linux installer script
   description: |
-    This endpoint returns a Linux script that can be used to install the Run:AI CLI.
+    This endpoint returns a Linux script that can be used to install the Run:ai CLI.
   operationId: get_installer_linux_deprecated
   x-service: cli-exposer
   x-test-coverage:

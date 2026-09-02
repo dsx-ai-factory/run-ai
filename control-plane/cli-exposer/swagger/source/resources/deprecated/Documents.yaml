@@ -2,7 +2,7 @@ get:
   deprecated: true
   summary: Get CLI document by name
   description: |
-    This endpoint returns a document of help for the Run:AI CLI.
+    This endpoint returns a document of help for the Run:ai CLI.
   operationId: get_manual_document_deprecated
   x-service: cli-exposer
   x-test-coverage:

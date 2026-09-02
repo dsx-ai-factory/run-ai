@@ -47,11 +47,6 @@ spec:
                 description: LabelValue is the label value a node needs to have to
                   be assigned to the nodepool
                 type: string
-              overProvisioningRatio:
-                description: OverProvisioningRatio is the ratio for scheduler over
-                  provisioning
-                format: int32
-                type: integer
               placementStrategy:
                 description: PlacementStrategy is the placement scheduler strategy
                 properties:

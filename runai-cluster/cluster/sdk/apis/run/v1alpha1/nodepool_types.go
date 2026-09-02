@@ -27,13 +27,6 @@ const (
 
 	UnexistingRunaiNodePool = "runai-unexisting-node-pool"
 
-	NodeSchedulerEnabledLabel = "run.ai/node-scheduler-enabled"
-	NodeOPRLabel              = "run.ai/over-provisioning-ratio"
-	DefaultOPRValue           = 1
-
-	SwapEnabledLabel     = "run.ai/swap-enabled"
-	SwapCpuRamLimitLabel = "run.ai/swap-cpu-ram-limit"
-	SwapGpuReservedLabel = "run.ai/swap-gpu-reserved"
 )
 
 // NodePoolSpec defines the desired state of NodePool
@@ -43,11 +36,6 @@ type NodePoolSpec struct {
 
 	// LabelValue is the label value a node needs to have to be assigned to the nodepool
 	LabelValue string `json:"labelValue,omitempty"`
-
-	// DEPRECATED
-	// OverProvisioningRatio is the ratio for scheduler over provisioning.
-	// Use NodeLevelSchedulerEnabled instead.
-	OverProvisioningRatio int32 `json:"overProvisioningRatio,omitempty"`
 
 	// PlacementStrategy is the placement scheduler strategy
 	PlacementStrategy PlacementStrategy `json:"placementStrategy,omitempty"`
@@ -60,9 +48,6 @@ type NodePoolSpec struct {
 	// GPUNetworkAccelerationLabelKey - Label key by which to determine GPUNetworkAccelerationDetection nodes
 	// +kubebuilder:default="nvidia.com/gpu.clique"
 	GPUNetworkAccelerationLabelKey string `json:"gpuNetworkAccelerationLabelKey,omitempty"`
-
-	// GpuResourceOptimization - GPU resource optimization settings
-	GpuResourceOptimization GpuResourceOptimization `json:"gpuResourceOptimization,omitempty"`
 
 	// MinGuaranteedRuntime - the minimum duration (e.g., 5d8h40m) that a preemptible workload is
 	// guaranteed to run once scheduled and bound to a node
@@ -90,20 +75,6 @@ type PlacementStrategy struct {
 
 	// Cpu scheduling strategy
 	Cpu string `json:"cpu,omitempty"`
-}
-
-type GpuResourceOptimization struct {
-	// NodeLevelSchedulerEnabled - whether to enable node level scheduler for the nodepool
-	NodeLevelSchedulerEnabled bool `json:"nodeLevelSchedulerEnabled,omitempty"`
-
-	// SwapEnabled - whether to enable swap for the nodepool
-	SwapEnabled bool `json:"swapEnabled,omitempty"`
-
-	// CpuSwapMemorySize - CPU memory size for GPU SWAP
-	CpuSwapMemorySize string `json:"cpuSwapMemorySize,omitempty"`
-
-	// ReservedGpuMemoryForSwapOperations - reserved GPU memory for SWAP operations
-	ReservedGpuMemoryForSwapOperations string `json:"reservedGpuMemoryForSwapOperations,omitempty"`
 }
 
 type TimeBasedFairShare struct {

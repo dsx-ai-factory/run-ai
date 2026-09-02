@@ -1,7 +1,7 @@
 get:
   summary: Download Windows MSI
   description: |
-    This endpoint returns a MSI that can be used to install the Run:AI CLI.
+    This endpoint returns a MSI that can be used to install the Run:ai CLI.
   operationId: get_installer_windows
   x-service: cli-exposer
   x-test-coverage:

@@ -25,12 +25,12 @@ paths:
       tags:
       - Health
       x-no-authorization: true
-      x-runai-team: fox
+      x-service: cli-exposer
     x-internal: true
   /api/v1/cli-exposer/installer/unix:
     get:
       description: |
-        This endpoint returns a unix script that can be used to install the Run:AI CLI.
+        This endpoint returns a unix script that can be used to install the Run:ai CLI.
       operationId: get_installer_unix
       responses:
         "200":
@@ -89,14 +89,14 @@ paths:
       summary: Download Unix installer script
       tags:
       - Researcher Command Line Interface
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
   /api/v1/cli-exposer/installer/unix/commands:
     get:
       description: |
-        This endpoint returns a unix script commands that can be used to install the Run:AI CLI.
+        This endpoint returns a unix script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_unix_commands
       responses:
         "200":
@@ -154,14 +154,14 @@ paths:
       summary: Get Unix installer script commands
       tags:
       - Researcher Command Line Interface
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
   /api/v1/cli-exposer/installer/mac:
     get:
       description: |
-        This endpoint returns a Mac script that can be used to install the Run:AI CLI.
+        This endpoint returns a Mac script that can be used to install the Run:ai CLI.
       operationId: get_installer_mac
       responses:
         "200":
@@ -220,14 +220,14 @@ paths:
       summary: Download Mac installer script
       tags:
       - Researcher Command Line Interface
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
   /api/v1/cli-exposer/installer/mac/commands:
     get:
       description: |
-        This endpoint returns a Mac script commands that can be used to install the Run:AI CLI.
+        This endpoint returns a Mac script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_mac_commands
       responses:
         "200":
@@ -285,14 +285,14 @@ paths:
       summary: Get Mac installer script commands
       tags:
       - Researcher Command Line Interface
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
   /api/v1/cli-exposer/installer/linux:
     get:
       description: |
-        This endpoint returns a Linux script that can be used to install the Run:AI CLI.
+        This endpoint returns a Linux script that can be used to install the Run:ai CLI.
       operationId: get_installer_linux
       responses:
         "200":
@@ -351,14 +351,14 @@ paths:
       summary: Download Linux installer script
       tags:
       - Researcher Command Line Interface
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
   /api/v1/cli-exposer/installer/linux/commands:
     get:
       description: |
-        This endpoint returns a linux script commands that can be used to install the Run:AI CLI.
+        This endpoint returns a linux script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_linux_commands
       responses:
         "200":
@@ -416,14 +416,14 @@ paths:
       summary: Get Linux installer script commands
       tags:
       - Researcher Command Line Interface
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
   /api/v1/cli-exposer/installer/windows/commands:
     get:
       description: |
-        This endpoint returns a windows script commands that can be used to install the Run:AI CLI.
+        This endpoint returns a windows script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_windows_commands
       responses:
         "200":
@@ -481,7 +481,7 @@ paths:
       summary: Get Windows MSI installer script commands
       tags:
       - Researcher Command Line Interface
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
@@ -546,14 +546,14 @@ paths:
       summary: Get CLI latest version
       tags:
       - Researcher Command Line Interface
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
   /api/v1/cli-exposer/dist/{operatingSystem}/{architecture}/runai:
     get:
       description: |
-        This endpoint returns a binary file that run the Run:AI CLI.
+        This endpoint returns a binary file that run the Run:ai CLI.
       operationId: get_binary
       parameters:
       - description: The operating system name.
@@ -632,14 +632,14 @@ paths:
       summary: Download RunAI Researcher command line binary
       tags:
       - Researcher Command Line Interface
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
   /api/v1/cli-exposer/docs/{documentName}:
     get:
       description: |
-        This endpoint returns a document of help for the Run:AI CLI.
+        This endpoint returns a document of help for the Run:ai CLI.
       operationId: get_manual_document
       parameters:
       - description: The manual document name.
@@ -701,7 +701,7 @@ paths:
       summary: Get CLI document by name
       tags:
       - Researcher Command Line Interface
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
@@ -709,7 +709,7 @@ paths:
     get:
       deprecated: true
       description: |
-        This endpoint returns a unix script that can be used to install the Run:AI CLI.
+        This endpoint returns a unix script that can be used to install the Run:ai CLI.
       operationId: get_installer_unix_deprecated
       responses:
         "200":
@@ -768,7 +768,7 @@ paths:
       summary: Download Unix installer script
       tags:
       - Researcher Command Line Interface Deprecated
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
@@ -776,7 +776,7 @@ paths:
     get:
       deprecated: true
       description: |
-        This endpoint returns a unix script commands that can be used to install the Run:AI CLI.
+        This endpoint returns a unix script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_unix_commands_deprecated
       responses:
         "200":
@@ -834,7 +834,7 @@ paths:
       summary: Get Unix installer script commands
       tags:
       - Researcher Command Line Interface Deprecated
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
@@ -842,7 +842,7 @@ paths:
     get:
       deprecated: true
       description: |
-        This endpoint returns a Mac script that can be used to install the Run:AI CLI.
+        This endpoint returns a Mac script that can be used to install the Run:ai CLI.
       operationId: get_installer_mac_deprecated
       responses:
         "200":
@@ -901,7 +901,7 @@ paths:
       summary: Download Mac installer script
       tags:
       - Researcher Command Line Interface Deprecated
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
@@ -909,7 +909,7 @@ paths:
     get:
       deprecated: true
       description: |
-        This endpoint returns a Mac script commands that can be used to install the Run:AI CLI.
+        This endpoint returns a Mac script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_mac_commands_deprecated
       responses:
         "200":
@@ -967,7 +967,7 @@ paths:
       summary: Get Mac installer script commands
       tags:
       - Researcher Command Line Interface Deprecated
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
@@ -975,7 +975,7 @@ paths:
     get:
       deprecated: true
       description: |
-        This endpoint returns a Linux script that can be used to install the Run:AI CLI.
+        This endpoint returns a Linux script that can be used to install the Run:ai CLI.
       operationId: get_installer_linux_deprecated
       responses:
         "200":
@@ -1034,7 +1034,7 @@ paths:
       summary: Download Linux installer script
       tags:
       - Researcher Command Line Interface Deprecated
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
@@ -1042,7 +1042,7 @@ paths:
     get:
       deprecated: true
       description: |
-        This endpoint returns a linux script commands that can be used to install the Run:AI CLI.
+        This endpoint returns a linux script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_linux_commands_deprecated
       responses:
         "200":
@@ -1100,7 +1100,7 @@ paths:
       summary: Get Linux installer script commands
       tags:
       - Researcher Command Line Interface Deprecated
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
@@ -1108,7 +1108,7 @@ paths:
     get:
       deprecated: true
       description: |
-        This endpoint returns a windows script commands that can be used to install the Run:AI CLI.
+        This endpoint returns a windows script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_windows_commands_deprecated
       responses:
         "200":
@@ -1166,7 +1166,7 @@ paths:
       summary: Get Windows MSI installer script commands
       tags:
       - Researcher Command Line Interface Deprecated
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
@@ -1232,7 +1232,7 @@ paths:
       summary: Get CLI latest version
       tags:
       - Researcher Command Line Interface Deprecated
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
@@ -1240,7 +1240,7 @@ paths:
     get:
       deprecated: true
       description: |
-        This endpoint returns a binary file that run the Run:AI CLI.
+        This endpoint returns a binary file that run the Run:ai CLI.
       operationId: get_binary_deprecated
       parameters:
       - description: The operating system name.
@@ -1319,7 +1319,7 @@ paths:
       summary: Download RunAI Researcher command line binary
       tags:
       - Researcher Command Line Interface Deprecated
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
@@ -1327,7 +1327,7 @@ paths:
     get:
       deprecated: true
       description: |
-        This endpoint returns a document of help for the Run:AI CLI.
+        This endpoint returns a document of help for the Run:ai CLI.
       operationId: get_manual_document_deprecated
       parameters:
       - description: The manual document name.
@@ -1389,7 +1389,7 @@ paths:
       summary: Get CLI document by name
       tags:
       - Researcher Command Line Interface Deprecated
-      x-runai-team: fox
+      x-service: cli-exposer
       x-test-coverage:
       - cli-exposer/pkg/services/api_cli_service_test.go
       x-no-authorization: true
@@ -1570,7 +1570,7 @@ components:
         command: runai version
       properties:
         command:
-          description: The commands that can be used to install the Run:AI CLI.
+          description: The commands that can be used to install the Run:ai CLI.
           example: runai version
           maxLength: 200
           minLength: 1

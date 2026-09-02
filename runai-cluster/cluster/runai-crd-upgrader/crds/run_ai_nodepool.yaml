@@ -54,24 +54,6 @@ spec:
                 description: GPUNetworkAccelerationLabelKey - Label key by which to
                   determine GPUNetworkAccelerationDetection nodes
                 type: string
-              gpuResourceOptimization:
-                description: GpuResourceOptimization - GPU resource optimization settings
-                properties:
-                  cpuSwapMemorySize:
-                    description: CpuSwapMemorySize - CPU memory size for GPU SWAP
-                    type: string
-                  nodeLevelSchedulerEnabled:
-                    description: NodeLevelSchedulerEnabled - whether to enable node
-                      level scheduler for the nodepool
-                    type: boolean
-                  reservedGpuMemoryForSwapOperations:
-                    description: ReservedGpuMemoryForSwapOperations - reserved GPU
-                      memory for SWAP operations
-                    type: string
-                  swapEnabled:
-                    description: SwapEnabled - whether to enable swap for the nodepool
-                    type: boolean
-                type: object
               labelKey:
                 description: LabelKey is the label key a node needs to have to be
                   assigned to the nodepool
@@ -94,13 +76,6 @@ spec:
                   NumaAwareScheduling - when enabled, the Scheduler places workloads so that GPU, CPU,
                   and CPU memory are allocated within the same NUMA node where possible.
                 type: boolean
-              overProvisioningRatio:
-                description: |-
-                  DEPRECATED
-                  OverProvisioningRatio is the ratio for scheduler over provisioning.
-                  Use NodeLevelSchedulerEnabled instead.
-                format: int32
-                type: integer
               placementStrategy:
                 description: PlacementStrategy is the placement scheduler strategy
                 properties:

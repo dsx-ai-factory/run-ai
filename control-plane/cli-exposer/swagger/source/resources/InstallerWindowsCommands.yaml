@@ -1,7 +1,7 @@
 get:
   summary: Get Windows MSI installer script commands
   description: |
-    This endpoint returns a windows script commands that can be used to install the Run:AI CLI.
+    This endpoint returns a windows script commands that can be used to install the Run:ai CLI.
   operationId: get_installer_windows_commands
   x-service: cli-exposer
   x-test-coverage:

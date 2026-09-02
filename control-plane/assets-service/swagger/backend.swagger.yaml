@@ -2,15 +2,15 @@ openapi: 3.0.3
 info:
   version: 2.0.0
   description: |
-    The aggregated API of Run:AI Control-Plane
+    The aggregated API of Run:ai Control-Plane
   title: Runai API
   x-logo:
     url: ./redoc-runai-logo.png
-    altText: 'Run:AI'
+    altText: 'Run:ai'
     backgroundColor: '#FAFAFA'
     href: 'https://run.ai'
   license:
-    name: 'Run:AI'
+    name: 'Run:ai'
     url: www.run.ai
 servers:
   - url: 'https://app.run.ai'

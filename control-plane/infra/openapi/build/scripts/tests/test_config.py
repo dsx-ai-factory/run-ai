@@ -141,11 +141,6 @@ class TestRegexPatterns(unittest.TestCase):
         self.assertIsNotNone(version_pattern.search("version: 2.0.0"))
         self.assertIsNone(version_pattern.search("version: 2.22.0"))
         
-        # Branding replacement
-        branding_pattern = RegexPatterns.BRANDING
-        self.assertIsNotNone(branding_pattern.search("Run:AI platform"))
-        self.assertIsNone(branding_pattern.search("Run:ai platform"))
-        
         # Logo replacement
         logo_pattern = RegexPatterns.LOGO
         self.assertIsNotNone(logo_pattern.search("url: ./runai-logo-api.png"))

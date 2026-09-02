@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Command** | **string** | The commands that can be used to install the Run:AI CLI. | 
+**Command** | **string** | The commands that can be used to install the Run:ai CLI. | 
 
 ## Methods
 

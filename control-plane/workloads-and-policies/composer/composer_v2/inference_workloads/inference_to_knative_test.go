@@ -97,6 +97,12 @@ var _ = Describe("InferenceToKnativeComposer", func() {
 			},
 		}),
 
+		Entry("serving auth still uses the proxy when external URL auth is disabled", composerCase{
+			specFile:             "auth_authenticated",
+			expectedFile:         "auth_authenticated_external_auth_disabled",
+			clusterStorageConfig: inferenceAuthTestConfigWithExternalAuth(false),
+		}),
+
 		Entry("authenticated NIM keeps metrics as the only networking endpoint", composerCase{
 			specFile:             "auth_nim",
 			clusterStorageConfig: inferenceAuthTestConfig(),
@@ -663,6 +669,12 @@ func inferenceAuthTestConfig() composer.ClusterStorageConfig {
 	cluster.Status.Set(&status)
 	cluster.SetDomain("https://test.run.ai")
 	return composer.NewClusterStorageConfigFromCluster(&cluster)
+}
+
+func inferenceAuthTestConfigWithExternalAuth(enabled bool) composer.ClusterStorageConfig {
+	config := inferenceAuthTestConfig().(composer.StaticClusterStorageConfig)
+	config.SetExternalAuthUrlEnabled(enabled)
+	return config
 }
 
 func assertInferenceAuthSidecar(target *KnativeServiceTarget, expectedArgs ...string) {

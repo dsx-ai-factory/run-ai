@@ -963,7 +963,7 @@ paths:
                       fontColor: '#FFFFFF'
                     displayName: Banner configuration
                     description: Configure a persistent banner displayed at the top
-                      of the Run:AI UI for all authenticated users.
+                      of the Run:ai UI for all authenticated users.
               schema:
                 $ref: '#/components/schemas/GetSettingResponse'
           description: Executed successfully.
@@ -1998,7 +1998,7 @@ components:
           backgroundColor: '#D32F2F'
           fontColor: '#FFFFFF'
         displayName: Banner configuration
-        description: Configure a persistent banner displayed at the top of the Run:AI
+        description: Configure a persistent banner displayed at the top of the Run:ai
           UI for all authenticated users.
       properties:
         value:
@@ -2023,7 +2023,7 @@ components:
             backgroundColor: '#D32F2F'
             fontColor: '#FFFFFF'
           displayName: Banner configuration
-          description: Configure a persistent banner displayed at the top of the Run:AI
+          description: Configure a persistent banner displayed at the top of the Run:ai
             UI for all authenticated users.
       properties:
         bannerConfig:

@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**AllowOverride** | Pointer to **NullableBool** | when false, a child scope cannot override this rule. default to true. | [optional] 
+**AllowOverride** | Pointer to **NullableBool** | when false, a child scope cannot override this rule. default to false. | [optional] 
 
 ## Methods
 

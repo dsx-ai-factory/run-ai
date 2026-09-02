@@ -2,7 +2,7 @@ get:
   deprecated: true
   summary: Get Unix installer script commands
   description: |
-    This endpoint returns a unix script commands that can be used to install the Run:AI CLI.
+    This endpoint returns a unix script commands that can be used to install the Run:ai CLI.
   operationId: get_installer_unix_commands_deprecated
   x-service: cli-exposer
   x-test-coverage:

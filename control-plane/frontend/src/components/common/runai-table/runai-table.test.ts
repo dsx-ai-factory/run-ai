@@ -8,6 +8,7 @@ import { mount } from "@vue/test-utils";
 import { Quasar } from "quasar";
 import { describe, beforeEach, expect, test, vi } from "vitest";
 import { RunaiTable } from ".";
+import { RunaiTableRow } from "./runai-table-row";
 import { tableModels } from "./runai-table.mock";
 // Models
 import type {
@@ -89,6 +90,20 @@ describe("runai-table.vue", () => {
     test("table should not show the pagination by default if the 'hidePagination' prop is true", async () => {
       await runaiTableCmp.setProps({ hidePagination: true });
       expect(runaiTableCmp.find(".q-table__control").exists()).toBe(false);
+    });
+
+    test("rendered rows use their row keys for stable identity", async () => {
+      await runaiTableCmp.setProps({
+        columns: tableModels.environmentColumns,
+        rows: tableModels.environmentModel.rows,
+        filterBy: tableModels.environmentModel.filterBy,
+        getRowKey: (row: EnvironmentAsset) => row.meta.id,
+      });
+
+      const renderedRowKeys = runaiTableCmp.findAllComponents(RunaiTableRow).map((row) => row.vm.$.vnode.key);
+      const expectedRowKeys = tableModels.environmentModel.rows.map((row) => row.meta.id);
+
+      expect(renderedRowKeys).toEqual(expectedRowKeys);
     });
   });
 

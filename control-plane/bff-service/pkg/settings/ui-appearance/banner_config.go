@@ -29,7 +29,7 @@ func (b *BannerConfig) Category() string {
 }
 
 func (b *BannerConfig) Description() string {
-	return "Configure a persistent banner displayed at the top of the Run:AI UI for all authenticated users."
+	return "Configure a persistent banner displayed at the top of the Run:ai UI for all authenticated users."
 }
 
 func (b *BannerConfig) DisplayName() string {

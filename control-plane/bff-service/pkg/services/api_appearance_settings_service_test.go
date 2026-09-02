@@ -62,7 +62,7 @@ func TestAppearanceSettingsAPIService_GetAppearanceSettings_Success(t *testing.T
 				FontColor:       ptr.To("#FFFFFF"),
 			},
 			DisplayName: "Banner configuration",
-			Description: "Configure a persistent banner displayed at the top of the Run:AI UI for all authenticated users.",
+			Description: "Configure a persistent banner displayed at the top of the Run:ai UI for all authenticated users.",
 		},
 	}
 	assert.Equal(t, expected, response.Body)

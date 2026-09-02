@@ -159,6 +159,10 @@ func (ht *HierarchyTree) calculateEffectivePolicy(ctx context.Context, tx orm.DB
 
 		ht.InitSourceOfRules(currentEffectivePolicy.RulesV2, currentSourceOfRule, effectiveContext.GvkWorkload)
 
+		if effectiveContext.GvkWorkload {
+			ht.NormalizeAllowOverrideInGvkRules(currentEffectivePolicy.RulesV2)
+		}
+
 		// if we have fallback policy, we need to merge its rules and values to the effective policy of this policy.
 		if effectiveContext.Hierarchy[idxToCalculate].Fallback != nil {
 			fallbackPolicy := effectiveContext.Hierarchy[idxToCalculate].Fallback
@@ -260,6 +264,26 @@ func (ht *HierarchyTree) calculateEffectivePolicy(ctx context.Context, tx orm.DB
 	}
 
 	return &currentEffectivePolicy, dao.UpsertEffectivePolicy(ctx, tx, &currentEffectivePolicy)
+}
+
+// NormalizeAllowOverrideInGvkRules ensures every GVK rule in the given rules
+// map carries an explicit allowOverride value. When the field is missing
+// (nil / omitted in the payload) it is set to false, matching the merge
+// semantic where unspecified means "locked". This makes the flag always
+// visible to API consumers of the effective rules — they no longer have to
+// compensate for the "omitempty" JSON serialization when a rule was
+// authored without an allowOverride value.
+func (ht *HierarchyTree) NormalizeAllowOverrideInGvkRules(rulesMap map[string]interface{}) {
+	if rulesMap == nil {
+		return
+	}
+	rulesArr := convutils.ArrayMe(rulesMap[dbmodel.GvkRulesJsonKey])
+	for idx := 0; idx < len(rulesArr); idx++ {
+		rule := convutils.MapMe(rulesArr[idx])
+		if _, ok := rule["allowOverride"]; !ok {
+			rule["allowOverride"] = false
+		}
+	}
 }
 
 // InitSourceOfRules initializes the sourceOfRules for all the rules in the given policy to
@@ -509,6 +533,7 @@ func (ht *HierarchyTree) MergeGvkRules(effectiveRules dbmodels.JsonBMap, givenRu
 	//
 	rulesOfGivenPolicy := givenRules.Clone()
 	ht.InitSourceOfRules(rulesOfGivenPolicy, currentSourceOfRule, true)
+	ht.NormalizeAllowOverrideInGvkRules(rulesOfGivenPolicy)
 
 	//
 	//   if there are no rules from the parent, just copy the given rules to the result
@@ -535,11 +560,11 @@ func (ht *HierarchyTree) MergeGvkRules(effectiveRules dbmodels.JsonBMap, givenRu
 		if idx, found := keyToIdx[key]; found {
 			parentRule := convutils.MapMe(effectiveArr[idx])
 
-			// note that the default for allowOverride is true, so only if "false" is explicitly
-			// sent in the json, the override=false takes place.
+			// note that the default for allowOverride is false, so only if "true" is explicitly
+			// sent in the json, the override=true takes place.
 			allowOverride, allowOverrideSpecified := parentRule["allowOverride"].(bool)
-			if !allowOverrideSpecified || allowOverride {
-				// when override is allowed, take the rule from the child scope. oterwise keep
+			if allowOverrideSpecified && allowOverride {
+				// when override is allowed, take the rule from the child scope. otherwise keep
 				// the rule from the parent scope
 				effectiveArr[idx] = rule
 			}

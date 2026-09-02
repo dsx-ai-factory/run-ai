@@ -18,8 +18,8 @@ github.com/ThreeDotsLabs/watermill-redisstream v1.4.3 h1:h/0qsW4y2H6mJ397bTBagqj
 github.com/ThreeDotsLabs/watermill-redisstream v1.4.3/go.mod h1:69++855LyB+ckYDe60PiJLBcUrpckfDE2WwyzuVJRCk=
 github.com/andybalholm/brotli v1.2.1 h1:R+f5xP285VArJDRgowrfb9DqL18yVK0gKAW/F+eTWro=
 github.com/andybalholm/brotli v1.2.1/go.mod h1:rzTDkvFWvIrjDXZHkuS16NPggd91W3kUSvPlQ1pLaKY=
-github.com/aws/smithy-go v1.27.8 h1:FR0dxZfIlV7Z8eh2iHfIofdunw382XsDV3Mxt9nUvRY=
-github.com/aws/smithy-go v1.27.8/go.mod h1:YE2RhdIuDbA5E5bTdciG9KrW3+TiEONeUWCqxX9i1Fc=
+github.com/aws/smithy-go v1.28.1 h1:R/nXH00c8qcfCzQVELtRw+eLQWtzv+VAIEFJ1/xxXlQ=
+github.com/aws/smithy-go v1.28.1/go.mod h1:YE2RhdIuDbA5E5bTdciG9KrW3+TiEONeUWCqxX9i1Fc=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/bsm/ginkgo/v2 v2.12.0 h1:Ny8MWAHyOepLGlLKYmXG4IEkioBysk6GpaRTLC8zwWs=
@@ -215,8 +215,8 @@ github.com/run-ai/runai/runai-common-packages/metrics v1.2.4 h1:7+TetbiDTFIxZ46J
 github.com/run-ai/runai/runai-common-packages/metrics v1.2.4/go.mod h1:gE7gr07lZktg7X1Xab48nHCYiNNr+ya15f5nGMhbJxc=
 github.com/run-ai/runai/runai-common-packages/runaictx v1.1.5 h1:HACPWsBPp+VXkvAnHuHiPxT1or33IAO8mkRE//k9ql4=
 github.com/run-ai/runai/runai-common-packages/runaictx v1.1.5/go.mod h1:AdsugYhhrgH9cbO6NzNUVdHvcaLx0AjTbTma6FXfv8U=
-github.com/run-ai/runai/runai-common-packages/runaidb v1.0.11 h1:NNmPaCZxD6vtpWTRdQJg8Fw9Z/nVf6xdoVVAQRsP6cY=
-github.com/run-ai/runai/runai-common-packages/runaidb v1.0.11/go.mod h1:M9w2vK+oCtTlSyU7OxEKif7PnzMalbloNOSt2ThmnBU=
+github.com/run-ai/runai/runai-common-packages/runaidb v1.0.13 h1:DwpxOxYH/d8fhxpedxA2H0daa6XUsNQEyhPuUS8SPJI=
+github.com/run-ai/runai/runai-common-packages/runaidb v1.0.13/go.mod h1:VVFF5jlWTwRlUkIbq6yJxtjMX5aLcaQ4P+vSSxHUETE=
 github.com/run-ai/runai/runai-common-packages/runaihttp v1.1.6 h1:kkeTCjAFlJw9tTINt3t+cIicLSsRY/8T+Bk+a01p+qE=
 github.com/run-ai/runai/runai-common-packages/runaihttp v1.1.6/go.mod h1:JWHvfOZeQmZ2mCN6vmJsFaFtxqKgnIOuUPCM3DJMsqA=
 github.com/run-ai/runai/runai-common-packages/runaipubsub v1.6.3 h1:M5avZyKbUZ1VAAJUrNxGXgWRvR4bSV04J7BCN9y8h7E=

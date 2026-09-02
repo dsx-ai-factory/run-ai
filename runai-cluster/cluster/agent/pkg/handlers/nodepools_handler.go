@@ -30,13 +30,6 @@ type NodePoolsHandler struct {
 
 type NodePoolObjectInspector bool
 
-const (
-	OverProvisioningRatioDefault = 1
-
-	CpuSwapMemorySizeDefault                  = "100G"
-	ReservedGpuMemoryForSwapOperationsDefault = "2G"
-)
-
 func NewNodePoolsHandler(runaiBackendClient *runaiBackendClient.BackendClient, runaiClient client.Client,
 	cachedClient client.Reader) (ResourceHandler, error) {
 	commonHandler, err := NewCommonHandler(runaiBackendClient, runaiClient, cachedClient,
@@ -111,22 +104,11 @@ func convertNodePoolFields(nodepoolModel *openapi.Nodepool) (*v1alpha1.NodePool,
 		LabelValue:                      nodepoolModel.LabelValue,
 		GPUNetworkAccelerationDetection: ptr.To(convertNullableNodepoolGPUNetworkAccelerationDetection(nodepoolModel.GpuNetworkAccelerationDetection)),
 		GPUNetworkAccelerationLabelKey:  ptr.Deref(nodepoolModel.GpuNetworkAccelerationLabelKey, ""),
-		OverProvisioningRatio:           OverProvisioningRatioDefault,
 		NetworkTopologyName:             ptr.Deref(nodepoolModel.NetworkTopologyName.Get(), ""),
 	}
-	setGpuResourceOptimizationFields(crdNodePool)
 	setSchedulingConfigurationFields(crdNodePool, nodepoolModel.SchedulingConfiguration)
 	crdNodePool.Name = nodepoolModel.Name
 	return crdNodePool, nil
-}
-
-// setGpuResourceOptimizationFields writes the CRD defaults. cluster-service no longer
-// exposes gpuResourceOptimization, so swap and node-level scheduling are always off.
-func setGpuResourceOptimizationFields(crdNodePool *v1alpha1.NodePool) {
-	crdNodePool.Spec.GpuResourceOptimization.SwapEnabled = false
-	crdNodePool.Spec.GpuResourceOptimization.CpuSwapMemorySize = CpuSwapMemorySizeDefault
-	crdNodePool.Spec.GpuResourceOptimization.ReservedGpuMemoryForSwapOperations = ReservedGpuMemoryForSwapOperationsDefault
-	crdNodePool.Spec.GpuResourceOptimization.NodeLevelSchedulerEnabled = false
 }
 
 func setSchedulingConfigurationFields(crdNodePool *v1alpha1.NodePool, schedulingConfigurationFields openapi.NullableSchedulingConfiguration) {

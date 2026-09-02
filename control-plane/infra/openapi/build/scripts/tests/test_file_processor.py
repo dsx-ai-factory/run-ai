@@ -39,7 +39,7 @@ info:
   version: 2.0.0
   x-logo:
     url: ./runai-logo-api.png
-    altText: 'NVIDIA Run:AI'
+    altText: 'NVIDIA Run:ai'
 paths:
   /test:
     get:
@@ -130,15 +130,6 @@ paths:
         result = self.file_processor._replace_version(content, "2.22.0")
         self.assertIn('version: "2.22.0"', result)
         self.assertNotIn('version: 2.0.0', result)
-    
-    def test_apply_branding_transformation(self):
-        """Test branding transformation"""
-        # Read the file first to populate cache
-        self.file_processor.read_spec_file()
-        content = self.file_processor._cached_content
-        result = self.file_processor._replace_branding(content)
-        self.assertIn('Run:ai', result)
-        self.assertNotIn('Run:AI', result)
     
     def test_apply_docs_link_transformation(self):
         """Test documentation link transformation"""

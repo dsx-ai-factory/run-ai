@@ -20,7 +20,7 @@ var _ MappedNullable = &AllowOverride{}
 
 // AllowOverride struct for AllowOverride
 type AllowOverride struct {
-	// when false, a child scope cannot override this rule. default to true.
+	// when false, a child scope cannot override this rule. default to false.
 	AllowOverride NullableBool `json:"allowOverride,omitempty"`
 }
 
