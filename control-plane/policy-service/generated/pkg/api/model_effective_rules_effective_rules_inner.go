@@ -44,7 +44,7 @@ type EffectiveRulesEffectiveRulesInner struct {
 	SelectorParams map[string]interface{} `json:"selectorParams,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// when false, a child scope cannot override this rule. default to true.
+	// when false, a child scope cannot override this rule. default to false.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//AllowOverride *bool `json:"allowOverride,omitempty"`
 	AllowOverride *bool `json:"allowOverride,omitempty" gorm:""`

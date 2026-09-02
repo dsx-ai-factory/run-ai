@@ -7,7 +7,7 @@ Handles file operations and content transformations for OpenAPI specs.
 import shutil
 from pathlib import Path
 from typing import Optional
-from .config import Config, RegexPatterns, BrandingConstants
+from .config import Config, RegexPatterns
 from .link_replacer import LinkReplacer
 
 
@@ -89,18 +89,13 @@ class FileProcessor:
 
         # Apply content transformations
         content = self._replace_version(content, version)
-        content = self._replace_branding(content)
 
         self.write_spec_file(content)
 
     def _replace_version(self, content: str, version: str) -> str:
         """Replace version in the content"""
         return RegexPatterns.VERSION_REPLACE.sub(f'version: "{version}"', content)
-    
-    def _replace_branding(self, content: str) -> str:
-        """Replace branding in the content"""
-        return RegexPatterns.BRANDING.sub(BrandingConstants.NEW_BRAND, content)
-    
+
     def validate_files(self) -> None:
         """Validate that required files exist"""
         if not self.spec_file_path.exists():

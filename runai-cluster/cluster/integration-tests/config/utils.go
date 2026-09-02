@@ -69,9 +69,8 @@ func buildDefaultLegacyNodePoolObject() client.Object {
 			Name: v1alpha1.DefaultNodePoolName,
 		},
 		Spec: v1alpha1.NodePoolSpec{
-			LabelKey:              "",
-			LabelValue:            "",
-			OverProvisioningRatio: 1,
+			LabelKey:   "",
+			LabelValue: "",
 			PlacementStrategy: v1alpha1.PlacementStrategy{
 				Cpu:       "",
 				Gpu:       "",

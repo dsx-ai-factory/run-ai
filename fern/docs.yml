@@ -8,7 +8,7 @@ logo:
   right-text: Run:ai
 navbar-links:
 - type: github
-  value: https://github.com/run-ai/runai-docs
+  value: https://github.com/dsx-ai-factory/run-ai
 
 products:
   - display-name: Self-Hosted

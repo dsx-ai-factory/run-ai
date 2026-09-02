@@ -219,12 +219,22 @@ func UrlsToWorkloadRunner(info *composer.ExposedUrlInfo, target any, cookie any)
 
 	for _, nick := range composer.SortedMapKeys(info.Items) {
 		item := info.Items[nick]
-		if item == nil || item.OAuthPort == nil {
+		if item == nil {
 			continue
 		}
 
-		oauthPort := *item.OAuthPort
-		portName := fmt.Sprintf("port-%d", oauthPort)
+		// When this URL has no OAuth proxy, route the Service directly to the
+		// workload application. Forced-proxy URLs continue to use the OAuth port
+		// even when external URL auth is disabled cluster-wide.
+		targetPort := item.ContainerPort
+		if init_containers.ShouldBuildOAuth2Proxy(info.Config, item) {
+			targetPort = item.OAuthPort
+		}
+		if targetPort == nil {
+			continue
+		}
+		serviceTargetPort := *targetPort
+		portName := fmt.Sprintf("port-%d", serviceTargetPort)
 
 		// Determine the URL: either custom-provided or auto-generated
 		urlStr := item.Url
@@ -250,7 +260,7 @@ func UrlsToWorkloadRunner(info *composer.ExposedUrlInfo, target any, cookie any)
 
 		port := openapi.NewServicePort(defaultHttpPort)
 		port.SetName(portName)
-		port.SetTargetPort(oauthPort)
+		port.SetTargetPort(serviceTargetPort)
 
 		// K8s resource names follow the cluster builder convention
 		// "<workloadInitials>-<workloadName>-<suffix>" so two workloads with the

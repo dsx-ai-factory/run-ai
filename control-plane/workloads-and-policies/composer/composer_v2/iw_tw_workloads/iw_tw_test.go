@@ -37,11 +37,12 @@ const testOauth2ProxyImage = "test.registry/oauth2-proxy:test"
 // HTTPRoute paths in buildExternalAccess end-to-end without changing the
 // default test cluster used by the other entries.
 type testClusterOpts struct {
-	isOpenshift       bool
-	ingressEnabled    *bool
-	gatewayAPIEnabled *bool
-	gatewayName       string
-	gatewayNamespace  string
+	isOpenshift         bool
+	externalAuthEnabled *bool
+	ingressEnabled      *bool
+	gatewayAPIEnabled   *bool
+	gatewayName         string
+	gatewayNamespace    string
 }
 
 func testClusterStorageConfig(domain string, subdomain bool) composer.ClusterStorageConfig {
@@ -55,6 +56,9 @@ func testClusterStorageConfigWithOpts(domain string, subdomain bool, opts testCl
 	reported.SetS3FileSystemImage(defaults.S3FsImage())
 	reported.SetRunaiOauth2ProxyImage(testOauth2ProxyImage)
 	reported.SetSubdomainEnabled(subdomain)
+	if opts.externalAuthEnabled != nil {
+		reported.SetExternalAuthUrlEnabled(*opts.externalAuthEnabled)
+	}
 	if opts.ingressEnabled != nil {
 		reported.SetIngressEnabled(*opts.ingressEnabled)
 	}
@@ -107,12 +111,13 @@ type ComposerTest struct {
 	// disabled) is used. clusterSubdomain only takes effect when at least one
 	// of the cluster overrides below is set, so existing entries keep using
 	// the default subdomain=false.
-	clusterIsOpenshift       bool
-	clusterSubdomain         bool
-	clusterIngressEnabled    *bool
-	clusterGatewayAPIEnabled *bool
-	clusterGatewayName       string
-	clusterGatewayNamespace  string
+	clusterIsOpenshift         bool
+	clusterSubdomain           bool
+	clusterExternalAuthEnabled *bool
+	clusterIngressEnabled      *bool
+	clusterGatewayAPIEnabled   *bool
+	clusterGatewayName         string
+	clusterGatewayNamespace    string
 }
 
 var ComposerTests = append([]TableEntry{
@@ -317,6 +322,13 @@ var ComposerTests = append([]TableEntry{
 		workloadType:  string(workloadsApi.WORKLOADTYPE_WORKSPACE),
 		specFname:     "urls_tensor_and_jupyter",
 		expectedFname: "urls_tensor_and_jupyter_ws",
+	}),
+
+	Entry("urls_external_auth_disabled", ComposerTest{
+		workloadType:               string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:                  "urls_tensor_and_jupyter",
+		expectedFname:              "urls_external_auth_disabled_ws",
+		clusterExternalAuthEnabled: convutils.Ref(false),
 	}),
 
 	Entry("urls_host_syntax", ComposerTest{
@@ -673,11 +685,12 @@ func RunComposerTest(testDetails ComposerTest, basePath string) {
 	jobSpecComposer.WithStorageClassConfiguration(storageClassConfig)
 	jobSpecComposer.WithDataVolumeClaimNames(testDetails.dataVolumeClaimNames)
 	clusterOpts := testClusterOpts{
-		isOpenshift:       testDetails.clusterIsOpenshift,
-		ingressEnabled:    testDetails.clusterIngressEnabled,
-		gatewayAPIEnabled: testDetails.clusterGatewayAPIEnabled,
-		gatewayName:       testDetails.clusterGatewayName,
-		gatewayNamespace:  testDetails.clusterGatewayNamespace,
+		isOpenshift:         testDetails.clusterIsOpenshift,
+		externalAuthEnabled: testDetails.clusterExternalAuthEnabled,
+		ingressEnabled:      testDetails.clusterIngressEnabled,
+		gatewayAPIEnabled:   testDetails.clusterGatewayAPIEnabled,
+		gatewayName:         testDetails.clusterGatewayName,
+		gatewayNamespace:    testDetails.clusterGatewayNamespace,
 	}
 	clusterSubdomain := testDetails.clusterSubdomain
 	jobSpecComposer.WithClusterStorageConfig(

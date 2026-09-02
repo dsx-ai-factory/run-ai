@@ -37,6 +37,14 @@ const (
 
 var oauth2GroupPattern = regexp.MustCompile(`^[a-zA-Z0-9][-_a-zA-Z0-9.]{0,62}[a-zA-Z0-9]$`)
 
+// ShouldBuildOAuth2Proxy reports whether an exposed URL is backed by an OAuth
+// proxy. Some serving URLs require the proxy even when external URL auth is
+// disabled cluster-wide.
+func ShouldBuildOAuth2Proxy(config composer.ClusterStorageConfig, item *composer.ExposedUrlInfoItem) bool {
+	return config != nil && item != nil &&
+		(config.ExternalAuthUrlEnabled() || item.BuildWhenExternalAuthURLDisabled)
+}
+
 func BuildOAuth2ProxyContainers(info *composer.ExposedUrlInfo) ([]corev1.Container, *workloadsApi.Error) {
 	result := make([]corev1.Container, 0)
 	if info == nil || info.Config == nil || len(info.Items) == 0 {
@@ -60,10 +68,7 @@ func BuildOAuth2ProxyContainers(info *composer.ExposedUrlInfo) ([]corev1.Contain
 
 	for idx, key := range composer.SortedMapKeys(info.Items) {
 		item := info.Items[key]
-		if item == nil {
-			continue
-		}
-		if !cfg.ExternalAuthUrlEnabled() && !item.BuildWhenExternalAuthURLDisabled {
+		if !ShouldBuildOAuth2Proxy(cfg, item) {
 			continue
 		}
 

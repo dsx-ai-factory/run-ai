@@ -30,7 +30,7 @@ require (
 	github.com/ThreeDotsLabs/watermill v1.4.7 // indirect
 	github.com/ThreeDotsLabs/watermill-redisstream v1.4.3 // indirect
 	github.com/andybalholm/brotli v1.2.1 // indirect
-	github.com/aws/smithy-go v1.27.8 // indirect
+	github.com/aws/smithy-go v1.28.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v3 v3.2.2 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
@@ -133,7 +133,7 @@ require (
 	github.com/run-ai/runai/runai-common-packages/cache/v2 v2.4.3
 	github.com/run-ai/runai/runai-common-packages/fips v1.0.0
 	github.com/run-ai/runai/runai-common-packages/runaictx v1.1.5
-	github.com/run-ai/runai/runai-common-packages/runaidb v1.0.11
+	github.com/run-ai/runai/runai-common-packages/runaidb v1.0.13
 )
 
 replace github.com/run-ai/runai/control-plane/authorization/pkg/client => ../../control-plane/authorization/pkg/client

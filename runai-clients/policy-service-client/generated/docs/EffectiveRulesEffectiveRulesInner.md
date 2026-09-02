@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 **SpecSelector** | **string** | The unique name of the spec selector | 
 **ItemSelector** | Pointer to **NullableString** | The name of the item selector that picks specific items of an itemized field. Omit for non-itemized fields. | [optional] 
 **SelectorParams** | Pointer to **map[string]interface{}** | The parameter values supplied to the spec selector and item selector at evaluation time, as a key-value map. | [optional] 
-**AllowOverride** | Pointer to **NullableBool** | when false, a child scope cannot override this rule. default to true. | [optional] 
+**AllowOverride** | Pointer to **NullableBool** | when false, a child scope cannot override this rule. default to false. | [optional] 
 **Enforcements** | [**[]PolicyRuleEnforcement**](PolicyRuleEnforcement.md) | The set of enforcements that define the rule&#39;s behavior. Each enforcement pairs an enforcement type with its value, and multiple enforcements may combine on a single rule to constrain the targeted field. | 
 **SourceOfRule** | [**NullableSourceOfRule**](SourceOfRule.md) |  | 
 

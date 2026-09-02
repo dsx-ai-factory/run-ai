@@ -69,6 +69,7 @@
     <template v-slot:body="props">
       <runai-table-row
         v-if="(topRow && getRowKey(props.row) !== getRowKey(topRow)) || !topRow"
+        :key="props.key"
         :columns="props.cols"
         :row="props.row"
         :name-column-icon="getRowIcon(props.row)"

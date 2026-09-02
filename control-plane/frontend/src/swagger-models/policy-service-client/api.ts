@@ -40,7 +40,7 @@ export interface ActivationReplicasField {
  */
 export interface AllowOverride {
     /**
-     * when false, a child scope cannot override this rule. default to true.
+     * when false, a child scope cannot override this rule. default to false.
      * @type {boolean}
      * @memberof AllowOverride
      */
@@ -4523,7 +4523,7 @@ export interface EffectiveRulesEffectiveRulesInner {
      */
     'selectorParams'?: { [key: string]: any; };
     /**
-     * when false, a child scope cannot override this rule. default to true.
+     * when false, a child scope cannot override this rule. default to false.
      * @type {boolean}
      * @memberof EffectiveRulesEffectiveRulesInner
      */
@@ -11859,7 +11859,7 @@ export interface PolicyRule {
      */
     'selectorParams'?: { [key: string]: any; };
     /**
-     * when false, a child scope cannot override this rule. default to true.
+     * when false, a child scope cannot override this rule. default to false.
      * @type {boolean}
      * @memberof PolicyRule
      */

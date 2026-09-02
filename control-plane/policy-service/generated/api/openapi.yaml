@@ -74188,7 +74188,7 @@ components:
       properties:
         allowOverride:
           description: "when false, a child scope cannot override this rule. default\
-            \ to true."
+            \ to false."
           nullable: true
           type: boolean
       type: object

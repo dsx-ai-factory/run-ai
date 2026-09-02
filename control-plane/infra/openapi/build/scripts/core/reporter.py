@@ -57,7 +57,6 @@ class Reporter:
         """Print detailed transformation results"""
         print("✨ Transformations applied:")
         print(f"   • Version: 2.0.0 → {version_transform}")
-        print("   • Branding: Run:AI → Run:ai")
         print(f"   • Documentation links: → {docs_url}")
         print()
     

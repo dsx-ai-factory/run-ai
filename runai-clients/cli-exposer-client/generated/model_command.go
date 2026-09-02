@@ -22,7 +22,7 @@ var _ MappedNullable = &Command{}
 
 // Command struct for Command
 type Command struct {
-	// The commands that can be used to install the Run:AI CLI.
+	// The commands that can be used to install the Run:ai CLI.
 	Command string `json:"command"`
 }
 

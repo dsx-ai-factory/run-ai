@@ -453,18 +453,23 @@ var _ = Describe("GVK Policy Service - multi-scope effective + breakdown", Order
 	// ── override semantics: same rule identity at multiple scopes ──────────
 	Context("override: same (field, specSelector, ...) at multiple scopes", func() {
 
-		It("a rule defined at both cluster and project, with the same identity, is overridden by the project's version", func() {
-			// cluster sets imagePullPolicy=Required:true; project sets the
-			// SAME rule (same field + specSelector) but Required:false. the
-			// merge must keep ONE effective entry for that identity, taken
-			// from the project (descendant wins), and the sourceOfRule must
-			// point to project. this is the in-place-replace branch of
-			// MergeGvkRules - the only meaningful uncovered branch of the
-			// multi-scope merge before this test.
+		It("a rule defined at both cluster and project, with the same identity, is overridden by the project's version when the cluster opts in with allowOverride=true", func() {
+			// cluster sets imagePullPolicy=Required:true and explicitly
+			// allows descendants to override it (allowOverride=true); project
+			// sets the SAME rule (same field + specSelector) but
+			// Required:false. the merge must keep ONE effective entry for
+			// that identity, taken from the project (descendant wins), and
+			// the sourceOfRule must point to project. this is the in-place-
+			// replace branch of MergeGvkRules - the only meaningful
+			// uncovered branch of the multi-scope merge before this test.
+			// note: since the default for allowOverride is false, the
+			// cluster rule must explicitly set allowOverride=true for the
+			// project's version to win.
 			clusterVersion := api.PolicyRule{
-				Field:        "imagePullPolicy",
-				SpecSelector: "allContainers",
-				Enforcements: []api.PolicyRuleEnforcement{{Required: convutils.Ref(true)}},
+				Field:         "imagePullPolicy",
+				SpecSelector:  "allContainers",
+				AllowOverride: convutils.Ref(true),
+				Enforcements:  []api.PolicyRuleEnforcement{{Required: convutils.Ref(true)}},
 			}
 			projectVersion := api.PolicyRule{
 				Field:        "imagePullPolicy",
@@ -475,9 +480,8 @@ var _ = Describe("GVK Policy Service - multi-scope effective + breakdown", Order
 			createGvkPolicyForTest(router, tenantId, newClusterPolicyReq([]api.PolicyRule{clusterVersion}))
 			projectPolicy := createGvkPolicyForTest(router, tenantId, newProjectPolicyReq([]api.PolicyRule{projectVersion}))
 
-			// the project's own get-by-id (returned by create) carries the
-			// recomputed effective: a single rule, from project, with the
-			// project's enforcement value.
+			// the project's own get-by-id (returned by create) effectivr has the project own rule
+			// with allowOverride=nil
 			Expect(projectPolicy.EffectiveRules).To(HaveLen(1),
 				"override must produce exactly one effective rule per identity")
 			er := projectPolicy.EffectiveRules[0]
@@ -490,6 +494,8 @@ var _ = Describe("GVK Policy Service - multi-scope effective + breakdown", Order
 			Expect(er.Enforcements[0].Required).NotTo(BeNil())
 			Expect(*er.Enforcements[0].Required).To(BeFalse(),
 				"effective enforcement must be the project's value, not the cluster's")
+			Expect(er.AllowOverride).To(HaveValue(BeFalse()),
+				"project didn't specify allowOverride, so effective must show the default (false) - never nil")
 
 			// and the same single-rule, project-sourced result is what
 			// get-by-type-and-scope and get-effective return.
@@ -514,24 +520,13 @@ var _ = Describe("GVK Policy Service - multi-scope effective + breakdown", Order
 			expectBreakdownFields(projectByScope.Breakdown, "imagePullPolicy")
 		})
 
-		// Same rule identity, different enforcement kinds across scopes:
-		// department contributes a default value, project contributes a set
-		// value. A single given rule may not carry both set and default at
-		// once (that's rejected up front by validateRules), but the two
-		// kinds can legitimately coexist across the scope hierarchy — this
-		// is precisely the "in the effective it's ok because they can
-		// originate from two different scopes" case. Since both rules
-		// share the same identity (field + specSelector) and neither the
-		// department nor the project side pins allowOverride=false, the
-		// descendant-wins branch of MergeGvkRules replaces the department's
-		// whole rule with the project's whole rule: the effective ends up
-		// with a single rule carrying the project's set, sourced from
-		// project, and the department's default does not survive alongside
-		// it.
-		It("a department default and a project set for the same identity: the project set replaces the department default in effective", func() {
+		// department -> default value + allowOverride
+		// project -> different default value + nil override
+		It("a department default and a project set for the same identity: the project set replaces the department default in effective when the department opts in with allowOverride=true", func() {
 			deptVersion := api.PolicyRule{
-				Field:        "imagePullPolicy",
-				SpecSelector: "allContainers",
+				Field:         "imagePullPolicy",
+				SpecSelector:  "allContainers",
+				AllowOverride: convutils.Ref(true),
 				Enforcements: []api.PolicyRuleEnforcement{
 					{Default: map[string]interface{}{DefaultArgName: "IfNotPresent"}},
 				},
@@ -565,6 +560,8 @@ var _ = Describe("GVK Policy Service - multi-scope effective + breakdown", Order
 				"the department's default must not survive alongside the project's set for the same rule identity")
 			Expect(er.Enforcements[0].Set[DefaultArgName]).To(Equal("Always"),
 				"effective enforcement must carry the project's set value, not the department's default value")
+			Expect(er.AllowOverride).To(HaveValue(BeFalse()),
+				"project didn't specify allowOverride, so effective must show the default (false) - never nil")
 
 			// get-by-type-and-scope and get-effective agree with the
 			// create response.
@@ -597,6 +594,8 @@ var _ = Describe("GVK Policy Service - multi-scope effective + breakdown", Order
 			Expect(deptByScope.EffectiveRules[0].Enforcements[0].Default).NotTo(BeNil(),
 				"the department's own effective must still carry its default")
 			Expect(deptByScope.EffectiveRules[0].Enforcements[0].Default[DefaultArgName]).To(Equal("IfNotPresent"))
+			Expect(deptByScope.EffectiveRules[0].AllowOverride).To(HaveValue(BeTrue()),
+				"department explicitly set allowOverride=true; effective must carry the same value")
 		})
 	})
 
@@ -604,24 +603,26 @@ var _ = Describe("GVK Policy Service - multi-scope effective + breakdown", Order
 	Context("allowOverride: parent gates whether a descendant may override", func() {
 
 		// two rule identities shared across cluster + dept:
-		//   ruleLocked: image / allContainers - cluster pins it with allowOverride=false
-		//   ruleOpen:   imagePullPolicy / allContainers - cluster leaves it open
+		//   ruleLocked: image / allContainers - cluster leaves allowOverride
+		//               unset, which defaults to false (locked)
+		//   ruleOpen:   imagePullPolicy / allContainers - cluster explicitly
+		//               opts in with allowOverride=true
 		//
 		// "locked" means the cluster says "no descendant may override this
-		// rule, my version wins for the whole subtree". "open" means the
-		// cluster lets descendants replace its version (this is also the
-		// default when allowOverride is unset).
+		// rule, my version wins for the whole subtree" - this is also the
+		// default when allowOverride is unset. "open" means the cluster
+		// explicitly lets descendants replace its version.
 		ruleLockedAtCluster := api.PolicyRule{
-			Field:         "image",
-			SpecSelector:  "allContainers",
-			AllowOverride: convutils.Ref(false),
-			Enforcements:  []api.PolicyRuleEnforcement{{Required: convutils.Ref(true)}},
+			Field:        "image",
+			SpecSelector: "allContainers",
+			// no AllowOverride - defaults to false (locked)
+			Enforcements: []api.PolicyRuleEnforcement{{Required: convutils.Ref(true)}},
 		}
 		ruleOpenAtCluster := api.PolicyRule{
-			Field:        "imagePullPolicy",
-			SpecSelector: "allContainers",
-			// no AllowOverride - defaults to allow
-			Enforcements: []api.PolicyRuleEnforcement{{Required: convutils.Ref(true)}},
+			Field:         "imagePullPolicy",
+			SpecSelector:  "allContainers",
+			AllowOverride: convutils.Ref(true),
+			Enforcements:  []api.PolicyRuleEnforcement{{Required: convutils.Ref(true)}},
 		}
 		// the dept versions target the SAME two identities, but with the
 		// opposite Required value so we can tell the source apart from
@@ -727,6 +728,153 @@ var _ = Describe("GVK Policy Service - multi-scope effective + breakdown", Order
 			})
 			Expect(*findRuleByField(projectEff, "image").Enforcements[0].Required).To(BeFalse())
 			Expect(*findRuleByField(projectEff, "imagePullPolicy").Enforcements[0].Required).To(BeFalse())
+		})
+
+		// 3-level chain (cluster → dept → project) with the SAME rule
+		// identity at every scope. The subtle invariant tested here is
+		// that MergeGvkRules reads allowOverride off the currently-winning
+		// rule at each merge step - so once dept overrides cluster,
+		// dept's OWN allowOverride (not cluster's) governs whether
+		// project can override in turn. This is precisely the case that
+		// distinguishes the new default (unspecified = locked) from a
+		// naive "top ancestor's allowOverride cascades everywhere"
+		// reading of the semantics.
+		It("3-level chain: intermediate scope's allowOverride gates deeper descendants; flipping levels changes the winner", func() {
+			// state 0 setup:
+			//   cluster.image (allowOverride=true,   Required=true)
+			//   dept.image    (allowOverride unspec, Required=false)  -> defaults to locked
+			//   project.image (allowOverride=true,   Required=true)   -> tries to override, but dept locks
+			clusterRuleOpen := api.PolicyRule{
+				Field:         "image",
+				SpecSelector:  "allContainers",
+				AllowOverride: convutils.Ref(true),
+				Enforcements:  []api.PolicyRuleEnforcement{{Required: convutils.Ref(true)}},
+			}
+			deptRuleUnspec := api.PolicyRule{
+				Field:        "image",
+				SpecSelector: "allContainers",
+				// no AllowOverride - defaults to false (locked)
+				Enforcements: []api.PolicyRuleEnforcement{{Required: convutils.Ref(false)}},
+			}
+			projectRuleOpen := api.PolicyRule{
+				Field:         "image",
+				SpecSelector:  "allContainers",
+				AllowOverride: convutils.Ref(true),
+				Enforcements:  []api.PolicyRuleEnforcement{{Required: convutils.Ref(true)}},
+			}
+
+			clusterPolicy := createGvkPolicyForTest(router, tenantId, newClusterPolicyReq([]api.PolicyRule{clusterRuleOpen}))
+			deptPolicy := createGvkPolicyForTest(router, tenantId, newDepartmentPolicyReq([]api.PolicyRule{deptRuleUnspec}))
+			createGvkPolicyForTest(router, tenantId, newProjectPolicyReq([]api.PolicyRule{projectRuleOpen}))
+
+			// state 0 expectations:
+			// dept-level effective: cluster is open, dept overrides -> DEPT
+			// project-level effective: dept in accumulated effective has
+			// no allowOverride (locked), so project's allowOverride=true
+			// on its OWN rule is irrelevant - the merge reads the parent's
+			// allowOverride. project's rule is dropped -> DEPT wins.
+			deptEff0 := getDeptByScope().EffectiveRules
+			expectEffectiveRuleSources(deptEff0, map[string]api.ScopeType{
+				ruleKey(deptRuleUnspec): api.SCOPETYPE_DEPARTMENT,
+			})
+			Expect(*findRuleByField(deptEff0, "image").Enforcements[0].Required).To(BeFalse(),
+				"dept must carry its own Required=false (dept won over cluster's Required=true)")
+
+			projectEff0 := getProjectByScope().EffectiveRules
+			expectEffectiveRuleSources(projectEff0, map[string]api.ScopeType{
+				ruleKey(projectRuleOpen): api.SCOPETYPE_DEPARTMENT,
+			})
+			Expect(*findRuleByField(projectEff0, "image").Enforcements[0].Required).To(BeFalse(),
+				"project's allowOverride=true on its own rule cannot override the dept parent (whose allowOverride is unspec/locked): dept's Required=false must survive")
+
+			// state 1: PUT dept with allowOverride=true. now project's
+			// override is unlocked and its rule wins at project level.
+			// cluster is still open, so dept still wins over cluster at
+			// dept level.
+			deptRuleOpen := api.PolicyRule{
+				Field:         "image",
+				SpecSelector:  "allContainers",
+				AllowOverride: convutils.Ref(true),
+				Enforcements:  []api.PolicyRuleEnforcement{{Required: convutils.Ref(false)}},
+			}
+			doPut(router, tenantId, gvkPolicyURL(deptPolicy.Id), api.UpdateGvkPolicyReq{
+				Rules: []api.PolicyRule{deptRuleOpen},
+			})
+
+			deptEff1 := getDeptByScope().EffectiveRules
+			expectEffectiveRuleSources(deptEff1, map[string]api.ScopeType{
+				ruleKey(deptRuleOpen): api.SCOPETYPE_DEPARTMENT,
+			})
+			Expect(*findRuleByField(deptEff1, "image").Enforcements[0].Required).To(BeFalse(),
+				"cluster is still open, dept still wins at dept level")
+
+			projectEff1 := getProjectByScope().EffectiveRules
+			expectEffectiveRuleSources(projectEff1, map[string]api.ScopeType{
+				ruleKey(projectRuleOpen): api.SCOPETYPE_PROJECT,
+			})
+			Expect(*findRuleByField(projectEff1, "image").Enforcements[0].Required).To(BeTrue(),
+				"dept now allows override, so project's Required=true must win at project level")
+
+			// state 2: PUT cluster with allowOverride explicitly false.
+			// now dept cannot override cluster - cluster's rule survives
+			// at dept level. and since the accumulated effective at dept
+			// is cluster's rule (also locked), project cannot override
+			// either. cluster wins throughout the whole subtree.
+			clusterRuleLocked := api.PolicyRule{
+				Field:         "image",
+				SpecSelector:  "allContainers",
+				AllowOverride: convutils.Ref(false),
+				Enforcements:  []api.PolicyRuleEnforcement{{Required: convutils.Ref(true)}},
+			}
+			doPut(router, tenantId, gvkPolicyURL(clusterPolicy.Id), api.UpdateGvkPolicyReq{
+				Rules: []api.PolicyRule{clusterRuleLocked},
+			})
+
+			deptEff2 := getDeptByScope().EffectiveRules
+			expectEffectiveRuleSources(deptEff2, map[string]api.ScopeType{
+				ruleKey(deptRuleOpen): api.SCOPETYPE_CLUSTER,
+			})
+			Expect(*findRuleByField(deptEff2, "image").Enforcements[0].Required).To(BeTrue(),
+				"cluster is now locked, so dept's Required=false is dropped and cluster's Required=true survives at dept level")
+
+			projectEff2 := getProjectByScope().EffectiveRules
+			expectEffectiveRuleSources(projectEff2, map[string]api.ScopeType{
+				ruleKey(projectRuleOpen): api.SCOPETYPE_CLUSTER,
+			})
+			Expect(*findRuleByField(projectEff2, "image").Enforcements[0].Required).To(BeTrue(),
+				"cluster is locked and its rule cascaded through dept's effective, so project's own allowOverride=true cannot help: cluster wins at project level too")
+		})
+
+		// Small pinning test: an explicit allowOverride=false on the parent
+		// must behave identically to an unspecified allowOverride. Both
+		// take the "keep parent" branch of MergeGvkRules but through
+		// different sub-paths of the type-assertion on allowOverride
+		// (explicit=false gives allowOverrideSpecified=true+allowOverride=false;
+		// unspec gives allowOverrideSpecified=false), so it is worth
+		// pinning this equivalence down explicitly.
+		It("explicit allowOverride=false on the parent locks identically to leaving it unspecified", func() {
+			clusterExplicitFalse := api.PolicyRule{
+				Field:         "image",
+				SpecSelector:  "allContainers",
+				AllowOverride: convutils.Ref(false),
+				Enforcements:  []api.PolicyRuleEnforcement{{Required: convutils.Ref(true)}},
+			}
+			deptAttemptOverride := api.PolicyRule{
+				Field:         "image",
+				SpecSelector:  "allContainers",
+				AllowOverride: convutils.Ref(true),
+				Enforcements:  []api.PolicyRuleEnforcement{{Required: convutils.Ref(false)}},
+			}
+
+			createGvkPolicyForTest(router, tenantId, newClusterPolicyReq([]api.PolicyRule{clusterExplicitFalse}))
+			createGvkPolicyForTest(router, tenantId, newDepartmentPolicyReq([]api.PolicyRule{deptAttemptOverride}))
+
+			deptEff := getDeptByScope().EffectiveRules
+			expectEffectiveRuleSources(deptEff, map[string]api.ScopeType{
+				ruleKey(deptAttemptOverride): api.SCOPETYPE_CLUSTER,
+			})
+			Expect(*findRuleByField(deptEff, "image").Enforcements[0].Required).To(BeTrue(),
+				"explicit allowOverride=false must lock the cluster's rule just like an unspecified one: cluster's Required=true survives even though dept tried to override")
 		})
 	})
 

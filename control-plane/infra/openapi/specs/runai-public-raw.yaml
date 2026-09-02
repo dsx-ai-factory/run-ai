@@ -25142,7 +25142,7 @@ paths:
       summary: Download Unix installer script
       description: >
         This endpoint returns a unix script that can be used to install the
-        Run:AI CLI.
+        Run:ai CLI.
       operationId: get_installer_unix
       x-service: cli-exposer
       x-test-coverage:
@@ -25174,7 +25174,7 @@ paths:
       summary: Get Unix installer script commands
       description: >
         This endpoint returns a unix script commands that can be used to install
-        the Run:AI CLI.
+        the Run:ai CLI.
       operationId: get_installer_unix_commands
       x-service: cli-exposer
       x-test-coverage:
@@ -25205,7 +25205,7 @@ paths:
       summary: Download Mac installer script
       description: >
         This endpoint returns a Mac script that can be used to install the
-        Run:AI CLI.
+        Run:ai CLI.
       operationId: get_installer_mac
       x-service: cli-exposer
       x-test-coverage:
@@ -25237,7 +25237,7 @@ paths:
       summary: Get Mac installer script commands
       description: >
         This endpoint returns a Mac script commands that can be used to install
-        the Run:AI CLI.
+        the Run:ai CLI.
       operationId: get_installer_mac_commands
       x-service: cli-exposer
       x-test-coverage:
@@ -25268,7 +25268,7 @@ paths:
       summary: Download Linux installer script
       description: >
         This endpoint returns a Linux script that can be used to install the
-        Run:AI CLI.
+        Run:ai CLI.
       operationId: get_installer_linux
       x-service: cli-exposer
       x-test-coverage:
@@ -25300,7 +25300,7 @@ paths:
       summary: Get Linux installer script commands
       description: >
         This endpoint returns a linux script commands that can be used to
-        install the Run:AI CLI.
+        install the Run:ai CLI.
       operationId: get_installer_linux_commands
       x-service: cli-exposer
       x-test-coverage:
@@ -25331,7 +25331,7 @@ paths:
       summary: Get Windows MSI installer script commands
       description: >
         This endpoint returns a windows script commands that can be used to
-        install the Run:AI CLI.
+        install the Run:ai CLI.
       operationId: get_installer_windows_commands
       x-service: cli-exposer
       x-test-coverage:
@@ -25395,7 +25395,7 @@ paths:
     get:
       summary: Download RunAI Researcher command line binary
       description: |
-        This endpoint returns a binary file that run the Run:AI CLI.
+        This endpoint returns a binary file that run the Run:ai CLI.
       operationId: get_binary
       x-service: cli-exposer
       x-test-coverage:
@@ -25428,7 +25428,7 @@ paths:
     get:
       summary: Get CLI document by name
       description: |
-        This endpoint returns a document of help for the Run:AI CLI.
+        This endpoint returns a document of help for the Run:ai CLI.
       operationId: get_manual_document
       x-service: cli-exposer
       x-test-coverage:
@@ -25460,7 +25460,7 @@ paths:
       summary: Download Unix installer script
       description: >
         This endpoint returns a unix script that can be used to install the
-        Run:AI CLI.
+        Run:ai CLI.
       operationId: get_installer_unix_deprecated
       x-service: cli-exposer
       x-test-coverage:
@@ -25493,7 +25493,7 @@ paths:
       summary: Get Unix installer script commands
       description: >
         This endpoint returns a unix script commands that can be used to install
-        the Run:AI CLI.
+        the Run:ai CLI.
       operationId: get_installer_unix_commands_deprecated
       x-service: cli-exposer
       x-test-coverage:
@@ -25525,7 +25525,7 @@ paths:
       summary: Download Mac installer script
       description: >
         This endpoint returns a Mac script that can be used to install the
-        Run:AI CLI.
+        Run:ai CLI.
       operationId: get_installer_mac_deprecated
       x-service: cli-exposer
       x-test-coverage:
@@ -25558,7 +25558,7 @@ paths:
       summary: Get Mac installer script commands
       description: >
         This endpoint returns a Mac script commands that can be used to install
-        the Run:AI CLI.
+        the Run:ai CLI.
       operationId: get_installer_mac_commands_deprecated
       x-service: cli-exposer
       x-test-coverage:
@@ -25590,7 +25590,7 @@ paths:
       summary: Download Linux installer script
       description: >
         This endpoint returns a Linux script that can be used to install the
-        Run:AI CLI.
+        Run:ai CLI.
       operationId: get_installer_linux_deprecated
       x-service: cli-exposer
       x-test-coverage:
@@ -25623,7 +25623,7 @@ paths:
       summary: Get Linux installer script commands
       description: >
         This endpoint returns a linux script commands that can be used to
-        install the Run:AI CLI.
+        install the Run:ai CLI.
       operationId: get_installer_linux_commands_deprecated
       x-service: cli-exposer
       x-test-coverage:
@@ -25655,7 +25655,7 @@ paths:
       summary: Get Windows MSI installer script commands
       description: >
         This endpoint returns a windows script commands that can be used to
-        install the Run:AI CLI.
+        install the Run:ai CLI.
       operationId: get_installer_windows_commands_deprecated
       x-service: cli-exposer
       x-test-coverage:
@@ -25721,7 +25721,7 @@ paths:
       deprecated: true
       summary: Download RunAI Researcher command line binary
       description: |
-        This endpoint returns a binary file that run the Run:AI CLI.
+        This endpoint returns a binary file that run the Run:ai CLI.
       operationId: get_binary_deprecated
       x-service: cli-exposer
       x-test-coverage:
@@ -25755,7 +25755,7 @@ paths:
       deprecated: true
       summary: Get CLI document by name
       description: |
-        This endpoint returns a document of help for the Run:AI CLI.
+        This endpoint returns a document of help for the Run:ai CLI.
       operationId: get_manual_document_deprecated
       x-service: cli-exposer
       x-test-coverage:
@@ -27690,7 +27690,7 @@ paths:
                     displayName: Banner configuration
                     description: >-
                       Configure a persistent banner displayed at the top of the
-                      Run:AI UI for all authenticated users.
+                      Run:ai UI for all authenticated users.
         '400':
           $ref: '#/components/responses/400BadRequest'
         '401':
@@ -46432,7 +46432,7 @@ components:
         allowOverride:
           description: >-
             when false, a child scope cannot override this rule. default to
-            true.
+            false.
           type: boolean
           nullable: true
     PolicyEnforcementSet:
@@ -58922,7 +58922,7 @@ components:
           maxLength: 200
           minLength: 1
           example: runai version
-          description: 'The commands that can be used to install the Run:AI CLI.'
+          description: 'The commands that can be used to install the Run:ai CLI.'
     Version:
       type: object
       required:
@@ -59905,7 +59905,7 @@ components:
           fontColor: '#FFFFFF'
         displayName: Banner configuration
         description: >-
-          Configure a persistent banner displayed at the top of the Run:AI UI
+          Configure a persistent banner displayed at the top of the Run:ai UI
           for all authenticated users.
     AppearanceSettingsGetAllResponse:
       type: object

@@ -8,15 +8,18 @@ package encryption
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 
 	"github.com/rs/zerolog/log"
 	"golang.org/x/exp/slices"
+)
+
+const (
+	gcmNonceSize = 12
+	gcmTagSize   = 16
 )
 
 type EncrypterDecrypterer interface {
@@ -33,11 +36,7 @@ type EncrypterDecrypter struct {
 }
 
 func (ed *EncrypterDecrypter) Encrypt(plaintext string) (string, error) {
-	nonce := make([]byte, ed.GCM.NonceSize())
-	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		return "", fmt.Errorf("failed to generate nonce: %w", err)
-	}
-	ciphertext := ed.GCM.Seal(nonce, nonce, []byte(plaintext), nil)
+	ciphertext := ed.GCM.Seal(nil, nil, []byte(plaintext), nil)
 	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
 
@@ -56,13 +55,11 @@ func (ed *EncrypterDecrypter) Decrypt(ciphertext string) (string, error) {
 		return "", fmt.Errorf("failed b64 secret decryption: %w", err)
 	}
 
-	nonceSize := ed.GCM.NonceSize()
-	if len(encryptedData) < nonceSize {
+	if len(encryptedData) < gcmNonceSize+gcmTagSize {
 		return "", errors.New("invalid ciphertext")
 	}
 
-	nonce, encryptedData := encryptedData[:nonceSize], encryptedData[nonceSize:]
-	plaintext, err := ed.GCM.Open(nil, nonce, encryptedData, nil)
+	plaintext, err := ed.GCM.Open(nil, nil, encryptedData, nil)
 	if err != nil {
 		return "", err
 	}
@@ -93,7 +90,7 @@ func NewEncrypterDecrypter(key []byte) *EncrypterDecrypter {
 	if err != nil {
 		log.Panic().Msgf("failed to create new cipher block")
 	}
-	gcm, err := cipher.NewGCM(block)
+	gcm, err := cipher.NewGCMWithRandomNonce(block)
 	if err != nil {
 		log.Panic().Msgf("failed to create new cipher GCM")
 	}

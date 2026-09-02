@@ -27,7 +27,7 @@ import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError
  */
 export interface Command {
     /**
-     * The commands that can be used to install the Run:AI CLI.
+     * The commands that can be used to install the Run:ai CLI.
      * @type {string}
      * @memberof Command
      */
@@ -256,7 +256,7 @@ export class HealthApi extends BaseAPI {
 export const ResearcherCommandLineInterfaceApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * This endpoint returns a binary file that run the Run:AI CLI. 
+         * This endpoint returns a binary file that run the Run:ai CLI. 
          * @summary Download RunAI Researcher command line binary
          * @param {'linux' | 'windows' | 'darwin'} operatingSystem The operating system name.
          * @param {string} architecture The architecture type.
@@ -298,7 +298,7 @@ export const ResearcherCommandLineInterfaceApiAxiosParamCreator = function (conf
             };
         },
         /**
-         * This endpoint returns a Linux script that can be used to install the Run:AI CLI. 
+         * This endpoint returns a Linux script that can be used to install the Run:ai CLI. 
          * @summary Download Linux installer script
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -332,7 +332,7 @@ export const ResearcherCommandLineInterfaceApiAxiosParamCreator = function (conf
             };
         },
         /**
-         * This endpoint returns a linux script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a linux script commands that can be used to install the Run:ai CLI. 
          * @summary Get Linux installer script commands
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -366,7 +366,7 @@ export const ResearcherCommandLineInterfaceApiAxiosParamCreator = function (conf
             };
         },
         /**
-         * This endpoint returns a Mac script that can be used to install the Run:AI CLI. 
+         * This endpoint returns a Mac script that can be used to install the Run:ai CLI. 
          * @summary Download Mac installer script
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -400,7 +400,7 @@ export const ResearcherCommandLineInterfaceApiAxiosParamCreator = function (conf
             };
         },
         /**
-         * This endpoint returns a Mac script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a Mac script commands that can be used to install the Run:ai CLI. 
          * @summary Get Mac installer script commands
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -434,7 +434,7 @@ export const ResearcherCommandLineInterfaceApiAxiosParamCreator = function (conf
             };
         },
         /**
-         * This endpoint returns a unix script that can be used to install the Run:AI CLI. 
+         * This endpoint returns a unix script that can be used to install the Run:ai CLI. 
          * @summary Download Unix installer script
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -468,7 +468,7 @@ export const ResearcherCommandLineInterfaceApiAxiosParamCreator = function (conf
             };
         },
         /**
-         * This endpoint returns a unix script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a unix script commands that can be used to install the Run:ai CLI. 
          * @summary Get Unix installer script commands
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -502,7 +502,7 @@ export const ResearcherCommandLineInterfaceApiAxiosParamCreator = function (conf
             };
         },
         /**
-         * This endpoint returns a windows script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a windows script commands that can be used to install the Run:ai CLI. 
          * @summary Get Windows MSI installer script commands
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -536,7 +536,7 @@ export const ResearcherCommandLineInterfaceApiAxiosParamCreator = function (conf
             };
         },
         /**
-         * This endpoint returns a document of help for the Run:AI CLI. 
+         * This endpoint returns a document of help for the Run:ai CLI. 
          * @summary Get CLI document by name
          * @param {string} documentName The manual document name.
          * @param {*} [options] Override http request option.
@@ -618,7 +618,7 @@ export const ResearcherCommandLineInterfaceApiFp = function(configuration?: Conf
     const localVarAxiosParamCreator = ResearcherCommandLineInterfaceApiAxiosParamCreator(configuration)
     return {
         /**
-         * This endpoint returns a binary file that run the Run:AI CLI. 
+         * This endpoint returns a binary file that run the Run:ai CLI. 
          * @summary Download RunAI Researcher command line binary
          * @param {'linux' | 'windows' | 'darwin'} operatingSystem The operating system name.
          * @param {string} architecture The architecture type.
@@ -630,7 +630,7 @@ export const ResearcherCommandLineInterfaceApiFp = function(configuration?: Conf
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * This endpoint returns a Linux script that can be used to install the Run:AI CLI. 
+         * This endpoint returns a Linux script that can be used to install the Run:ai CLI. 
          * @summary Download Linux installer script
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -640,7 +640,7 @@ export const ResearcherCommandLineInterfaceApiFp = function(configuration?: Conf
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * This endpoint returns a linux script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a linux script commands that can be used to install the Run:ai CLI. 
          * @summary Get Linux installer script commands
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -650,7 +650,7 @@ export const ResearcherCommandLineInterfaceApiFp = function(configuration?: Conf
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * This endpoint returns a Mac script that can be used to install the Run:AI CLI. 
+         * This endpoint returns a Mac script that can be used to install the Run:ai CLI. 
          * @summary Download Mac installer script
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -660,7 +660,7 @@ export const ResearcherCommandLineInterfaceApiFp = function(configuration?: Conf
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * This endpoint returns a Mac script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a Mac script commands that can be used to install the Run:ai CLI. 
          * @summary Get Mac installer script commands
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -670,7 +670,7 @@ export const ResearcherCommandLineInterfaceApiFp = function(configuration?: Conf
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * This endpoint returns a unix script that can be used to install the Run:AI CLI. 
+         * This endpoint returns a unix script that can be used to install the Run:ai CLI. 
          * @summary Download Unix installer script
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -680,7 +680,7 @@ export const ResearcherCommandLineInterfaceApiFp = function(configuration?: Conf
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * This endpoint returns a unix script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a unix script commands that can be used to install the Run:ai CLI. 
          * @summary Get Unix installer script commands
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -690,7 +690,7 @@ export const ResearcherCommandLineInterfaceApiFp = function(configuration?: Conf
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * This endpoint returns a windows script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a windows script commands that can be used to install the Run:ai CLI. 
          * @summary Get Windows MSI installer script commands
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -700,7 +700,7 @@ export const ResearcherCommandLineInterfaceApiFp = function(configuration?: Conf
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * This endpoint returns a document of help for the Run:AI CLI. 
+         * This endpoint returns a document of help for the Run:ai CLI. 
          * @summary Get CLI document by name
          * @param {string} documentName The manual document name.
          * @param {*} [options] Override http request option.
@@ -731,7 +731,7 @@ export const ResearcherCommandLineInterfaceApiFactory = function (configuration?
     const localVarFp = ResearcherCommandLineInterfaceApiFp(configuration)
     return {
         /**
-         * This endpoint returns a binary file that run the Run:AI CLI. 
+         * This endpoint returns a binary file that run the Run:ai CLI. 
          * @summary Download RunAI Researcher command line binary
          * @param {'linux' | 'windows' | 'darwin'} operatingSystem The operating system name.
          * @param {string} architecture The architecture type.
@@ -742,7 +742,7 @@ export const ResearcherCommandLineInterfaceApiFactory = function (configuration?
             return localVarFp.getBinary(operatingSystem, architecture, options).then((request) => request(axios, basePath));
         },
         /**
-         * This endpoint returns a Linux script that can be used to install the Run:AI CLI. 
+         * This endpoint returns a Linux script that can be used to install the Run:ai CLI. 
          * @summary Download Linux installer script
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -751,7 +751,7 @@ export const ResearcherCommandLineInterfaceApiFactory = function (configuration?
             return localVarFp.getInstallerLinux(options).then((request) => request(axios, basePath));
         },
         /**
-         * This endpoint returns a linux script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a linux script commands that can be used to install the Run:ai CLI. 
          * @summary Get Linux installer script commands
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -760,7 +760,7 @@ export const ResearcherCommandLineInterfaceApiFactory = function (configuration?
             return localVarFp.getInstallerLinuxCommands(options).then((request) => request(axios, basePath));
         },
         /**
-         * This endpoint returns a Mac script that can be used to install the Run:AI CLI. 
+         * This endpoint returns a Mac script that can be used to install the Run:ai CLI. 
          * @summary Download Mac installer script
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -769,7 +769,7 @@ export const ResearcherCommandLineInterfaceApiFactory = function (configuration?
             return localVarFp.getInstallerMac(options).then((request) => request(axios, basePath));
         },
         /**
-         * This endpoint returns a Mac script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a Mac script commands that can be used to install the Run:ai CLI. 
          * @summary Get Mac installer script commands
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -778,7 +778,7 @@ export const ResearcherCommandLineInterfaceApiFactory = function (configuration?
             return localVarFp.getInstallerMacCommands(options).then((request) => request(axios, basePath));
         },
         /**
-         * This endpoint returns a unix script that can be used to install the Run:AI CLI. 
+         * This endpoint returns a unix script that can be used to install the Run:ai CLI. 
          * @summary Download Unix installer script
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -787,7 +787,7 @@ export const ResearcherCommandLineInterfaceApiFactory = function (configuration?
             return localVarFp.getInstallerUnix(options).then((request) => request(axios, basePath));
         },
         /**
-         * This endpoint returns a unix script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a unix script commands that can be used to install the Run:ai CLI. 
          * @summary Get Unix installer script commands
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -796,7 +796,7 @@ export const ResearcherCommandLineInterfaceApiFactory = function (configuration?
             return localVarFp.getInstallerUnixCommands(options).then((request) => request(axios, basePath));
         },
         /**
-         * This endpoint returns a windows script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a windows script commands that can be used to install the Run:ai CLI. 
          * @summary Get Windows MSI installer script commands
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -805,7 +805,7 @@ export const ResearcherCommandLineInterfaceApiFactory = function (configuration?
             return localVarFp.getInstallerWindowsCommands(options).then((request) => request(axios, basePath));
         },
         /**
-         * This endpoint returns a document of help for the Run:AI CLI. 
+         * This endpoint returns a document of help for the Run:ai CLI. 
          * @summary Get CLI document by name
          * @param {string} documentName The manual document name.
          * @param {*} [options] Override http request option.
@@ -834,7 +834,7 @@ export const ResearcherCommandLineInterfaceApiFactory = function (configuration?
  */
 export class ResearcherCommandLineInterfaceApi extends BaseAPI {
     /**
-     * This endpoint returns a binary file that run the Run:AI CLI. 
+     * This endpoint returns a binary file that run the Run:ai CLI. 
      * @summary Download RunAI Researcher command line binary
      * @param {'linux' | 'windows' | 'darwin'} operatingSystem The operating system name.
      * @param {string} architecture The architecture type.
@@ -847,7 +847,7 @@ export class ResearcherCommandLineInterfaceApi extends BaseAPI {
     }
 
     /**
-     * This endpoint returns a Linux script that can be used to install the Run:AI CLI. 
+     * This endpoint returns a Linux script that can be used to install the Run:ai CLI. 
      * @summary Download Linux installer script
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -858,7 +858,7 @@ export class ResearcherCommandLineInterfaceApi extends BaseAPI {
     }
 
     /**
-     * This endpoint returns a linux script commands that can be used to install the Run:AI CLI. 
+     * This endpoint returns a linux script commands that can be used to install the Run:ai CLI. 
      * @summary Get Linux installer script commands
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -869,7 +869,7 @@ export class ResearcherCommandLineInterfaceApi extends BaseAPI {
     }
 
     /**
-     * This endpoint returns a Mac script that can be used to install the Run:AI CLI. 
+     * This endpoint returns a Mac script that can be used to install the Run:ai CLI. 
      * @summary Download Mac installer script
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -880,7 +880,7 @@ export class ResearcherCommandLineInterfaceApi extends BaseAPI {
     }
 
     /**
-     * This endpoint returns a Mac script commands that can be used to install the Run:AI CLI. 
+     * This endpoint returns a Mac script commands that can be used to install the Run:ai CLI. 
      * @summary Get Mac installer script commands
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -891,7 +891,7 @@ export class ResearcherCommandLineInterfaceApi extends BaseAPI {
     }
 
     /**
-     * This endpoint returns a unix script that can be used to install the Run:AI CLI. 
+     * This endpoint returns a unix script that can be used to install the Run:ai CLI. 
      * @summary Download Unix installer script
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -902,7 +902,7 @@ export class ResearcherCommandLineInterfaceApi extends BaseAPI {
     }
 
     /**
-     * This endpoint returns a unix script commands that can be used to install the Run:AI CLI. 
+     * This endpoint returns a unix script commands that can be used to install the Run:ai CLI. 
      * @summary Get Unix installer script commands
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -913,7 +913,7 @@ export class ResearcherCommandLineInterfaceApi extends BaseAPI {
     }
 
     /**
-     * This endpoint returns a windows script commands that can be used to install the Run:AI CLI. 
+     * This endpoint returns a windows script commands that can be used to install the Run:ai CLI. 
      * @summary Get Windows MSI installer script commands
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -924,7 +924,7 @@ export class ResearcherCommandLineInterfaceApi extends BaseAPI {
     }
 
     /**
-     * This endpoint returns a document of help for the Run:AI CLI. 
+     * This endpoint returns a document of help for the Run:ai CLI. 
      * @summary Get CLI document by name
      * @param {string} documentName The manual document name.
      * @param {*} [options] Override http request option.
@@ -955,7 +955,7 @@ export class ResearcherCommandLineInterfaceApi extends BaseAPI {
 export const ResearcherCommandLineInterfaceDeprecatedApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * This endpoint returns a binary file that run the Run:AI CLI. 
+         * This endpoint returns a binary file that run the Run:ai CLI. 
          * @summary Download RunAI Researcher command line binary
          * @param {'linux' | 'windows' | 'darwin'} operatingSystem The operating system name.
          * @param {string} architecture The architecture type.
@@ -998,7 +998,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiAxiosParamCreator = func
             };
         },
         /**
-         * This endpoint returns a linux script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a linux script commands that can be used to install the Run:ai CLI. 
          * @summary Get Linux installer script commands
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1033,7 +1033,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiAxiosParamCreator = func
             };
         },
         /**
-         * This endpoint returns a Linux script that can be used to install the Run:AI CLI. 
+         * This endpoint returns a Linux script that can be used to install the Run:ai CLI. 
          * @summary Download Linux installer script
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1068,7 +1068,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiAxiosParamCreator = func
             };
         },
         /**
-         * This endpoint returns a Mac script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a Mac script commands that can be used to install the Run:ai CLI. 
          * @summary Get Mac installer script commands
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1103,7 +1103,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiAxiosParamCreator = func
             };
         },
         /**
-         * This endpoint returns a Mac script that can be used to install the Run:AI CLI. 
+         * This endpoint returns a Mac script that can be used to install the Run:ai CLI. 
          * @summary Download Mac installer script
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1138,7 +1138,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiAxiosParamCreator = func
             };
         },
         /**
-         * This endpoint returns a unix script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a unix script commands that can be used to install the Run:ai CLI. 
          * @summary Get Unix installer script commands
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1173,7 +1173,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiAxiosParamCreator = func
             };
         },
         /**
-         * This endpoint returns a unix script that can be used to install the Run:AI CLI. 
+         * This endpoint returns a unix script that can be used to install the Run:ai CLI. 
          * @summary Download Unix installer script
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1208,7 +1208,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiAxiosParamCreator = func
             };
         },
         /**
-         * This endpoint returns a windows script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a windows script commands that can be used to install the Run:ai CLI. 
          * @summary Get Windows MSI installer script commands
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1243,7 +1243,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiAxiosParamCreator = func
             };
         },
         /**
-         * This endpoint returns a document of help for the Run:AI CLI. 
+         * This endpoint returns a document of help for the Run:ai CLI. 
          * @summary Get CLI document by name
          * @param {string} documentName The manual document name.
          * @param {*} [options] Override http request option.
@@ -1327,7 +1327,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiFp = function(configurat
     const localVarAxiosParamCreator = ResearcherCommandLineInterfaceDeprecatedApiAxiosParamCreator(configuration)
     return {
         /**
-         * This endpoint returns a binary file that run the Run:AI CLI. 
+         * This endpoint returns a binary file that run the Run:ai CLI. 
          * @summary Download RunAI Researcher command line binary
          * @param {'linux' | 'windows' | 'darwin'} operatingSystem The operating system name.
          * @param {string} architecture The architecture type.
@@ -1340,7 +1340,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiFp = function(configurat
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * This endpoint returns a linux script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a linux script commands that can be used to install the Run:ai CLI. 
          * @summary Get Linux installer script commands
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1351,7 +1351,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiFp = function(configurat
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * This endpoint returns a Linux script that can be used to install the Run:AI CLI. 
+         * This endpoint returns a Linux script that can be used to install the Run:ai CLI. 
          * @summary Download Linux installer script
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1362,7 +1362,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiFp = function(configurat
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * This endpoint returns a Mac script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a Mac script commands that can be used to install the Run:ai CLI. 
          * @summary Get Mac installer script commands
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1373,7 +1373,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiFp = function(configurat
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * This endpoint returns a Mac script that can be used to install the Run:AI CLI. 
+         * This endpoint returns a Mac script that can be used to install the Run:ai CLI. 
          * @summary Download Mac installer script
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1384,7 +1384,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiFp = function(configurat
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * This endpoint returns a unix script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a unix script commands that can be used to install the Run:ai CLI. 
          * @summary Get Unix installer script commands
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1395,7 +1395,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiFp = function(configurat
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * This endpoint returns a unix script that can be used to install the Run:AI CLI. 
+         * This endpoint returns a unix script that can be used to install the Run:ai CLI. 
          * @summary Download Unix installer script
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1406,7 +1406,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiFp = function(configurat
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * This endpoint returns a windows script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a windows script commands that can be used to install the Run:ai CLI. 
          * @summary Get Windows MSI installer script commands
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1417,7 +1417,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiFp = function(configurat
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * This endpoint returns a document of help for the Run:AI CLI. 
+         * This endpoint returns a document of help for the Run:ai CLI. 
          * @summary Get CLI document by name
          * @param {string} documentName The manual document name.
          * @param {*} [options] Override http request option.
@@ -1450,7 +1450,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiFactory = function (conf
     const localVarFp = ResearcherCommandLineInterfaceDeprecatedApiFp(configuration)
     return {
         /**
-         * This endpoint returns a binary file that run the Run:AI CLI. 
+         * This endpoint returns a binary file that run the Run:ai CLI. 
          * @summary Download RunAI Researcher command line binary
          * @param {'linux' | 'windows' | 'darwin'} operatingSystem The operating system name.
          * @param {string} architecture The architecture type.
@@ -1462,7 +1462,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiFactory = function (conf
             return localVarFp.getBinaryDeprecated(operatingSystem, architecture, options).then((request) => request(axios, basePath));
         },
         /**
-         * This endpoint returns a linux script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a linux script commands that can be used to install the Run:ai CLI. 
          * @summary Get Linux installer script commands
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1472,7 +1472,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiFactory = function (conf
             return localVarFp.getInstallerLinuxCommandsDeprecated(options).then((request) => request(axios, basePath));
         },
         /**
-         * This endpoint returns a Linux script that can be used to install the Run:AI CLI. 
+         * This endpoint returns a Linux script that can be used to install the Run:ai CLI. 
          * @summary Download Linux installer script
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1482,7 +1482,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiFactory = function (conf
             return localVarFp.getInstallerLinuxDeprecated(options).then((request) => request(axios, basePath));
         },
         /**
-         * This endpoint returns a Mac script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a Mac script commands that can be used to install the Run:ai CLI. 
          * @summary Get Mac installer script commands
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1492,7 +1492,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiFactory = function (conf
             return localVarFp.getInstallerMacCommandsDeprecated(options).then((request) => request(axios, basePath));
         },
         /**
-         * This endpoint returns a Mac script that can be used to install the Run:AI CLI. 
+         * This endpoint returns a Mac script that can be used to install the Run:ai CLI. 
          * @summary Download Mac installer script
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1502,7 +1502,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiFactory = function (conf
             return localVarFp.getInstallerMacDeprecated(options).then((request) => request(axios, basePath));
         },
         /**
-         * This endpoint returns a unix script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a unix script commands that can be used to install the Run:ai CLI. 
          * @summary Get Unix installer script commands
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1512,7 +1512,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiFactory = function (conf
             return localVarFp.getInstallerUnixCommandsDeprecated(options).then((request) => request(axios, basePath));
         },
         /**
-         * This endpoint returns a unix script that can be used to install the Run:AI CLI. 
+         * This endpoint returns a unix script that can be used to install the Run:ai CLI. 
          * @summary Download Unix installer script
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1522,7 +1522,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiFactory = function (conf
             return localVarFp.getInstallerUnixDeprecated(options).then((request) => request(axios, basePath));
         },
         /**
-         * This endpoint returns a windows script commands that can be used to install the Run:AI CLI. 
+         * This endpoint returns a windows script commands that can be used to install the Run:ai CLI. 
          * @summary Get Windows MSI installer script commands
          * @param {*} [options] Override http request option.
          * @deprecated
@@ -1532,7 +1532,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiFactory = function (conf
             return localVarFp.getInstallerWindowsCommandsDeprecated(options).then((request) => request(axios, basePath));
         },
         /**
-         * This endpoint returns a document of help for the Run:AI CLI. 
+         * This endpoint returns a document of help for the Run:ai CLI. 
          * @summary Get CLI document by name
          * @param {string} documentName The manual document name.
          * @param {*} [options] Override http request option.
@@ -1563,7 +1563,7 @@ export const ResearcherCommandLineInterfaceDeprecatedApiFactory = function (conf
  */
 export class ResearcherCommandLineInterfaceDeprecatedApi extends BaseAPI {
     /**
-     * This endpoint returns a binary file that run the Run:AI CLI. 
+     * This endpoint returns a binary file that run the Run:ai CLI. 
      * @summary Download RunAI Researcher command line binary
      * @param {'linux' | 'windows' | 'darwin'} operatingSystem The operating system name.
      * @param {string} architecture The architecture type.
@@ -1577,7 +1577,7 @@ export class ResearcherCommandLineInterfaceDeprecatedApi extends BaseAPI {
     }
 
     /**
-     * This endpoint returns a linux script commands that can be used to install the Run:AI CLI. 
+     * This endpoint returns a linux script commands that can be used to install the Run:ai CLI. 
      * @summary Get Linux installer script commands
      * @param {*} [options] Override http request option.
      * @deprecated
@@ -1589,7 +1589,7 @@ export class ResearcherCommandLineInterfaceDeprecatedApi extends BaseAPI {
     }
 
     /**
-     * This endpoint returns a Linux script that can be used to install the Run:AI CLI. 
+     * This endpoint returns a Linux script that can be used to install the Run:ai CLI. 
      * @summary Download Linux installer script
      * @param {*} [options] Override http request option.
      * @deprecated
@@ -1601,7 +1601,7 @@ export class ResearcherCommandLineInterfaceDeprecatedApi extends BaseAPI {
     }
 
     /**
-     * This endpoint returns a Mac script commands that can be used to install the Run:AI CLI. 
+     * This endpoint returns a Mac script commands that can be used to install the Run:ai CLI. 
      * @summary Get Mac installer script commands
      * @param {*} [options] Override http request option.
      * @deprecated
@@ -1613,7 +1613,7 @@ export class ResearcherCommandLineInterfaceDeprecatedApi extends BaseAPI {
     }
 
     /**
-     * This endpoint returns a Mac script that can be used to install the Run:AI CLI. 
+     * This endpoint returns a Mac script that can be used to install the Run:ai CLI. 
      * @summary Download Mac installer script
      * @param {*} [options] Override http request option.
      * @deprecated
@@ -1625,7 +1625,7 @@ export class ResearcherCommandLineInterfaceDeprecatedApi extends BaseAPI {
     }
 
     /**
-     * This endpoint returns a unix script commands that can be used to install the Run:AI CLI. 
+     * This endpoint returns a unix script commands that can be used to install the Run:ai CLI. 
      * @summary Get Unix installer script commands
      * @param {*} [options] Override http request option.
      * @deprecated
@@ -1637,7 +1637,7 @@ export class ResearcherCommandLineInterfaceDeprecatedApi extends BaseAPI {
     }
 
     /**
-     * This endpoint returns a unix script that can be used to install the Run:AI CLI. 
+     * This endpoint returns a unix script that can be used to install the Run:ai CLI. 
      * @summary Download Unix installer script
      * @param {*} [options] Override http request option.
      * @deprecated
@@ -1649,7 +1649,7 @@ export class ResearcherCommandLineInterfaceDeprecatedApi extends BaseAPI {
     }
 
     /**
-     * This endpoint returns a windows script commands that can be used to install the Run:AI CLI. 
+     * This endpoint returns a windows script commands that can be used to install the Run:ai CLI. 
      * @summary Get Windows MSI installer script commands
      * @param {*} [options] Override http request option.
      * @deprecated
@@ -1661,7 +1661,7 @@ export class ResearcherCommandLineInterfaceDeprecatedApi extends BaseAPI {
     }
 
     /**
-     * This endpoint returns a document of help for the Run:AI CLI. 
+     * This endpoint returns a document of help for the Run:ai CLI. 
      * @summary Get CLI document by name
      * @param {string} documentName The manual document name.
      * @param {*} [options] Override http request option.

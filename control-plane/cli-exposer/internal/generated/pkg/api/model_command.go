@@ -20,7 +20,7 @@ var dummyCommand = runaihttp.AssertPattern
 
 type Command struct {
 
-	// The commands that can be used to install the Run:AI CLI.
+	// The commands that can be used to install the Run:ai CLI.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Command string `json:"command"`
 	Command string `json:"command" gorm:"not null;"`

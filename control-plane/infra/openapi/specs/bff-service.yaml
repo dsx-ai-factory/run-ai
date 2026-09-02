@@ -515,7 +515,7 @@ paths:
                       backgroundColor: '#D32F2F'
                       fontColor: '#FFFFFF'
                     displayName: Banner configuration
-                    description: Configure a persistent banner displayed at the top of the Run:AI UI for all authenticated users.
+                    description: Configure a persistent banner displayed at the top of the Run:ai UI for all authenticated users.
         '400':
           $ref: '#/components/responses/400BadRequest'
         '401':
@@ -1066,7 +1066,7 @@ components:
           backgroundColor: '#D32F2F'
           fontColor: '#FFFFFF'
         displayName: Banner configuration
-        description: Configure a persistent banner displayed at the top of the Run:AI UI for all authenticated users.
+        description: Configure a persistent banner displayed at the top of the Run:ai UI for all authenticated users.
     AppearanceSettingsGetAllResponse:
       type: object
       description: Response containing all appearance settings

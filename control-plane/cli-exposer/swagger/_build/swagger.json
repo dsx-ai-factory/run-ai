@@ -51,7 +51,7 @@
     "/api/v1/cli-exposer/installer/unix": {
       "get": {
         "summary": "Download Unix installer script",
-        "description": "This endpoint returns a unix script that can be used to install the Run:AI CLI.\n",
+        "description": "This endpoint returns a unix script that can be used to install the Run:ai CLI.\n",
         "operationId": "get_installer_unix",
         "x-service": "cli-exposer",
         "x-test-coverage": [
@@ -95,7 +95,7 @@
     "/api/v1/cli-exposer/installer/unix/commands": {
       "get": {
         "summary": "Get Unix installer script commands",
-        "description": "This endpoint returns a unix script commands that can be used to install the Run:AI CLI.\n",
+        "description": "This endpoint returns a unix script commands that can be used to install the Run:ai CLI.\n",
         "operationId": "get_installer_unix_commands",
         "x-service": "cli-exposer",
         "x-test-coverage": [
@@ -138,7 +138,7 @@
     "/api/v1/cli-exposer/installer/mac": {
       "get": {
         "summary": "Download Mac installer script",
-        "description": "This endpoint returns a Mac script that can be used to install the Run:AI CLI.\n",
+        "description": "This endpoint returns a Mac script that can be used to install the Run:ai CLI.\n",
         "operationId": "get_installer_mac",
         "x-service": "cli-exposer",
         "x-test-coverage": [
@@ -182,7 +182,7 @@
     "/api/v1/cli-exposer/installer/mac/commands": {
       "get": {
         "summary": "Get Mac installer script commands",
-        "description": "This endpoint returns a Mac script commands that can be used to install the Run:AI CLI.\n",
+        "description": "This endpoint returns a Mac script commands that can be used to install the Run:ai CLI.\n",
         "operationId": "get_installer_mac_commands",
         "x-service": "cli-exposer",
         "x-test-coverage": [
@@ -225,7 +225,7 @@
     "/api/v1/cli-exposer/installer/linux": {
       "get": {
         "summary": "Download Linux installer script",
-        "description": "This endpoint returns a Linux script that can be used to install the Run:AI CLI.\n",
+        "description": "This endpoint returns a Linux script that can be used to install the Run:ai CLI.\n",
         "operationId": "get_installer_linux",
         "x-service": "cli-exposer",
         "x-test-coverage": [
@@ -269,7 +269,7 @@
     "/api/v1/cli-exposer/installer/linux/commands": {
       "get": {
         "summary": "Get Linux installer script commands",
-        "description": "This endpoint returns a linux script commands that can be used to install the Run:AI CLI.\n",
+        "description": "This endpoint returns a linux script commands that can be used to install the Run:ai CLI.\n",
         "operationId": "get_installer_linux_commands",
         "x-service": "cli-exposer",
         "x-test-coverage": [
@@ -312,7 +312,7 @@
     "/api/v1/cli-exposer/installer/windows/commands": {
       "get": {
         "summary": "Get Windows MSI installer script commands",
-        "description": "This endpoint returns a windows script commands that can be used to install the Run:AI CLI.\n",
+        "description": "This endpoint returns a windows script commands that can be used to install the Run:ai CLI.\n",
         "operationId": "get_installer_windows_commands",
         "x-service": "cli-exposer",
         "x-test-coverage": [
@@ -398,7 +398,7 @@
     "/api/v1/cli-exposer/dist/{operatingSystem}/{architecture}/runai": {
       "get": {
         "summary": "Download RunAI Researcher command line binary",
-        "description": "This endpoint returns a binary file that run the Run:AI CLI.\n",
+        "description": "This endpoint returns a binary file that run the Run:ai CLI.\n",
         "operationId": "get_binary",
         "x-service": "cli-exposer",
         "x-test-coverage": [
@@ -448,7 +448,7 @@
     "/api/v1/cli-exposer/docs/{documentName}": {
       "get": {
         "summary": "Get CLI document by name",
-        "description": "This endpoint returns a document of help for the Run:AI CLI.\n",
+        "description": "This endpoint returns a document of help for the Run:ai CLI.\n",
         "operationId": "get_manual_document",
         "x-service": "cli-exposer",
         "x-test-coverage": [
@@ -494,7 +494,7 @@
       "get": {
         "deprecated": true,
         "summary": "Download Unix installer script",
-        "description": "This endpoint returns a unix script that can be used to install the Run:AI CLI.\n",
+        "description": "This endpoint returns a unix script that can be used to install the Run:ai CLI.\n",
         "operationId": "get_installer_unix_deprecated",
         "x-service": "cli-exposer",
         "x-test-coverage": [
@@ -539,7 +539,7 @@
       "get": {
         "deprecated": true,
         "summary": "Get Unix installer script commands",
-        "description": "This endpoint returns a unix script commands that can be used to install the Run:AI CLI.\n",
+        "description": "This endpoint returns a unix script commands that can be used to install the Run:ai CLI.\n",
         "operationId": "get_installer_unix_commands_deprecated",
         "x-service": "cli-exposer",
         "x-test-coverage": [
@@ -583,7 +583,7 @@
       "get": {
         "deprecated": true,
         "summary": "Download Mac installer script",
-        "description": "This endpoint returns a Mac script that can be used to install the Run:AI CLI.\n",
+        "description": "This endpoint returns a Mac script that can be used to install the Run:ai CLI.\n",
         "operationId": "get_installer_mac_deprecated",
         "x-service": "cli-exposer",
         "x-test-coverage": [
@@ -628,7 +628,7 @@
       "get": {
         "deprecated": true,
         "summary": "Get Mac installer script commands",
-        "description": "This endpoint returns a Mac script commands that can be used to install the Run:AI CLI.\n",
+        "description": "This endpoint returns a Mac script commands that can be used to install the Run:ai CLI.\n",
         "operationId": "get_installer_mac_commands_deprecated",
         "x-service": "cli-exposer",
         "x-test-coverage": [
@@ -672,7 +672,7 @@
       "get": {
         "deprecated": true,
         "summary": "Download Linux installer script",
-        "description": "This endpoint returns a Linux script that can be used to install the Run:AI CLI.\n",
+        "description": "This endpoint returns a Linux script that can be used to install the Run:ai CLI.\n",
         "operationId": "get_installer_linux_deprecated",
         "x-service": "cli-exposer",
         "x-test-coverage": [
@@ -717,7 +717,7 @@
       "get": {
         "deprecated": true,
         "summary": "Get Linux installer script commands",
-        "description": "This endpoint returns a linux script commands that can be used to install the Run:AI CLI.\n",
+        "description": "This endpoint returns a linux script commands that can be used to install the Run:ai CLI.\n",
         "operationId": "get_installer_linux_commands_deprecated",
         "x-service": "cli-exposer",
         "x-test-coverage": [
@@ -761,7 +761,7 @@
       "get": {
         "deprecated": true,
         "summary": "Get Windows MSI installer script commands",
-        "description": "This endpoint returns a windows script commands that can be used to install the Run:AI CLI.\n",
+        "description": "This endpoint returns a windows script commands that can be used to install the Run:ai CLI.\n",
         "operationId": "get_installer_windows_commands_deprecated",
         "x-service": "cli-exposer",
         "x-test-coverage": [
@@ -849,7 +849,7 @@
       "get": {
         "deprecated": true,
         "summary": "Download RunAI Researcher command line binary",
-        "description": "This endpoint returns a binary file that run the Run:AI CLI.\n",
+        "description": "This endpoint returns a binary file that run the Run:ai CLI.\n",
         "operationId": "get_binary_deprecated",
         "x-service": "cli-exposer",
         "x-test-coverage": [
@@ -900,7 +900,7 @@
       "get": {
         "deprecated": true,
         "summary": "Get CLI document by name",
-        "description": "This endpoint returns a document of help for the Run:AI CLI.\n",
+        "description": "This endpoint returns a document of help for the Run:ai CLI.\n",
         "operationId": "get_manual_document_deprecated",
         "x-service": "cli-exposer",
         "x-test-coverage": [
@@ -1162,7 +1162,7 @@
             "maxLength": 200,
             "minLength": 1,
             "example": "runai version",
-            "description": "The commands that can be used to install the Run:AI CLI."
+            "description": "The commands that can be used to install the Run:ai CLI."
           }
         }
       },

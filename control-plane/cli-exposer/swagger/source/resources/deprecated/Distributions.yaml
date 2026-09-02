@@ -2,7 +2,7 @@ get:
   deprecated: true
   summary: Download RunAI Researcher command line binary
   description: |
-    This endpoint returns a binary file that run the Run:AI CLI.
+    This endpoint returns a binary file that run the Run:ai CLI.
   operationId: get_binary_deprecated
   x-service: cli-exposer
   x-test-coverage:

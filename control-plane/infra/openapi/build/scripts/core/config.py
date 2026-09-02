@@ -40,11 +40,6 @@ class VersionConstants:
     VERSION_MULTIPLIER = 100  # For converting "2.20" to 220
 
 
-class BrandingConstants:
-    OLD_BRAND = "Run:AI"
-    NEW_BRAND = "Run:ai"
-
-
 class DocumentationConstants:
     NVIDIA_DOCS_DOMAIN = "https://run-ai-docs.nvidia.com"
     LEGACY_DOCS_DOMAIN = "https://docs.run.ai"
@@ -78,7 +73,6 @@ class RegexPatterns:
     
     # Content replacement
     VERSION_REPLACE = re.compile(r'version: 2\.0\.0')
-    BRANDING = re.compile(r'Run:AI')
     LOGO = re.compile(r'url: \./runai-logo-api\.png')
     
     @classmethod

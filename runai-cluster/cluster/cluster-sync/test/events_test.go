@@ -169,6 +169,36 @@ var _ = Describe("EventHandler", func() {
 				Eventually(numOfSyncedEvents).WithTimeout(syncEventsIntervalSeconds*time.Second + time.Second).Should(Receive(Equal(3)))
 			})
 		})
+
+		Context("Backend rejects the batch with 413 Request Entity Too Large", func() {
+			BeforeAll(func() {
+				runaiManagedNamespace := BuildNamespace(NamespaceIdForTests, map[string]string{constants.RunaiQueueLabel: ProjectIdForTests})
+				runaiManagedNamespace2 := BuildNamespace(anotherNamespaceForTests, map[string]string{constants.RunaiQueueLabel: ProjectIdForTests + "00"})
+
+				k8sClient = fakerunaiclient.NewClientBuilder().WithScheme(GetTestScheme()).WithObjects(runaiManagedNamespace, runaiManagedNamespace2).Build()
+				for _, event := range existingEvents {
+					createEvent(event, k8sClient)
+				}
+			})
+
+			BeforeEach(func() {
+				server.RouteToHandler("POST", eventsPath, func(writer http.ResponseWriter, request *http.Request) {
+					events := &openapi.EventsSyncRequest{}
+					err := json.NewDecoder(request.Body).Decode(events)
+					Expect(err).To(BeNil())
+					ghttp.RespondWith(http.StatusRequestEntityTooLarge, "<html>Request Entity Too Large</html>")(writer, request)
+
+					numOfSyncedEvents <- len(events.Events)
+				})
+			})
+
+			It("Reduces the events chunk size by 20% per rejection, down to the minimum", func() {
+				// the chunk size starts at 5 and is reduced by 20% after every rejected request,
+				// until it reaches the minimum of 2 and stops shrinking
+				sentChunkSizes := ReadFromChannel(numOfSyncedEvents, 5)
+				Expect(sentChunkSizes).To(HaveExactElements(5, 4, 3, 2, 2))
+			})
+		})
 	})
 
 })

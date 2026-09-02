@@ -11661,7 +11661,7 @@ paths:
     get:
       summary: Download Unix installer script
       description: |
-        This endpoint returns a unix script that can be used to install the Run:AI CLI.
+        This endpoint returns a unix script that can be used to install the Run:ai CLI.
       operationId: get_installer_unix
       tags:
         - Researcher Command Line Interface
@@ -11687,7 +11687,7 @@ paths:
     get:
       summary: Get Unix installer script commands
       description: |
-        This endpoint returns a unix script commands that can be used to install the Run:AI CLI.
+        This endpoint returns a unix script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_unix_commands
       tags:
         - Researcher Command Line Interface
@@ -11713,7 +11713,7 @@ paths:
     get:
       summary: Download Mac installer script
       description: |
-        This endpoint returns a Mac script that can be used to install the Run:AI CLI.
+        This endpoint returns a Mac script that can be used to install the Run:ai CLI.
       operationId: get_installer_mac
       tags:
         - Researcher Command Line Interface
@@ -11739,7 +11739,7 @@ paths:
     get:
       summary: Get Mac installer script commands
       description: |
-        This endpoint returns a Mac script commands that can be used to install the Run:AI CLI.
+        This endpoint returns a Mac script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_mac_commands
       tags:
         - Researcher Command Line Interface
@@ -11765,7 +11765,7 @@ paths:
     get:
       summary: Download Linux installer script
       description: |
-        This endpoint returns a Linux script that can be used to install the Run:AI CLI.
+        This endpoint returns a Linux script that can be used to install the Run:ai CLI.
       operationId: get_installer_linux
       tags:
         - Researcher Command Line Interface
@@ -11791,7 +11791,7 @@ paths:
     get:
       summary: Get Linux installer script commands
       description: |
-        This endpoint returns a linux script commands that can be used to install the Run:AI CLI.
+        This endpoint returns a linux script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_linux_commands
       tags:
         - Researcher Command Line Interface
@@ -11817,7 +11817,7 @@ paths:
     get:
       summary: Get Windows MSI installer script commands
       description: |
-        This endpoint returns a windows script commands that can be used to install the Run:AI CLI.
+        This endpoint returns a windows script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_windows_commands
       tags:
         - Researcher Command Line Interface
@@ -11843,7 +11843,7 @@ paths:
     get:
       summary: Download RunAI Researcher command line binary
       description: |
-        This endpoint returns a binary file that run the Run:AI CLI.
+        This endpoint returns a binary file that run the Run:ai CLI.
       operationId: get_binary
       tags:
         - Researcher Command Line Interface
@@ -11871,7 +11871,7 @@ paths:
     get:
       summary: Get CLI document by name
       description: |
-        This endpoint returns a document of help for the Run:AI CLI.
+        This endpoint returns a document of help for the Run:ai CLI.
       operationId: get_manual_document
       tags:
         - Researcher Command Line Interface
@@ -11897,7 +11897,7 @@ paths:
       deprecated: true
       summary: Download Unix installer script
       description: |
-        This endpoint returns a unix script that can be used to install the Run:AI CLI.
+        This endpoint returns a unix script that can be used to install the Run:ai CLI.
       operationId: get_installer_unix_deprecated
       tags:
         - Researcher Command Line Interface Deprecated
@@ -11924,7 +11924,7 @@ paths:
       deprecated: true
       summary: Get Unix installer script commands
       description: |
-        This endpoint returns a unix script commands that can be used to install the Run:AI CLI.
+        This endpoint returns a unix script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_unix_commands_deprecated
       tags:
         - Researcher Command Line Interface Deprecated
@@ -11951,7 +11951,7 @@ paths:
       deprecated: true
       summary: Download Mac installer script
       description: |
-        This endpoint returns a Mac script that can be used to install the Run:AI CLI.
+        This endpoint returns a Mac script that can be used to install the Run:ai CLI.
       operationId: get_installer_mac_deprecated
       tags:
         - Researcher Command Line Interface Deprecated
@@ -11978,7 +11978,7 @@ paths:
       deprecated: true
       summary: Get Mac installer script commands
       description: |
-        This endpoint returns a Mac script commands that can be used to install the Run:AI CLI.
+        This endpoint returns a Mac script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_mac_commands_deprecated
       tags:
         - Researcher Command Line Interface Deprecated
@@ -12005,7 +12005,7 @@ paths:
       deprecated: true
       summary: Download Linux installer script
       description: |
-        This endpoint returns a Linux script that can be used to install the Run:AI CLI.
+        This endpoint returns a Linux script that can be used to install the Run:ai CLI.
       operationId: get_installer_linux_deprecated
       tags:
         - Researcher Command Line Interface Deprecated
@@ -12032,7 +12032,7 @@ paths:
       deprecated: true
       summary: Get Linux installer script commands
       description: |
-        This endpoint returns a linux script commands that can be used to install the Run:AI CLI.
+        This endpoint returns a linux script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_linux_commands_deprecated
       tags:
         - Researcher Command Line Interface Deprecated
@@ -12059,7 +12059,7 @@ paths:
       deprecated: true
       summary: Get Windows MSI installer script commands
       description: |
-        This endpoint returns a windows script commands that can be used to install the Run:AI CLI.
+        This endpoint returns a windows script commands that can be used to install the Run:ai CLI.
       operationId: get_installer_windows_commands_deprecated
       tags:
         - Researcher Command Line Interface Deprecated
@@ -12086,7 +12086,7 @@ paths:
       deprecated: true
       summary: Download RunAI Researcher command line binary
       description: |
-        This endpoint returns a binary file that run the Run:AI CLI.
+        This endpoint returns a binary file that run the Run:ai CLI.
       operationId: get_binary_deprecated
       tags:
         - Researcher Command Line Interface Deprecated
@@ -12115,7 +12115,7 @@ paths:
       deprecated: true
       summary: Get CLI document by name
       description: |
-        This endpoint returns a document of help for the Run:AI CLI.
+        This endpoint returns a document of help for the Run:ai CLI.
       operationId: get_manual_document_deprecated
       tags:
         - Researcher Command Line Interface Deprecated
@@ -26361,7 +26361,7 @@ components:
       type: object
       properties:
         allowOverride:
-          description: when false, a child scope cannot override this rule. default to true.
+          description: when false, a child scope cannot override this rule. default to false.
           type: boolean
           nullable: true
     PolicyEnforcementSet:
@@ -34413,7 +34413,7 @@ components:
           maxLength: 200
           minLength: 1
           example: runai version
-          description: The commands that can be used to install the Run:AI CLI.
+          description: The commands that can be used to install the Run:ai CLI.
     AuditLog:
       type: object
       required:
@@ -35018,7 +35018,7 @@ components:
           backgroundColor: '#D32F2F'
           fontColor: '#FFFFFF'
         displayName: Banner configuration
-        description: Configure a persistent banner displayed at the top of the Run:AI UI for all authenticated users.
+        description: Configure a persistent banner displayed at the top of the Run:ai UI for all authenticated users.
     GetLogo:
       type: object
       properties:
