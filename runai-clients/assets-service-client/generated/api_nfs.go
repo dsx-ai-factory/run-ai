@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name NFSAPI --output ../mocks/
 type NFSAPI interface {
 
@@ -134,9 +133,7 @@ func (a *NFSAPIService) CreateNfsAsset(ctx context.Context) ApiCreateNfsAssetReq
 }
 
 // Execute executes the request
-//
 //	@return S3Asset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NFSAPIService) CreateNfsAssetExecute(r ApiCreateNfsAssetRequest) (*S3Asset, *http.Response, error) {
 	var (
@@ -296,9 +293,7 @@ func (a *NFSAPIService) DeleteNfsAssetById(ctx context.Context, assetId string) 
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NFSAPIService) DeleteNfsAssetByIdExecute(r ApiDeleteNfsAssetByIdRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -477,9 +472,7 @@ func (a *NFSAPIService) GetNfsAssetById(ctx context.Context, assetId string) Api
 }
 
 // Execute executes the request
-//
 //	@return NFSAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NFSAPIService) GetNfsAssetByIdExecute(r ApiGetNfsAssetByIdRequest) (*NFSAsset, *http.Response, error) {
 	var (
@@ -709,9 +702,7 @@ func (a *NFSAPIService) ListNfsAssets(ctx context.Context) ApiListNfsAssetsReque
 }
 
 // Execute executes the request
-//
 //	@return NFSListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NFSAPIService) ListNfsAssetsExecute(r ApiListNfsAssetsRequest) (*NFSListResponse, *http.Response, error) {
 	var (
@@ -883,9 +874,7 @@ func (a *NFSAPIService) UpdateNfsAssetById(ctx context.Context, assetId string) 
 }
 
 // Execute executes the request
-//
 //	@return NFSAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NFSAPIService) UpdateNfsAssetByIdExecute(r ApiUpdateNfsAssetByIdRequest) (*NFSAsset, *http.Response, error) {
 	var (

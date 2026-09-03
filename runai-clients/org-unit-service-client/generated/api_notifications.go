@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name NotificationsAPI --output ../mocks/
 type NotificationsAPI interface {
 

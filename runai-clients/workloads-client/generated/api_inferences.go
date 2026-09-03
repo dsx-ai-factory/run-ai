@@ -24,7 +24,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name InferencesAPI --output ../mocks/
 type InferencesAPI interface {
 
@@ -209,9 +208,7 @@ func (a *InferencesAPIService) CreateInference(ctx context.Context) ApiCreateInf
 }
 
 // Execute executes the request
-//
 //	@return Inference
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InferencesAPIService) CreateInferenceExecute(r ApiCreateInferenceRequest) (*Inference, *http.Response, error) {
 	var (
@@ -360,9 +357,7 @@ func (a *InferencesAPIService) DeleteInference(ctx context.Context, workloadId s
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InferencesAPIService) DeleteInferenceExecute(r ApiDeleteInferenceRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -521,9 +516,7 @@ func (a *InferencesAPIService) GetInference(ctx context.Context, workloadId stri
 }
 
 // Execute executes the request
-//
 //	@return Inference
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InferencesAPIService) GetInferenceExecute(r ApiGetInferenceRequest) (*Inference, *http.Response, error) {
 	var (
@@ -680,9 +673,7 @@ func (a *InferencesAPIService) GetInferenceAncestors(ctx context.Context, worklo
 }
 
 // Execute executes the request
-//
 //	@return Ancestors
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InferencesAPIService) GetInferenceAncestorsExecute(r ApiGetInferenceAncestorsRequest) (*Ancestors, *http.Response, error) {
 	var (
@@ -847,9 +838,7 @@ func (a *InferencesAPIService) GetInferenceWorkloadMetrics(ctx context.Context, 
 }
 
 // Execute executes the request
-//
 //	@return MetricsResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InferencesAPIService) GetInferenceWorkloadMetricsExecute(r ApiGetInferenceWorkloadMetricsRequest) (*MetricsResponse, *http.Response, error) {
 	var (
@@ -1074,9 +1063,7 @@ func (a *InferencesAPIService) GetInferenceWorkloadPodMetrics(ctx context.Contex
 }
 
 // Execute executes the request
-//
 //	@return MetricsResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InferencesAPIService) GetInferenceWorkloadPodMetricsExecute(r ApiGetInferenceWorkloadPodMetricsRequest) (*MetricsResponse, *http.Response, error) {
 	var (
@@ -1303,9 +1290,7 @@ func (a *InferencesAPIService) GetNimCatalog(ctx context.Context) ApiGetNimCatal
 }
 
 // Execute executes the request
-//
 //	@return Catalog
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InferencesAPIService) GetNimCatalogExecute(r ApiGetNimCatalogRequest) (*Catalog, *http.Response, error) {
 	var (
@@ -1492,9 +1477,7 @@ func (a *InferencesAPIService) ListInferencesUpdates(ctx context.Context) ApiLis
 }
 
 // Execute executes the request
-//
 //	@return WorkloadsSyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InferencesAPIService) ListInferencesUpdatesExecute(r ApiListInferencesUpdatesRequest) (*WorkloadsSyncResponse, *http.Response, error) {
 	var (
@@ -1677,9 +1660,7 @@ func (a *InferencesAPIService) RequestInferencesUpdates(ctx context.Context) Api
 }
 
 // Execute executes the request
-//
 //	@return WorkloadsSyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InferencesAPIService) RequestInferencesUpdatesExecute(r ApiRequestInferencesUpdatesRequest) (*WorkloadsSyncResponse, *http.Response, error) {
 	var (
@@ -1853,9 +1834,7 @@ func (a *InferencesAPIService) UpdateInferenceSpec(ctx context.Context, workload
 }
 
 // Execute executes the request
-//
 //	@return Inference
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InferencesAPIService) UpdateInferenceSpecExecute(r ApiUpdateInferenceSpecRequest) (*Inference, *http.Response, error) {
 	var (

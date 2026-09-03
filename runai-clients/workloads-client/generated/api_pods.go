@@ -23,7 +23,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name PodsAPI --output ../mocks/
 type PodsAPI interface {
 
@@ -246,9 +245,7 @@ func (a *PodsAPIService) CountPods(ctx context.Context) ApiCountPodsRequest {
 }
 
 // Execute executes the request
-//
 //	@return CountWorkloads200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PodsAPIService) CountPodsExecute(r ApiCountPodsRequest) (*CountWorkloads200Response, *http.Response, error) {
 	var (
@@ -552,9 +549,7 @@ func (a *PodsAPIService) GetRevisionPods(ctx context.Context, revisionId string)
 }
 
 // Execute executes the request
-//
 //	@return GetRevisionPods200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PodsAPIService) GetRevisionPodsExecute(r ApiGetRevisionPodsRequest) (*GetRevisionPods200Response, *http.Response, error) {
 	var (
@@ -719,9 +714,7 @@ func (a *PodsAPIService) GetWorkloadPod(ctx context.Context, workloadId string, 
 }
 
 // Execute executes the request
-//
 //	@return Pod
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PodsAPIService) GetWorkloadPodExecute(r ApiGetWorkloadPodRequest) (*Pod, *http.Response, error) {
 	var (
@@ -923,9 +916,7 @@ func (a *PodsAPIService) GetWorkloadPodMetrics(ctx context.Context, workloadId s
 }
 
 // Execute executes the request
-//
 //	@return MetricsCompositeResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PodsAPIService) GetWorkloadPodMetricsExecute(r ApiGetWorkloadPodMetricsRequest) (*MetricsCompositeResponse, *http.Response, error) {
 	var (
@@ -1169,9 +1160,7 @@ func (a *PodsAPIService) GetWorkloadPods(ctx context.Context, workloadId string)
 }
 
 // Execute executes the request
-//
 //	@return ListPods200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PodsAPIService) GetWorkloadPodsExecute(r ApiGetWorkloadPodsRequest) (*ListPods200Response, *http.Response, error) {
 	var (
@@ -1746,9 +1735,7 @@ func (a *PodsAPIService) ListPods(ctx context.Context) ApiListPodsRequest {
 }
 
 // Execute executes the request
-//
 //	@return ListPods200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PodsAPIService) ListPodsExecute(r ApiListPodsRequest) (*ListPods200Response, *http.Response, error) {
 	var (

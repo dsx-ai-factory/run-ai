@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name StorageClassesAPI --output ../mocks/
 type StorageClassesAPI interface {
 
@@ -223,9 +222,7 @@ func (a *StorageClassesAPIService) CreateStorageClass(ctx context.Context) ApiCr
 }
 
 // Execute executes the request
-//
 //	@return StorageClass
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *StorageClassesAPIService) CreateStorageClassExecute(r ApiCreateStorageClassRequest) (*StorageClass, *http.Response, error) {
 	var (
@@ -568,9 +565,7 @@ func (a *StorageClassesAPIService) GetStorageClasses(ctx context.Context) ApiGet
 }
 
 // Execute executes the request
-//
 //	@return StorageClasses
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *StorageClassesAPIService) GetStorageClassesExecute(r ApiGetStorageClassesRequest) (*StorageClasses, *http.Response, error) {
 	var (
@@ -743,9 +738,7 @@ func (a *StorageClassesAPIService) GetStorageClassesV2(ctx context.Context) ApiG
 }
 
 // Execute executes the request
-//
 //	@return StorageClassesV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *StorageClassesAPIService) GetStorageClassesV2Execute(r ApiGetStorageClassesV2Request) (*StorageClassesV2, *http.Response, error) {
 	var (
@@ -912,9 +905,7 @@ func (a *StorageClassesAPIService) SyncStorageClass(ctx context.Context) ApiSync
 }
 
 // Execute executes the request
-//
 //	@return StorageClasses
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *StorageClassesAPIService) SyncStorageClassExecute(r ApiSyncStorageClassRequest) (*StorageClasses, *http.Response, error) {
 	var (
@@ -1071,9 +1062,7 @@ func (a *StorageClassesAPIService) UpdateStorageClass(ctx context.Context) ApiUp
 }
 
 // Execute executes the request
-//
 //	@return StorageClass
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *StorageClassesAPIService) UpdateStorageClassExecute(r ApiUpdateStorageClassRequest) (*StorageClass, *http.Response, error) {
 	var (
@@ -1233,9 +1222,7 @@ func (a *StorageClassesAPIService) V1CreateStorageClass(ctx context.Context, uui
 }
 
 // Execute executes the request
-//
 //	@return V1StorageClass
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *StorageClassesAPIService) V1CreateStorageClassExecute(r ApiV1CreateStorageClassRequest) (*V1StorageClass, *http.Response, error) {
@@ -1527,9 +1514,7 @@ func (a *StorageClassesAPIService) V1GetStorageClasses(ctx context.Context, uuid
 }
 
 // Execute executes the request
-//
 //	@return V1GetStorageClasses200Response
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *StorageClassesAPIService) V1GetStorageClassesExecute(r ApiV1GetStorageClassesRequest) (*V1GetStorageClasses200Response, *http.Response, error) {
@@ -1676,9 +1661,7 @@ func (a *StorageClassesAPIService) V1SyncStorageClass(ctx context.Context, uuid 
 }
 
 // Execute executes the request
-//
 //	@return V1StorageClass
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *StorageClassesAPIService) V1SyncStorageClassExecute(r ApiV1SyncStorageClassRequest) (*V1StorageClass, *http.Response, error) {
@@ -1841,9 +1824,7 @@ func (a *StorageClassesAPIService) V1UpdateStorageClass(ctx context.Context, uui
 }
 
 // Execute executes the request
-//
 //	@return []V1StorageClass
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *StorageClassesAPIService) V1UpdateStorageClassExecute(r ApiV1UpdateStorageClassRequest) ([]V1StorageClass, *http.Response, error) {

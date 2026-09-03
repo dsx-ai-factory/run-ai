@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name RevisionsAPI --output ../mocks/
 type RevisionsAPI interface {
 
@@ -135,9 +134,7 @@ func (a *RevisionsAPIService) CountInferenceWorkloadRevisions(ctx context.Contex
 }
 
 // Execute executes the request
-//
 //	@return CountWorkloads200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RevisionsAPIService) CountInferenceWorkloadRevisionsExecute(r ApiCountInferenceWorkloadRevisionsRequest) (*CountWorkloads200Response, *http.Response, error) {
 	var (
@@ -443,9 +440,7 @@ func (a *RevisionsAPIService) GetInferenceWorkloadRevisions(ctx context.Context,
 }
 
 // Execute executes the request
-//
 //	@return GetInferenceWorkloadRevisions200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RevisionsAPIService) GetInferenceWorkloadRevisionsExecute(r ApiGetInferenceWorkloadRevisionsRequest) (*GetInferenceWorkloadRevisions200Response, *http.Response, error) {
 	var (
@@ -607,9 +602,7 @@ func (a *RevisionsAPIService) GetRevision(ctx context.Context, revisionId string
 }
 
 // Execute executes the request
-//
 //	@return Revision
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RevisionsAPIService) GetRevisionExecute(r ApiGetRevisionRequest) (*Revision, *http.Response, error) {
 	var (

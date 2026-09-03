@@ -21,7 +21,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name AssetsAPI --output ../mocks/
 type AssetsAPI interface {
 
@@ -74,9 +73,7 @@ func (a *AssetsAPIService) RequestAssetFlatFormat(ctx context.Context) ApiReques
 }
 
 // Execute executes the request
-//
 //	@return AssetFlatResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AssetsAPIService) RequestAssetFlatFormatExecute(r ApiRequestAssetFlatFormatRequest) (*AssetFlatResponse, *http.Response, error) {
 	var (

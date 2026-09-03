@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name TemplateAPI --output ../mocks/
 type TemplateAPI interface {
 
@@ -151,9 +150,7 @@ func (a *TemplateAPIService) CreateTemplate(ctx context.Context) ApiCreateTempla
 }
 
 // Execute executes the request
-//
 //	@return WorkloadTemplate
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TemplateAPIService) CreateTemplateExecute(r ApiCreateTemplateRequest) (*WorkloadTemplate, *http.Response, error) {
@@ -316,9 +313,7 @@ func (a *TemplateAPIService) DeleteTemplateById(ctx context.Context, assetId str
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TemplateAPIService) DeleteTemplateByIdExecute(r ApiDeleteTemplateByIdRequest) (*HttpResponse, *http.Response, error) {
@@ -472,9 +467,7 @@ func (a *TemplateAPIService) GetTemplateById(ctx context.Context, assetId string
 }
 
 // Execute executes the request
-//
 //	@return WorkloadTemplate
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TemplateAPIService) GetTemplateByIdExecute(r ApiGetTemplateByIdRequest) (*WorkloadTemplate, *http.Response, error) {
@@ -695,9 +688,7 @@ func (a *TemplateAPIService) ListTemplates(ctx context.Context) ApiListTemplates
 }
 
 // Execute executes the request
-//
 //	@return WorkloadTemplateListResponse
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TemplateAPIService) ListTemplatesExecute(r ApiListTemplatesRequest) (*WorkloadTemplateListResponse, *http.Response, error) {
@@ -872,9 +863,7 @@ func (a *TemplateAPIService) UpdateTemplate(ctx context.Context, assetId string)
 }
 
 // Execute executes the request
-//
 //	@return WorkloadTemplate
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TemplateAPIService) UpdateTemplateExecute(r ApiUpdateTemplateRequest) (*WorkloadTemplate, *http.Response, error) {

@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name PVCAPI --output ../mocks/
 type PVCAPI interface {
 
@@ -149,9 +148,7 @@ func (a *PVCAPIService) CreatePvcAsset(ctx context.Context) ApiCreatePvcAssetReq
 }
 
 // Execute executes the request
-//
 //	@return PVCAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCAPIService) CreatePvcAssetExecute(r ApiCreatePvcAssetRequest) (*PVCAsset, *http.Response, error) {
 	var (
@@ -311,9 +308,7 @@ func (a *PVCAPIService) DeletePvcAssetById(ctx context.Context, assetId string) 
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCAPIService) DeletePvcAssetByIdExecute(r ApiDeletePvcAssetByIdRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -506,9 +501,7 @@ func (a *PVCAPIService) GetPvcAssetById(ctx context.Context, assetId string) Api
 }
 
 // Execute executes the request
-//
 //	@return PVCAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCAPIService) GetPvcAssetByIdExecute(r ApiGetPvcAssetByIdRequest) (*PVCAsset, *http.Response, error) {
 	var (
@@ -691,9 +684,7 @@ func (a *PVCAPIService) GetPvcHistory(ctx context.Context, assetId string) ApiGe
 }
 
 // Execute executes the request
-//
 //	@return PVCHistoryResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCAPIService) GetPvcHistoryExecute(r ApiGetPvcHistoryRequest) (*PVCHistoryResponse, *http.Response, error) {
 	var (
@@ -927,9 +918,7 @@ func (a *PVCAPIService) ListPvcAssets(ctx context.Context) ApiListPvcAssetsReque
 }
 
 // Execute executes the request
-//
 //	@return PVCListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCAPIService) ListPvcAssetsExecute(r ApiListPvcAssetsRequest) (*PVCListResponse, *http.Response, error) {
 	var (
@@ -1104,9 +1093,7 @@ func (a *PVCAPIService) UpdatePvcAssetById(ctx context.Context, assetId string) 
 }
 
 // Execute executes the request
-//
 //	@return PVCAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PVCAPIService) UpdatePvcAssetByIdExecute(r ApiUpdatePvcAssetByIdRequest) (*PVCAsset, *http.Response, error) {
 	var (

@@ -21,7 +21,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name WorkloadsBatchAPI --output ../mocks/
 type WorkloadsBatchAPI interface {
 
@@ -70,9 +69,7 @@ func (a *WorkloadsBatchAPIService) BatchWorkloads(ctx context.Context) ApiBatchW
 }
 
 // Execute executes the request
-//
 //	@return BatchResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsBatchAPIService) BatchWorkloadsExecute(r ApiBatchWorkloadsRequest) (*BatchResponse, *http.Response, error) {
 	var (

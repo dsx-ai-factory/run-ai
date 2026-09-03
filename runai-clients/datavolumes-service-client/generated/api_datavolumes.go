@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name DatavolumesAPI --output ../mocks/
 type DatavolumesAPI interface {
 
@@ -279,9 +278,7 @@ func (a *DatavolumesAPIService) CountDatavolumes(ctx context.Context) ApiCountDa
 }
 
 // Execute executes the request
-//
 //	@return CountDatavolumes200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DatavolumesAPIService) CountDatavolumesExecute(r ApiCountDatavolumesRequest) (*CountDatavolumes200Response, *http.Response, error) {
 	var (
@@ -454,9 +451,7 @@ func (a *DatavolumesAPIService) CreateDatavolume(ctx context.Context) ApiCreateD
 }
 
 // Execute executes the request
-//
 //	@return Datavolume
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DatavolumesAPIService) CreateDatavolumeExecute(r ApiCreateDatavolumeRequest) (*Datavolume, *http.Response, error) {
 	var (
@@ -775,9 +770,7 @@ func (a *DatavolumesAPIService) DeleteDatavolume(ctx context.Context, datavolume
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DatavolumesAPIService) DeleteDatavolumeExecute(r ApiDeleteDatavolumeRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -934,9 +927,7 @@ func (a *DatavolumesAPIService) GetDatavolume(ctx context.Context, datavolumeId 
 }
 
 // Execute executes the request
-//
 //	@return Datavolume
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DatavolumesAPIService) GetDatavolumeExecute(r ApiGetDatavolumeRequest) (*Datavolume, *http.Response, error) {
 	var (
@@ -1093,9 +1084,7 @@ func (a *DatavolumesAPIService) GetDatavolumeAncestors(ctx context.Context, data
 }
 
 // Execute executes the request
-//
 //	@return Ancestors
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DatavolumesAPIService) GetDatavolumeAncestorsExecute(r ApiGetDatavolumeAncestorsRequest) (*Ancestors, *http.Response, error) {
 	var (
@@ -1230,9 +1219,7 @@ func (a *DatavolumesAPIService) GetDatavolumeSharedScopes(ctx context.Context, d
 }
 
 // Execute executes the request
-//
 //	@return []SharedScope
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DatavolumesAPIService) GetDatavolumeSharedScopesExecute(r ApiGetDatavolumeSharedScopesRequest) ([]SharedScope, *http.Response, error) {
 	var (
@@ -1451,9 +1438,7 @@ func (a *DatavolumesAPIService) GetDatavolumes(ctx context.Context) ApiGetDatavo
 }
 
 // Execute executes the request
-//
 //	@return GetDatavolumes200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DatavolumesAPIService) GetDatavolumesExecute(r ApiGetDatavolumesRequest) (*GetDatavolumes200Response, *http.Response, error) {
 	var (
@@ -1666,9 +1651,7 @@ func (a *DatavolumesAPIService) GetDatavolumesInternal(ctx context.Context) ApiG
 }
 
 // Execute executes the request
-//
 //	@return GetDatavolumesInternal200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DatavolumesAPIService) GetDatavolumesInternalExecute(r ApiGetDatavolumesInternalRequest) (*GetDatavolumesInternal200Response, *http.Response, error) {
 	var (
@@ -1843,9 +1826,7 @@ func (a *DatavolumesAPIService) GetUsedPvcsFromDatavolumes(ctx context.Context) 
 }
 
 // Execute executes the request
-//
 //	@return GetUsedPvcsFromDatavolumes200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DatavolumesAPIService) GetUsedPvcsFromDatavolumesExecute(r ApiGetUsedPvcsFromDatavolumesRequest) (*GetUsedPvcsFromDatavolumes200Response, *http.Response, error) {
 	var (
@@ -1976,9 +1957,7 @@ func (a *DatavolumesAPIService) InternalCreateDatavolume(ctx context.Context) Ap
 }
 
 // Execute executes the request
-//
 //	@return InternalDatavolume
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DatavolumesAPIService) InternalCreateDatavolumeExecute(r ApiInternalCreateDatavolumeRequest) (*InternalDatavolume, *http.Response, error) {
 	var (
@@ -2146,9 +2125,7 @@ func (a *DatavolumesAPIService) PatchDatavolume(ctx context.Context, datavolumeI
 }
 
 // Execute executes the request
-//
 //	@return DatavolumeNoSharedScopes
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DatavolumesAPIService) PatchDatavolumeExecute(r ApiPatchDatavolumeRequest) (*DatavolumeNoSharedScopes, *http.Response, error) {
 	var (
@@ -2328,9 +2305,7 @@ func (a *DatavolumesAPIService) PatchDatavolumeSharedScopes(ctx context.Context,
 }
 
 // Execute executes the request
-//
 //	@return []SharedScope
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DatavolumesAPIService) PatchDatavolumeSharedScopesExecute(r ApiPatchDatavolumeSharedScopesRequest) ([]SharedScope, *http.Response, error) {
 	var (

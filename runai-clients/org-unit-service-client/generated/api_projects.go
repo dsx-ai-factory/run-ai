@@ -23,7 +23,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name ProjectsAPI --output ../mocks/
 type ProjectsAPI interface {
 
@@ -350,9 +349,7 @@ func (a *ProjectsAPIService) BatchPatchProjectNodePoolResources(ctx context.Cont
 }
 
 // Execute executes the request
-//
 //	@return BatchPatchProjectResourcesResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsAPIService) BatchPatchProjectNodePoolResourcesExecute(r ApiBatchPatchProjectNodePoolResourcesRequest) (*BatchPatchProjectResourcesResponse, *http.Response, error) {
 	var (
@@ -526,9 +523,7 @@ func (a *ProjectsAPIService) CountProjectNodePoolResources(ctx context.Context) 
 }
 
 // Execute executes the request
-//
 //	@return CountResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsAPIService) CountProjectNodePoolResourcesExecute(r ApiCountProjectNodePoolResourcesRequest) (*CountResponse, *http.Response, error) {
 	var (
@@ -692,9 +687,7 @@ func (a *ProjectsAPIService) CountProjects(ctx context.Context) ApiCountProjects
 }
 
 // Execute executes the request
-//
 //	@return CountResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsAPIService) CountProjectsExecute(r ApiCountProjectsRequest) (*CountResponse, *http.Response, error) {
 	var (
@@ -851,9 +844,7 @@ func (a *ProjectsAPIService) CreateProject(ctx context.Context) ApiCreateProject
 }
 
 // Execute executes the request
-//
 //	@return Project
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsAPIService) CreateProjectExecute(r ApiCreateProjectRequest) (*Project, *http.Response, error) {
 	var (
@@ -1195,9 +1186,7 @@ func (a *ProjectsAPIService) GetProject(ctx context.Context, projectId string) A
 }
 
 // Execute executes the request
-//
 //	@return Project
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsAPIService) GetProjectExecute(r ApiGetProjectRequest) (*Project, *http.Response, error) {
 	var (
@@ -1343,9 +1332,7 @@ func (a *ProjectsAPIService) GetProjectAncestors(ctx context.Context, projectId 
 }
 
 // Execute executes the request
-//
 //	@return Ancestors
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsAPIService) GetProjectAncestorsExecute(r ApiGetProjectAncestorsRequest) (*Ancestors, *http.Response, error) {
 	var (
@@ -1524,9 +1511,7 @@ func (a *ProjectsAPIService) GetProjectMetrics(ctx context.Context, projectId st
 }
 
 // Execute executes the request
-//
 //	@return MetricsResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsAPIService) GetProjectMetricsExecute(r ApiGetProjectMetricsRequest) (*MetricsResponse, *http.Response, error) {
 	var (
@@ -1762,9 +1747,7 @@ func (a *ProjectsAPIService) GetProjectNodePoolResources(ctx context.Context) Ap
 }
 
 // Execute executes the request
-//
 //	@return GetProjectNodePoolResources200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsAPIService) GetProjectNodePoolResourcesExecute(r ApiGetProjectNodePoolResourcesRequest) (*GetProjectNodePoolResources200Response, *http.Response, error) {
 	var (
@@ -1974,9 +1957,7 @@ func (a *ProjectsAPIService) GetProjects(ctx context.Context) ApiGetProjectsRequ
 }
 
 // Execute executes the request
-//
 //	@return GetProjects200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsAPIService) GetProjectsExecute(r ApiGetProjectsRequest) (*GetProjects200Response, *http.Response, error) {
 	var (
@@ -2186,9 +2167,7 @@ func (a *ProjectsAPIService) GetProjectsMetadata(ctx context.Context) ApiGetProj
 }
 
 // Execute executes the request
-//
 //	@return GetProjectsMetadata200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsAPIService) GetProjectsMetadataExecute(r ApiGetProjectsMetadataRequest) (*GetProjectsMetadata200Response, *http.Response, error) {
 	var (
@@ -2390,9 +2369,7 @@ func (a *ProjectsAPIService) GetProjectsRanking(ctx context.Context) ApiGetProje
 }
 
 // Execute executes the request
-//
 //	@return GetProjectsRanking200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsAPIService) GetProjectsRankingExecute(r ApiGetProjectsRankingRequest) (*GetProjectsRanking200Response, *http.Response, error) {
 	var (
@@ -2596,9 +2573,7 @@ func (a *ProjectsAPIService) GetProjectsTelemetry(ctx context.Context) ApiGetPro
 }
 
 // Execute executes the request
-//
 //	@return TelemetryResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsAPIService) GetProjectsTelemetryExecute(r ApiGetProjectsTelemetryRequest) (*TelemetryResponse, *http.Response, error) {
 	var (
@@ -2792,9 +2767,7 @@ func (a *ProjectsAPIService) GetSyncProjects(ctx context.Context) ApiGetSyncProj
 }
 
 // Execute executes the request
-//
 //	@return GetSyncProjects200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsAPIService) GetSyncProjectsExecute(r ApiGetSyncProjectsRequest) (*GetSyncProjects200Response, *http.Response, error) {
 	var (
@@ -2967,9 +2940,7 @@ func (a *ProjectsAPIService) PatchProjectResources(ctx context.Context, projectI
 }
 
 // Execute executes the request
-//
 //	@return []Resources
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsAPIService) PatchProjectResourcesExecute(r ApiPatchProjectResourcesRequest) ([]Resources, *http.Response, error) {
 	var (
@@ -3297,9 +3268,7 @@ func (a *ProjectsAPIService) SumProjectNodePoolResources(ctx context.Context) Ap
 }
 
 // Execute executes the request
-//
 //	@return SumResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsAPIService) SumProjectNodePoolResourcesExecute(r ApiSumProjectNodePoolResourcesRequest) (*SumResponse, *http.Response, error) {
 	var (
@@ -3603,9 +3572,7 @@ func (a *ProjectsAPIService) UpdateProject(ctx context.Context, projectId string
 }
 
 // Execute executes the request
-//
 //	@return Project
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsAPIService) UpdateProjectExecute(r ApiUpdateProjectRequest) (*Project, *http.Response, error) {
 	var (
@@ -3776,9 +3743,7 @@ func (a *ProjectsAPIService) UpdateProjectResources(ctx context.Context, project
 }
 
 // Execute executes the request
-//
 //	@return []Resources
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsAPIService) UpdateProjectResourcesExecute(r ApiUpdateProjectResourcesRequest) ([]Resources, *http.Response, error) {
 	var (

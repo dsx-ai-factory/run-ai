@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name TrainingsAPI --output ../mocks/
 type TrainingsAPI interface {
 
@@ -224,9 +223,7 @@ func (a *TrainingsAPIService) CreateTraining(ctx context.Context) ApiCreateTrain
 }
 
 // Execute executes the request
-//
 //	@return Training
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TrainingsAPIService) CreateTrainingExecute(r ApiCreateTrainingRequest) (*Training, *http.Response, error) {
 	var (
@@ -378,9 +375,7 @@ func (a *TrainingsAPIService) CreateTrainingV2(ctx context.Context) ApiCreateTra
 }
 
 // Execute executes the request
-//
 //	@return TrainingV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TrainingsAPIService) CreateTrainingV2Execute(r ApiCreateTrainingV2Request) (*TrainingV2, *http.Response, error) {
 	var (
@@ -817,9 +812,7 @@ func (a *TrainingsAPIService) GetTrainingByIdV2(ctx context.Context, workloadId 
 }
 
 // Execute executes the request
-//
 //	@return TrainingV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TrainingsAPIService) GetTrainingByIdV2Execute(r ApiGetTrainingByIdV2Request) (*TrainingV2, *http.Response, error) {
 	var (
@@ -999,9 +992,7 @@ func (a *TrainingsAPIService) GetTrainingMerged(ctx context.Context) ApiGetTrain
 }
 
 // Execute executes the request
-//
 //	@return TrainingV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TrainingsAPIService) GetTrainingMergedExecute(r ApiGetTrainingMergedRequest) (*TrainingV2, *http.Response, error) {
 	var (
@@ -1203,9 +1194,7 @@ func (a *TrainingsAPIService) ListTrainings(ctx context.Context, clusterUuid str
 }
 
 // Execute executes the request
-//
 //	@return TrainingListResponse
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TrainingsAPIService) ListTrainingsExecute(r ApiListTrainingsRequest) (*TrainingListResponse, *http.Response, error) {
@@ -1373,9 +1362,7 @@ func (a *TrainingsAPIService) SyncDistributedStatus(ctx context.Context, cluster
 }
 
 // Execute executes the request
-//
 //	@return []WorkloadStatusUpdate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TrainingsAPIService) SyncDistributedStatusExecute(r ApiSyncDistributedStatusRequest) ([]WorkloadStatusUpdate, *http.Response, error) {
 	var (
@@ -1534,9 +1521,7 @@ func (a *TrainingsAPIService) SyncTrainingStatus(ctx context.Context, clusterUui
 }
 
 // Execute executes the request
-//
 //	@return []WorkloadStatusUpdate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TrainingsAPIService) SyncTrainingStatusExecute(r ApiSyncTrainingStatusRequest) ([]WorkloadStatusUpdate, *http.Response, error) {
 	var (
@@ -1695,9 +1680,7 @@ func (a *TrainingsAPIService) UpdateDistributedStatus(ctx context.Context, clust
 }
 
 // Execute executes the request
-//
 //	@return WorkloadStatusUpdate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TrainingsAPIService) UpdateDistributedStatusExecute(r ApiUpdateDistributedStatusRequest) (*WorkloadStatusUpdate, *http.Response, error) {
 	var (
@@ -1867,9 +1850,7 @@ func (a *TrainingsAPIService) UpdateTrainingStatus(ctx context.Context, clusterU
 }
 
 // Execute executes the request
-//
 //	@return WorkloadStatusUpdate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TrainingsAPIService) UpdateTrainingStatusExecute(r ApiUpdateTrainingStatusRequest) (*WorkloadStatusUpdate, *http.Response, error) {
 	var (

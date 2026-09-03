@@ -21,7 +21,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name InferencesAPI --output ../mocks/
 type InferencesAPI interface {
 
@@ -75,9 +74,7 @@ func (a *InferencesAPIService) SearchHuggingFaceCatalog(ctx context.Context) Api
 }
 
 // Execute executes the request
-//
 //	@return HuggingFaceModelSearchResults
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InferencesAPIService) SearchHuggingFaceCatalogExecute(r ApiSearchHuggingFaceCatalogRequest) (*HuggingFaceModelSearchResults, *http.Response, error) {
 	var (

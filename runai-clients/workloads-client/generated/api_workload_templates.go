@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name WorkloadTemplatesAPI --output ../mocks/
 type WorkloadTemplatesAPI interface {
 
@@ -567,9 +566,7 @@ func (a *WorkloadTemplatesAPIService) CountTemplates(ctx context.Context) ApiCou
 }
 
 // Execute executes the request
-//
 //	@return CountResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) CountTemplatesExecute(r ApiCountTemplatesRequest) (*CountResponse, *http.Response, error) {
 	var (
@@ -728,9 +725,7 @@ func (a *WorkloadTemplatesAPIService) CreateDistributedInferenceTemplate(ctx con
 }
 
 // Execute executes the request
-//
 //	@return DistributedInferenceTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) CreateDistributedInferenceTemplateExecute(r ApiCreateDistributedInferenceTemplateRequest) (*DistributedInferenceTemplate, *http.Response, error) {
 	var (
@@ -893,9 +888,7 @@ func (a *WorkloadTemplatesAPIService) CreateDistributedTemplate(ctx context.Cont
 }
 
 // Execute executes the request
-//
 //	@return DistributedTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) CreateDistributedTemplateExecute(r ApiCreateDistributedTemplateRequest) (*DistributedTemplate, *http.Response, error) {
 	var (
@@ -1058,9 +1051,7 @@ func (a *WorkloadTemplatesAPIService) CreateInferenceTemplate(ctx context.Contex
 }
 
 // Execute executes the request
-//
 //	@return InferenceTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) CreateInferenceTemplateExecute(r ApiCreateInferenceTemplateRequest) (*InferenceTemplate, *http.Response, error) {
 	var (
@@ -1223,9 +1214,7 @@ func (a *WorkloadTemplatesAPIService) CreateTrainingTemplate(ctx context.Context
 }
 
 // Execute executes the request
-//
 //	@return TrainingTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) CreateTrainingTemplateExecute(r ApiCreateTrainingTemplateRequest) (*TrainingTemplate, *http.Response, error) {
 	var (
@@ -1388,9 +1377,7 @@ func (a *WorkloadTemplatesAPIService) CreateWorkspaceTemplate(ctx context.Contex
 }
 
 // Execute executes the request
-//
 //	@return WorkspaceTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) CreateWorkspaceTemplateExecute(r ApiCreateWorkspaceTemplateRequest) (*WorkspaceTemplate, *http.Response, error) {
 	var (
@@ -2290,9 +2277,7 @@ func (a *WorkloadTemplatesAPIService) GetDistributedInferenceTemplate(ctx contex
 }
 
 // Execute executes the request
-//
 //	@return DistributedInferenceTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) GetDistributedInferenceTemplateExecute(r ApiGetDistributedInferenceTemplateRequest) (*DistributedInferenceTemplate, *http.Response, error) {
 	var (
@@ -2451,9 +2436,7 @@ func (a *WorkloadTemplatesAPIService) GetDistributedTemplate(ctx context.Context
 }
 
 // Execute executes the request
-//
 //	@return DistributedTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) GetDistributedTemplateExecute(r ApiGetDistributedTemplateRequest) (*DistributedTemplate, *http.Response, error) {
 	var (
@@ -2612,9 +2595,7 @@ func (a *WorkloadTemplatesAPIService) GetInferenceTemplate(ctx context.Context, 
 }
 
 // Execute executes the request
-//
 //	@return InferenceTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) GetInferenceTemplateExecute(r ApiGetInferenceTemplateRequest) (*InferenceTemplate, *http.Response, error) {
 	var (
@@ -2773,9 +2754,7 @@ func (a *WorkloadTemplatesAPIService) GetTemplateById(ctx context.Context, templ
 }
 
 // Execute executes the request
-//
 //	@return SupersetTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) GetTemplateByIdExecute(r ApiGetTemplateByIdRequest) (*SupersetTemplate, *http.Response, error) {
 	var (
@@ -2934,9 +2913,7 @@ func (a *WorkloadTemplatesAPIService) GetTrainingTemplate(ctx context.Context, t
 }
 
 // Execute executes the request
-//
 //	@return TrainingTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) GetTrainingTemplateExecute(r ApiGetTrainingTemplateRequest) (*TrainingTemplate, *http.Response, error) {
 	var (
@@ -3095,9 +3072,7 @@ func (a *WorkloadTemplatesAPIService) GetWorkspaceTemplate(ctx context.Context, 
 }
 
 // Execute executes the request
-//
 //	@return WorkspaceTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) GetWorkspaceTemplateExecute(r ApiGetWorkspaceTemplateRequest) (*WorkspaceTemplate, *http.Response, error) {
 	var (
@@ -3309,9 +3284,7 @@ func (a *WorkloadTemplatesAPIService) ListDistributedInferenceTemplates(ctx cont
 }
 
 // Execute executes the request
-//
 //	@return DistributedInferenceTemplatesListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) ListDistributedInferenceTemplatesExecute(r ApiListDistributedInferenceTemplatesRequest) (*DistributedInferenceTemplatesListResponse, *http.Response, error) {
 	var (
@@ -3548,9 +3521,7 @@ func (a *WorkloadTemplatesAPIService) ListDistributedTemplates(ctx context.Conte
 }
 
 // Execute executes the request
-//
 //	@return DistributedTemplatesListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) ListDistributedTemplatesExecute(r ApiListDistributedTemplatesRequest) (*DistributedTemplatesListResponse, *http.Response, error) {
 	var (
@@ -3783,9 +3754,7 @@ func (a *WorkloadTemplatesAPIService) ListInferenceTemplates(ctx context.Context
 }
 
 // Execute executes the request
-//
 //	@return InferenceTemplatesListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) ListInferenceTemplatesExecute(r ApiListInferenceTemplatesRequest) (*InferenceTemplatesListResponse, *http.Response, error) {
 	var (
@@ -4029,9 +3998,7 @@ func (a *WorkloadTemplatesAPIService) ListTemplates(ctx context.Context) ApiList
 }
 
 // Execute executes the request
-//
 //	@return TemplatesListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) ListTemplatesExecute(r ApiListTemplatesRequest) (*TemplatesListResponse, *http.Response, error) {
 	var (
@@ -4267,9 +4234,7 @@ func (a *WorkloadTemplatesAPIService) ListTrainingTemplates(ctx context.Context)
 }
 
 // Execute executes the request
-//
 //	@return TrainingTemplatesListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) ListTrainingTemplatesExecute(r ApiListTrainingTemplatesRequest) (*TrainingTemplatesListResponse, *http.Response, error) {
 	var (
@@ -4499,9 +4464,7 @@ func (a *WorkloadTemplatesAPIService) ListWorkspaceTemplates(ctx context.Context
 }
 
 // Execute executes the request
-//
 //	@return WorkspaceTemplatesListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) ListWorkspaceTemplatesExecute(r ApiListWorkspaceTemplatesRequest) (*WorkspaceTemplatesListResponse, *http.Response, error) {
 	var (
@@ -4684,9 +4647,7 @@ func (a *WorkloadTemplatesAPIService) PatchDistributedInferenceTemplate(ctx cont
 }
 
 // Execute executes the request
-//
 //	@return DistributedInferenceTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) PatchDistributedInferenceTemplateExecute(r ApiPatchDistributedInferenceTemplateRequest) (*DistributedInferenceTemplate, *http.Response, error) {
 	var (
@@ -4864,9 +4825,7 @@ func (a *WorkloadTemplatesAPIService) PatchDistributedTemplate(ctx context.Conte
 }
 
 // Execute executes the request
-//
 //	@return DistributedTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) PatchDistributedTemplateExecute(r ApiPatchDistributedTemplateRequest) (*DistributedTemplate, *http.Response, error) {
 	var (
@@ -5044,9 +5003,7 @@ func (a *WorkloadTemplatesAPIService) PatchInferenceTemplate(ctx context.Context
 }
 
 // Execute executes the request
-//
 //	@return InferenceTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) PatchInferenceTemplateExecute(r ApiPatchInferenceTemplateRequest) (*InferenceTemplate, *http.Response, error) {
 	var (
@@ -5224,9 +5181,7 @@ func (a *WorkloadTemplatesAPIService) PatchTrainingTemplate(ctx context.Context,
 }
 
 // Execute executes the request
-//
 //	@return TrainingTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) PatchTrainingTemplateExecute(r ApiPatchTrainingTemplateRequest) (*TrainingTemplate, *http.Response, error) {
 	var (
@@ -5404,9 +5359,7 @@ func (a *WorkloadTemplatesAPIService) PatchWorkspaceTemplate(ctx context.Context
 }
 
 // Execute executes the request
-//
 //	@return WorkspaceTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) PatchWorkspaceTemplateExecute(r ApiPatchWorkspaceTemplateRequest) (*WorkspaceTemplate, *http.Response, error) {
 	var (
@@ -5752,9 +5705,7 @@ func (a *WorkloadTemplatesAPIService) UpdateDistributedInferenceTemplate(ctx con
 }
 
 // Execute executes the request
-//
 //	@return DistributedInferenceTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) UpdateDistributedInferenceTemplateExecute(r ApiUpdateDistributedInferenceTemplateRequest) (*DistributedInferenceTemplate, *http.Response, error) {
 	var (
@@ -5932,9 +5883,7 @@ func (a *WorkloadTemplatesAPIService) UpdateDistributedTemplate(ctx context.Cont
 }
 
 // Execute executes the request
-//
 //	@return DistributedTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) UpdateDistributedTemplateExecute(r ApiUpdateDistributedTemplateRequest) (*DistributedTemplate, *http.Response, error) {
 	var (
@@ -6112,9 +6061,7 @@ func (a *WorkloadTemplatesAPIService) UpdateInferenceTemplate(ctx context.Contex
 }
 
 // Execute executes the request
-//
 //	@return InferenceTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) UpdateInferenceTemplateExecute(r ApiUpdateInferenceTemplateRequest) (*InferenceTemplate, *http.Response, error) {
 	var (
@@ -6292,9 +6239,7 @@ func (a *WorkloadTemplatesAPIService) UpdateTrainingTemplate(ctx context.Context
 }
 
 // Execute executes the request
-//
 //	@return TrainingTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) UpdateTrainingTemplateExecute(r ApiUpdateTrainingTemplateRequest) (*TrainingTemplate, *http.Response, error) {
 	var (
@@ -6472,9 +6417,7 @@ func (a *WorkloadTemplatesAPIService) UpdateWorkspaceTemplate(ctx context.Contex
 }
 
 // Execute executes the request
-//
 //	@return WorkspaceTemplate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadTemplatesAPIService) UpdateWorkspaceTemplateExecute(r ApiUpdateWorkspaceTemplateRequest) (*WorkspaceTemplate, *http.Response, error) {
 	var (

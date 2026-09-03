@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name DistributedInferencesAPI --output ../mocks/
 type DistributedInferencesAPI interface {
 
@@ -148,9 +147,7 @@ func (a *DistributedInferencesAPIService) CreateDistributedInference(ctx context
 }
 
 // Execute executes the request
-//
 //	@return DistributedInference
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DistributedInferencesAPIService) CreateDistributedInferenceExecute(r ApiCreateDistributedInferenceRequest) (*DistributedInference, *http.Response, error) {
 	var (
@@ -299,9 +296,7 @@ func (a *DistributedInferencesAPIService) DeleteDistributedInference(ctx context
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DistributedInferencesAPIService) DeleteDistributedInferenceExecute(r ApiDeleteDistributedInferenceRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -460,9 +455,7 @@ func (a *DistributedInferencesAPIService) GetDistributedInference(ctx context.Co
 }
 
 // Execute executes the request
-//
 //	@return DistributedInference
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DistributedInferencesAPIService) GetDistributedInferenceExecute(r ApiGetDistributedInferenceRequest) (*DistributedInference, *http.Response, error) {
 	var (
@@ -632,9 +625,7 @@ func (a *DistributedInferencesAPIService) ListDistributedInferencesUpdates(ctx c
 }
 
 // Execute executes the request
-//
 //	@return WorkloadsSyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DistributedInferencesAPIService) ListDistributedInferencesUpdatesExecute(r ApiListDistributedInferencesUpdatesRequest) (*WorkloadsSyncResponse, *http.Response, error) {
 	var (
@@ -817,9 +808,7 @@ func (a *DistributedInferencesAPIService) RequestDistributedInferencesUpdates(ct
 }
 
 // Execute executes the request
-//
 //	@return WorkloadsSyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DistributedInferencesAPIService) RequestDistributedInferencesUpdatesExecute(r ApiRequestDistributedInferencesUpdatesRequest) (*WorkloadsSyncResponse, *http.Response, error) {
 	var (
@@ -993,9 +982,7 @@ func (a *DistributedInferencesAPIService) UpdateDistributedInferenceSpec(ctx con
 }
 
 // Execute executes the request
-//
 //	@return DistributedInference
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DistributedInferencesAPIService) UpdateDistributedInferenceSpecExecute(r ApiUpdateDistributedInferenceSpecRequest) (*DistributedInference, *http.Response, error) {
 	var (

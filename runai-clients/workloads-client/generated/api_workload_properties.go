@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name WorkloadPropertiesAPI --output ../mocks/
 type WorkloadPropertiesAPI interface {
 
@@ -263,9 +262,7 @@ func (a *WorkloadPropertiesAPIService) CreateWorkloadPriorities(ctx context.Cont
 }
 
 // Execute executes the request
-//
 //	@return WorkloadPriority
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadPropertiesAPIService) CreateWorkloadPrioritiesExecute(r ApiCreateWorkloadPrioritiesRequest) (*WorkloadPriority, *http.Response, error) {
 	var (
@@ -429,9 +426,7 @@ func (a *WorkloadPropertiesAPIService) CreateWorkloadType(ctx context.Context) A
 }
 
 // Execute executes the request
-//
 //	@return WorkloadTypeConfig
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadPropertiesAPIService) CreateWorkloadTypeExecute(r ApiCreateWorkloadTypeRequest) (*WorkloadTypeConfig, *http.Response, error) {
 	var (
@@ -754,9 +749,7 @@ func (a *WorkloadPropertiesAPIService) GetAvailablePrioritiesAndCategories(ctx c
 }
 
 // Execute executes the request
-//
 //	@return GetAvailablePrioritiesAndCategories200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadPropertiesAPIService) GetAvailablePrioritiesAndCategoriesExecute(r ApiGetAvailablePrioritiesAndCategoriesRequest) (*GetAvailablePrioritiesAndCategories200Response, *http.Response, error) {
 	var (
@@ -930,9 +923,7 @@ func (a *WorkloadPropertiesAPIService) GetCategoryById(ctx context.Context, cate
 }
 
 // Execute executes the request
-//
 //	@return WorkloadCategory
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadPropertiesAPIService) GetCategoryByIdExecute(r ApiGetCategoryByIdRequest) (*WorkloadCategory, *http.Response, error) {
 	var (
@@ -1093,9 +1084,7 @@ func (a *WorkloadPropertiesAPIService) GetSyncWorkloadPriorities(ctx context.Con
 }
 
 // Execute executes the request
-//
 //	@return []SyncPriority
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadPropertiesAPIService) GetSyncWorkloadPrioritiesExecute(r ApiGetSyncWorkloadPrioritiesRequest) ([]SyncPriority, *http.Response, error) {
 	var (
@@ -1280,9 +1269,7 @@ func (a *WorkloadPropertiesAPIService) GetWorkloadClusterPriorities(ctx context.
 }
 
 // Execute executes the request
-//
 //	@return GetWorkloadClusterPriorities200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadPropertiesAPIService) GetWorkloadClusterPrioritiesExecute(r ApiGetWorkloadClusterPrioritiesRequest) (*GetWorkloadClusterPriorities200Response, *http.Response, error) {
 	var (
@@ -1474,9 +1461,7 @@ func (a *WorkloadPropertiesAPIService) GetWorkloadPriorities(ctx context.Context
 }
 
 // Execute executes the request
-//
 //	@return GetWorkloadPriorities200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadPropertiesAPIService) GetWorkloadPrioritiesExecute(r ApiGetWorkloadPrioritiesRequest) (*GetWorkloadPriorities200Response, *http.Response, error) {
 	var (
@@ -1646,9 +1631,7 @@ func (a *WorkloadPropertiesAPIService) GetWorkloadType(ctx context.Context, work
 }
 
 // Execute executes the request
-//
 //	@return WorkloadTypeConfig
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadPropertiesAPIService) GetWorkloadTypeExecute(r ApiGetWorkloadTypeRequest) (*WorkloadTypeConfig, *http.Response, error) {
 	var (
@@ -1804,9 +1787,7 @@ func (a *WorkloadPropertiesAPIService) ListCategories(ctx context.Context) ApiLi
 }
 
 // Execute executes the request
-//
 //	@return ListCategories200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadPropertiesAPIService) ListCategoriesExecute(r ApiListCategoriesRequest) (*ListCategories200Response, *http.Response, error) {
 	var (
@@ -1971,9 +1952,7 @@ func (a *WorkloadPropertiesAPIService) ListWorkloadTypes(ctx context.Context) Ap
 }
 
 // Execute executes the request
-//
 //	@return ListWorkloadTypes200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadPropertiesAPIService) ListWorkloadTypesExecute(r ApiListWorkloadTypesRequest) (*ListWorkloadTypes200Response, *http.Response, error) {
 	var (
@@ -2303,9 +2282,7 @@ func (a *WorkloadPropertiesAPIService) UpdateWorkloadType(ctx context.Context, w
 }
 
 // Execute executes the request
-//
 //	@return WorkloadTypeConfig
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadPropertiesAPIService) UpdateWorkloadTypeExecute(r ApiUpdateWorkloadTypeRequest) (*WorkloadTypeConfig, *http.Response, error) {
 	var (

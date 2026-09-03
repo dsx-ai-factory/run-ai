@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name RegistriesAPI --output ../mocks/
 type RegistriesAPI interface {
 
@@ -134,9 +133,7 @@ func (a *RegistriesAPIService) CreateRegistryIntegration(ctx context.Context) Ap
 }
 
 // Execute executes the request
-//
 //	@return RegistryIntegration
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RegistriesAPIService) CreateRegistryIntegrationExecute(r ApiCreateRegistryIntegrationRequest) (*RegistryIntegration, *http.Response, error) {
 	var (
@@ -307,9 +304,7 @@ func (a *RegistriesAPIService) DeleteRegistryIntegration(ctx context.Context, re
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RegistriesAPIService) DeleteRegistryIntegrationExecute(r ApiDeleteRegistryIntegrationRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -479,9 +474,7 @@ func (a *RegistriesAPIService) GetRegistryIntegrationById(ctx context.Context, r
 }
 
 // Execute executes the request
-//
 //	@return RegistryIntegration
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RegistriesAPIService) GetRegistryIntegrationByIdExecute(r ApiGetRegistryIntegrationByIdRequest) (*RegistryIntegration, *http.Response, error) {
 	var (
@@ -648,9 +641,7 @@ func (a *RegistriesAPIService) ListRegistryIntegrations(ctx context.Context) Api
 }
 
 // Execute executes the request
-//
 //	@return RegistryIntegrationListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RegistriesAPIService) ListRegistryIntegrationsExecute(r ApiListRegistryIntegrationsRequest) (*RegistryIntegrationListResponse, *http.Response, error) {
 	var (
@@ -814,9 +805,7 @@ func (a *RegistriesAPIService) UpdateRegistryIntegration(ctx context.Context, re
 }
 
 // Execute executes the request
-//
 //	@return RegistryIntegration
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RegistriesAPIService) UpdateRegistryIntegrationExecute(r ApiUpdateRegistryIntegrationRequest) (*RegistryIntegration, *http.Response, error) {
 	var (

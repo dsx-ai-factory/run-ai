@@ -23,7 +23,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name AIApplicationsAPI --output ../mocks/
 type AIApplicationsAPI interface {
 
@@ -205,9 +204,7 @@ func (a *AIApplicationsAPIService) CountApplications(ctx context.Context) ApiCou
 }
 
 // Execute executes the request
-//
 //	@return CountResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AIApplicationsAPIService) CountApplicationsExecute(r ApiCountApplicationsRequest) (*CountResponse, *http.Response, error) {
 	var (
@@ -374,9 +371,7 @@ func (a *AIApplicationsAPIService) CreateApplication(ctx context.Context) ApiCre
 }
 
 // Execute executes the request
-//
 //	@return AIApplication
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AIApplicationsAPIService) CreateApplicationExecute(r ApiCreateApplicationRequest) (*AIApplication, *http.Response, error) {
 	var (
@@ -514,9 +509,7 @@ func (a *AIApplicationsAPIService) DeleteApplication(ctx context.Context, aiAppl
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AIApplicationsAPIService) DeleteApplicationExecute(r ApiDeleteApplicationRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -667,9 +660,7 @@ func (a *AIApplicationsAPIService) DownloadApplicationChart(ctx context.Context,
 }
 
 // Execute executes the request
-//
 //	@return *os.File
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AIApplicationsAPIService) DownloadApplicationChartExecute(r ApiDownloadApplicationChartRequest) (**os.File, *http.Response, error) {
 	var (
@@ -817,9 +808,7 @@ func (a *AIApplicationsAPIService) GetApplication(ctx context.Context, aiApplica
 }
 
 // Execute executes the request
-//
 //	@return AIApplication
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AIApplicationsAPIService) GetApplicationExecute(r ApiGetApplicationRequest) (*AIApplication, *http.Response, error) {
 	var (
@@ -1013,9 +1002,7 @@ func (a *AIApplicationsAPIService) ListApplications(ctx context.Context) ApiList
 }
 
 // Execute executes the request
-//
 //	@return ListApplications200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AIApplicationsAPIService) ListApplicationsExecute(r ApiListApplicationsRequest) (*ListApplications200Response, *http.Response, error) {
 	var (
@@ -1209,9 +1196,7 @@ func (a *AIApplicationsAPIService) RequestApplicationsUpdates(ctx context.Contex
 }
 
 // Execute executes the request
-//
 //	@return AIApplicationSyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AIApplicationsAPIService) RequestApplicationsUpdatesExecute(r ApiRequestApplicationsUpdatesRequest) (*AIApplicationSyncResponse, *http.Response, error) {
 	var (
@@ -1537,9 +1522,7 @@ func (a *AIApplicationsAPIService) UploadApplicationChart(ctx context.Context) A
 }
 
 // Execute executes the request
-//
 //	@return AIApplicationChartUploadResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AIApplicationsAPIService) UploadApplicationChartExecute(r ApiUploadApplicationChartRequest) (*AIApplicationChartUploadResponse, *http.Response, error) {
 	var (

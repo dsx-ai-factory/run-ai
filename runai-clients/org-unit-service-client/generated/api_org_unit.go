@@ -23,7 +23,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name OrgUnitAPI --output ../mocks/
 type OrgUnitAPI interface {
 
@@ -159,9 +158,7 @@ func (a *OrgUnitAPIService) GetInternalDeletedOrgUnits(ctx context.Context) ApiG
 }
 
 // Execute executes the request
-//
 //	@return GetInternalDeletedOrgUnits200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *OrgUnitAPIService) GetInternalDeletedOrgUnitsExecute(r ApiGetInternalDeletedOrgUnitsRequest) (*GetInternalDeletedOrgUnits200Response, *http.Response, error) {
 	var (
@@ -307,9 +304,7 @@ func (a *OrgUnitAPIService) GetInternalOrgTree(ctx context.Context) ApiGetIntern
 }
 
 // Execute executes the request
-//
 //	@return GetInternalOrgTree200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *OrgUnitAPIService) GetInternalOrgTreeExecute(r ApiGetInternalOrgTreeRequest) (*GetInternalOrgTree200Response, *http.Response, error) {
 	var (
@@ -451,9 +446,7 @@ func (a *OrgUnitAPIService) GetOrgTree(ctx context.Context) ApiGetOrgTreeRequest
 }
 
 // Execute executes the request
-//
 //	@return GetInternalOrgTree200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *OrgUnitAPIService) GetOrgTreeExecute(r ApiGetOrgTreeRequest) (*GetInternalOrgTree200Response, *http.Response, error) {
 	var (
@@ -611,9 +604,7 @@ func (a *OrgUnitAPIService) GetOrgUnitsNames(ctx context.Context) ApiGetOrgUnits
 }
 
 // Execute executes the request
-//
 //	@return []OrgUnit
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *OrgUnitAPIService) GetOrgUnitsNamesExecute(r ApiGetOrgUnitsNamesRequest) ([]OrgUnit, *http.Response, error) {
 	var (
@@ -757,9 +748,7 @@ func (a *OrgUnitAPIService) GetRanks(ctx context.Context) ApiGetRanksRequest {
 }
 
 // Execute executes the request
-//
 //	@return GetRanks200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *OrgUnitAPIService) GetRanksExecute(r ApiGetRanksRequest) (*GetRanks200Response, *http.Response, error) {
 	var (
@@ -1053,9 +1042,7 @@ func (a *OrgUnitAPIService) OrgsNodePoolSummary(ctx context.Context, nodepoolId 
 }
 
 // Execute executes the request
-//
 //	@return OrgsNodePoolSummary200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *OrgUnitAPIService) OrgsNodePoolSummaryExecute(r ApiOrgsNodePoolSummaryRequest) (*OrgsNodePoolSummary200Response, *http.Response, error) {
 	var (

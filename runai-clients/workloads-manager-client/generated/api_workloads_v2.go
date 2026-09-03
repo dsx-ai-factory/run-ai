@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name WorkloadsV2API --output ../mocks/
 type WorkloadsV2API interface {
 
@@ -193,9 +192,7 @@ func (a *WorkloadsV2APIService) BatchWorkloads(ctx context.Context) ApiBatchWork
 }
 
 // Execute executes the request
-//
 //	@return BatchResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsV2APIService) BatchWorkloadsExecute(r ApiBatchWorkloadsRequest) (*BatchResponse, *http.Response, error) {
 	var (
@@ -368,9 +365,7 @@ func (a *WorkloadsV2APIService) CreateWorkloadInternal(ctx context.Context) ApiC
 }
 
 // Execute executes the request
-//
 //	@return WorkloadV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsV2APIService) CreateWorkloadInternalExecute(r ApiCreateWorkloadInternalRequest) (*WorkloadV2, *http.Response, error) {
 	var (
@@ -528,9 +523,7 @@ func (a *WorkloadsV2APIService) CreateWorkloadV2(ctx context.Context) ApiCreateW
 }
 
 // Execute executes the request
-//
 //	@return WorkloadV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsV2APIService) CreateWorkloadV2Execute(r ApiCreateWorkloadV2Request) (*WorkloadV2, *http.Response, error) {
 	var (
@@ -710,9 +703,7 @@ func (a *WorkloadsV2APIService) DeleteWorkloadV2(ctx context.Context, workloadV2
 }
 
 // Execute executes the request
-//
 //	@return WorkloadV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsV2APIService) DeleteWorkloadV2Execute(r ApiDeleteWorkloadV2Request) (*WorkloadV2, *http.Response, error) {
 	var (
@@ -871,9 +862,7 @@ func (a *WorkloadsV2APIService) GetWorkloadV2ById(ctx context.Context, workloadV
 }
 
 // Execute executes the request
-//
 //	@return WorkloadV2GetResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsV2APIService) GetWorkloadV2ByIdExecute(r ApiGetWorkloadV2ByIdRequest) (*WorkloadV2GetResponse, *http.Response, error) {
 	var (
@@ -1056,9 +1045,7 @@ func (a *WorkloadsV2APIService) GetWorkloadV2Updates(ctx context.Context) ApiGet
 }
 
 // Execute executes the request
-//
 //	@return WorkloadsV2Updates
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsV2APIService) GetWorkloadV2UpdatesExecute(r ApiGetWorkloadV2UpdatesRequest) (*WorkloadsV2Updates, *http.Response, error) {
 	var (
@@ -1238,9 +1225,7 @@ func (a *WorkloadsV2APIService) SetWorkloadRunState(ctx context.Context, workloa
 }
 
 // Execute executes the request
-//
 //	@return WorkloadV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsV2APIService) SetWorkloadRunStateExecute(r ApiSetWorkloadRunStateRequest) (*WorkloadV2, *http.Response, error) {
 	var (
@@ -1433,9 +1418,7 @@ func (a *WorkloadsV2APIService) UpdateWorkloadInternal(ctx context.Context, work
 }
 
 // Execute executes the request
-//
 //	@return WorkloadV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsV2APIService) UpdateWorkloadInternalExecute(r ApiUpdateWorkloadInternalRequest) (*WorkloadV2, *http.Response, error) {
 	var (
@@ -1605,9 +1588,7 @@ func (a *WorkloadsV2APIService) UpdateWorkloadV2(ctx context.Context, workloadV2
 }
 
 // Execute executes the request
-//
 //	@return WorkloadV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsV2APIService) UpdateWorkloadV2Execute(r ApiUpdateWorkloadV2Request) (*WorkloadV2, *http.Response, error) {
 	var (

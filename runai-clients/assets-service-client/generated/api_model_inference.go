@@ -21,7 +21,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name ModelInferenceAPI --output ../mocks/
 type ModelInferenceAPI interface {
 
@@ -88,9 +87,7 @@ func (a *ModelInferenceAPIService) CreateModelInference(ctx context.Context) Api
 }
 
 // Execute executes the request
-//
 //	@return ModelInference
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ModelInferenceAPIService) CreateModelInferenceExecute(r ApiCreateModelInferenceRequest) (*ModelInference, *http.Response, error) {
 	var (
@@ -253,9 +250,7 @@ func (a *ModelInferenceAPIService) CreateModelInferenceV2(ctx context.Context) A
 }
 
 // Execute executes the request
-//
 //	@return ModelInferenceV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ModelInferenceAPIService) CreateModelInferenceV2Execute(r ApiCreateModelInferenceV2Request) (*ModelInferenceV2, *http.Response, error) {
 	var (

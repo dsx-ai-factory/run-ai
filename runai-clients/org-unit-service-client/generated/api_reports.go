@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name ReportsAPI --output ../mocks/
 type ReportsAPI interface {
 
@@ -152,9 +151,7 @@ func (a *ReportsAPIService) AreReportsAvailable(ctx context.Context) ApiAreRepor
 }
 
 // Execute executes the request
-//
 //	@return AreReportsAvailable200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ReportsAPIService) AreReportsAvailableExecute(r ApiAreReportsAvailableRequest) (*AreReportsAvailable200Response, *http.Response, error) {
 	var (
@@ -283,9 +280,7 @@ func (a *ReportsAPIService) BatchDeleteReports(ctx context.Context) ApiBatchDele
 }
 
 // Execute executes the request
-//
 //	@return BatchDeleteReportsResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ReportsAPIService) BatchDeleteReportsExecute(r ApiBatchDeleteReportsRequest) (*BatchDeleteReportsResponse, *http.Response, error) {
 	var (
@@ -457,9 +452,7 @@ func (a *ReportsAPIService) CountReports(ctx context.Context) ApiCountReportsReq
 }
 
 // Execute executes the request
-//
 //	@return CountResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ReportsAPIService) CountReportsExecute(r ApiCountReportsRequest) (*CountResponse, *http.Response, error) {
 	var (
@@ -614,9 +607,7 @@ func (a *ReportsAPIService) CreateReport(ctx context.Context) ApiCreateReportReq
 }
 
 // Execute executes the request
-//
 //	@return Report
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ReportsAPIService) CreateReportExecute(r ApiCreateReportRequest) (*Report, *http.Response, error) {
 	var (
@@ -1058,9 +1049,7 @@ func (a *ReportsAPIService) GetReportById(ctx context.Context, reportId string) 
 }
 
 // Execute executes the request
-//
 //	@return Report
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ReportsAPIService) GetReportByIdExecute(r ApiGetReportByIdRequest) (*Report, *http.Response, error) {
 	var (
@@ -1256,9 +1245,7 @@ func (a *ReportsAPIService) ListReports(ctx context.Context) ApiListReportsReque
 }
 
 // Execute executes the request
-//
 //	@return ListReports200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ReportsAPIService) ListReportsExecute(r ApiListReportsRequest) (*ListReports200Response, *http.Response, error) {
 	var (

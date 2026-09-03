@@ -21,7 +21,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name UnifiedAPI --output ../mocks/
 type UnifiedAPI interface {
 
@@ -74,9 +73,7 @@ func (a *UnifiedAPIService) GetUnifiedWorkload(ctx context.Context) ApiGetUnifie
 }
 
 // Execute executes the request
-//
 //	@return UnifiedWorkload
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *UnifiedAPIService) GetUnifiedWorkloadExecute(r ApiGetUnifiedWorkloadRequest) (*UnifiedWorkload, *http.Response, error) {
 	var (

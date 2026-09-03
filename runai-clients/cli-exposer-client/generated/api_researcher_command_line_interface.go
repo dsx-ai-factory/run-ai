@@ -23,7 +23,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name ResearcherCommandLineInterfaceAPI --output ../mocks/
 type ResearcherCommandLineInterfaceAPI interface {
 
@@ -216,9 +215,7 @@ func (a *ResearcherCommandLineInterfaceAPIService) GetBinary(ctx context.Context
 }
 
 // Execute executes the request
-//
 //	@return *os.File
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceAPIService) GetBinaryExecute(r ApiGetBinaryRequest) (**os.File, *http.Response, error) {
 	var (
@@ -376,9 +373,7 @@ func (a *ResearcherCommandLineInterfaceAPIService) GetInstallerLinux(ctx context
 }
 
 // Execute executes the request
-//
 //	@return string
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceAPIService) GetInstallerLinuxExecute(r ApiGetInstallerLinuxRequest) (string, *http.Response, error) {
 	var (
@@ -533,9 +528,7 @@ func (a *ResearcherCommandLineInterfaceAPIService) GetInstallerLinuxCommands(ctx
 }
 
 // Execute executes the request
-//
 //	@return Command
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceAPIService) GetInstallerLinuxCommandsExecute(r ApiGetInstallerLinuxCommandsRequest) (*Command, *http.Response, error) {
 	var (
@@ -690,9 +683,7 @@ func (a *ResearcherCommandLineInterfaceAPIService) GetInstallerMac(ctx context.C
 }
 
 // Execute executes the request
-//
 //	@return string
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceAPIService) GetInstallerMacExecute(r ApiGetInstallerMacRequest) (string, *http.Response, error) {
 	var (
@@ -847,9 +838,7 @@ func (a *ResearcherCommandLineInterfaceAPIService) GetInstallerMacCommands(ctx c
 }
 
 // Execute executes the request
-//
 //	@return Command
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceAPIService) GetInstallerMacCommandsExecute(r ApiGetInstallerMacCommandsRequest) (*Command, *http.Response, error) {
 	var (
@@ -1004,9 +993,7 @@ func (a *ResearcherCommandLineInterfaceAPIService) GetInstallerUnix(ctx context.
 }
 
 // Execute executes the request
-//
 //	@return string
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceAPIService) GetInstallerUnixExecute(r ApiGetInstallerUnixRequest) (string, *http.Response, error) {
 	var (
@@ -1161,9 +1148,7 @@ func (a *ResearcherCommandLineInterfaceAPIService) GetInstallerUnixCommands(ctx 
 }
 
 // Execute executes the request
-//
 //	@return Command
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceAPIService) GetInstallerUnixCommandsExecute(r ApiGetInstallerUnixCommandsRequest) (*Command, *http.Response, error) {
 	var (
@@ -1318,9 +1303,7 @@ func (a *ResearcherCommandLineInterfaceAPIService) GetInstallerWindowsCommands(c
 }
 
 // Execute executes the request
-//
 //	@return Command
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceAPIService) GetInstallerWindowsCommandsExecute(r ApiGetInstallerWindowsCommandsRequest) (*Command, *http.Response, error) {
 	var (
@@ -1478,9 +1461,7 @@ func (a *ResearcherCommandLineInterfaceAPIService) GetManualDocument(ctx context
 }
 
 // Execute executes the request
-//
 //	@return string
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceAPIService) GetManualDocumentExecute(r ApiGetManualDocumentRequest) (string, *http.Response, error) {
 	var (
@@ -1632,9 +1613,7 @@ func (a *ResearcherCommandLineInterfaceAPIService) GetVersion(ctx context.Contex
 }
 
 // Execute executes the request
-//
 //	@return Version
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceAPIService) GetVersionExecute(r ApiGetVersionRequest) (*Version, *http.Response, error) {
 	var (

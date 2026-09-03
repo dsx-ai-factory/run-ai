@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name EnvironmentAPI --output ../mocks/
 type EnvironmentAPI interface {
 
@@ -134,9 +133,7 @@ func (a *EnvironmentAPIService) CreateEnvironmentAsset(ctx context.Context) ApiC
 }
 
 // Execute executes the request
-//
 //	@return EnvironmentAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *EnvironmentAPIService) CreateEnvironmentAssetExecute(r ApiCreateEnvironmentAssetRequest) (*EnvironmentAsset, *http.Response, error) {
 	var (
@@ -296,9 +293,7 @@ func (a *EnvironmentAPIService) DeleteEnvironmentAssetById(ctx context.Context, 
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *EnvironmentAPIService) DeleteEnvironmentAssetByIdExecute(r ApiDeleteEnvironmentAssetByIdRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -484,9 +479,7 @@ func (a *EnvironmentAPIService) GetEnvironmentAssetById(ctx context.Context, ass
 }
 
 // Execute executes the request
-//
 //	@return EnvironmentAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *EnvironmentAPIService) GetEnvironmentAssetByIdExecute(r ApiGetEnvironmentAssetByIdRequest) (*EnvironmentAsset, *http.Response, error) {
 	var (
@@ -768,9 +761,7 @@ func (a *EnvironmentAPIService) ListEnvironmentAssets(ctx context.Context) ApiLi
 }
 
 // Execute executes the request
-//
 //	@return EnvironmentListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *EnvironmentAPIService) ListEnvironmentAssetsExecute(r ApiListEnvironmentAssetsRequest) (*EnvironmentListResponse, *http.Response, error) {
 	var (
@@ -963,9 +954,7 @@ func (a *EnvironmentAPIService) UpdateEnvironmentAssetById(ctx context.Context, 
 }
 
 // Execute executes the request
-//
 //	@return EnvironmentAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *EnvironmentAPIService) UpdateEnvironmentAssetByIdExecute(r ApiUpdateEnvironmentAssetByIdRequest) (*EnvironmentAsset, *http.Response, error) {
 	var (

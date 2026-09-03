@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name ClusterAPIAPI --output ../mocks/
 type ClusterAPIAPI interface {
 
@@ -85,9 +84,7 @@ func (a *ClusterAPIAPIService) GetWorkloadStatus(ctx context.Context, projectNam
 }
 
 // Execute executes the request
-//
 //	@return WorkloadStatus
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClusterAPIAPIService) GetWorkloadStatusExecute(r ApiGetWorkloadStatusRequest) (*WorkloadStatus, *http.Response, error) {
 	var (

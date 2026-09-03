@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name HelmReposAPI --output ../mocks/
 type HelmReposAPI interface {
 
@@ -153,9 +152,7 @@ func (a *HelmReposAPIService) BrowseHelmRepoCharts(ctx context.Context, helmRepo
 }
 
 // Execute executes the request
-//
 //	@return HelmChartListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *HelmReposAPIService) BrowseHelmRepoChartsExecute(r ApiBrowseHelmRepoChartsRequest) (*HelmChartListResponse, *http.Response, error) {
 	var (
@@ -331,9 +328,7 @@ func (a *HelmReposAPIService) CreateHelmRepo(ctx context.Context) ApiCreateHelmR
 }
 
 // Execute executes the request
-//
 //	@return HelmRepo
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *HelmReposAPIService) CreateHelmRepoExecute(r ApiCreateHelmRepoRequest) (*HelmRepo, *http.Response, error) {
 	var (
@@ -504,9 +499,7 @@ func (a *HelmReposAPIService) DeleteHelmRepo(ctx context.Context, helmRepoId str
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *HelmReposAPIService) DeleteHelmRepoExecute(r ApiDeleteHelmRepoRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -676,9 +669,7 @@ func (a *HelmReposAPIService) GetHelmRepoById(ctx context.Context, helmRepoId st
 }
 
 // Execute executes the request
-//
 //	@return HelmRepo
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *HelmReposAPIService) GetHelmRepoByIdExecute(r ApiGetHelmRepoByIdRequest) (*HelmRepo, *http.Response, error) {
 	var (
@@ -845,9 +836,7 @@ func (a *HelmReposAPIService) ListHelmRepos(ctx context.Context) ApiListHelmRepo
 }
 
 // Execute executes the request
-//
 //	@return HelmRepoListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *HelmReposAPIService) ListHelmReposExecute(r ApiListHelmReposRequest) (*HelmRepoListResponse, *http.Response, error) {
 	var (
@@ -1011,9 +1000,7 @@ func (a *HelmReposAPIService) UpdateHelmRepo(ctx context.Context, helmRepoId str
 }
 
 // Execute executes the request
-//
 //	@return HelmRepo
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *HelmReposAPIService) UpdateHelmRepoExecute(r ApiUpdateHelmRepoRequest) (*HelmRepo, *http.Response, error) {
 	var (

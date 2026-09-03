@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name S3API --output ../mocks/
 type S3API interface {
 
@@ -134,9 +133,7 @@ func (a *S3APIService) CreateS3Asset(ctx context.Context) ApiCreateS3AssetReques
 }
 
 // Execute executes the request
-//
 //	@return S3Asset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *S3APIService) CreateS3AssetExecute(r ApiCreateS3AssetRequest) (*S3Asset, *http.Response, error) {
 	var (
@@ -296,9 +293,7 @@ func (a *S3APIService) DeleteS3AssetById(ctx context.Context, assetId string) Ap
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *S3APIService) DeleteS3AssetByIdExecute(r ApiDeleteS3AssetByIdRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -484,9 +479,7 @@ func (a *S3APIService) GetS3AssetById(ctx context.Context, assetId string) ApiGe
 }
 
 // Execute executes the request
-//
 //	@return S3Asset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *S3APIService) GetS3AssetByIdExecute(r ApiGetS3AssetByIdRequest) (*S3Asset, *http.Response, error) {
 	var (
@@ -726,9 +719,7 @@ func (a *S3APIService) ListS3Assets(ctx context.Context) ApiListS3AssetsRequest 
 }
 
 // Execute executes the request
-//
 //	@return S3ListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *S3APIService) ListS3AssetsExecute(r ApiListS3AssetsRequest) (*S3ListResponse, *http.Response, error) {
 	var (
@@ -903,9 +894,7 @@ func (a *S3APIService) UpdateS3AssetById(ctx context.Context, assetId string) Ap
 }
 
 // Execute executes the request
-//
 //	@return S3Asset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *S3APIService) UpdateS3AssetByIdExecute(r ApiUpdateS3AssetByIdRequest) (*S3Asset, *http.Response, error) {
 	var (

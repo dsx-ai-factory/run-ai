@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name WorkspacesAPI --output ../mocks/
 type WorkspacesAPI interface {
 
@@ -163,9 +162,7 @@ func (a *WorkspacesAPIService) CreateWorkspace(ctx context.Context) ApiCreateWor
 }
 
 // Execute executes the request
-//
 //	@return Workspace
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkspacesAPIService) CreateWorkspaceExecute(r ApiCreateWorkspaceRequest) (*Workspace, *http.Response, error) {
 	var (
@@ -314,9 +311,7 @@ func (a *WorkspacesAPIService) DeleteWorkspace(ctx context.Context, workloadId s
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkspacesAPIService) DeleteWorkspaceExecute(r ApiDeleteWorkspaceRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -475,9 +470,7 @@ func (a *WorkspacesAPIService) GetWorkspace(ctx context.Context, workloadId stri
 }
 
 // Execute executes the request
-//
 //	@return Workspace
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkspacesAPIService) GetWorkspaceExecute(r ApiGetWorkspaceRequest) (*Workspace, *http.Response, error) {
 	var (
@@ -647,9 +640,7 @@ func (a *WorkspacesAPIService) ListWorkspacesUpdates(ctx context.Context) ApiLis
 }
 
 // Execute executes the request
-//
 //	@return WorkloadsSyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkspacesAPIService) ListWorkspacesUpdatesExecute(r ApiListWorkspacesUpdatesRequest) (*WorkloadsSyncResponse, *http.Response, error) {
 	var (
@@ -832,9 +823,7 @@ func (a *WorkspacesAPIService) RequestWorkspacesUpdates(ctx context.Context) Api
 }
 
 // Execute executes the request
-//
 //	@return WorkloadsSyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkspacesAPIService) RequestWorkspacesUpdatesExecute(r ApiRequestWorkspacesUpdatesRequest) (*WorkloadsSyncResponse, *http.Response, error) {
 	var (
@@ -1002,9 +991,7 @@ func (a *WorkspacesAPIService) ResumeWorkspace(ctx context.Context, workloadId s
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkspacesAPIService) ResumeWorkspaceExecute(r ApiResumeWorkspaceRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -1163,9 +1150,7 @@ func (a *WorkspacesAPIService) SuspendWorkspace(ctx context.Context, workloadId 
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkspacesAPIService) SuspendWorkspaceExecute(r ApiSuspendWorkspaceRequest) (*HttpResponse, *http.Response, error) {
 	var (

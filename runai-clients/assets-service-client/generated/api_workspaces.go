@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name WorkspacesAPI --output ../mocks/
 type WorkspacesAPI interface {
 
@@ -234,9 +233,7 @@ func (a *WorkspacesAPIService) CountAssets(ctx context.Context) ApiCountAssetsRe
 }
 
 // Execute executes the request
-//
 //	@return AssetCountResponse
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkspacesAPIService) CountAssetsExecute(r ApiCountAssetsRequest) (*AssetCountResponse, *http.Response, error) {
@@ -394,9 +391,7 @@ func (a *WorkspacesAPIService) CreateWorkspace(ctx context.Context) ApiCreateWor
 }
 
 // Execute executes the request
-//
 //	@return Workspace
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkspacesAPIService) CreateWorkspaceExecute(r ApiCreateWorkspaceRequest) (*Workspace, *http.Response, error) {
 	var (
@@ -548,9 +543,7 @@ func (a *WorkspacesAPIService) CreateWorkspaceV2(ctx context.Context) ApiCreateW
 }
 
 // Execute executes the request
-//
 //	@return WorkspaceV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkspacesAPIService) CreateWorkspaceV2Execute(r ApiCreateWorkspaceV2Request) (*WorkspaceV2, *http.Response, error) {
 	var (
@@ -843,9 +836,7 @@ func (a *WorkspacesAPIService) GetWorkspaceByIdV2(ctx context.Context, workloadI
 }
 
 // Execute executes the request
-//
 //	@return WorkspaceV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkspacesAPIService) GetWorkspaceByIdV2Execute(r ApiGetWorkspaceByIdV2Request) (*WorkspaceV2, *http.Response, error) {
 	var (
@@ -1011,9 +1002,7 @@ func (a *WorkspacesAPIService) GetWorkspaceMerged(ctx context.Context) ApiGetWor
 }
 
 // Execute executes the request
-//
 //	@return WorkspaceV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkspacesAPIService) GetWorkspaceMergedExecute(r ApiGetWorkspaceMergedRequest) (*WorkspaceV2, *http.Response, error) {
 	var (
@@ -1209,9 +1198,7 @@ func (a *WorkspacesAPIService) ListWorkspaces(ctx context.Context, clusterUuid s
 }
 
 // Execute executes the request
-//
 //	@return WorkspaceListResponse
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkspacesAPIService) ListWorkspacesExecute(r ApiListWorkspacesRequest) (*WorkspaceListResponse, *http.Response, error) {
@@ -1379,9 +1366,7 @@ func (a *WorkspacesAPIService) SyncWorkspaceStatus(ctx context.Context, clusterU
 }
 
 // Execute executes the request
-//
 //	@return []WorkloadStatusUpdate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkspacesAPIService) SyncWorkspaceStatusExecute(r ApiSyncWorkspaceStatusRequest) ([]WorkloadStatusUpdate, *http.Response, error) {
 	var (
@@ -1540,9 +1525,7 @@ func (a *WorkspacesAPIService) UpdateWorkspaceStatus(ctx context.Context, cluste
 }
 
 // Execute executes the request
-//
 //	@return WorkloadStatusUpdate
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkspacesAPIService) UpdateWorkspaceStatusExecute(r ApiUpdateWorkspaceStatusRequest) (*WorkloadStatusUpdate, *http.Response, error) {
 	var (

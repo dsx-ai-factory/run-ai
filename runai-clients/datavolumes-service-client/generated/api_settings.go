@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name SettingsAPI --output ../mocks/
 type SettingsAPI interface {
 
@@ -100,9 +99,7 @@ func (a *SettingsAPIService) GetDatavolumesSettingByKey(ctx context.Context, key
 }
 
 // Execute executes the request
-//
 //	@return GetEnableDataVolumes
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetDatavolumesSettingByKeyExecute(r ApiGetDatavolumesSettingByKeyRequest) (*GetEnableDataVolumes, *http.Response, error) {
 	var (
@@ -280,9 +277,7 @@ func (a *SettingsAPIService) GetDatavolumesSettings(ctx context.Context) ApiGetD
 }
 
 // Execute executes the request
-//
 //	@return DatavolumesSettingsGetResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetDatavolumesSettingsExecute(r ApiGetDatavolumesSettingsRequest) (*DatavolumesSettingsGetResponse, *http.Response, error) {
 	var (

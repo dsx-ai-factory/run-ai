@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name ModelAPI --output ../mocks/
 type ModelAPI interface {
 
@@ -134,9 +133,7 @@ func (a *ModelAPIService) CreateModelAsset(ctx context.Context) ApiCreateModelAs
 }
 
 // Execute executes the request
-//
 //	@return ModelAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ModelAPIService) CreateModelAssetExecute(r ApiCreateModelAssetRequest) (*ModelAsset, *http.Response, error) {
 	var (
@@ -296,9 +293,7 @@ func (a *ModelAPIService) DeleteModelAssetById(ctx context.Context, modelId stri
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ModelAPIService) DeleteModelAssetByIdExecute(r ApiDeleteModelAssetByIdRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -477,9 +472,7 @@ func (a *ModelAPIService) GetModelAssetById(ctx context.Context, modelId string)
 }
 
 // Execute executes the request
-//
 //	@return ModelAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ModelAPIService) GetModelAssetByIdExecute(r ApiGetModelAssetByIdRequest) (*ModelAsset, *http.Response, error) {
 	var (
@@ -709,9 +702,7 @@ func (a *ModelAPIService) ListModelAssets(ctx context.Context) ApiListModelAsset
 }
 
 // Execute executes the request
-//
 //	@return ModelListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ModelAPIService) ListModelAssetsExecute(r ApiListModelAssetsRequest) (*ModelListResponse, *http.Response, error) {
 	var (
@@ -883,9 +874,7 @@ func (a *ModelAPIService) UpdateModelAssetById(ctx context.Context, modelId stri
 }
 
 // Execute executes the request
-//
 //	@return ModelAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ModelAPIService) UpdateModelAssetByIdExecute(r ApiUpdateModelAssetByIdRequest) (*ModelAsset, *http.Response, error) {
 	var (

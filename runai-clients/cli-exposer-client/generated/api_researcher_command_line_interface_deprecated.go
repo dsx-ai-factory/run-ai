@@ -23,7 +23,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name ResearcherCommandLineInterfaceDeprecatedAPI --output ../mocks/
 type ResearcherCommandLineInterfaceDeprecatedAPI interface {
 
@@ -248,9 +247,7 @@ func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetBinaryDeprecated
 }
 
 // Execute executes the request
-//
 //	@return *os.File
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetBinaryDeprecatedExecute(r ApiGetBinaryDeprecatedRequest) (**os.File, *http.Response, error) {
@@ -411,9 +408,7 @@ func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetInstallerLinuxCo
 }
 
 // Execute executes the request
-//
 //	@return Command
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetInstallerLinuxCommandsDeprecatedExecute(r ApiGetInstallerLinuxCommandsDeprecatedRequest) (*Command, *http.Response, error) {
@@ -571,9 +566,7 @@ func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetInstallerLinuxDe
 }
 
 // Execute executes the request
-//
 //	@return string
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetInstallerLinuxDeprecatedExecute(r ApiGetInstallerLinuxDeprecatedRequest) (string, *http.Response, error) {
@@ -731,9 +724,7 @@ func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetInstallerMacComm
 }
 
 // Execute executes the request
-//
 //	@return Command
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetInstallerMacCommandsDeprecatedExecute(r ApiGetInstallerMacCommandsDeprecatedRequest) (*Command, *http.Response, error) {
@@ -891,9 +882,7 @@ func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetInstallerMacDepr
 }
 
 // Execute executes the request
-//
 //	@return string
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetInstallerMacDeprecatedExecute(r ApiGetInstallerMacDeprecatedRequest) (string, *http.Response, error) {
@@ -1051,9 +1040,7 @@ func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetInstallerUnixCom
 }
 
 // Execute executes the request
-//
 //	@return Command
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetInstallerUnixCommandsDeprecatedExecute(r ApiGetInstallerUnixCommandsDeprecatedRequest) (*Command, *http.Response, error) {
@@ -1211,9 +1198,7 @@ func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetInstallerUnixDep
 }
 
 // Execute executes the request
-//
 //	@return string
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetInstallerUnixDeprecatedExecute(r ApiGetInstallerUnixDeprecatedRequest) (string, *http.Response, error) {
@@ -1371,9 +1356,7 @@ func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetInstallerWindows
 }
 
 // Execute executes the request
-//
 //	@return Command
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetInstallerWindowsCommandsDeprecatedExecute(r ApiGetInstallerWindowsCommandsDeprecatedRequest) (*Command, *http.Response, error) {
@@ -1534,9 +1517,7 @@ func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetManualDocumentDe
 }
 
 // Execute executes the request
-//
 //	@return string
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetManualDocumentDeprecatedExecute(r ApiGetManualDocumentDeprecatedRequest) (string, *http.Response, error) {
@@ -1691,9 +1672,7 @@ func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetVersionDeprecate
 }
 
 // Execute executes the request
-//
 //	@return Version
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ResearcherCommandLineInterfaceDeprecatedAPIService) GetVersionDeprecatedExecute(r ApiGetVersionDeprecatedRequest) (*Version, *http.Response, error) {

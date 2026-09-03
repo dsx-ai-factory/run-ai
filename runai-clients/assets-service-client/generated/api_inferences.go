@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name InferencesAPI --output ../mocks/
 type InferencesAPI interface {
 
@@ -162,9 +161,7 @@ func (a *InferencesAPIService) CreateInference(ctx context.Context) ApiCreateInf
 }
 
 // Execute executes the request
-//
 //	@return Inference
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InferencesAPIService) CreateInferenceExecute(r ApiCreateInferenceRequest) (*Inference, *http.Response, error) {
 	var (
@@ -316,9 +313,7 @@ func (a *InferencesAPIService) CreateInferenceV2(ctx context.Context) ApiCreateI
 }
 
 // Execute executes the request
-//
 //	@return InferenceV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InferencesAPIService) CreateInferenceV2Execute(r ApiCreateInferenceV2Request) (*InferenceV2, *http.Response, error) {
 	var (
@@ -467,9 +462,7 @@ func (a *InferencesAPIService) DeleteInferenceById(ctx context.Context, workload
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InferencesAPIService) DeleteInferenceByIdExecute(r ApiDeleteInferenceByIdRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -620,9 +613,7 @@ func (a *InferencesAPIService) GetHuggingFaceModelInfo(ctx context.Context) ApiG
 }
 
 // Execute executes the request
-//
 //	@return HuggingFaceModelInfo
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InferencesAPIService) GetHuggingFaceModelInfoExecute(r ApiGetHuggingFaceModelInfoRequest) (*HuggingFaceModelInfo, *http.Response, error) {
 	var (
@@ -782,9 +773,7 @@ func (a *InferencesAPIService) GetInferenceById(ctx context.Context, workloadId 
 }
 
 // Execute executes the request
-//
 //	@return Inference
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InferencesAPIService) GetInferenceByIdExecute(r ApiGetInferenceByIdRequest) (*Inference, *http.Response, error) {
 	var (
@@ -932,9 +921,7 @@ func (a *InferencesAPIService) GetInferenceByIdV2(ctx context.Context, workloadI
 }
 
 // Execute executes the request
-//
 //	@return InferenceV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InferencesAPIService) GetInferenceByIdV2Execute(r ApiGetInferenceByIdV2Request) (*InferenceV2, *http.Response, error) {
 	var (
@@ -1100,9 +1087,7 @@ func (a *InferencesAPIService) GetInferenceMerged(ctx context.Context) ApiGetInf
 }
 
 // Execute executes the request
-//
 //	@return InferenceV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InferencesAPIService) GetInferenceMergedExecute(r ApiGetInferenceMergedRequest) (*InferenceV2, *http.Response, error) {
 	var (

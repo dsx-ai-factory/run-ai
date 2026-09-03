@@ -21,7 +21,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name SynchronizationAPI --output ../mocks/
 type SynchronizationAPI interface {
 
@@ -140,9 +139,7 @@ func (a *SynchronizationAPIService) CredentialsSyncUpdates(ctx context.Context) 
 }
 
 // Execute executes the request
-//
 //	@return CredentialsUpdatesResp
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SynchronizationAPIService) CredentialsSyncUpdatesExecute(r ApiCredentialsSyncUpdatesRequest) (*CredentialsUpdatesResp, *http.Response, error) {
 	var (
@@ -324,9 +321,7 @@ func (a *SynchronizationAPIService) DatasourceSyncUpdates(ctx context.Context) A
 }
 
 // Execute executes the request
-//
 //	@return DatasourceUpdatesResp
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SynchronizationAPIService) DatasourceSyncUpdatesExecute(r ApiDatasourceSyncUpdatesRequest) (*DatasourceUpdatesResp, *http.Response, error) {
 	var (
@@ -499,9 +494,7 @@ func (a *SynchronizationAPIService) ListAssetsById(ctx context.Context) ApiListA
 }
 
 // Execute executes the request
-//
 //	@return AssetListByIdsResponse
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SynchronizationAPIService) ListAssetsByIdExecute(r ApiListAssetsByIdRequest) (*AssetListByIdsResponse, *http.Response, error) {
@@ -775,9 +768,7 @@ func (a *SynchronizationAPIService) SyncValidate(ctx context.Context) ApiSyncVal
 }
 
 // Execute executes the request
-//
 //	@return ValidateSyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SynchronizationAPIService) SyncValidateExecute(r ApiSyncValidateRequest) (*ValidateSyncResponse, *http.Response, error) {
 	var (

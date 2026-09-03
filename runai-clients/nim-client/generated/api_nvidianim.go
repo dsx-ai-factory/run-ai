@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name NVIDIANIMAPI --output ../mocks/
 type NVIDIANIMAPI interface {
 
@@ -105,9 +104,7 @@ func (a *NVIDIANIMAPIService) CreateNimService(ctx context.Context) ApiCreateNim
 }
 
 // Execute executes the request
-//
 //	@return NimServiceResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NVIDIANIMAPIService) CreateNimServiceExecute(r ApiCreateNimServiceRequest) (*NimServiceResponse, *http.Response, error) {
 	var (
@@ -282,9 +279,7 @@ func (a *NVIDIANIMAPIService) GetNimServiceById(ctx context.Context, workloadV2I
 }
 
 // Execute executes the request
-//
 //	@return NimServiceResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NVIDIANIMAPIService) GetNimServiceByIdExecute(r ApiGetNimServiceByIdRequest) (*NimServiceResponse, *http.Response, error) {
 	var (
@@ -449,9 +444,7 @@ func (a *NVIDIANIMAPIService) UpdateNimServiceSpec(ctx context.Context, workload
 }
 
 // Execute executes the request
-//
 //	@return NimServiceResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NVIDIANIMAPIService) UpdateNimServiceSpecExecute(r ApiUpdateNimServiceSpecRequest) (*NimServiceResponse, *http.Response, error) {
 	var (

@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name SettingsAPI --output ../mocks/
 type SettingsAPI interface {
 
@@ -100,9 +99,7 @@ func (a *SettingsAPIService) GetWorkloadsSettingByKey(ctx context.Context, key W
 }
 
 // Execute executes the request
-//
 //	@return GetYamlSubmission
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetWorkloadsSettingByKeyExecute(r ApiGetWorkloadsSettingByKeyRequest) (*GetYamlSubmission, *http.Response, error) {
 	var (
@@ -280,9 +277,7 @@ func (a *SettingsAPIService) GetWorkloadsSettings(ctx context.Context) ApiGetWor
 }
 
 // Execute executes the request
-//
 //	@return WorkloadsSettingsGetResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetWorkloadsSettingsExecute(r ApiGetWorkloadsSettingsRequest) (*WorkloadsSettingsGetResponse, *http.Response, error) {
 	var (

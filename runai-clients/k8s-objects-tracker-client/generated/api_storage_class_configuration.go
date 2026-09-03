@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name StorageClassConfigurationAPI --output ../mocks/
 type StorageClassConfigurationAPI interface {
 
@@ -164,9 +163,7 @@ func (a *StorageClassConfigurationAPIService) CreateStorageClassConfiguration(ct
 }
 
 // Execute executes the request
-//
 //	@return StorageClassConfiguration
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *StorageClassConfigurationAPIService) CreateStorageClassConfigurationExecute(r ApiCreateStorageClassConfigurationRequest) (*StorageClassConfiguration, *http.Response, error) {
 	var (
@@ -503,9 +500,7 @@ func (a *StorageClassConfigurationAPIService) GetStorageClassConfigurationById(c
 }
 
 // Execute executes the request
-//
 //	@return StorageClassConfiguration
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *StorageClassConfigurationAPIService) GetStorageClassConfigurationByIdExecute(r ApiGetStorageClassConfigurationByIdRequest) (*StorageClassConfiguration, *http.Response, error) {
 	var (
@@ -699,9 +694,7 @@ func (a *StorageClassConfigurationAPIService) ListStorageClassConfiguration(ctx 
 }
 
 // Execute executes the request
-//
 //	@return StorageClassConfigurationListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *StorageClassConfigurationAPIService) ListStorageClassConfigurationExecute(r ApiListStorageClassConfigurationRequest) (*StorageClassConfigurationListResponse, *http.Response, error) {
 	var (
@@ -910,9 +903,7 @@ func (a *StorageClassConfigurationAPIService) ListStorageClassConfigurationInt(c
 }
 
 // Execute executes the request
-//
 //	@return StorageClassConfigurationListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *StorageClassConfigurationAPIService) ListStorageClassConfigurationIntExecute(r ApiListStorageClassConfigurationIntRequest) (*StorageClassConfigurationListResponse, *http.Response, error) {
 	var (
@@ -1092,9 +1083,7 @@ func (a *StorageClassConfigurationAPIService) PatchStorageClassConfigurationById
 }
 
 // Execute executes the request
-//
 //	@return StorageClassConfiguration
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *StorageClassConfigurationAPIService) PatchStorageClassConfigurationByIdExecute(r ApiPatchStorageClassConfigurationByIdRequest) (*StorageClassConfiguration, *http.Response, error) {
 	var (
@@ -1273,9 +1262,7 @@ func (a *StorageClassConfigurationAPIService) UpdateStorageClassConfigurationByI
 }
 
 // Execute executes the request
-//
 //	@return StorageClassConfiguration
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *StorageClassConfigurationAPIService) UpdateStorageClassConfigurationByIdExecute(r ApiUpdateStorageClassConfigurationByIdRequest) (*StorageClassConfiguration, *http.Response, error) {
 	var (

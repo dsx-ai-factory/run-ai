@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name K8sObjectAPI --output ../mocks/
 type K8sObjectAPI interface {
 
@@ -111,9 +110,7 @@ func (a *K8sObjectAPIService) GetElementObject(ctx context.Context, workloadId s
 }
 
 // Execute executes the request
-//
 //	@return Object
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *K8sObjectAPIService) GetElementObjectExecute(r ApiGetElementObjectRequest) (*Object, *http.Response, error) {
 	var (
@@ -287,9 +284,7 @@ func (a *K8sObjectAPIService) GetPodObject(ctx context.Context, workloadId strin
 }
 
 // Execute executes the request
-//
 //	@return Object
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *K8sObjectAPIService) GetPodObjectExecute(r ApiGetPodObjectRequest) (*Object, *http.Response, error) {
 	var (
@@ -460,9 +455,7 @@ func (a *K8sObjectAPIService) GetWorkloadObject(ctx context.Context, workloadId 
 }
 
 // Execute executes the request
-//
 //	@return Object
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *K8sObjectAPIService) GetWorkloadObjectExecute(r ApiGetWorkloadObjectRequest) (*Object, *http.Response, error) {
 	var (

@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name RegistryAPI --output ../mocks/
 type RegistryAPI interface {
 
@@ -163,9 +162,7 @@ func (a *RegistryAPIService) CreateRegistry(ctx context.Context) ApiCreateRegist
 }
 
 // Execute executes the request
-//
 //	@return Registry
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RegistryAPIService) CreateRegistryExecute(r ApiCreateRegistryRequest) (*Registry, *http.Response, error) {
 	var (
@@ -479,9 +476,7 @@ func (a *RegistryAPIService) GetRegistryById(ctx context.Context, assetId string
 }
 
 // Execute executes the request
-//
 //	@return Registry
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RegistryAPIService) GetRegistryByIdExecute(r ApiGetRegistryByIdRequest) (*Registry, *http.Response, error) {
 	var (
@@ -639,9 +634,7 @@ func (a *RegistryAPIService) GetRepositories(ctx context.Context, assetId string
 }
 
 // Execute executes the request
-//
 //	@return Repositories
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RegistryAPIService) GetRepositoriesExecute(r ApiGetRepositoriesRequest) (*Repositories, *http.Response, error) {
 	var (
@@ -820,9 +813,7 @@ func (a *RegistryAPIService) GetRepositoryTags(ctx context.Context, assetId stri
 }
 
 // Execute executes the request
-//
 //	@return RepositoryTags
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RegistryAPIService) GetRepositoryTagsExecute(r ApiGetRepositoryTagsRequest) (*RepositoryTags, *http.Response, error) {
 	var (
@@ -995,9 +986,7 @@ func (a *RegistryAPIService) ListRegistries(ctx context.Context) ApiListRegistri
 }
 
 // Execute executes the request
-//
 //	@return RegistryListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RegistryAPIService) ListRegistriesExecute(r ApiListRegistriesRequest) (*RegistryListResponse, *http.Response, error) {
 	var (
@@ -1142,9 +1131,7 @@ func (a *RegistryAPIService) UpdateRegistry(ctx context.Context, assetId string)
 }
 
 // Execute executes the request
-//
 //	@return Registry
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RegistryAPIService) UpdateRegistryExecute(r ApiUpdateRegistryRequest) (*Registry, *http.Response, error) {
 	var (

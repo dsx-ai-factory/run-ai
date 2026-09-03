@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name ImagesAPI --output ../mocks/
 type ImagesAPI interface {
 
@@ -98,9 +97,7 @@ func (a *ImagesAPIService) GetImageTags(ctx context.Context, registryIntegration
 }
 
 // Execute executes the request
-//
 //	@return ImageTags
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ImagesAPIService) GetImageTagsExecute(r ApiGetImageTagsRequest) (*ImageTags, *http.Response, error) {
 	var (
@@ -280,9 +277,7 @@ func (a *ImagesAPIService) ListImages(ctx context.Context, registryIntegrationId
 }
 
 // Execute executes the request
-//
 //	@return ImagesListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ImagesAPIService) ListImagesExecute(r ApiListImagesRequest) (*ImagesListResponse, *http.Response, error) {
 	var (

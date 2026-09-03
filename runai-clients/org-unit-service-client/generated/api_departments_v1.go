@@ -23,7 +23,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name DepartmentsV1API --output ../mocks/
 type DepartmentsV1API interface {
 
@@ -167,9 +166,7 @@ func (a *DepartmentsV1APIService) GetDepartmentMetricsV1(ctx context.Context, cl
 }
 
 // Execute executes the request
-//
 //	@return DepartmentMetricsV1Response
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsV1APIService) GetDepartmentMetricsV1Execute(r ApiGetDepartmentMetricsV1Request) (*DepartmentMetricsV1Response, *http.Response, error) {
@@ -376,9 +373,7 @@ func (a *DepartmentsV1APIService) GetDepartmentsMetricsV1(ctx context.Context, c
 }
 
 // Execute executes the request
-//
 //	@return DepartmentsMetricsV1Response
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsV1APIService) GetDepartmentsMetricsV1Execute(r ApiGetDepartmentsMetricsV1Request) (*DepartmentsMetricsV1Response, *http.Response, error) {
@@ -572,9 +567,7 @@ func (a *DepartmentsV1APIService) GetDepartmentsV1(ctx context.Context, clusterI
 }
 
 // Execute executes the request
-//
 //	@return []DepartmentForGetV1
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsV1APIService) GetDepartmentsV1Execute(r ApiGetDepartmentsV1Request) ([]DepartmentForGetV1, *http.Response, error) {
@@ -740,9 +733,7 @@ func (a *DepartmentsV1APIService) SetDepartmentAdminsV1(ctx context.Context, clu
 }
 
 // Execute executes the request
-//
 //	@return DepartmentV1AccessControl
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsV1APIService) SetDepartmentAdminsV1Execute(r ApiSetDepartmentAdminsV1Request) (*DepartmentV1AccessControl, *http.Response, error) {

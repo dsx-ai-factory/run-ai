@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name SettingsAPI --output ../mocks/
 type SettingsAPI interface {
 
@@ -100,9 +99,7 @@ func (a *SettingsAPIService) GetOrgUnitSettingByKey(ctx context.Context, key Org
 }
 
 // Execute executes the request
-//
 //	@return OrgUnitSetting
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetOrgUnitSettingByKeyExecute(r ApiGetOrgUnitSettingByKeyRequest) (*OrgUnitSetting, *http.Response, error) {
 	var (
@@ -280,9 +277,7 @@ func (a *SettingsAPIService) GetOrgUnitSettings(ctx context.Context) ApiGetOrgUn
 }
 
 // Execute executes the request
-//
 //	@return OrgUnitSettingsGetResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetOrgUnitSettingsExecute(r ApiGetOrgUnitSettingsRequest) (*OrgUnitSettingsGetResponse, *http.Response, error) {
 	var (

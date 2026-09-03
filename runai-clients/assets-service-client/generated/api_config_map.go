@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name ConfigMapAPI --output ../mocks/
 type ConfigMapAPI interface {
 
@@ -134,9 +133,7 @@ func (a *ConfigMapAPIService) CreateConfigMapAsset(ctx context.Context) ApiCreat
 }
 
 // Execute executes the request
-//
 //	@return ConfigMapAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ConfigMapAPIService) CreateConfigMapAssetExecute(r ApiCreateConfigMapAssetRequest) (*ConfigMapAsset, *http.Response, error) {
 	var (
@@ -296,9 +293,7 @@ func (a *ConfigMapAPIService) DeleteConfigMapAssetById(ctx context.Context, asse
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ConfigMapAPIService) DeleteConfigMapAssetByIdExecute(r ApiDeleteConfigMapAssetByIdRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -484,9 +479,7 @@ func (a *ConfigMapAPIService) GetConfigMapAssetById(ctx context.Context, assetId
 }
 
 // Execute executes the request
-//
 //	@return ConfigMapAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ConfigMapAPIService) GetConfigMapAssetByIdExecute(r ApiGetConfigMapAssetByIdRequest) (*ConfigMapAsset, *http.Response, error) {
 	var (
@@ -726,9 +719,7 @@ func (a *ConfigMapAPIService) ListConfigMapAssets(ctx context.Context) ApiListCo
 }
 
 // Execute executes the request
-//
 //	@return ConfigMapListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ConfigMapAPIService) ListConfigMapAssetsExecute(r ApiListConfigMapAssetsRequest) (*ConfigMapListResponse, *http.Response, error) {
 	var (
@@ -903,9 +894,7 @@ func (a *ConfigMapAPIService) UpdateConfigMapAssetById(ctx context.Context, asse
 }
 
 // Execute executes the request
-//
 //	@return ConfigMapAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ConfigMapAPIService) UpdateConfigMapAssetByIdExecute(r ApiUpdateConfigMapAssetByIdRequest) (*ConfigMapAsset, *http.Response, error) {
 	var (

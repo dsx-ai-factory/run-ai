@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name CredentialsAPI --output ../mocks/
 type CredentialsAPI interface {
 
@@ -453,9 +452,7 @@ func (a *CredentialsAPIService) CreateAccessKey(ctx context.Context) ApiCreateAc
 }
 
 // Execute executes the request
-//
 //	@return AccessKey
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) CreateAccessKeyExecute(r ApiCreateAccessKeyRequest) (*AccessKey, *http.Response, error) {
 	var (
@@ -610,9 +607,7 @@ func (a *CredentialsAPIService) CreateDockerRegistry(ctx context.Context) ApiCre
 }
 
 // Execute executes the request
-//
 //	@return DockerRegistry
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) CreateDockerRegistryExecute(r ApiCreateDockerRegistryRequest) (*DockerRegistry, *http.Response, error) {
 	var (
@@ -767,9 +762,7 @@ func (a *CredentialsAPIService) CreateGenericSecret(ctx context.Context) ApiCrea
 }
 
 // Execute executes the request
-//
 //	@return GenericSecret
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) CreateGenericSecretExecute(r ApiCreateGenericSecretRequest) (*GenericSecret, *http.Response, error) {
 	var (
@@ -935,9 +928,7 @@ func (a *CredentialsAPIService) CreateNgcApiKey(ctx context.Context) ApiCreateNg
 }
 
 // Execute executes the request
-//
 //	@return NgcApiKey
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) CreateNgcApiKeyExecute(r ApiCreateNgcApiKeyRequest) (*NgcApiKey, *http.Response, error) {
 	var (
@@ -1103,9 +1094,7 @@ func (a *CredentialsAPIService) CreatePassword(ctx context.Context) ApiCreatePas
 }
 
 // Execute executes the request
-//
 //	@return Password
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) CreatePasswordExecute(r ApiCreatePasswordRequest) (*Password, *http.Response, error) {
 	var (
@@ -1257,9 +1246,7 @@ func (a *CredentialsAPIService) DeleteAccessKey(ctx context.Context, assetId str
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) DeleteAccessKeyExecute(r ApiDeleteAccessKeyRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -1432,9 +1419,7 @@ func (a *CredentialsAPIService) DeleteDockerRegistry(ctx context.Context, assetI
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) DeleteDockerRegistryExecute(r ApiDeleteDockerRegistryRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -1931,9 +1916,7 @@ func (a *CredentialsAPIService) DeletePassword(ctx context.Context, assetId stri
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) DeletePasswordExecute(r ApiDeletePasswordRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -2120,9 +2103,7 @@ func (a *CredentialsAPIService) GetAccessKeyById(ctx context.Context, assetId st
 }
 
 // Execute executes the request
-//
 //	@return AccessKey
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) GetAccessKeyByIdExecute(r ApiGetAccessKeyByIdRequest) (*AccessKey, *http.Response, error) {
 	var (
@@ -2304,9 +2285,7 @@ func (a *CredentialsAPIService) GetDockerRegistryById(ctx context.Context, asset
 }
 
 // Execute executes the request
-//
 //	@return DockerRegistry
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) GetDockerRegistryByIdExecute(r ApiGetDockerRegistryByIdRequest) (*DockerRegistry, *http.Response, error) {
 	var (
@@ -2488,9 +2467,7 @@ func (a *CredentialsAPIService) GetGenericSecretById(ctx context.Context, assetI
 }
 
 // Execute executes the request
-//
 //	@return GenericSecret
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) GetGenericSecretByIdExecute(r ApiGetGenericSecretByIdRequest) (*GenericSecret, *http.Response, error) {
 	var (
@@ -2672,9 +2649,7 @@ func (a *CredentialsAPIService) GetNgcApiKeyById(ctx context.Context, assetId st
 }
 
 // Execute executes the request
-//
 //	@return NgcApiKey
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) GetNgcApiKeyByIdExecute(r ApiGetNgcApiKeyByIdRequest) (*NgcApiKey, *http.Response, error) {
 	var (
@@ -2842,9 +2817,7 @@ func (a *CredentialsAPIService) GetNgcApiKeyByIdInternal(ctx context.Context, as
 }
 
 // Execute executes the request
-//
 //	@return NgcApiKeyInternal
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) GetNgcApiKeyByIdInternalExecute(r ApiGetNgcApiKeyByIdInternalRequest) (*NgcApiKeyInternal, *http.Response, error) {
 	var (
@@ -2998,9 +2971,7 @@ func (a *CredentialsAPIService) GetPasswordById(ctx context.Context, assetId str
 }
 
 // Execute executes the request
-//
 //	@return Password
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) GetPasswordByIdExecute(r ApiGetPasswordByIdRequest) (*Password, *http.Response, error) {
 	var (
@@ -3214,9 +3185,7 @@ func (a *CredentialsAPIService) ListAccessKeys(ctx context.Context) ApiListAcces
 }
 
 // Execute executes the request
-//
 //	@return AccessKeyListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) ListAccessKeysExecute(r ApiListAccessKeysRequest) (*AccessKeyListResponse, *http.Response, error) {
 	var (
@@ -3458,9 +3427,7 @@ func (a *CredentialsAPIService) ListCredentialsAssets(ctx context.Context) ApiLi
 }
 
 // Execute executes the request
-//
 //	@return CredentialsListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) ListCredentialsAssetsExecute(r ApiListCredentialsAssetsRequest) (*CredentialsListResponse, *http.Response, error) {
 	var (
@@ -3689,9 +3656,7 @@ func (a *CredentialsAPIService) ListDockerRegistries(ctx context.Context) ApiLis
 }
 
 // Execute executes the request
-//
 //	@return DockerRegistryListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) ListDockerRegistriesExecute(r ApiListDockerRegistriesRequest) (*DockerRegistryListResponse, *http.Response, error) {
 	var (
@@ -3925,9 +3890,7 @@ func (a *CredentialsAPIService) ListGenericSecret(ctx context.Context) ApiListGe
 }
 
 // Execute executes the request
-//
 //	@return GenericSecretListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) ListGenericSecretExecute(r ApiListGenericSecretRequest) (*GenericSecretListResponse, *http.Response, error) {
 	var (
@@ -4161,9 +4124,7 @@ func (a *CredentialsAPIService) ListNgcApiKey(ctx context.Context) ApiListNgcApi
 }
 
 // Execute executes the request
-//
 //	@return NgcApiKeyListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) ListNgcApiKeyExecute(r ApiListNgcApiKeyRequest) (*NgcApiKeyListResponse, *http.Response, error) {
 	var (
@@ -4383,9 +4344,7 @@ func (a *CredentialsAPIService) ListPasswords(ctx context.Context) ApiListPasswo
 }
 
 // Execute executes the request
-//
 //	@return PasswordListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) ListPasswordsExecute(r ApiListPasswordsRequest) (*PasswordListResponse, *http.Response, error) {
 	var (
@@ -4559,9 +4518,7 @@ func (a *CredentialsAPIService) UpdateAccessKey(ctx context.Context, assetId str
 }
 
 // Execute executes the request
-//
 //	@return AccessKey
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) UpdateAccessKeyExecute(r ApiUpdateAccessKeyRequest) (*AccessKey, *http.Response, error) {
 	var (
@@ -4734,9 +4691,7 @@ func (a *CredentialsAPIService) UpdateDockerRegistry(ctx context.Context, assetI
 }
 
 // Execute executes the request
-//
 //	@return DockerRegistry
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) UpdateDockerRegistryExecute(r ApiUpdateDockerRegistryRequest) (*DockerRegistry, *http.Response, error) {
 	var (
@@ -4909,9 +4864,7 @@ func (a *CredentialsAPIService) UpdateGenericSecret(ctx context.Context, assetId
 }
 
 // Execute executes the request
-//
 //	@return GenericSecret
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) UpdateGenericSecretExecute(r ApiUpdateGenericSecretRequest) (*GenericSecret, *http.Response, error) {
 	var (
@@ -5084,9 +5037,7 @@ func (a *CredentialsAPIService) UpdateNgcApiKey(ctx context.Context, assetId str
 }
 
 // Execute executes the request
-//
 //	@return NgcApiKey
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) UpdateNgcApiKeyExecute(r ApiUpdateNgcApiKeyRequest) (*NgcApiKey, *http.Response, error) {
 	var (
@@ -5259,9 +5210,7 @@ func (a *CredentialsAPIService) UpdatePassword(ctx context.Context, assetId stri
 }
 
 // Execute executes the request
-//
 //	@return Password
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *CredentialsAPIService) UpdatePasswordExecute(r ApiUpdatePasswordRequest) (*Password, *http.Response, error) {
 	var (

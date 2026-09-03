@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name SpecMappingAPI --output ../mocks/
 type SpecMappingAPI interface {
 
@@ -319,9 +318,7 @@ func (a *SpecMappingAPIService) CreateFieldGroup(ctx context.Context) ApiCreateF
 }
 
 // Execute executes the request
-//
 //	@return FieldGroup
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SpecMappingAPIService) CreateFieldGroupExecute(r ApiCreateFieldGroupRequest) (*FieldGroup, *http.Response, error) {
 	var (
@@ -484,9 +481,7 @@ func (a *SpecMappingAPIService) CreateFormatter(ctx context.Context) ApiCreateFo
 }
 
 // Execute executes the request
-//
 //	@return Formatter
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SpecMappingAPIService) CreateFormatterExecute(r ApiCreateFormatterRequest) (*Formatter, *http.Response, error) {
 	var (
@@ -649,9 +644,7 @@ func (a *SpecMappingAPIService) CreateMapping(ctx context.Context) ApiCreateMapp
 }
 
 // Execute executes the request
-//
 //	@return Mapping
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SpecMappingAPIService) CreateMappingExecute(r ApiCreateMappingRequest) (*Mapping, *http.Response, error) {
 	var (
@@ -971,9 +964,7 @@ func (a *SpecMappingAPIService) DeleteFieldGroupFields(ctx context.Context, fiel
 }
 
 // Execute executes the request
-//
 //	@return FieldGroup
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SpecMappingAPIService) DeleteFieldGroupFieldsExecute(r ApiDeleteFieldGroupFieldsRequest) (*FieldGroup, *http.Response, error) {
 	var (
@@ -1146,9 +1137,7 @@ func (a *SpecMappingAPIService) DeleteFieldGroupItemSelectors(ctx context.Contex
 }
 
 // Execute executes the request
-//
 //	@return FieldGroup
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SpecMappingAPIService) DeleteFieldGroupItemSelectorsExecute(r ApiDeleteFieldGroupItemSelectorsRequest) (*FieldGroup, *http.Response, error) {
 	var (
@@ -1475,9 +1464,7 @@ func (a *SpecMappingAPIService) DeleteFormatterFields(ctx context.Context, forma
 }
 
 // Execute executes the request
-//
 //	@return Formatter
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SpecMappingAPIService) DeleteFormatterFieldsExecute(r ApiDeleteFormatterFieldsRequest) (*Formatter, *http.Response, error) {
 	var (
@@ -1799,9 +1786,7 @@ func (a *SpecMappingAPIService) DeleteMappingSpecSelectors(ctx context.Context) 
 }
 
 // Execute executes the request
-//
 //	@return Mapping
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SpecMappingAPIService) DeleteMappingSpecSelectorsExecute(r ApiDeleteMappingSpecSelectorsRequest) (*Mapping, *http.Response, error) {
 	var (
@@ -1961,9 +1946,7 @@ func (a *SpecMappingAPIService) GetFieldGroup(ctx context.Context, fieldGroupNam
 }
 
 // Execute executes the request
-//
 //	@return FieldGroup
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SpecMappingAPIService) GetFieldGroupExecute(r ApiGetFieldGroupRequest) (*FieldGroup, *http.Response, error) {
 	var (
@@ -2128,9 +2111,7 @@ func (a *SpecMappingAPIService) GetFormatter(ctx context.Context, formatterName 
 }
 
 // Execute executes the request
-//
 //	@return Formatter
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SpecMappingAPIService) GetFormatterExecute(r ApiGetFormatterRequest) (*Formatter, *http.Response, error) {
 	var (
@@ -2306,9 +2287,7 @@ func (a *SpecMappingAPIService) ListFieldGroups(ctx context.Context) ApiListFiel
 }
 
 // Execute executes the request
-//
 //	@return FieldGroupListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SpecMappingAPIService) ListFieldGroupsExecute(r ApiListFieldGroupsRequest) (*FieldGroupListResponse, *http.Response, error) {
 	var (
@@ -2475,9 +2454,7 @@ func (a *SpecMappingAPIService) ListFormatters(ctx context.Context) ApiListForma
 }
 
 // Execute executes the request
-//
 //	@return FormatterListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SpecMappingAPIService) ListFormattersExecute(r ApiListFormattersRequest) (*FormatterListResponse, *http.Response, error) {
 	var (
@@ -2637,9 +2614,7 @@ func (a *SpecMappingAPIService) ListMappings(ctx context.Context) ApiListMapping
 }
 
 // Execute executes the request
-//
 //	@return MappingListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SpecMappingAPIService) ListMappingsExecute(r ApiListMappingsRequest) (*MappingListResponse, *http.Response, error) {
 	var (
@@ -2795,9 +2770,7 @@ func (a *SpecMappingAPIService) PatchFieldGroup(ctx context.Context, fieldGroupN
 }
 
 // Execute executes the request
-//
 //	@return FieldGroup
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SpecMappingAPIService) PatchFieldGroupExecute(r ApiPatchFieldGroupRequest) (*FieldGroup, *http.Response, error) {
 	var (
@@ -2970,9 +2943,7 @@ func (a *SpecMappingAPIService) PatchFormatter(ctx context.Context, formatterNam
 }
 
 // Execute executes the request
-//
 //	@return Formatter
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SpecMappingAPIService) PatchFormatterExecute(r ApiPatchFormatterRequest) (*Formatter, *http.Response, error) {
 	var (
@@ -3142,9 +3113,7 @@ func (a *SpecMappingAPIService) UpdateMapping(ctx context.Context) ApiUpdateMapp
 }
 
 // Execute executes the request
-//
 //	@return Mapping
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SpecMappingAPIService) UpdateMappingExecute(r ApiUpdateMappingRequest) (*Mapping, *http.Response, error) {
 	var (

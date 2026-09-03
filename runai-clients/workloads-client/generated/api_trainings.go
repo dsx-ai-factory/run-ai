@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name TrainingsAPI --output ../mocks/
 type TrainingsAPI interface {
 
@@ -163,9 +162,7 @@ func (a *TrainingsAPIService) CreateTraining(ctx context.Context) ApiCreateTrain
 }
 
 // Execute executes the request
-//
 //	@return Training
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TrainingsAPIService) CreateTrainingExecute(r ApiCreateTrainingRequest) (*Training, *http.Response, error) {
 	var (
@@ -314,9 +311,7 @@ func (a *TrainingsAPIService) DeleteTraining(ctx context.Context, workloadId str
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TrainingsAPIService) DeleteTrainingExecute(r ApiDeleteTrainingRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -475,9 +470,7 @@ func (a *TrainingsAPIService) GetTraining(ctx context.Context, workloadId string
 }
 
 // Execute executes the request
-//
 //	@return Training
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TrainingsAPIService) GetTrainingExecute(r ApiGetTrainingRequest) (*Training, *http.Response, error) {
 	var (
@@ -647,9 +640,7 @@ func (a *TrainingsAPIService) ListTrainingsUpdates(ctx context.Context) ApiListT
 }
 
 // Execute executes the request
-//
 //	@return WorkloadsSyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TrainingsAPIService) ListTrainingsUpdatesExecute(r ApiListTrainingsUpdatesRequest) (*WorkloadsSyncResponse, *http.Response, error) {
 	var (
@@ -832,9 +823,7 @@ func (a *TrainingsAPIService) RequestTrainingsUpdates(ctx context.Context) ApiRe
 }
 
 // Execute executes the request
-//
 //	@return WorkloadsSyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TrainingsAPIService) RequestTrainingsUpdatesExecute(r ApiRequestTrainingsUpdatesRequest) (*WorkloadsSyncResponse, *http.Response, error) {
 	var (
@@ -1002,9 +991,7 @@ func (a *TrainingsAPIService) ResumeTraining(ctx context.Context, workloadId str
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TrainingsAPIService) ResumeTrainingExecute(r ApiResumeTrainingRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -1163,9 +1150,7 @@ func (a *TrainingsAPIService) SuspendTraining(ctx context.Context, workloadId st
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TrainingsAPIService) SuspendTrainingExecute(r ApiSuspendTrainingRequest) (*HttpResponse, *http.Response, error) {
 	var (

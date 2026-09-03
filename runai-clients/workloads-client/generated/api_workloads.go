@@ -23,7 +23,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name WorkloadsAPI --output ../mocks/
 type WorkloadsAPI interface {
 
@@ -402,9 +401,7 @@ func (a *WorkloadsAPIService) CountWorkloadElements(ctx context.Context, workloa
 }
 
 // Execute executes the request
-//
 //	@return CountWorkloadElements200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsAPIService) CountWorkloadElementsExecute(r ApiCountWorkloadElementsRequest) (*CountWorkloadElements200Response, *http.Response, error) {
 	var (
@@ -599,9 +596,7 @@ func (a *WorkloadsAPIService) CountWorkloads(ctx context.Context) ApiCountWorklo
 }
 
 // Execute executes the request
-//
 //	@return CountWorkloads200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsAPIService) CountWorkloadsExecute(r ApiCountWorkloadsRequest) (*CountWorkloads200Response, *http.Response, error) {
 	var (
@@ -895,9 +890,7 @@ func (a *WorkloadsAPIService) GetWorkload(ctx context.Context, workloadId string
 }
 
 // Execute executes the request
-//
 //	@return WorkloadDetailed
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsAPIService) GetWorkloadExecute(r ApiGetWorkloadRequest) (*WorkloadDetailed, *http.Response, error) {
 	var (
@@ -1054,9 +1047,7 @@ func (a *WorkloadsAPIService) GetWorkloadAncestors(ctx context.Context, workload
 }
 
 // Execute executes the request
-//
 //	@return Ancestors
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsAPIService) GetWorkloadAncestorsExecute(r ApiGetWorkloadAncestorsRequest) (*Ancestors, *http.Response, error) {
 	var (
@@ -1196,9 +1187,7 @@ func (a *WorkloadsAPIService) GetWorkloadElement(ctx context.Context, workloadId
 }
 
 // Execute executes the request
-//
 //	@return WorkloadElementResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsAPIService) GetWorkloadElementExecute(r ApiGetWorkloadElementRequest) (*WorkloadElementResponse, *http.Response, error) {
 	var (
@@ -1400,9 +1389,7 @@ func (a *WorkloadsAPIService) GetWorkloadElementMetrics(ctx context.Context, wor
 }
 
 // Execute executes the request
-//
 //	@return MetricsCompositeResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsAPIService) GetWorkloadElementMetricsExecute(r ApiGetWorkloadElementMetricsRequest) (*MetricsCompositeResponse, *http.Response, error) {
 	var (
@@ -1611,9 +1598,7 @@ func (a *WorkloadsAPIService) GetWorkloadElements(ctx context.Context, workloadI
 }
 
 // Execute executes the request
-//
 //	@return WorkloadElementsResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsAPIService) GetWorkloadElementsExecute(r ApiGetWorkloadElementsRequest) (*WorkloadElementsResponse, *http.Response, error) {
 	var (
@@ -1792,9 +1777,7 @@ func (a *WorkloadsAPIService) GetWorkloadEndpoints(ctx context.Context, workload
 }
 
 // Execute executes the request
-//
 //	@return GetWorkloadEndpoints200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsAPIService) GetWorkloadEndpointsExecute(r ApiGetWorkloadEndpointsRequest) (*GetWorkloadEndpoints200Response, *http.Response, error) {
 	var (
@@ -1981,9 +1964,7 @@ func (a *WorkloadsAPIService) GetWorkloadMetrics(ctx context.Context, workloadId
 }
 
 // Execute executes the request
-//
 //	@return MetricsCompositeResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsAPIService) GetWorkloadMetricsExecute(r ApiGetWorkloadMetricsRequest) (*MetricsCompositeResponse, *http.Response, error) {
 	var (
@@ -2223,9 +2204,7 @@ func (a *WorkloadsAPIService) GetWorkloads(ctx context.Context) ApiGetWorkloadsR
 }
 
 // Execute executes the request
-//
 //	@return GetWorkloads200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsAPIService) GetWorkloadsExecute(r ApiGetWorkloadsRequest) (*GetWorkloads200Response, *http.Response, error) {
 	var (
@@ -2456,9 +2435,7 @@ func (a *WorkloadsAPIService) GetWorkloadsTelemetry(ctx context.Context) ApiGetW
 }
 
 // Execute executes the request
-//
 //	@return TelemetryResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsAPIService) GetWorkloadsTelemetryExecute(r ApiGetWorkloadsTelemetryRequest) (*TelemetryResponse, *http.Response, error) {
 	var (
@@ -2651,9 +2628,7 @@ func (a *WorkloadsAPIService) InternalCreateWorkload(ctx context.Context) ApiInt
 }
 
 // Execute executes the request
-//
 //	@return Workload
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsAPIService) InternalCreateWorkloadExecute(r ApiInternalCreateWorkloadRequest) (*Workload, *http.Response, error) {
 	var (
@@ -2817,9 +2792,7 @@ func (a *WorkloadsAPIService) InternalEnrichOrgUnitRanking(ctx context.Context) 
 }
 
 // Execute executes the request
-//
 //	@return InternalEnrichOrgUnitRankingResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsAPIService) InternalEnrichOrgUnitRankingExecute(r ApiInternalEnrichOrgUnitRankingRequest) (*InternalEnrichOrgUnitRankingResponse, *http.Response, error) {
 	var (
@@ -3463,9 +3436,7 @@ func (a *WorkloadsAPIService) PostSyncPodgroupsBackwards(ctx context.Context, cl
 }
 
 // Execute executes the request
-//
 //	@return string
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsAPIService) PostSyncPodgroupsBackwardsExecute(r ApiPostSyncPodgroupsBackwardsRequest) (string, *http.Response, error) {
 	var (
@@ -3622,9 +3593,7 @@ func (a *WorkloadsAPIService) PostSyncPodsBackwards(ctx context.Context, cluster
 }
 
 // Execute executes the request
-//
 //	@return string
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsAPIService) PostSyncPodsBackwardsExecute(r ApiPostSyncPodsBackwardsRequest) (string, *http.Response, error) {
 	var (
@@ -3933,9 +3902,7 @@ func (a *WorkloadsAPIService) SyncPodgroupsBackwards(ctx context.Context, cluste
 }
 
 // Execute executes the request
-//
 //	@return SyncPodsBackwards200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsAPIService) SyncPodgroupsBackwardsExecute(r ApiSyncPodgroupsBackwardsRequest) (*SyncPodsBackwards200Response, *http.Response, error) {
 	var (
@@ -4095,9 +4062,7 @@ func (a *WorkloadsAPIService) SyncPodsBackwards(ctx context.Context, clusterId s
 }
 
 // Execute executes the request
-//
 //	@return SyncPodsBackwards200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *WorkloadsAPIService) SyncPodsBackwardsExecute(r ApiSyncPodsBackwardsRequest) (*SyncPodsBackwards200Response, *http.Response, error) {
 	var (

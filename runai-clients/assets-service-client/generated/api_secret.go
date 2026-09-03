@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name SecretAPI --output ../mocks/
 type SecretAPI interface {
 
@@ -134,9 +133,7 @@ func (a *SecretAPIService) CreateSecretAsset(ctx context.Context) ApiCreateSecre
 }
 
 // Execute executes the request
-//
 //	@return SecretAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SecretAPIService) CreateSecretAssetExecute(r ApiCreateSecretAssetRequest) (*SecretAsset, *http.Response, error) {
 	var (
@@ -296,9 +293,7 @@ func (a *SecretAPIService) DeleteSecretAssetById(ctx context.Context, assetId st
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SecretAPIService) DeleteSecretAssetByIdExecute(r ApiDeleteSecretAssetByIdRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -484,9 +479,7 @@ func (a *SecretAPIService) GetSecretAssetById(ctx context.Context, assetId strin
 }
 
 // Execute executes the request
-//
 //	@return SecretAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SecretAPIService) GetSecretAssetByIdExecute(r ApiGetSecretAssetByIdRequest) (*SecretAsset, *http.Response, error) {
 	var (
@@ -726,9 +719,7 @@ func (a *SecretAPIService) ListSecretAssets(ctx context.Context) ApiListSecretAs
 }
 
 // Execute executes the request
-//
 //	@return SecretAssetListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SecretAPIService) ListSecretAssetsExecute(r ApiListSecretAssetsRequest) (*SecretAssetListResponse, *http.Response, error) {
 	var (
@@ -903,9 +894,7 @@ func (a *SecretAPIService) UpdateSecretAssetById(ctx context.Context, assetId st
 }
 
 // Execute executes the request
-//
 //	@return SecretAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SecretAPIService) UpdateSecretAssetByIdExecute(r ApiUpdateSecretAssetByIdRequest) (*SecretAsset, *http.Response, error) {
 	var (

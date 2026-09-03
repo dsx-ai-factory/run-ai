@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name DistributedAPI --output ../mocks/
 type DistributedAPI interface {
 
@@ -163,9 +162,7 @@ func (a *DistributedAPIService) CreateDistributed(ctx context.Context) ApiCreate
 }
 
 // Execute executes the request
-//
 //	@return DistributedWorkload
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DistributedAPIService) CreateDistributedExecute(r ApiCreateDistributedRequest) (*DistributedWorkload, *http.Response, error) {
 	var (
@@ -314,9 +311,7 @@ func (a *DistributedAPIService) DeleteDistributed(ctx context.Context, workloadI
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DistributedAPIService) DeleteDistributedExecute(r ApiDeleteDistributedRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -475,9 +470,7 @@ func (a *DistributedAPIService) GetDistributed(ctx context.Context, workloadId s
 }
 
 // Execute executes the request
-//
 //	@return DistributedWorkload
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DistributedAPIService) GetDistributedExecute(r ApiGetDistributedRequest) (*DistributedWorkload, *http.Response, error) {
 	var (
@@ -647,9 +640,7 @@ func (a *DistributedAPIService) ListDistributedUpdates(ctx context.Context) ApiL
 }
 
 // Execute executes the request
-//
 //	@return WorkloadsSyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DistributedAPIService) ListDistributedUpdatesExecute(r ApiListDistributedUpdatesRequest) (*WorkloadsSyncResponse, *http.Response, error) {
 	var (
@@ -832,9 +823,7 @@ func (a *DistributedAPIService) RequestDistributedUpdates(ctx context.Context) A
 }
 
 // Execute executes the request
-//
 //	@return WorkloadsSyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DistributedAPIService) RequestDistributedUpdatesExecute(r ApiRequestDistributedUpdatesRequest) (*WorkloadsSyncResponse, *http.Response, error) {
 	var (
@@ -1002,9 +991,7 @@ func (a *DistributedAPIService) ResumeDistributed(ctx context.Context, workloadI
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DistributedAPIService) ResumeDistributedExecute(r ApiResumeDistributedRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -1163,9 +1150,7 @@ func (a *DistributedAPIService) SuspendDistributed(ctx context.Context, workload
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DistributedAPIService) SuspendDistributedExecute(r ApiSuspendDistributedRequest) (*HttpResponse, *http.Response, error) {
 	var (

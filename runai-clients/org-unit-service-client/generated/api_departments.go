@@ -23,7 +23,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name DepartmentsAPI --output ../mocks/
 type DepartmentsAPI interface {
 
@@ -336,9 +335,7 @@ func (a *DepartmentsAPIService) BatchPatchDepartmentNodePoolResources(ctx contex
 }
 
 // Execute executes the request
-//
 //	@return BatchPatchDepartmentResourcesResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsAPIService) BatchPatchDepartmentNodePoolResourcesExecute(r ApiBatchPatchDepartmentNodePoolResourcesRequest) (*BatchPatchDepartmentResourcesResponse, *http.Response, error) {
 	var (
@@ -512,9 +509,7 @@ func (a *DepartmentsAPIService) CountDepartmentNodePoolResources(ctx context.Con
 }
 
 // Execute executes the request
-//
 //	@return CountResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsAPIService) CountDepartmentNodePoolResourcesExecute(r ApiCountDepartmentNodePoolResourcesRequest) (*CountResponse, *http.Response, error) {
 	var (
@@ -671,9 +666,7 @@ func (a *DepartmentsAPIService) CountDepartments(ctx context.Context) ApiCountDe
 }
 
 // Execute executes the request
-//
 //	@return CountResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsAPIService) CountDepartmentsExecute(r ApiCountDepartmentsRequest) (*CountResponse, *http.Response, error) {
 	var (
@@ -827,9 +820,7 @@ func (a *DepartmentsAPIService) CreateDepartment(ctx context.Context) ApiCreateD
 }
 
 // Execute executes the request
-//
 //	@return Department
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsAPIService) CreateDepartmentExecute(r ApiCreateDepartmentRequest) (*Department, *http.Response, error) {
 	var (
@@ -1293,9 +1284,7 @@ func (a *DepartmentsAPIService) GetDepartment(ctx context.Context, departmentId 
 }
 
 // Execute executes the request
-//
 //	@return Department
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsAPIService) GetDepartmentExecute(r ApiGetDepartmentRequest) (*Department, *http.Response, error) {
 	var (
@@ -1441,9 +1430,7 @@ func (a *DepartmentsAPIService) GetDepartmentAncestors(ctx context.Context, depa
 }
 
 // Execute executes the request
-//
 //	@return Ancestors
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsAPIService) GetDepartmentAncestorsExecute(r ApiGetDepartmentAncestorsRequest) (*Ancestors, *http.Response, error) {
 	var (
@@ -1622,9 +1609,7 @@ func (a *DepartmentsAPIService) GetDepartmentMetrics(ctx context.Context, depart
 }
 
 // Execute executes the request
-//
 //	@return MetricsResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsAPIService) GetDepartmentMetricsExecute(r ApiGetDepartmentMetricsRequest) (*MetricsResponse, *http.Response, error) {
 	var (
@@ -1860,9 +1845,7 @@ func (a *DepartmentsAPIService) GetDepartmentNodePoolResources(ctx context.Conte
 }
 
 // Execute executes the request
-//
 //	@return GetDepartmentNodePoolResources200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsAPIService) GetDepartmentNodePoolResourcesExecute(r ApiGetDepartmentNodePoolResourcesRequest) (*GetDepartmentNodePoolResources200Response, *http.Response, error) {
 	var (
@@ -2072,9 +2055,7 @@ func (a *DepartmentsAPIService) GetDepartments(ctx context.Context) ApiGetDepart
 }
 
 // Execute executes the request
-//
 //	@return GetDepartments200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsAPIService) GetDepartmentsExecute(r ApiGetDepartmentsRequest) (*GetDepartments200Response, *http.Response, error) {
 	var (
@@ -2247,9 +2228,7 @@ func (a *DepartmentsAPIService) GetDepartmentsDescendants(ctx context.Context) A
 }
 
 // Execute executes the request
-//
 //	@return Descendants
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsAPIService) GetDepartmentsDescendantsExecute(r ApiGetDepartmentsDescendantsRequest) (*Descendants, *http.Response, error) {
 	var (
@@ -2416,9 +2395,7 @@ func (a *DepartmentsAPIService) GetDepartmentsRanking(ctx context.Context) ApiGe
 }
 
 // Execute executes the request
-//
 //	@return GetDepartmentsRanking200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsAPIService) GetDepartmentsRankingExecute(r ApiGetDepartmentsRankingRequest) (*GetDepartmentsRanking200Response, *http.Response, error) {
 	var (
@@ -2610,9 +2587,7 @@ func (a *DepartmentsAPIService) GetDepartmentsTelemetry(ctx context.Context) Api
 }
 
 // Execute executes the request
-//
 //	@return TelemetryResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsAPIService) GetDepartmentsTelemetryExecute(r ApiGetDepartmentsTelemetryRequest) (*TelemetryResponse, *http.Response, error) {
 	var (
@@ -2797,9 +2772,7 @@ func (a *DepartmentsAPIService) GetSyncDepartments(ctx context.Context) ApiGetSy
 }
 
 // Execute executes the request
-//
 //	@return GetSyncDepartments200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsAPIService) GetSyncDepartmentsExecute(r ApiGetSyncDepartmentsRequest) (*GetSyncDepartments200Response, *http.Response, error) {
 	var (
@@ -2969,9 +2942,7 @@ func (a *DepartmentsAPIService) PatchDepartmentResources(ctx context.Context, de
 }
 
 // Execute executes the request
-//
 //	@return []Resources
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsAPIService) PatchDepartmentResourcesExecute(r ApiPatchDepartmentResourcesRequest) ([]Resources, *http.Response, error) {
 	var (
@@ -3157,9 +3128,7 @@ func (a *DepartmentsAPIService) SumDepartmentNodePoolResources(ctx context.Conte
 }
 
 // Execute executes the request
-//
 //	@return DepartmentSumResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsAPIService) SumDepartmentNodePoolResourcesExecute(r ApiSumDepartmentNodePoolResourcesRequest) (*DepartmentSumResponse, *http.Response, error) {
 	var (
@@ -3320,9 +3289,7 @@ func (a *DepartmentsAPIService) UpdateDepartment(ctx context.Context, department
 }
 
 // Execute executes the request
-//
 //	@return Department
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsAPIService) UpdateDepartmentExecute(r ApiUpdateDepartmentRequest) (*Department, *http.Response, error) {
 	var (
@@ -3493,9 +3460,7 @@ func (a *DepartmentsAPIService) UpdateDepartmentResources(ctx context.Context, d
 }
 
 // Execute executes the request
-//
 //	@return []Resources
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DepartmentsAPIService) UpdateDepartmentResourcesExecute(r ApiUpdateDepartmentResourcesRequest) ([]Resources, *http.Response, error) {
 	var (

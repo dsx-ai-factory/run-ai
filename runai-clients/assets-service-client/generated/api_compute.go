@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name ComputeAPI --output ../mocks/
 type ComputeAPI interface {
 
@@ -134,9 +133,7 @@ func (a *ComputeAPIService) CreateComputeAsset(ctx context.Context) ApiCreateCom
 }
 
 // Execute executes the request
-//
 //	@return ComputeAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ComputeAPIService) CreateComputeAssetExecute(r ApiCreateComputeAssetRequest) (*ComputeAsset, *http.Response, error) {
 	var (
@@ -296,9 +293,7 @@ func (a *ComputeAPIService) DeleteComputeAssetById(ctx context.Context, assetId 
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ComputeAPIService) DeleteComputeAssetByIdExecute(r ApiDeleteComputeAssetByIdRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -477,9 +472,7 @@ func (a *ComputeAPIService) GetComputeAssetById(ctx context.Context, assetId str
 }
 
 // Execute executes the request
-//
 //	@return ComputeAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ComputeAPIService) GetComputeAssetByIdExecute(r ApiGetComputeAssetByIdRequest) (*ComputeAsset, *http.Response, error) {
 	var (
@@ -709,9 +702,7 @@ func (a *ComputeAPIService) ListComputeAssets(ctx context.Context) ApiListComput
 }
 
 // Execute executes the request
-//
 //	@return ComputeListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ComputeAPIService) ListComputeAssetsExecute(r ApiListComputeAssetsRequest) (*ComputeListResponse, *http.Response, error) {
 	var (
@@ -883,9 +874,7 @@ func (a *ComputeAPIService) UpdateComputeAssetById(ctx context.Context, assetId 
 }
 
 // Execute executes the request
-//
 //	@return ComputeAsset
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ComputeAPIService) UpdateComputeAssetByIdExecute(r ApiUpdateComputeAssetByIdRequest) (*ComputeAsset, *http.Response, error) {
 	var (

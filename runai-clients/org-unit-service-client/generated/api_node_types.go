@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name NodeTypesAPI --output ../mocks/
 type NodeTypesAPI interface {
 
@@ -133,9 +132,7 @@ func (a *NodeTypesAPIService) CreateNodeType(ctx context.Context) ApiCreateNodeT
 }
 
 // Execute executes the request
-//
 //	@return NodeType
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodeTypesAPIService) CreateNodeTypeExecute(r ApiCreateNodeTypeRequest) (*NodeType, *http.Response, error) {
@@ -467,9 +464,7 @@ func (a *NodeTypesAPIService) GetNodeTypes(ctx context.Context) ApiGetNodeTypesR
 }
 
 // Execute executes the request
-//
 //	@return GetNodeTypes200Response
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodeTypesAPIService) GetNodeTypesExecute(r ApiGetNodeTypesRequest) (*GetNodeTypes200Response, *http.Response, error) {
@@ -629,9 +624,7 @@ func (a *NodeTypesAPIService) UpdateNodeType(ctx context.Context, nodeTypeId str
 }
 
 // Execute executes the request
-//
 //	@return NodeType
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodeTypesAPIService) UpdateNodeTypeExecute(r ApiUpdateNodeTypeRequest) (*NodeType, *http.Response, error) {

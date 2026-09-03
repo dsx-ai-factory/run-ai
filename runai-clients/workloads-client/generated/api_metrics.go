@@ -21,7 +21,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name MetricsAPI --output ../mocks/
 type MetricsAPI interface {
 
@@ -64,9 +63,7 @@ func (a *MetricsAPIService) GetWorkloadsScrapeableMetrics(ctx context.Context) A
 }
 
 // Execute executes the request
-//
 //	@return string
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *MetricsAPIService) GetWorkloadsScrapeableMetricsExecute(r ApiGetWorkloadsScrapeableMetricsRequest) (string, *http.Response, error) {
 	var (

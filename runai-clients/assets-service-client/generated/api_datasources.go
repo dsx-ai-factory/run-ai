@@ -21,7 +21,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name DatasourcesAPI --output ../mocks/
 type DatasourcesAPI interface {
 
@@ -286,9 +285,7 @@ func (a *DatasourcesAPIService) ListDatasourceAssets(ctx context.Context) ApiLis
 }
 
 // Execute executes the request
-//
 //	@return DatasourceListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *DatasourcesAPIService) ListDatasourceAssetsExecute(r ApiListDatasourceAssetsRequest) (*DatasourceListResponse, *http.Response, error) {
 	var (

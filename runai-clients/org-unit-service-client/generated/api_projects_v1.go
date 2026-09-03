@@ -23,7 +23,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name ProjectsV1API --output ../mocks/
 type ProjectsV1API interface {
 
@@ -172,9 +171,7 @@ func (a *ProjectsV1APIService) GetProjectMetricsV1(ctx context.Context, clusterU
 }
 
 // Execute executes the request
-//
 //	@return ProjectMetricsV1Response
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsV1APIService) GetProjectMetricsV1Execute(r ApiGetProjectMetricsV1Request) (*ProjectMetricsV1Response, *http.Response, error) {
@@ -381,9 +378,7 @@ func (a *ProjectsV1APIService) GetProjectsMetricsV1(ctx context.Context, cluster
 }
 
 // Execute executes the request
-//
 //	@return ProjectsMetricsV1Response
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsV1APIService) GetProjectsMetricsV1Execute(r ApiGetProjectsMetricsV1Request) (*ProjectsMetricsV1Response, *http.Response, error) {
@@ -561,9 +556,7 @@ func (a *ProjectsV1APIService) GetProjectsQuotasV1(ctx context.Context, clusterI
 }
 
 // Execute executes the request
-//
 //	@return []ProjectQuotasV1Inner
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsV1APIService) GetProjectsQuotasV1Execute(r ApiGetProjectsQuotasV1Request) ([]ProjectQuotasV1Inner, *http.Response, error) {
@@ -739,9 +732,7 @@ func (a *ProjectsV1APIService) GetProjectsV1(ctx context.Context, clusterId stri
 }
 
 // Execute executes the request
-//
 //	@return []ProjectV1
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ProjectsV1APIService) GetProjectsV1Execute(r ApiGetProjectsV1Request) ([]ProjectV1, *http.Response, error) {

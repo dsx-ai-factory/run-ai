@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name SettingsAPI --output ../mocks/
 type SettingsAPI interface {
 
@@ -100,9 +99,7 @@ func (a *SettingsAPIService) GetCatalogSettingByKey(ctx context.Context, key Cat
 }
 
 // Execute executes the request
-//
 //	@return GetEnableNgcIntegration
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetCatalogSettingByKeyExecute(r ApiGetCatalogSettingByKeyRequest) (*GetEnableNgcIntegration, *http.Response, error) {
 	var (
@@ -280,9 +277,7 @@ func (a *SettingsAPIService) GetCatalogSettings(ctx context.Context) ApiGetCatal
 }
 
 // Execute executes the request
-//
 //	@return CatalogSettingsGetResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetCatalogSettingsExecute(r ApiGetCatalogSettingsRequest) (*CatalogSettingsGetResponse, *http.Response, error) {
 	var (

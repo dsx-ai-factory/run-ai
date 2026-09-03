@@ -22,7 +22,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
 //go:generate mockery --name EventsAPI --output ../mocks/
 type EventsAPI interface {
 
@@ -150,9 +149,7 @@ func (a *EventsAPIService) GetRevisionEvents(ctx context.Context, revisionId str
 }
 
 // Execute executes the request
-//
 //	@return GetWorkloadEvents200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *EventsAPIService) GetRevisionEventsExecute(r ApiGetRevisionEventsRequest) (*GetWorkloadEvents200Response, *http.Response, error) {
 	var (
@@ -340,9 +337,7 @@ func (a *EventsAPIService) GetRevisionHistory(ctx context.Context, revisionId st
 }
 
 // Execute executes the request
-//
 //	@return GetWorkloadHistory200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *EventsAPIService) GetRevisionHistoryExecute(r ApiGetRevisionHistoryRequest) (*GetWorkloadHistory200Response, *http.Response, error) {
 	var (
@@ -531,9 +526,7 @@ func (a *EventsAPIService) GetWorkloadEvents(ctx context.Context, workloadId str
 }
 
 // Execute executes the request
-//
 //	@return GetWorkloadEvents200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *EventsAPIService) GetWorkloadEventsExecute(r ApiGetWorkloadEventsRequest) (*GetWorkloadEvents200Response, *http.Response, error) {
 	var (
@@ -721,9 +714,7 @@ func (a *EventsAPIService) GetWorkloadHistory(ctx context.Context, workloadId st
 }
 
 // Execute executes the request
-//
 //	@return GetWorkloadHistory200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *EventsAPIService) GetWorkloadHistoryExecute(r ApiGetWorkloadHistoryRequest) (*GetWorkloadHistory200Response, *http.Response, error) {
 	var (
