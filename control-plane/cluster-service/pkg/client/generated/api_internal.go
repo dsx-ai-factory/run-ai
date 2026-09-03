@@ -84,9 +84,7 @@ func (a *InternalAPIService) GetClustersHistories(ctx context.Context) ApiGetClu
 }
 
 // Execute executes the request
-//
 //	@return []ClusterHistory
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InternalAPIService) GetClustersHistoriesExecute(r ApiGetClustersHistoriesRequest) ([]ClusterHistory, *http.Response, error) {
 	var (

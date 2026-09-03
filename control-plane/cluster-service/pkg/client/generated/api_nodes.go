@@ -234,9 +234,7 @@ func (a *NodesAPIService) CountNodes(ctx context.Context, clusterUuid string) Ap
 }
 
 // Execute executes the request
-//
 //	@return CountNodes200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodesAPIService) CountNodesExecute(r ApiCountNodesRequest) (*CountNodes200Response, *http.Response, error) {
 	var (
@@ -415,9 +413,7 @@ func (a *NodesAPIService) CountTenantNodes(ctx context.Context) ApiCountTenantNo
 }
 
 // Execute executes the request
-//
 //	@return CountNodes200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodesAPIService) CountTenantNodesExecute(r ApiCountTenantNodesRequest) (*CountNodes200Response, *http.Response, error) {
 	var (
@@ -725,9 +721,7 @@ func (a *NodesAPIService) GetNode(ctx context.Context, nodeId string) ApiGetNode
 }
 
 // Execute executes the request
-//
 //	@return NodeExtended
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodesAPIService) GetNodeExecute(r ApiGetNodeRequest) (*NodeExtended, *http.Response, error) {
 	var (
@@ -892,9 +886,7 @@ func (a *NodesAPIService) GetNodeInternal(ctx context.Context, clusterUuid strin
 }
 
 // Execute executes the request
-//
 //	@return NodeInternal
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodesAPIService) GetNodeInternalExecute(r ApiGetNodeInternalRequest) (*NodeInternal, *http.Response, error) {
 	var (
@@ -1063,9 +1055,7 @@ func (a *NodesAPIService) GetNodeMetrics(ctx context.Context, nodeId string) Api
 }
 
 // Execute executes the request
-//
 //	@return MetricsResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodesAPIService) GetNodeMetricsExecute(r ApiGetNodeMetricsRequest) (*MetricsResponse, *http.Response, error) {
 	var (
@@ -1294,9 +1284,7 @@ func (a *NodesAPIService) GetNodeTelemetry(ctx context.Context) ApiGetNodeTeleme
 }
 
 // Execute executes the request
-//
 //	@return TelemetryResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodesAPIService) GetNodeTelemetryExecute(r ApiGetNodeTelemetryRequest) (*TelemetryResponse, *http.Response, error) {
 	var (
@@ -1528,9 +1516,7 @@ func (a *NodesAPIService) GetTenantNodes(ctx context.Context) ApiGetTenantNodesR
 }
 
 // Execute executes the request
-//
 //	@return Nodes
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodesAPIService) GetTenantNodesExecute(r ApiGetTenantNodesRequest) (*Nodes, *http.Response, error) {
 	var (

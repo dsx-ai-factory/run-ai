@@ -129,9 +129,7 @@ func (a *PermissionsAPIService) EvaluatePermission(ctx context.Context) ApiEvalu
 }
 
 // Execute executes the request
-//
 //	@return PermittedScopes
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PermissionsAPIService) EvaluatePermissionExecute(r ApiEvaluatePermissionRequest) (*PermittedScopes, *http.Response, error) {
 	var (
@@ -272,9 +270,7 @@ func (a *PermissionsAPIService) GetPermissionSet(ctx context.Context, permission
 }
 
 // Execute executes the request
-//
 //	@return PermissionSet
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PermissionsAPIService) GetPermissionSetExecute(r ApiGetPermissionSetRequest) (*PermissionSet, *http.Response, error) {
 	var (
@@ -430,9 +426,7 @@ func (a *PermissionsAPIService) GetPermissionSets(ctx context.Context) ApiGetPer
 }
 
 // Execute executes the request
-//
 //	@return GetPermissionSets200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PermissionsAPIService) GetPermissionSetsExecute(r ApiGetPermissionSetsRequest) (*GetPermissionSets200Response, *http.Response, error) {
 	var (
@@ -587,9 +581,7 @@ func (a *PermissionsAPIService) GetPermissions(ctx context.Context) ApiGetPermis
 }
 
 // Execute executes the request
-//
 //	@return []Permission
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PermissionsAPIService) GetPermissionsExecute(r ApiGetPermissionsRequest) ([]Permission, *http.Response, error) {
 	var (
@@ -729,9 +721,7 @@ func (a *PermissionsAPIService) GetPermittedScopes(ctx context.Context) ApiGetPe
 }
 
 // Execute executes the request
-//
 //	@return PermittedScopesActions
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PermissionsAPIService) GetPermittedScopesExecute(r ApiGetPermittedScopesRequest) (*PermittedScopesActions, *http.Response, error) {
 	var (

@@ -78,9 +78,7 @@ func (a *MetricsAPIService) GetMetrics(ctx context.Context) ApiGetMetricsRequest
 }
 
 // Execute executes the request
-//
 //	@return GetMetrics200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *MetricsAPIService) GetMetricsExecute(r ApiGetMetricsRequest) (*GetMetrics200Response, *http.Response, error) {
 	var (

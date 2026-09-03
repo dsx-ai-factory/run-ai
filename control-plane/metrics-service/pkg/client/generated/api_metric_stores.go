@@ -102,9 +102,7 @@ func (a *MetricStoresAPIService) CreateMetricStore(ctx context.Context) ApiCreat
 }
 
 // Execute executes the request
-//
 //	@return MetricStore
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *MetricStoresAPIService) CreateMetricStoreExecute(r ApiCreateMetricStoreRequest) (*MetricStore, *http.Response, error) {
 	var (
@@ -414,9 +412,7 @@ func (a *MetricStoresAPIService) GetMetricStores(ctx context.Context) ApiGetMetr
 }
 
 // Execute executes the request
-//
 //	@return []MetricStore
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *MetricStoresAPIService) GetMetricStoresExecute(r ApiGetMetricStoresRequest) ([]MetricStore, *http.Response, error) {
 	var (

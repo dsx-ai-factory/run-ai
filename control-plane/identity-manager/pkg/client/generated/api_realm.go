@@ -119,9 +119,7 @@ func (a *RealmAPIService) CreateRealm(ctx context.Context) ApiCreateRealmRequest
 }
 
 // Execute executes the request
-//
 //	@return RealmCreationResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RealmAPIService) CreateRealmExecute(r ApiCreateRealmRequest) (*RealmCreationResponse, *http.Response, error) {
 	var (
@@ -466,9 +464,7 @@ func (a *RealmAPIService) GetOrCreateRealm(ctx context.Context) ApiGetOrCreateRe
 }
 
 // Execute executes the request
-//
 //	@return RealmCreationResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RealmAPIService) GetOrCreateRealmExecute(r ApiGetOrCreateRealmRequest) (*RealmCreationResponse, *http.Response, error) {
 	var (

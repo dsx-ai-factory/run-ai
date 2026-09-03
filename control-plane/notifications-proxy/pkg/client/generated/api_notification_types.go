@@ -68,9 +68,7 @@ func (a *NotificationTypesAPIService) GetNotificationTypes(ctx context.Context) 
 }
 
 // Execute executes the request
-//
 //	@return []NotificationType
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NotificationTypesAPIService) GetNotificationTypesExecute(r ApiGetNotificationTypesRequest) ([]NotificationType, *http.Response, error) {
 	var (

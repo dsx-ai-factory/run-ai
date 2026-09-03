@@ -46,7 +46,6 @@ func (a *HealthAPIService) Health(ctx context.Context) ApiHealthRequest {
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *HealthAPIService) HealthExecute(r ApiHealthRequest) (string, *http.Response, error) {
 	var (

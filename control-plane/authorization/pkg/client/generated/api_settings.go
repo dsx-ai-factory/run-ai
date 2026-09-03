@@ -100,9 +100,7 @@ func (a *SettingsAPIService) GetAuthorizationSettingByKey(ctx context.Context, k
 }
 
 // Execute executes the request
-//
 //	@return EnableScopedAuthorizationSetting
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetAuthorizationSettingByKeyExecute(r ApiGetAuthorizationSettingByKeyRequest) (*EnableScopedAuthorizationSetting, *http.Response, error) {
 	var (
@@ -280,9 +278,7 @@ func (a *SettingsAPIService) GetAuthorizationSettings(ctx context.Context) ApiGe
 }
 
 // Execute executes the request
-//
 //	@return AuthorizationSettingsGetResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetAuthorizationSettingsExecute(r ApiGetAuthorizationSettingsRequest) (*AuthorizationSettingsGetResponse, *http.Response, error) {
 	var (

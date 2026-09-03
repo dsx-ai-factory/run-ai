@@ -162,9 +162,7 @@ func (a *AccessKeysAPIService) CreateAccessKey(ctx context.Context) ApiCreateAcc
 }
 
 // Execute executes the request
-//
 //	@return AccessKeyPostResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AccessKeysAPIService) CreateAccessKeyExecute(r ApiCreateAccessKeyRequest) (*AccessKeyPostResponse, *http.Response, error) {
 	var (
@@ -656,9 +654,7 @@ func (a *AccessKeysAPIService) GetAccessKeyById(ctx context.Context, accessKeyId
 }
 
 // Execute executes the request
-//
 //	@return AccessKey
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AccessKeysAPIService) GetAccessKeyByIdExecute(r ApiGetAccessKeyByIdRequest) (*AccessKey, *http.Response, error) {
 	var (
@@ -814,9 +810,7 @@ func (a *AccessKeysAPIService) GetAccessKeys(ctx context.Context) ApiGetAccessKe
 }
 
 // Execute executes the request
-//
 //	@return AccessKeys
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AccessKeysAPIService) GetAccessKeysExecute(r ApiGetAccessKeysRequest) (*AccessKeys, *http.Response, error) {
 	var (
@@ -974,9 +968,7 @@ func (a *AccessKeysAPIService) GetAccessKeysAdministration(ctx context.Context) 
 }
 
 // Execute executes the request
-//
 //	@return AccessKeysAdministration
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AccessKeysAPIService) GetAccessKeysAdministrationExecute(r ApiGetAccessKeysAdministrationRequest) (*AccessKeysAdministration, *http.Response, error) {
 	var (
@@ -1140,9 +1132,7 @@ func (a *AccessKeysAPIService) RegenerateAccessKeySecret(ctx context.Context, ac
 }
 
 // Execute executes the request
-//
 //	@return RegenerateAccessKeySecret200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AccessKeysAPIService) RegenerateAccessKeySecretExecute(r ApiRegenerateAccessKeySecretRequest) (*RegenerateAccessKeySecret200Response, *http.Response, error) {
 	var (

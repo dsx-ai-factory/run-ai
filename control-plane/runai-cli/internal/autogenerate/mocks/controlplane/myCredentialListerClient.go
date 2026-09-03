@@ -8,8 +8,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	client "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/mycredential/client"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockMyCredentialLister is a mock of Lister interface.

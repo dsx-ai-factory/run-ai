@@ -276,9 +276,7 @@ func (a *UsersAPIService) BatchCreateUsers(ctx context.Context) ApiBatchCreateUs
 }
 
 // Execute executes the request
-//
 //	@return BulkUserCreationResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *UsersAPIService) BatchCreateUsersExecute(r ApiBatchCreateUsersRequest) (*BulkUserCreationResponse, *http.Response, error) {
 	var (
@@ -443,9 +441,7 @@ func (a *UsersAPIService) ChangeUserPassword(ctx context.Context) ApiChangeUserP
 }
 
 // Execute executes the request
-//
 //	@return ChangeUserPassword200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *UsersAPIService) ChangeUserPasswordExecute(r ApiChangeUserPasswordRequest) (*ChangeUserPassword200Response, *http.Response, error) {
 	var (
@@ -630,9 +626,7 @@ func (a *UsersAPIService) CountUsers(ctx context.Context) ApiCountUsersRequest {
 }
 
 // Execute executes the request
-//
 //	@return CountUsers200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *UsersAPIService) CountUsersExecute(r ApiCountUsersRequest) (*CountUsers200Response, *http.Response, error) {
 	var (
@@ -787,9 +781,7 @@ func (a *UsersAPIService) CreateIntenralUser(ctx context.Context) ApiCreateInten
 }
 
 // Execute executes the request
-//
 //	@return UserPostResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *UsersAPIService) CreateIntenralUserExecute(r ApiCreateIntenralUserRequest) (*UserPostResponse, *http.Response, error) {
 	var (
@@ -967,9 +959,7 @@ func (a *UsersAPIService) CreateUser(ctx context.Context) ApiCreateUserRequest {
 }
 
 // Execute executes the request
-//
 //	@return UserPostResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *UsersAPIService) CreateUserExecute(r ApiCreateUserRequest) (*UserPostResponse, *http.Response, error) {
 	var (
@@ -1432,9 +1422,7 @@ func (a *UsersAPIService) GetInternalUserById(ctx context.Context, userId string
 }
 
 // Execute executes the request
-//
 //	@return User
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *UsersAPIService) GetInternalUserByIdExecute(r ApiGetInternalUserByIdRequest) (*User, *http.Response, error) {
 	var (
@@ -1571,9 +1559,7 @@ func (a *UsersAPIService) GetUserAccessGroups(ctx context.Context, email string)
 }
 
 // Execute executes the request
-//
 //	@return []string
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *UsersAPIService) GetUserAccessGroupsExecute(r ApiGetUserAccessGroupsRequest) ([]string, *http.Response, error) {
 	var (
@@ -1721,9 +1707,7 @@ func (a *UsersAPIService) GetUserById(ctx context.Context, userId string) ApiGet
 }
 
 // Execute executes the request
-//
 //	@return User
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *UsersAPIService) GetUserByIdExecute(r ApiGetUserByIdRequest) (*User, *http.Response, error) {
 	var (
@@ -1932,9 +1916,7 @@ func (a *UsersAPIService) GetUsers(ctx context.Context) ApiGetUsersRequest {
 }
 
 // Execute executes the request
-//
 //	@return []User
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *UsersAPIService) GetUsersExecute(r ApiGetUsersRequest) ([]User, *http.Response, error) {
 	var (
@@ -2142,9 +2124,7 @@ func (a *UsersAPIService) GetUsersMinimal(ctx context.Context) ApiGetUsersMinima
 }
 
 // Execute executes the request
-//
 //	@return []UserMinimal
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *UsersAPIService) GetUsersMinimalExecute(r ApiGetUsersMinimalRequest) ([]UserMinimal, *http.Response, error) {
 	var (
@@ -2483,9 +2463,7 @@ func (a *UsersAPIService) PatchUserById(ctx context.Context, userId string) ApiP
 }
 
 // Execute executes the request
-//
 //	@return User
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *UsersAPIService) PatchUserByIdExecute(r ApiPatchUserByIdRequest) (*User, *http.Response, error) {
 	var (
@@ -2657,9 +2635,7 @@ func (a *UsersAPIService) ResetUserPassword(ctx context.Context, userId string) 
 }
 
 // Execute executes the request
-//
 //	@return ResetUserPassword200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *UsersAPIService) ResetUserPasswordExecute(r ApiResetUserPasswordRequest) (*ResetUserPassword200Response, *http.Response, error) {
 	var (

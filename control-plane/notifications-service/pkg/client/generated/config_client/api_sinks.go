@@ -53,7 +53,6 @@ func (a *SinksAPIService) CreateSink(ctx context.Context) ApiCreateSinkRequest {
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *SinksAPIService) CreateSinkExecute(r ApiCreateSinkRequest) (string, *http.Response, error) {
 	var (
@@ -193,7 +192,6 @@ func (a *SinksAPIService) DeleteSink(ctx context.Context, sinkId string) ApiDele
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *SinksAPIService) DeleteSinkExecute(r ApiDeleteSinkRequest) (string, *http.Response, error) {
 	var (
@@ -318,7 +316,6 @@ func (a *SinksAPIService) GetSink(ctx context.Context, sinkId string) ApiGetSink
 }
 
 // Execute executes the request
-//
 //	@return SinkData
 func (a *SinksAPIService) GetSinkExecute(r ApiGetSinkRequest) (*SinkData, *http.Response, error) {
 	var (
@@ -440,7 +437,6 @@ func (a *SinksAPIService) GetSinks(ctx context.Context) ApiGetSinksRequest {
 }
 
 // Execute executes the request
-//
 //	@return []SinkData
 func (a *SinksAPIService) GetSinksExecute(r ApiGetSinksRequest) ([]SinkData, *http.Response, error) {
 	var (
@@ -559,7 +555,6 @@ func (a *SinksAPIService) UpdateSink(ctx context.Context, sinkId string) ApiUpda
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *SinksAPIService) UpdateSinkExecute(r ApiUpdateSinkRequest) (string, *http.Response, error) {
 	var (
@@ -692,7 +687,6 @@ func (a *SinksAPIService) ValidateSink(ctx context.Context) ApiValidateSinkReque
 }
 
 // Execute executes the request
-//
 //	@return ValidateSink200Response
 func (a *SinksAPIService) ValidateSinkExecute(r ApiValidateSinkRequest) (*ValidateSink200Response, *http.Response, error) {
 	var (

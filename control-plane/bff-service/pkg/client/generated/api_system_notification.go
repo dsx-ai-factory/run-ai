@@ -239,9 +239,7 @@ func (a *SystemNotificationAPIService) GetSystemNotification(ctx context.Context
 }
 
 // Execute executes the request
-//
 //	@return GetSystemNotification
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SystemNotificationAPIService) GetSystemNotificationExecute(r ApiGetSystemNotificationRequest) (*GetSystemNotification, *http.Response, error) {
 	var (

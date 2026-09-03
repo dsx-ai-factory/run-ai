@@ -118,9 +118,7 @@ func (a *SubscriptionsAPIService) CreateSubscription(ctx context.Context) ApiCre
 }
 
 // Execute executes the request
-//
 //	@return Subscription
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SubscriptionsAPIService) CreateSubscriptionExecute(r ApiCreateSubscriptionRequest) (*Subscription, *http.Response, error) {
 	var (
@@ -475,9 +473,7 @@ func (a *SubscriptionsAPIService) GetUserSubscriptions(ctx context.Context) ApiG
 }
 
 // Execute executes the request
-//
 //	@return []Subscription
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SubscriptionsAPIService) GetUserSubscriptionsExecute(r ApiGetUserSubscriptionsRequest) ([]Subscription, *http.Response, error) {
 	var (
@@ -652,9 +648,7 @@ func (a *SubscriptionsAPIService) UpdateSubscription(ctx context.Context, id str
 }
 
 // Execute executes the request
-//
 //	@return Subscription
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SubscriptionsAPIService) UpdateSubscriptionExecute(r ApiUpdateSubscriptionRequest) (*Subscription, *http.Response, error) {
 	var (

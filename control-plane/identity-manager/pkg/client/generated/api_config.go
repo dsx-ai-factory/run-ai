@@ -68,9 +68,7 @@ func (a *ConfigAPIService) GetTenantConfiguration(ctx context.Context) ApiGetTen
 }
 
 // Execute executes the request
-//
 //	@return AuthConfiguration
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ConfigAPIService) GetTenantConfigurationExecute(r ApiGetTenantConfigurationRequest) (*AuthConfiguration, *http.Response, error) {
 	var (

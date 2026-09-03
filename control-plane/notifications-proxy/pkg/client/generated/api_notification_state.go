@@ -107,9 +107,7 @@ func (a *NotificationStateAPIService) GetDetailedNotificationState(ctx context.C
 }
 
 // Execute executes the request
-//
 //	@return DetailedNotificationState
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NotificationStateAPIService) GetDetailedNotificationStateExecute(r ApiGetDetailedNotificationStateRequest) (*DetailedNotificationState, *http.Response, error) {
@@ -278,9 +276,7 @@ func (a *NotificationStateAPIService) GetNotificationState(ctx context.Context) 
 }
 
 // Execute executes the request
-//
 //	@return NotificationState
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NotificationStateAPIService) GetNotificationStateExecute(r ApiGetNotificationStateRequest) (*NotificationState, *http.Response, error) {
@@ -455,9 +451,7 @@ func (a *NotificationStateAPIService) UpdateNotificationState(ctx context.Contex
 }
 
 // Execute executes the request
-//
 //	@return NotificationState
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NotificationStateAPIService) UpdateNotificationStateExecute(r ApiUpdateNotificationStateRequest) (*NotificationState, *http.Response, error) {

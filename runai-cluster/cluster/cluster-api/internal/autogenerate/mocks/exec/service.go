@@ -7,8 +7,8 @@ package mocks
 import (
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	stream "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/cluster/stream"
+	gomock "github.com/golang/mock/gomock"
 	rest "k8s.io/client-go/rest"
 )
 

@@ -8,8 +8,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	authorizers "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/authz/authorizers"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockAuthorizer is a mock of Authorizer interface.

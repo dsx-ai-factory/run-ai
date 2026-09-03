@@ -8,8 +8,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	spec "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/spec"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockActionClient is a mock of ActionClient interface.

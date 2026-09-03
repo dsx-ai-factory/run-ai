@@ -109,9 +109,7 @@ func (a *TenantsAPIService) CreateTenantInternal(ctx context.Context) ApiCreateT
 }
 
 // Execute executes the request
-//
 //	@return TenantCreationResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TenantsAPIService) CreateTenantInternalExecute(r ApiCreateTenantInternalRequest) (*TenantCreationResponse, *http.Response, error) {
 	var (
@@ -301,9 +299,7 @@ func (a *TenantsAPIService) DeleteTenantByIdInternal(ctx context.Context, tenant
 }
 
 // Execute executes the request
-//
 //	@return DeleteTenantById200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TenantsAPIService) DeleteTenantByIdInternalExecute(r ApiDeleteTenantByIdInternalRequest) (*DeleteTenantById200Response, *http.Response, error) {
 	var (
@@ -481,9 +477,7 @@ func (a *TenantsAPIService) GetTenant(ctx context.Context) ApiGetTenantRequest {
 }
 
 // Execute executes the request
-//
 //	@return Tenant
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TenantsAPIService) GetTenantExecute(r ApiGetTenantRequest) (*Tenant, *http.Response, error) {
 	var (
@@ -643,9 +637,7 @@ func (a *TenantsAPIService) GetTenantByIdInternal(ctx context.Context, tenantId 
 }
 
 // Execute executes the request
-//
 //	@return Tenant
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TenantsAPIService) GetTenantByIdInternalExecute(r ApiGetTenantByIdInternalRequest) (*Tenant, *http.Response, error) {
 	var (

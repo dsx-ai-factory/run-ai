@@ -59,7 +59,6 @@ func (a *UserRouteAPIService) CreateUserRoute(ctx context.Context, tenantId stri
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *UserRouteAPIService) CreateUserRouteExecute(r ApiCreateUserRouteRequest) (string, *http.Response, error) {
 	var (
@@ -201,7 +200,6 @@ func (a *UserRouteAPIService) DeleteAllUserRoutes(ctx context.Context, tenantId 
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *UserRouteAPIService) DeleteAllUserRoutesExecute(r ApiDeleteAllUserRoutesRequest) (string, *http.Response, error) {
 	var (
@@ -318,7 +316,6 @@ func (a *UserRouteAPIService) DeleteNotifyIdFromAllUserRoutes(ctx context.Contex
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *UserRouteAPIService) DeleteNotifyIdFromAllUserRoutesExecute(r ApiDeleteNotifyIdFromAllUserRoutesRequest) (string, *http.Response, error) {
 	var (
@@ -450,7 +447,6 @@ func (a *UserRouteAPIService) DeleteUserRoute(ctx context.Context, tenantId stri
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *UserRouteAPIService) DeleteUserRouteExecute(r ApiDeleteUserRouteRequest) (string, *http.Response, error) {
 	var (
@@ -580,7 +576,6 @@ func (a *UserRouteAPIService) GetUserRoutes(ctx context.Context, tenantId string
 }
 
 // Execute executes the request
-//
 //	@return []RouteData
 func (a *UserRouteAPIService) GetUserRoutesExecute(r ApiGetUserRoutesRequest) ([]RouteData, *http.Response, error) {
 	var (
@@ -707,7 +702,6 @@ func (a *UserRouteAPIService) UpdateUserRoute(ctx context.Context, tenantId stri
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *UserRouteAPIService) UpdateUserRouteExecute(r ApiUpdateUserRouteRequest) (string, *http.Response, error) {
 	var (

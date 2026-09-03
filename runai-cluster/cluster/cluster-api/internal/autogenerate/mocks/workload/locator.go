@@ -8,8 +8,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	api "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/api"
+	gomock "github.com/golang/mock/gomock"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
 

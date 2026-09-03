@@ -209,9 +209,7 @@ func (a *RolesAPIService) CreateRole(ctx context.Context) ApiCreateRoleRequest {
 }
 
 // Execute executes the request
-//
 //	@return Role
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RolesAPIService) CreateRoleExecute(r ApiCreateRoleRequest) (*Role, *http.Response, error) {
 	var (
@@ -536,9 +534,7 @@ func (a *RolesAPIService) GetRole(ctx context.Context, roleIdPath int32) ApiGetR
 }
 
 // Execute executes the request
-//
 //	@return Role
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RolesAPIService) GetRoleExecute(r ApiGetRoleRequest) (*Role, *http.Response, error) {
 	var (
@@ -713,9 +709,7 @@ func (a *RolesAPIService) GetRoleV1(ctx context.Context, roleIdPath int32) ApiGe
 }
 
 // Execute executes the request
-//
 //	@return RoleV1
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RolesAPIService) GetRoleV1Execute(r ApiGetRoleV1Request) (*RoleV1, *http.Response, error) {
@@ -934,9 +928,7 @@ func (a *RolesAPIService) GetRoles(ctx context.Context) ApiGetRolesRequest {
 }
 
 // Execute executes the request
-//
 //	@return GetRoles200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RolesAPIService) GetRolesExecute(r ApiGetRolesRequest) (*GetRoles200Response, *http.Response, error) {
 	var (
@@ -1129,9 +1121,7 @@ func (a *RolesAPIService) GetRolesV1(ctx context.Context) ApiGetRolesV1Request {
 }
 
 // Execute executes the request
-//
 //	@return []RoleV1
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RolesAPIService) GetRolesV1Execute(r ApiGetRolesV1Request) ([]RoleV1, *http.Response, error) {
@@ -1819,9 +1809,7 @@ func (a *RolesAPIService) UpdateRole(ctx context.Context, roleIdPath int32) ApiU
 }
 
 // Execute executes the request
-//
 //	@return Role
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *RolesAPIService) UpdateRoleExecute(r ApiUpdateRoleRequest) (*Role, *http.Response, error) {
 	var (

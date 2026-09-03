@@ -8,10 +8,10 @@ import (
 	context "context"
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/nim-client/generated"
 	openapi0 "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	openapi1 "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockWorkloadClient is a mock of WorkloadClient interface.

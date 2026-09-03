@@ -87,9 +87,7 @@ func (a *OpenIDConnectAPIService) GetOauthAuthorizationServerMetadata(ctx contex
 }
 
 // Execute executes the request
-//
 //	@return OAuthAuthorizationServer
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *OpenIDConnectAPIService) GetOauthAuthorizationServerMetadataExecute(r ApiGetOauthAuthorizationServerMetadataRequest) (*OAuthAuthorizationServer, *http.Response, error) {
 	var (
@@ -212,9 +210,7 @@ func (a *OpenIDConnectAPIService) GetOpenidConfiguration(ctx context.Context) Ap
 }
 
 // Execute executes the request
-//
 //	@return OpenIDConfiguration
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *OpenIDConnectAPIService) GetOpenidConfigurationExecute(r ApiGetOpenidConfigurationRequest) (*OpenIDConfiguration, *http.Response, error) {
 	var (

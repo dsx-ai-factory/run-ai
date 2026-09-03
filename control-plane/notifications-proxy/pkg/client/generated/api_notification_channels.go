@@ -520,9 +520,7 @@ func (a *NotificationChannelsAPIService) GetNotificationChannel(ctx context.Cont
 }
 
 // Execute executes the request
-//
 //	@return NotificationChannelResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NotificationChannelsAPIService) GetNotificationChannelExecute(r ApiGetNotificationChannelRequest) (*NotificationChannelResponse, *http.Response, error) {
 	var (
@@ -706,9 +704,7 @@ func (a *NotificationChannelsAPIService) GetNotificationChannels(ctx context.Con
 }
 
 // Execute executes the request
-//
 //	@return []NotificationChannelMeta
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NotificationChannelsAPIService) GetNotificationChannelsExecute(r ApiGetNotificationChannelsRequest) ([]NotificationChannelMeta, *http.Response, error) {
 	var (
@@ -1250,9 +1246,7 @@ func (a *NotificationChannelsAPIService) ValidateNotificationChannel(ctx context
 }
 
 // Execute executes the request
-//
 //	@return bool
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NotificationChannelsAPIService) ValidateNotificationChannelExecute(r ApiValidateNotificationChannelRequest) (bool, *http.Response, error) {

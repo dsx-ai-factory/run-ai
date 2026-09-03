@@ -119,9 +119,7 @@ func (a *ClusterConfigAPIService) GetClusterConfig(ctx context.Context, clusterU
 }
 
 // Execute executes the request
-//
 //	@return GetPutPatchClusterConfigResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClusterConfigAPIService) GetClusterConfigExecute(r ApiGetClusterConfigRequest) (*GetPutPatchClusterConfigResponse, *http.Response, error) {
 	var (
@@ -292,9 +290,7 @@ func (a *ClusterConfigAPIService) GetInternalClusterConfig(ctx context.Context, 
 }
 
 // Execute executes the request
-//
 //	@return GetInternalClusterConfigResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClusterConfigAPIService) GetInternalClusterConfigExecute(r ApiGetInternalClusterConfigRequest) (*GetInternalClusterConfigResponse, *http.Response, error) {
 	var (
@@ -471,9 +467,7 @@ func (a *ClusterConfigAPIService) PatchClusterConfig(ctx context.Context, cluste
 }
 
 // Execute executes the request
-//
 //	@return GetPutPatchClusterConfigResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClusterConfigAPIService) PatchClusterConfigExecute(r ApiPatchClusterConfigRequest) (*GetPutPatchClusterConfigResponse, *http.Response, error) {
 	var (
@@ -655,9 +649,7 @@ func (a *ClusterConfigAPIService) PutClusterConfig(ctx context.Context, clusterU
 }
 
 // Execute executes the request
-//
 //	@return GetPutPatchClusterConfigResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClusterConfigAPIService) PutClusterConfigExecute(r ApiPutClusterConfigRequest) (*GetPutPatchClusterConfigResponse, *http.Response, error) {
 	var (

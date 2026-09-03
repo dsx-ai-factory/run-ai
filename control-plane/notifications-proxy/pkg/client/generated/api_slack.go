@@ -257,9 +257,7 @@ func (a *SlackAPIService) AddSlackAppDeprecated(ctx context.Context) ApiAddSlack
 }
 
 // Execute executes the request
-//
 //	@return ConnectSlackWorkspace200Response
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SlackAPIService) AddSlackAppDeprecatedExecute(r ApiAddSlackAppDeprecatedRequest) (*ConnectSlackWorkspace200Response, *http.Response, error) {
@@ -644,9 +642,7 @@ func (a *SlackAPIService) ConnectSlackWorkspace(ctx context.Context) ApiConnectS
 }
 
 // Execute executes the request
-//
 //	@return ConnectSlackWorkspace200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SlackAPIService) ConnectSlackWorkspaceExecute(r ApiConnectSlackWorkspaceRequest) (*ConnectSlackWorkspace200Response, *http.Response, error) {
 	var (
@@ -785,9 +781,7 @@ func (a *SlackAPIService) CreateSlackApp(ctx context.Context) ApiCreateSlackAppR
 }
 
 // Execute executes the request
-//
 //	@return CreateSlackAppResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SlackAPIService) CreateSlackAppExecute(r ApiCreateSlackAppRequest) (*CreateSlackAppResponse, *http.Response, error) {
 	var (
@@ -974,9 +968,7 @@ func (a *SlackAPIService) CreateSlackAppDeprecated(ctx context.Context) ApiCreat
 }
 
 // Execute executes the request
-//
 //	@return CreateSlackAppResponse
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SlackAPIService) CreateSlackAppDeprecatedExecute(r ApiCreateSlackAppDeprecatedRequest) (*CreateSlackAppResponse, *http.Response, error) {
@@ -1444,9 +1436,7 @@ func (a *SlackAPIService) GetDetailedSlackNotificationState(ctx context.Context)
 }
 
 // Execute executes the request
-//
 //	@return DetailedSlackNotificationsState
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SlackAPIService) GetDetailedSlackNotificationStateExecute(r ApiGetDetailedSlackNotificationStateRequest) (*DetailedSlackNotificationsState, *http.Response, error) {
 	var (
@@ -1612,9 +1602,7 @@ func (a *SlackAPIService) GetSlack(ctx context.Context) ApiGetSlackRequest {
 }
 
 // Execute executes the request
-//
 //	@return SlackNotificationChannel
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SlackAPIService) GetSlackExecute(r ApiGetSlackRequest) (*SlackNotificationChannel, *http.Response, error) {
 	var (
@@ -1802,9 +1790,7 @@ func (a *SlackAPIService) GetSlackNotificationState(ctx context.Context) ApiGetS
 }
 
 // Execute executes the request
-//
 //	@return NotificationStateStatus
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SlackAPIService) GetSlackNotificationStateExecute(r ApiGetSlackNotificationStateRequest) (*NotificationStateStatus, *http.Response, error) {
 	var (
@@ -1976,9 +1962,7 @@ func (a *SlackAPIService) PatchSlack(ctx context.Context) ApiPatchSlackRequest {
 }
 
 // Execute executes the request
-//
 //	@return SlackNotificationChannel
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SlackAPIService) PatchSlackExecute(r ApiPatchSlackRequest) (*SlackNotificationChannel, *http.Response, error) {
 	var (
@@ -2087,9 +2071,7 @@ func (a *SlackAPIService) UpdateSlackNotificationState(ctx context.Context) ApiU
 }
 
 // Execute executes the request
-//
 //	@return NotificationStateStatus
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SlackAPIService) UpdateSlackNotificationStateExecute(r ApiUpdateSlackNotificationStateRequest) (*NotificationStateStatus, *http.Response, error) {
 	var (
@@ -2274,9 +2256,7 @@ func (a *SlackAPIService) ValidateSlack(ctx context.Context) ApiValidateSlackReq
 }
 
 // Execute executes the request
-//
 //	@return ValidateSinkResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SlackAPIService) ValidateSlackExecute(r ApiValidateSlackRequest) (*ValidateSinkResponse, *http.Response, error) {
 	var (

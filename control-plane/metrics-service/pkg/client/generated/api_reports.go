@@ -145,9 +145,7 @@ func (a *ReportsAPIService) BatchDeleteReports(ctx context.Context) ApiBatchDele
 }
 
 // Execute executes the request
-//
 //	@return BatchResponseAsync
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ReportsAPIService) BatchDeleteReportsExecute(r ApiBatchDeleteReportsRequest) (*BatchResponseAsync, *http.Response, error) {
 	var (
@@ -301,9 +299,7 @@ func (a *ReportsAPIService) BatchGetReportsByIds(ctx context.Context) ApiBatchGe
 }
 
 // Execute executes the request
-//
 //	@return ReportsBatchGetResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ReportsAPIService) BatchGetReportsByIdsExecute(r ApiBatchGetReportsByIdsRequest) (*ReportsBatchGetResponse, *http.Response, error) {
 	var (
@@ -464,9 +460,7 @@ func (a *ReportsAPIService) CountReports(ctx context.Context) ApiCountReportsReq
 }
 
 // Execute executes the request
-//
 //	@return CountReports200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ReportsAPIService) CountReportsExecute(r ApiCountReportsRequest) (*CountReports200Response, *http.Response, error) {
 	var (
@@ -621,9 +615,7 @@ func (a *ReportsAPIService) CreateReport(ctx context.Context) ApiCreateReportReq
 }
 
 // Execute executes the request
-//
 //	@return Report
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ReportsAPIService) CreateReportExecute(r ApiCreateReportRequest) (*Report, *http.Response, error) {
 	var (
@@ -919,9 +911,7 @@ func (a *ReportsAPIService) GetReportById(ctx context.Context, reportId string) 
 }
 
 // Execute executes the request
-//
 //	@return Report
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ReportsAPIService) GetReportByIdExecute(r ApiGetReportByIdRequest) (*Report, *http.Response, error) {
 	var (
@@ -1117,9 +1107,7 @@ func (a *ReportsAPIService) ListReports(ctx context.Context) ApiListReportsReque
 }
 
 // Execute executes the request
-//
 //	@return ListReports200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ReportsAPIService) ListReportsExecute(r ApiListReportsRequest) (*ListReports200Response, *http.Response, error) {
 	var (

@@ -8,8 +8,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockDepartmentClient is a mock of DepartmentClient interface.

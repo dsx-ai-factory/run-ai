@@ -50,7 +50,6 @@ func (a *EventsAPIService) DeleteEvent(ctx context.Context, eventId string) ApiD
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *EventsAPIService) DeleteEventExecute(r ApiDeleteEventRequest) (string, *http.Response, error) {
 	var (
@@ -193,7 +192,6 @@ func (a *EventsAPIService) DeleteEvents(ctx context.Context) ApiDeleteEventsRequ
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *EventsAPIService) DeleteEventsExecute(r ApiDeleteEventsRequest) (string, *http.Response, error) {
 	var (
@@ -335,7 +333,6 @@ func (a *EventsAPIService) GetEvents(ctx context.Context) ApiGetEventsRequest {
 }
 
 // Execute executes the request
-//
 //	@return []Event
 func (a *EventsAPIService) GetEventsExecute(r ApiGetEventsRequest) ([]Event, *http.Response, error) {
 	var (
@@ -463,7 +460,6 @@ func (a *EventsAPIService) UpdateEventRead(ctx context.Context, eventId string) 
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *EventsAPIService) UpdateEventReadExecute(r ApiUpdateEventReadRequest) (string, *http.Response, error) {
 	var (

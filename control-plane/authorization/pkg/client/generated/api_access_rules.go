@@ -238,9 +238,7 @@ func (a *AccessRulesAPIService) AccessRulesBatch(ctx context.Context) ApiAccessR
 }
 
 // Execute executes the request
-//
 //	@return AccessRuleDeletionBatchResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AccessRulesAPIService) AccessRulesBatchExecute(r ApiAccessRulesBatchRequest) (*AccessRuleDeletionBatchResponse, *http.Response, error) {
 	var (
@@ -403,9 +401,7 @@ func (a *AccessRulesAPIService) AccessRulesBatchCreate(ctx context.Context) ApiA
 }
 
 // Execute executes the request
-//
 //	@return AccessRulesBatchCreateResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AccessRulesAPIService) AccessRulesBatchCreateExecute(r ApiAccessRulesBatchCreateRequest) (*AccessRulesBatchCreateResponse, *http.Response, error) {
 	var (
@@ -578,9 +574,7 @@ func (a *AccessRulesAPIService) AccessRulesMigrateDeprecated(ctx context.Context
 }
 
 // Execute executes the request
-//
 //	@return AccessRulesMigrateDeprecatedResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AccessRulesAPIService) AccessRulesMigrateDeprecatedExecute(r ApiAccessRulesMigrateDeprecatedRequest) (*AccessRulesMigrateDeprecatedResponse, *http.Response, error) {
 	var (
@@ -769,9 +763,7 @@ func (a *AccessRulesAPIService) CountAccessRules(ctx context.Context) ApiCountAc
 }
 
 // Execute executes the request
-//
 //	@return CountAccessRules200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AccessRulesAPIService) CountAccessRulesExecute(r ApiCountAccessRulesRequest) (*CountAccessRules200Response, *http.Response, error) {
 	var (
@@ -945,9 +937,7 @@ func (a *AccessRulesAPIService) CreateAccessRule(ctx context.Context) ApiCreateA
 }
 
 // Execute executes the request
-//
 //	@return AccessRule
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AccessRulesAPIService) CreateAccessRuleExecute(r ApiCreateAccessRuleRequest) (*AccessRule, *http.Response, error) {
 	var (
@@ -1124,9 +1114,7 @@ func (a *AccessRulesAPIService) CreateAuthenticatedUsersAccessRule(ctx context.C
 }
 
 // Execute executes the request
-//
 //	@return AccessRule
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AccessRulesAPIService) CreateAuthenticatedUsersAccessRuleExecute(r ApiCreateAuthenticatedUsersAccessRuleRequest) (*AccessRule, *http.Response, error) {
 	var (
@@ -1451,9 +1439,7 @@ func (a *AccessRulesAPIService) GetAccessRule(ctx context.Context, accessRuleId 
 }
 
 // Execute executes the request
-//
 //	@return AccessRuleById
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AccessRulesAPIService) GetAccessRuleExecute(r ApiGetAccessRuleRequest) (*AccessRuleById, *http.Response, error) {
 	var (
@@ -1696,9 +1682,7 @@ func (a *AccessRulesAPIService) GetAccessRules(ctx context.Context) ApiGetAccess
 }
 
 // Execute executes the request
-//
 //	@return GetAccessRules200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AccessRulesAPIService) GetAccessRulesExecute(r ApiGetAccessRulesRequest) (*GetAccessRules200Response, *http.Response, error) {
 	var (
@@ -1915,9 +1899,7 @@ func (a *AccessRulesAPIService) GetAccessRulesSync(ctx context.Context) ApiGetAc
 }
 
 // Execute executes the request
-//
 //	@return GetAccessRulesSync200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AccessRulesAPIService) GetAccessRulesSyncExecute(r ApiGetAccessRulesSyncRequest) (*GetAccessRulesSync200Response, *http.Response, error) {
 	var (

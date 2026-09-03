@@ -95,9 +95,7 @@ func (a *LogoAPIService) GetTenantLogo(ctx context.Context) ApiGetTenantLogoRequ
 }
 
 // Execute executes the request
-//
 //	@return GetTenantLogo200Response
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *LogoAPIService) GetTenantLogoExecute(r ApiGetTenantLogoRequest) (*GetTenantLogo200Response, *http.Response, error) {

@@ -8,9 +8,9 @@ import (
 	context "context"
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	stream "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/cluster/stream"
 	workload "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/workload"
+	gomock "github.com/golang/mock/gomock"
 	rest "k8s.io/client-go/rest"
 )
 

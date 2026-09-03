@@ -52,7 +52,6 @@ func (a *RegisterNotificationAPIService) CreateNotificationKind(ctx context.Cont
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *RegisterNotificationAPIService) CreateNotificationKindExecute(r ApiCreateNotificationKindRequest) (string, *http.Response, error) {
 	var (
@@ -190,7 +189,6 @@ func (a *RegisterNotificationAPIService) DeleteNotificationKind(ctx context.Cont
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *RegisterNotificationAPIService) DeleteNotificationKindExecute(r ApiDeleteNotificationKindRequest) (string, *http.Response, error) {
 	var (
@@ -337,7 +335,6 @@ func (a *RegisterNotificationAPIService) GetNotificationKinds(ctx context.Contex
 }
 
 // Execute executes the request
-//
 //	@return []NotificationKind
 func (a *RegisterNotificationAPIService) GetNotificationKindsExecute(r ApiGetNotificationKindsRequest) ([]NotificationKind, *http.Response, error) {
 	var (
@@ -462,7 +459,6 @@ func (a *RegisterNotificationAPIService) UpdateNotificationKind(ctx context.Cont
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *RegisterNotificationAPIService) UpdateNotificationKindExecute(r ApiUpdateNotificationKindRequest) (string, *http.Response, error) {
 	var (

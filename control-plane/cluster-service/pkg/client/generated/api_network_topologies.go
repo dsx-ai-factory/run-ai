@@ -144,9 +144,7 @@ func (a *NetworkTopologiesAPIService) CreateNetworkTopology(ctx context.Context)
 }
 
 // Execute executes the request
-//
 //	@return NetworkTopology
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NetworkTopologiesAPIService) CreateNetworkTopologyExecute(r ApiCreateNetworkTopologyRequest) (*NetworkTopology, *http.Response, error) {
 	var (
@@ -472,9 +470,7 @@ func (a *NetworkTopologiesAPIService) GetNetworkTopologies(ctx context.Context) 
 }
 
 // Execute executes the request
-//
 //	@return GetNetworkTopologies200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NetworkTopologiesAPIService) GetNetworkTopologiesExecute(r ApiGetNetworkTopologiesRequest) (*GetNetworkTopologies200Response, *http.Response, error) {
 	var (
@@ -639,9 +635,7 @@ func (a *NetworkTopologiesAPIService) GetNetworkTopologiesCount(ctx context.Cont
 }
 
 // Execute executes the request
-//
 //	@return CountResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NetworkTopologiesAPIService) GetNetworkTopologiesCountExecute(r ApiGetNetworkTopologiesCountRequest) (*CountResponse, *http.Response, error) {
 	var (
@@ -802,9 +796,7 @@ func (a *NetworkTopologiesAPIService) GetNetworkTopologyById(ctx context.Context
 }
 
 // Execute executes the request
-//
 //	@return NetworkTopology
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NetworkTopologiesAPIService) GetNetworkTopologyByIdExecute(r ApiGetNetworkTopologyByIdRequest) (*NetworkTopology, *http.Response, error) {
 	var (

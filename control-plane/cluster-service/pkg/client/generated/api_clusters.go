@@ -328,9 +328,7 @@ func (a *ClustersAPIService) CreateCluster(ctx context.Context) ApiCreateCluster
 }
 
 // Execute executes the request
-//
 //	@return DisplayedCluster
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClustersAPIService) CreateClusterExecute(r ApiCreateClusterRequest) (*DisplayedCluster, *http.Response, error) {
 	var (
@@ -503,9 +501,7 @@ func (a *ClustersAPIService) DeleteCluster(ctx context.Context, clusterUuid stri
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClustersAPIService) DeleteClusterExecute(r ApiDeleteClusterRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -660,9 +656,7 @@ func (a *ClustersAPIService) GetClusterAncestors(ctx context.Context, clusterUui
 }
 
 // Execute executes the request
-//
 //	@return Ancestors
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClustersAPIService) GetClusterAncestorsExecute(r ApiGetClusterAncestorsRequest) (*Ancestors, *http.Response, error) {
 	var (
@@ -809,9 +803,7 @@ func (a *ClustersAPIService) GetClusterByUuid(ctx context.Context, clusterUuid s
 }
 
 // Execute executes the request
-//
 //	@return DisplayedCluster
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClustersAPIService) GetClusterByUuidExecute(r ApiGetClusterByUuidRequest) (*DisplayedCluster, *http.Response, error) {
 	var (
@@ -994,9 +986,7 @@ func (a *ClustersAPIService) GetClusterInstallInfoByUuid(ctx context.Context, cl
 }
 
 // Execute executes the request
-//
 //	@return ClusterInstallationInfoResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClustersAPIService) GetClusterInstallInfoByUuidExecute(r ApiGetClusterInstallInfoByUuidRequest) (*ClusterInstallationInfoResponse, *http.Response, error) {
 	var (
@@ -1165,9 +1155,7 @@ func (a *ClustersAPIService) GetClusterInternal(ctx context.Context, clusterUuid
 }
 
 // Execute executes the request
-//
 //	@return DisplayedCluster
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClustersAPIService) GetClusterInternalExecute(r ApiGetClusterInternalRequest) (*DisplayedCluster, *http.Response, error) {
 	var (
@@ -1371,9 +1359,7 @@ func (a *ClustersAPIService) GetClusterMetrics(ctx context.Context, clusterUuid 
 }
 
 // Execute executes the request
-//
 //	@return GroupedMetricsResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClustersAPIService) GetClusterMetricsExecute(r ApiGetClusterMetricsRequest) (*GroupedMetricsResponse, *http.Response, error) {
 	var (
@@ -1581,9 +1567,7 @@ func (a *ClustersAPIService) GetClusterMinimalDataById(ctx context.Context, clus
 }
 
 // Execute executes the request
-//
 //	@return ClustersMinimalData
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClustersAPIService) GetClusterMinimalDataByIdExecute(r ApiGetClusterMinimalDataByIdRequest) (*ClustersMinimalData, *http.Response, error) {
 	var (
@@ -1723,9 +1707,7 @@ func (a *ClustersAPIService) GetClusterName(ctx context.Context, clusterUuid str
 }
 
 // Execute executes the request
-//
 //	@return GetClusterName200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClustersAPIService) GetClusterNameExecute(r ApiGetClusterNameRequest) (*GetClusterName200Response, *http.Response, error) {
 	var (
@@ -1865,9 +1847,7 @@ func (a *ClustersAPIService) GetClusterUrl(ctx context.Context, clusterUuid stri
 }
 
 // Execute executes the request
-//
 //	@return GetClusterUrl200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClustersAPIService) GetClusterUrlExecute(r ApiGetClusterUrlRequest) (*GetClusterUrl200Response, *http.Response, error) {
 	var (
@@ -2004,9 +1984,7 @@ func (a *ClustersAPIService) GetClusterVersions(ctx context.Context) ApiGetClust
 }
 
 // Execute executes the request
-//
 //	@return map[string]string
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClustersAPIService) GetClusterVersionsExecute(r ApiGetClusterVersionsRequest) (map[string]string, *http.Response, error) {
 	var (
@@ -2182,9 +2160,7 @@ func (a *ClustersAPIService) GetClusters(ctx context.Context) ApiGetClustersRequ
 }
 
 // Execute executes the request
-//
 //	@return []DisplayedCluster
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClustersAPIService) GetClustersExecute(r ApiGetClustersRequest) ([]DisplayedCluster, *http.Response, error) {
 	var (
@@ -2366,9 +2342,7 @@ func (a *ClustersAPIService) GetClustersCount(ctx context.Context) ApiGetCluster
 }
 
 // Execute executes the request
-//
 //	@return []ClustersCount
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClustersAPIService) GetClustersCountExecute(r ApiGetClustersCountRequest) ([]ClustersCount, *http.Response, error) {
 	var (
@@ -2547,9 +2521,7 @@ func (a *ClustersAPIService) GetClustersMinimalData(ctx context.Context) ApiGetC
 }
 
 // Execute executes the request
-//
 //	@return GetClustersMinimalData200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClustersAPIService) GetClustersMinimalDataExecute(r ApiGetClustersMinimalDataRequest) (*GetClustersMinimalData200Response, *http.Response, error) {
 	var (
@@ -2689,9 +2661,7 @@ func (a *ClustersAPIService) GetInternalClusters(ctx context.Context) ApiGetInte
 }
 
 // Execute executes the request
-//
 //	@return []DisplayedCluster
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClustersAPIService) GetInternalClustersExecute(r ApiGetInternalClustersRequest) ([]DisplayedCluster, *http.Response, error) {
 	var (

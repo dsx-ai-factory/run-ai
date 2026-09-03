@@ -53,7 +53,6 @@ func (a *ListenerAPIService) CreateListener(ctx context.Context) ApiCreateListen
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *ListenerAPIService) CreateListenerExecute(r ApiCreateListenerRequest) (string, *http.Response, error) {
 	var (
@@ -193,7 +192,6 @@ func (a *ListenerAPIService) DeleteListener(ctx context.Context, listenerId stri
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *ListenerAPIService) DeleteListenerExecute(r ApiDeleteListenerRequest) (string, *http.Response, error) {
 	var (
@@ -318,7 +316,6 @@ func (a *ListenerAPIService) GetListener(ctx context.Context, listenerId string)
 }
 
 // Execute executes the request
-//
 //	@return ListenerData
 func (a *ListenerAPIService) GetListenerExecute(r ApiGetListenerRequest) (*ListenerData, *http.Response, error) {
 	var (
@@ -449,7 +446,6 @@ func (a *ListenerAPIService) UpdateListener(ctx context.Context, listenerId stri
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *ListenerAPIService) UpdateListenerExecute(r ApiUpdateListenerRequest) (string, *http.Response, error) {
 	var (

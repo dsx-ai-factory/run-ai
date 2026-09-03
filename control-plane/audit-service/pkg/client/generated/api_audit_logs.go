@@ -331,9 +331,7 @@ func (a *AuditLogsAPIService) GetAuditLogs(ctx context.Context) ApiGetAuditLogsR
 }
 
 // Execute executes the request
-//
 //	@return GetAuditLogs200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *AuditLogsAPIService) GetAuditLogsExecute(r ApiGetAuditLogsRequest) (*GetAuditLogs200Response, *http.Response, error) {
 	var (

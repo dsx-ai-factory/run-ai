@@ -72,9 +72,7 @@ func (a *ControlPlaneConfigAPIService) GetClusterControlPlaneConfig(ctx context.
 }
 
 // Execute executes the request
-//
 //	@return ClusterControlPlaneConfig
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ControlPlaneConfigAPIService) GetClusterControlPlaneConfigExecute(r ApiGetClusterControlPlaneConfigRequest) (*ClusterControlPlaneConfig, *http.Response, error) {
 	var (

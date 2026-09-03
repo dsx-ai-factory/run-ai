@@ -68,9 +68,7 @@ func (a *BootConfigAPIService) GetBootConfig(ctx context.Context) ApiGetBootConf
 }
 
 // Execute executes the request
-//
 //	@return BootConfig
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *BootConfigAPIService) GetBootConfigExecute(r ApiGetBootConfigRequest) (*BootConfig, *http.Response, error) {
 	var (

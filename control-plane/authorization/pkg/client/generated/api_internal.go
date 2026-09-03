@@ -151,9 +151,7 @@ func (a *InternalAPIService) CreateInternalAccessRule(ctx context.Context) ApiCr
 }
 
 // Execute executes the request
-//
 //	@return AccessRule
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InternalAPIService) CreateInternalAccessRuleExecute(r ApiCreateInternalAccessRuleRequest) (*AccessRule, *http.Response, error) {
 	var (
@@ -584,9 +582,7 @@ func (a *InternalAPIService) GetGroups(ctx context.Context) ApiGetGroupsRequest 
 }
 
 // Execute executes the request
-//
 //	@return GetGroups200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InternalAPIService) GetGroupsExecute(r ApiGetGroupsRequest) (*GetGroups200Response, *http.Response, error) {
 	var (
@@ -734,9 +730,7 @@ func (a *InternalAPIService) GetScopeAccessRules(ctx context.Context) ApiGetScop
 }
 
 // Execute executes the request
-//
 //	@return GetAccessRules200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InternalAPIService) GetScopeAccessRulesExecute(r ApiGetScopeAccessRulesRequest) (*GetAccessRules200Response, *http.Response, error) {
 	var (
@@ -882,9 +876,7 @@ func (a *InternalAPIService) GetSubjectAccessRules(ctx context.Context) ApiGetSu
 }
 
 // Execute executes the request
-//
 //	@return []AccessRule
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InternalAPIService) GetSubjectAccessRulesExecute(r ApiGetSubjectAccessRulesRequest) ([]AccessRule, *http.Response, error) {
 	var (

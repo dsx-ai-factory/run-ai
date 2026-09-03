@@ -196,9 +196,7 @@ func (a *ServiceAccountsAPIService) CreateServiceAccount(ctx context.Context) Ap
 }
 
 // Execute executes the request
-//
 //	@return ServiceAccountPostResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ServiceAccountsAPIService) CreateServiceAccountExecute(r ApiCreateServiceAccountRequest) (*ServiceAccountPostResponse, *http.Response, error) {
 	var (
@@ -387,9 +385,7 @@ func (a *ServiceAccountsAPIService) CreateServiceAccountInternally(ctx context.C
 }
 
 // Execute executes the request
-//
 //	@return ServiceAccountPostResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ServiceAccountsAPIService) CreateServiceAccountInternallyExecute(r ApiCreateServiceAccountInternallyRequest) (*ServiceAccountPostResponse, *http.Response, error) {
 	var (
@@ -704,9 +700,7 @@ func (a *ServiceAccountsAPIService) GetInstallerServiceAccount(ctx context.Conte
 }
 
 // Execute executes the request
-//
 //	@return ServiceAccountPostResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ServiceAccountsAPIService) GetInstallerServiceAccountExecute(r ApiGetInstallerServiceAccountRequest) (*ServiceAccountPostResponse, *http.Response, error) {
 	var (
@@ -870,9 +864,7 @@ func (a *ServiceAccountsAPIService) GetServiceAccountById(ctx context.Context, s
 }
 
 // Execute executes the request
-//
 //	@return ServiceAccount
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ServiceAccountsAPIService) GetServiceAccountByIdExecute(r ApiGetServiceAccountByIdRequest) (*ServiceAccount, *http.Response, error) {
 	var (
@@ -1039,9 +1031,7 @@ func (a *ServiceAccountsAPIService) GetServiceAccounts(ctx context.Context) ApiG
 }
 
 // Execute executes the request
-//
 //	@return []ServiceAccount
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ServiceAccountsAPIService) GetServiceAccountsExecute(r ApiGetServiceAccountsRequest) ([]ServiceAccount, *http.Response, error) {
 	var (
@@ -1219,9 +1209,7 @@ func (a *ServiceAccountsAPIService) MintInstallerBootstrapToken(ctx context.Cont
 }
 
 // Execute executes the request
-//
 //	@return InstallerBootstrapResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ServiceAccountsAPIService) MintInstallerBootstrapTokenExecute(r ApiMintInstallerBootstrapTokenRequest) (*InstallerBootstrapResponse, *http.Response, error) {
 	var (
@@ -1352,9 +1340,7 @@ func (a *ServiceAccountsAPIService) RegenerateServiceAccountSecret(ctx context.C
 }
 
 // Execute executes the request
-//
 //	@return RegenerateServiceAccountSecretResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ServiceAccountsAPIService) RegenerateServiceAccountSecretExecute(r ApiRegenerateServiceAccountSecretRequest) (*RegenerateServiceAccountSecretResponse, *http.Response, error) {
 	var (

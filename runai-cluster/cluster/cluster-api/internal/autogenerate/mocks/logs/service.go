@@ -9,8 +9,8 @@ import (
 	io "io"
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	logs "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/logs"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockStreamer is a mock of Streamer interface.

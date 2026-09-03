@@ -8,9 +8,9 @@ import (
 	context "context"
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	apis "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/cluster/apis"
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/cluster-api-client/generated"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockClusterStatusClient is a mock of ClusterStatusClient interface.

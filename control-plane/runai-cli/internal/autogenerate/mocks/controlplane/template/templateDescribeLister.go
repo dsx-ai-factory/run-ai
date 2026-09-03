@@ -8,8 +8,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockTemplateDescribeLister is a mock of Lister interface.

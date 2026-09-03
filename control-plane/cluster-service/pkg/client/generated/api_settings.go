@@ -136,9 +136,7 @@ func (a *SettingsAPIService) GetClusterSettingByKey(ctx context.Context, key Clu
 }
 
 // Execute executes the request
-//
 //	@return EnableAdvancedGpuMetricsSetting
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetClusterSettingByKeyExecute(r ApiGetClusterSettingByKeyRequest) (*EnableAdvancedGpuMetricsSetting, *http.Response, error) {
 	var (
@@ -316,9 +314,7 @@ func (a *SettingsAPIService) GetClusterSettings(ctx context.Context) ApiGetClust
 }
 
 // Execute executes the request
-//
 //	@return ClusterSettingsGetResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetClusterSettingsExecute(r ApiGetClusterSettingsRequest) (*ClusterSettingsGetResponse, *http.Response, error) {
 	var (
@@ -487,9 +483,7 @@ func (a *SettingsAPIService) GetNodePoolSettingByKey(ctx context.Context, key No
 }
 
 // Execute executes the request
-//
 //	@return NodePoolSetting
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetNodePoolSettingByKeyExecute(r ApiGetNodePoolSettingByKeyRequest) (*NodePoolSetting, *http.Response, error) {
 	var (
@@ -667,9 +661,7 @@ func (a *SettingsAPIService) GetNodePoolSettings(ctx context.Context) ApiGetNode
 }
 
 // Execute executes the request
-//
 //	@return NodePoolSettingsGetResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetNodePoolSettingsExecute(r ApiGetNodePoolSettingsRequest) (*NodePoolSettingsGetResponse, *http.Response, error) {
 	var (

@@ -171,9 +171,7 @@ func (a *EmailAPIService) CreateEmail(ctx context.Context) ApiCreateEmailRequest
 }
 
 // Execute executes the request
-//
 //	@return EmailChannel
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *EmailAPIService) CreateEmailExecute(r ApiCreateEmailRequest) (*EmailChannel, *http.Response, error) {
 	var (
@@ -529,9 +527,7 @@ func (a *EmailAPIService) GetEmail(ctx context.Context) ApiGetEmailRequest {
 }
 
 // Execute executes the request
-//
 //	@return EmailChannel
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *EmailAPIService) GetEmailExecute(r ApiGetEmailRequest) (*EmailChannel, *http.Response, error) {
 	var (
@@ -708,9 +704,7 @@ func (a *EmailAPIService) GetEmailNotificationState(ctx context.Context) ApiGetE
 }
 
 // Execute executes the request
-//
 //	@return NotificationStateStatus
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *EmailAPIService) GetEmailNotificationStateExecute(r ApiGetEmailNotificationStateRequest) (*NotificationStateStatus, *http.Response, error) {
 	var (
@@ -882,9 +876,7 @@ func (a *EmailAPIService) PatchEmail(ctx context.Context) ApiPatchEmailRequest {
 }
 
 // Execute executes the request
-//
 //	@return EmailChannel
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *EmailAPIService) PatchEmailExecute(r ApiPatchEmailRequest) (*EmailChannel, *http.Response, error) {
 	var (
@@ -1069,9 +1061,7 @@ func (a *EmailAPIService) UpdateEmail(ctx context.Context) ApiUpdateEmailRequest
 }
 
 // Execute executes the request
-//
 //	@return EmailChannel
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *EmailAPIService) UpdateEmailExecute(r ApiUpdateEmailRequest) (*EmailChannel, *http.Response, error) {
 	var (
@@ -1256,9 +1246,7 @@ func (a *EmailAPIService) UpdateEmailNotificationState(ctx context.Context) ApiU
 }
 
 // Execute executes the request
-//
 //	@return NotificationStateStatus
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *EmailAPIService) UpdateEmailNotificationStateExecute(r ApiUpdateEmailNotificationStateRequest) (*NotificationStateStatus, *http.Response, error) {
 	var (
@@ -1443,9 +1431,7 @@ func (a *EmailAPIService) ValidateEmail(ctx context.Context) ApiValidateEmailReq
 }
 
 // Execute executes the request
-//
 //	@return ValidateSinkResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *EmailAPIService) ValidateEmailExecute(r ApiValidateEmailRequest) (*ValidateSinkResponse, *http.Response, error) {
 	var (

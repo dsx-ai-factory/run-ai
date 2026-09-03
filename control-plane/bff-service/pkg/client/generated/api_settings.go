@@ -223,9 +223,7 @@ func (a *SettingsAPIService) GetAppearanceSettingByKey(ctx context.Context, key 
 }
 
 // Execute executes the request
-//
 //	@return map[string]interface{}
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetAppearanceSettingByKeyExecute(r ApiGetAppearanceSettingByKeyRequest) (map[string]interface{}, *http.Response, error) {
 	var (
@@ -403,9 +401,7 @@ func (a *SettingsAPIService) GetAppearanceSettings(ctx context.Context) ApiGetAp
 }
 
 // Execute executes the request
-//
 //	@return AppearanceSettingsGetAllResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetAppearanceSettingsExecute(r ApiGetAppearanceSettingsRequest) (*AppearanceSettingsGetAllResponse, *http.Response, error) {
 	var (
@@ -565,9 +561,7 @@ func (a *SettingsAPIService) GetBrandingSettingByKey(ctx context.Context, key Br
 }
 
 // Execute executes the request
-//
 //	@return map[string]interface{}
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetBrandingSettingByKeyExecute(r ApiGetBrandingSettingByKeyRequest) (map[string]interface{}, *http.Response, error) {
 	var (
@@ -725,9 +719,7 @@ func (a *SettingsAPIService) GetBrandingSettings(ctx context.Context) ApiGetBran
 }
 
 // Execute executes the request
-//
 //	@return BrandingSettingsGetAllResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetBrandingSettingsExecute(r ApiGetBrandingSettingsRequest) (*BrandingSettingsGetAllResponse, *http.Response, error) {
 	var (
@@ -865,9 +857,7 @@ func (a *SettingsAPIService) GetNotificationsSettingByKey(ctx context.Context, k
 }
 
 // Execute executes the request
-//
 //	@return map[string]interface{}
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetNotificationsSettingByKeyExecute(r ApiGetNotificationsSettingByKeyRequest) (map[string]interface{}, *http.Response, error) {
 	var (
@@ -1047,9 +1037,7 @@ func (a *SettingsAPIService) GetNotificationsSettings(ctx context.Context) ApiGe
 }
 
 // Execute executes the request
-//
 //	@return NotificationsSettingsGetAllResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetNotificationsSettingsExecute(r ApiGetNotificationsSettingsRequest) (*NotificationsSettingsGetAllResponse, *http.Response, error) {
 	var (
@@ -1207,9 +1195,7 @@ func (a *SettingsAPIService) GetWorkloadsSettingByKey(ctx context.Context, key W
 }
 
 // Execute executes the request
-//
 //	@return map[string]interface{}
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetWorkloadsSettingByKeyExecute(r ApiGetWorkloadsSettingByKeyRequest) (map[string]interface{}, *http.Response, error) {
 	var (
@@ -1387,9 +1373,7 @@ func (a *SettingsAPIService) GetWorkloadsSettings(ctx context.Context) ApiGetWor
 }
 
 // Execute executes the request
-//
 //	@return WorkloadsSettingsGetAllResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetWorkloadsSettingsExecute(r ApiGetWorkloadsSettingsRequest) (*WorkloadsSettingsGetAllResponse, *http.Response, error) {
 	var (

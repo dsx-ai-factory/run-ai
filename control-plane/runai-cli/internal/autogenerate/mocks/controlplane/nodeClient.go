@@ -8,9 +8,9 @@ import (
 	context "context"
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	api "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/api"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockNodeClient is a mock of Client interface.

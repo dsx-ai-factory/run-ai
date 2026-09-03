@@ -69,9 +69,7 @@ func (a *VersionAPIService) GetVersion(ctx context.Context) ApiGetVersionRequest
 }
 
 // Execute executes the request
-//
 //	@return VersionResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *VersionAPIService) GetVersionExecute(r ApiGetVersionRequest) (*VersionResponse, *http.Response, error) {
 	var (

@@ -100,9 +100,7 @@ func (a *SettingsAPIService) GetSecuritySettingByKey(ctx context.Context, key Se
 }
 
 // Execute executes the request
-//
 //	@return map[string]interface{}
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetSecuritySettingByKeyExecute(r ApiGetSecuritySettingByKeyRequest) (map[string]interface{}, *http.Response, error) {
 	var (
@@ -280,9 +278,7 @@ func (a *SettingsAPIService) GetSecuritySettings(ctx context.Context) ApiGetSecu
 }
 
 // Execute executes the request
-//
 //	@return SettingsGetResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SettingsAPIService) GetSecuritySettingsExecute(r ApiGetSecuritySettingsRequest) (*SettingsGetResponse, *http.Response, error) {
 	var (

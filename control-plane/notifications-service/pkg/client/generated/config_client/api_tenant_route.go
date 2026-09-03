@@ -56,7 +56,6 @@ func (a *TenantRouteAPIService) CreateRoute(ctx context.Context, tenantId string
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *TenantRouteAPIService) CreateRouteExecute(r ApiCreateRouteRequest) (string, *http.Response, error) {
 	var (
@@ -200,7 +199,6 @@ func (a *TenantRouteAPIService) DeleteRoute(ctx context.Context, tenantId string
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *TenantRouteAPIService) DeleteRouteExecute(r ApiDeleteRouteRequest) (string, *http.Response, error) {
 	var (
@@ -323,7 +321,6 @@ func (a *TenantRouteAPIService) GetAllTenantsWithRoutes(ctx context.Context) Api
 }
 
 // Execute executes the request
-//
 //	@return []string
 func (a *TenantRouteAPIService) GetAllTenantsWithRoutesExecute(r ApiGetAllTenantsWithRoutesRequest) ([]string, *http.Response, error) {
 	var (
@@ -439,7 +436,6 @@ func (a *TenantRouteAPIService) GetRoute(ctx context.Context, tenantId string, r
 }
 
 // Execute executes the request
-//
 //	@return RouteData
 func (a *TenantRouteAPIService) GetRouteExecute(r ApiGetRouteRequest) (*RouteData, *http.Response, error) {
 	var (
@@ -565,7 +561,6 @@ func (a *TenantRouteAPIService) GetRoutes(ctx context.Context, tenantId string) 
 }
 
 // Execute executes the request
-//
 //	@return []RouteData
 func (a *TenantRouteAPIService) GetRoutesExecute(r ApiGetRoutesRequest) ([]RouteData, *http.Response, error) {
 	var (
@@ -678,7 +673,6 @@ func (a *TenantRouteAPIService) UpdateRoute(ctx context.Context, tenantId string
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *TenantRouteAPIService) UpdateRouteExecute(r ApiUpdateRouteRequest) (string, *http.Response, error) {
 	var (

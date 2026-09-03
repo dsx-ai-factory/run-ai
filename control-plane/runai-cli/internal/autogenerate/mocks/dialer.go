@@ -10,8 +10,8 @@ import (
 	url "net/url"
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	network "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/network"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockDialer is a mock of Dialer interface.

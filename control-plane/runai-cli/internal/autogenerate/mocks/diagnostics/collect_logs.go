@@ -8,8 +8,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	diagnostics "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/diagnostics"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockClusterValidatorer is a mock of ClusterValidatorer interface.

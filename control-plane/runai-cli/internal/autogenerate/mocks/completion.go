@@ -7,9 +7,9 @@ package mocks
 import (
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	api "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api"
 	completion "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/completion"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockFactory is a mock of Factory interface.

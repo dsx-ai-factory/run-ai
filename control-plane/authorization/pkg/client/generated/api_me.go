@@ -89,9 +89,7 @@ func (a *MeAPIService) CountMeAccessRules(ctx context.Context) ApiCountMeAccessR
 }
 
 // Execute executes the request
-//
 //	@return CountAccessRules200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *MeAPIService) CountMeAccessRulesExecute(r ApiCountMeAccessRulesRequest) (*CountAccessRules200Response, *http.Response, error) {
 	var (
@@ -248,9 +246,7 @@ func (a *MeAPIService) GetMeAccessRules(ctx context.Context) ApiGetMeAccessRules
 }
 
 // Execute executes the request
-//
 //	@return MeAccessRulesResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *MeAPIService) GetMeAccessRulesExecute(r ApiGetMeAccessRulesRequest) (*MeAccessRulesResponse, *http.Response, error) {
 	var (

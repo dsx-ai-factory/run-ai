@@ -9,9 +9,9 @@ import (
 	io "io"
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	logs "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/logs"
 	workload "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/workload"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockPodLogsService is a mock of PodLogsService interface.

@@ -141,9 +141,7 @@ func (a *InternalAPIService) GetAllLogos(ctx context.Context) ApiGetAllLogosRequ
 }
 
 // Execute executes the request
-//
 //	@return TenantLogosResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InternalAPIService) GetAllLogosExecute(r ApiGetAllLogosRequest) (*TenantLogosResponse, *http.Response, error) {
 	var (
@@ -293,9 +291,7 @@ func (a *InternalAPIService) GetTenantByNameOrAlias(ctx context.Context) ApiGetT
 }
 
 // Execute executes the request
-//
 //	@return Tenant
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InternalAPIService) GetTenantByNameOrAliasExecute(r ApiGetTenantByNameOrAliasRequest) (*Tenant, *http.Response, error) {
 	var (
@@ -444,9 +440,7 @@ func (a *InternalAPIService) GetTenantDomain(ctx context.Context, tenantId int32
 }
 
 // Execute executes the request
-//
 //	@return string
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InternalAPIService) GetTenantDomainExecute(r ApiGetTenantDomainRequest) (string, *http.Response, error) {
 	var (
@@ -595,9 +589,7 @@ func (a *InternalAPIService) GetTenantExtendedMetricStore(ctx context.Context, t
 }
 
 // Execute executes the request
-//
 //	@return ExtendedMetricStore
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InternalAPIService) GetTenantExtendedMetricStoreExecute(r ApiGetTenantExtendedMetricStoreRequest) (*ExtendedMetricStore, *http.Response, error) {
 	var (
@@ -746,9 +738,7 @@ func (a *InternalAPIService) GetTenantMetricStore(ctx context.Context, tenantId 
 }
 
 // Execute executes the request
-//
 //	@return MetricStore
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InternalAPIService) GetTenantMetricStoreExecute(r ApiGetTenantMetricStoreRequest) (*MetricStore, *http.Response, error) {
 	var (
@@ -894,9 +884,7 @@ func (a *InternalAPIService) ManagementGetTenantsInternal(ctx context.Context) A
 }
 
 // Execute executes the request
-//
 //	@return []Tenant
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InternalAPIService) ManagementGetTenantsInternalExecute(r ApiManagementGetTenantsInternalRequest) ([]Tenant, *http.Response, error) {
 	var (

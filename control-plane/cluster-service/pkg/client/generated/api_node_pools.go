@@ -546,9 +546,7 @@ func (a *NodePoolsAPIService) CountNodepools(ctx context.Context) ApiCountNodepo
 }
 
 // Execute executes the request
-//
 //	@return CountNodes200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodePoolsAPIService) CountNodepoolsExecute(r ApiCountNodepoolsRequest) (*CountNodes200Response, *http.Response, error) {
 	var (
@@ -702,9 +700,7 @@ func (a *NodePoolsAPIService) CreateNodepool(ctx context.Context) ApiCreateNodep
 }
 
 // Execute executes the request
-//
 //	@return Nodepool
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodePoolsAPIService) CreateNodepoolExecute(r ApiCreateNodepoolRequest) (*Nodepool, *http.Response, error) {
 	var (
@@ -856,9 +852,7 @@ func (a *NodePoolsAPIService) DeleteNodepool(ctx context.Context, nodepoolId str
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodePoolsAPIService) DeleteNodepoolExecute(r ApiDeleteNodepoolRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -1028,9 +1022,7 @@ func (a *NodePoolsAPIService) GetNodepool(ctx context.Context, nodepoolId string
 }
 
 // Execute executes the request
-//
 //	@return Nodepool
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodePoolsAPIService) GetNodepoolExecute(r ApiGetNodepoolRequest) (*Nodepool, *http.Response, error) {
 	var (
@@ -1198,9 +1190,7 @@ func (a *NodePoolsAPIService) GetNodepoolAncestors(ctx context.Context, nodepool
 }
 
 // Execute executes the request
-//
 //	@return Ancestors
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodePoolsAPIService) GetNodepoolAncestorsExecute(r ApiGetNodepoolAncestorsRequest) (*Ancestors, *http.Response, error) {
 	var (
@@ -1368,9 +1358,7 @@ func (a *NodePoolsAPIService) GetNodepoolMetrics(ctx context.Context, clusterUui
 }
 
 // Execute executes the request
-//
 //	@return MetricsResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodePoolsAPIService) GetNodepoolMetricsExecute(r ApiGetNodepoolMetricsRequest) (*MetricsResponse, *http.Response, error) {
 	var (
@@ -1562,9 +1550,7 @@ func (a *NodePoolsAPIService) GetNodepoolMinimal(ctx context.Context, nodepoolId
 }
 
 // Execute executes the request
-//
 //	@return NodepoolMinimal
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodePoolsAPIService) GetNodepoolMinimalExecute(r ApiGetNodepoolMinimalRequest) (*NodepoolMinimal, *http.Response, error) {
 	var (
@@ -1733,9 +1719,7 @@ func (a *NodePoolsAPIService) GetNodepools(ctx context.Context) ApiGetNodepoolsR
 }
 
 // Execute executes the request
-//
 //	@return GetNodepools200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodePoolsAPIService) GetNodepoolsExecute(r ApiGetNodepoolsRequest) (*GetNodepools200Response, *http.Response, error) {
 	var (
@@ -1907,9 +1891,7 @@ func (a *NodePoolsAPIService) GetNodepoolsInternal(ctx context.Context) ApiGetNo
 }
 
 // Execute executes the request
-//
 //	@return GetNodepoolsInternal200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodePoolsAPIService) GetNodepoolsInternalExecute(r ApiGetNodepoolsInternalRequest) (*GetNodepoolsInternal200Response, *http.Response, error) {
 	var (
@@ -2092,9 +2074,7 @@ func (a *NodePoolsAPIService) GetNodepoolsMinimal(ctx context.Context) ApiGetNod
 }
 
 // Execute executes the request
-//
 //	@return GetNodepoolsMinimal200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodePoolsAPIService) GetNodepoolsMinimalExecute(r ApiGetNodepoolsMinimalRequest) (*GetNodepoolsMinimal200Response, *http.Response, error) {
 	var (
@@ -2244,9 +2224,7 @@ func (a *NodePoolsAPIService) GetNodepoolsMinimalInternal(ctx context.Context) A
 }
 
 // Execute executes the request
-//
 //	@return GetNodepoolsMinimalInternal200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodePoolsAPIService) GetNodepoolsMinimalInternalExecute(r ApiGetNodepoolsMinimalInternalRequest) (*GetNodepoolsMinimalInternal200Response, *http.Response, error) {
 	var (
@@ -2685,9 +2663,7 @@ func (a *NodePoolsAPIService) LegacyGetNodepools(ctx context.Context, clusterId 
 }
 
 // Execute executes the request
-//
 //	@return []LegacyNodePool
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodePoolsAPIService) LegacyGetNodepoolsExecute(r ApiLegacyGetNodepoolsRequest) ([]LegacyNodePool, *http.Response, error) {
@@ -3426,9 +3402,7 @@ func (a *NodePoolsAPIService) PatchNodepool(ctx context.Context, nodepoolId stri
 }
 
 // Execute executes the request
-//
 //	@return Nodepool
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodePoolsAPIService) PatchNodepoolExecute(r ApiPatchNodepoolRequest) (*Nodepool, *http.Response, error) {
 	var (
@@ -3762,9 +3736,7 @@ func (a *NodePoolsAPIService) UpdateNodepool(ctx context.Context, nodepoolId str
 }
 
 // Execute executes the request
-//
 //	@return Nodepool
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *NodePoolsAPIService) UpdateNodepoolExecute(r ApiUpdateNodepoolRequest) (*Nodepool, *http.Response, error) {
 	var (

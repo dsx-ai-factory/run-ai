@@ -121,9 +121,7 @@ func (a *ClientsAPIService) CreateInternalClient(ctx context.Context) ApiCreateI
 }
 
 // Execute executes the request
-//
 //	@return CreateInternalClient201Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClientsAPIService) CreateInternalClientExecute(r ApiCreateInternalClientRequest) (*CreateInternalClient201Response, *http.Response, error) {
 	var (
@@ -467,9 +465,7 @@ func (a *ClientsAPIService) GetAllClients(ctx context.Context) ApiGetAllClientsR
 }
 
 // Execute executes the request
-//
 //	@return []Client
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClientsAPIService) GetAllClientsExecute(r ApiGetAllClientsRequest) ([]Client, *http.Response, error) {
 	var (
@@ -639,9 +635,7 @@ func (a *ClientsAPIService) GetClientSecret(ctx context.Context, id string) ApiG
 }
 
 // Execute executes the request
-//
 //	@return GetClientSecret200Response
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClientsAPIService) GetClientSecretExecute(r ApiGetClientSecretRequest) (*GetClientSecret200Response, *http.Response, error) {
 	var (

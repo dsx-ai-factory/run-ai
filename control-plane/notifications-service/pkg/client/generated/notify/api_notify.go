@@ -52,7 +52,6 @@ func (a *NotifyAPIService) Notify(ctx context.Context) ApiNotifyRequest {
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *NotifyAPIService) NotifyExecute(r ApiNotifyRequest) (string, *http.Response, error) {
 	var (
@@ -184,7 +183,6 @@ func (a *NotifyAPIService) NotifyBatch(ctx context.Context) ApiNotifyBatchReques
 }
 
 // Execute executes the request
-//
 //	@return NotifyBatch200Response
 func (a *NotifyAPIService) NotifyBatchExecute(r ApiNotifyBatchRequest) (*NotifyBatch200Response, *http.Response, error) {
 	var (

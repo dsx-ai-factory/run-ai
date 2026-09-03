@@ -118,9 +118,7 @@ func (a *TokensAPIService) AppToken(ctx context.Context) ApiAppTokenRequest {
 }
 
 // Execute executes the request
-//
 //	@return AppTokenResponse
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TokensAPIService) AppTokenExecute(r ApiAppTokenRequest) (*AppTokenResponse, *http.Response, error) {
@@ -265,9 +263,7 @@ func (a *TokensAPIService) GrantToken(ctx context.Context) ApiGrantTokenRequest 
 }
 
 // Execute executes the request
-//
 //	@return TokenResponse
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TokensAPIService) GrantTokenExecute(r ApiGrantTokenRequest) (*TokenResponse, *http.Response, error) {
@@ -473,9 +469,7 @@ func (a *TokensAPIService) GrantTokenV2(ctx context.Context) ApiGrantTokenV2Requ
 }
 
 // Execute executes the request
-//
 //	@return OAuth2TokenResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TokensAPIService) GrantTokenV2Execute(r ApiGrantTokenV2Request) (*OAuth2TokenResponse, *http.Response, error) {
 	var (

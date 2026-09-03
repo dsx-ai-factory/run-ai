@@ -165,9 +165,7 @@ func (a *IdpsAPIService) CreateIdp(ctx context.Context) ApiCreateIdpRequest {
 }
 
 // Execute executes the request
-//
 //	@return IdpPostResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *IdpsAPIService) CreateIdpExecute(r ApiCreateIdpRequest) (*IdpPostResponse, *http.Response, error) {
 	var (
@@ -681,9 +679,7 @@ func (a *IdpsAPIService) GetIdpMappers(ctx context.Context, idp string) ApiGetId
 }
 
 // Execute executes the request
-//
 //	@return Mappers
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *IdpsAPIService) GetIdpMappersExecute(r ApiGetIdpMappersRequest) (*Mappers, *http.Response, error) {
 	var (
@@ -853,9 +849,7 @@ func (a *IdpsAPIService) GetIdpResources(ctx context.Context, idp string) ApiGet
 }
 
 // Execute executes the request
-//
 //	@return IdpResources
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *IdpsAPIService) GetIdpResourcesExecute(r ApiGetIdpResourcesRequest) (*IdpResources, *http.Response, error) {
 	var (
@@ -1022,9 +1016,7 @@ func (a *IdpsAPIService) GetIdps(ctx context.Context) ApiGetIdpsRequest {
 }
 
 // Execute executes the request
-//
 //	@return []Idp
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *IdpsAPIService) GetIdpsExecute(r ApiGetIdpsRequest) ([]Idp, *http.Response, error) {
 	var (
