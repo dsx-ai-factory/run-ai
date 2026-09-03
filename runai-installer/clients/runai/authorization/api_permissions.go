@@ -125,7 +125,6 @@ func (a *PermissionsAPIService) EvaluatePermission(ctx context.Context) Permissi
 }
 
 // Execute executes the request
-//
 //	@return PermittedScopes
 func (a *PermissionsAPIService) EvaluatePermissionExecute(r PermissionsAPIEvaluatePermissionRequest) (*PermittedScopes, *http.Response, error) {
 	var (
@@ -265,7 +264,6 @@ func (a *PermissionsAPIService) GetPermissionSet(ctx context.Context, permission
 }
 
 // Execute executes the request
-//
 //	@return PermissionSet
 func (a *PermissionsAPIService) GetPermissionSetExecute(r PermissionsAPIGetPermissionSetRequest) (*PermissionSet, *http.Response, error) {
 	var (
@@ -420,7 +418,6 @@ func (a *PermissionsAPIService) GetPermissionSets(ctx context.Context) Permissio
 }
 
 // Execute executes the request
-//
 //	@return GetPermissionSets200Response
 func (a *PermissionsAPIService) GetPermissionSetsExecute(r PermissionsAPIGetPermissionSetsRequest) (*GetPermissionSets200Response, *http.Response, error) {
 	var (
@@ -574,7 +571,6 @@ func (a *PermissionsAPIService) GetPermissions(ctx context.Context) PermissionsA
 }
 
 // Execute executes the request
-//
 //	@return []Permission
 func (a *PermissionsAPIService) GetPermissionsExecute(r PermissionsAPIGetPermissionsRequest) ([]Permission, *http.Response, error) {
 	var (
@@ -713,7 +709,6 @@ func (a *PermissionsAPIService) GetPermittedScopes(ctx context.Context) Permissi
 }
 
 // Execute executes the request
-//
 //	@return PermittedScopesActions
 func (a *PermissionsAPIService) GetPermittedScopesExecute(r PermissionsAPIGetPermittedScopesRequest) (*PermittedScopesActions, *http.Response, error) {
 	var (

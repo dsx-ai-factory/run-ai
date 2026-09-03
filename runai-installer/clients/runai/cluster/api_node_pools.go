@@ -414,7 +414,6 @@ func (a *NodePoolsAPIService) CountNodepools(ctx context.Context) NodePoolsAPICo
 }
 
 // Execute executes the request
-//
 //	@return CountNodes200Response
 func (a *NodePoolsAPIService) CountNodepoolsExecute(r NodePoolsAPICountNodepoolsRequest) (*CountNodes200Response, *http.Response, error) {
 	var (
@@ -567,7 +566,6 @@ func (a *NodePoolsAPIService) CreateNodepool(ctx context.Context) NodePoolsAPICr
 }
 
 // Execute executes the request
-//
 //	@return Nodepool
 func (a *NodePoolsAPIService) CreateNodepoolExecute(r NodePoolsAPICreateNodepoolRequest) (*Nodepool, *http.Response, error) {
 	var (
@@ -718,7 +716,6 @@ func (a *NodePoolsAPIService) DeleteNodepool(ctx context.Context, nodepoolId str
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
 func (a *NodePoolsAPIService) DeleteNodepoolExecute(r NodePoolsAPIDeleteNodepoolRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -887,7 +884,6 @@ func (a *NodePoolsAPIService) GetNodepool(ctx context.Context, nodepoolId string
 }
 
 // Execute executes the request
-//
 //	@return Nodepool
 func (a *NodePoolsAPIService) GetNodepoolExecute(r NodePoolsAPIGetNodepoolRequest) (*Nodepool, *http.Response, error) {
 	var (
@@ -1054,7 +1050,6 @@ func (a *NodePoolsAPIService) GetNodepoolAncestors(ctx context.Context, nodepool
 }
 
 // Execute executes the request
-//
 //	@return Ancestors
 func (a *NodePoolsAPIService) GetNodepoolAncestorsExecute(r NodePoolsAPIGetNodepoolAncestorsRequest) (*Ancestors, *http.Response, error) {
 	var (
@@ -1221,7 +1216,6 @@ func (a *NodePoolsAPIService) GetNodepoolMetrics(ctx context.Context, clusterUui
 }
 
 // Execute executes the request
-//
 //	@return MetricsResponse
 func (a *NodePoolsAPIService) GetNodepoolMetricsExecute(r NodePoolsAPIGetNodepoolMetricsRequest) (*MetricsResponse, *http.Response, error) {
 	var (
@@ -1412,7 +1406,6 @@ func (a *NodePoolsAPIService) GetNodepoolMinimal(ctx context.Context, nodepoolId
 }
 
 // Execute executes the request
-//
 //	@return NodepoolMinimal
 func (a *NodePoolsAPIService) GetNodepoolMinimalExecute(r NodePoolsAPIGetNodepoolMinimalRequest) (*NodepoolMinimal, *http.Response, error) {
 	var (
@@ -1580,7 +1573,6 @@ func (a *NodePoolsAPIService) GetNodepools(ctx context.Context) NodePoolsAPIGetN
 }
 
 // Execute executes the request
-//
 //	@return GetNodepools200Response
 func (a *NodePoolsAPIService) GetNodepoolsExecute(r NodePoolsAPIGetNodepoolsRequest) (*GetNodepools200Response, *http.Response, error) {
 	var (
@@ -1751,7 +1743,6 @@ func (a *NodePoolsAPIService) GetNodepoolsInternal(ctx context.Context) NodePool
 }
 
 // Execute executes the request
-//
 //	@return GetNodepoolsInternal200Response
 func (a *NodePoolsAPIService) GetNodepoolsInternalExecute(r NodePoolsAPIGetNodepoolsInternalRequest) (*GetNodepoolsInternal200Response, *http.Response, error) {
 	var (
@@ -1940,7 +1931,6 @@ func (a *NodePoolsAPIService) GetNodepoolsMinimal(ctx context.Context) NodePools
 }
 
 // Execute executes the request
-//
 //	@return GetNodepoolsMinimal200Response
 func (a *NodePoolsAPIService) GetNodepoolsMinimalExecute(r NodePoolsAPIGetNodepoolsMinimalRequest) (*GetNodepoolsMinimal200Response, *http.Response, error) {
 	var (
@@ -2092,7 +2082,6 @@ func (a *NodePoolsAPIService) PatchNodepool(ctx context.Context, nodepoolId stri
 }
 
 // Execute executes the request
-//
 //	@return Nodepool
 func (a *NodePoolsAPIService) PatchNodepoolExecute(r NodePoolsAPIPatchNodepoolRequest) (*Nodepool, *http.Response, error) {
 	var (
@@ -2423,7 +2412,6 @@ func (a *NodePoolsAPIService) UpdateNodepool(ctx context.Context, nodepoolId str
 }
 
 // Execute executes the request
-//
 //	@return Nodepool
 func (a *NodePoolsAPIService) UpdateNodepoolExecute(r NodePoolsAPIUpdateNodepoolRequest) (*Nodepool, *http.Response, error) {
 	var (

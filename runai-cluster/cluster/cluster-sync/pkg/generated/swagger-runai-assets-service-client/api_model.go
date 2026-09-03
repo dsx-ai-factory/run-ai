@@ -134,7 +134,6 @@ func (a *ModelApiService) CreateModelAsset(ctx context.Context) ApiCreateModelAs
 }
 
 // Execute executes the request
-//
 //	@return ModelAsset
 func (a *ModelApiService) CreateModelAssetExecute(r ApiCreateModelAssetRequest) (*ModelAsset, *http.Response, error) {
 	var (
@@ -288,7 +287,6 @@ func (a *ModelApiService) DeleteModelAssetById(ctx context.Context, modelId stri
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
 func (a *ModelApiService) DeleteModelAssetByIdExecute(r ApiDeleteModelAssetByIdRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -455,7 +453,6 @@ func (a *ModelApiService) GetModelAssetById(ctx context.Context, modelId string)
 }
 
 // Execute executes the request
-//
 //	@return ModelAsset
 func (a *ModelApiService) GetModelAssetByIdExecute(r ApiGetModelAssetByIdRequest) (*ModelAsset, *http.Response, error) {
 	var (
@@ -670,7 +667,6 @@ func (a *ModelApiService) ListModelAssets(ctx context.Context) ApiListModelAsset
 }
 
 // Execute executes the request
-//
 //	@return ModelListResponse
 func (a *ModelApiService) ListModelAssetsExecute(r ApiListModelAssetsRequest) (*ModelListResponse, *http.Response, error) {
 	var (
@@ -835,7 +831,6 @@ func (a *ModelApiService) UpdateModelAssetById(ctx context.Context, modelId stri
 }
 
 // Execute executes the request
-//
 //	@return ModelAsset
 func (a *ModelApiService) UpdateModelAssetByIdExecute(r ApiUpdateModelAssetByIdRequest) (*ModelAsset, *http.Response, error) {
 	var (

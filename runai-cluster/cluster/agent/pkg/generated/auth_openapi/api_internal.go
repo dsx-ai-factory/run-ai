@@ -346,7 +346,6 @@ func (a *InternalApiService) EvaluatePermission(ctx context.Context) ApiEvaluate
 }
 
 // Execute executes the request
-//
 //	@return PermittedScopes
 func (a *InternalApiService) EvaluatePermissionExecute(r ApiEvaluatePermissionRequest) (*PermittedScopes, *http.Response, error) {
 	var (
@@ -506,7 +505,6 @@ func (a *InternalApiService) GetScopeAccessRules(ctx context.Context) ApiGetScop
 }
 
 // Execute executes the request
-//
 //	@return GetAccessRules200Response
 func (a *InternalApiService) GetScopeAccessRulesExecute(r ApiGetScopeAccessRulesRequest) (*GetAccessRules200Response, *http.Response, error) {
 	var (
@@ -649,7 +647,6 @@ func (a *InternalApiService) GetSubjectAccessRules(ctx context.Context) ApiGetSu
 }
 
 // Execute executes the request
-//
 //	@return []AccessRule
 func (a *InternalApiService) GetSubjectAccessRulesExecute(r ApiGetSubjectAccessRulesRequest) ([]AccessRule, *http.Response, error) {
 	var (
@@ -780,7 +777,6 @@ func (a *InternalApiService) SetAdminUser(ctx context.Context) ApiSetAdminUserRe
 }
 
 // Execute executes the request
-//
 //	@return AccessRule
 func (a *InternalApiService) SetAdminUserExecute(r ApiSetAdminUserRequest) (*AccessRule, *http.Response, error) {
 	var (
@@ -909,7 +905,6 @@ func (a *InternalApiService) SetClusterApp(ctx context.Context) ApiSetClusterApp
 }
 
 // Execute executes the request
-//
 //	@return AccessRule
 func (a *InternalApiService) SetClusterAppExecute(r ApiSetClusterAppRequest) (*AccessRule, *http.Response, error) {
 	var (
@@ -1045,7 +1040,6 @@ func (a *InternalApiService) SetInstallerApp(ctx context.Context) ApiSetInstalle
 }
 
 // Execute executes the request
-//
 //	@return AccessRule
 func (a *InternalApiService) SetInstallerAppExecute(r ApiSetInstallerAppRequest) (*AccessRule, *http.Response, error) {
 	var (

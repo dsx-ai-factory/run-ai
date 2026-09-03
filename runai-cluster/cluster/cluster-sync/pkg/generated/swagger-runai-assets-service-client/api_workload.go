@@ -277,7 +277,6 @@ func (a *WorkloadApiService) CountWorkloads(ctx context.Context) ApiCountWorkloa
 }
 
 // Execute executes the request
-//
 //	@return AssetCountResponse
 func (a *WorkloadApiService) CountWorkloadsExecute(r ApiCountWorkloadsRequest) (*AssetCountResponse, *http.Response, error) {
 	var (

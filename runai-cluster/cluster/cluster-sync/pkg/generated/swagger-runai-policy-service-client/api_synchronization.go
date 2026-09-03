@@ -214,9 +214,7 @@ func (a *SynchronizationAPIService) SyncDistributedPolicies(ctx context.Context)
 }
 
 // Execute executes the request
-//
 //	@return PolicySyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SynchronizationAPIService) SyncDistributedPoliciesExecute(r ApiSyncDistributedPoliciesRequest) (*PolicySyncResponse, *http.Response, error) {
 	var (
@@ -390,9 +388,7 @@ func (a *SynchronizationAPIService) SyncInferencePolicies(ctx context.Context) A
 }
 
 // Execute executes the request
-//
 //	@return PolicySyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SynchronizationAPIService) SyncInferencePoliciesExecute(r ApiSyncInferencePoliciesRequest) (*PolicySyncResponse, *http.Response, error) {
 	var (
@@ -572,9 +568,7 @@ func (a *SynchronizationAPIService) SyncRequestDistributedPolicies(ctx context.C
 }
 
 // Execute executes the request
-//
 //	@return PolicySyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SynchronizationAPIService) SyncRequestDistributedPoliciesExecute(r ApiSyncRequestDistributedPoliciesRequest) (*PolicySyncResponse, *http.Response, error) {
 	var (
@@ -756,9 +750,7 @@ func (a *SynchronizationAPIService) SyncRequestInferencePolicies(ctx context.Con
 }
 
 // Execute executes the request
-//
 //	@return PolicySyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SynchronizationAPIService) SyncRequestInferencePoliciesExecute(r ApiSyncRequestInferencePoliciesRequest) (*PolicySyncResponse, *http.Response, error) {
 	var (
@@ -940,9 +932,7 @@ func (a *SynchronizationAPIService) SyncRequestTrainingPolicies(ctx context.Cont
 }
 
 // Execute executes the request
-//
 //	@return PolicySyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SynchronizationAPIService) SyncRequestTrainingPoliciesExecute(r ApiSyncRequestTrainingPoliciesRequest) (*PolicySyncResponse, *http.Response, error) {
 	var (
@@ -1124,9 +1114,7 @@ func (a *SynchronizationAPIService) SyncRequestWorkspacePolicies(ctx context.Con
 }
 
 // Execute executes the request
-//
 //	@return PolicySyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SynchronizationAPIService) SyncRequestWorkspacePoliciesExecute(r ApiSyncRequestWorkspacePoliciesRequest) (*PolicySyncResponse, *http.Response, error) {
 	var (
@@ -1302,9 +1290,7 @@ func (a *SynchronizationAPIService) SyncTrainingPolicies(ctx context.Context) Ap
 }
 
 // Execute executes the request
-//
 //	@return PolicySyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SynchronizationAPIService) SyncTrainingPoliciesExecute(r ApiSyncTrainingPoliciesRequest) (*PolicySyncResponse, *http.Response, error) {
 	var (
@@ -1478,9 +1464,7 @@ func (a *SynchronizationAPIService) SyncWorkspacePolicies(ctx context.Context) A
 }
 
 // Execute executes the request
-//
 //	@return PolicySyncResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SynchronizationAPIService) SyncWorkspacePoliciesExecute(r ApiSyncWorkspacePoliciesRequest) (*PolicySyncResponse, *http.Response, error) {
 	var (

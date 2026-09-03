@@ -604,7 +604,6 @@ func (a *PodGroupsApiService) UpdatePodGroups(ctx context.Context, uuid string) 
 }
 
 // Execute executes the request
-//
 //	@return IdsResponse
 func (a *PodGroupsApiService) UpdatePodGroupsExecute(r ApiUpdatePodGroupsRequest) (*IdsResponse, *http.Response, error) {
 	var (

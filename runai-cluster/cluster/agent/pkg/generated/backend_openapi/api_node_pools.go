@@ -306,7 +306,6 @@ func (a *NodePoolsApiService) GetNodePools(ctx context.Context, clusterId string
 }
 
 // Execute executes the request
-//
 //	@return []NodePool
 func (a *NodePoolsApiService) GetNodePoolsExecute(r ApiGetNodePoolsRequest) ([]NodePool, *http.Response, error) {
 	var (

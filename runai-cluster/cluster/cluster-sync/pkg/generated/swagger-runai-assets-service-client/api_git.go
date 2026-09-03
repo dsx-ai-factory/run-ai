@@ -134,7 +134,6 @@ func (a *GitApiService) CreateGitAsset(ctx context.Context) ApiCreateGitAssetReq
 }
 
 // Execute executes the request
-//
 //	@return GitAsset
 func (a *GitApiService) CreateGitAssetExecute(r ApiCreateGitAssetRequest) (*GitAsset, *http.Response, error) {
 	var (
@@ -288,7 +287,6 @@ func (a *GitApiService) DeleteGitAssetById(ctx context.Context, assetId string) 
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
 func (a *GitApiService) DeleteGitAssetByIdExecute(r ApiDeleteGitAssetByIdRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -455,7 +453,6 @@ func (a *GitApiService) GetGitAssetById(ctx context.Context, assetId string) Api
 }
 
 // Execute executes the request
-//
 //	@return GitAsset
 func (a *GitApiService) GetGitAssetByIdExecute(r ApiGetGitAssetByIdRequest) (*GitAsset, *http.Response, error) {
 	var (
@@ -663,7 +660,6 @@ func (a *GitApiService) ListGitAssets(ctx context.Context) ApiListGitAssetsReque
 }
 
 // Execute executes the request
-//
 //	@return GitListResponse
 func (a *GitApiService) ListGitAssetsExecute(r ApiListGitAssetsRequest) (*GitListResponse, *http.Response, error) {
 	var (
@@ -825,7 +821,6 @@ func (a *GitApiService) UpdateGitAssetById(ctx context.Context, assetId string) 
 }
 
 // Execute executes the request
-//
 //	@return GitAsset
 func (a *GitApiService) UpdateGitAssetByIdExecute(r ApiUpdateGitAssetByIdRequest) (*GitAsset, *http.Response, error) {
 	var (

@@ -134,7 +134,6 @@ func (a *ConfigMapApiService) CreateConfigMapAsset(ctx context.Context) ApiCreat
 }
 
 // Execute executes the request
-//
 //	@return ConfigMapAsset
 func (a *ConfigMapApiService) CreateConfigMapAssetExecute(r ApiCreateConfigMapAssetRequest) (*ConfigMapAsset, *http.Response, error) {
 	var (
@@ -288,7 +287,6 @@ func (a *ConfigMapApiService) DeleteConfigMapAssetById(ctx context.Context, asse
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
 func (a *ConfigMapApiService) DeleteConfigMapAssetByIdExecute(r ApiDeleteConfigMapAssetByIdRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -455,7 +453,6 @@ func (a *ConfigMapApiService) GetConfigMapAssetById(ctx context.Context, assetId
 }
 
 // Execute executes the request
-//
 //	@return ConfigMapAsset
 func (a *ConfigMapApiService) GetConfigMapAssetByIdExecute(r ApiGetConfigMapAssetByIdRequest) (*ConfigMapAsset, *http.Response, error) {
 	var (
@@ -663,7 +660,6 @@ func (a *ConfigMapApiService) ListConfigMapAssets(ctx context.Context) ApiListCo
 }
 
 // Execute executes the request
-//
 //	@return ConfigMapListResponse
 func (a *ConfigMapApiService) ListConfigMapAssetsExecute(r ApiListConfigMapAssetsRequest) (*ConfigMapListResponse, *http.Response, error) {
 	var (
@@ -825,7 +821,6 @@ func (a *ConfigMapApiService) UpdateConfigMapAssetById(ctx context.Context, asse
 }
 
 // Execute executes the request
-//
 //	@return ConfigMapAsset
 func (a *ConfigMapApiService) UpdateConfigMapAssetByIdExecute(r ApiUpdateConfigMapAssetByIdRequest) (*ConfigMapAsset, *http.Response, error) {
 	var (

@@ -299,7 +299,6 @@ func (a *ServicesApiService) GetService(ctx context.Context, uuid string, servic
 }
 
 // Execute executes the request
-//
 //	@return Service
 func (a *ServicesApiService) GetServiceExecute(r ApiGetServiceRequest) (*Service, *http.Response, error) {
 	var (
@@ -431,7 +430,6 @@ func (a *ServicesApiService) GetServices(ctx context.Context, uuid string) ApiGe
 }
 
 // Execute executes the request
-//
 //	@return []Service
 func (a *ServicesApiService) GetServicesExecute(r ApiGetServicesRequest) ([]Service, *http.Response, error) {
 	var (
@@ -560,7 +558,6 @@ func (a *ServicesApiService) GetServicesCount(ctx context.Context, uuid string) 
 }
 
 // Execute executes the request
-//
 //	@return float32
 func (a *ServicesApiService) GetServicesCountExecute(r ApiGetServicesCountRequest) (float32, *http.Response, error) {
 	var (
@@ -961,7 +958,6 @@ func (a *ServicesApiService) UpdateServices(ctx context.Context, uuid string) Ap
 }
 
 // Execute executes the request
-//
 //	@return IdsResponse
 func (a *ServicesApiService) UpdateServicesExecute(r ApiUpdateServicesRequest) (*IdsResponse, *http.Response, error) {
 	var (

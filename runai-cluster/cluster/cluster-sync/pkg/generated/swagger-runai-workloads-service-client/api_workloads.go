@@ -176,7 +176,6 @@ func (a *WorkloadsApiService) CountWorkloads(ctx context.Context) ApiCountWorklo
 }
 
 // Execute executes the request
-//
 //	@return CountWorkloads200Response
 func (a *WorkloadsApiService) CountWorkloadsExecute(r ApiCountWorkloadsRequest) (*CountWorkloads200Response, *http.Response, error) {
 	var (
@@ -459,7 +458,6 @@ func (a *WorkloadsApiService) GetWorkload(ctx context.Context, workloadId string
 }
 
 // Execute executes the request
-//
 //	@return Workload
 func (a *WorkloadsApiService) GetWorkloadExecute(r ApiGetWorkloadRequest) (*Workload, *http.Response, error) {
 	var (
@@ -610,7 +608,6 @@ func (a *WorkloadsApiService) GetWorkloadAncestors(ctx context.Context, workload
 }
 
 // Execute executes the request
-//
 //	@return Ancestors
 func (a *WorkloadsApiService) GetWorkloadAncestorsExecute(r ApiGetWorkloadAncestorsRequest) (*Ancestors, *http.Response, error) {
 	var (
@@ -780,7 +777,6 @@ func (a *WorkloadsApiService) GetWorkloads(ctx context.Context) ApiGetWorkloadsR
 }
 
 // Execute executes the request
-//
 //	@return GetWorkloads200Response
 func (a *WorkloadsApiService) GetWorkloadsExecute(r ApiGetWorkloadsRequest) (*GetWorkloads200Response, *http.Response, error) {
 	var (
@@ -950,7 +946,6 @@ func (a *WorkloadsApiService) InternalCreateWorkload(ctx context.Context) ApiInt
 }
 
 // Execute executes the request
-//
 //	@return Workload
 func (a *WorkloadsApiService) InternalCreateWorkloadExecute(r ApiInternalCreateWorkloadRequest) (*Workload, *http.Response, error) {
 	var (

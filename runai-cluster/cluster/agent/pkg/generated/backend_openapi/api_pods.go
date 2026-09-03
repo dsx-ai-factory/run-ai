@@ -54,7 +54,6 @@ func (a *PodsApiService) CreatePods(ctx context.Context, uuid string) ApiCreateP
 }
 
 // Execute executes the request
-//
 //	@return []Pod
 func (a *PodsApiService) CreatePodsExecute(r ApiCreatePodsRequest) ([]Pod, *http.Response, error) {
 	var (
@@ -191,7 +190,6 @@ func (a *PodsApiService) DeletePod(ctx context.Context, uuid string, podId strin
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *PodsApiService) DeletePodExecute(r ApiDeletePodRequest) (string, *http.Response, error) {
 	var (
@@ -333,7 +331,6 @@ func (a *PodsApiService) GetPods(ctx context.Context, uuid string) ApiGetPodsReq
 }
 
 // Execute executes the request
-//
 //	@return []Pod
 func (a *PodsApiService) GetPodsExecute(r ApiGetPodsRequest) ([]Pod, *http.Response, error) {
 	var (
@@ -755,7 +752,6 @@ func (a *PodsApiService) UpdatePods(ctx context.Context, uuid string) ApiUpdateP
 }
 
 // Execute executes the request
-//
 //	@return IdsResponse
 func (a *PodsApiService) UpdatePodsExecute(r ApiUpdatePodsRequest) (*IdsResponse, *http.Response, error) {
 	var (

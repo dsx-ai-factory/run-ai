@@ -73,9 +73,7 @@ func (a *InternalAPIService) GetSettingByKeyForAllTenants(ctx context.Context, k
 }
 
 // Execute executes the request
-//
 //	@return map[string]interface{}
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *InternalAPIService) GetSettingByKeyForAllTenantsExecute(r ApiGetSettingByKeyForAllTenantsRequest) (map[string]interface{}, *http.Response, error) {
 	var (

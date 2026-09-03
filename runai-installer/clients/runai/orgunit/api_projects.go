@@ -346,7 +346,6 @@ func (a *ProjectsAPIService) BatchPatchProjectNodePoolResources(ctx context.Cont
 }
 
 // Execute executes the request
-//
 //	@return BatchPatchProjectResourcesResponse
 func (a *ProjectsAPIService) BatchPatchProjectNodePoolResourcesExecute(r ProjectsAPIBatchPatchProjectNodePoolResourcesRequest) (*BatchPatchProjectResourcesResponse, *http.Response, error) {
 	var (
@@ -519,7 +518,6 @@ func (a *ProjectsAPIService) CountProjectNodePoolResources(ctx context.Context) 
 }
 
 // Execute executes the request
-//
 //	@return CountResponse
 func (a *ProjectsAPIService) CountProjectNodePoolResourcesExecute(r ProjectsAPICountProjectNodePoolResourcesRequest) (*CountResponse, *http.Response, error) {
 	var (
@@ -682,7 +680,6 @@ func (a *ProjectsAPIService) CountProjects(ctx context.Context) ProjectsAPICount
 }
 
 // Execute executes the request
-//
 //	@return CountResponse
 func (a *ProjectsAPIService) CountProjectsExecute(r ProjectsAPICountProjectsRequest) (*CountResponse, *http.Response, error) {
 	var (
@@ -838,7 +835,6 @@ func (a *ProjectsAPIService) CreateProject(ctx context.Context) ProjectsAPICreat
 }
 
 // Execute executes the request
-//
 //	@return Project
 func (a *ProjectsAPIService) CreateProjectExecute(r ProjectsAPICreateProjectRequest) (*Project, *http.Response, error) {
 	var (
@@ -1177,7 +1173,6 @@ func (a *ProjectsAPIService) GetProject(ctx context.Context, projectId string) P
 }
 
 // Execute executes the request
-//
 //	@return Project
 func (a *ProjectsAPIService) GetProjectExecute(r ProjectsAPIGetProjectRequest) (*Project, *http.Response, error) {
 	var (
@@ -1322,7 +1317,6 @@ func (a *ProjectsAPIService) GetProjectAncestors(ctx context.Context, projectId 
 }
 
 // Execute executes the request
-//
 //	@return Ancestors
 func (a *ProjectsAPIService) GetProjectAncestorsExecute(r ProjectsAPIGetProjectAncestorsRequest) (*Ancestors, *http.Response, error) {
 	var (
@@ -1493,7 +1487,6 @@ func (a *ProjectsAPIService) GetProjectMetrics(ctx context.Context, projectId st
 }
 
 // Execute executes the request
-//
 //	@return MetricsResponse
 func (a *ProjectsAPIService) GetProjectMetricsExecute(r ProjectsAPIGetProjectMetricsRequest) (*MetricsResponse, *http.Response, error) {
 	var (
@@ -1722,7 +1715,6 @@ func (a *ProjectsAPIService) GetProjectNodePoolResources(ctx context.Context) Pr
 }
 
 // Execute executes the request
-//
 //	@return GetProjectNodePoolResources200Response
 func (a *ProjectsAPIService) GetProjectNodePoolResourcesExecute(r ProjectsAPIGetProjectNodePoolResourcesRequest) (*GetProjectNodePoolResources200Response, *http.Response, error) {
 	var (
@@ -1931,7 +1923,6 @@ func (a *ProjectsAPIService) GetProjects(ctx context.Context) ProjectsAPIGetProj
 }
 
 // Execute executes the request
-//
 //	@return GetProjects200Response
 func (a *ProjectsAPIService) GetProjectsExecute(r ProjectsAPIGetProjectsRequest) (*GetProjects200Response, *http.Response, error) {
 	var (
@@ -2140,7 +2131,6 @@ func (a *ProjectsAPIService) GetProjectsMetadata(ctx context.Context) ProjectsAP
 }
 
 // Execute executes the request
-//
 //	@return GetProjectsMetadata200Response
 func (a *ProjectsAPIService) GetProjectsMetadataExecute(r ProjectsAPIGetProjectsMetadataRequest) (*GetProjectsMetadata200Response, *http.Response, error) {
 	var (
@@ -2334,7 +2324,6 @@ func (a *ProjectsAPIService) GetProjectsRanking(ctx context.Context) ProjectsAPI
 }
 
 // Execute executes the request
-//
 //	@return GetProjectsRanking200Response
 func (a *ProjectsAPIService) GetProjectsRankingExecute(r ProjectsAPIGetProjectsRankingRequest) (*GetProjectsRanking200Response, *http.Response, error) {
 	var (
@@ -2527,7 +2516,6 @@ func (a *ProjectsAPIService) GetProjectsTelemetry(ctx context.Context) ProjectsA
 }
 
 // Execute executes the request
-//
 //	@return TelemetryResponse
 func (a *ProjectsAPIService) GetProjectsTelemetryExecute(r ProjectsAPIGetProjectsTelemetryRequest) (*TelemetryResponse, *http.Response, error) {
 	var (
@@ -2717,7 +2705,6 @@ func (a *ProjectsAPIService) GetSyncProjects(ctx context.Context) ProjectsAPIGet
 }
 
 // Execute executes the request
-//
 //	@return GetSyncProjects200Response
 func (a *ProjectsAPIService) GetSyncProjectsExecute(r ProjectsAPIGetSyncProjectsRequest) (*GetSyncProjects200Response, *http.Response, error) {
 	var (
@@ -2889,7 +2876,6 @@ func (a *ProjectsAPIService) PatchProjectResources(ctx context.Context, projectI
 }
 
 // Execute executes the request
-//
 //	@return []Resources
 func (a *ProjectsAPIService) PatchProjectResourcesExecute(r ProjectsAPIPatchProjectResourcesRequest) ([]Resources, *http.Response, error) {
 	var (
@@ -3207,7 +3193,6 @@ func (a *ProjectsAPIService) SumProjectNodePoolResources(ctx context.Context) Pr
 }
 
 // Execute executes the request
-//
 //	@return SumResponse
 func (a *ProjectsAPIService) SumProjectNodePoolResourcesExecute(r ProjectsAPISumProjectNodePoolResourcesRequest) (*SumResponse, *http.Response, error) {
 	var (
@@ -3504,7 +3489,6 @@ func (a *ProjectsAPIService) UpdateProject(ctx context.Context, projectId string
 }
 
 // Execute executes the request
-//
 //	@return Project
 func (a *ProjectsAPIService) UpdateProjectExecute(r ProjectsAPIUpdateProjectRequest) (*Project, *http.Response, error) {
 	var (
@@ -3674,7 +3658,6 @@ func (a *ProjectsAPIService) UpdateProjectResources(ctx context.Context, project
 }
 
 // Execute executes the request
-//
 //	@return []Resources
 func (a *ProjectsAPIService) UpdateProjectResourcesExecute(r ProjectsAPIUpdateProjectResourcesRequest) ([]Resources, *http.Response, error) {
 	var (

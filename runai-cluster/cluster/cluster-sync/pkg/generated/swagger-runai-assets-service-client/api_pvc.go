@@ -134,7 +134,6 @@ func (a *PVCApiService) CreatePvcAsset(ctx context.Context) ApiCreatePvcAssetReq
 }
 
 // Execute executes the request
-//
 //	@return PVCAsset
 func (a *PVCApiService) CreatePvcAssetExecute(r ApiCreatePvcAssetRequest) (*PVCAsset, *http.Response, error) {
 	var (
@@ -288,7 +287,6 @@ func (a *PVCApiService) DeletePvcAssetById(ctx context.Context, assetId string) 
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
 func (a *PVCApiService) DeletePvcAssetByIdExecute(r ApiDeletePvcAssetByIdRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -462,7 +460,6 @@ func (a *PVCApiService) GetPvcAssetById(ctx context.Context, assetId string) Api
 }
 
 // Execute executes the request
-//
 //	@return PVCAsset
 func (a *PVCApiService) GetPvcAssetByIdExecute(r ApiGetPvcAssetByIdRequest) (*PVCAsset, *http.Response, error) {
 	var (
@@ -680,7 +677,6 @@ func (a *PVCApiService) ListPvcAssets(ctx context.Context) ApiListPvcAssetsReque
 }
 
 // Execute executes the request
-//
 //	@return PVCListResponse
 func (a *PVCApiService) ListPvcAssetsExecute(r ApiListPvcAssetsRequest) (*PVCListResponse, *http.Response, error) {
 	var (
@@ -845,7 +841,6 @@ func (a *PVCApiService) UpdatePvcAssetById(ctx context.Context, assetId string) 
 }
 
 // Execute executes the request
-//
 //	@return PVCAsset
 func (a *PVCApiService) UpdatePvcAssetByIdExecute(r ApiUpdatePvcAssetByIdRequest) (*PVCAsset, *http.Response, error) {
 	var (

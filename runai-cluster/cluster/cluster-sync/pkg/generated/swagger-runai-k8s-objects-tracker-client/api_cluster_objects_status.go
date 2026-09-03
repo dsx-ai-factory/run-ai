@@ -92,9 +92,7 @@ func (a *ClusterObjectsStatusAPIService) ListClusterObjectsStatus(ctx context.Co
 }
 
 // Execute executes the request
-//
 //	@return ClusterObjectsStatus
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ClusterObjectsStatusAPIService) ListClusterObjectsStatusExecute(r ApiListClusterObjectsStatusRequest) (*ClusterObjectsStatus, *http.Response, error) {
 	var (

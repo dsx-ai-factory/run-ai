@@ -134,7 +134,6 @@ func (a *S3ApiService) CreateS3Asset(ctx context.Context) ApiCreateS3AssetReques
 }
 
 // Execute executes the request
-//
 //	@return S3Asset
 func (a *S3ApiService) CreateS3AssetExecute(r ApiCreateS3AssetRequest) (*S3Asset, *http.Response, error) {
 	var (
@@ -288,7 +287,6 @@ func (a *S3ApiService) DeleteS3AssetById(ctx context.Context, assetId string) Ap
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
 func (a *S3ApiService) DeleteS3AssetByIdExecute(r ApiDeleteS3AssetByIdRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -455,7 +453,6 @@ func (a *S3ApiService) GetS3AssetById(ctx context.Context, assetId string) ApiGe
 }
 
 // Execute executes the request
-//
 //	@return S3Asset
 func (a *S3ApiService) GetS3AssetByIdExecute(r ApiGetS3AssetByIdRequest) (*S3Asset, *http.Response, error) {
 	var (
@@ -663,7 +660,6 @@ func (a *S3ApiService) ListS3Assets(ctx context.Context) ApiListS3AssetsRequest 
 }
 
 // Execute executes the request
-//
 //	@return S3ListResponse
 func (a *S3ApiService) ListS3AssetsExecute(r ApiListS3AssetsRequest) (*S3ListResponse, *http.Response, error) {
 	var (
@@ -825,7 +821,6 @@ func (a *S3ApiService) UpdateS3AssetById(ctx context.Context, assetId string) Ap
 }
 
 // Execute executes the request
-//
 //	@return S3Asset
 func (a *S3ApiService) UpdateS3AssetByIdExecute(r ApiUpdateS3AssetByIdRequest) (*S3Asset, *http.Response, error) {
 	var (

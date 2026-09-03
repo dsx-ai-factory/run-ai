@@ -74,7 +74,6 @@ func (a *ModelInferenceApiService) CreateModelInference(ctx context.Context) Api
 }
 
 // Execute executes the request
-//
 //	@return ModelInference
 func (a *ModelInferenceApiService) CreateModelInferenceExecute(r ApiCreateModelInferenceRequest) (*ModelInference, *http.Response, error) {
 	var (

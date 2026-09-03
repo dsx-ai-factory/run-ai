@@ -333,8 +333,8 @@ spec:
                             - message: both name and namespace are required when gatewayAPI
                                 override is specified
                               rule: '!has(self.name) && !has(self.__namespace__) ||
-                                (has(self.name) && self.name != "" && has(self.__namespace__)
-                                && self.__namespace__ != "")'
+                                (has(self.name) && self.name != " && has(self.__namespace__)
+                                && self.__namespace__ != ")'
                           mgmtPrometheusIngress:
                             description: Ingress defines configuration of the researcher-service
                               ingress
@@ -1917,8 +1917,8 @@ spec:
                     - message: both name and namespace are required when gatewayAPI
                         override is specified
                       rule: '!has(self.name) && !has(self.__namespace__) || (has(self.name)
-                        && self.name != "" && has(self.__namespace__) && self.__namespace__
-                        != "")'
+                        && self.name != " && has(self.__namespace__) && self.__namespace__
+                        != ")'
                   idleTimeout:
                     description: IdleTimeout specifies the time in seconds for router
                       idle timeout
@@ -3637,8 +3637,8 @@ spec:
                     - message: name and namespace are required when gatewayAPI is
                         enabled
                       rule: '!has(self.enabled) || !self.enabled || (has(self.name)
-                        && self.name != "" && has(self.__namespace__) && self.__namespace__
-                        != "")'
+                        && self.name != " && has(self.__namespace__) && self.__namespace__
+                        != ")'
                   httpProxy:
                     description: |-
                       Describes the proxy settings RunAI components will use when accessing
@@ -21864,8 +21864,8 @@ spec:
                     - message: both name and namespace are required when gatewayAPI
                         override is specified
                       rule: '!has(self.name) && !has(self.__namespace__) || (has(self.name)
-                        && self.name != "" && has(self.__namespace__) && self.__namespace__
-                        != "")'
+                        && self.name != " && has(self.__namespace__) && self.__namespace__
+                        != ")'
                   image:
                     description: Image is the configuration of the researcher-service
                       image

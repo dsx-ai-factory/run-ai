@@ -107,7 +107,6 @@ func (a *EventsApiService) GetWorkloadEvents(ctx context.Context, workloadId str
 }
 
 // Execute executes the request
-//
 //	@return GetWorkloadEvents200Response
 func (a *EventsApiService) GetWorkloadEventsExecute(r ApiGetWorkloadEventsRequest) (*GetWorkloadEvents200Response, *http.Response, error) {
 	var (
@@ -278,7 +277,6 @@ func (a *EventsApiService) GetWorkloadHistory(ctx context.Context, workloadId st
 }
 
 // Execute executes the request
-//
 //	@return GetWorkloadHistory200Response
 func (a *EventsApiService) GetWorkloadHistoryExecute(r ApiGetWorkloadHistoryRequest) (*GetWorkloadHistory200Response, *http.Response, error) {
 	var (

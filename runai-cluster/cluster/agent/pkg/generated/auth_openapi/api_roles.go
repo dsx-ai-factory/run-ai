@@ -53,7 +53,6 @@ func (a *RolesApiService) CreateRole(ctx context.Context) ApiCreateRoleRequest {
 }
 
 // Execute executes the request
-//
 //	@return Role
 func (a *RolesApiService) CreateRoleExecute(r ApiCreateRoleRequest) (*Role, *http.Response, error) {
 	var (
@@ -350,7 +349,6 @@ func (a *RolesApiService) GetRole(ctx context.Context, roleId int32) ApiGetRoleR
 }
 
 // Execute executes the request
-//
 //	@return Role
 func (a *RolesApiService) GetRoleExecute(r ApiGetRoleRequest) (*Role, *http.Response, error) {
 	var (
@@ -501,7 +499,6 @@ func (a *RolesApiService) GetRoles(ctx context.Context) ApiGetRolesRequest {
 }
 
 // Execute executes the request
-//
 //	@return []Role
 func (a *RolesApiService) GetRolesExecute(r ApiGetRolesRequest) ([]Role, *http.Response, error) {
 	var (

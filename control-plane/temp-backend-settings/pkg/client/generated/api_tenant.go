@@ -122,9 +122,7 @@ func (a *TenantAPIService) GetTenantSettings(ctx context.Context) ApiGetTenantSe
 }
 
 // Execute executes the request
-//
 //	@return []Setting
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TenantAPIService) GetTenantSettingsExecute(r ApiGetTenantSettingsRequest) ([]Setting, *http.Response, error) {
@@ -289,9 +287,7 @@ func (a *TenantAPIService) GetTenantSettingsByKey(ctx context.Context, settingKe
 }
 
 // Execute executes the request
-//
 //	@return bool
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TenantAPIService) GetTenantSettingsByKeyExecute(r ApiGetTenantSettingsByKeyRequest) (bool, *http.Response, error) {
@@ -454,9 +450,7 @@ func (a *TenantAPIService) UpdateTenantSetting(ctx context.Context) ApiUpdateTen
 }
 
 // Execute executes the request
-//
 //	@return TenantSettingCreationResponse
-//
 // Deprecated
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *TenantAPIService) UpdateTenantSettingExecute(r ApiUpdateTenantSettingRequest) (*TenantSettingCreationResponse, *http.Response, error) {

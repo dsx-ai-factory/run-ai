@@ -248,7 +248,6 @@ func (a *DatasourcesApiService) ListDatasourceAssets(ctx context.Context) ApiLis
 }
 
 // Execute executes the request
-//
 //	@return DatasourceListResponse
 func (a *DatasourcesApiService) ListDatasourceAssetsExecute(r ApiListDatasourceAssetsRequest) (*DatasourceListResponse, *http.Response, error) {
 	var (

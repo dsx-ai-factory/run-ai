@@ -53,7 +53,6 @@ func (a *ClustersApiService) CreateCluster(ctx context.Context) ApiCreateCluster
 }
 
 // Execute executes the request
-//
 //	@return Cluster
 func (a *ClustersApiService) CreateClusterExecute(r ApiCreateClusterRequest) (*Cluster, *http.Response, error) {
 	var (
@@ -176,7 +175,6 @@ func (a *ClustersApiService) UpdateCluster(ctx context.Context, uuid string) Api
 }
 
 // Execute executes the request
-//
 //	@return Cluster
 func (a *ClustersApiService) UpdateClusterExecute(r ApiUpdateClusterRequest) (*Cluster, *http.Response, error) {
 	var (
@@ -560,7 +558,6 @@ func (a *ClustersApiService) V1K8sClustersClusterUuidConfigControlPlaneGet(ctx c
 }
 
 // Execute executes the request
-//
 //	@return ClusterControlPlaneConfig
 func (a *ClustersApiService) V1K8sClustersClusterUuidConfigControlPlaneGetExecute(r ApiV1K8sClustersClusterUuidConfigControlPlaneGetRequest) (*ClusterControlPlaneConfig, *http.Response, error) {
 	var (
@@ -683,7 +680,6 @@ func (a *ClustersApiService) V1K8sClustersClusterUuidConfigCustomGet(ctx context
 }
 
 // Execute executes the request
-//
 //	@return ClusterCustomConfig
 func (a *ClustersApiService) V1K8sClustersClusterUuidConfigCustomGetExecute(r ApiV1K8sClustersClusterUuidConfigCustomGetRequest) (*ClusterCustomConfig, *http.Response, error) {
 	var (
@@ -812,7 +808,6 @@ func (a *ClustersApiService) V1K8sClustersClusterUuidConfigCustomPost(ctx contex
 }
 
 // Execute executes the request
-//
 //	@return ClusterCustomConfig
 func (a *ClustersApiService) V1K8sClustersClusterUuidConfigCustomPostExecute(r ApiV1K8sClustersClusterUuidConfigCustomPostRequest) (*ClusterCustomConfig, *http.Response, error) {
 	var (
@@ -954,7 +949,6 @@ func (a *ClustersApiService) V1K8sClustersClusterUuidConfigGet(ctx context.Conte
 }
 
 // Execute executes the request
-//
 //	@return map[string]interface{}
 func (a *ClustersApiService) V1K8sClustersClusterUuidConfigGetExecute(r ApiV1K8sClustersClusterUuidConfigGetRequest) (map[string]interface{}, *http.Response, error) {
 	var (
@@ -1104,7 +1098,6 @@ func (a *ClustersApiService) V1K8sClustersClusterUuidInstallfileGet(ctx context.
 }
 
 // Execute executes the request
-//
 //	@return string
 func (a *ClustersApiService) V1K8sClustersClusterUuidInstallfileGetExecute(r ApiV1K8sClustersClusterUuidInstallfileGetRequest) (string, *http.Response, error) {
 	var (
@@ -1233,7 +1226,6 @@ func (a *ClustersApiService) V1K8sClustersGet(ctx context.Context) ApiV1K8sClust
 }
 
 // Execute executes the request
-//
 //	@return []Cluster
 func (a *ClustersApiService) V1K8sClustersGetExecute(r ApiV1K8sClustersGetRequest) ([]Cluster, *http.Response, error) {
 	var (
@@ -1345,7 +1337,6 @@ func (a *ClustersApiService) V1K8sClustersUuidDelete(ctx context.Context, uuid s
 }
 
 // Execute executes the request
-//
 //	@return V1K8sClustersUuidDelete200Response
 func (a *ClustersApiService) V1K8sClustersUuidDeleteExecute(r ApiV1K8sClustersUuidDeleteRequest) (*V1K8sClustersUuidDelete200Response, *http.Response, error) {
 	var (
@@ -1468,7 +1459,6 @@ func (a *ClustersApiService) V1K8sClustersUuidGet(ctx context.Context, uuid stri
 }
 
 // Execute executes the request
-//
 //	@return Cluster
 func (a *ClustersApiService) V1K8sClustersUuidGetExecute(r ApiV1K8sClustersUuidGetRequest) (*Cluster, *http.Response, error) {
 	var (

@@ -134,7 +134,6 @@ func (a *EnvironmentApiService) CreateEnvironmentAsset(ctx context.Context) ApiC
 }
 
 // Execute executes the request
-//
 //	@return EnvironmentAsset
 func (a *EnvironmentApiService) CreateEnvironmentAssetExecute(r ApiCreateEnvironmentAssetRequest) (*EnvironmentAsset, *http.Response, error) {
 	var (
@@ -288,7 +287,6 @@ func (a *EnvironmentApiService) DeleteEnvironmentAssetById(ctx context.Context, 
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
 func (a *EnvironmentApiService) DeleteEnvironmentAssetByIdExecute(r ApiDeleteEnvironmentAssetByIdRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -455,7 +453,6 @@ func (a *EnvironmentApiService) GetEnvironmentAssetById(ctx context.Context, ass
 }
 
 // Execute executes the request
-//
 //	@return EnvironmentAsset
 func (a *EnvironmentApiService) GetEnvironmentAssetByIdExecute(r ApiGetEnvironmentAssetByIdRequest) (*EnvironmentAsset, *http.Response, error) {
 	var (
@@ -698,7 +695,6 @@ func (a *EnvironmentApiService) ListEnvironmentAssets(ctx context.Context) ApiLi
 }
 
 // Execute executes the request
-//
 //	@return EnvironmentListResponse
 func (a *EnvironmentApiService) ListEnvironmentAssetsExecute(r ApiListEnvironmentAssetsRequest) (*EnvironmentListResponse, *http.Response, error) {
 	var (
@@ -875,7 +871,6 @@ func (a *EnvironmentApiService) UpdateEnvironmentAssetById(ctx context.Context, 
 }
 
 // Execute executes the request
-//
 //	@return EnvironmentAsset
 func (a *EnvironmentApiService) UpdateEnvironmentAssetByIdExecute(r ApiUpdateEnvironmentAssetByIdRequest) (*EnvironmentAsset, *http.Response, error) {
 	var (

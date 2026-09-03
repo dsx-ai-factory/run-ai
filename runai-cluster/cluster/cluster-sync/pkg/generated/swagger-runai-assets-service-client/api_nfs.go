@@ -134,7 +134,6 @@ func (a *NFSApiService) CreateNfsAsset(ctx context.Context) ApiCreateNfsAssetReq
 }
 
 // Execute executes the request
-//
 //	@return S3Asset
 func (a *NFSApiService) CreateNfsAssetExecute(r ApiCreateNfsAssetRequest) (*S3Asset, *http.Response, error) {
 	var (
@@ -288,7 +287,6 @@ func (a *NFSApiService) DeleteNfsAssetById(ctx context.Context, assetId string) 
 }
 
 // Execute executes the request
-//
 //	@return HttpResponse
 func (a *NFSApiService) DeleteNfsAssetByIdExecute(r ApiDeleteNfsAssetByIdRequest) (*HttpResponse, *http.Response, error) {
 	var (
@@ -455,7 +453,6 @@ func (a *NFSApiService) GetNfsAssetById(ctx context.Context, assetId string) Api
 }
 
 // Execute executes the request
-//
 //	@return NFSAsset
 func (a *NFSApiService) GetNfsAssetByIdExecute(r ApiGetNfsAssetByIdRequest) (*NFSAsset, *http.Response, error) {
 	var (
@@ -663,7 +660,6 @@ func (a *NFSApiService) ListNfsAssets(ctx context.Context) ApiListNfsAssetsReque
 }
 
 // Execute executes the request
-//
 //	@return NFSListResponse
 func (a *NFSApiService) ListNfsAssetsExecute(r ApiListNfsAssetsRequest) (*NFSListResponse, *http.Response, error) {
 	var (
@@ -825,7 +821,6 @@ func (a *NFSApiService) UpdateNfsAssetById(ctx context.Context, assetId string) 
 }
 
 // Execute executes the request
-//
 //	@return NFSAsset
 func (a *NFSApiService) UpdateNfsAssetByIdExecute(r ApiUpdateNfsAssetByIdRequest) (*NFSAsset, *http.Response, error) {
 	var (

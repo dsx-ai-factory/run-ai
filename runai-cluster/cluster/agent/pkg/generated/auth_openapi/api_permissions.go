@@ -45,7 +45,6 @@ func (a *PermissionsApiService) GetPermissions(ctx context.Context) ApiGetPermis
 }
 
 // Execute executes the request
-//
 //	@return []Permission
 func (a *PermissionsApiService) GetPermissionsExecute(r ApiGetPermissionsRequest) ([]Permission, *http.Response, error) {
 	var (
@@ -179,7 +178,6 @@ func (a *PermissionsApiService) GetPermittedScopes(ctx context.Context) ApiGetPe
 }
 
 // Execute executes the request
-//
 //	@return PermittedScopesActions
 func (a *PermissionsApiService) GetPermittedScopesExecute(r ApiGetPermittedScopesRequest) (*PermittedScopesActions, *http.Response, error) {
 	var (

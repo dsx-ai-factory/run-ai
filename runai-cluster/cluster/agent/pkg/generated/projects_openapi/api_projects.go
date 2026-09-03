@@ -165,7 +165,6 @@ func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsGet(ctx context.Conte
 }
 
 // Execute executes the request
-//
 //	@return []Project
 func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsGetExecute(r ApiV1K8sClustersClusterIdProjectsGetRequest) ([]Project, *http.Response, error) {
 	var (
@@ -278,7 +277,6 @@ func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsIdDelete(ctx context.
 }
 
 // Execute executes the request
-//
 //	@return Project
 func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsIdDeleteExecute(r ApiV1K8sClustersClusterIdProjectsIdDeleteRequest) (*Project, *http.Response, error) {
 	var (
@@ -393,7 +391,6 @@ func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsIdGet(ctx context.Con
 }
 
 // Execute executes the request
-//
 //	@return Project
 func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsIdGetExecute(r ApiV1K8sClustersClusterIdProjectsIdGetRequest) (*Project, *http.Response, error) {
 	var (
@@ -517,7 +514,6 @@ func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsIdPut(ctx context.Con
 }
 
 // Execute executes the request
-//
 //	@return Project
 func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsIdPutExecute(r ApiV1K8sClustersClusterIdProjectsIdPutRequest) (*Project, *http.Response, error) {
 	var (
@@ -643,7 +639,6 @@ func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsPost(ctx context.Cont
 }
 
 // Execute executes the request
-//
 //	@return Project
 func (a *ProjectsApiService) V1K8sClustersClusterIdProjectsPostExecute(r ApiV1K8sClustersClusterIdProjectsPostRequest) (*Project, *http.Response, error) {
 	var (

@@ -1226,9 +1226,7 @@ func (a *PolicyAPIService) GetDistributedPolicyV2(ctx context.Context) ApiGetDis
 }
 
 // Execute executes the request
-//
 //	@return DistributedPolicyV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PolicyAPIService) GetDistributedPolicyV2Execute(r ApiGetDistributedPolicyV2Request) (*DistributedPolicyV2, *http.Response, error) {
 	var (
@@ -1434,9 +1432,7 @@ func (a *PolicyAPIService) GetInferencePolicyV2(ctx context.Context) ApiGetInfer
 }
 
 // Execute executes the request
-//
 //	@return InferencePolicyV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PolicyAPIService) GetInferencePolicyV2Execute(r ApiGetInferencePolicyV2Request) (*InferencePolicyV2, *http.Response, error) {
 	var (
@@ -1642,9 +1638,7 @@ func (a *PolicyAPIService) GetTrainingPolicyV2(ctx context.Context) ApiGetTraini
 }
 
 // Execute executes the request
-//
 //	@return TrainingPolicyV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PolicyAPIService) GetTrainingPolicyV2Execute(r ApiGetTrainingPolicyV2Request) (*TrainingPolicyV2, *http.Response, error) {
 	var (
@@ -1850,9 +1844,7 @@ func (a *PolicyAPIService) GetWorkspacePolicyV2(ctx context.Context) ApiGetWorks
 }
 
 // Execute executes the request
-//
 //	@return WorkspacePolicyV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PolicyAPIService) GetWorkspacePolicyV2Execute(r ApiGetWorkspacePolicyV2Request) (*WorkspacePolicyV2, *http.Response, error) {
 	var (
@@ -2058,9 +2050,7 @@ func (a *PolicyAPIService) ListPolicies(ctx context.Context) ApiListPoliciesRequ
 }
 
 // Execute executes the request
-//
 //	@return PolicyListResponse
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PolicyAPIService) ListPoliciesExecute(r ApiListPoliciesRequest) (*PolicyListResponse, *http.Response, error) {
 	var (
@@ -2221,9 +2211,7 @@ func (a *PolicyAPIService) OverwriteDistributedPolicyV2(ctx context.Context) Api
 }
 
 // Execute executes the request
-//
 //	@return DistributedPolicyV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PolicyAPIService) OverwriteDistributedPolicyV2Execute(r ApiOverwriteDistributedPolicyV2Request) (*DistributedPolicyV2, *http.Response, error) {
 	var (
@@ -2385,9 +2373,7 @@ func (a *PolicyAPIService) OverwriteInferencePolicyV2(ctx context.Context) ApiOv
 }
 
 // Execute executes the request
-//
 //	@return InferencePolicyV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PolicyAPIService) OverwriteInferencePolicyV2Execute(r ApiOverwriteInferencePolicyV2Request) (*InferencePolicyV2, *http.Response, error) {
 	var (
@@ -2549,9 +2535,7 @@ func (a *PolicyAPIService) OverwriteTrainingPolicyV2(ctx context.Context) ApiOve
 }
 
 // Execute executes the request
-//
 //	@return TrainingPolicyV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PolicyAPIService) OverwriteTrainingPolicyV2Execute(r ApiOverwriteTrainingPolicyV2Request) (*TrainingPolicyV2, *http.Response, error) {
 	var (
@@ -2713,9 +2697,7 @@ func (a *PolicyAPIService) OverwriteWorkspacePolicyV2(ctx context.Context) ApiOv
 }
 
 // Execute executes the request
-//
 //	@return WorkspacePolicyV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PolicyAPIService) OverwriteWorkspacePolicyV2Execute(r ApiOverwriteWorkspacePolicyV2Request) (*WorkspacePolicyV2, *http.Response, error) {
 	var (
@@ -2877,9 +2859,7 @@ func (a *PolicyAPIService) UpdateDistributedPolicyV2(ctx context.Context) ApiUpd
 }
 
 // Execute executes the request
-//
 //	@return DistributedPolicyV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PolicyAPIService) UpdateDistributedPolicyV2Execute(r ApiUpdateDistributedPolicyV2Request) (*DistributedPolicyV2, *http.Response, error) {
 	var (
@@ -3041,9 +3021,7 @@ func (a *PolicyAPIService) UpdateInferencePolicyV2(ctx context.Context) ApiUpdat
 }
 
 // Execute executes the request
-//
 //	@return InferencePolicyV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PolicyAPIService) UpdateInferencePolicyV2Execute(r ApiUpdateInferencePolicyV2Request) (*InferencePolicyV2, *http.Response, error) {
 	var (
@@ -3205,9 +3183,7 @@ func (a *PolicyAPIService) UpdateTrainingPolicyV2(ctx context.Context) ApiUpdate
 }
 
 // Execute executes the request
-//
 //	@return TrainingPolicyV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PolicyAPIService) UpdateTrainingPolicyV2Execute(r ApiUpdateTrainingPolicyV2Request) (*TrainingPolicyV2, *http.Response, error) {
 	var (
@@ -3369,9 +3345,7 @@ func (a *PolicyAPIService) UpdateWorkspacePolicyV2(ctx context.Context) ApiUpdat
 }
 
 // Execute executes the request
-//
 //	@return WorkspacePolicyV2
-//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *PolicyAPIService) UpdateWorkspacePolicyV2Execute(r ApiUpdateWorkspacePolicyV2Request) (*WorkspacePolicyV2, *http.Response, error) {
 	var (

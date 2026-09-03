@@ -48,7 +48,6 @@ func (a *GroupsApiService) GetClusterGroups(ctx context.Context, uuid string) Ap
 }
 
 // Execute executes the request
-//
 //	@return Groups
 func (a *GroupsApiService) GetClusterGroupsExecute(r ApiGetClusterGroupsRequest) (*Groups, *http.Response, error) {
 	var (

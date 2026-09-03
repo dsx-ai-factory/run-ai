@@ -90,7 +90,6 @@ func (a *InferenceApiService) CreateInference(ctx context.Context) ApiCreateInfe
 }
 
 // Execute executes the request
-//
 //	@return Inference
 func (a *InferenceApiService) CreateInferenceExecute(r ApiCreateInferenceRequest) (*Inference, *http.Response, error) {
 	var (
@@ -234,7 +233,6 @@ func (a *InferenceApiService) GetInferenceById(ctx context.Context, id string) A
 }
 
 // Execute executes the request
-//
 //	@return Inference
 func (a *InferenceApiService) GetInferenceByIdExecute(r ApiGetInferenceByIdRequest) (*Inference, *http.Response, error) {
 	var (

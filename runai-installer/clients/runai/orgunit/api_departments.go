@@ -332,7 +332,6 @@ func (a *DepartmentsAPIService) BatchPatchDepartmentNodePoolResources(ctx contex
 }
 
 // Execute executes the request
-//
 //	@return BatchPatchDepartmentResourcesResponse
 func (a *DepartmentsAPIService) BatchPatchDepartmentNodePoolResourcesExecute(r DepartmentsAPIBatchPatchDepartmentNodePoolResourcesRequest) (*BatchPatchDepartmentResourcesResponse, *http.Response, error) {
 	var (
@@ -505,7 +504,6 @@ func (a *DepartmentsAPIService) CountDepartmentNodePoolResources(ctx context.Con
 }
 
 // Execute executes the request
-//
 //	@return CountResponse
 func (a *DepartmentsAPIService) CountDepartmentNodePoolResourcesExecute(r DepartmentsAPICountDepartmentNodePoolResourcesRequest) (*CountResponse, *http.Response, error) {
 	var (
@@ -661,7 +659,6 @@ func (a *DepartmentsAPIService) CountDepartments(ctx context.Context) Department
 }
 
 // Execute executes the request
-//
 //	@return CountResponse
 func (a *DepartmentsAPIService) CountDepartmentsExecute(r DepartmentsAPICountDepartmentsRequest) (*CountResponse, *http.Response, error) {
 	var (
@@ -814,7 +811,6 @@ func (a *DepartmentsAPIService) CreateDepartment(ctx context.Context) Department
 }
 
 // Execute executes the request
-//
 //	@return Department
 func (a *DepartmentsAPIService) CreateDepartmentExecute(r DepartmentsAPICreateDepartmentRequest) (*Department, *http.Response, error) {
 	var (
@@ -1273,7 +1269,6 @@ func (a *DepartmentsAPIService) GetDepartment(ctx context.Context, departmentId 
 }
 
 // Execute executes the request
-//
 //	@return Department
 func (a *DepartmentsAPIService) GetDepartmentExecute(r DepartmentsAPIGetDepartmentRequest) (*Department, *http.Response, error) {
 	var (
@@ -1418,7 +1413,6 @@ func (a *DepartmentsAPIService) GetDepartmentAncestors(ctx context.Context, depa
 }
 
 // Execute executes the request
-//
 //	@return Ancestors
 func (a *DepartmentsAPIService) GetDepartmentAncestorsExecute(r DepartmentsAPIGetDepartmentAncestorsRequest) (*Ancestors, *http.Response, error) {
 	var (
@@ -1589,7 +1583,6 @@ func (a *DepartmentsAPIService) GetDepartmentMetrics(ctx context.Context, depart
 }
 
 // Execute executes the request
-//
 //	@return MetricsResponse
 func (a *DepartmentsAPIService) GetDepartmentMetricsExecute(r DepartmentsAPIGetDepartmentMetricsRequest) (*MetricsResponse, *http.Response, error) {
 	var (
@@ -1818,7 +1811,6 @@ func (a *DepartmentsAPIService) GetDepartmentNodePoolResources(ctx context.Conte
 }
 
 // Execute executes the request
-//
 //	@return GetDepartmentNodePoolResources200Response
 func (a *DepartmentsAPIService) GetDepartmentNodePoolResourcesExecute(r DepartmentsAPIGetDepartmentNodePoolResourcesRequest) (*GetDepartmentNodePoolResources200Response, *http.Response, error) {
 	var (
@@ -2027,7 +2019,6 @@ func (a *DepartmentsAPIService) GetDepartments(ctx context.Context) DepartmentsA
 }
 
 // Execute executes the request
-//
 //	@return GetDepartments200Response
 func (a *DepartmentsAPIService) GetDepartmentsExecute(r DepartmentsAPIGetDepartmentsRequest) (*GetDepartments200Response, *http.Response, error) {
 	var (
@@ -2199,7 +2190,6 @@ func (a *DepartmentsAPIService) GetDepartmentsDescendants(ctx context.Context) D
 }
 
 // Execute executes the request
-//
 //	@return Descendants
 func (a *DepartmentsAPIService) GetDepartmentsDescendantsExecute(r DepartmentsAPIGetDepartmentsDescendantsRequest) (*Descendants, *http.Response, error) {
 	var (
@@ -2362,7 +2352,6 @@ func (a *DepartmentsAPIService) GetDepartmentsRanking(ctx context.Context) Depar
 }
 
 // Execute executes the request
-//
 //	@return GetDepartmentsRanking200Response
 func (a *DepartmentsAPIService) GetDepartmentsRankingExecute(r DepartmentsAPIGetDepartmentsRankingRequest) (*GetDepartmentsRanking200Response, *http.Response, error) {
 	var (
@@ -2553,7 +2542,6 @@ func (a *DepartmentsAPIService) GetDepartmentsTelemetry(ctx context.Context) Dep
 }
 
 // Execute executes the request
-//
 //	@return TelemetryResponse
 func (a *DepartmentsAPIService) GetDepartmentsTelemetryExecute(r DepartmentsAPIGetDepartmentsTelemetryRequest) (*TelemetryResponse, *http.Response, error) {
 	var (
@@ -2737,7 +2725,6 @@ func (a *DepartmentsAPIService) GetSyncDepartments(ctx context.Context) Departme
 }
 
 // Execute executes the request
-//
 //	@return GetSyncDepartments200Response
 func (a *DepartmentsAPIService) GetSyncDepartmentsExecute(r DepartmentsAPIGetSyncDepartmentsRequest) (*GetSyncDepartments200Response, *http.Response, error) {
 	var (
@@ -2906,7 +2893,6 @@ func (a *DepartmentsAPIService) PatchDepartmentResources(ctx context.Context, de
 }
 
 // Execute executes the request
-//
 //	@return []Resources
 func (a *DepartmentsAPIService) PatchDepartmentResourcesExecute(r DepartmentsAPIPatchDepartmentResourcesRequest) ([]Resources, *http.Response, error) {
 	var (
@@ -3084,7 +3070,6 @@ func (a *DepartmentsAPIService) SumDepartmentNodePoolResources(ctx context.Conte
 }
 
 // Execute executes the request
-//
 //	@return DepartmentSumResponse
 func (a *DepartmentsAPIService) SumDepartmentNodePoolResourcesExecute(r DepartmentsAPISumDepartmentNodePoolResourcesRequest) (*DepartmentSumResponse, *http.Response, error) {
 	var (
@@ -3240,7 +3225,6 @@ func (a *DepartmentsAPIService) UpdateDepartment(ctx context.Context, department
 }
 
 // Execute executes the request
-//
 //	@return Department
 func (a *DepartmentsAPIService) UpdateDepartmentExecute(r DepartmentsAPIUpdateDepartmentRequest) (*Department, *http.Response, error) {
 	var (
@@ -3410,7 +3394,6 @@ func (a *DepartmentsAPIService) UpdateDepartmentResources(ctx context.Context, d
 }
 
 // Execute executes the request
-//
 //	@return []Resources
 func (a *DepartmentsAPIService) UpdateDepartmentResourcesExecute(r DepartmentsAPIUpdateDepartmentResourcesRequest) ([]Resources, *http.Response, error) {
 	var (

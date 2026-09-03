@@ -314,7 +314,6 @@ func (a *SynchronizationApiService) AccessKeySyncInfo(ctx context.Context) ApiAc
 }
 
 // Execute executes the request
-//
 //	@return SyncInfoResponse
 func (a *SynchronizationApiService) AccessKeySyncInfoExecute(r ApiAccessKeySyncInfoRequest) (*SyncInfoResponse, *http.Response, error) {
 	var (
@@ -460,7 +459,6 @@ func (a *SynchronizationApiService) AccessKeySyncInfoV2(ctx context.Context) Api
 }
 
 // Execute executes the request
-//
 //	@return SyncInfoResponseV2
 func (a *SynchronizationApiService) AccessKeySyncInfoV2Execute(r ApiAccessKeySyncInfoV2Request) (*SyncInfoResponseV2, *http.Response, error) {
 	var (
@@ -602,7 +600,6 @@ func (a *SynchronizationApiService) DockerRegistrySyncInfo(ctx context.Context) 
 }
 
 // Execute executes the request
-//
 //	@return SyncInfoResponse
 func (a *SynchronizationApiService) DockerRegistrySyncInfoExecute(r ApiDockerRegistrySyncInfoRequest) (*SyncInfoResponse, *http.Response, error) {
 	var (
@@ -748,7 +745,6 @@ func (a *SynchronizationApiService) DockerRegistrySyncInfoV2(ctx context.Context
 }
 
 // Execute executes the request
-//
 //	@return SyncInfoResponseV2
 func (a *SynchronizationApiService) DockerRegistrySyncInfoV2Execute(r ApiDockerRegistrySyncInfoV2Request) (*SyncInfoResponseV2, *http.Response, error) {
 	var (
@@ -890,7 +886,6 @@ func (a *SynchronizationApiService) ListAssetsById(ctx context.Context) ApiListA
 }
 
 // Execute executes the request
-//
 //	@return AssetListByIdsResponse
 func (a *SynchronizationApiService) ListAssetsByIdExecute(r ApiListAssetsByIdRequest) (*AssetListByIdsResponse, *http.Response, error) {
 	var (
@@ -1030,7 +1025,6 @@ func (a *SynchronizationApiService) PasswordSyncInfo(ctx context.Context) ApiPas
 }
 
 // Execute executes the request
-//
 //	@return SyncInfoResponse
 func (a *SynchronizationApiService) PasswordSyncInfoExecute(r ApiPasswordSyncInfoRequest) (*SyncInfoResponse, *http.Response, error) {
 	var (
@@ -1176,7 +1170,6 @@ func (a *SynchronizationApiService) PasswordSyncInfoV2(ctx context.Context) ApiP
 }
 
 // Execute executes the request
-//
 //	@return SyncInfoResponseV2
 func (a *SynchronizationApiService) PasswordSyncInfoV2Execute(r ApiPasswordSyncInfoV2Request) (*SyncInfoResponseV2, *http.Response, error) {
 	var (
@@ -1318,7 +1311,6 @@ func (a *SynchronizationApiService) PvcSyncInfo(ctx context.Context) ApiPvcSyncI
 }
 
 // Execute executes the request
-//
 //	@return SyncInfoResponse
 func (a *SynchronizationApiService) PvcSyncInfoExecute(r ApiPvcSyncInfoRequest) (*SyncInfoResponse, *http.Response, error) {
 	var (
@@ -1464,7 +1456,6 @@ func (a *SynchronizationApiService) PvcSyncInfoV2(ctx context.Context) ApiPvcSyn
 }
 
 // Execute executes the request
-//
 //	@return SyncInfoResponseV2
 func (a *SynchronizationApiService) PvcSyncInfoV2Execute(r ApiPvcSyncInfoV2Request) (*SyncInfoResponseV2, *http.Response, error) {
 	var (
@@ -1605,7 +1596,6 @@ func (a *SynchronizationApiService) SyncAccessKeys(ctx context.Context) ApiSyncA
 }
 
 // Execute executes the request
-//
 //	@return AccessKeysSyncResponse
 func (a *SynchronizationApiService) SyncAccessKeysExecute(r ApiSyncAccessKeysRequest) (*AccessKeysSyncResponse, *http.Response, error) {
 	var (
@@ -1742,7 +1732,6 @@ func (a *SynchronizationApiService) SyncAccessKeysV2(ctx context.Context) ApiSyn
 }
 
 // Execute executes the request
-//
 //	@return AccessKeysSyncResponse
 func (a *SynchronizationApiService) SyncAccessKeysV2Execute(r ApiSyncAccessKeysV2Request) (*AccessKeysSyncResponse, *http.Response, error) {
 	var (
@@ -1879,7 +1868,6 @@ func (a *SynchronizationApiService) SyncDockerRegistry(ctx context.Context) ApiS
 }
 
 // Execute executes the request
-//
 //	@return DockerRegistrySyncResponse
 func (a *SynchronizationApiService) SyncDockerRegistryExecute(r ApiSyncDockerRegistryRequest) (*DockerRegistrySyncResponse, *http.Response, error) {
 	var (
@@ -2016,7 +2004,6 @@ func (a *SynchronizationApiService) SyncDockerRegistryV2(ctx context.Context) Ap
 }
 
 // Execute executes the request
-//
 //	@return DockerRegistrySyncResponse
 func (a *SynchronizationApiService) SyncDockerRegistryV2Execute(r ApiSyncDockerRegistryV2Request) (*DockerRegistrySyncResponse, *http.Response, error) {
 	var (
@@ -2153,7 +2140,6 @@ func (a *SynchronizationApiService) SyncPasswords(ctx context.Context) ApiSyncPa
 }
 
 // Execute executes the request
-//
 //	@return PasswordsSyncResponse
 func (a *SynchronizationApiService) SyncPasswordsExecute(r ApiSyncPasswordsRequest) (*PasswordsSyncResponse, *http.Response, error) {
 	var (
@@ -2290,7 +2276,6 @@ func (a *SynchronizationApiService) SyncPasswordsV2(ctx context.Context) ApiSync
 }
 
 // Execute executes the request
-//
 //	@return PasswordsSyncResponse
 func (a *SynchronizationApiService) SyncPasswordsV2Execute(r ApiSyncPasswordsV2Request) (*PasswordsSyncResponse, *http.Response, error) {
 	var (
@@ -2427,7 +2412,6 @@ func (a *SynchronizationApiService) SyncPvcs(ctx context.Context) ApiSyncPvcsReq
 }
 
 // Execute executes the request
-//
 //	@return PVCsSyncResponse
 func (a *SynchronizationApiService) SyncPvcsExecute(r ApiSyncPvcsRequest) (*PVCsSyncResponse, *http.Response, error) {
 	var (
@@ -2706,7 +2690,6 @@ func (a *SynchronizationApiService) SyncPvcsV2(ctx context.Context) ApiSyncPvcsV
 }
 
 // Execute executes the request
-//
 //	@return PVCsSyncResponse
 func (a *SynchronizationApiService) SyncPvcsV2Execute(r ApiSyncPvcsV2Request) (*PVCsSyncResponse, *http.Response, error) {
 	var (

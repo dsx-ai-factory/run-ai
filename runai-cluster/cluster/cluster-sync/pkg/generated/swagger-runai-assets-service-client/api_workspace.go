@@ -168,9 +168,7 @@ func (a *WorkspaceApiService) CountAssets(ctx context.Context) ApiCountAssetsReq
 }
 
 // Execute executes the request
-//
 //	@return AssetCountResponse
-//
 // Deprecated
 func (a *WorkspaceApiService) CountAssetsExecute(r ApiCountAssetsRequest) (*AssetCountResponse, *http.Response, error) {
 	var (
@@ -334,9 +332,7 @@ func (a *WorkspaceApiService) CountWorkspaces(ctx context.Context) ApiCountWorks
 }
 
 // Execute executes the request
-//
 //	@return AssetCountResponse
-//
 // Deprecated
 func (a *WorkspaceApiService) CountWorkspacesExecute(r ApiCountWorkspacesRequest) (*AssetCountResponse, *http.Response, error) {
 	var (
@@ -477,7 +473,6 @@ func (a *WorkspaceApiService) CreateWorkspace(ctx context.Context) ApiCreateWork
 }
 
 // Execute executes the request
-//
 //	@return Workspace
 func (a *WorkspaceApiService) CreateWorkspaceExecute(r ApiCreateWorkspaceRequest) (*Workspace, *http.Response, error) {
 	var (
@@ -621,7 +616,6 @@ func (a *WorkspaceApiService) GetWorkspaceById(ctx context.Context, id string) A
 }
 
 // Execute executes the request
-//
 //	@return Workspace
 func (a *WorkspaceApiService) GetWorkspaceByIdExecute(r ApiGetWorkspaceByIdRequest) (*Workspace, *http.Response, error) {
 	var (
@@ -805,7 +799,6 @@ func (a *WorkspaceApiService) ListWorkspaces(ctx context.Context, clusterUuid st
 }
 
 // Execute executes the request
-//
 //	@return WorkspaceListResponse
 func (a *WorkspaceApiService) ListWorkspacesExecute(r ApiListWorkspacesRequest) (*WorkspaceListResponse, *http.Response, error) {
 	var (

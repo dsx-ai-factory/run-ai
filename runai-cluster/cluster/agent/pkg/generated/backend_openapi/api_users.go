@@ -48,7 +48,6 @@ func (a *UsersApiService) GetClusterUsers(ctx context.Context, uuid string) ApiG
 }
 
 // Execute executes the request
-//
 //	@return Users
 func (a *UsersApiService) GetClusterUsersExecute(r ApiGetClusterUsersRequest) (*Users, *http.Response, error) {
 	var (
