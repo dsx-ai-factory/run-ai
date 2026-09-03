@@ -784,7 +784,7 @@ func (ingress *Ingress) SetDefaultsWhereNeeded() {
 	}
 }
 
-// +kubebuilder:validation:XValidation:rule="!has(self.enabled) || !self.enabled || (has(self.name) && self.name != ” && has(self.__namespace__) && self.__namespace__ != ”)",message="name and namespace are required when gatewayAPI is enabled"
+// +kubebuilder:validation:XValidation:rule="!has(self.enabled) || !self.enabled || (has(self.name) && self.name != '' && has(self.__namespace__) && self.__namespace__ != '')",message="name and namespace are required when gatewayAPI is enabled"
 type GatewayAPI struct {
 	// Enabled specifies whether Gateway API HTTPRoute resources should be created.
 	Enabled *bool `json:"enabled,omitempty"`
