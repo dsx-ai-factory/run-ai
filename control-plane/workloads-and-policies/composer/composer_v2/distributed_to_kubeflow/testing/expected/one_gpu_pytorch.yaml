@@ -1,0 +1,122 @@
+DistributedTarget:
+  Config: {}
+  Framework: PyTorch
+  JaxJob: null
+  MasterSpec: null
+  MpiJob: null
+  ObjectMeta: null
+  PyTorchJob:
+    apiVersion: kubeflow.org/v1
+    kind: PyTorchJob
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: pytorchjob
+        createdBy: PyTorchJob
+        project: test
+        release: one_gpu
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: one_gpu
+      name: one_gpu
+      namespace: runai-test
+    spec:
+      nprocPerNode: "1"
+      pytorchReplicaSpecs:
+        Master:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: pytorchjob
+                createdBy: PyTorchJob
+                project: test
+                release: one_gpu
+                workloadKind: Distributed
+                workloadName: one_gpu
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: one_gpu
+                image: ubuntu
+                name: pytorch
+                resources:
+                  limits:
+                    nvidia.com/gpu: "1"
+                  requests:
+                    nvidia.com/gpu: "1"
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              priorityClassName: low
+              schedulerName: runai-scheduler
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: pytorchjob
+                createdBy: PyTorchJob
+                project: test
+                release: one_gpu
+                workloadKind: Distributed
+                workloadName: one_gpu
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: one_gpu
+                image: ubuntu
+                name: pytorch
+                resources:
+                  limits:
+                    nvidia.com/gpu: "1"
+                  requests:
+                    nvidia.com/gpu: "1"
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              priorityClassName: low
+              schedulerName: runai-scheduler
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: None
+    status: {}
+  RunPolicy: null
+  TFJob: null
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: PyTorchJob
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-one_gpu/, Framework: PyTorch'
+  images:
+  - ubuntu
+  name: 'one_gpu/, Framework: PyTorch'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "ce-favicon",
+      "url": "https://www.nvidia.com/favicon.ico",
+      "target": "ce/favicon.ico",
+      "sha256": "bedcb14e0470ff8abe26405a630e9604ac4fa581b385a7cfb00420c22f541b6e",
+      "bytes": 25214,
+      "contentType": "image/vnd.microsoft.icon"
+    },
+    {
+      "id": "ce-vendor-logo-on-light",
+      "url": "https://www.nvidia.com/content/dam/en-zz/Solutions/about-nvidia/nvidia-brochure/images/nvidia-logo-black.svg",
+      "target": "ce/vendor-logo-on-light.svg",
+      "sha256": "b979e9c0240b9b45098cb7ce691124b97d774da3a68006ba046f29df0ce5d6db",
+      "bytes": 2311,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "id": "ce-vendor-logo-on-dark",
+      "url": "https://www.nvidia.com/content/dam/en-zz/Solutions/about-nvidia/nvidia-brochure/images/nvidia-logo-white.svg",
+      "target": "ce/vendor-logo-on-dark.svg",
+      "sha256": "201bed0f3fc1c7f83555fe448361a8bb278a049ad3970b3a6aed7fea0502ae55",
+      "bytes": 2122,
+      "contentType": "image/svg+xml"
+    },
+    {
+      "id": "ce-vendor-mark-on-light",
+      "url": "https://www.nvidia.com/content/nvidiaGDC/eu/en_EU/about-nvidia/legal-info/logo-brand-usage/_jcr_content/root/responsivegrid/nv_container_392921705/nv_container/nv_image.coreimg.svg/1776076274943/nvidia-logo-vert.svg",
+      "target": "ce/vendor-mark-on-light.svg",
+      "sha256": "5347e5188c74204767d2d4daa17b59b5a18ccd7ad0a7281e7961a83c20c96808",
+      "bytes": 2832,
+      "contentType": "image/svg+xml"
+    }
+  ]
+}

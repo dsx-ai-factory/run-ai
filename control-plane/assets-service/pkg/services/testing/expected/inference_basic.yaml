@@ -1,0 +1,73 @@
+flatWorkloads:
+  Distributed: null
+  Inferences:
+  - actualPhase: Creating
+    clusterId: ""
+    createdAt: "0001-01-01T00:00:00Z"
+    createdBy: ""
+    desiredPhase: Running
+    name: inference_basic
+    projectId: ""
+    requestedName: inference_basic
+    spec:
+      annotations:
+      - name: run.ai/assets-info
+        value: ""
+      args: -x myscript.py
+      autoscaling:
+        maxReplicas: 5
+        minReplicas: 0
+        scaleToZeroRetentionSeconds: 30
+      command: command-from-specific-run-params
+      compute:
+        cpuCoreLimit: 2
+        cpuCoreRequest: 0.5
+        cpuMemoryLimit: 30M
+        cpuMemoryRequest: 20M
+        extendedResources:
+        - quantity: 2M
+          resource: my/cpu
+        - quantity: 3M
+          resource: my/gpu
+        gpuDevicesRequest: 1
+        gpuPortionLimit: 0.8
+        gpuPortionRequest: 0.5
+        gpuRequestType: portion
+        largeShmRequest: false
+      createHomeDir: true
+      environmentVariables:
+      - name: HOME
+        value: home-from-specific-run-params
+      exposedUrls: []
+      image: ubuntu
+      nodePools:
+      - my-node-a
+      - my-node-b
+      ports:
+      - container: 8000
+        serviceType: NodePort
+        toolName: exposed-port-auto
+        toolType: visual-studio-code
+      relatedUrls: []
+      security:
+        hostIpc: true
+        hostNetwork: true
+        runAsGid: 30
+        runAsNonRoot: true
+        runAsUid: 500
+        seccompProfileType: RuntimeDefault
+        supplementalGroups: 2,3,5,8
+        uidGidSource: custom
+      servingPort:
+        container: 8001
+        protocol: grpc
+      storage:
+        pvc:
+        - claimName: existing-claim
+          existingPvc: true
+          path: /my/existing/pvc/path
+          readOnly: true
+      workingDir: /my/home
+    workloadId: ""
+  Trainings: null
+  Workspaces: null

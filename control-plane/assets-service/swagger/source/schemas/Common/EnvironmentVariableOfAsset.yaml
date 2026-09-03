@@ -1,0 +1,31 @@
+description: Details of an environment variable which is populated into the container.
+properties:
+  name:
+    description: The name of the environment variable. (mandatory)
+    type: string
+    minLength: 1
+    example: HOME
+    nullable: true
+  value:
+    description: The value of the environment variable. (mutually exclusive with credential, configMap and podFieldRef)
+    type: string
+    example: /home/my-folder
+    nullable: true
+  credential:
+    $ref: "./EnvironmentVariableCredential.yaml"
+  configMap:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/container/EnvironmentVariableConfigMap.yaml"
+  podFieldRef:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/container/EnvironmentVariablePodFieldReference.yaml"
+  exclude:
+    description: Use 'true' in case the environment variable is defined in defaults of the policy, and you wish to exclude it from the workload.
+    type: boolean
+    example: false
+    nullable: true
+  description:
+    description: Description of the environment variable.
+    type: string
+    example: Home directory of the user.
+    nullable: true
+nullable: true
+type: object

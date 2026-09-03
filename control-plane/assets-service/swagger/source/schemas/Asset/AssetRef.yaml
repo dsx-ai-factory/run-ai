@@ -1,0 +1,9 @@
+description: Reference information about an asset.
+required:
+  - id
+  - name
+properties:
+  id:
+    $ref: "../../../../../infra/openapi/docs/schemas/assets/AssetId.yaml"
+  name:
+    $ref: "./AssetName.yaml"

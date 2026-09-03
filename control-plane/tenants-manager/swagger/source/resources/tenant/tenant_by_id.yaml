@@ -1,0 +1,112 @@
+get:
+  summary: Get tenant
+  x-service: tenants-manager
+  x-test-coverage:
+  - e2e/src/test/suites/sphinxSuite/tenantCreation.test.ts
+  operationId: get_tenant_by_id
+  x-authorize:
+    resource-type: tenant
+    action: read
+    resource-id: tenantId
+  tags:
+  - Tenant
+  parameters:
+  - $ref: "../../parameters/path/tenantId.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Tenants/Tenant.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+patch:
+  summary: Update tenant
+  description: Update tenant properties such as alias.
+  x-service: tenants-manager
+  operationId: update_tenant_by_id
+  x-test-coverage: not-applicable
+  x-authorize:
+    resource-type: tenant
+    action: update
+    resource-id: tenantId
+  tags:
+  - Tenant
+  parameters:
+  - $ref: "../../parameters/path/tenantId.yaml"
+  requestBody:
+    description: The tenant properties to update.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/Tenants/TenantUpdateRequest.yaml'
+  responses:
+    200:
+      description: Tenant updated successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Tenants/Tenant.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    409:
+      $ref: '../../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+delete:
+  summary: soft/hard delete tenant
+  x-service: tenants-manager
+  x-test-coverage:
+  - e2e/src/test/suites/sphinxSuite/delete_scripts/deleteScript.test.ts
+  operationId: delete_tenant_by_id
+  x-authorize:
+    resource-type: tenant
+    action: delete
+    resource-id: tenantId
+  tags:
+  - Tenant
+  parameters:
+  - $ref: "../../parameters/path/tenantId.yaml"
+  - $ref: "../../parameters/query/isHardDelete.yaml"
+  responses:
+    200:
+      description: tenant uid that was deleted.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - uid
+            properties:
+              uid:
+                type: string
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

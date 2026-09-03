@@ -1,0 +1,10 @@
+description: |
+  Specify the restart policy of the workload pods. Default is empty, which is determine by the framework default.
+  The `Always` value is deprecated; use `OnFailure` or `Never` instead.
+type: string
+minLength: 1
+enum:
+  - Always
+  - Never
+  - OnFailure
+nullable: true

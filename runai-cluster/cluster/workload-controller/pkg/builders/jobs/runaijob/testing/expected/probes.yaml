@@ -1,0 +1,62 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      template: probes
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      kai.scheduler/preemptibility: non-preemptible
+      priorityClassName: build
+      project: team-a
+      release: probes
+      workloadKind: InteractiveWorkload
+      workloadName: probes
+    name: probes
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 0
+    completions: 1
+    maxIdleDurationSeconds: 1200
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          user: ""
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          kai.scheduler/preemptibility: non-preemptible
+          priorityClassName: build
+          project: team-a
+          release: probes
+          run.ai/top-owner-uid: ""
+          workloadKind: InteractiveWorkload
+          workloadName: probes
+      spec:
+        containers:
+        - image: ubuntu
+          imagePullPolicy: Always
+          name: probes
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              host: my.domain.com
+              path: /ready
+              port: 8080
+              scheme: HTTPS
+            initialDelaySeconds: 1
+            periodSeconds: 2
+            successThreshold: 4
+            timeoutSeconds: 3
+          resources: {}
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+        restartPolicy: Never
+        schedulerName: runai-scheduler
+  status: {}

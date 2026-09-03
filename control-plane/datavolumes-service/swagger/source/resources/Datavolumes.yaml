@@ -1,0 +1,83 @@
+get:
+  summary: List datavolumes in permitted scopes
+  description: Get requested datavolumes.
+  operationId: get_datavolumes
+  x-service: datavolumes-service
+  x-test-coverage:
+    - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+  x-authorize:
+    resource-type: datavolumes
+    action: read
+  tags:
+    - Datavolumes
+  parameters:
+    - $ref: '../parameters/query/mandatory/DatavolumesRequestType.yaml'
+    - $ref: '../parameters/query/optional/DatavolumesUsableInProjectId.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: '../parameters/query/optional/DatavolumesSortBy.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+    - $ref: '../parameters/query/optional/DatavolumesFilter.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Search.yaml"
+    - $ref: "../parameters/query/optional/IncludeInternal.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - datavolumes
+            properties:
+              next:
+                type: integer
+                example: 1
+              datavolumes:
+                $ref: '../schemas/Datavolumes/DatavolumesNoSharedScopes.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+post:
+  summary: Create a datavolume
+  operationId: create_datavolume
+  x-service: datavolumes-service
+  x-test-coverage:
+    - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+  x-authorize:
+    resource-type: datavolumes
+    action: create
+  x-audit: true
+  tags:
+    - Datavolumes
+  requestBody:
+    description: The datavolume to create.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Datavolumes/DatavolumeCreationFields.yaml'
+  responses:
+    201:
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Datavolumes/Datavolume.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

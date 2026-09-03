@@ -1,0 +1,7 @@
+image: ubuntu
+
+probes:
+  readiness:
+    handler:
+      httpGet:
+        path: /ready

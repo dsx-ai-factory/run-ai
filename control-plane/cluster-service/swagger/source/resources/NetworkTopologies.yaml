@@ -1,0 +1,75 @@
+get:
+  summary: Get network topologies.
+  x-service: cluster-service
+  description: Retrieve a list of network topologies with details.
+  operationId: get_network_topologies
+  x-test-coverage:
+    - cluster-service/pkg/services/api_network_topologies_service_test.go
+  x-authorize:
+    resource-type: network-topologies
+    action: read
+  tags:
+    - Network Topologies
+  parameters:
+    - $ref: '../parameters/query/NetworkTopologiesFilterBy.yaml'
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              networkTopologies:
+                type: array
+                items:
+                  $ref: '../schemas/NetworkTopologies/NetworkTopology.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+post:
+  summary: Create network topologies
+  x-service: cluster-service
+  description: Creates a network topology object based on the provided specification.
+  operationId: create_network_topology
+  x-test-coverage:
+    - cluster-service/pkg/services/api_network_topologies_service_test.go
+  x-authorize:
+    resource-type: network-topologies
+    action: create
+  x-audit: true
+  tags:
+    - Network Topologies
+  requestBody:
+    description: The network topology to create.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/NetworkTopologies/NetworkTopologyCreateRequest.yaml'
+  responses:
+    201:
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/NetworkTopologies/NetworkTopology.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml' 

@@ -1,0 +1,11 @@
+required:
+  - code
+  - message
+properties:
+  code:
+    type: integer
+    format: int32
+    minimum: 100
+    maximum: 599
+  message:
+    type: string

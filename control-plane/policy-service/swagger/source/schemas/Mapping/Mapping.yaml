@@ -1,0 +1,68 @@
+type: object
+description: >-
+  A mapping: the per-workload-type binding, identified by GVK
+  (group/version/kind) rather than by a name. It defines spec selectors (JQ
+  queries that pick subtrees of the workload spec) and assigns one or more field
+  groups to each spec selector.
+required:
+  - workloadType
+  - id
+  - scope
+properties:
+  workloadType:
+    description: >-
+      The Kubernetes group, version, and kind of the workload type this mapping
+      applies to.
+    allOf:
+      - $ref: "../../../../../workloads-manager/swagger/source/schemas/WorkloadsV2/GVK.yaml"
+  description:
+    $ref: "./MappingDescriptionOptional.yaml"
+  specSelectors:
+    $ref: "./SpecSelectorsWithScope.yaml"
+
+  id:
+    $ref: "./MappingId.yaml"
+  scope:
+    $ref: "./MappingScope.yaml"
+
+  createdBy:
+    description: The identifier of the user who created the mapping.
+    type: string
+    minLength: 1
+  createdAt:
+    description: The time at which the mapping was created.
+    type: string
+    minLength: 1
+    format: date-time
+  updatedBy:
+    description: The identifier of the user who last updated the mapping.
+    type: string
+    minLength: 1
+  updatedAt:
+    description: The time at which the mapping was last updated.
+    type: string
+    minLength: 1
+    format: date-time
+
+example:
+  scope: system
+  description: Default mapping for Deployments.
+  workloadType:
+    group: apps
+    kind: Deployment
+    version: v1
+  specSelectors:
+    containerByName:
+      description: Containers with a given name.
+      query: >
+        .spec.template.spec.containers[]
+        | select(.name == $ARGS.named.containerName)
+      fieldGroups:
+        - podSpecContainer
+        - podSpecAndContainer
+  id: d0eb98d0-9c23-4294-9b12-f13672251c33
+  createdBy: someone
+  createdAt: 2025-01-03T11:22:33.000Z
+  updatedBy: someone.else
+  updatedAt: 2025-01-05T12:34:56.000Z
+

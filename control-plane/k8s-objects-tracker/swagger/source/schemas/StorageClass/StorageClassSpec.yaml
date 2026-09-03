@@ -1,0 +1,17 @@
+type: object
+required:
+  - isDefault
+properties:
+  provisioner:
+    type: string
+    description: The provisioner type (unique name)
+    example: kubernetes.io/aws-ebs
+  allowVolumeExpansion:
+    type: boolean
+    description: Indicates whether the storage class allows volume expansion
+    example: true
+  isDefault:
+    type: boolean
+    description: Indicates whether the storage class is the default one
+    example: false
+

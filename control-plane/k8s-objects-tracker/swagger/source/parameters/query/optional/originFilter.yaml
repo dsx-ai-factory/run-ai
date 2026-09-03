@@ -1,0 +1,12 @@
+name: origin
+in: query
+description: filter by the origin of the resource. 
+  by default, we have to list only customer existing resources (to preserve backward compatibility)
+  to list both existing pvc and assets related pvcs use 'all'.
+schema:
+  type: string
+  enum:
+    - all
+    - assets
+    - existing
+required: false

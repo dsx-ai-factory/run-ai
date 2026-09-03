@@ -1,0 +1,13 @@
+type: object
+required:
+    - id
+properties:
+  id:
+    $ref: './BatchId.yaml'
+  accepted:
+    $ref: './IdsList.yaml'
+  failed:
+    type: array
+    description: The IDs that failed to update.
+    items:
+      $ref: './BatchResponseFailureItem.yaml'

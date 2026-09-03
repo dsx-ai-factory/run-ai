@@ -1,0 +1,7 @@
+type: object
+description: The names of the fields to delete from the field group.
+required:
+  - fields
+properties:
+  fields:
+    $ref: "./MappingFieldsToDelete.yaml"

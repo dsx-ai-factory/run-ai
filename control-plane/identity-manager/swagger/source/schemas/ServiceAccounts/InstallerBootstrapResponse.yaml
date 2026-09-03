@@ -1,0 +1,9 @@
+type: object
+required:
+  - token
+properties:
+  token:
+    type: string
+    description: Short-lived Keycloak JWT (2h TTL) for the installer service account. Pass as Authorization Bearer to GET /clusters/{uuid}/control-plane-config.
+example:
+  token: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...

@@ -1,0 +1,6 @@
+type: array
+x-internal: true
+minItems: 0
+maxItems: 100
+items:
+  $ref: './Client.yaml'

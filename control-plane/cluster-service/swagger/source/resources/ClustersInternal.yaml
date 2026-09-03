@@ -1,0 +1,31 @@
+get:
+  summary: Get an internal list of clusters.
+  x-service: cluster-service
+  x-no-authorization: true
+  description: Retrieve a list of clusters without permitted scopes filtering.
+  x-test-coverage:
+    - cluster-service/pkg/services/api_clusters_service_test.go
+  operationId: get_internal_clusters
+  tags:
+    - Clusters
+  parameters:
+    - $ref: '../parameters/query/QueryIncludeDeleted.yaml'
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../schemas/Clusters/DisplayedCluster.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

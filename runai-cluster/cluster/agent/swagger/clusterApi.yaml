@@ -1,0 +1,3519 @@
+################################## IMPORTANT NOTE ###########################################
+# If you change anything in this file, please also generate client-sdk for the cluster-sync
+# using swagger codegen, and add it under pkg/swagger-runai-backend-client folder in the
+# cluster-sync repo.
+#############################################################################################
+openapi: 3.0.0
+info:
+  version: 1.5.1
+  description: |
+    The aggregated API  of Run:AI backend
+  title: Cluster service API
+  license:
+    name: Run:AI
+servers:
+  - url: https://app.run.ai
+  - url: https://staging.run.ai
+  - url: https://test.run.ai
+security:
+  - bearerAuth: []
+paths:
+  /v1/k8s/clusters/{uuid}/jobs/{job_id}/workload-history:
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+      - $ref: '#/components/parameters/job_id'
+    get:
+      x-internal: true
+      summary: list workload history
+      operationId: getWorkloadHistory
+      tags:
+        - workloadHistory
+      responses:
+        200:
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/workloadHistoryResponse'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Unauthorized'
+        503:
+          $ref: '#/components/responses/serviceUnavailable'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /v1/k8s/clusters/{uuid}/storage-classes:
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+    post:
+      summary: create storageClass
+      operationId: createStorageClass
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StorageClass'
+      tags:
+        - Storage Classes
+      responses:
+        200:
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorageClass"
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Unauthorized'
+        503:
+          $ref: '#/components/responses/serviceUnavailable'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      summary: get all storageClasses from a specific cluster
+      operationId: getStorageClasses
+      tags:
+        - Storage Classes
+      responses:
+        200:
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorageClasses"
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /v1/k8s/clusters/{uuid}/storage-classes/sync:
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+    post:
+      summary: sync storageClass
+      operationId: syncStorageClass
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StorageClasses'
+      tags:
+        - Storage Classes
+      responses:
+        200:
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorageClass"
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /v1/k8s/clusters/{uuid}/storage-classes/{storage_class_name}:
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+      - $ref: '#/components/parameters/storage_class_name'
+    delete:
+      summary: delete storageClass
+      operationId: deleteStorageClass
+      tags:
+        - Storage Classes
+      responses:
+        200:
+          description: Expected response to a valid request
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      summary: update storageClass
+      operationId: updateStorageClass
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StorageClass'
+      tags:
+        - Storage Classes
+      responses:
+        200:
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorageClasses"
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+  /v1/k8s/clusters/{uuid}/podGroups:
+    x-internal: true
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+    post:
+      summary: Create podGroups
+      operationId: createPodGroups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PodGroups'
+      tags:
+        - Pod Groups
+      responses:
+        '201':
+          description: Created podGroup data in DB
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+    put:
+      summary: Sync all podGroups in a project to DB
+      operationId: updatePodGroups
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PodGroupsSync'
+      tags:
+        - Pod Groups
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/k8s/clusters/{uuid}/podGroups/{podGroupId}:
+    x-internal: true
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+      - $ref: '#/components/parameters/podGroupId'
+    put:
+      summary: Update a podGroup by id
+      operationId: updatePodGroup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PodGroup'
+      tags:
+        - Pod Groups
+      responses:
+        '201':
+          description: Created podGroup data in DB
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+    delete:
+      summary: Delete a podGroup by id
+      operationId: deletePodGroup
+      tags:
+        - Pod Groups
+      responses:
+        '200':
+          description: Deleted the podGroup successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/k8s/clusters/{uuid}/podGroups/sync:
+    x-internal: true
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+    post:
+      deprecated: true
+      summary: Sync All cluster podGroup data to DB
+      operationId: syncPodGroupData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PodGroups'
+      tags:
+        - Pod Groups
+      responses:
+        '201':
+          description: Created podGroups data in DB
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/k8s/clusters/{uuid}/pods:
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+    get:
+      summary: get all pods from a specific cluster
+      operationId: getPods
+      tags:
+        - Pods
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pods'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      x-internal: true
+      summary: create pods
+      operationId: createPods
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pods'
+      tags:
+        - Pods
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pods'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      x-internal: true
+      summary: Sync all pods in a namespace to DB
+      operationId: updatePods
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PodsSync'
+      tags:
+        - Pods
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/k8s/clusters/{uuid}/pods/{podId}:
+    x-internal: true
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+      - name: podId
+        in: path
+        description: Unique identifier of the pod.
+        required: true
+        schema:
+          type: string
+    put:
+      summary: Update a pod by id
+      operationId: updatePod
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pod'
+      tags:
+        - Pods
+      responses:
+        '200':
+          description: Updated a pod in the DB
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+    delete:
+      summary: Delete a pod by id
+      operationId: deletePod
+      tags:
+        - Pods
+      responses:
+        '200':
+          $ref: '#/components/responses/OK'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/k8s/clusters/{uuid}/pods/sync:
+    x-internal: true
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+    post:
+      deprecated: true
+      summary: Sync All cluster pods data to DB
+      operationId: syncPodsData
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pods'
+      tags:
+        - Pods
+      responses:
+        '201':
+          description: Created pods data in DB
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/k8s/clusters/{uuid}/events:
+    x-internal: true
+    post:
+      tags:
+        - Events
+      summary: Sync events
+      description: |
+        Sync all events from k8s cluster to Run:AI backend
+      operationId: syncEvents
+      parameters:
+        - name: uuid
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventsSyncData'
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/k8s/clusters/{uuid}/services:
+    x-internal: true
+    get:
+      tags:
+        - Services
+      summary: Get all cluster's services.
+      operationId: getServices
+      parameters:
+        - name: uuid
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Services'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - Services
+      summary: Create a service
+      operationId: createService
+      parameters:
+        - name: uuid
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Service'
+      responses:
+        '201':
+          description: Created
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+        - Services
+      summary: Sync services
+      description: |
+        Sync all services in a namespace from k8s cluster to Run:AI backend
+      operationId: updateServices
+      parameters:
+        - name: uuid
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServicesSync'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/k8s/clusters/{uuid}/services/count:
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+    get:
+      tags:
+        - Services
+      summary: Get the number of services
+      operationId: getServicesCount
+      responses:
+        '200':
+          description: The services count
+          content:
+            application/json:
+              schema:
+                type: number
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/k8s/clusters/{uuid}/services/{serviceId}:
+    x-internal: true
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+      - $ref: '#/components/parameters/serviceId'
+    get:
+      tags:
+        - Services
+      summary: Get a service by id
+      operationId: getService
+      responses:
+        '200':
+          description: A service
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+    put:
+      tags:
+        - Services
+      summary: Update a service by id
+      operationId: updateService
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Service'
+        required: true
+      responses:
+        '201':
+          description: Created service data in DB
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+    delete:
+      tags:
+        - Services
+      summary: Delete a service by id
+      operationId: deleteService
+      responses:
+        '200':
+          description: Deleted the service sucessfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/k8s/clusters/{uuid}/services/sync:
+    x-internal: true
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+    post:
+      deprecated: true
+      tags:
+        - Services
+      summary: Sync services
+      description: |
+        Sync all services from k8s cluster to Run:AI backend
+      operationId: syncServices
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Services'
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/k8s/clusters/{uuid}/deployments:
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+    get:
+      tags:
+        - Deployments
+      summary: Get all cluster's deployments
+      operationId: getDeployments
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deployments'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      x-internal: true
+      tags:
+        - Deployments
+      summary: Create a deployment
+      operationId: createDeployment
+      parameters:
+        - $ref: '#/components/parameters/uuid'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Deployment'
+      responses:
+        '201':
+          description: Created
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      x-internal: true
+      tags:
+        - Deployments
+      summary: Sync deployments
+      description: |
+        Sync all deployments in a project from k8s cluster to Run:AI backend
+      operationId: updateDeployments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeploymentsSync'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/k8s/clusters/{uuid}/deployments/count:
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+    get:
+      tags:
+        - Deployments
+      summary: Get the number of deployments
+      operationId: getDeploymentsCount
+      responses:
+        '200':
+          description: The deployments count
+          content:
+            application/json:
+              schema:
+                type: number
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/k8s/clusters/{uuid}/deployments/deleted:
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+    get:
+      tags:
+        - Deployments
+      summary: Get all the deployments that were deleted in the cluster
+      operationId: getDeploymentsHistory
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deployments'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/k8s/clusters/{uuid}/deployments/deleted/count:
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+    get:
+      tags:
+        - Deployments
+      summary: Get the number of deleted deployments
+      operationId: getDeploymentsHistoryCount
+      responses:
+        '200':
+          description: The deleted deployments count
+          content:
+            application/json:
+              schema:
+                type: number
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/k8s/clusters/{uuid}/deployments/{deploymentId}:
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+      - $ref: '#/components/parameters/deploymentId'
+    get:
+      tags:
+        - Deployments
+      summary: Get a deployment by id
+      operationId: getDeployment
+      responses:
+        '200':
+          description: A deployment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deployment'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+    put:
+      x-internal: true
+      tags:
+        - Deployments
+      summary: Update a deployment by id
+      operationId: updateDeployment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Deployment'
+        required: true
+      responses:
+        '201':
+          description: Created deployment data in DB
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+    delete:
+      x-internal: true
+      tags:
+        - Deployments
+      summary: Delete a deployment by id
+      operationId: deleteDeployment
+      responses:
+        '200':
+          description: Deleted the deployment successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/k8s/clusters/{uuid}/deployments/sync:
+    x-internal: true
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+    post:
+      deprecated: true
+      tags:
+        - Deployments
+      summary: Sync deployments
+      description: |
+        Sync all deployments from k8s cluster to Run:AI backend
+      operationId: syncDeployments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Deployments'
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/k8s/clusters/{uuid}/deployments/{deploymentId}/pods:
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+      - $ref: '#/components/parameters/deploymentId'
+    get:
+      tags:
+        - Deployments
+      summary: Get all pods associated with the deployment by id
+      operationId: getPodsByDeploymentId
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pods'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/k8s/clusters/{uuid}/jobs:
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+    get:
+      summary: List all Jobs in the cluster
+      parameters:
+        - name: nodeId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Unique identifier of the node.
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Order of the results.
+        - name: sortDirection
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: number
+          description: Start the response from a given number of result. Used along with 'limit' to retrieve the results paginated.
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: number
+          description: Limit the response to a given number of results.
+        - name: includeDeleted
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+          description: True to include deleted jobs in the result.
+      operationId: listJobs
+      tags:
+        - Jobs
+      responses:
+        '200':
+          description: An array of Jobs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DisplayedJobs'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/k8s/clusters/{uuid}/jobs/count:
+    parameters:
+      - $ref: '#/components/parameters/uuid'
+      - name: nodeId
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Unique identifier of the node.
+      - name: filter
+        in: query
+        required: false
+        schema:
+          type: string
+    get:
+      summary: Return the number all Jobs in the cluster
+      operationId: getClusterJobsCount
+      tags:
+        - Jobs
+      responses:
+        '200':
+          description: The job count
+          content:
+            application/json:
+              schema:
+                type: number
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/k8s/clusters/{uuid}/jobs/{jobId}/pods:
+    parameters:
+      - $ref: '#/components/parameters/jobId'
+      - $ref: '#/components/parameters/uuid'
+      - name: id
+        in: query
+        description: id
+        required: false
+        schema:
+          type: string
+      - name: podId
+        in: query
+        description: Unique identifier of the pod.
+        required: false
+        schema:
+          type: string
+      - name: podGroupId
+        in: query
+        description: Identifier of the pod group.
+        required: false
+        schema:
+          type: string
+      - name: nodeID
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Unique identifier of the node.
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: string
+        description: The name of the job.
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+        description: The status of the job.
+    get:
+      summary: Get all pods that are assoiciated for a specific job
+      operationId: getPodsByJobId
+      tags:
+        - Jobs
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pods'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/k8s/clusters/{uuid}/liveness:
+    x-internal: true
+    post:
+      summary: Update liveness status for a specific cluster. This endpoint is reserved for internal run:ai purposes.
+      operationId: updateClusterLiveness
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                timeTag:
+                  type: integer
+                  format: int64
+      tags:
+        - Clusters
+      parameters:
+        - $ref: '#/components/parameters/uuid'
+      responses:
+        '204':
+          description: Expected response to a valid request (No content)
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/k8s/clusters/{uuid}/cluster-info:
+    x-internal: true
+    post:
+      summary: Send cluster-info. This endpoint is reserved for internal run:ai purposes.
+      operationId: updateClusterInfo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClusterInfo'
+      tags:
+        - Clusters
+      parameters:
+        - $ref: '#/components/parameters/uuid'
+      responses:
+        '201':
+          description: Updated successfully.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/k8s/clusters/{uuid}/users:
+    x-internal: true
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: Unique identifier of the cluster.
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - Users
+      summary: Get all cluster users.
+      operationId: getClusterUsers
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/k8s/clusters/{uuid}/groups:
+    x-internal: true
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: Unique identifier of the cluster.
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - Groups
+      summary: Get all cluster groups.
+      operationId: getClusterGroups
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Groups'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/k8s/clusters:
+    post:
+      x-internal: true
+      tags:
+        - Clusters
+      summary: Create a cluster
+      description: Create a new cluster for the tenant. This endpoint requires ADMIN role.
+      operationId: createCluster
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCluster'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cluster'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    get:
+      tags:
+        - Clusters
+      summary: List clusters.
+      description: Get a list of all the clusters of the tenant.
+      responses:
+        '200':
+          description: A JSON array of Clusters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cluster'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /v1/k8s/clusters/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: Unique identifier of the cluster.
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - Clusters
+      summary: Get cluster by id
+      description: Retrieve a cluster given a cluster id. This endpoint requires ADMIN role.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cluster'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+        - Clusters
+      summary: Update a Cluster by Id
+      operationId: updateCluster
+      description: Update the details of a given cluster. This endpoint requires ADMIN role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Cluster'
+            example:
+              name: cluster-a
+              description: group-a-cluster
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cluster'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Clusters
+      summary: Delete a Cluster
+      description: Delete a Cluster by Cluster ID. This endpoint requires ADMIN role.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uuid:
+                    type: string
+                    format: uuid
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/k8s/clusters/{cluster_uuid}/installfile:
+    x-intern: true
+    get:
+      tags:
+        - Clusters
+      summary: Returns cluster installation file by Id
+      description: Retrieve the installation values file of a given cluster by ID.
+      parameters:
+        - name: cluster_uuid
+          in: path
+          required: true
+          description: Unique identifier of the cluster.
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: cloud
+          description: Cloud type identifier.
+          schema:
+            type: string
+            enum:
+              - gke
+              - aws
+              - aks
+              - op
+              - airgapped
+              - openshift
+        - in: query
+          name: clusterip
+          description: Comma-separated list of IP addresses that provide access to the cluster.
+          schema:
+            type: string
+        - in: query
+          name: format
+          description: Format of the output file.
+          schema:
+            type: string
+            enum:
+              - json
+              - yaml
+            default: yaml
+      responses:
+        '200':
+          $ref: '#/components/responses/OK'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/k8s/clusters/{cluster_uuid}/config:
+    x-internal: true
+    get:
+      tags:
+        - Clusters
+      summary: Returns cluster configuration
+      description: Retrieve the configuration of a given cluster
+      parameters:
+        - name: cluster_uuid
+          in: path
+          required: true
+          description: Unique identifier of the cluster.
+          schema:
+            type: string
+            format: uuid
+        - name: cluster_domain
+          in: query
+          required: false
+          description: The domain of the cluster.
+          schema:
+            type: string
+            format: uri
+        - name: cluster_version
+          in: query
+          required: false
+          description: The version of the configuration.
+          schema:
+            type: string
+            # The format is taken from https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+            pattern: ^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+      responses:
+        '200':
+          description: Cluster config returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterConfig'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/k8s/clusters/{cluster_uuid}/config/custom:
+    x-internal: true
+    get:
+      tags:
+        - Clusters
+      summary: Returns custom cluster configuration
+      description: Retrieve custom configuration of a given cluster
+      parameters:
+        - name: cluster_uuid
+          in: path
+          required: true
+          description: Unique identifier of the cluster.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Cluster custom config returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterCustomConfig'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags:
+        - Clusters
+      summary: Update custom cluster configuration
+      description: Update custom configuration of a given cluster
+      parameters:
+        - name: cluster_uuid
+          in: path
+          required: true
+          description: Unique identifier of the cluster.
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClusterCustomConfig'
+      responses:
+        '200':
+          description: Cluster custom config updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterCustomConfig'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/k8s/clusters/{cluster_uuid}/config/control-plane:
+    x-internal: true
+    get:
+      tags:
+        - Clusters
+      summary: Returns cluster's control plane configuration
+      description: Retrieve the control plane configuration of a given cluster
+      parameters:
+        - name: cluster_uuid
+          in: path
+          required: true
+          description: Unique identifier of the cluster.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Cluster control plane config returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClusterControlPlaneConfig'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/k8s/clusters/{clusterId}/node-pools:
+    get:
+      tags:
+        - NodePools
+      summary: Get all cluster's Node Pools.
+      operationId: getNodePools
+      parameters:
+        - name: clusterId
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Node pools returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NodePool'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - NodePools
+      summary: Create a Node Pool
+      operationId: createNodePool
+      parameters:
+        - name: clusterId
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodePoolCreateRequest'
+      responses:
+        '201':
+          description: Created
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/k8s/clusters/{clusterId}/node-pools/{id}/labels:
+    put:
+      tags:
+        - NodePools
+      summary: Update Node Pool labels
+      operationId: updateNodePoolLabels
+      parameters:
+        - name: clusterId
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: The unique id identifying the Node Pool.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodePoolLabelsRequest'
+        required: true
+      responses:
+        '202':
+          description: Node Pool update accepted.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/k8s/clusters/{clusterId}/node-pools/{id}:
+    delete:
+      tags:
+        - NodePools
+      summary: Delete a Node Pool by id
+      operationId: deleteNodePool
+      parameters:
+        - name: clusterId
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: The unique id identifying the Node Pool.
+      responses:
+        '202':
+          description: Node Pool deletion accepted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+    put:
+      tags:
+        - NodePools
+      summary: Update Node Pool
+      operationId: updateNodePool
+      parameters:
+        - name: clusterId
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: The unique id identifying the Node Pool.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateNodePoolRequest'
+        required: true
+      responses:
+        '202':
+          description: Node Pool update accepted.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/k8s/clusters/{clusterId}/node-pools/status:
+    x-internal: true
+    put:
+      tags:
+        - NodePools
+      summary: Update Node Pool status
+      operationId: updateNodePoolStatus
+      parameters:
+        - name: clusterId
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: name
+          schema:
+            type: string
+          required: true
+          description: The unique name identifying the Node Pool.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodePoolStatusRequest'
+        required: true
+      responses:
+        '201':
+          description: Node Pool updated successfully.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/k8s/clusters/{clusterId}/node-pools/sync:
+    x-internal: true
+    post:
+      tags:
+        - NodePools
+      summary: Sync Node Pools
+      description: |
+        Sync all Node Pools statuses from k8s cluster to Run:AI backend
+      operationId: syncNodePools
+      parameters:
+        - name: clusterId
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/NodePoolStatusRequest'
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/k8s/clusters/{clusterId}/workspaces/status:
+    x-internal: true
+    put:
+      tags:
+        - Workspaces
+      summary: Update workspace status
+      operationId: updateWorkspaceStatus
+      parameters:
+        - name: clusterId
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkloadStatus'
+        required: true
+      responses:
+        '202':
+          description: workspace status update accepted.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+    post:
+      tags:
+        - Workspaces
+      summary: Sync workspaces status
+      description: |
+        Sync the status of all workspaces from k8s cluster to Run:AI control plane
+      operationId: syncWorkspacesStatus
+      parameters:
+        - name: clusterId
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/WorkloadStatus'
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/k8s/clusters/{clusterId}/workspaces/{id}:
+    delete:
+      tags:
+        - Workspaces
+      summary: Delete a workspace
+      operationId: deleteWorkspace
+      parameters:
+        - name: clusterId
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            $ref: '#/components/schemas/WorkloadId'
+      responses:
+        '202':
+          description: workspace deletion accepted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/k8s/clusters/{clusterId}/trainings/status:
+    x-internal: true
+    put:
+      tags:
+        - Trainings
+      summary: Update training status
+      operationId: updateTrainingStatus
+      parameters:
+        - name: clusterId
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkloadStatus'
+        required: true
+      responses:
+        '202':
+          description: training status update accepted.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+    post:
+      tags:
+        - Trainings
+      summary: Sync trainings status
+      description: |
+        Sync the status of all trainings from k8s cluster to Run:AI control plane
+      operationId: syncTrainingsStatus
+      parameters:
+        - name: clusterId
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/WorkloadStatus'
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/k8s/clusters/{clusterId}/trainings/{id}:
+    x-internal: true
+    delete:
+      tags:
+        - Trainings
+      summary: Delete a training
+      operationId: deleteTraining
+      parameters:
+        - name: clusterId
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            $ref: '#/components/schemas/WorkloadId'
+      responses:
+        '202':
+          description: training deletion accepted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+  /v1/k8s/clusters/{clusterId}/distributed/status:
+    x-internal: true
+    put:
+      tags:
+        - Distributed
+      summary: Update distributed status
+      operationId: updateDistributedStatus
+      parameters:
+        - name: clusterId
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkloadStatus'
+        required: true
+      responses:
+        '202':
+          description: distributed status update accepted.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+    post:
+      tags:
+        - Distributed
+      summary: Sync distributed status
+      description: |
+        Sync the status of all distributed from k8s cluster to Run:AI control plane
+      operationId: syncDistributedStatus
+      parameters:
+        - name: clusterId
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/WorkloadStatus'
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /v1/k8s/clusters/{clusterId}/distributed/{id}:
+    x-internal: true
+    delete:
+      tags:
+        - Distributed
+      summary: Delete a distributed
+      operationId: deleteDistributed
+      parameters:
+        - name: clusterId
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            $ref: '#/components/schemas/WorkloadId'
+      responses:
+        '202':
+          description: distributed deletion accepted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/serviceUnavailable'
+components:
+  parameters:
+    namespace:
+      in: path
+      name: namespace
+      description: namespace of the objects
+      required: true
+      schema:
+        type: string
+        format: string
+
+    secret_name:
+      in: path
+      name: secret_name
+      description: secret name
+      required: true
+      schema:
+        type: string
+        format: string
+    pvc_name:
+      in: path
+      name: pvc_name
+      description: pvc name
+      required: true
+      schema:
+        type: string
+        format: string
+    storage_class_name:
+      in: path
+      name: storage_class_name
+      description: Unique identifier of the storageClass
+      required: true
+      schema:
+        type: string
+        format: string
+    uuid:
+      in: path
+      name: uuid
+      description: Unique identifier of the cluster
+      required: true
+      schema:
+        type: string
+        format: uuid
+    job_id:
+      in: path
+      name: job_id
+      description: Unique identifier of the job
+      required: true
+      schema:
+        type: string
+        format: uuid
+    jobId:
+      name: jobId
+      in: path
+      description: Unique identifier of the job (UUID)
+      required: true
+      schema:
+        type: string
+        format: uuid
+    podGroupId:
+      name: podGroupId
+      in: path
+      description: Unique identifier of the podGroup (UUID)
+      required: true
+      schema:
+        type: string
+        format: uuid
+    deploymentId:
+      name: deploymentId
+      in: path
+      description: the unique Id of the deployment (UUID)
+      required: true
+      schema:
+        type: string
+    serviceId:
+      name: serviceId
+      in: path
+      description: the unique Id of the service (UUID)
+      required: true
+      schema:
+        type: string
+    limit:
+      name: limit
+      in: query
+      required: false
+      description: The maximum number of entries to return.
+      schema:
+        type: integer
+        format: int32
+        example: 1000
+    offset:
+      name: offset
+      in: query
+      required: false
+      description: The offset of the first item returned in the collection.
+      schema:
+        type: integer
+        format: int32
+        example: 4000
+    lastUpdated:
+      name: lastUpdated
+      in: query
+      required: false
+      description: The last timestamp of the previously received items.
+      schema:
+        type: string
+        format: date-time
+        example: '2021-12-14T16:04:15.099Z'
+    includeDeleted:
+      name: includeDeleted
+      in: query
+      required: false
+      description: True to include deleted objects in the result.
+      schema:
+        type: boolean
+        example: false
+        default: false
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    serviceUnavailable:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: conflict error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    OK:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: string
+            format: text
+  schemas:
+    workloadHistoryResponse:
+      required:
+        - entries
+      properties:
+        entries:
+          type: array
+          items:
+            required:
+              - meta
+              - spec
+            properties:
+              meta:
+                $ref: '#/components/schemas/workloadHistoryMeta'
+              spec:
+                $ref: '#/components/schemas/workloadHistorySpec'
+    workloadHistoryMeta:
+      type: object
+      required:
+        - creationTimestamp
+        - type
+      properties:
+        creationTimestamp:
+          type: number
+          description: the creation timestamp of the workload history item
+        type:
+          type: string
+          description: the type of the workload history item
+    workloadHistorySpec:
+      type: object
+      properties:
+        workloadEvent:
+          $ref: "#/components/schemas/workloadEvent"
+        statusChange:
+          $ref: "#/components/schemas/statusChange"
+    statusChange:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          description: the workload status
+    workloadEvent:
+      type: object
+      required:
+        - clusterUuid
+        - tenantId
+        - uid
+        - type
+        - message
+        - reason
+        - sourceComponent
+        - involvedObjUID
+        - involvedObjKind
+        - involvedObjName
+        - involvedObjNamespace
+      properties:
+        clusterUuid:
+          type: string
+          format: uuid
+          description: clusterUuid of the workload event
+        tenantId:
+          type: number
+          description: tenantId of the workload event
+        uid:
+          type: string
+          format: uuid
+          description: uid of the workload event
+        type:
+          type: string
+          description: type of the workload event
+        message:
+          type: string
+          description: message of the workload event
+        reason:
+          type: string
+          description: reason of the workload event
+        sourceComponent:
+          type: string
+          description: the event source component
+        involvedObjUID:
+          type: string
+          description: involvedObjUID of the workload event
+        involvedObjKind:
+          type: string
+          description: involvedObjKind of the workload event
+        involvedObjName:
+          type: string
+          description: involvedObjName of the workload event
+        involvedObjNamespace:
+          type: string
+          description: involvedObjNamespace of the workload event
+    StorageClasses:
+      type: array
+      items:
+        $ref: "#/components/schemas/StorageClass"
+    StorageClass:
+      required:
+        - storage_class_name
+      properties:
+        storage_class_name:
+          type: string
+          description: Identifier of the storage class
+        is_default:
+          type: boolean
+          description: Indicator if the storage class is the default storage class
+
+    Cluster:
+      properties:
+        uuid:
+          type: string
+          description: The cluster ID.
+          example: 067afc1b-8806-4ade-8bbd-e5a0c47a39a2
+        createdAt:
+          type: string
+          description: The cluster's creation date.
+          example: '2021-12-14T16:04:15.099Z'
+        domain:
+          type: string
+          description: The cluster's url.
+          example: https://my-cluster.com
+        tenantId:
+          type: number
+          format: integer
+          description: The tenant id this cluster belongs to.
+          example: 42
+        name:
+          type: string
+          description: The cluster's name.
+          example: MY RUN:AI cluster
+        description:
+          type: string
+          description: The cluster's name.
+          example: deep-learning cluster*
+        version:
+          type: string
+          description: The cluster's  RUN:AI version.
+          example: 2.0.58
+        connected:
+          type: boolean
+          description: if the cluster is connected to the control plane.
+          example: true
+    User:
+      type: object
+      required:
+        - role
+        - userId
+      properties:
+        userId:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+        groups:
+          type: array
+          items:
+            type: string
+    Users:
+      type: object
+      required:
+        - users
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    Groups:
+      type: object
+      required:
+        - groups
+      properties:
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    CreateCluster:
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: cluster-a
+        description:
+          type: string
+          example: group-a-cluster
+    ClusterInfo:
+      type: object
+      required:
+        - domain
+        - version
+      properties:
+        domain:
+          type: string
+          description: the cluster domain
+        version:
+          type: string
+          description: the cluster version
+        dependencies:
+          type: object
+          required:
+            - required
+            - optional
+          properties:
+            required:
+              type: object
+              additionalProperties:
+                type: object
+                $ref: '#/components/schemas/DependencyStatus'
+            optional:
+              type: object
+              additionalProperties:
+                type: object
+                $ref: '#/components/schemas/DependencyStatus'
+    DependencyStatus:
+      type: object
+      required:
+        - available
+      properties:
+        available:
+          type: boolean
+          description: whether the dependency is available
+        reason:
+          type: string
+          description: the reason for the dependency status
+        components:
+          type: object
+          additionalProperties:
+            type: object
+            $ref: '#/components/schemas/DependencyStatus'
+
+    PodGroup:
+      required:
+        - jobId
+        - podGroupId
+        - workloadName
+        - workloadType
+        - clusterUuid
+        - imageName
+        - jobPhase
+        - workloadUser
+        - project
+        - created
+        - lastUpdated
+        - parallelism
+        - completions
+        - currentRequestedGpus
+        - totalRequestedGpus
+        - requestedGpusPerPodgroup
+        - requestedGpusMemoryPerPodgroup
+        - parentWorkloadName
+        - workloadKind
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        podGroupId:
+          type: string
+          format: uuid
+          description: Unique identifier of the pod group.
+        podGroupName:
+          type: string
+          description: Name of the pod group.
+        workloadName:
+          type: string
+          description: Name of the workload.
+        workloadType:
+          type: string
+          description: Type of the workload.
+          enum:
+            - build
+            - interactive
+          example: interactive
+        workloadKind:
+          type: string
+          description: Specifies the kind of k8s resource that owns the pod group.
+          example: runaijob
+        clusterUuid:
+          type: string
+          format: uuid
+          description: Unique identifier of the cluster.
+        imageName:
+          type: string
+          description: The name of the image executed by the pod.
+          example: tensorflow
+        podGroupPhase:
+          type: string
+          description: The phase of the pod group.
+          enum:
+            - Unknown
+            - Pending
+            - Running
+            - Succeeded
+            - Failed
+        jobPhase:
+          type: string
+        workloadUser:
+          type: string
+          description: The owner of the pod group.
+        project:
+          type: string
+          description: The project that the pod group belongs to.
+        nodeId:
+          type: string
+          description: Unique identifier of the node.
+        created:
+          type: integer
+          format: int64
+          description: Pod group creation time.
+        lastUpdated:
+          type: integer
+          format: int64
+          description: Time of the latest update to the pod group details.
+        parallelism:
+          type: integer
+          format: int32
+          description: Specifies the maximum number of pods the workload is able run at any given time.
+        completions:
+          type: integer
+          format: int32
+          description: Specifies the number of successfully finished pods the created workload should be run with.
+        currentRequestedGpus:
+          type: number
+        totalRequestedGpus:
+          type: number
+        requestedGpusPerPodgroup:
+          type: number
+        requestedGpusMemoryPerPodgroup:
+          type: number
+        parentWorkloadName:
+          type: string
+          example: parentWorkloadName
+          description: Specifies the Parent Workload Name
+        currentAllocatedGpus:
+          type: number
+        currentAllocatedGpusMemory:
+          type: number
+        totalRequestedCpu:
+          type: number
+        totalRequestedMemory:
+          type: number
+        totalLimitCpu:
+          type: number
+        totalLimitMemory:
+          type: number
+        cliCommand:
+          type: string
+        requestedMigDevices:
+          type: string
+        dynamicData:
+          type: object
+        existsInCluster:
+          type: boolean
+        jobUrlType:
+          type: string
+          default: ''
+          description: Describe the content of jobUrl field, values may be (tensorboard , jupyter or '')
+        isJupyter:
+          type: boolean
+          description: If true, it indicates that the pod group runs jupyter notebook.
+          default: false
+          deprecated: true
+        jobUrl:
+          type: string
+        workspaceId:
+          type: string
+          description: this attribute is obsolete, use workloadId instead.
+        workloadId:
+          type: string
+          description: reference to the workspace which was used for the creation of the job.
+        nodePool:
+          type: string
+          description: The node pool of the podgroup.
+    PodGroups:
+      type: array
+      items:
+        $ref: '#/components/schemas/PodGroup'
+    PodGroupsSync:
+      type: object
+      required:
+        - podGroups
+        - projectName
+      properties:
+        projectName:
+          $ref: '#/components/schemas/ProjectName'
+        podGroups:
+          $ref: '#/components/schemas/PodGroups'
+        from:
+          type: string
+          description: the first podgroup to sync. if empty, all podgroups before the first one sent will be deleted.
+          example: podgroup-a
+        to:
+          type: string
+          description: the last podgroup to sync. if empty, all podgroups after the last one sent will be deleted.
+          example: podgroup-d
+
+    PVCs:
+      type: array
+      items:
+        $ref: "#/components/schemas/PVC"
+    PVC:
+      required:
+        - pvc_name
+      properties:
+        pvc_name:
+          type: string
+          description: Identifier of the pvc name.
+    Secrets:
+      type: array
+      items:
+        $ref: "#/components/schemas/Secret"
+    Secret:
+      required:
+        - secret_name
+      properties:
+        secret_name:
+          type: string
+          description: Identifier of the secret name.
+
+    Pod:
+      required:
+        - podId
+        - podName
+        - jobId
+        - clusterUuid
+        - imageName
+        - phase
+        - created
+        - completed
+        - lastUpdated
+      properties:
+        podId:
+          type: string
+          description: Identifier of the pod running the job.
+        jobId:
+          type: string
+          format: uuid
+          description: Unique identifier of the job.
+        podGroupId:
+          type: string
+          description: This had been used as jobId. Remained here for backward compatibility
+        clusterUuid:
+          type: string
+          format: uuid
+          description: Unique identifier of the cluster.
+        podName:
+          type: string
+          description: The name of the pod running the job.
+        imageName:
+          type: string
+          description: The name of the image executed by the pod.
+        nodeId:
+          type: string
+          description: Unique identifier of the node.
+        phase:
+          type: string
+        status:
+          type: string
+        created:
+          type: integer
+          format: int64
+          description: Creation time of the pod.
+        completed:
+          type: integer
+          format: int64
+          description: Completion time of the pod.
+        started:
+          type: integer
+          format: int64
+          description: The time when the pod started executing.
+        lastUpdated:
+          type: integer
+          format: int64
+          description: Last time the pod details were updated.
+        dynamicData:
+          type: object
+        existsInCluster:
+          type: boolean
+        resourceRequest:
+          type: object
+          additionalProperties:
+            type: number
+        resourceAllocation:
+          type: object
+          additionalProperties:
+            type: number
+        nodePool:
+          type: string
+          description: The node pool of the pod.
+        namespace:
+          type: string
+          description: The namespace of the pod.
+    Pods:
+      type: array
+      items:
+        $ref: '#/components/schemas/Pod'
+    PodsSync:
+      type: object
+      required:
+        - pods
+        - namespace
+      properties:
+        namespace:
+          $ref: '#/components/schemas/Namespace'
+        pods:
+          $ref: '#/components/schemas/Pods'
+        from:
+          type: string
+          description: the first pod id to sync. if empty, all pods before the first one sent will be deleted.
+          example: 2b3a73a5-9f46-4ab0-bdc4-cce26bbb413b
+        to:
+          type: string
+          description: the last pod id to sync. if empty, all pods after the last one sent will be deleted.
+          example: 2b3a73a5-9f46-4ab0-bdc4-cce26bbb413b
+
+    Event:
+      properties:
+        uid:
+          type: string
+          format: uuid
+        type:
+          type: string
+        message:
+          type: string
+        reason:
+          type: string
+        creationTimestamp:
+          type: number
+        sourceComponent:
+          type: string
+        involvedObjUID:
+          type: string
+        involvedObjKind:
+          type: string
+        involvedObjName:
+          type: string
+        involvedObjNamespace:
+          type: string
+
+    EventsSyncData:
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+
+    Service:
+      required:
+        - clusterUuid
+        - createdAt
+        - id
+        - name
+        - namespace
+      properties:
+        clusterUuid:
+          type: string
+          format: uuid
+        url:
+          type: string
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        namespace:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      example:
+        clusterUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        createdAt: '2022-02-01T16:21:16Z'
+        name: name
+        namespace: namespace
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+
+    Services:
+      type: array
+      items:
+        $ref: '#/components/schemas/Service'
+      x-schema-name: Services
+    ServicesSync:
+      type: object
+      required:
+        - services
+        - namespace
+      properties:
+        namespace:
+          $ref: '#/components/schemas/Namespace'
+        services:
+          $ref: '#/components/schemas/Services'
+
+    Deployment:
+      required:
+        - clusterUuid
+        - created
+        - id
+        - name
+        - namespace
+        - owners
+        - replicas
+        - schedulerName
+        - template
+      properties:
+        clusterUuid:
+          type: string
+          format: uuid
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        namespace:
+          type: string
+        project:
+          type: string
+        owners:
+          writeOnly: true
+          type: array
+          items:
+            $ref: '#/components/schemas/Owner'
+        createdAt:
+          type: string
+          format: date-time
+        replicas:
+          type: integer
+          format: int32
+        template:
+          $ref: '#/components/schemas/PodTemplate'
+        schedulerName:
+          type: string
+        username:
+          type: string
+        serviceId:
+          type: string
+          format: uuid
+        revisionId:
+          type: string
+          format: uuid
+        inferenceworkloadName:
+          type: string
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeploymentCondition'
+        nodePool:
+          type: string
+      example:
+        clusterUuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        template:
+          containers:
+            - image: image
+              name: name
+        createdAt: '2022-02-01T16:21:16Z'
+        replicas: 6
+        name: name
+        namespace: namespace
+        owners:
+          - kind: kind
+            name: name
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          - kind: kind
+            name: name
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        schedulerName: runai-scheduler
+        conditions:
+          - type: Available
+            status: true
+            reason: MinimumReplicasAvailable
+          - type: Progressing
+            status: true
+            reason: NewReplicaSetAvailable
+    DeploymentCondition:
+      x-schema-name: DeploymentCondition
+      required:
+        - status
+        - type
+      properties:
+        type:
+          type: string
+          enum:
+            - Available
+            - Progressing
+            - ReplicaFailure
+        status:
+          type: string
+          enum:
+            - true
+            - false
+            - Unknown
+        reason:
+          type: string
+        message:
+          type: string
+      example:
+        type: Available
+        status: true
+        reason: MinimumReplicasAvailable
+    Deployments:
+      type: array
+      items:
+        $ref: '#/components/schemas/Deployment'
+      x-schema-name: Deployments
+    DeploymentsSync:
+      type: object
+      required:
+        - deployments
+        - projectName
+      properties:
+        projectName:
+          $ref: '#/components/schemas/ProjectName'
+        deployments:
+          $ref: '#/components/schemas/Deployments'
+    PodTemplate:
+      required:
+        - containers
+        - resourceRequest
+      properties:
+        containers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Container'
+        resourceRequest:
+          type: object
+          additionalProperties:
+            type: number
+    Container:
+      required:
+        - image
+        - name
+      properties:
+        image:
+          type: string
+        name:
+          type: string
+      example:
+        image: image
+        name: name
+    Owner:
+      required:
+        - id
+        - kind
+        - name
+      type: object
+      properties:
+        kind:
+          type: string
+        name:
+          type: string
+        id:
+          type: string
+          format: uuid
+      example:
+        kind: kind
+        name: name
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+    AgentSyncDataDepricated:
+      type: object
+      required:
+        - version
+      properties:
+        version:
+          type: string
+        podGroups:
+          $ref: '#/components/schemas/PodGroups'
+        pods:
+          $ref: '#/components/schemas/PodGroups'
+    DisplayedJob:
+      type: object
+      properties:
+        JobId:
+          type: string
+          format: uuid
+          description: Unique identifier of the job.
+        podGroupId:
+          type: string
+          format: uuid
+          description: Unique identifier of the pod group.
+        jobName:
+          type: string
+          description: The name of the job.
+          example: job-0
+        jobType:
+          type: string
+        clusterId:
+          type: string
+          description: Unique identifier of the cluster.
+        status:
+          type: string
+        imageName:
+          type: string
+          description: The name of the image executed by the pod.
+          example: tensorflow
+        user:
+          type: string
+          description: The owner of the job.
+        project:
+          type: string
+          description: The project that the pod group belongs to.
+        nodeId:
+          type: string
+          description: Unique identifier of the node.
+        creationTime:
+          type: string
+          description: Creation time of the job.
+        completionTime:
+          type: string
+          description: Completion time of the job.
+        totalRuntime:
+          type: string
+        totalWaitTime:
+          type: string
+        pending:
+          type: number
+        running:
+          type: number
+        parallelism:
+          type: number
+        completions:
+          type: number
+        failed:
+          type: number
+        succeeded:
+          type: number
+        currentAllocatedGPUs:
+          type: number
+        currentAllocatedGPUsMemory:
+          type: number
+        currentRequestedGPUs:
+          type: number
+        totalRequestedGPUs:
+          type: number
+        requestedGPUsPerPodGroup:
+          type: number
+        requestedGPUsMemoryPerPodGroup:
+          type: number
+        parentWorkloadName:
+          type: string
+        totalRequestedMemory:
+          type: number
+        totalRequestedCPU:
+          type: number
+        totalLimitCPU:
+          type: number
+        totalLimitMemory:
+          type: number
+        workloadKind:
+          type: number
+          description: Specifies the kind of k8s resource that owns the pod group.
+          example: runaijob
+        latestPod:
+          $ref: '#/components/schemas/Pod'
+        cliCommand:
+          type: string
+        requestedMigDevices:
+          type: string
+        dynamicData:
+          type: object
+        existsInCluster:
+          type: boolean
+        isJupyter:
+          type: boolean
+          default: false
+          description: If true, it indicates that the pod group runs jupyter notebook.
+        jobUrl:
+          type: string
+        nodePool:
+          type: string
+          description: The node pool of the job.
+    DisplayedJobs:
+      type: array
+      items:
+        $ref: '#/components/schemas/DisplayedJob'
+
+    PlacementStrategy:
+      properties:
+        cpu:
+          type: string
+          enum:
+            - spread
+            - binpack
+          description: scheduling strategy for cpu
+          example: spread
+        gpu:
+          type: string
+          enum:
+            - spread
+            - binpack
+          description: scheduling strategy for gpu
+          example: binpack
+    NodePoolCreateRequest:
+      properties:
+        name:
+          type: string
+          description: Node Pool Name
+          example: node-pool-a
+        overProvisioningRatio:
+          type: integer
+          example: 1
+          default: 1
+        labelKey:
+          type: string
+          description: Label key for associated nodes to the Node Pool (with value as in labelValue)
+          example: node-type
+        labelValue:
+          type: string
+          description: Label value for associated nodes to the Node Pool (with key as in labelKey)
+          example: type-x
+        placementStrategy:
+          $ref: '#/components/schemas/PlacementStrategy'
+    NodePoolStatus:
+      properties:
+        labelKey:
+          type: string
+          description: key of node label for pool
+          example: node-type
+    NodePoolLabelsRequest:
+      properties:
+        labelKey:
+          type: string
+          description: key of node label for pool
+          example: node-type
+        labelValue:
+          type: string
+          description: value of node label for pool
+          example: type-x
+    UpdateNodePoolRequest:
+      properties:
+        labelKey:
+          type: string
+          description: key of node label for pool
+          example: node-type
+        labelValue:
+          type: string
+          description: value of node label for pool
+          example: type-x
+        placementStrategy:
+          $ref: '#/components/schemas/PlacementStrategy'
+    NodePoolResponse:
+      properties:
+        id:
+          type: number
+          description: The NodePool id
+          readOnly: true
+          example: 5
+        labelKey:
+          type: string
+          description: Key of node label for pool
+          example: node-type
+        labelValue:
+          type: string
+          description: Value of node label for pool
+          example: type-x
+        placementStrategy:
+          $ref: '#/components/schemas/PlacementStrategy'
+        isDefault:
+          type: boolean
+          description: Is the Node Pool default for cluster
+          example: false
+        status:
+          type: string
+          enum:
+            - Creating
+            - Updating
+            - Deleting
+            - Empty
+            - Unschedulable
+            - Ready
+            - Deleted
+          description: Status of Node Pool
+          example: Creating
+        statusMessage:
+          type: string
+          description: Message for status of Node Pool
+          example: all nodes are down
+        nodes:
+          type: string
+          description: List of Nodes that are assigned to this nodepool - as json string
+          example:
+            - node-a
+            - node-b
+    NodePoolStatusRequest:
+      properties:
+        status:
+          type: string
+          enum:
+            - Creating
+            - Updating
+            - Deleting
+            - Empty
+            - Unschedulable
+            - Ready
+            - Deleted
+          description: Status of Node Pool
+          example: Creating
+        statusMessage:
+          type: string
+          description: Message for status of Node Pool
+          example: all nodes are down
+        nodes:
+          type: string
+          description: List of Nodes that are assigned to this nodepool - as json string
+          example:
+            - node-a
+            - node-b
+    NodePool:
+      allOf:
+        - $ref: '#/components/schemas/NodePoolCreateRequest'
+        - properties:
+            id:
+              type: number
+              description: Node Pool unique id
+              readOnly: true
+              example: 5
+            clusterId:
+              type: string
+              format: uuid
+              description: Node Pool cluster id
+              example: 71f69d83-ba66-4822-adf5-55ce55efd210
+            createdAt:
+              type: string
+              description: Node Pool creation time
+              format: date-time
+              example: '2021-12-14T16:04:15.099Z'
+            updatedAt:
+              type: string
+              description: Node Pool update time
+              format: date-time
+              example: '2021-12-14T16:04:15.099Z'
+            deletedAt:
+              type: string
+              description: Node Pool delete time
+              format: date-time
+              example: '2021-12-14T16:04:15.099Z'
+            status:
+              type: string
+              enum:
+                - Creating
+                - Updating
+                - Deleting
+                - Empty
+                - Unschedulable
+                - Ready
+                - Deleted
+              description: Node Pool status
+              example: Creating
+            statusMessage:
+              type: string
+              description: Node Pool status details
+              example: all nodes are down
+            nodes:
+              type: string
+              description: List of Nodes that are assigned to this nodepool - as json string
+              example:
+                - node-a
+                - node-b
+            createdBy:
+              type: string
+              description: Node Pool creator
+              example: user@run.ai
+            updatedBy:
+              type: string
+              description: Node Pool updater
+              example: user@run.ai
+            isDefault:
+              type: boolean
+              description: Is the Node Pool the default Node Pool for all nodes not assigned to any other Node Pool
+              example: false
+
+    WorkloadStatus:
+      required:
+        - id
+        - status
+      properties:
+        id:
+          $ref: '#/components/schemas/WorkloadId'
+        status:
+          type: string
+          enum:
+            - Submitted
+            - Failed
+          description: Status of a workload
+    WorkloadId:
+      type: string
+      format: uuid
+      description: The unique id identifying the workspace/training workload.
+
+    IdsResponse:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+    ProjectName:
+      type: string
+      format: string
+      description: The project name we are syncing objects in
+      example: team-a
+    Namespace:
+      type: string
+      format: string
+      description: The namespace we are syncing objects in
+      example: runai-team-a
+    TenantId:
+      type: number
+      format: integer
+      description: The tenant id this cluster belongs to.
+      example: 42
+    ClusterId:
+      type: string
+      description: Unique identifier of the cluster.
+      format: uuid
+      example: 71f69d83-ba66-4822-adf5-55ce55efd210
+    ClusterConfig:
+      type: object
+      description: The cluster configuration.
+      example: {}
+    ClusterCustomConfig:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+          readOnly: true
+        tenantId:
+          $ref: '#/components/schemas/TenantId'
+          readOnly: true
+        clusterId:
+          $ref: '#/components/schemas/ClusterId'
+          readOnly: true
+        config:
+          type: object
+          description: The cluster custom configuration.
+          example: {}
+        createdAt:
+          type: string
+          format: date-time
+          description: The time the cluster custom configuration was created.
+          example: '2021-12-14T16:04:15.099Z'
+          readOnly: true
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+    ClusterControlPlaneConfig:
+      type: object
+      description: The cluster's configuration for connecting to the control plane.
+      properties:
+        agent:
+          type: object
+          description: The cluster's agent configuration for connecting to the control plane.
+          properties:
+            client:
+              type: object
+              description: Client configuration for connecting to the control plane.
+              properties:
+                id:
+                  type: string
+                  description: Client id.
+                  example: 71f69d83-ba66-4822-adf5-55ce55efd210
+                name:
+                  type: string
+                  description: Client name.
+                  example: agent-1
+                secret:
+                  type: string
+                  description: Client secret.
+                  example: abcdefghijklmnopqrstuvwxyz
+        metricsRemoteWrite:
+          type: object
+          description: The cluster's metrics remote write configuration.
+          properties:
+            url:
+              type: string
+              description: Remote write url.
+              example: https://metrics.run.ai
+            orgID:
+              type: string
+              description: Remote write org ID.
+              example: orgID
+            credentials:
+              type: object
+              description: Remote write credentials.
+              properties:
+                username:
+                  type: string
+                  description: Remote write username.
+                  example: user
+                password:
+                  type: string
+                  description: Remote write password.
+                  example: password
+        researcherService:
+          type: object
+          description: The cluster's researcher service configuration related to the control plane.
+          properties:
+            jwksURL:
+              type: string
+              description: URL to the endpoint that returns JWT validation keys
+              example: https://test.test.com/auth/realms/runai/protocol/openid-connect/certs
+            logoutLink:
+              type: string
+              description: Logout link.
+              example: https://researcher.run.ai/logout
+            oauthProxy:
+              type: object
+              description: OAuth Proxy configuration.
+              properties:
+                oidcIssuerDN:
+                  type: string
+                  description: OAuth proxy oidc issuer DN.
+                  example: oidcIssuerDN
+                oidcIssuerUrl:
+                  type: string
+                  description: OAuth proxy oidc issuer url.
+                  example: https://researcher.run.ai/oidc
+                clientId:
+                  type: string
+                  description: OAuth proxy client id.
+                  example: 71f69d83-ba66-4822-adf5-55ce55efd210
+                clientSecret:
+                  type: string
+                  description: OAuth proxy client secret.
+                  example: abcdefghijklmnopqrstuvwxyz
+                providerType:
+                  type: string
+                  description: OAuth proxy provider type.
+                  example: oidc
+        clusterName:
+          type: string
+          description: The cluster's name.
+          example: cluster-1
+        dockerConfigJson:
+          type: string
+          description: The cluster's docker config json.
+          example: dockerConfigJson

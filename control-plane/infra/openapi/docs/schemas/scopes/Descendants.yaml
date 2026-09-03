@@ -1,0 +1,7 @@
+description: The descendants of an org unit.
+type: object
+properties:
+  project_ids:
+    type: array
+    items:
+      $ref: './ProjectId.yaml'

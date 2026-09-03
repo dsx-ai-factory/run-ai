@@ -1,0 +1,10 @@
+x-internal: true
+description: policy information per replica
+  for non-distributed, worker replica is used as the container for the information.
+properties:
+  worker:
+    $ref: "./UnifiedPolicyInfoPerReplicaType.yaml"
+  master:
+    $ref: "./UnifiedPolicyInfoPerReplicaType.yaml"
+type: object
+nullable: true

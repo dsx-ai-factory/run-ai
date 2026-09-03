@@ -1,0 +1,81 @@
+BatchJobTarget:
+  Config: {}
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: data-volume-multi
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: data-volume-multi
+      name: data-volume-multi
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: data-volume-multi
+            workloadKind: Workspace
+            workloadName: data-volume-multi
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: data-volume-multi
+            image: ubuntu
+            name: data-volume-multi
+            resources: {}
+            volumeMounts:
+            - mountPath: /data-1
+              name: data-volume-1234-5678
+              readOnly: true
+            - mountPath: /data-2
+              name: data-volume-8765-4321
+              readOnly: true
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+          volumes:
+          - name: data-volume-1234-5678
+            persistentVolumeClaim:
+              claimName: data-volume-pvc-1
+          - name: data-volume-8765-4321
+            persistentVolumeClaim:
+              claimName: data-volume-pvc-2
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: data-volume-multi, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: data-volume-multi, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

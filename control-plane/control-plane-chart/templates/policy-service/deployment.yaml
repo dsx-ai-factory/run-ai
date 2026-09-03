@@ -1,0 +1,12 @@
+{{- include "common.deployment" (list . .Values.policyService .Values.policyService.autoscaling .Values.policyService.serviceAccount "control-plane.policyService.deployment" ) }}
+
+{{- define "control-plane.policyService.deployment" -}}
+spec:
+  template:
+    spec:
+      initContainers:
+        {{- include "awaitingPostgresReadinessContainer" . | nindent 8 }}
+        {{- include "common.initContainer" . | nindent 8 }}
+      containers:
+      - {{- include "common.container" . | nindent 8 }}
+{{- end }}

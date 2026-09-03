@@ -1,0 +1,65 @@
+openapi: "3.0.0"
+info:
+  version: 2.0.0
+  title: catalog-service
+  description: An API for managing catalogs
+  contact:
+    email: support@run.ai
+servers:
+  - url: https://app.run.ai
+  - url: https://staging.run.ai
+  - url: https://test.run.ai
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+components:
+  responses:
+    $ref: "../../../infra/openapi/docs/responses/_index.yaml"
+  securitySchemes:
+    $ref: "./securitySchemes/_index.yaml"
+  parameters:
+    $ref: "./parameters/_index.yaml"
+  schemas:
+    $ref: "./schemas/_index.yaml"
+
+paths:
+  /:
+    x-internal: true
+    get:
+      summary: health check
+      x-service: catalog-service
+      x-no-authorization: true
+      operationId: health
+      tags:
+        - Health
+      responses:
+        200:
+          description: Executed successfully.
+
+
+  /api/v1/registries:
+    $ref: "./resources/Registries.yaml"
+  /api/v1/registries/{RegistryIntegrationId}:
+    $ref: "./resources/RegistriesById.yaml"
+    
+  /api/v1/registries/{RegistryIntegrationId}/images:
+    $ref: "./resources/Images.yaml"
+  /api/v1/registries/{RegistryIntegrationId}/images/tags:
+    $ref: "./resources/ImageTags.yaml"
+
+  /api/v1/helm-repos:
+    $ref: "./resources/HelmRepos.yaml"
+  /api/v1/helm-repos/{HelmRepoId}:
+    $ref: "./resources/HelmReposById.yaml"
+  /api/v1/helm-repos/{HelmRepoId}/charts:
+    $ref: "./resources/HelmRepoCharts.yaml"
+
+  /api/v1/huggingface/catalog:
+    $ref: "./resources/HuggingfaceCatalog.yaml"
+
+  /api/v1/catalog/settings:
+    x-scope: [ system, tenant ]
+    $ref: "./resources/Settings/CatalogSettings.yaml"
+  /api/v1/catalog/settings/{key}:
+    x-scope: [ system, tenant ]
+    $ref: "./resources/Settings/CatalogSettingsByKey.yaml"

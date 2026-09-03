@@ -1,0 +1,26 @@
+type: object
+properties:
+  elements:
+    type: object
+    description: >
+      Enforces the number of elements in an array field to fall within the
+      inclusive range [min, max]. At least one of `min`/`max` must be
+      specified.
+    nullable: true
+    properties:
+      min:
+        description: Enforces the minimum number of elements.
+        type: integer
+        format: int32
+        minimum: 0
+        nullable: true
+      max:
+        description: Enforces the maximum number of elements.
+        type: integer
+        format: int32
+        minimum: 0
+        nullable: true
+example:
+  elements:
+    min: 1
+    max: 10

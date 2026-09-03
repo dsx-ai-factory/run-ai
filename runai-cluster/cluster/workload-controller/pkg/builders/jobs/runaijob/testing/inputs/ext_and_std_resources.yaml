@@ -1,0 +1,31 @@
+apiVersion: run.ai/v2alpha1
+kind: InteractiveWorkload
+metadata:
+  name: ext_resources
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  image:
+    value: ubuntu
+  name:
+    value: ext_resources
+  cpu:
+    value: "3"
+  gpu:
+    value: "1"
+  memory:
+    value: "2M"
+  gpuMemory:
+    value: "1G"
+  gpuMemoryLimit:
+    value: "2G"
+  extendedResources:
+    items:
+      "resrc-1":
+        value:
+          name: "ext/a"
+          quantity: "5"
+      "resrc-2":
+        value:
+          name: "ext/b"
+          quantity: "10M"

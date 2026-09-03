@@ -1,0 +1,5 @@
+image: ubuntu
+
+storage:
+  emptyDirVolume:
+    - medium: Memory

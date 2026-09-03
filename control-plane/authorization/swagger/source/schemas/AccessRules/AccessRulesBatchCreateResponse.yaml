@@ -1,0 +1,17 @@
+type: object
+properties:
+  succeeded:
+    type: array
+    items:
+      $ref: './AccessRule.yaml'
+  failed:
+    type: array
+    items:
+      properties:
+        payload:
+          $ref: './AccessRuleCreationFields.yaml'
+        code:
+          $ref: "../../../../../infra/openapi/docs/schemas/common/ErrorCode.yaml"
+        message:
+          type: string
+          description: A human-readable message describing the access rule IDs that failed to create.

@@ -1,0 +1,66 @@
+{{- include "common.configMap" (list . .Values.workloads "control-plane.workloads.configmap") }}
+
+{{- define "control-plane.workloads.configmap" -}}
+{{- $top := first . }}
+data:
+  LOG_LEVEL: {{ $top.Values.workloads.config.logLevel | quote }}
+  SERVICE_PORT: {{ $top.Values.workloads.service.port | quote }}
+  SERVER_WRITE_TIMEOUT: {{ $top.Values.workloads.config.server.writeTimeout | quote }}
+  SERVER_READ_TIMEOUT: {{ $top.Values.workloads.config.server.readTimeout | quote }}
+  SERVER_IDLE_TIMEOUT: {{ $top.Values.workloads.config.server.idleTimeout | quote }}
+  SERVICE_NAME: {{ $top.Values.workloads.name | quote }}
+  TRACING_ENABLED: {{ if hasKey $top.Values.workloads.config "tracingEnabled" }}{{ $top.Values.workloads.config.tracingEnabled | quote }}{{ else }}{{ $top.Values.global.config.tracingEnabled | quote }}{{ end }}
+  AUDIT_ENABLED: {{ if hasKey $top.Values.workloads.config "auditEnabled" }}{{ $top.Values.workloads.config.auditEnabled | quote }}{{ else }}{{ $top.Values.global.config.auditEnabled | quote }}{{ end }}
+  AUDIT_ENABLE_PRINT_TO_STDOUT: {{ if hasKey $top.Values.workloads.config "auditEnablePrintToStdout" }}{{ $top.Values.workloads.config.auditEnablePrintToStdout | quote }}{{ else }}{{ $top.Values.global.config.auditEnablePrintToStdout | quote }}{{ end }}
+  AUDIT_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.auditService.name ($top.Values.auditService.service.port | toString) | quote }}
+  DB_NAME: {{ $top.Values.workloads.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_HOST: {{ $top.Values.workloads.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SSL_MODE: {{ $top.Values.workloads.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_SCHEMA: {{ $top.Values.workloads.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  DB_VERBOSE_LOGGING: {{ $top.Values.workloads.config.dbVerboseLogging | default $top.Values.global.postgresql.dbVerboseLogging | quote }}
+  DB_PORT: {{ $top.Values.workloads.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  {{- if or ($top.Values.global.postgresql.auth.readHost) ($top.Values.workloads.config.dbReadHost) }}
+  DB_READ_HOST: {{ $top.Values.workloads.config.dbReadHost | default $top.Values.global.postgresql.auth.readHost | quote }}
+  {{- end }}
+  {{- if or ($top.Values.global.postgresql.auth.dbReadPort) ($top.Values.workloads.config.dbReadPort) }}
+  DB_READ_PORT: {{ $top.Values.workloads.config.dbReadPort | default $top.Values.global.postgresql.auth.readPort | quote }}
+  {{- end }}
+  {{- if $top.Values.workloads.config.viewRefreshRateMilli }}
+  VIEW_REFRESH_RATE_MILLI_SECONDS: {{ $top.Values.workloads.config.viewRefreshRateMilli | quote }}
+  {{- end }}
+  TEMP_BACKEND_SETTINGS_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.tempBackendSettings.name ($top.Values.tempBackendSettings.service.port | toString) | quote }}
+  ORG_UNIT_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.orgUnitService.name (toString $top.Values.orgUnitService.service.port) }}
+  DATA_VOLUME_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.datavolumes.name (toString $top.Values.datavolumes.service.port) }}
+  TENANTS_MANAGER_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.tenantsManager.name ($top.Values.tenantsManager.service.port | toString ) }}
+  ASSETS_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.assetsService.name ($top.Values.assetsService.service.port | toString) | quote }}
+  POLICY_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.policyService.name ($top.Values.policyService.service.port | toString) | quote }}
+  CLUSTER_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.clusterService.name ($top.Values.clusterService.service.port | toString) | quote }}
+  K8S_OBJECTS_TRACKER_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.k8sObjectsTracker.name ($top.Values.k8sObjectsTracker.service.port | toString) | quote }}
+  CHART_PUBLIC_BASE_URL: {{ $top.Values.workloads.config.chartPublicBaseUrl | default (printf "https://%s" $top.Values.global.domain) | quote }}
+  CHART_MAX_UPLOAD_BYTES: {{ mul $top.Values.workloads.config.chartUploadMaxSizeMB 1048576 | quote }}
+  CHART_RETENTION_MINUTES: {{ $top.Values.workloads.config.chartRetentionMinutes | quote }}
+  MIGRATION_FILES: {{ $top.Values.workloads.config.migrationFiles | quote }}
+  CLEANER_INTERVAL_HOURS: "24"
+  DELETED_WORKLOADS_DAYS_TO_LIVE: "14"
+  FINISHED_WORKLOADS_DAYS_TO_LIVE: "28"
+  CREATING_WORKLOADS_MINUTES_TO_LIVE: "60"
+  CLUSTER_CACHE_EXPIRATION_SEC: {{ $top.Values.workloads.config.clusterCacheExpirationSeconds | quote }}
+  CLUSTER_CACHE_CLEANUP_SEC: {{ $top.Values.workloads.config.clusterCacheCleanupSeconds | quote }}
+  SKIP_DEFAULT_TRANSACTION: {{ $top.Values.workloads.config.skipDefaultTransaction | quote }}
+  WORKLOADS_BATCH_SIZE: "50"
+
+  {{- $cacheEnabled := $top.Values.workloads.config.cacheEnabled | default false }}
+  CACHE_ENABLED: {{ $cacheEnabled | quote }}
+  {{- if eq (toString $cacheEnabled) "true" }}
+  CACHE_URL: {{ $top.Values.workloads.config.cacheUrl | default $top.Values.global.cache.url | quote }}
+  CACHE_READ_URL: {{ $top.Values.workloads.config.cacheReadUrl | default $top.Values.global.cache.readUrl | quote }}
+  CACHE_TYPE: {{ $top.Values.workloads.config.cacheType | default $top.Values.global.cache.type | quote }}
+  {{- end }}
+  PUBSUB_URL: {{ $top.Values.global.pubsub.url | quote }}
+  PUBSUB_TYPE: {{ $top.Values.global.pubsub.type | quote }}
+  PUBSUB_ENABLE_ADDITIONAL_SUBSCRIBER: {{ $top.Values.global.pubsub.additionalSubscriber.enabled | quote }}
+  {{- if $top.Values.global.pubsub.additionalSubscriber.enabled }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_TYPE: {{ $top.Values.global.pubsub.additionalSubscriber.type | quote }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_URL: {{ $top.Values.global.pubsub.additionalSubscriber.url | quote }}
+  {{- end }}
+{{- end }}

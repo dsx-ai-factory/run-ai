@@ -1,0 +1,6 @@
+description: Rules for the attributes of extendedResources
+properties:
+  quantity:
+    $ref: "../../policy_rules/StringRules.yaml"
+nullable: true
+type: object

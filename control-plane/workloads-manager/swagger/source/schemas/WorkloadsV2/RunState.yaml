@@ -1,0 +1,5 @@
+type: string
+description: The desired run state of the workload.
+enum:
+  - suspend
+  - resume

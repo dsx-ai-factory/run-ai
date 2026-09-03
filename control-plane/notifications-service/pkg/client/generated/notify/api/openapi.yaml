@@ -1,0 +1,173 @@
+openapi: 3.0.3
+info:
+  description: API for notifications-service events listener endpoint
+  title: Notifications Service Notify API
+  version: 0.0.1
+servers:
+- url: /
+tags:
+- description: Notify API
+  name: notify
+paths:
+  /notify:
+    post:
+      description: creates an event to be notify
+      operationId: notify
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Notification"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Bad request - Resource should have a name
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Bad request
+        "429":
+          content:
+            application/json:
+              schema:
+                example: Queue is full
+                type: string
+          description: Queue is full
+      tags:
+      - notify
+  /notify_batch:
+    post:
+      description: creates a batch of events to be notified
+      operationId: notifyBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Notifications"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/notifyBatch_200_response"
+          description: OK
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Bad request - Resource should have a name
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Bad request
+        "429":
+          content:
+            application/json:
+              schema:
+                example: Queue is full
+                type: string
+          description: Queue is full
+      tags:
+      - notify
+components:
+  responses:
+    OkRequest:
+      content:
+        application/json:
+          schema:
+            example: OK
+            type: string
+      description: OK
+    BadRequest:
+      content:
+        application/json:
+          example:
+            code: 400
+            message: Bad request - Resource should have a name
+          schema:
+            $ref: "#/components/schemas/APIError"
+      description: Bad request
+    QueueIsFull:
+      content:
+        application/json:
+          schema:
+            example: Queue is full
+            type: string
+      description: Queue is full
+    OkNotifyBatchResponse:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/notifyBatch_200_response"
+      description: OK
+  schemas:
+    Notification:
+      example:
+        tenant_id: "12345"
+        event_type: event_type
+        properties: "{}"
+      properties:
+        tenant_id:
+          example: "12345"
+          type: string
+        event_type:
+          type: string
+        properties:
+          type: object
+      required:
+      - event_type
+      - properties
+      - tenant_id
+      type: object
+    APIError:
+      example:
+        code: 400
+        message: Bad request - Resource should have a name
+      properties:
+        code:
+          maximum: 599
+          minimum: 100
+          type: integer
+        message:
+          type: string
+        details:
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    Notifications:
+      items:
+        $ref: "#/components/schemas/Notification"
+      type: array
+    notifyBatch_200_response:
+      example:
+        total: 2
+        succeed: 1
+        failed: 1
+      properties:
+        succeed:
+          example: 1
+          type: integer
+        failed:
+          example: 1
+          type: integer
+        total:
+          example: 2
+          type: integer
+      required:
+      - failed
+      - succeed
+      - total
+      type: object

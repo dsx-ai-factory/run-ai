@@ -1,0 +1,10 @@
+type: object
+properties:
+  payload:
+    $ref: "./NodePoolResourcesPatchRequest.yaml"
+  code:
+    type: integer
+    description: HTTP error code.
+  message:
+    type: string
+    description: Error message.

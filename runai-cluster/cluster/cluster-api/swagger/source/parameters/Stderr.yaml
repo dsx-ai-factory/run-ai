@@ -1,0 +1,5 @@
+in: query
+name: stderr
+description: Stdout if true indicates that stdout is to be redirected for the attach call. Defaults to true.
+schema:
+  type: boolean

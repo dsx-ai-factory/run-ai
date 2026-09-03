@@ -1,0 +1,90 @@
+# Thin public stub for the static code analysis lane.
+#
+# The scan itself (SonarQube host, project key, exclusions, self-hosted runner)
+# lives in run-ai/saas-configuration/.github/workflows/static-code-analysis.yml
+# so this repo — which is going public — carries no internal references. Same
+# split already used by pr-trigger.yaml and tag-trigger.yaml.
+#
+# Triggers and the gate below are unchanged from when the scan ran here.
+
+name: Static code analysis
+
+on:
+  push:
+    branches:
+      - "master"
+      - "main"
+      - "v[0-9]+.[0-9]+"
+      - "release-[0-9]+.[0-9]+"
+
+    paths-ignore:
+      - .github/**
+
+  create:
+
+permissions: {}
+
+jobs:
+  gate:
+    if: >-
+      github.event_name == 'push' ||
+      (github.event.ref_type == 'branch' && (startsWith(github.event.ref, 'v') || startsWith(github.event.ref, 'release-')))
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+      ref: ${{ steps.check.outputs.ref }}
+    steps:
+      - id: check
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF: ${{ github.event.ref }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "push" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "ref=${REF_NAME}" >> "$GITHUB_OUTPUT"
+          elif printf '%s' "$REF" | grep -qE '^(v|release-)[0-9]+\.[0-9]+$'; then
+            # `create` event: github.event.ref carries the new branch name,
+            # which github.ref_name does not reliably reflect here.
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            echo "ref=${REF}" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "ref=" >> "$GITHUB_OUTPUT"
+          fi
+
+  dispatch:
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
+    name: Dispatch static code analysis to saas-configuration
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      # toJSON() emits its own quotes — branch names may contain characters that
+      # would otherwise break out of the JSON payload.
+      - name: Cross-repo dispatch to saas-configuration/static-code-analysis.yml
+        uses: benc-uk/workflow-dispatch@31e2b3319479a63f0ab15bf800eff9e913504e26 # v1
+        with:
+          workflow: static-code-analysis.yml
+          repo: run-ai/saas-configuration
+          # the ref should be the branch name of the same branch in the caller repo,
+          # except that saas-configuration has no `main` — map it to `master`. Only the
+          # dispatch `ref:` is mapped; the `ref` INPUT below stays the caller's own ref,
+          # or the scan would analyse master and report against this branch.
+          ref: ${{ (needs.gate.outputs.ref == 'main' || needs.gate.outputs.ref == 'master') && 'master' || needs.gate.outputs.ref }}
+          token: ${{ secrets.GIT_HUB_OSS }}
+          inputs: |
+            {
+              "ref":         ${{ toJSON(needs.gate.outputs.ref) }},
+              "caller_repo": ${{ toJSON(github.repository) }},
+              "repository":  ${{ toJSON(github.repository) }}
+            }

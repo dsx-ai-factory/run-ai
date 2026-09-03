@@ -1,0 +1,5 @@
+#path
+tenantId:
+  $ref: "./path/tenantId.yaml"
+
+#query

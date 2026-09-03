@@ -1,0 +1,9 @@
+# GitHub issue-chooser configuration.
+# Reference: https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository
+
+blank_issues_enabled: false
+
+contact_links:
+  - name: Report a security vulnerability
+    url: https://www.nvidia.com/object/submit-security-vulnerability.html
+    about: Security issues must be reported privately via NVIDIA PSIRT. See SECURITY.md for the GitHub Security Advisory option as well.

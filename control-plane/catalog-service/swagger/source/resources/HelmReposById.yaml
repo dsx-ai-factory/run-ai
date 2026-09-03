@@ -1,0 +1,95 @@
+parameters:
+  - $ref: '../parameters/path/HelmRepoId.yaml'
+get:
+  summary: Get helm repo by id. [Experimental]
+  description: Get helm repo by id.
+  operationId: get_helm_repo_by_id
+  x-service: catalog-service
+  x-internal: true
+  x-authorize:
+    resource-type: registries
+    action: read
+  tags:
+    - HelmRepos
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/helmRepos/HelmRepo.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+put:
+  summary: Update helm repo. [Experimental]
+  description: Update helm repo.
+  operationId: update_helm_repo
+  x-service: catalog-service
+  x-internal: true
+  x-authorize:
+    resource-type: registries
+    action: update
+  tags:
+    - HelmRepos
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/helmRepos/HelmRepoUpdateRequest.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/helmRepos/HelmRepo.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    409:
+      $ref: '../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+delete:
+  summary: Delete helm repo. [Experimental]
+  description: Delete helm repo.
+  operationId: delete_helm_repo
+  x-service: catalog-service
+  x-internal: true
+  x-authorize:
+    resource-type: registries
+    action: delete
+  tags:
+    - HelmRepos
+  responses:
+    202:
+      $ref: '../../../../infra/openapi/docs/responses/202Accepted.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

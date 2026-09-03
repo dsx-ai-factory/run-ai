@@ -1,0 +1,7 @@
+name: projectIds
+in: query
+required: false
+description: The project scope resource ids that we want to filter by.
+schema:
+  type: string
+  example: "1,2"

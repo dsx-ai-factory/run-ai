@@ -1,0 +1,42 @@
+authSecret: ngc-secret
+expose:
+  ingress:
+    enabled: false
+    spec: {}
+  router: {}
+  service:
+    port: 8000
+    type: ClusterIP
+image:
+  repository: nvidia/nim-llama3-8b-instruct
+  tag: 1.0.0
+livenessProbe: {}
+metrics:
+  enabled: true
+  serviceMonitor: {}
+readinessProbe: {}
+replicas: 1
+scale:
+  hpa:
+    maxReplicas: 0
+schedulerName: runai-scheduler
+startupProbe: {}
+storage:
+  nimCache:
+    name: nim-cache
+  pvc: {}
+tolerations:
+- effect: PreferNoSchedule
+  key: dedicated
+  operator: Equal
+  value: ml-workload
+- key: experimental
+  operator: Exists
+- effect: NoSchedule
+  key: nvidia.com/gpu
+  operator: Equal
+  value: v100
+- effect: NoExecute
+  key: node-type
+  operator: Exists
+  tolerationSeconds: 300

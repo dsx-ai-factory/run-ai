@@ -1,0 +1,3 @@
+properties:
+  meta:
+    $ref: "../Credentials/CredentialUpdateRequest.yaml" 

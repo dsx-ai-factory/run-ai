@@ -1,0 +1,17 @@
+description: >-
+  The name of an enforcement type that may be applied to a field. The set of
+  enforcements available for a given field is determined by the field's data
+  type and by whether the field is itemized (has an itemSelector).
+type: string
+enum:
+  - set
+  - default
+  - required
+  - blocked
+  - match
+  - options
+  - length
+  - range
+  - quantityRange
+  - elements
+  - items

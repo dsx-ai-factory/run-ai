@@ -1,0 +1,18 @@
+apiVersion: run.ai/v2alpha1
+kind: InteractiveWorkload
+metadata:
+  creationTimestamp: null
+  name: job-3
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  image:
+    value: ubuntu
+  name:
+    value: job-3
+  dataVolumes:
+    items:
+      dv-0:
+        value:
+          mountPath: /tmp/claim0
+          id: 5e0445ea-6d67-4641-a791-b4a372ef722c

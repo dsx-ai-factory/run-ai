@@ -1,0 +1,9 @@
+type: object
+required:
+- logo
+properties:
+  logo:
+    type: string
+    description: Base64 logo file
+    minLength: 1
+    maxLength: 500000

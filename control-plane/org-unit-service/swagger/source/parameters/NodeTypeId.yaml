@@ -1,0 +1,7 @@
+name: nodeTypeId
+in: path
+required: true
+description: The node-type id
+example: 575c19e8-c7c3-45b0-8290-2f47397a8383
+schema:
+  type: string

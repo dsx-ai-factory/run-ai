@@ -1,0 +1,106 @@
+apiVersion: kubeflow.org/v1
+kind: JAXJob
+metadata:
+  annotations:
+    image: ubuntu
+    template: job-0-20220125-034942
+    user: user.name
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: jaxjob
+    createdBy: JAXJob
+    project: team-a
+    release: job-0
+    run.ai/top-owner-uid: b5efa366-77be-4da3-1234-b59483d02a99
+    workloadKind: DistributedWorkload
+    workloadName: job-0-20220125-034942
+  name: job-0
+  namespace: runai-team-a
+spec:
+  jaxReplicaSpecs:
+    Worker:
+      replicas: 3
+      template:
+        metadata:
+          annotations:
+            gpu-fraction-num-devices: "1"
+            gpu-memory: "120"
+            runai-nodepools: mnnvl-node-2 mnnvl-node-1
+            totalGPUs: "0"
+            totalGPUsMemory: "360"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-1234-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-0-20220125-034942
+        spec:
+          affinity:
+            nodeAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+              - preference:
+                  matchExpressions:
+                  - key: custom.run.ai/mnnvl-key
+                    operator: Exists
+                weight: 10
+              - preference:
+                  matchExpressions:
+                  - key: nvidia.com/gpu.imex-domain
+                    operator: Exists
+                weight: 10
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: nodepool-key-2
+                    operator: In
+                    values:
+                    - nodepool-value-2
+                - matchExpressions:
+                  - key: nodepool-key-1
+                    operator: In
+                    values:
+                    - nodepool-value-1
+            podAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+              - podAffinityTerm:
+                  labelSelector:
+                    matchLabels:
+                      run.ai/top-owner-uid: b5efa366-77be-4da3-1234-b59483d02a99
+                  topologyKey: custom.run.ai/mnnvl-key
+                weight: 10
+              - podAffinityTerm:
+                  labelSelector:
+                    matchLabels:
+                      run.ai/top-owner-uid: b5efa366-77be-4da3-1234-b59483d02a99
+                  topologyKey: nvidia.com/gpu.imex-domain
+                weight: 10
+          containers:
+          - env:
+            - name: ENV_0
+              value: env0
+            - name: ENV_1
+              value: env1
+            image: ubuntu
+            imagePullPolicy: Always
+            name: jax
+            resources:
+              claims:
+              - name: compute-domain
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              seccompProfile:
+                type: Unconfined
+          resourceClaims:
+          - name: compute-domain
+            resourceClaimTemplateName: cd-dw-job-0-20220125-034942
+          schedulerName: runai-scheduler
+          tolerations:
+          - key: aaa
+            operator: Exists
+  runPolicy:
+    backoffLimit: 5
+    cleanPodPolicy: None
+status: {}

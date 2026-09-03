@@ -1,0 +1,33 @@
+errors:
+- code: 400
+  message: 'field port-protocol failed blocked validation: must not be set (path=".spec.template.spec.containers[2].ports[0].protocol")'
+policy:
+  effectiveRules:
+  - enforcements:
+    - blocked: true
+    field: port-protocol
+    itemSelector: allPorts
+    sourceOfRule: null
+    specSelector: allContainers
+  workloadType:
+    group: apps
+    kind: Deployment
+    version: v1
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: blocked-port-protocol
+  spec:
+    template:
+      spec:
+        containers:
+        - name: no-ports
+        - name: ports-without-protocol
+          ports:
+          - containerPort: 80
+          - containerPort: 8080
+        - name: ports-with-protocol
+          ports:
+          - containerPort: 443
+            protocol: TCP

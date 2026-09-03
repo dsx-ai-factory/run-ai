@@ -1,0 +1,64 @@
+type: object
+required:
+  - id
+  - name
+  - hierarchyLevel
+properties:
+  id:
+    type: string
+    description: The unique identifier of the structure element.
+    format: uuid
+  name:
+    type: string
+    description: The display name of the structure element.
+    maxLength: 250
+  hierarchyLevel:
+    type: integer
+    format: int32
+    description: The position of the element in the workload structure hierarchy. Valid values are 1 (top-level), 2, and 3.
+    minimum: 1
+    maximum: 3
+  parentId:
+    type: string
+    nullable: true
+    description: The unique identifier of the parent element. Empty for level 1 elements, whose parent is implicitly the workload.
+    format: uuid
+  instanceKey:
+    x-internal: true
+    type: string
+    nullable: true
+    description: Instance identifier from ComponentInstanceSelector (e.g., Frontend, PrefillWorker)
+  replicaKey:
+    x-internal: true
+    type: string
+    nullable: true
+    description: Replica identifier if applicable
+  createdAt:
+    type: string
+    format: date-time
+    example: 2022-01-01T03:49:52.531Z
+    description: The timestamp when the structure element was created.
+  kubernetesRef:
+    type: object
+    nullable: true
+    description: Reference to the backing K8s object. Present for object-backed elements, nil for logical elements.
+    properties:
+      uid:
+        description: The unique identifier (UID) of the Kubernetes object backing this element.
+        type: string
+      name:
+        description: The name of the Kubernetes object backing this element.
+        type: string
+      gvk:
+        description: The group, version and kind of the Kubernetes resource.
+        type: object
+        properties:
+          group:
+            description: The API group of the Kubernetes resource (for example, apps or batch).
+            type: string
+          version:
+            description: The API version of the Kubernetes resource (for example, v1 or v1beta1).
+            type: string
+          kind:
+            description: The kind of the Kubernetes resource (for example, Deployment or Job).
+            type: string

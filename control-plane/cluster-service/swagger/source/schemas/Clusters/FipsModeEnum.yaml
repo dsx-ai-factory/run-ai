@@ -1,0 +1,8 @@
+type: string
+nullable: true
+enum:
+  - "off"
+  - "on"
+  - "only"
+description: the cluster's Go FIPS 140-3 runtime mode (off, on, or only), propagated to injected init/sidecar containers via GODEBUG
+example: only

@@ -1,0 +1,91 @@
+parameters:
+  - $ref: "../../../../infra/openapi/docs/parameters/path/AssetId.yaml"
+get:
+  tags:
+    - Registry
+  summary: Get a registry.
+  description: Retrieve a registry asset by id.
+  operationId: get_registry_by_id
+  x-service: assets-service
+  x-authorize:
+    resource-type: credentials
+    action: read
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_registry_service_test.go
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Registry/Registry.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+delete:
+  tags:
+    - Registry
+  summary: Delete a registry asset.
+  description: Use to delete a registry asset containing registry base url and credentials by id.
+  operationId: delete_registry
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_registry_service_test.go
+  x-authorize:
+    resource-type: credentials
+    action: delete
+  x-audit: true
+  responses:
+    204:
+      description: Registry has been deleted.
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+put:
+  tags:
+    - Registry
+  summary: Update a registry asset.
+  description: Use to update a registry asset containing registry base url and credentials by id.
+  operationId: update_registry
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_registry_service_test.go
+  x-authorize:
+    resource-type: credentials
+    action: update
+  x-audit: true
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Registry/RegistryUpdateRequest.yaml"
+  responses:
+    200:
+      description: Request accepted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Registry/Registry.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    409:
+      $ref: "../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

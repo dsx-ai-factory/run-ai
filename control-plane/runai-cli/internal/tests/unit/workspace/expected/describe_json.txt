@@ -1,0 +1,245 @@
+{
+  "general": {
+    "name": "my-workspace-demo-123",
+    "id": "eeaac0d9-db0b-4053-9839-86b808e4a7c5",
+    "type": "Workspace",
+    "phase": "Pending",
+    "project": "team-b",
+    "department": "default",
+    "createdAt": "2025-12-15T08:58:28.691571Z",
+    "updatedAt": "2025-12-15T08:59:22.514455Z",
+    "submittedBy": "test@run.ai",
+    "priority": "high (125)",
+    "category": "Build",
+    "environmentVariables": {
+      "JUPYTER_ENABLE_LAB": "yes",
+      "RUNAI_JOB_NAME": "${RUNAI_JOB_NAME}",
+      "RUNAI_PROJECT": "${RUNAI_PROJECT}",
+      "USER": "developer",
+      "WORKSPACE": "demo"
+    },
+    "command": "start-notebook.sh --NotebookApp.token= --NotebookApp.password=",
+    "cliCommand": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai workspace submit my-workspace-demo-123 --project team-b --image jupyter/scipy-notebook --image-pull-policy IfNotPresent -g 1 --stdin --tty --port service-type=NodePort,container=8888,external=31888 --external-url container=8888,authusers=user1:user2:demo-user --environment-variable USER=developer --environment-variable WORKSPACE=demo --environment-variable JUPYTER_ENABLE_LAB=yes --label team=ml-platform --label purpose=development --label tool=jupyter --annotation 'description=Jupyter workspace with auth' --existing-pvc claimname=my-simple-pvc,path=/home/jovyan/work --restart-policy OnFailure --working-dir /home/jovyan --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 100 --capability NET_BIND_SERVICE --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --command -- start-notebook.sh --NotebookApp.token= --NotebookApp.password="
+  },
+  "workloadDetails": {
+    "preemptible": false,
+    "images": [
+      "jupyter/scipy-notebook"
+    ],
+    "imagePullPolicy": "IfNotPresent",
+    "workingDir": "/home/jovyan",
+    "nodeType": "gpu-nodes",
+    "runAsUser": 1000,
+    "runAsGroup": 100,
+    "capabilities": [
+      "NET_BIND_SERVICE"
+    ],
+    "tolerations": [
+      "nvidia.com/gpu=true:NoSchedule"
+    ]
+  },
+  "compute": {
+    "requestedResources": {
+      "gpuCompute": {
+        "requested": 1
+      },
+      "cpuCores": {
+        "requested": 0
+      },
+      "gpuMemory": {
+        "request": "",
+        "limit": ""
+      },
+      "cpuMemory": {
+        "request": "",
+        "limit": ""
+      }
+    },
+    "allocatedResources": {
+      "gpuCompute": 0,
+      "cpuCores": 0,
+      "gpuMemory": "",
+      "cpuMemory": ""
+    },
+    "requestedNodePools": [
+      "default"
+    ]
+  },
+  "storage": {
+    "pvcs": [
+      {
+        "name": "my-simple-pvc",
+        "mountPath": "/local/pvc",
+        "readOnly": false
+      },
+      {
+        "name": "claim-24mqhfjj7j",
+        "mountPath": "/local/vol",
+        "size": "1G",
+        "ephemeral": false,
+        "storageClass": "standard"
+      }
+    ],
+    "gits": [
+      {
+        "name": "https://github.com/run-ai",
+        "mountPath": "/git"
+      }
+    ],
+    "hostPaths": [
+      {
+        "name": "/host/path",
+        "mountPath": "/hostpath"
+      }
+    ],
+    "s3s": [
+      {
+        "name": "bucket-name",
+        "mountPath": "/s3"
+      }
+    ]
+  },
+  "networks": [
+    {
+      "name": "url",
+      "toolType": "custom",
+      "connectionType": "ExternalUrl",
+      "url": "https://nael-env-001.runailabs.com/team-b/my-workspace-demo-123",
+      "authorizedUsers": [
+        "user1",
+        "user2",
+        "demo-user"
+      ],
+      "port": 8888
+    },
+    {
+      "name": "port",
+      "toolType": "",
+      "connectionType": "NodePort",
+      "url": "172.18.0.2:31888",
+      "port": 8888
+    }
+  ],
+  "events": [
+    {
+      "createdAt": "2025-12-15T08:58:39Z",
+      "id": "6b891b05-4548-4c48-a50b-a5b7d5487dce",
+      "message": "PodSchedulingErrors: Resources were not found for pod runai-team-b/my-workspace-demo-123-0-0 due to: no nodes with enough resources were found: 1 node(s) didn't match Pod's node affinity/selector. \n3 node(s) didn't have enough resources: GPUs.\n",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "15dc8efe-d782-435a-af50-53f06f82002c",
+        "kind": "PodGroup",
+        "name": "pg-my-workspace-demo-123-0-4229a79c-e60f-43be-a713-30a1dd3a71f0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:39Z",
+      "id": "404bdd91-e5dc-4bd1-bfbe-85c88ac48d92",
+      "message": "\n\u003crunai-cluster-control-plane\u003e: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.\n\u003crunai-cluster-system-0-0\u003e: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.\n\u003crunai-cluster-system-0-1\u003e: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.\n\u003crunai-cluster-worker-0-0\u003e: node(s) didn't match Pod's node affinity/selector.\nno nodes with enough resources were found.",
+      "reason": "Unschedulable",
+      "source": "runai-scheduler",
+      "involvedObject": {
+        "uid": "481e81be-add5-45d3-984f-6c140eb5eff9",
+        "kind": "Pod",
+        "name": "my-workspace-demo-123-0-0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:36Z",
+      "id": "f196f573-25b3-4623-bc89-78a79d777b69",
+      "message": "Job status is Pending",
+      "reason": "Pending",
+      "source": "status-updater",
+      "involvedObject": {
+        "uid": "15dc8efe-d782-435a-af50-53f06f82002c",
+        "kind": "PodGroup",
+        "name": "pg-my-workspace-demo-123-0-4229a79c-e60f-43be-a713-30a1dd3a71f0",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:34Z",
+      "id": "f3252690-6324-4cb3-879e-db1bede73715",
+      "message": "Created pod: my-workspace-demo-123-0-0",
+      "reason": "SuccessfulCreate",
+      "source": "runaijobcontroller",
+      "involvedObject": {
+        "uid": "4229a79c-e60f-43be-a713-30a1dd3a71f0",
+        "kind": "RunaiJob",
+        "name": "my-workspace-demo-123",
+        "namespace": "runai-team-b"
+      }
+    },
+    {
+      "createdAt": "2025-12-15T08:58:34Z",
+      "id": "f29ff3a9-cc24-4de6-9600-f3b8b6be1013",
+      "message": "Scheduled for sync",
+      "reason": "Sync",
+      "source": "nginx-ingress-controller",
+      "involvedObject": {
+        "uid": "502cffec-099f-4605-a0cf-af6f50a9b50f",
+        "kind": "Ingress",
+        "name": "iw-my-workspace-demo-123-0",
+        "namespace": "runai-team-b"
+      }
+    }
+  ],
+  "podsInfo": {
+    "pods": [
+      {
+        "name": "my-workspace-demo-123-0-0",
+        "k8sPhase": "Pending",
+        "containers": [
+          {
+            "name": "my-workspace-demo-123",
+            "image": "jupyter/scipy-notebook"
+          }
+        ]
+      }
+    ],
+    "runningPods": 0
+  },
+  "spec": {
+    "podLabels": [
+      {
+        "name": "team",
+        "value": "ml-platform"
+      },
+      {
+        "name": "purpose",
+        "value": "development"
+      },
+      {
+        "name": "tool",
+        "value": "jupyter"
+      }
+    ],
+    "annotations": [
+      {
+        "name": "description",
+        "value": "Jupyter workspace with auth"
+      },
+      {
+        "name": "runai-submit-command",
+        "value": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai workspace submit my-workspace-demo-123 --project team-b --image jupyter/scipy-notebook --image-pull-policy IfNotPresent -g 1 --stdin --tty --port service-type=NodePort,container=8888,external=31888 --external-url container=8888,authusers=user1:user2:demo-user --environment-variable USER=developer --environment-variable WORKSPACE=demo --environment-variable JUPYTER_ENABLE_LAB=yes --label team=ml-platform --label purpose=development --label tool=jupyter --annotation 'description=Jupyter workspace with auth' --existing-pvc claimname=my-simple-pvc,path=/home/jovyan/work --restart-policy OnFailure --working-dir /home/jovyan --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 100 --capability NET_BIND_SERVICE --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --command -- start-notebook.sh --NotebookApp.token= --NotebookApp.password="
+      }
+    ],
+    "autoScaling": {},
+    "runaiCliCommand": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai workspace submit my-workspace-demo-123 --project team-b --image jupyter/scipy-notebook --image-pull-policy IfNotPresent -g 1 --stdin --tty --port service-type=NodePort,container=8888,external=31888 --external-url container=8888,authusers=user1:user2:demo-user --environment-variable USER=developer --environment-variable WORKSPACE=demo --environment-variable JUPYTER_ENABLE_LAB=yes --label team=ml-platform --label purpose=development --label tool=jupyter --annotation 'description=Jupyter workspace with auth' --existing-pvc claimname=my-simple-pvc,path=/home/jovyan/work --restart-policy OnFailure --working-dir /home/jovyan --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 100 --capability NET_BIND_SERVICE --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --command -- start-notebook.sh --NotebookApp.token= --NotebookApp.password=",
+    "servingConfiguration": {},
+    "exposedUrls": [
+      {
+        "authorizedUsers": [
+          "user1",
+          "user2",
+          "demo-user"
+        ],
+        "container": 8888
+      }
+    ]
+  },
+  "GPUAcceleration": null
+}

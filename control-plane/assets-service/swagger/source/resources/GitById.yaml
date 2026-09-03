@@ -1,0 +1,101 @@
+parameters:
+  - $ref: "../../../../infra/openapi/docs/parameters/path/AssetId.yaml"
+get:
+  summary: Get a Git asset.
+  description: Use to retrieve the details of a Git datasource asset by id.
+  operationId: get_git_asset_by_id
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_datasources_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - control-plane/assets-service/pkg/services/api_git_service_test.go
+    - e2e/src/test/suites/parallel/dataSource/dataSourceUI.test.ts
+  x-authorize:
+    resource-type: git-assets
+    action: read
+  tags:
+    - Git
+  parameters:
+    - $ref: "../parameters/query/optional/IncludeUsageInfo.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToProject.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToWorkloadType.yaml"
+    - $ref: "../parameters/query/optional/IncludeStatus.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToReplicaType.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Git/GitAsset.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+put:
+  summary: Update a Git asset.
+  description: Use to update the details of Git datasource asset by id.
+  operationId: update_git_asset_by_id
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_datasources_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - control-plane/assets-service/pkg/services/api_git_service_test.go
+    - e2e/src/test/suites/parallel/dataSource/dataSourceUI.test.ts
+  x-authorize:
+    resource-type: git-assets
+    action: update
+  x-audit: true
+  tags:
+    - Git
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Git/GitUpdateRequest.yaml"
+  responses:
+    202:
+      description: Request accepted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Git/GitAsset.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    default:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+delete:
+  summary: Delete a Git asset.
+  description: Use to delete a Git datasource asset by id.
+  operationId: delete_git_asset_by_id
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_datasources_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - control-plane/assets-service/pkg/services/api_git_service_test.go
+    - e2e/src/test/suites/parallel/dataSource/dataSourceUI.test.ts
+  x-authorize:
+    resource-type: git-assets
+    action: delete
+  x-audit: true
+  tags:
+    - Git
+  responses:
+    202:
+      $ref: "../../../../infra/openapi/docs/responses/202Accepted.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

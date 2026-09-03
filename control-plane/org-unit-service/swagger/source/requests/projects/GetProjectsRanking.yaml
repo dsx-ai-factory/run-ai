@@ -1,0 +1,55 @@
+get:
+  summary:  Get top 15 projects by highest or lowest average resource utilization, allocation, or allocation ratio
+  operationId: get_projects_ranking
+  x-service: org-unit-service
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/project_api_test.go
+  description: Get top 15 projects by highest or lowest average resource utilization, allocation, or allocation ratio (gpuAllocationRatio)
+  x-authorize:
+    resource-type: project
+    action: read
+  x-internal: true
+  tags:
+    - Projects
+  parameters:
+    - $ref: '../../parameters/OrgUnitRankingMetricType.yaml'
+    - $ref: '../../parameters/OrgUnitRankingOrderType.yaml'
+    - name: clusterId
+      in: query
+      required: true
+      schema:
+        type: string
+    - name: nodepoolName
+      description: The name of the node pool to filter by
+      in: query
+      required: false
+      schema:
+        type: string
+    - name: departmentId
+      description: Filter projects by department ID. If the department does not exist or belongs to a different cluster, an empty list is returned.
+      in: query
+      required: false
+      schema:
+        type: string
+  responses:
+    200:
+      description: ok
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - projects
+            properties:
+              projects:
+                type: array
+                items:
+                  $ref: "../../schemas/projects/ProjectGetRanking.yaml"
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

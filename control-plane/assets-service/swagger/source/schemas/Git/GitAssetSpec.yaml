@@ -1,0 +1,4 @@
+allOf:
+  - $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/GitCommon.yaml"
+  - $ref: "./GitPasswordAsset.yaml"
+  - $ref: "./GitCredentialId.yaml"

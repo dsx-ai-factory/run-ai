@@ -1,0 +1,13 @@
+spec:
+  existingPvc: false
+  claimName: non-existing-claim
+  path: /my/non/existing/pvc/path
+  readOnly: true
+  claimInfo:
+    size: 1G
+    storageClass: my-storage-class
+    accessModes:
+      readWriteOnce: true
+      readOnlyMany: false
+      readWriteMany: false
+    volumeMode: Filesystem

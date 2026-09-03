@@ -1,0 +1,3 @@
+# Exclude cookiecutter template directory from Go tools
+{{cookiecutter.app_name}}/
+

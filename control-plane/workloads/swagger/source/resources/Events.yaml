@@ -1,0 +1,32 @@
+post:
+  x-internal: true
+  summary: Sync events.
+  operationId: sync_events
+  x-service: workloads
+  x-test-coverage:
+    - e2e/src/test/suites/advancedSuite/workloads/workloadsApi.test.ts
+    - e2e/src/test/suites/parallel/workloads/jobsStatus.test.ts
+  x-authorize:
+    resource-type: events-history
+    action: sync
+  tags:
+    - Events
+  requestBody:
+    description: The events to sync.
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Events/EventsSyncRequest.yaml'
+  responses:
+    204:
+      $ref: '../../../../infra/openapi/docs/responses/204NoContent.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,19 @@
+type: object
+required:
+  - name
+  - displayName
+properties:
+  name:
+    type: string
+    maxLength: 250
+    minLength: 1
+    example: gpu_allocation_hours
+  displayName:
+    type: string
+    maxLength: 250
+    minLength: 1
+    example: GPU allocation hours
+  filters:
+    $ref: './Filters.yaml'
+  quantile:
+    $ref: './Quantile.yaml'

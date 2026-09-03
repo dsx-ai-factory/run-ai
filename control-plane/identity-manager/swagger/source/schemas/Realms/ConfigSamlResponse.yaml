@@ -1,0 +1,12 @@
+type: object
+required:
+  - entity_id
+  - redirect_uri
+properties:
+  entity_id:
+    type: string
+  redirect_uri:
+    type: string
+example:
+  entity_id: f84d2fcf-8a61-4136-9b75-d06f496ca1f2
+  redirect_uri: app.run.ai/auth/realms/runai/broker/saml/endpoint

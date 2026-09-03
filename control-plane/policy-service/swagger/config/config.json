@@ -1,0 +1,7 @@
+{
+  "packageVersion" : "1.19",
+  "gitUserId" : "run-ai",
+  "gitRepoId" : "backend/policy-service",
+  "sourceFolder" : "pkg/api",
+  "packageName" : "api"
+}

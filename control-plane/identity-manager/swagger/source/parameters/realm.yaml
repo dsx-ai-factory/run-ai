@@ -1,0 +1,6 @@
+name: realm
+in: path
+required: true
+description: The name of the realm
+schema:
+  type: string

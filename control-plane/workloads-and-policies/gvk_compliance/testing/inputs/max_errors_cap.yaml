@@ -1,0 +1,57 @@
+policy:
+  id: test-policy
+  # Five independent rules each producing one validation error. The test
+  # harness runs Apply with maxErrors=2, so only the first two should land
+  # in the result and the remaining rules should be skipped entirely once
+  # the cap is hit.
+  effectiveRules:
+    - field: a
+      specSelector: self
+      enforcements: [{ range: { max: 5 } }]
+    - field: b
+      specSelector: self
+      enforcements: [{ range: { max: 5 } }]
+    - field: c
+      specSelector: self
+      enforcements: [{ range: { max: 5 } }]
+    - field: d
+      specSelector: self
+      enforcements: [{ range: { max: 5 } }]
+    - field: e
+      specSelector: self
+      enforcements: [{ range: { max: 5 } }]
+
+  breakdown:
+    fields:
+      a:
+        - specSelectors: [self]
+          specRef: a
+          formatter: { builtin: KeyValue }
+      b:
+        - specSelectors: [self]
+          specRef: b
+          formatter: { builtin: KeyValue }
+      c:
+        - specSelectors: [self]
+          specRef: c
+          formatter: { builtin: KeyValue }
+      d:
+        - specSelectors: [self]
+          specRef: d
+          formatter: { builtin: KeyValue }
+      e:
+        - specSelectors: [self]
+          specRef: e
+          formatter: { builtin: KeyValue }
+    specSelectors:
+      self:
+        query: "."
+
+workload:
+  apiVersion: test/v1
+  kind: Synthetic
+  a: 10
+  b: 10
+  c: 10
+  d: 10
+  e: 10

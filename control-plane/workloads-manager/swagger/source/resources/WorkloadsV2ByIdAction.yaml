@@ -1,0 +1,42 @@
+post:
+  summary: Perform an action on a workload.
+  description: Suspend or resume a specific workload by ID.
+  operationId: perform_workload_action
+  x-service: workloads-manager
+  x-test-coverage:
+    - control-plane/workloads-manager/pkg/services/services_test.go
+  x-authorize:
+    resource-type: workloads
+    action: update
+  x-internal: true
+  tags:
+    - Workloads V2
+  parameters:
+    - $ref: '../parameters/path/WorkloadV2Id.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/WorkloadsV2/WorkloadActionRequest.yaml'
+  responses:
+    202:
+      description: Action request accepted.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/WorkloadsV2/WorkloadV2.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    409:
+      $ref: '../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,7 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: authorizedUsers
+  authorizedUsers:
+    - alice@example.com
+    - bob@example.com

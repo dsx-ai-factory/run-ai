@@ -1,0 +1,16 @@
+description: Information of the external tool.
+required:
+  - toolType
+  - externalUrl
+properties:
+  toolType:
+    $ref: "./ExternalToolType.yaml"
+  externalUrl:
+    description: The external url for connecting to the external tool.
+      The url can include environment variables that will be replaced
+      with the value provided for those variables when the workspace is created.
+    example: 'https://wandb.com/myteam/${PROJECT_NAME}'
+    type: string
+    minLength: 1
+nullable: true
+type: object

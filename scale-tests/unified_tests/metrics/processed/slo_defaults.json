@@ -1,0 +1,129 @@
+{
+  "scale_groups": [
+    {
+      "group_name": "many-nodes-per-nodepool",
+      "metrics": [
+        {
+          "metric_name": "workload_first_pod_creation",
+          "p95_value_ms": 1626000
+        },
+        {
+          "metric_name": "workload_pod_scheduling",
+          "p95_value_ms": 645000
+        },
+        {
+          "metric_name": "workload_sync_to_cluster",
+          "p95_value_ms": 20380
+        },
+        {
+          "metric_name": "workload_sync_to_control_plane",
+          "p95_value_ms": 354844
+        },
+        {
+          "metric_name": "workload_whole_lifecycle",
+          "p95_value_ms": 2596184
+        }
+      ]
+    },
+    {
+      "group_name": "many-workloads",
+      "metrics": [
+        {
+          "metric_name": "workload_sync_to_control_plane",
+          "p95_value_ms": 1822128
+        },
+        {
+          "metric_name": "workload_whole_lifecycle",
+          "p95_value_ms": 2958475
+        },
+        {
+          "metric_name": "workload_first_pod_creation",
+          "p95_value_ms": 1648000
+        },
+        {
+          "metric_name": "workload_pod_scheduling",
+          "p95_value_ms": 418000
+        },
+        {
+          "metric_name": "workload_sync_to_cluster",
+          "p95_value_ms": 66347
+        }
+      ]
+    },
+    {
+      "group_name": "many-all",
+      "metrics": [
+        {
+          "metric_name": "workload_sync_to_control_plane",
+          "p95_value_ms": 1642485
+        },
+        {
+          "metric_name": "workload_whole_lifecycle",
+          "p95_value_ms": 2997211
+        },
+        {
+          "metric_name": "workload_first_pod_creation",
+          "p95_value_ms": 5256000
+        },
+        {
+          "metric_name": "workload_pod_scheduling",
+          "p95_value_ms": 298000
+        },
+        {
+          "metric_name": "workload_sync_to_cluster",
+          "p95_value_ms": 109085
+        }
+      ]
+    },
+    {
+      "group_name": "many-projects",
+      "metrics": [
+        {
+          "metric_name": "workload_first_pod_creation",
+          "p95_value_ms": 981000
+        },
+        {
+          "metric_name": "workload_pod_scheduling",
+          "p95_value_ms": 65000
+        },
+        {
+          "metric_name": "workload_sync_to_cluster",
+          "p95_value_ms": 17467
+        },
+        {
+          "metric_name": "workload_sync_to_control_plane",
+          "p95_value_ms": 1015
+        },
+        {
+          "metric_name": "workload_whole_lifecycle",
+          "p95_value_ms": 1235705
+        }
+      ]
+    },
+    {
+      "group_name": "real-gpus",
+      "metrics": [
+        {
+          "metric_name": "workload_first_pod_creation",
+          "p95_value_ms": 22000
+        },
+        {
+          "metric_name": "workload_pod_scheduling",
+          "p95_value_ms": 38000
+        },
+        {
+          "metric_name": "workload_sync_to_cluster",
+          "p95_value_ms": 8703
+        },
+        {
+          "metric_name": "workload_sync_to_control_plane",
+          "p95_value_ms": 21158
+        },
+        {
+          "metric_name": "workload_whole_lifecycle",
+          "p95_value_ms": 246027
+        }
+      ]
+    }
+  ]
+}

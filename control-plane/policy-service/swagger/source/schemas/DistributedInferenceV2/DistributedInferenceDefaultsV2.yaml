@@ -1,0 +1,4 @@
+allOf:
+  - $ref: "./DistributedInferenceCommonDefaultsV2.yaml"
+  - $ref: "./DistributedInferenceLeaderDefaults.yaml"
+  - $ref: "./DistributedInferenceWorkerDefaults.yaml"

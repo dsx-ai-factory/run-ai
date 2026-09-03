@@ -1,0 +1,29 @@
+get:
+  summary: Get cluster minimal data by id
+  operationId: get_cluster_minimal_data_by_id
+  x-service: cluster-service
+  description: Retrieve essential data for a specific cluster by ID required for common operations (e.g., workload submission)
+  x-authorize:
+    resource-type: clusters-minimal
+    action: read
+    resource-id: clusterUuid
+  x-test-coverage:
+    - cluster-service/pkg/services/api_clusters_service_test.go
+  tags:
+    - Clusters
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+  responses:
+    200:
+      description: ok
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Clusters/ClustersMinimalData.yaml"
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+

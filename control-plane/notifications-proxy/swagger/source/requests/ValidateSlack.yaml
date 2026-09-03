@@ -1,0 +1,40 @@
+post:
+  x-authorize:
+    resource-type: notification-settings
+    action: read
+  x-service: notifications-proxy
+  x-test-coverage:
+    - src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts
+  tags:
+    - Slack
+  operationId: validateSlack
+  summary: Validate configuration of Slack Channel
+  description: Validate configuration of Slack Channel
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/SlackNotificationChannelConfig.yaml'
+  responses:
+    '200':
+      description: Slack Channel validity
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/ValidateSinkResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    409:
+      $ref: '../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    501:
+      $ref: '../../../../infra/openapi/docs/responses/501NotImplemented.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

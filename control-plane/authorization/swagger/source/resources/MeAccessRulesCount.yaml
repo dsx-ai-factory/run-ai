@@ -1,0 +1,32 @@
+get:
+  summary: Count the access rules assigned to the requesting user.
+  description: Use to retrieve the number of access rules assigned to the requesting user.
+  operationId: count_me_access_rules
+  x-service: authorization
+  x-test-coverage:
+    - control-plane/authorization/pkg/services/me_api_test.go
+  x-no-authorization: true
+  tags:
+    - Me
+  parameters:
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Search.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - count
+            properties:
+              count:
+                type: integer
+                format: int64
+                example: 1
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

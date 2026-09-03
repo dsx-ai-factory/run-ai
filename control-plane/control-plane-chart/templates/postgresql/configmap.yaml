@@ -1,0 +1,13 @@
+{{- if and .Values.postgresql.enabled .Values.postgresql.tls.enabled }}
+{{- include "common.configMap" (list . .Values.postgresql "control-plane.postgresql.configmap") }}
+{{- end }}
+
+{{- define "control-plane.postgresql.configmap" -}}
+data:
+  pg_hba.conf: |
+    hostssl all             all             0.0.0.0/0               md5
+    hostssl all             all             ::/0                    md5
+    local   all             all                                     md5
+    hostssl all             all             127.0.0.1/32            md5
+    hostssl all             all             ::1/128                 md5
+{{- end }}

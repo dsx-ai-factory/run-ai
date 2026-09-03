@@ -1,0 +1,42 @@
+apiVersion: optimization.nvidia.com/v1alpha1
+kind: ResourceInterface
+metadata:
+  creationTimestamp: "2026-05-10T06:38:29Z"
+  finalizers:
+  - rid.kai.bolt/finalize
+  generation: 1
+  labels:
+    run.ai/resource-interface-group: machinelearning.seldon.io
+    run.ai/resource-interface-kind: SeldonDeployment
+    run.ai/resource-interface-updated-at: 2026-05-10T06-35-07Z
+    run.ai/resource-interface-version: v1
+    run.ai/workload-type-id: 01eef2d4-00a1-469d-9a86-8092a8cd7dd5
+  name: ri-v1-machinelearning-seldon-io-seldondeployment
+  resourceVersion: "8314"
+  uid: 646ddf84-e370-4ee1-9e6c-374a0e2ad1be
+spec:
+  optimizationInstructions: {}
+  structureDefinition:
+    rootComponent:
+      kind:
+        group: machinelearning.seldon.io
+        kind: SeldonDeployment
+        version: v1
+      name: ""
+status:
+  conditions:
+  - lastTransitionTime: "2026-05-10T06:38:30Z"
+    message: The CustomResourceDefinition for the group/kind does not exist
+    reason: CRDExists
+    status: "False"
+    type: CRDExists
+  - lastTransitionTime: "2026-05-10T06:38:30Z"
+    message: The RBAC permissions for the group/kind are not ready
+    reason: RBACReady
+    status: "False"
+    type: RBACReady
+  - lastTransitionTime: "2026-05-10T06:38:30Z"
+    message: The sync is not enabled
+    reason: SyncEnabled
+    status: "False"
+    type: SyncEnabled

@@ -1,0 +1,20 @@
+description: Resource requests and limits reported by a cluster for a composed container.
+type: object
+properties:
+  limits:
+    type: object
+    additionalProperties:
+      type: string
+    description: Resource limits keyed by Kubernetes resource name.
+    example:
+      cpu: 100m
+      memory: 128Mi
+  requests:
+    type: object
+    additionalProperties:
+      type: string
+    description: Resource requests keyed by Kubernetes resource name.
+    example:
+      cpu: 100m
+      memory: 128Mi
+nullable: true

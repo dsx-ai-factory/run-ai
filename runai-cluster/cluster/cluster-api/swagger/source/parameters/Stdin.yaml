@@ -1,0 +1,5 @@
+in: query
+name: stdin
+description: Stdin if true, redirects the standard input stream of the pod for this call. Defaults to false.
+schema:
+  type: boolean

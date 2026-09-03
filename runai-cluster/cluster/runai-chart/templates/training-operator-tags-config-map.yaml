@@ -1,0 +1,10 @@
+{{- if index .Values "operands" "trainingOperator" "enabled" -}}
+{{- $tags := index .Values "trainingOperatorImageTags" -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: training-operator-tags-config
+  namespace: runai
+data:
+{{- $tags | toYaml | nindent 2 -}}
+{{- end -}}

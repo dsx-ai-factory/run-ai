@@ -1,0 +1,5 @@
+in: query
+name: follow
+description: Follow the log stream of the pod. Defaults to false.
+schema:
+  type: boolean

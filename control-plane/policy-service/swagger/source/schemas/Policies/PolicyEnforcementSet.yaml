@@ -1,0 +1,10 @@
+type: object
+properties:
+  set:
+    type: object
+    description: Enforces the value of the field.
+    additionalProperties: true
+example:
+  set:
+    containerPort: 1234
+    protocol: TCP

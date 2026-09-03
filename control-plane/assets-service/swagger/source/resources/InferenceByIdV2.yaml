@@ -1,0 +1,31 @@
+get:
+  summary: Get inference data - assets based.
+  description:
+    Retrieves the data of a training, i.e. its set of assets and specific env.
+  operationId: get_inference_by_id_v2
+  x-service: assets-service
+  x-internal: true
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_inference_service_test.go
+    - e2e/src/test/suites/parallel/submitUI/inferenceUI.test.ts
+  x-no-authorization: true
+  tags:
+    - Inferences
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Inference/InferenceV2.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+

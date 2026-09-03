@@ -1,0 +1,58 @@
+type: object
+required:
+  - uuid
+  - tenantId
+  - name
+  - createdAt
+properties:
+  uuid:
+    type: string
+    format: uuid
+  tenantId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml'
+  name:
+    type: string
+    minLength: 1  # Must have a value
+    maxLength: 253  # Kubernetes DNS subdomain limit (RFC 1035/1123)
+  createdAt:
+    type: string
+    format: date-time
+  domain:
+    type: string
+    nullable: true
+    minLength: 1  # Must have a value when set
+    maxLength: 253  # DNS domain name limit (RFC 1035)
+  version:
+    type: string
+    nullable: true
+    minLength: 1  # Must have a value when set
+    maxLength: 50  # Supports semantic version + metadata
+  status:
+    $ref: './ClusterDisplayedStatus.yaml'
+  updatedAt:
+    type: string
+    format: date-time
+    nullable: true
+  deletedAt:
+    type: string
+    nullable: true
+    format: date-time
+  lastLiveness:
+    type: string
+    nullable: true
+    format: date-time
+  deleteRequestedAt:
+    description: the timestamp value of when the cluster deletion request was received
+    type: string
+    format: date-time
+    nullable: true
+example:
+  uuid: 'A0EEBC99-9C0B-4EF8-BB6D-6BB9BD380A11'
+  name: example
+  tenantId: 1001
+  domain: my.company.com
+  status: {}
+  createdAt: '2020-01-01T00:00:00Z'
+  updatedAt: '2020-01-02T00:00:00Z'
+  lastLiveness: '2020-01-02T00:00:00Z'
+  version: 2.15.0

@@ -1,0 +1,7 @@
+properties:
+  attributes:
+    $ref: "./RelatedUrl.yaml"
+  instances:
+    $ref: "./RelatedUrls.yaml"
+nullable: true
+type: object

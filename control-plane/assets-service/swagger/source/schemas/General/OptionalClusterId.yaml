@@ -1,0 +1,3 @@
+description: The id of the cluster. If empty - tenant scoped assets.
+type: string
+format: uuid

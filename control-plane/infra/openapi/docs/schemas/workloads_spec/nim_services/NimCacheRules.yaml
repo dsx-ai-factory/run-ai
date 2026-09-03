@@ -1,0 +1,7 @@
+properties:
+  name:
+    $ref: "../../policy_rules/StringRules.yaml"
+  profile:
+    $ref: "../../policy_rules/StringRules.yaml"
+nullable: true
+type: object

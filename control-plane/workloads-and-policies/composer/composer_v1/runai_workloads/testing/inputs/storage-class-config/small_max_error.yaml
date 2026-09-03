@@ -1,0 +1,6 @@
+small:
+  customization:
+    claimSize:
+      default: 1M
+      max: 4M
+

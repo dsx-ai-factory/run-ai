@@ -1,0 +1,9 @@
+description: Represents a key's relationship to a set of values (mandatory).
+type: string
+enum:
+  - In
+  - NotIn
+  - Exists
+  - DoesNotExist
+  - Gt
+  - Lt

@@ -1,0 +1,76 @@
+put:
+  summary: Update org unit setting by key
+  operationId: update_org_unit_setting_by_key
+  x-service: org-unit-service
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/settings_test.go
+  x-authorize:
+    resource-type: settings
+    action: update
+  tags:
+    - Settings
+  parameters:
+    - $ref: "../../parameters/OrgUnitSettingsKey.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/settings/UpdateOrgUnitSettingByKeyRequest.yaml"
+        examples:
+          limitQuotaOverSubscription:
+            value:
+              enabled: false
+  responses:
+    200:
+      description: Setting successfully updated
+    400:
+      $ref: "../../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    500:
+      $ref: "../../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+get:
+  summary: Get org unit setting by key
+  operationId: get_org_unit_setting_by_key
+  x-service: org-unit-service
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/settings_test.go
+  x-authorize:
+    resource-type: settings
+    action: read
+  tags:
+    - Settings
+  parameters:
+    - $ref: "../../parameters/OrgUnitSettingsKey.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/settings/OrgUnitSetting.yaml"
+          examples:
+            limitQuotaOverSubscription:
+              value:
+                enabled: false
+    400:
+      $ref: "../../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    500:
+      $ref: "../../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

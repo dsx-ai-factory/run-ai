@@ -1,0 +1,6 @@
+name: id
+in: path
+required: true
+description: The client "id" to retrieve
+schema:
+  type: string

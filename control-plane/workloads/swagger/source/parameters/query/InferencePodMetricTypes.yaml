@@ -1,0 +1,11 @@
+name: metricType
+in: query
+required: true
+description: Specifies metrics data to request. Inference metrics are only available for inference workloads.
+explode: false
+schema:
+  type: array
+  minItems: 1
+  maxItems: 20
+  items:
+    $ref: '../../schemas/Pods/InferencePodMetricType.yaml'

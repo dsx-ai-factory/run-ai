@@ -1,0 +1,16 @@
+type: array
+description: scopes for the access rules. must have at least one value
+minItems: 1
+maxItems: 50
+items:
+  type: object
+  required:
+    - scopeId
+    - scopeType
+  properties:
+    scopeId:
+      $ref: "../../../../../infra/openapi/docs/schemas/scopes/ScopeId.yaml"
+    scopeType:
+      allOf:
+        - $ref: "../../../../../infra/openapi/docs/schemas/scopes/ScopeType.yaml"
+        - description: "The scope to apply the access rule to. Valid values: system, tenant, cluster, department, project."

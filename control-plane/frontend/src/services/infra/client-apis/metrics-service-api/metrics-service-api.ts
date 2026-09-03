@@ -1,0 +1,29 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { Configuration, type ConfigurationParameters, MetricsApi } from "@/swagger-models/metrics-service-client";
+import { authenticatedAxios } from "@/services/infra/https.service/auth-axios.service";
+
+class MetricsServiceApi {
+  configuration: Configuration;
+
+  metricsApi: MetricsApi;
+
+  constructor() {
+    this.configuration = new Configuration();
+
+    this.metricsApi = new MetricsApi(this.configuration, this.baseUrl, authenticatedAxios);
+  }
+
+  get baseUrl() {
+    return `${window.location.origin}`;
+  }
+
+  public set setAccessToken(accessToken: ConfigurationParameters["accessToken"]) {
+    this.configuration.accessToken = accessToken;
+  }
+}
+
+export const metricsServiceApi = new MetricsServiceApi();

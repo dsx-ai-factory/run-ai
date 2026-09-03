@@ -1,0 +1,51 @@
+type: object
+nullable: true
+description: Time-based fairshare configuration for the node pool. [Experimental].
+properties:
+  enabled:
+    type: boolean
+    example: true
+    nullable: true
+    default: false
+    description: |
+      Enables time-based fairshare for the node pool. When true, the Scheduler adjusts fairshare based on historical resource usage over a defined time window, allowing past consumption to influence scheduling order. When false, scheduling is based only on the current queue state. [Experimental]
+  historicalUsageWeight:
+    type: number
+    format: float
+    nullable: true
+    example: 1.5
+    default: 1.0
+    description: |
+      Set the weight value that determines how a project’s historical resource usage affects its fairshare.
+       - 0.0: Ignore historical usage data (100% current usage).
+       - 1.0: Historical usage data has higher impact, it may cause fairshare to be 0.
+       - Values between 0.0 and 1.0 combine historical and current usage to maintain a balanced fairshare
+       - Values above 1 will cause historical usage to have an even higher impact on fairshare.
+  decayHalfLife:
+    type: string
+    nullable: true
+    example: 24h
+    default: 0h
+    pattern: ^(0|[+]?((\d+(\.\d+)?)(m|h|d))+$)
+    description: |
+      Set the half-life time to define the decay rate of a project’s historical resource usage. The half-life defines how long it takes for past usage to diminish to half of its original influence on a project's fairshare.
+       - 0: disables decay; all historical usage is weighted equally.
+       - > 0: older usage gradually contributes less over time (e.g., with a 24-hour half-life, usage from 24 hours ago contributes 50%, from 48 hours ago 25%, and so on).
+  windowType:
+    $ref: "./TimeBasedFairShareWindowType.yaml"
+  windowDuration:
+    type: string
+    nullable: true
+    example: 2d
+    default: 7d
+    pattern: ^(0|[+]?((\d+(\.\d+)?)(m|h|d))+$)
+    description: |
+      The time period over which historical usage is evaluated. Only usage within this window contributes to fairshare. For sliding windows, this is a moving period (e.g., 7d = always the last 7 days). For tumbling windows, this is the fixed cycle duration after which the window resets.
+  tumblingWindowStartTime:
+    type: string
+    format: date-time
+    nullable: true
+    example: "2025-01-06T08:00:00Z"
+    description: |
+      An RFC-3339 timestamp that defines the start time for all tumbling windows. Used only when windowType = Tumbling. This timestamp marks the beginning of the first fixed window, and subsequent windows repeat at intervals equal to the configured WindowDuration.
+      For example, with a 7-day window, an anchor of 2025-01-06T08:00:00Z produces weekly windows starting every Monday at 08:00 UTC.

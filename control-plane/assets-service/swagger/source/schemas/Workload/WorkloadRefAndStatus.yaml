@@ -1,0 +1,13 @@
+description: Id, name and status of a workspace or training
+required:
+  - id
+  - name
+properties:
+  id:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads/WorkloadId.yaml"
+  name:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads/WorkloadName.yaml"
+  status:
+    description: The status of the workspace or training.
+    type: string
+    minLength: 1

@@ -1,0 +1,2 @@
+description: the id of the scope resource, empty for tenant scope, the id of the department for department scope and the project name for project scope.
+type: string

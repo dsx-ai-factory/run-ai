@@ -1,0 +1,16 @@
+description: The inference workload serving configuration.
+properties:
+  initializationTimeoutSeconds:
+    description: The maximum time (in seconds) allowed for a workload to initialize and become ready. If the workload does not start within this time, it will be moved to failed state.
+    type: integer
+    format: int32
+    minimum: 1
+    nullable: true
+  requestTimeoutSeconds:
+    description: The maximum time (in seconds) allowed to process an end-user request. If no response is returned within this time, the request will be ignored.Supported from Cluster version 2.22
+    type: integer
+    format: int32
+    minimum: 1
+    nullable: true
+nullable: true
+type: object

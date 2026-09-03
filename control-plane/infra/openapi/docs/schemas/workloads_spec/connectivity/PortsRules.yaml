@@ -1,0 +1,7 @@
+properties:
+  attributes:
+    $ref: "./PortRules.yaml"
+  instances:
+    $ref: "../../policy_rules/ItemRules.yaml"
+nullable: true
+type: object

@@ -1,0 +1,6 @@
+name: completed
+in: query
+description: Return only completed resources when 'true', return only non-completed resources when 'false'. By default, or when empty, returns all resources.
+schema:
+  type: string
+  default: all

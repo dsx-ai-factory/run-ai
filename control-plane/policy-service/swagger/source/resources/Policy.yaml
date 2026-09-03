@@ -1,0 +1,41 @@
+get:
+  summary: List policies
+  description: Retrieve a list of all the applied policies.
+  operationId: list_policies
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/list_test.go
+  x-no-authorization: true
+  tags:
+    - Policy
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/WorkloadType.yaml"
+    - name: scope
+      in: query
+      required: false
+      description: filter by this scope.
+      schema:
+        type: string
+        enum:
+          - tenant
+          - cluster
+          - department
+          - project
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByDepartment.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByProject.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml"
+    - $ref: "../parameters/query/optional/IncludeFallbackPolicies.yaml"
+    - $ref: "../parameters/query/optional/IncludeGvkPolicies.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Policy/PolicyListResponse.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

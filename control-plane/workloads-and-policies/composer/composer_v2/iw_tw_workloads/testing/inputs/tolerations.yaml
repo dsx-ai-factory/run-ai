@@ -1,0 +1,18 @@
+image: ubuntu
+
+tolerations:
+  - name: tol1
+    operator: Equal
+    key: key1
+    value: value1
+    effect: NoSchedule
+  - name: tol2
+    operator: Equal
+    key: key2
+    value: value2
+    effect: NoExecute
+    seconds: 60
+  - name: tol3
+    operator: Exists
+    key: key3
+    effect: PreferNoSchedule

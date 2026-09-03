@@ -1,0 +1,10 @@
+image: ubuntu
+
+storage:
+  pvc:
+    - existingPvc: false
+      path: "/path/rw"
+      readOnly: false
+      claimInfo:
+        size: 10M
+        storageClass: my-storage

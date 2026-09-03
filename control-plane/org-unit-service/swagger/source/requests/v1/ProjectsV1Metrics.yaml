@@ -1,0 +1,36 @@
+get:
+  deprecated: true
+  summary: Get metrics for all projects.
+  operationId: get_projects_metrics_v1
+  x-service: org-unit-service
+  x-internal: true
+  x-authorize:
+    resource-type: project
+    action: read
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/metrics_v1_api_test.go
+  tags:
+    - Projects v1
+  parameters:
+    - $ref: "../../parameters/v1/ClusterUuidV1.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/Start.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/End.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/NumberOfSamples.yaml"
+    - $ref: "../../parameters/v1/MetricsV1NodePool.yaml"
+  responses:
+    200:
+      description: Successfully retrieved metrics for all projects.
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/v1/metrics/ProjectsMetricsV1Response.yaml"
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

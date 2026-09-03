@@ -1,0 +1,5 @@
+image: ubuntu
+
+storage:
+  dataVolume:
+    - mountPath: /data

@@ -1,0 +1,13 @@
+type: object
+description: an issue found while syncing the resource to the cluster
+required:
+  - scopeId
+  - scopeType
+  - issue
+properties:
+  scopeType:
+    $ref: "../Scopes/ScopeType.yaml"
+  scopeId:
+    $ref: "../Scopes/ScopeId.yaml"
+  issue:
+    $ref: "./ClusterObjectIssueType.yaml"

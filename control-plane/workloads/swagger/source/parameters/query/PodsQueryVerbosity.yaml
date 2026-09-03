@@ -1,0 +1,8 @@
+name: verbosity
+in: query
+required: false
+description: |
+  response verbosity level. if full, the response includes workloadName and projectName fields.
+example: full
+schema:
+  $ref : "../../schemas/Pods/PodVerbosity.yaml"

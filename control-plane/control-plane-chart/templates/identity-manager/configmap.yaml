@@ -1,0 +1,79 @@
+{{- include "common.configMap" (list . .Values.identityManager "control-plane.identityManager.configmap") }}
+{{- define "control-plane.identityManager.configmap" -}}
+{{- $top := first . }}
+data:
+  ENVIRONMENT: {{ $top.Values.global.config.environment | quote }}
+  KEYCLOAK_HOST: {{ $top.Values.global.keycloakx.host | quote }}
+  TENANT_MNG_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.tenantsManager.name ($top.Values.tenantsManager.service.port | toString ) }}
+  MULTI_TENANCY_ENABLED: {{ $top.Values.global.multiTenancy.enabled | quote }}
+  {{- if $top.Values.global.multiTenancy.enabled }}
+  TENANT_DOMAIN_TEMPLATE: {{ ($top.Values.identityManager.config.hostTemplate) |  default (printf "https://{{.}}.%s" ($top.Values.global.domain)) }}
+  {{- else }}
+  TENANT_DOMAIN_TEMPLATE: {{ printf "https://%s" ($top.Values.global.domain) }}
+  TENANT_NAME: {{  $top.Values.tenantsManager.config.tenantName | default "runai" }}
+  {{- end }}
+  SERVICE_PORT: {{ $top.Values.identityManager.service.port | quote }}
+  SERVER_WRITE_TIMEOUT: {{ $top.Values.identityManager.config.server.writeTimeout | quote }}
+  SERVER_READ_TIMEOUT: {{ $top.Values.identityManager.config.server.readTimeout | quote }}
+  SERVER_IDLE_TIMEOUT: {{ $top.Values.identityManager.config.server.idleTimeout | quote }}
+  SERVER_HEALTH_ENDPOINT: {{ $top.Values.identityManager.config.server.healthEndpoint | quote }}
+  SERVICE_NAME: {{ $top.Values.identityManager.name | quote }}
+  TRACING_ENABLED: {{ if hasKey $top.Values.identityManager.config "tracingEnabled" }}{{ $top.Values.identityManager.config.tracingEnabled | quote }}{{ else }}{{ $top.Values.global.config.tracingEnabled | quote }}{{ end }}
+  AUDIT_ENABLED: {{ if hasKey $top.Values.identityManager.config "auditEnabled" }}{{ $top.Values.identityManager.config.auditEnabled | quote }}{{ else }}{{ $top.Values.global.config.auditEnabled | quote }}{{ end }}
+  AUDIT_ENABLE_PRINT_TO_STDOUT: {{ if hasKey $top.Values.identityManager.config "auditEnablePrintToStdout" }}{{ $top.Values.identityManager.config.auditEnablePrintToStdout | quote }}{{ else }}{{ $top.Values.global.config.auditEnablePrintToStdout | quote }}{{ end }}
+  AUDIT_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.auditService.name ($top.Values.auditService.service.port | toString) | quote }}
+  LOG_LEVEL: {{ $top.Values.identityManager.config.logLevel }}
+  APP_URL: {{ printf "https://%s" ($top.Values.global.domain) }}
+  {{- if $top.Values.identityManager.config.ignoredRealms }}
+  IGNORED_REALMS: {{ $top.Values.identityManager.config.ignoredRealms | quote }}
+  {{- end }}
+  MIGRATION_FILES: {{ $top.Values.identityManager.config.migrationFiles | quote }}
+  DB_NAME: {{ $top.Values.identityManager.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_VERBOSE_LOGGING: {{ $top.Values.identityManager.config.dbVerboseLogging | default $top.Values.global.postgresql.dbVerboseLogging | quote }}
+  DB_HOST: {{ $top.Values.identityManager.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SSL_MODE: {{ $top.Values.identityManager.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_PORT: {{ $top.Values.identityManager.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  {{- if or ($top.Values.global.postgresql.auth.readHost) ($top.Values.identityManager.config.dbReadHost) }}
+  DB_READ_HOST: {{ $top.Values.identityManager.config.dbReadHost | default $top.Values.global.postgresql.auth.readHost | quote }}
+  {{- end }}
+  {{- if or ($top.Values.global.postgresql.auth.dbReadPort) ($top.Values.identityManager.config.dbReadPort) }}
+  DB_READ_PORT: {{ $top.Values.identityManager.config.dbReadPort | default $top.Values.global.postgresql.auth.readPort | quote }}
+  {{- end }}
+  DB_SCHEMA: {{ $top.Values.identityManager.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  PUBSUB_URL: {{ $top.Values.global.pubsub.url | quote }}
+  PUBSUB_TYPE: {{ $top.Values.global.pubsub.type | quote }}
+  PUBSUB_ENABLE_ADDITIONAL_SUBSCRIBER: {{ $top.Values.global.pubsub.additionalSubscriber.enabled | quote }}
+  {{- if $top.Values.global.pubsub.additionalSubscriber.enabled }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_TYPE: {{ $top.Values.global.pubsub.additionalSubscriber.type | quote }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_URL: {{ $top.Values.global.pubsub.additionalSubscriber.url | quote }}
+  {{- end }}
+  SERVICE_ACCOUNTS_VERSION: {{ $top.Values.identityManager.config.serviceAccountsVersion | quote }}
+  INTERNAL_SERVICE_ACCOUNTS_VERSION: {{ $top.Values.identityManager.config.internalServiceAccountsVersion | quote }}
+  ACCESS_KEYS_VERSION: {{ $top.Values.identityManager.config.accessKeysVersion | quote }}
+  LOGIN_THEME: {{ $top.Values.identityManager.config.loginTheme | quote }}
+  CLIENT_CACHING_CLEANUP: {{ $top.Values.identityManager.config.clientCachingCleanup | quote }}
+  CLIENT_CACHING_EXPIRATION: {{ $top.Values.identityManager.config.clientCachingExpiration | quote }}
+  NOTIFY_NOTIFY_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.notificationsService.name (toString $top.Values.notificationsService.service.port) }}
+  NOTIFY_CONFIG_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.notificationsService.name (toString $top.Values.notificationsService.config.app.api_port) }}
+  {{- if hasKey $top.Values.identityManager.config "notifyEnabled" }}
+  NOTIFY_ENABLED: {{ printf "%t" $top.Values.identityManager.config.notifyEnabled | quote }}
+  {{- else }}
+  NOTIFY_ENABLED: {{ printf "%t" $top.Values.notificationsService.enabled | quote }}
+  {{- end }}
+  {{- if $top.Values.identityManager.config.welcomeEmailTemplate }}
+  NOTIFY_WELCOME_EMAIL_TEMPLATE: {{ $top.Values.identityManager.config.welcomeEmailTemplate | quote }}
+  {{- end }}
+  {{- if $top.Values.identityManager.config.resetPasswordEmailTemplate }}
+  NOTIFY_RESET_PASSWORD_EMAIL_TEMPLATE: {{ $top.Values.identityManager.config.resetPasswordEmailTemplate | quote }}
+  {{- end }}
+  SMTP_HOST: {{ $top.Values.identityManager.config.smtpHost | default (printf "%s-%s" $top.Values.fullnameOverride $top.Values.notificationsService.name) | quote }}
+  SMTP_PORT: {{ $top.Values.identityManager.config.smtpPort | default 2525 | quote }}
+  SMTP_FROM_EMAIL: {{ $top.Values.identityManager.config.smtpFromEmail | default "nvidia-runai@nvidia.com" | quote }}
+  {{- $cacheEnabled := $top.Values.identityManager.config.cacheEnabled | default false }}
+  CACHE_ENABLED: {{ $cacheEnabled | quote }}
+  {{- if eq (toString $cacheEnabled) "true" }}
+  CACHE_URL: {{ $top.Values.identityManager.config.cacheUrl | default $top.Values.global.cache.url | quote }}
+  CACHE_READ_URL: {{ $top.Values.identityManager.config.cacheReadUrl | default $top.Values.global.cache.readUrl | quote }}
+  CACHE_TYPE: {{ $top.Values.identityManager.config.cacheType | default $top.Values.global.cache.type | quote }}
+  {{- end }}
+{{- end }}

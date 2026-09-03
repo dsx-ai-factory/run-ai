@@ -1,0 +1,33 @@
+type: object
+required:
+- email
+- realm
+- resetPassword
+
+properties:
+  email:
+    type: string
+    minLength: 5
+    maxLength: 254
+  realm:
+    type: string
+    minLength: 1
+    maxLength: 255
+  password:
+    type: string
+    nullable: true
+    minLength: 8
+    maxLength: 255
+  resetPassword:
+    type: boolean
+  notify:
+    type: boolean
+    description: When true, send an email to the user. The email includes a link to reset the password.
+    nullable: true
+
+example:
+  email: "test@run.ai"
+  realm: "runai"
+  password: "ae23idjn9d!2a4"
+  resetPassword: true
+  notify: true

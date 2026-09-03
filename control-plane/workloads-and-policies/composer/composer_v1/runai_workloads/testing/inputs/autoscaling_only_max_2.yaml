@@ -1,0 +1,9 @@
+image: ubuntu
+servingPort:
+  container: 8081
+  protocol: http
+autoscaling:
+  maxReplicas: 2
+  metric: throughput
+  metricThreshold: 80
+

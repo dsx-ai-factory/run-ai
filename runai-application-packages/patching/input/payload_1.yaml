@@ -1,0 +1,29 @@
+spec:
+  image: ubuntu
+  workingDir: /my/directory
+  environmentVariables:
+    - name: env-0
+      value: value-0
+    - name: env-1
+      value: value-1
+    - name: env-2
+      value: value-2
+    - name: env-3
+      value: value-3
+    - name: env-4
+      value: value-4
+  storage:
+    pvc:
+      - name: pvc-0
+        claimName: my-pvc-0
+        claimInfo:
+          size: 12M
+          volumeMode: filesystem
+      - name: pvc-1
+        claimName: my-pvc-1
+        claimInfo:
+          size: 24M
+          volumeMode: block
+array:
+  - name: item-0
+  - name: item-1

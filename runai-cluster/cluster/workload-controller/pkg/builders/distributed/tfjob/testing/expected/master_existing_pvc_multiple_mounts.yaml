@@ -1,0 +1,209 @@
+apiVersion: kubeflow.org/v1
+kind: TFJob
+metadata:
+  annotations:
+    image: ""
+    template: job-1
+    user: user.name
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: tfjob
+    createdBy: TFJob
+    project: team-a
+    release: job-1
+    run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+    workloadKind: DistributedWorkload
+    workloadName: job-1
+  name: job-1
+  namespace: runai-team-a
+spec:
+  runPolicy:
+    backoffLimit: 6
+    cleanPodPolicy: Running
+  tfReplicaSpecs:
+    Chief:
+      replicas: 1
+      template:
+        metadata:
+          annotations:
+            totalGPUs: "0"
+            totalGPUsMemory: "0"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-1
+        spec:
+          containers:
+          - imagePullPolicy: IfNotPresent
+            name: tensorflow
+            resources: {}
+            securityContext:
+              seccompProfile:
+                type: RuntimeDefault
+            volumeMounts:
+            - mountPath: /tmp/path6
+              name: pvc-volume-0
+              readOnly: true
+            - mountPath: /tmp/path7
+              name: pvc-volume-0
+              readOnly: true
+            - mountPath: /tmp/path8
+              name: pvc-volume-1
+            - mountPath: /tmp/path9
+              name: pvc-volume-2
+          schedulerName: runai-scheduler
+          volumes:
+          - name: pvc-volume-0
+            persistentVolumeClaim:
+              claimName: existing3
+              readOnly: true
+          - name: pvc-volume-1
+            persistentVolumeClaim:
+              claimName: non-existing
+          - name: pvc-volume-2
+            persistentVolumeClaim:
+              claimName: pvc-job-1-1-2
+    Worker:
+      replicas: 1
+      template:
+        metadata:
+          annotations:
+            totalGPUs: "0"
+            totalGPUsMemory: "0"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-1
+        spec:
+          containers:
+          - imagePullPolicy: IfNotPresent
+            name: tensorflow
+            resources: {}
+            securityContext:
+              seccompProfile:
+                type: RuntimeDefault
+            volumeMounts:
+            - mountPath: /tmp/path1
+              name: pvc-volume-0
+              readOnly: true
+            - mountPath: /tmp/path2
+              name: pvc-volume-0
+              readOnly: true
+            - mountPath: /tmp/path3
+              name: pvc-volume-1
+              readOnly: true
+            - mountPath: /tmp/path4
+              name: pvc-volume-2
+            - mountPath: /tmp/path5
+              name: pvc-volume-3
+          schedulerName: runai-scheduler
+          volumes:
+          - name: pvc-volume-0
+            persistentVolumeClaim:
+              claimName: existing
+              readOnly: true
+          - name: pvc-volume-1
+            persistentVolumeClaim:
+              claimName: existing2
+              readOnly: true
+          - name: pvc-volume-2
+            persistentVolumeClaim:
+              claimName: non-existing
+          - name: pvc-volume-3
+            persistentVolumeClaim:
+              claimName: pvc-job-1-0-3
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: tfjob
+    createdBy: TFJob
+    project: team-a
+    release: job-1
+    workloadKind: DistributedWorkload
+    workloadName: job-1
+  name: non-existing
+  namespace: runai-team-a
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  storageClassName: local-storage
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: tfjob
+    createdBy: TFJob
+    project: team-a
+    release: job-1
+    workloadKind: DistributedWorkload
+    workloadName: job-1
+  name: pvc-job-1-0-4
+  namespace: runai-team-a
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  storageClassName: local-storage
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: tfjob
+    createdBy: TFJob
+    project: team-a
+    release: job-1
+    workloadKind: DistributedWorkload
+    workloadName: job-1
+  name: non-existing
+  namespace: runai-team-a
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  storageClassName: local-storage
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: tfjob
+    createdBy: TFJob
+    project: team-a
+    release: job-1
+    workloadKind: DistributedWorkload
+    workloadName: job-1
+  name: pvc-job-1-1-3
+  namespace: runai-team-a
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  storageClassName: local-storage
+status: {}

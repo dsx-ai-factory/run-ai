@@ -1,0 +1,6 @@
+name: key
+in: path
+required: true
+description: The settings key
+schema:
+  $ref: "../../schemas/Settings/AuthorizationSettingsKeyEnum.yaml"

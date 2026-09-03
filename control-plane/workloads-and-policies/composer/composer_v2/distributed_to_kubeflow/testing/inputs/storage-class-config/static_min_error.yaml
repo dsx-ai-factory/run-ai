@@ -1,0 +1,6 @@
+runai-none:
+  customization:
+    claimSize:
+      default: 1G
+      min: 1G
+

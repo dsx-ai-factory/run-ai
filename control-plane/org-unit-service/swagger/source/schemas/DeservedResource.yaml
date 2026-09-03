@@ -1,0 +1,7 @@
+properties:
+  deserved:
+    type: number
+    format: double
+    description: The project resource allocation that it is deserved to get in case the cluster has those resources
+    nullable: true
+    example: 1000

@@ -1,0 +1,23 @@
+servingPort:
+  port: 8080
+  exposeExternally: false
+workers: 1
+leader:
+  image: leader:latest
+  storage:
+    pvc:
+      - name: shared
+        path: /shared
+        existingPvc: true
+        claimName: shared-claim
+worker:
+  image: worker:latest
+  storage:
+    pvc:
+      - name: models
+        path: /models
+        existingPvc: false
+        ephemeral: false
+        claimName: models-claim
+        claimInfo:
+          size: 1Gi

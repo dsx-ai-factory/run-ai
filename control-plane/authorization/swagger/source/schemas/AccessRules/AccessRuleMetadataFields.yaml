@@ -1,0 +1,31 @@
+type: object
+required:
+  - id
+  - createdAt
+  - updatedAt
+  - createdBy
+properties:
+  id:
+    type: integer
+    format: int32
+    description: The ID of the access rule entry.
+    example: 32
+  createdAt:
+    type: string
+    format: date-time
+    description: The timestamp for when the access rule was created.
+  updatedAt:
+    type: string
+    format: date-time
+    description: The timestamp for the last time the access rule was updated.
+  deletedAt:
+    type: string
+    nullable: true
+    format: date-time
+    description: The timestamp indicating when the access rule was deleted.
+  tenantId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml'
+  createdBy:
+    type: string
+    example: "user@run.ai"
+    description: Identifier of the user who created the access rule.

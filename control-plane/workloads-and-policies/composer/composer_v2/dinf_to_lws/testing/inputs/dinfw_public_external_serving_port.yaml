@@ -1,0 +1,7 @@
+servingPort:
+  port: 8080
+  authorizationType: public
+  exposeExternally: true
+  exposedUrl: "https://model.example.com/predict"
+leader:
+  image: leader:latest

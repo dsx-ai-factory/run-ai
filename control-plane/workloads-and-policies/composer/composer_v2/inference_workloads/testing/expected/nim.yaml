@@ -1,0 +1,58 @@
+Config:
+  networking:
+  - services:
+    - spec:
+        labels:
+          run.ai/nim-workload: "true"
+          run.ai/nim-workload-metrics-service: "true"
+          run.ai/workload-metrics-service: "true"
+          workloadKind: InferenceWorkload
+        name: my-llm-metrics
+        ports:
+        - name: metrics
+          port: 8080
+          protocol: TCP
+          targetPort: 8080
+        selector:
+          workloadName: my-llm
+        type: ClusterIP
+Service:
+  apiVersion: serving.knative.dev/v1
+  kind: Service
+  metadata:
+    annotations:
+      run.ai/submitted-by: tester
+    labels:
+      app: service
+      createdBy: Service
+      project: team-a
+      release: my-llm
+      run.ai/control-plane-managed: "true"
+      run.ai/converted-from-native: "true"
+      run.ai/nim-workload: "true"
+      runai.nim/workload: "true"
+      workloadKind: Inference
+      workloadName: my-llm
+    name: my-llm
+    namespace: runai-team-a
+  spec:
+    template:
+      metadata:
+        labels:
+          app: service
+          createdBy: Service
+          project: team-a
+          release: my-llm
+          run.ai/nim-workload: "true"
+          runai.nim/workload: "true"
+          workloadKind: Inference
+          workloadName: my-llm
+      spec:
+        containers:
+        - image: my-llm:latest
+          name: my-llm
+          ports:
+          - containerPort: 8080
+          resources: {}
+        schedulerName: runai-scheduler
+  status: {}

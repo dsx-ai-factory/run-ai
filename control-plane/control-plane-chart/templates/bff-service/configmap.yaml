@@ -1,0 +1,59 @@
+{{- include "common.configMap" (list . .Values.bffService "control-plane.bffService.configmap") }}
+{{- define "control-plane.bffService.configmap" -}}
+{{- $top := first . }}
+data:
+  SERVICE_PORT: {{ $top.Values.bffService.service.port | quote }}
+  SERVER_WRITE_TIMEOUT: {{ $top.Values.bffService.config.server.writeTimeout | quote }}
+  SERVER_READ_TIMEOUT: {{ $top.Values.bffService.config.server.readTimeout | quote }}
+  SERVER_IDLE_TIMEOUT: {{ $top.Values.bffService.config.server.idleTimeout | quote }}
+  SERVER_HEALTH_ENDPOINT: {{ $top.Values.bffService.config.server.healthEndpoint | quote }}
+  SERVICE_NAME: {{ $top.Values.bffService.name | quote }}
+  TRACING_ENABLED: {{ if hasKey $top.Values.bffService.config "tracingEnabled" }}{{ $top.Values.bffService.config.tracingEnabled | quote }}{{ else }}{{ $top.Values.global.config.tracingEnabled | quote }}{{ end }}
+  LOG_LEVEL: {{ $top.Values.bffService.config.logLevel }}
+  RUNAI_VERSION: {{ $top.Values.bffService.config.runaiVersion| default $top.Chart.AppVersion | toString | quote }}
+  DISTRIBUTION_ASSETS_PROFILE: {{ $top.Values.bffService.bootConfig.distributionAssets.profile | quote }}
+  DOCS_BASE_URL: {{ $top.Values.bffService.bootConfig.docs.baseUrl | quote }}
+  DOCS_VERSIONED: {{ $top.Values.bffService.bootConfig.docs.versioned | quote }}
+  DOCS_WHATS_NEW_URL_TEMPLATE: {{ $top.Values.bffService.bootConfig.docs.whatsNew.urlTemplate | quote }}
+  {{- with $top.Values.bffService.bootConfig.support.label }}
+  SUPPORT_LABEL: {{ . | quote }}
+  {{- end }}
+  {{- with $top.Values.bffService.bootConfig.support.url }}
+  SUPPORT_URL: {{ . | quote }}
+  {{- end }}
+  SHOWS_CLUSTER_LOCATION_STEP: {{ $top.Values.bffService.bootConfig.capabilities.showsClusterLocationStep | quote }}
+  UNLEASH_ENABLED: {{ $top.Values.bffService.bootConfig.unleash.enabled | quote }}
+  {{- with $top.Values.bffService.bootConfig.version.displayPrefix }}
+  VERSION_DISPLAY_PREFIX: {{ . | quote }}
+  {{- end }}
+  {{- with $top.Values.bffService.bootConfig.unleash.url }}
+  UNLEASH_URL: {{ . | quote }}
+  {{- end }}
+  {{- with $top.Values.bffService.bootConfig.unleash.clientKey }}
+  UNLEASH_CLIENT_KEY: {{ . | quote }}
+  {{- end }}
+  {{- with $top.Values.bffService.bootConfig.unleash.appName }}
+  UNLEASH_APP_NAME: {{ . | quote }}
+  {{- end }}
+  {{- with $top.Values.bffService.bootConfig.unleash.environment }}
+  UNLEASH_ENVIRONMENT: {{ . | quote }}
+  {{- end }}
+  {{- with $top.Values.bffService.bootConfig.unleash.project }}
+  UNLEASH_PROJECT: {{ . | quote }}
+  {{- end }}
+  DB_MIGRATION_FILES: {{ $top.Values.bffService.config.migrationFiles | quote }}
+  DB_NAME: {{ $top.Values.bffService.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_VERBOSE_LOGGING: {{ $top.Values.bffService.config.dbVerboseLogging | default $top.Values.global.postgresql.dbVerboseLogging | quote }}
+  DB_HOST: {{ $top.Values.bffService.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SSL_MODE: {{ $top.Values.bffService.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_PORT: {{ $top.Values.bffService.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  DB_SCHEMA: {{ $top.Values.bffService.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  BACKEND_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.tempBackendSettings.name ($top.Values.tempBackendSettings.service.port | toString ) }}
+  {{- $cacheEnabled := $top.Values.bffService.config.cacheEnabled | default false }}
+  CACHE_ENABLED: {{ $cacheEnabled | quote }}
+  {{- if eq (toString $cacheEnabled) "true" }}
+  CACHE_URL: {{ $top.Values.bffService.config.cacheUrl | default $top.Values.global.cache.url | quote }}
+  CACHE_READ_URL: {{ $top.Values.bffService.config.cacheReadUrl | default $top.Values.global.cache.readUrl | quote }}
+  CACHE_TYPE: {{ $top.Values.bffService.config.cacheType | default $top.Values.global.cache.type | quote }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,67 @@
+post:
+  summary: Create a formatter. [experimental]
+  description: Creates a formatter object based on the provided specification.
+  operationId: create_formatter
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/service_mapping_formatter_test.go
+  x-authorize:
+    resource-type: policies
+    action: create
+  x-audit: true
+  tags:
+    - Spec mapping
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Mapping/FormatterCreationRequest.yaml"
+  responses:
+    200:
+      description: Formatter created.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Mapping/Formatter.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    409:
+      $ref: "../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+
+get:
+  summary: List formatters. [experimental]
+  description: Retrieve a list of formatters with details.
+  operationId: list_formatters
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/service_mapping_formatter_test.go
+  x-authorize:
+    resource-type: policies
+    action: read
+  tags:
+    - Spec mapping
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml"
+  responses:
+    200:
+      description: List of formatters.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Mapping/FormatterListResponse.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+

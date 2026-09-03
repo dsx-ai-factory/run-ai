@@ -1,0 +1,5 @@
+allOf:
+  - $ref: "./DataVolume.yaml"
+  - $ref: "../ExcludeField.yaml"
+nullable: true
+type: object

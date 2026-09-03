@@ -1,0 +1,7 @@
+type: object
+description: >-
+  The parameter values supplied to the spec selector and item selector at
+  evaluation time, as a key-value map.
+additionalProperties: true
+example:
+  containerName: my-container

@@ -1,0 +1,6 @@
+allOf:
+  - $ref: "./StorageInstanceName.yaml"
+  - $ref: "./Nfs.yaml"
+  - $ref: "../ExcludeField.yaml"
+nullable: true
+type: object

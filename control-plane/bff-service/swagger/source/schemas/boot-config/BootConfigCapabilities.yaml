@@ -1,0 +1,8 @@
+type: object
+required:
+  - showsClusterLocationStep
+properties:
+  showsClusterLocationStep:
+    type: boolean
+    description: Whether onboarding should ask the user for the cluster location.
+    example: true

@@ -1,0 +1,27 @@
+command: start
+args: "--log-dir xxx"
+image:          "tensorboard:latest"
+imagePullPolicy: Always
+workingDir:      "/my/home"
+createHomeDir:   true
+tty:   true
+stdin:   true
+
+priorityClass: build
+terminateAfterPreemption: false
+terminationGracePeriodSeconds: 55
+
+security:
+  hostIpc:        true
+  hostNetwork:    true
+  allowPrivilegeEscalation: true
+  uidGidSource:            custom
+  capabilities:
+    - KILL
+    - CHOWN
+  runAsNonRoot: false
+  seccompProfileType: RuntimeDefault
+  runAsUid:    500
+  runAsGid:    30
+  readOnlyRootFilesystem: true
+

@@ -1,0 +1,7 @@
+name: usableInProjectId
+in: query
+required: false
+description: Only when using "UsableInProject" requestType; Filter results for only datavolumes that are shared with - or originated in - the project.
+schema:
+  type: string
+  example: "5"

@@ -1,0 +1,74 @@
+BatchJobTarget:
+  Config: {}
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: gpu_multiple
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: gpu_multiple
+      name: gpu_multiple
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: gpu_multiple
+            workloadKind: Workspace
+            workloadName: gpu_multiple
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: gpu_multiple
+            image: ubuntu
+            name: gpu_multiple
+            resources:
+              limits:
+                nvidia.com/gpu: "5"
+              requests:
+                nvidia.com/gpu: "5"
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: gpu_multiple, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: gpu_multiple, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  requestedResources:
+    gpu:
+      request: 5
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

@@ -1,0 +1,31 @@
+get:
+  summary: Get departments telemetry
+  operationId: get_departments_telemetry
+  x-authorize:
+    resource-type: department
+    action: read
+  x-service: org-unit-service
+  x-test-coverage: not-applicable
+  tags:
+    - Departments
+  parameters:
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml'
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/FilterByNodepoolName.yaml'
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/FilterByDepartment.yaml'
+    - $ref: '../../parameters/TelemetryGroupByDepartment.yaml'
+    - $ref: '../../parameters/TelemetryType.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../infra/openapi/docs/schemas/metrics/TelemetryResponse.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

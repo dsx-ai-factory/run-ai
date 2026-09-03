@@ -1,0 +1,86 @@
+BatchJobTarget:
+  Config:
+    pvcs:
+    - metadata:
+        name: claim-rw
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10M
+        storageClassName: my-storage
+    pvcsConfig:
+      cleanupOnCompletion: true
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: pvc_not_existing
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: pvc_not_existing
+      name: pvc_not_existing
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: pvc_not_existing
+            workloadKind: Workspace
+            workloadName: pvc_not_existing
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: pvc_not_existing
+            image: ubuntu
+            name: pvc_not_existing
+            resources: {}
+            volumeMounts:
+            - mountPath: /path/rw
+              name: pvc
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+          volumes:
+          - name: pvc
+            persistentVolumeClaim:
+              claimName: claim-rw
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: pvc_not_existing, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: pvc_not_existing, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

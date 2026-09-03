@@ -1,0 +1,5 @@
+allOf:
+  - $ref: "./AutoScalingField.yaml"
+  - $ref: "./ServingConfigurationField.yaml"
+nullable: true
+type: object

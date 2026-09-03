@@ -1,0 +1,17 @@
+assets:
+  environment: basic
+  compute: memory
+  datasources:
+    - kind: nfs
+      id: basic
+
+specificRunParams:
+  command: python
+  args: "-x worker-command"
+  environmentVariables:
+    - name: HOME
+      value: "/home/worker"
+
+distributed:
+  numWorkers: 3
+  framework: TF

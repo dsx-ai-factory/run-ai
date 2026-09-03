@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 520" width="780" height="520">
+  <defs>
+    <!-- Solid arrowhead for internal flow arrows -->
+    <marker id="arrow" markerWidth="8" markerHeight="7" refX="7" refY="3.5"
+            orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0 0, 8 3.5, 0 7" fill="#64748B"/>
+    </marker>
+    <!-- Gray arrowhead for dashed management arrow -->
+    <marker id="arrow-mgmt" markerWidth="8" markerHeight="7" refX="7" refY="3.5"
+            orient="auto" markerUnits="userSpaceOnUse">
+      <polygon points="0 0, 8 3.5, 0 7" fill="#94A3B8"/>
+    </marker>
+  </defs>
+
+  <!-- Canvas background -->
+  <rect width="780" height="520" fill="white"/>
+
+  <!-- ================================================================== -->
+  <!-- LEFT CLUSTER: Control Plane Kubernetes Cluster                      -->
+  <!-- ================================================================== -->
+
+  <!-- Cluster container (dashed border, light fill) -->
+  <rect x="12" y="58" width="308" height="372"
+        fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="6,3" rx="4"/>
+  <!-- Header band (label tab) -->
+  <rect x="13.5" y="59.5" width="305" height="27"
+        fill="#E2E8F0" rx="3"/>
+  <text x="166" y="79"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="bold"
+        fill="#334155" text-anchor="middle">Control Plane Kubernetes Cluster</text>
+
+  <!-- User access label (above left cluster) -->
+  <text x="166" y="26"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="bold"
+        fill="#475569" text-anchor="middle">Users</text>
+  <text x="166" y="41"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="10"
+        fill="#64748B" text-anchor="middle">runai.mycorp.local</text>
+  <!-- Arrow: Users → Load Balancer -->
+  <line x1="166" y1="45" x2="166" y2="95"
+        stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Load Balancer (left) -->
+  <rect x="37" y="97" width="258" height="52"
+        fill="#FFF7ED" stroke="#F97316" stroke-width="1.5" rx="3"/>
+  <text x="166" y="118"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="bold"
+        fill="#C2410C" text-anchor="middle">Load Balancer</text>
+  <text x="166" y="135"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="10"
+        fill="#EA580C" text-anchor="middle">TLS termination</text>
+  <!-- Arrow: Load Balancer → Ingress Controller -->
+  <line x1="166" y1="149" x2="166" y2="167"
+        stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Ingress Controller (left) -->
+  <rect x="37" y="169" width="258" height="52"
+        fill="#FAF5FF" stroke="#A855F7" stroke-width="1.5" rx="3"/>
+  <text x="166" y="190"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="bold"
+        fill="#7E22CE" text-anchor="middle">Ingress Controller</text>
+  <text x="166" y="207"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="10"
+        fill="#9333EA" text-anchor="middle">routes by hostname</text>
+  <!-- Arrow: Ingress Controller → Control Plane -->
+  <line x1="166" y1="221" x2="166" y2="239"
+        stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Control Plane box (blue, with left accent bar) -->
+  <rect x="37" y="241" width="258" height="150"
+        fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5" rx="3"/>
+  <rect x="37" y="241" width="6" height="150"
+        fill="#3B82F6" rx="2"/>
+  <text x="169" y="272"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="bold"
+        fill="#1D4ED8" text-anchor="middle">NVIDIA Run:ai</text>
+  <text x="169" y="290"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="bold"
+        fill="#1D4ED8" text-anchor="middle">Control Plane</text>
+  <text x="169" y="316"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="10"
+        fill="#2563EB" text-anchor="middle">management · scheduling</text>
+  <text x="169" y="331"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="10"
+        fill="#2563EB" text-anchor="middle">UI · metrics · auth</text>
+
+  <!-- ================================================================== -->
+  <!-- RIGHT CLUSTER: Kubernetes Cluster A                                 -->
+  <!-- ================================================================== -->
+
+  <!-- Cluster container (dashed border, light fill) -->
+  <rect x="388" y="58" width="335" height="372"
+        fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="6,3" rx="4"/>
+  <!-- Header band (label tab) -->
+  <rect x="389.5" y="59.5" width="332" height="27"
+        fill="#E2E8F0" rx="3"/>
+  <text x="555" y="79"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="bold"
+        fill="#334155" text-anchor="middle">Kubernetes Cluster A</text>
+
+  <!-- User access labels (above right cluster, two FQDNs) -->
+  <text x="555" y="20"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="bold"
+        fill="#475569" text-anchor="middle">Users</text>
+  <text x="555" y="34"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="10"
+        fill="#64748B" text-anchor="middle">*.runai-a.mycorp.local</text>
+  <text x="555" y="48"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="10"
+        fill="#64748B" text-anchor="middle">*.runai-a-inference.mycorp.local</text>
+  <!-- Arrow: Users → Load Balancer -->
+  <line x1="555" y1="52" x2="555" y2="95"
+        stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Load Balancer (right) -->
+  <rect x="408" y="97" width="290" height="52"
+        fill="#FFF7ED" stroke="#F97316" stroke-width="1.5" rx="3"/>
+  <text x="553" y="118"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="bold"
+        fill="#C2410C" text-anchor="middle">Load Balancer</text>
+  <text x="553" y="135"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="10"
+        fill="#EA580C" text-anchor="middle">TLS termination</text>
+  <!-- Arrow: Load Balancer → Ingress Controller -->
+  <line x1="553" y1="149" x2="553" y2="167"
+        stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Ingress Controller (right) -->
+  <rect x="408" y="169" width="290" height="52"
+        fill="#FAF5FF" stroke="#A855F7" stroke-width="1.5" rx="3"/>
+  <text x="553" y="190"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="bold"
+        fill="#7E22CE" text-anchor="middle">Ingress Controller</text>
+  <text x="553" y="207"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="10"
+        fill="#9333EA" text-anchor="middle">routes by hostname</text>
+  <!-- Arrow: Ingress Controller → Run:ai Cluster -->
+  <line x1="553" y1="221" x2="553" y2="239"
+        stroke="#64748B" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Run:ai Cluster box (green, with left accent bar) -->
+  <rect x="408" y="241" width="290" height="150"
+        fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5" rx="3"/>
+  <rect x="408" y="241" width="6" height="150"
+        fill="#22C55E" rx="2"/>
+  <text x="555" y="264"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="bold"
+        fill="#15803D" text-anchor="middle">NVIDIA Run:ai Cluster</text>
+
+  <!-- Sub-box: Workloads -->
+  <rect x="420" y="276" width="122" height="50"
+        fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1" rx="3"/>
+  <text x="481" y="297"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="bold"
+        fill="#475569" text-anchor="middle">Workloads</text>
+  <text x="481" y="312"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="10"
+        fill="#64748B" text-anchor="middle">GPU pods</text>
+
+  <!-- Sub-box: Run:ai services -->
+  <rect x="556" y="276" width="130" height="50"
+        fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1" rx="3"/>
+  <text x="621" y="297"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="11" font-weight="bold"
+        fill="#475569" text-anchor="middle">Run:ai services</text>
+  <text x="621" y="312"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="10"
+        fill="#64748B" text-anchor="middle">agent · scheduler</text>
+
+  <!-- "..." indicator: additional clusters beyond Cluster A -->
+  <text x="751" y="260"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="20"
+        fill="#CBD5E1" text-anchor="middle" letter-spacing="3">•••</text>
+
+  <!-- ================================================================== -->
+  <!-- MANAGEMENT ARROW                                                     -->
+  <!-- Dashed, outbound 443, from Run:ai services → Control Plane          -->
+  <!-- Route: down from sub-box bottom → across below clusters → up to CP  -->
+  <!-- ================================================================== -->
+  <path d="M 621,326 L 621,452 L 166,452 L 166,391"
+        fill="none"
+        stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="6,3"
+        marker-end="url(#arrow-mgmt)"/>
+  <!-- White knockout behind label to keep it readable over the dashed line -->
+  <rect x="297" y="439" width="200" height="18"
+        fill="white" rx="2"/>
+  <!-- Management label -->
+  <text x="397" y="452"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="10"
+        fill="#64748B" text-anchor="middle">management (outbound, 443)</text>
+
+  <!-- ================================================================== -->
+  <!-- FOOTER NOTE                                                          -->
+  <!-- ================================================================== -->
+  <text x="390" y="485"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="10"
+        fill="#94A3B8" text-anchor="middle">Additional NVIDIA Run:ai clusters connect to the same control plane, each with its own load balancer,</text>
+  <text x="390" y="500"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="10"
+        fill="#94A3B8" text-anchor="middle">ingress controller, FQDNs, and TLS certificates.</text>
+
+</svg>

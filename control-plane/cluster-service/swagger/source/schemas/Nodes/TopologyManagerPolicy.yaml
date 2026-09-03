@@ -1,0 +1,10 @@
+type: string
+x-internal: true
+enum:
+  - none
+  - best-effort
+  - restricted
+  - single-numa-node
+nullable: true
+description: The node's Kubelet Topology Manager policy; null when NUMA-aware scheduling is disabled.
+x-schema-name: TopologyManagerPolicy

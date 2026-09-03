@@ -1,0 +1,22 @@
+template: testify
+template-data:
+  unroll-variadic: true
+packages:
+  github.com/dsx-ai-factory/run-ai/runai-common-packages/toggles:
+    interfaces:
+      Toggler:
+        configs:
+          - dir: "{{.InterfaceDir}}/testing"
+            filename: "mock_Toggler.go"
+            structname: "MockToggler"
+            pkgname: "testing"
+          - dir: "{{.InterfaceDir}}/mocks"
+            filename: "Toggler.go"
+            structname: "Toggler"
+            pkgname: "mocks"
+      unleashClienter:
+        configs:
+          - dir: "{{.InterfaceDir}}/mocks"
+            filename: "UnleashClienter.go"
+            structname: "UnleashClienter"
+            pkgname: "mocks"

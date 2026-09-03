@@ -1,0 +1,7 @@
+properties:
+  attributes:
+    $ref: "./ConfigMapInstance.yaml"
+  instances:
+    $ref: "./ConfigMapItems.yaml"
+nullable: true
+type: object

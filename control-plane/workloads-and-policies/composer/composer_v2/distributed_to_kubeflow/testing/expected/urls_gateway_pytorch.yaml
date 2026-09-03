@@ -1,0 +1,321 @@
+DistributedTarget:
+  Config:
+    networking:
+    - externalAccess:
+        httpRoute:
+          apiVersion: gateway.networking.k8s.io/v1
+          kind: HTTPRoute
+          metadata:
+            name: kf-urls_no_master-url-worker
+          spec:
+            hostnames:
+            - test.run.ai
+            parentRefs:
+            - name: runai-gateway
+              namespace: runai
+            rules:
+            - backendRefs:
+              - name: kf-urls_no_master-url-worker
+                port: 80
+              matches:
+              - path:
+                  type: PathPrefix
+                  value: /test/urls_no_master/url-worker
+        ingress:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: kf-urls_no_master-url-worker
+          spec:
+            rules:
+            - host: test.run.ai
+              http:
+                paths:
+                - backend:
+                    service:
+                      name: kf-urls_no_master-url-worker
+                      port:
+                        number: 80
+                  path: /test/urls_no_master/url-worker
+                  pathType: Prefix
+      services:
+      - spec:
+          name: kf-urls_no_master-url-worker
+          ports:
+          - name: port-4180
+            port: 80
+            protocol: TCP
+            targetPort: 4180
+          selector:
+            training.kubeflow.org/job-name: urls_no_master
+            training.kubeflow.org/replica-index: "0"
+            training.kubeflow.org/replica-type: worker
+          type: ClusterIP
+    - externalAccess:
+        httpRoute:
+          apiVersion: gateway.networking.k8s.io/v1
+          kind: HTTPRoute
+          metadata:
+            name: kf-urls_no_master-url-master
+          spec:
+            hostnames:
+            - test.run.ai
+            parentRefs:
+            - name: runai-gateway
+              namespace: runai
+            rules:
+            - backendRefs:
+              - name: kf-urls_no_master-url-master
+                port: 80
+              matches:
+              - path:
+                  type: PathPrefix
+                  value: /test/urls_no_master
+        ingress:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: kf-urls_no_master-url-master
+          spec:
+            rules:
+            - host: test.run.ai
+              http:
+                paths:
+                - backend:
+                    service:
+                      name: kf-urls_no_master-url-master
+                      port:
+                        number: 80
+                  path: /test/urls_no_master
+                  pathType: Prefix
+      services:
+      - spec:
+          name: kf-urls_no_master-url-master
+          ports:
+          - name: port-4180
+            port: 80
+            protocol: TCP
+            targetPort: 4180
+          selector:
+            training.kubeflow.org/job-name: urls_no_master
+            training.kubeflow.org/replica-index: "0"
+            training.kubeflow.org/replica-type: master
+          type: ClusterIP
+  Framework: PyTorch
+  JaxJob: null
+  MasterSpec: null
+  MpiJob: null
+  ObjectMeta: null
+  PyTorchJob:
+    apiVersion: kubeflow.org/v1
+    kind: PyTorchJob
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: pytorchjob
+        createdBy: PyTorchJob
+        project: test
+        release: urls_no_master
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: urls_no_master
+      name: urls_no_master
+      namespace: runai-test
+    spec:
+      pytorchReplicaSpecs:
+        Master:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: pytorchjob
+                createdBy: PyTorchJob
+                project: test
+                release: urls_no_master
+                workloadKind: Distributed
+                workloadName: urls_no_master
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: urls_no_master
+                image: ubuntu
+                name: pytorch
+                ports:
+                - containerPort: 8080
+                  name: port-8080
+                  protocol: TCP
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              initContainers:
+              - args:
+                - --provider=keycloak-oidc
+                - --upstream=http://localhost:8080
+                - --redirect-url=https://test.run.ai/test/urls_no_master/oauth2/callback
+                - --oidc-issuer-url=/auth/realms/runai
+                - --scope=openid
+                - --http-address=0.0.0.0:4180
+                - --proxy-prefix=/test/urls_no_master/oauth2
+                - --skip-provider-button=true
+                - --whitelist-domain=test.run.ai
+                - --cookie-domain=test.run.ai
+                - --cookie-httponly=true
+                - --cookie-secure=true
+                - --code-challenge-method=S256
+                - --cookie-refresh=10m
+                - --cookie-samesite=lax
+                - --skip-jwt-bearer-tokens=true
+                - --extra-jwt-issuers=/auth/realms/runai=runai
+                - --custom-templates-dir=/usr/share/oauth2-proxy
+                - --pass-authorization-header=false
+                - --cookie-name=urls_no_master-url-master-auth-proxy
+                - --email-domain=*
+                env:
+                - name: OAUTH2_PROXY_COOKIE_PATH
+                  value: /test/urls_no_master
+                envFrom:
+                - secretRef: {}
+                image: test.registry/oauth2-proxy:test
+                imagePullPolicy: IfNotPresent
+                name: runai-oauth2-proxy-0
+                ports:
+                - containerPort: 4180
+                  name: port-4180
+                  protocol: TCP
+                resources: {}
+                restartPolicy: Always
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  runAsNonRoot: true
+                volumeMounts:
+                - mountPath: /etc/runai/auth/users
+                  name: runai-auth
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - emptyDir: {}
+                name: runai-auth
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: pytorchjob
+                createdBy: PyTorchJob
+                project: test
+                release: urls_no_master
+                workloadKind: Distributed
+                workloadName: urls_no_master
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: urls_no_master
+                image: ubuntu
+                name: pytorch
+                ports:
+                - containerPort: 8080
+                  name: port-8080
+                  protocol: TCP
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              initContainers:
+              - args:
+                - --provider=keycloak-oidc
+                - --upstream=http://localhost:8080
+                - --redirect-url=https://test.run.ai/test/urls_no_master/url-worker/oauth2/callback
+                - --oidc-issuer-url=/auth/realms/runai
+                - --scope=openid
+                - --http-address=0.0.0.0:4180
+                - --proxy-prefix=/test/urls_no_master/url-worker/oauth2
+                - --skip-provider-button=true
+                - --whitelist-domain=test.run.ai
+                - --cookie-domain=test.run.ai
+                - --cookie-httponly=true
+                - --cookie-secure=true
+                - --code-challenge-method=S256
+                - --cookie-refresh=10m
+                - --cookie-samesite=lax
+                - --skip-jwt-bearer-tokens=true
+                - --extra-jwt-issuers=/auth/realms/runai=runai
+                - --custom-templates-dir=/usr/share/oauth2-proxy
+                - --pass-authorization-header=false
+                - --cookie-name=urls_no_master-url-worker-auth-proxy
+                - --email-domain=*
+                env:
+                - name: OAUTH2_PROXY_COOKIE_PATH
+                  value: /test/urls_no_master/url-worker
+                envFrom:
+                - secretRef: {}
+                image: test.registry/oauth2-proxy:test
+                imagePullPolicy: IfNotPresent
+                name: runai-oauth2-proxy-0
+                ports:
+                - containerPort: 4180
+                  name: port-4180
+                  protocol: TCP
+                resources: {}
+                restartPolicy: Always
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  runAsNonRoot: true
+                volumeMounts:
+                - mountPath: /etc/runai/auth/users
+                  name: runai-auth
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - emptyDir: {}
+                name: runai-auth
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: None
+    status: {}
+  RunPolicy: null
+  TFJob: null
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: PyTorchJob
+  environments:
+  - connections:
+    - connectionType: ExternalUrl
+      containerPort: 8080
+      correlationName: url
+      exposedUrlPath: /project/urls_no_master
+      exposedUrlSubDomain: project-urls_no_master
+      name: url
+      toolType: jupyter
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-urls_no_master/, Framework: PyTorch'
+  images:
+  - ubuntu
+  name: 'urls_no_master/, Framework: PyTorch'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

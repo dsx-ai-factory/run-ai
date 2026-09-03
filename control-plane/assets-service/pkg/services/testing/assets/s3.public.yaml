@@ -1,0 +1,4 @@
+spec:
+  bucket: my-bucket
+  path: /container/my-bucket
+  url: https://s3.amazonaws.com

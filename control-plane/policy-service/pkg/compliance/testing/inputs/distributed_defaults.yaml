@@ -1,0 +1,46 @@
+master:
+  image: master_image
+
+  annotations:
+    instances:
+      - name: master_name1
+        value: master_value1
+      - name: master_name2
+        exclude: true
+
+  compute:
+    cpuCoreLimit: 2.0
+    extendedResources:
+      attributes:
+        quantity: 1M
+      instances:
+        - resource: nvidia/gpu
+          quantity: 2M
+        - resource: nvidia/cpu
+          quantity: "3"
+
+worker:
+  image: worker_image
+
+  annotations:
+    instances:
+      - name: worker_name1
+        value: worker_value1
+      - name: worker_name2
+        exclude: true
+
+  compute:
+    cpuCoreLimit: 5.0
+    extendedResources:
+      attributes:
+        quantity: 5M
+      instances:
+        - resource: nvidia/gpu
+          quantity: 10M
+        - resource: nvidia/cpu
+          quantity: "30"
+
+  storage:
+    pvc:
+      attributes:
+        claimName: default-claim-name

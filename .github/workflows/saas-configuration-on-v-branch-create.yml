@@ -1,0 +1,88 @@
+name: Create SaaS configuration branch on v-branch create
+
+on:
+  create:
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        description: "Release branch to mirror in saas-configuration (e.g. release-3.0, or legacy v2.26)"
+        required: false
+        type: string
+        default: ""
+      tag_name:
+        description: "SaaS tag to mirror in saas-configuration (e.g. 2.26.3-saas.3)"
+        required: false
+        type: string
+        default: ""
+
+permissions: {}
+
+jobs:
+  dispatch:
+    name: Dispatch to saas-configuration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Parse event
+        id: parse
+        env:
+          EVENT_NAME:   ${{ github.event_name }}
+          REF_TYPE:     ${{ github.event.ref_type }}
+          INPUT_BRANCH: ${{ github.event.inputs.branch_name }}
+          INPUT_TAG:    ${{ github.event.inputs.tag_name }}
+        run: |
+          set -euo pipefail
+
+          # Legacy `v2.26` and post-OSS `release-3.0` are both release branches.
+          BRANCH_RE='^(v|release-)[0-9]+\.[0-9]+$'
+          TAG_RE='^[0-9]+\.[0-9]+\.[0-9]+(-saas\.[0-9]+)?$'
+
+          branch_out=""
+          tag_out=""
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            # Manual inputs are held to the same contract as the event paths below.
+            # They are interpolated straight into the JSON dispatch payload, so an
+            # unvalidated value can break the payload or reach the target as garbage.
+            # A typed-in value failing the contract is an error, not a silent skip.
+            if [ -n "$INPUT_BRANCH" ] && ! printf '%s' "$INPUT_BRANCH" | grep -qE "$BRANCH_RE"; then
+              echo "::error::branch_name '$INPUT_BRANCH' does not match $BRANCH_RE"
+              exit 1
+            fi
+            if [ -n "$INPUT_TAG" ] && ! printf '%s' "$INPUT_TAG" | grep -qE "$TAG_RE"; then
+              echo "::error::tag_name '$INPUT_TAG' does not match $TAG_RE"
+              exit 1
+            fi
+            branch_out="$INPUT_BRANCH"
+            tag_out="$INPUT_TAG"
+          elif [ "$REF_TYPE" = "branch" ]; then
+            BRANCH="${GITHUB_REF#refs/heads/}"
+            if printf '%s' "$BRANCH" | grep -qE "$BRANCH_RE"; then
+              branch_out="$BRANCH"
+            else
+              echo "::notice::branch '$BRANCH' is not a release branch — not mirroring"
+            fi
+          elif [ "$REF_TYPE" = "tag" ]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+            if printf '%s' "$TAG" | grep -qE "$TAG_RE"; then
+              tag_out="$TAG"
+            else
+              echo "::notice::tag '$TAG' is not a release tag — not mirroring"
+            fi
+          fi
+
+          echo "branch_name=$branch_out" >> "$GITHUB_OUTPUT"
+          echo "tag_name=$tag_out" >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch to saas-configuration
+        if: steps.parse.outputs.branch_name != '' || steps.parse.outputs.tag_name != ''
+        uses: benc-uk/workflow-dispatch@31e2b3319479a63f0ab15bf800eff9e913504e26 # v1
+        with:
+          workflow: mirror-from-runai.yml
+          repo: run-ai/saas-configuration
+          ref: master
+          token: ${{ secrets.GIT_HUB_OSS }}
+          inputs: |
+            {
+              "branch_name": "${{ steps.parse.outputs.branch_name }}",
+              "tag_name":    "${{ steps.parse.outputs.tag_name }}"
+            }

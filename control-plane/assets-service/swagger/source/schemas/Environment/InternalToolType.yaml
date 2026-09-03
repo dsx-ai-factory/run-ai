@@ -1,0 +1,13 @@
+description: The type of the internal tool. Internal tool runs within the container and exposes ports associated with the tool using NodePort, LoadBalancer or ExternalUrl.
+type: string
+minLength: 1
+enum:
+  - jupyter-notebook
+  - pycharm
+  - visual-studio-code
+  - tensorboard
+  - rstudio
+  - mlflow
+  - custom
+  - matlab
+  - chatbot-ui

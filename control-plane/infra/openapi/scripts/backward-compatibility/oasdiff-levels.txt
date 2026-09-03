@@ -1,0 +1,5 @@
+request-property-pattern-added warn
+request-parameter-pattern-added warn
+response-property-min-decreased warn
+response-property-became-optional warn
+response-property-became-nullable warn

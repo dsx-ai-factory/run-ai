@@ -1,0 +1,11 @@
+type: object
+properties:
+  priority:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads_spec/resources/PriorityClass.yaml'
+  category:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads_spec/resources/Category.yaml'
+  configuration:
+    type: object
+    nullable: true
+    allOf:
+      - $ref: './WorkloadV2Configuration.yaml'

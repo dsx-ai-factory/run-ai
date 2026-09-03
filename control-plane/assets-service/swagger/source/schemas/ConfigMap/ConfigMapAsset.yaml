@@ -1,0 +1,16 @@
+required:
+  - meta
+  - spec
+properties:
+  meta:
+    $ref: "../Asset/AssetMeta.yaml"
+  spec:
+    $ref: "./ConfigMapAssetSpec.yaml"
+  usedBy:
+    $ref: "../Asset/AssetUsageInfo.yaml"
+  usageTimes:
+    $ref: "../Asset/UsageTimesInfo.yaml"
+  compliance:
+    $ref: "../../../../../infra/openapi/docs/schemas/policy/ComplianceInfo.yaml"
+  status:
+    $ref: "../Asset/AssetClusterStatusInfo.yaml"

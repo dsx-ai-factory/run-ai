@@ -1,0 +1,60 @@
+projectId:
+  $ref: "./ProjectId.yaml"
+nodeTypeId:
+  $ref: "./NodeTypeId.yaml"
+FilterByCluster:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml"
+DepartmentsVerbosity:
+  $ref: "./DepartmentsVerbosity.yaml"
+DepartmentsFilterBy:
+  $ref: "./DepartmentsFilterBy.yaml"
+ProjectsFilterBy:
+  $ref: "./ProjectsFilterBy.yaml"
+ProjectsMetadataFilterBy:
+  $ref: "./ProjectsMetadataFilterBy.yaml"
+DepartmentsSortBy:
+  $ref: "./DepartmentsSortBy.yaml"
+ProjectsSortBy:
+  $ref: "./ProjectsSortBy.yaml"
+ProjectsDeletion:
+  $ref: "./ProjectsDeletion.yaml"
+ProjectsMetadataSortBy:
+  $ref: "./ProjectsMetadataSortBy.yaml"
+DefaultNodePool:
+  $ref: "./DefaultNodePool.yaml"
+OrgUnitType:
+  $ref: "./OrgUnitType.yaml"
+OrgUnitIds:
+  $ref: "./OrgUnitIds.yaml"
+OrgUnitMetricTypes:
+  $ref: "./OrgUnitMetricTypes.yaml"
+ClusterIdV1:
+  $ref: "./v1/ClusterIdV1.yaml"
+ClusterUuidV1:
+  $ref: "./v1/ClusterUuidV1.yaml"
+DepartmentIdV1:
+  $ref: "./v1/DepartmentIdV1.yaml"
+ProjectIdIntV1:
+  $ref: "./v1/ProjectIdIntV1.yaml"
+ProjectIdV1:
+  $ref: "./v1/ProjectIdV1.yaml"
+ExcludePermissionsV1:
+  $ref: "./v1/ExcludePermissionsV1.yaml"
+NodeTypeIdV1:
+  $ref: "./v1/NodeTypeIdV1.yaml"
+MetricsV1NodePool:
+  $ref: "./v1/MetricsV1NodePool.yaml"
+ReportId:
+  $ref: '../../../../infra/openapi/docs/parameters/path/ReportId.yaml'
+UpdatedAfter:
+  $ref: './UpdatedAfter.yaml'
+DeletedAfter:
+  $ref: './DeletedAfter.yaml'
+DepartmentNodePoolResourcesFilterBy:
+  $ref: './DepartmentNodePoolResourcesFilterBy.yaml'
+DepartmentNodePoolResourcesSortBy:
+  $ref: './DepartmentNodePoolResourcesSortBy.yaml'
+ProjectNodePoolResourcesFilterBy:
+  $ref: './ProjectNodePoolResourcesFilterBy.yaml'
+ProjectNodePoolResourcesSortBy:
+  $ref: './ProjectNodePoolResourcesSortBy.yaml'

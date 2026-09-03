@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 300" width="560" height="300">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="560" height="300" fill="#FFFFFF" rx="6"/>
+
+  <!-- Title -->
+  <text x="280" y="34" text-anchor="middle" font-size="15" font-weight="700" fill="#1E293B">Same-Cluster Deployment</text>
+
+  <!-- Kubernetes Cluster outer box -->
+  <rect x="40" y="52" width="480" height="224" rx="10" fill="#F8FAFC" stroke="#94A3B8" stroke-width="2" stroke-dasharray="8 4"/>
+  <!-- Cluster label tab -->
+  <rect x="52" y="44" width="168" height="20" rx="4" fill="#94A3B8"/>
+  <text x="136" y="58" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF">Kubernetes Cluster</text>
+
+  <!-- Control Plane box -->
+  <rect x="72" y="76" width="416" height="80" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5"/>
+  <!-- Left accent bar -->
+  <rect x="72" y="76" width="5" height="80" rx="4" fill="#3B82F6"/>
+  <text x="296" y="111" text-anchor="middle" font-size="14" font-weight="700" fill="#1E3A5F">NVIDIA Run:ai Control Plane</text>
+  <text x="296" y="133" text-anchor="middle" font-size="12" fill="#64748B">Centralized resource management · workload submission · monitoring</text>
+
+  <!-- Divider / connection indicator -->
+  <line x1="280" y1="156" x2="280" y2="184" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <circle cx="280" cy="170" r="12" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1.5"/>
+  <text x="280" y="174" text-anchor="middle" font-size="9" font-weight="600" fill="#94A3B8">mgmt</text>
+
+  <!-- Cluster Services box -->
+  <rect x="72" y="184" width="416" height="80" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5"/>
+  <!-- Left accent bar -->
+  <rect x="72" y="184" width="5" height="80" rx="4" fill="#22C55E"/>
+  <text x="296" y="219" text-anchor="middle" font-size="14" font-weight="700" fill="#14532D">NVIDIA Run:ai Cluster</text>
+  <text x="296" y="241" text-anchor="middle" font-size="12" fill="#64748B">GPU-aware scheduling · workload management · resource optimization</text>
+</svg>

@@ -1,0 +1,6 @@
+in: query
+name: pod
+required: true
+description: The name of the pod to attach to.
+schema:
+  type: string

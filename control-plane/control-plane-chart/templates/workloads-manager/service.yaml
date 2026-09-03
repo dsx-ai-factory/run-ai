@@ -1,0 +1,3 @@
+{{- if .Values.workloadsManager.enabled }}
+{{- include "common.service" (list . .Values.workloadsManager.service .Values.workloadsManager) }}
+{{- end }}

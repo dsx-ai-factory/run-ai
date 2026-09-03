@@ -1,0 +1,23 @@
+defaults:
+  image: ubuntu
+  environmentVariables:
+    instances:
+        - name: name_from_the_policy
+          value: value_from_the_policy
+  compute:
+    cpuCoreLimit: 5
+    extendedResources:
+      instances:
+        - resource: aaa/bbb
+        - resource: ccc/ddd
+          quantity: 10M
+      attributes:
+        quantity: 20M
+  storage:
+    pvc:
+      attributes:
+        claimInfo:
+          storageClass: standard
+          size: 1M
+      instances:
+        - path: "/aaa/bbb"

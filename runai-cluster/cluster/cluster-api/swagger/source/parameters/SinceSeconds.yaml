@@ -1,0 +1,5 @@
+in: query
+name: sinceSeconds
+description: Return logs newer than a relative duration like 5s, 2m, or 3h. Defaults to 0s (all logs).
+schema:
+  type: string

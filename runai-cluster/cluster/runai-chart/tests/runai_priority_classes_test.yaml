@@ -1,0 +1,95 @@
+suite: Test RunAI priority classes retained with KAI
+
+templates:
+  - templates/priorityclasses/build-priority-class.yaml
+  - templates/priorityclasses/critical-priority-class.yaml
+  - templates/priorityclasses/inference-priority-class.yaml
+  - templates/priorityclasses/interactive-preemptible-priority-class.yaml
+  - templates/priorityclasses/train-priority-class.yaml
+  - templates/priorityclasses/train-critical-priority-class.yaml
+  - templates/priorityclasses/train-high-priority-class.yaml
+
+tests:
+  - it: should retain the interactive priority class
+    template: templates/priorityclasses/build-priority-class.yaml
+    asserts:
+      - isKind:
+          of: PriorityClass
+      - equal:
+          path: metadata.name
+          value: build
+      - equal:
+          path: value
+          value: 100
+
+  - it: should retain the critical priority class
+    template: templates/priorityclasses/critical-priority-class.yaml
+    asserts:
+      - isKind:
+          of: PriorityClass
+      - equal:
+          path: metadata.name
+          value: runai-critical
+      - equal:
+          path: value
+          value: 1000000000
+
+  - it: should retain the inference priority class
+    template: templates/priorityclasses/inference-priority-class.yaml
+    asserts:
+      - isKind:
+          of: PriorityClass
+      - equal:
+          path: metadata.name
+          value: inference
+      - equal:
+          path: value
+          value: 125
+
+  - it: should retain the interactive preemptible priority class
+    template: templates/priorityclasses/interactive-preemptible-priority-class.yaml
+    asserts:
+      - isKind:
+          of: PriorityClass
+      - equal:
+          path: metadata.name
+          value: interactive-preemptible
+      - equal:
+          path: value
+          value: 75
+
+  - it: should retain the training priority class
+    template: templates/priorityclasses/train-priority-class.yaml
+    asserts:
+      - isKind:
+          of: PriorityClass
+      - equal:
+          path: metadata.name
+          value: train
+      - equal:
+          path: value
+          value: 50
+
+  - it: should retain the critical training priority class
+    template: templates/priorityclasses/train-critical-priority-class.yaml
+    asserts:
+      - isKind:
+          of: PriorityClass
+      - equal:
+          path: metadata.name
+          value: train-critical
+      - equal:
+          path: value
+          value: 60
+
+  - it: should retain the high-priority training class
+    template: templates/priorityclasses/train-high-priority-class.yaml
+    asserts:
+      - isKind:
+          of: PriorityClass
+      - equal:
+          path: metadata.name
+          value: train-high
+      - equal:
+          path: value
+          value: 55

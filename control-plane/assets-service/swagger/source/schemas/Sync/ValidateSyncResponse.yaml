@@ -1,0 +1,8 @@
+description: List of asset names that have been validated for deletion
+required:
+  - validatedNames
+properties:
+  validatedNames:
+    type: array
+    items:
+      type: string

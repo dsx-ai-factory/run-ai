@@ -1,0 +1,12 @@
+allOf:
+  - $ref: "./NetworkTopologyUpdateFields.yaml"
+  - type: object
+    required:
+      - name
+      - clusterId
+    properties:
+      name:
+        $ref: './NetworkTopologyName.yaml'
+      clusterId:
+        $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+x-schema-name: NetworkTopologyCreateRequest 

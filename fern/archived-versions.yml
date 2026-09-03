@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://schema.buildwithfern.dev/docs-yml.json
+# Stub navigation for archived version entries.
+# Its only purpose is to register those versions in the version selector;
+# the redirects in docs.yml send all their URLs to the externally
+# hosted docs for each version.
+tabs:
+  documentation:
+    display-name: Documentation
+navigation:
+  - tab: documentation
+    layout:
+      - page: Archived Documentation
+        path: archived.mdx

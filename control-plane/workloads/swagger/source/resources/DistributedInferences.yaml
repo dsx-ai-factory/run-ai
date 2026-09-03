@@ -1,0 +1,32 @@
+post:
+  summary: Create a distributed inference.
+  operationId: create_distributed_inference
+  description: Create a distributed inference using container related fields.
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/distributed_inferences_service_test.go
+  x-authorize:
+    resource-type: inferences
+    action: create
+  tags:
+    - Distributed Inferences
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../../../infra/openapi/docs/schemas/distributed_inferences/DistributedInferenceCreationRequest.yaml"
+  responses:
+    202:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../../../infra/openapi/docs/schemas/distributed_inferences/DistributedInference.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

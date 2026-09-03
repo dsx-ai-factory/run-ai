@@ -1,0 +1,38 @@
+get:
+  summary: Get inference workload revisions count.
+  description: Retrieve the number of an inference workload revisions from a cluster. Supported for clusters v2.21+.
+  operationId: count_inference_workload_revisions
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/revisions_api_test.go
+  x-authorize:
+    resource-type: inferences
+    action: read
+    resource-id: workloadId
+  tags:
+    - Revisions
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+    - $ref: '../parameters/query/Deleted.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - count
+            properties:
+              count:
+                type: integer
+                format: int64
+                example: 1
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

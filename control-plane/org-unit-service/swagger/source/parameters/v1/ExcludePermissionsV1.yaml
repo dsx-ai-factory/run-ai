@@ -1,0 +1,7 @@
+name: excludePermissions
+in: query
+required: false
+description: Backward compatibility of the `departmentAdmins` field. If `true`, the `departmentAdmins` field in the returned departments is not set. If `false`, the `departmentAdmins` is set in the returned departments.
+schema:
+  type: boolean
+example: true

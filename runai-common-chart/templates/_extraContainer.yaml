@@ -1,0 +1,59 @@
+{{- define "common.extraContainers.tpl" -}}
+{{- $top := first . }}
+{{- $container := index . 1 }}
+{{- $containers := $container.extraContainers }}
+{{- range $containers }}
+{{- $container := . }}
+{{- $image := $container.image | default (dict) }}
+name: {{ $container.name }}
+securityContext:
+  {{- toYaml $container.securityContext | nindent 2 }}
+{{- with $container.command }}
+command: 
+{{- toYaml . | nindent 2 }}
+{{- end }}
+image: "{{ $image.registry | default $top.Values.global.image.registry }}/{{ $image.repository }}:{{ $image.tag | default $top.Chart.AppVersion }}"
+imagePullPolicy: {{ $container.image.pullPolicy | default $top.Values.global.image.pullPolicy }}
+livenessProbe:
+  {{- toYaml $container.livenessProbe | nindent 2 }}
+readinessProbe:
+  {{- toYaml $container.readinessProbe | nindent 2 }}
+{{- with $container.service }}
+ports:
+- name: http
+  containerPort: {{ .port }}
+  protocol: {{ .protocol }}
+{{- end }}
+resources:
+  {{- toYaml $container.resources | nindent 2 }}
+{{- with $container.envFrom }}
+envFrom: 
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- with $container.args }}
+args: 
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- with $container.extraArgs }}
+  {{- tpl . $top | nindent 2 }}
+{{- end }}
+env: 
+  {{- if ($top.Values.global.customCA).enabled | default false }}
+    {{- $top.Values.global.customCA.env | toYaml | nindent 2 }}
+  {{- end }}
+  {{- with $container.env }}
+    {{- tpl (toYaml .) $top | nindent 2 }}
+  {{- end }}
+volumeMounts: 
+  {{- if ($top.Values.global.customCA).enabled | default false }}
+    {{- $top.Values.global.customCA.volumeMounts | toYaml | nindent 2 }}
+  {{- end }}
+  {{- with $container.volumeMounts }}
+    {{- toYaml . | nindent 2 }}
+  {{- end }}
+{{- end }}
+{{- end }}
+
+{{- define "common.extraContainers" -}}
+{{- include "common.utils.merge" (append . "common.extraContainers.tpl") }}
+{{- end }}

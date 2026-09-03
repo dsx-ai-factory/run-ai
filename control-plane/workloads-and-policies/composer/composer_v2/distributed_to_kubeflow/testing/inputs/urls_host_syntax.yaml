@@ -1,0 +1,37 @@
+image: ubuntu
+exposedUrls:
+  - container: 8080
+    url: "http://examplecom/ffr"
+    toolType: jupyter
+    toolName: my-jupyter
+  - container: 8081
+    toolType: tensor
+    authorizedGroups:
+      - group-a
+      - group-b
+  - container: 8082
+    toolName: my-tool
+    authorizedUsers:
+      - user-a
+      - user-b
+  - container: 8083
+    toolType: by-users
+    authorizationType: authorizedUsers
+    authorizedGroups:
+      - group-a
+      - group-b
+    authorizedUsers:
+      - user-a
+      - user-b
+  - container: 8084
+    toolType: by-groups
+    authorizationType: authorizedGroups
+    authorizedGroups:
+      - group-c
+      - group-d
+    authorizedUsers:
+      - user-c
+      - user-d
+
+
+

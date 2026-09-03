@@ -1,0 +1,1812 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "2.0.0",
+    "title": "catalog-service",
+    "description": "An API for managing catalogs",
+    "contact": {
+      "email": "support@run.ai"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://app.run.ai"
+    },
+    {
+      "url": "https://staging.run.ai"
+    },
+    {
+      "url": "https://test.run.ai"
+    },
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/": {
+      "x-internal": true,
+      "get": {
+        "summary": "health check",
+        "x-service": "catalog-service",
+        "x-no-authorization": true,
+        "operationId": "health",
+        "tags": [
+          "Health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully."
+          }
+        }
+      }
+    },
+    "/api/v1/registries": {
+      "get": {
+        "summary": "List registry integrations",
+        "description": "List registry integrations.",
+        "operationId": "list_registry_integrations",
+        "x-service": "catalog-service",
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "registries",
+          "action": "read"
+        },
+        "tags": [
+          "Registries"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistryIntegrationListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create registry integration",
+        "description": "Create registry integration.",
+        "operationId": "create_registry_integration",
+        "x-service": "catalog-service",
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "registries",
+          "action": "create"
+        },
+        "tags": [
+          "Registries"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistryIntegrationCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistryIntegration"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/409Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/registries/{RegistryIntegrationId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/RegistryIntegrationId"
+        }
+      ],
+      "get": {
+        "summary": "Get registry integration by id",
+        "description": "Get registry integration by id.",
+        "operationId": "get_registry_integration_by_id",
+        "x-service": "catalog-service",
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "registries",
+          "action": "read"
+        },
+        "tags": [
+          "Registries"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistryIntegration"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update registry integration",
+        "description": "Update registry integration.",
+        "operationId": "update_registry_integration",
+        "x-service": "catalog-service",
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "registries",
+          "action": "update"
+        },
+        "tags": [
+          "Registries"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistryIntegrationUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistryIntegration"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/409Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete registry integration",
+        "description": "Delete registry integration.",
+        "operationId": "delete_registry_integration",
+        "x-service": "catalog-service",
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "registries",
+          "action": "delete"
+        },
+        "tags": [
+          "Registries"
+        ],
+        "responses": {
+          "202": {
+            "$ref": "#/components/responses/202Accepted"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/registries/{RegistryIntegrationId}/images": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/RegistryIntegrationId"
+        }
+      ],
+      "get": {
+        "summary": "List images by registry-integration id",
+        "description": "List requested images.",
+        "operationId": "list_images",
+        "x-service": "catalog-service",
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "registries",
+          "action": "read"
+        },
+        "tags": [
+          "Images"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Search"
+          },
+          {
+            "$ref": "#/components/parameters/AssetIdOptional"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImagesListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/registries/{RegistryIntegrationId}/images/tags": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/RegistryIntegrationId"
+        }
+      ],
+      "get": {
+        "summary": "Get the image's tags",
+        "operationId": "get_image_tags",
+        "x-service": "catalog-service",
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "registries",
+          "action": "read"
+        },
+        "tags": [
+          "Images"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ImageName"
+          },
+          {
+            "$ref": "#/components/parameters/AssetIdOptional"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImageTags"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/helm-repos": {
+      "get": {
+        "summary": "List helm repos. [Experimental]",
+        "description": "List helm repos.",
+        "operationId": "list_helm_repos",
+        "x-service": "catalog-service",
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "registries",
+          "action": "read"
+        },
+        "tags": [
+          "HelmRepos"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelmRepoListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create helm repo. [Experimental]",
+        "description": "Create helm repo.",
+        "operationId": "create_helm_repo",
+        "x-service": "catalog-service",
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "registries",
+          "action": "create"
+        },
+        "tags": [
+          "HelmRepos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HelmRepoCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelmRepo"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/409Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/helm-repos/{HelmRepoId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/HelmRepoId"
+        }
+      ],
+      "get": {
+        "summary": "Get helm repo by id. [Experimental]",
+        "description": "Get helm repo by id.",
+        "operationId": "get_helm_repo_by_id",
+        "x-service": "catalog-service",
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "registries",
+          "action": "read"
+        },
+        "tags": [
+          "HelmRepos"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelmRepo"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update helm repo. [Experimental]",
+        "description": "Update helm repo.",
+        "operationId": "update_helm_repo",
+        "x-service": "catalog-service",
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "registries",
+          "action": "update"
+        },
+        "tags": [
+          "HelmRepos"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HelmRepoUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelmRepo"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/409Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete helm repo. [Experimental]",
+        "description": "Delete helm repo.",
+        "operationId": "delete_helm_repo",
+        "x-service": "catalog-service",
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "registries",
+          "action": "delete"
+        },
+        "tags": [
+          "HelmRepos"
+        ],
+        "responses": {
+          "202": {
+            "$ref": "#/components/responses/202Accepted"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/helm-repos/{HelmRepoId}/charts": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/HelmRepoId"
+        }
+      ],
+      "get": {
+        "summary": "Browse helm repo charts. [Experimental]",
+        "description": "Fetch and list all charts and their versions from a helm repo.",
+        "operationId": "browse_helm_repo_charts",
+        "x-service": "catalog-service",
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "registries",
+          "action": "read"
+        },
+        "tags": [
+          "HelmRepos"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AssetIdOptional"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelmChartListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/huggingface/catalog": {
+      "get": {
+        "summary": "Search Hugging Face models.",
+        "x-internal": true,
+        "description": "Proxy to the Hugging Face catalog search API.",
+        "operationId": "search_hugging_face_catalog",
+        "x-service": "catalog-service",
+        "x-test-coverage": [
+          "control-plane/catalog-service/pkg/services/api_inferences_service_test.go",
+          "control-plane/catalog-service/pkg/services/huggingface/huggingface_info_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "inferences",
+          "action": "create"
+        },
+        "tags": [
+          "Inferences"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/HuggingFaceSearchQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HuggingFaceModelSearchResults"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/catalog/settings": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "summary": "Get catalog settings",
+        "x-service": "catalog-service",
+        "x-test-coverage": "not-applicable",
+        "operationId": "get_catalog_settings",
+        "x-authorize": {
+          "resource-type": "settings",
+          "action": "read"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/TenantId"
+          }
+        ],
+        "tags": [
+          "Settings"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogSettingsGetResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/catalog/settings/{key}": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "put": {
+        "summary": "Update catalog setting by key",
+        "x-service": "catalog-service",
+        "x-test-coverage": "not-applicable",
+        "operationId": "update_catalog_setting_by_key",
+        "x-authorize": {
+          "resource-type": "settings",
+          "action": "update"
+        },
+        "tags": [
+          "Settings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CatalogSettingsKey"
+          },
+          {
+            "$ref": "#/components/parameters/TenantId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCatalogSettingByKeyRequest"
+              },
+              "examples": {
+                "enableNgcIntegration": {
+                  "value": {
+                    "enabled": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Setting successfully updated"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get catalog setting by key",
+        "x-service": "catalog-service",
+        "x-test-coverage": "not-applicable",
+        "operationId": "get_catalog_setting_by_key",
+        "x-authorize": {
+          "resource-type": "settings",
+          "action": "read"
+        },
+        "tags": [
+          "Settings"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CatalogSettingsKey"
+          },
+          {
+            "$ref": "#/components/parameters/TenantId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEnableNgcIntegration"
+                },
+                "examples": {
+                  "enableNgcIntegration": {
+                    "value": {
+                      "enabled": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "400BadRequest": {
+        "description": "Bad request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 400,
+              "message": "Required parameter is missing"
+            }
+          }
+        }
+      },
+      "401Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 401,
+              "message": "Issuer is not familiar."
+            }
+          }
+        }
+      },
+      "403Forbidden": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 403,
+              "message": "You do not have sufficient permissions."
+            }
+          }
+        }
+      },
+      "500InternalServerError": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 500,
+              "message": "Something went wrong."
+            }
+          }
+        }
+      },
+      "503ServiceUnavailable": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 503,
+              "message": "Please try again in few minutes."
+            }
+          }
+        }
+      },
+      "409Conflict": {
+        "description": "The specified resource already exists",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 409,
+              "message": "Resource with this name already exists"
+            }
+          }
+        }
+      },
+      "404NotFound": {
+        "description": "The specified resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 404,
+              "message": "Resource id not found."
+            }
+          }
+        }
+      },
+      "202Accepted": {
+        "description": "Accepted.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HttpResponse"
+            },
+            "example": {
+              "code": 202,
+              "message": "Request has been accepted."
+            }
+          }
+        }
+      },
+      "204NoContent": {
+        "description": "No Content."
+      },
+      "400BadSubmissionRequest": {
+        "description": "Bad submission request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SubmissionError"
+            },
+            "example": {
+              "code": 400,
+              "message": "The workload request does not comply with the policy set by the administrator"
+            }
+          }
+        }
+      },
+      "406NotAcceptable": {
+        "description": "Not acceptable request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "412PreconditionFailed": {
+        "description": "The specified resource was not found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 412,
+              "message": "Precondition failed"
+            }
+          }
+        }
+      },
+      "413RequestEntityTooLarge": {
+        "description": "Request entity too large",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "415UnsupportedMediaType": {
+        "description": "Unsupported media type",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "501NotImplemented": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 501,
+              "message": "Not implemented"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Bearer authentication"
+      }
+    },
+    "parameters": {
+      "RegistryIntegrationId": {
+        "name": "RegistryIntegrationId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "description": "The ID of the registry integration."
+        }
+      },
+      "Search": {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "description": "Filter results by a free text search.",
+        "schema": {
+          "type": "string",
+          "example": "test project"
+        }
+      },
+      "AssetIdOptional": {
+        "name": "assetId",
+        "in": "query",
+        "required": false,
+        "description": "The asset ID to use for accessing resources that require API key authentication",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "ImageName": {
+        "name": "ImageName",
+        "in": "query",
+        "required": true,
+        "description": "The name of the image to get the tags for",
+        "example": "runai/viper-catalog-service:latest",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "HelmRepoId": {
+        "name": "HelmRepoId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "description": "The ID of the helm repo."
+        }
+      },
+      "HuggingFaceSearchQuery": {
+        "name": "query",
+        "in": "query",
+        "required": false,
+        "description": "Search query used to look up Hugging Face models. Accepts a full repository ID (`org/model`), a standalone model name, or a partial match string.",
+        "example": "meta-llama/Llama-3.1-405B-Instruct or Llama-3.1-405B-Instruct or Llama-3.1-405B",
+        "schema": {
+          "type": "string",
+          "pattern": "^/?[A-Za-z0-9._-/]+$"
+        }
+      },
+      "TenantId": {
+        "name": "tenantId",
+        "in": "query",
+        "required": false,
+        "x-scope": [
+          "system"
+        ],
+        "description": "If exists will return the relevant resource for the tenant ID",
+        "example": "1008",
+        "schema": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "CatalogSettingsKey": {
+        "name": "key",
+        "in": "path",
+        "required": true,
+        "description": "The settings key",
+        "schema": {
+          "$ref": "#/components/schemas/CatalogSettingsKeyEnum"
+        }
+      }
+    },
+    "schemas": {
+      "ScopeType": {
+        "type": "string",
+        "enum": [
+          "system",
+          "tenant",
+          "cluster",
+          "department",
+          "project"
+        ]
+      },
+      "ScopeId": {
+        "type": "string",
+        "description": "The id of the cluster, department or project, depending on the scope type."
+      },
+      "TenantId": {
+        "description": "The id of the tenant.",
+        "type": "integer",
+        "format": "int32",
+        "example": 1001
+      },
+      "ClusterId": {
+        "description": "The id of the cluster.",
+        "type": "string",
+        "format": "uuid",
+        "example": "71f69d83-ba66-4822-adf5-55ce55efd210"
+      },
+      "DepartmentId": {
+        "description": "The id of the department.",
+        "type": "string",
+        "minLength": 1,
+        "example": 2,
+        "pattern": ".*"
+      },
+      "ProjectId": {
+        "description": "The id of the project.",
+        "type": "string",
+        "example": 1,
+        "pattern": ".*"
+      },
+      "RegistryIntegration": {
+        "type": "object",
+        "required": [
+          "createdAt",
+          "updatedAt",
+          "createdBy",
+          "updatedBy",
+          "scopeType",
+          "id",
+          "name",
+          "url"
+        ],
+        "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the registry integration was created."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the registry integration was updated."
+          },
+          "createdBy": {
+            "type": "string",
+            "description": "The user who created the registry integration."
+          },
+          "updatedBy": {
+            "type": "string",
+            "description": "The user who updated the registry integration."
+          },
+          "scopeType": {
+            "$ref": "#/components/schemas/ScopeType"
+          },
+          "scopeId": {
+            "$ref": "#/components/schemas/ScopeId",
+            "nullable": true
+          },
+          "tenantId": {
+            "$ref": "#/components/schemas/TenantId",
+            "nullable": true
+          },
+          "clusterId": {
+            "$ref": "#/components/schemas/ClusterId",
+            "nullable": true
+          },
+          "departmentId": {
+            "$ref": "#/components/schemas/DepartmentId",
+            "nullable": true
+          },
+          "projectId": {
+            "$ref": "#/components/schemas/ProjectId",
+            "nullable": true
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the registry integration."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the registry integration."
+          },
+          "url": {
+            "type": "string",
+            "description": "The type of the registry integration."
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the registry integration."
+          }
+        }
+      },
+      "RegistryIntegrations": {
+        "type": "array",
+        "description": "The list of registry-integrations.",
+        "items": {
+          "$ref": "#/components/schemas/RegistryIntegration"
+        }
+      },
+      "RegistryIntegrationListResponse": {
+        "required": [
+          "registries"
+        ],
+        "properties": {
+          "registries": {
+            "$ref": "#/components/schemas/RegistryIntegrations"
+          }
+        }
+      },
+      "Error": {
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "code": 400,
+          "message": "Bad request - Resource should have a name"
+        }
+      },
+      "RegistryIntegrationCreationRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "url",
+          "scopeType",
+          "scopeId"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the registry integration."
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL of the registry integration."
+          },
+          "scopeType": {
+            "$ref": "#/components/schemas/ScopeType"
+          },
+          "scopeId": {
+            "$ref": "#/components/schemas/ScopeId",
+            "description": "The ID of the scope. Mandatory for non-system scope registries.",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the registry integration."
+          },
+          "version": {
+            "type": "string",
+            "description": "The version of the registry integration.",
+            "x-internal": true
+          }
+        }
+      },
+      "RegistryIntegrationUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL of the registry integration."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the registry integration."
+          }
+        }
+      },
+      "HttpResponse": {
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "Image": {
+        "type": "string",
+        "description": "The image name."
+      },
+      "Images": {
+        "type": "array",
+        "description": "The list of images.",
+        "items": {
+          "$ref": "#/components/schemas/Image"
+        }
+      },
+      "ImagesListResponse": {
+        "required": [
+          "images"
+        ],
+        "properties": {
+          "images": {
+            "$ref": "#/components/schemas/Images"
+          },
+          "prefix": {
+            "type": "string",
+            "description": "The prefix of the image names.",
+            "nullable": true
+          }
+        }
+      },
+      "ImageTags": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the image"
+          },
+          "tags": {
+            "type": "array",
+            "description": "The tags of the image",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "tags",
+          "name"
+        ]
+      },
+      "HelmRepo": {
+        "type": "object",
+        "required": [
+          "createdAt",
+          "updatedAt",
+          "createdBy",
+          "updatedBy",
+          "scopeType",
+          "id",
+          "name",
+          "url",
+          "isPrivate"
+        ],
+        "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the helm repo was created."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the helm repo was updated."
+          },
+          "createdBy": {
+            "type": "string",
+            "description": "The user who created the helm repo."
+          },
+          "updatedBy": {
+            "type": "string",
+            "description": "The user who updated the helm repo."
+          },
+          "scopeType": {
+            "$ref": "#/components/schemas/ScopeType"
+          },
+          "scopeId": {
+            "$ref": "#/components/schemas/ScopeId",
+            "nullable": true
+          },
+          "tenantId": {
+            "$ref": "#/components/schemas/TenantId",
+            "nullable": true
+          },
+          "clusterId": {
+            "$ref": "#/components/schemas/ClusterId",
+            "nullable": true
+          },
+          "departmentId": {
+            "$ref": "#/components/schemas/DepartmentId",
+            "nullable": true
+          },
+          "projectId": {
+            "$ref": "#/components/schemas/ProjectId",
+            "nullable": true
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The ID of the helm repo."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the helm repo."
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL of the helm repo."
+          },
+          "isPrivate": {
+            "type": "boolean",
+            "description": "Whether the helm repo requires authentication to browse."
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the helm repo."
+          }
+        }
+      },
+      "HelmRepos": {
+        "type": "array",
+        "description": "The list of helm repos.",
+        "items": {
+          "$ref": "#/components/schemas/HelmRepo"
+        }
+      },
+      "HelmRepoListResponse": {
+        "required": [
+          "helmRepos"
+        ],
+        "properties": {
+          "helmRepos": {
+            "$ref": "#/components/schemas/HelmRepos"
+          }
+        }
+      },
+      "HelmRepoCreationRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "url",
+          "scopeType",
+          "scopeId"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the helm repo."
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL of the helm repo."
+          },
+          "isPrivate": {
+            "type": "boolean",
+            "description": "Whether the helm repo requires authentication to browse."
+          },
+          "scopeType": {
+            "$ref": "#/components/schemas/ScopeType"
+          },
+          "scopeId": {
+            "$ref": "#/components/schemas/ScopeId",
+            "description": "The ID of the scope. Mandatory for non-system scope helm repos.",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the helm repo."
+          }
+        }
+      },
+      "HelmRepoUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL of the helm repo."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the helm repo."
+          },
+          "isPrivate": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Whether the helm repo requires authentication to browse."
+          }
+        }
+      },
+      "HelmChartVersion": {
+        "type": "object",
+        "required": [
+          "version"
+        ],
+        "properties": {
+          "version": {
+            "type": "string",
+            "description": "The version of the chart (SemVer)."
+          },
+          "appVersion": {
+            "type": "string",
+            "description": "The application version the chart represents."
+          },
+          "description": {
+            "type": "string",
+            "description": "A one-line description of the chart version."
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time this chart version was created."
+          }
+        }
+      },
+      "HelmChart": {
+        "type": "object",
+        "required": [
+          "name",
+          "versions"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the helm chart."
+          },
+          "versions": {
+            "type": "array",
+            "description": "The list of available versions for this chart.",
+            "items": {
+              "$ref": "#/components/schemas/HelmChartVersion"
+            }
+          }
+        }
+      },
+      "HelmChartListResponse": {
+        "type": "object",
+        "required": [
+          "charts"
+        ],
+        "properties": {
+          "charts": {
+            "type": "array",
+            "description": "The list of charts in the helm repo.",
+            "items": {
+              "$ref": "#/components/schemas/HelmChart"
+            }
+          }
+        }
+      },
+      "HuggingFaceModelItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "meta-llama/Llama-3.1-405B-Instruct",
+            "description": "the huggingface model id"
+          },
+          "gated": {
+            "type": "boolean",
+            "example": false
+          },
+          "downloads": {
+            "type": "integer",
+            "example": 558919
+          },
+          "trending": {
+            "type": "boolean",
+            "description": "indicates if the model is trending",
+            "example": true
+          }
+        }
+      },
+      "HuggingFaceModelSearchResults": {
+        "type": "object",
+        "properties": {
+          "resources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HuggingFaceModelItem"
+            }
+          }
+        }
+      },
+      "GetEnableNgcIntegration": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "nullable": true
+              }
+            }
+          },
+          "displayName": {
+            "type": "string",
+            "readOnly": true
+          },
+          "description": {
+            "type": "string",
+            "readOnly": true
+          },
+          "stage": {
+            "type": "string",
+            "readOnly": true
+          }
+        }
+      },
+      "CatalogSettingsGetResponse": {
+        "type": "object",
+        "properties": {
+          "enableNgcIntegration": {
+            "$ref": "#/components/schemas/GetEnableNgcIntegration"
+          }
+        }
+      },
+      "CatalogSettingsKeyEnum": {
+        "type": "string",
+        "enum": [
+          "enableNgcIntegration"
+        ]
+      },
+      "UpdateCatalogSettingByKeyRequest": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "example": {
+          "enabled": false
+        }
+      },
+      "EnableNgcIntegrationSetting": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "example": {
+          "enabled": false
+        }
+      },
+      "ComplianceIssues": {
+        "properties": {
+          "complianceIssues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "details",
+                "field"
+              ],
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "example": "compute.gpuDevicesRequest"
+                },
+                "details": {
+                  "type": "string",
+                  "example": "value must be no less than 3"
+                }
+              }
+            }
+          }
+        },
+        "nullable": true,
+        "type": "object"
+      },
+      "SubmissionError": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "$ref": "#/components/schemas/ComplianceIssues"
+          }
+        ]
+      }
+    }
+  }
+}

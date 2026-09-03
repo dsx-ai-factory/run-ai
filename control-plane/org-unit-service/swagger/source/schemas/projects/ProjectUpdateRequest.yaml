@@ -1,0 +1,15 @@
+allOf:
+  - $ref: "../DataUpdatableFields.yaml"
+  - type: object
+    required:
+      - resources
+    properties:
+      enforceRunaiScheduler:
+        type: boolean
+        description: a flag to enforce that all pods in this namespace will be scheduled with runai-scheduler. Supported for cluster v2.21+
+        nullable: true
+      resources:
+        type: array
+        items:
+          $ref: "../ResourcesNullable.yaml"
+        description: Resources assigned to this Organization per Node Pool

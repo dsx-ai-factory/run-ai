@@ -1,0 +1,21 @@
+rules:
+  compute:
+    gpuPortionLimit:
+      defaultFrom:
+        field: compute.cpuCoreRequest
+        factor: 1.5
+    gpuPortionRequest:
+      defaultFrom:
+        field: compute.gpuPortionLimit
+        factor: 3.5
+    cpuCoreRequest:
+      defaultFrom:
+        field: security.runAsUid
+  security:
+    runAsUid:
+      defaultFrom:
+        field: compute.gpuPortionRequest
+    runAsGid:
+      defaultFrom:
+        field: compute.gpuPortionRequest
+        factor: 0.2

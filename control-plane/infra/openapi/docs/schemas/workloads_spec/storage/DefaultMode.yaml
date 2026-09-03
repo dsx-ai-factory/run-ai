@@ -1,0 +1,10 @@
+type: string
+description: >
+  File permission mode in octal string format.
+  This value must be a 4-digit octal number, representing the default file mode
+  when mounting a Secret or ConfigMap as a volume.
+minLength: 4
+maxLength: 4
+example: "0644"
+pattern: '0[0-7]{3}'
+nullable: true

@@ -1,0 +1,45 @@
+dir: '{{.InterfaceDir}}/mocks'
+structname: '{{.InterfaceName}}'
+filename: "{{.InterfaceName}}.go"
+pkgname: mocks
+template: testify
+packages:
+  github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/internal/connections:
+    interfaces:
+      MetricStoreGetter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/internal/datasources:
+    interfaces:
+      ConnectionGetter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/internal/metrics:
+    interfaces:
+      ClusterVersionsHistoryGetter: {}
+      MetricQueryPicker: {}
+      QueryInjector: {}
+      QueryVersionPicker: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/internal/metricstores:
+    interfaces:
+      DatasourceProvider: {}
+      MetricStoresDao: {}
+      TenantMetricStoreGetter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/internal/providers:
+    interfaces:
+      GrafanaLabsClienter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/internal/reports:
+    interfaces:
+      Collectorer: {}
+      PendingReportsGetter: {}
+      ReportsDeleter: {}
+      ReportsUpdater: {}
+      ResultMapBuilder: {}
+      S3Deleter: {}
+      S3Saver: {}
+      WaitGrouper: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/internal/services:
+    interfaces:
+      MetricQuerier: {}
+      MetricQueryBuilder: {}
+      MetricStoreManager: {}
+      ReportsDao:
+        config:
+          dir: '{{.InterfaceDir}}/../database/dao/mocks'
+      TenantsClienter: {}

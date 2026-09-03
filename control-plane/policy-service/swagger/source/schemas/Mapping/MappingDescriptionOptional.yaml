@@ -1,0 +1,7 @@
+type: string
+nullable: true
+description: A free-text description of the element.
+example: "a short description of the mapping element"
+pattern: .*
+minLength: 1
+maxLength: 1023

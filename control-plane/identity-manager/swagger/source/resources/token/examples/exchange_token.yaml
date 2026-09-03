@@ -1,0 +1,4 @@
+grantType: "exchange_token"
+code: "code"
+clientID: "clientID"
+redirectUri: "redirectUri"

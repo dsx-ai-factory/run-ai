@@ -1,0 +1,5045 @@
+nameOverride: ''
+fullnameOverride: 'runai-backend'
+
+thirdPartyImages:
+  keycloak: keycloakx.image
+  nats: nats.image
+  postgres: global.postgresImage
+  postgresql: postgresql.image
+  thanos: thanos.image
+  traefik: traefik.image
+  wait-ubi-minimal: global.waitImage
+
+supportEntitled: false
+
+global:
+  domain: localhost
+  installationType: selfhosted
+  security:
+    contentSecurityPolicy: "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://fonts.googleapis.com/; style-src 'self' https://fonts.googleapis.com/ 'unsafe-inline' blob:; connect-src 'self' wss: https: blob:; frame-src 'self' https: blob:; frame-ancestors 'self'; base-uri 'self'; object-src 'self'; worker-src blob: 'self'; upgrade-insecure-requests"
+  blobStorage:
+    type: s3
+    s3:
+      enabled: false
+  management:
+    name: console
+    user: admin@run.ai
+    # Lands in runai-backend-gen-tenants-manager (key TENANT_MNG_PASSWORD) via
+    # the secret-generator hook's chartValue path, which takes precedence over
+    # random generation. Flip to "" once CI/e2e/dev seed an existingSecret with
+    # this value, at which point the hook will produce a random 24-char password.
+    password: ""
+    existingSecret: ""
+    secretKeys:
+      userKey: TENANT_MNG_USER
+      passwordKey: TENANT_MNG_PASSWORD
+  config:
+    kubernetesDistribution: kubernetes
+    environment: production
+    tracingEnabled: false
+    auditEnabled: true
+    auditEnablePrintToStdout: false
+    hpaEnabled: false
+    serviceMonitorEnabled: false
+  multiTenancy:
+    enabled: false
+  ingress:
+    enabled: true
+    # Ingress controller class. Supported: nginx (default), haproxy
+    # Controller-specific annotations are automatically applied based on the ingressClass.
+    # To add default annotations to additional ingressClasses, add them to ingressClassAnnotations below
+    ingressClass: nginx
+    tlsSecretName: runai-backend-tls
+    openshift:
+      route:
+        tls:
+          # Certificate in PEM format
+          certificate: ""
+          # Private key in PEM format
+          key: ""
+    # Controller-specific default annotations (automatically applied based on ingressClass)
+    ingressClassAnnotations:
+      nginx:
+        nginx.ingress.kubernetes.io/proxy-buffer-size: '16k'
+        nginx.ingress.kubernetes.io/proxy_buffers: "4 16k"
+        nginx.ingress.kubernetes.io/proxy-busy-buffers-size: "48k"
+        nginx.ingress.kubernetes.io/ssl-ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-CHACHA20-POLY1305"
+        nginx.ingress.kubernetes.io/x-content-type-options: nosniff
+        nginx.ingress.kubernetes.io/x-frame-options: DENY
+        nginx.ingress.kubernetes.io/referrer-policy: "strict-origin-when-cross-origin"
+      haproxy:
+        haproxy.org/response-set-header: |
+          X-Content-Type-Options nosniff
+          X-Frame-Options DENY
+          Referrer-Policy strict-origin-when-cross-origin
+    extraAnnotations: {}
+  # Gateway API configuration (independent toggle, non-mutually exclusive with ingress)
+  # Requires a pre-installed Gateway controller and Gateway resource in the cluster
+  gatewayAPI:
+    enabled: false
+    # List of parent Gateway references. Each entry creates a parentRef in the HTTPRoute.
+    # - name: my-gateway
+    #   namespace: gateway-system
+    #   sectionName: https
+    parentRefs: []
+  keycloakx:
+    # Used to overcome the keycloak host resolution issue.
+    host: http://keycloak-http
+  k8sObjectsTracker:
+    config:
+      dbUseServiceSession: "true"
+  postgresql:
+    auth:
+      postgresPassword: ""
+      password: ""
+      existingSecret: "runai-backend-gen-postgresql"
+      username: user
+      database: backend
+      port: 5432
+      scheme: backend
+      host: runai-backend-postgresql
+      dbSslMode: disable
+      secretKeys:
+        adminPasswordKey: postgres-password
+        userPasswordKey: password
+    dbVerboseLogging: true
+  cache:
+    type: nats
+    url: runai-backend-nats:4222
+    readUrl: runai-backend-nats:4222
+    auth:
+      password: ""
+      existingSecret: ""
+      secretKeys:
+        passwordKey: cache-password
+
+  pubsub:
+    type: nats
+    url: runai-backend-nats:4222
+    auth:
+      user: ""
+      password: ""
+      existingSecret: ""
+      secretKeys:
+        passwordKey: pubsub-password
+        userKey: pubsub-user
+    additionalSubscriber:
+      enabled: false
+      type: redis
+      url: ""
+      auth:
+        user: ""
+        password: ""
+        existingSecret: ""
+        secretKeys:
+          passwordKey: pubsub-additional-subscriber-password
+          userKey: pubsub-additional-subscriber-user
+
+  customCA:
+    enabled: false
+    secret:
+      name: runai-ca-cert
+      key: runai-ca.pem
+      optional: true
+    env:
+      - name: NODE_EXTRA_CA_CERTS
+        value: /etc/ssl/certs/runai-ca.pem
+    volumes:
+      - name: runai-ca-cert
+        secret:
+          secretName: runai-ca-cert
+          optional: true
+    volumeMounts:
+      - mountPath: /etc/ssl/certs/runai-ca.pem
+        name: runai-ca-cert
+        readOnly: true
+        subPath: runai-ca.pem
+
+  fipsMode: "off"
+
+  seo:
+    allowSearchEngineIndexing: false
+  image:
+    registry: docker.io
+    repository: postgres
+    tag: "16-alpine"
+    pullPolicy: IfNotPresent
+  postgresImage:
+    registry: docker.io
+    repository: postgres
+    tag: "16-alpine"
+    pullPolicy: IfNotPresent
+  waitImage:
+    registry: registry.access.redhat.com
+    repository: ubi9/ubi-minimal
+    tag: "9.8"
+    pullPolicy: IfNotPresent
+  affinity: &affinity
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            matchExpressions:
+              - key: node-role.kubernetes.io/runai-system
+                operator: Exists
+  ## @param global.requireDefaultPodAntiAffinity Specifies whether to require default pod anti-affinity (which is preferred by default) 
+  ## for all control-plane services
+  requireDefaultPodAntiAffinity: false
+  ## @param global.replicaCount Specifies the number of replicas for all control-plane services
+  ## providing $SERVICE.replicaCount will override this value for a given service (ex: assetsService.replicaCount: 3)
+  replicaCount: 1
+  ## @param global.tolerations Specifies the tolerations for all control-plane services
+  ## This will be appended to any tolerations specified in a service's specific configuration (ex: assetsService.tolerations)
+  tolerations: []
+
+assetsService:
+  name: assets-service
+  exposedRules:
+    - PathPrefix(`/api/v1/asset`)
+    - PathPrefix(`/api/v2/asset`)
+    - PathPrefix(`/api/v1/workload`)
+    - PathPrefix(`/api/v1/workspace`)
+    - PathPrefix(`/api/v2/workspace`)
+    - PathPrefix(`/api/v1/training`)
+    - PathPrefix(`/api/v2/training`)
+    - PathPrefix(`/api/v1/inference`)
+    - PathPrefix(`/api/v2/inference`)
+    - PathPrefix(`/api/v1/model-inference`)
+    - PathPrefix(`/api/v2/model-inference`)
+    - PathPrefix(`/api/v2/huggingface-model/info-request`)
+    - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/workspaces`)
+    - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/trainings`)
+    - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/distributed`)
+  image:
+    repository: assets-service
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.assetsService.config.secretsMountPath }}'
+    - name: POD_NAMESPACE
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-assets-service
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-assets-service
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.password.secret.key" . }}'
+                  path: PUBSUB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.user.secret.key" . }}'
+                  path: PUBSUB_USER
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_USER
+
+  volumeMounts:
+    - mountPath: '{{ .Values.assetsService.config.secretsMountPath }}'
+      name: runai-service-config
+
+  extraVolumes: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumes | toYaml }}
+    {{- end }}
+
+  extraVolumeMounts: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumeMounts | toYaml }}
+    {{- end }}
+
+  imagePullSecrets: []
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  startupProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 3
+    periodSeconds: 10           # Check every 10 seconds
+    failureThreshold: 20        # 3s + (20 × 10s) = 203s ~ 3.4 minutes
+    timeoutSeconds: 2
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: 'assets-service'
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9090
+        protocol: TCP
+
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  config:
+    logLevel: Info
+    dbScheme: assets
+    dbMaxConnections: 500
+    dbMaxIdleConnections: 250
+    dbMaxIdleConnectionsTimeDuration: 1h
+    dbUseServiceSession: false
+    migrationFiles: file:///migrations
+    secretsMountPath: /etc/secrets
+    syncBulkSize: 50
+    daysLimitForFirstSync: 7
+    cleanupRefreshRateHours: 24
+    cleanupKeepAssetsDays: 30
+    cacheMaxRecordSizeKb: 100
+    cacheMaxStoreSizeMb: 1000
+
+auditService:
+  enabled: true
+  exposedRules:
+    - PathPrefix(`/api/v1/audit`)
+  name: audit-service
+  image:
+    repository: audit-service
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.auditService.config.secretsMountPath }}'
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-audit-service
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+              - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-audit-service
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.password.secret.key" . }}'
+                  path: PUBSUB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.user.secret.key" . }}'
+                  path: PUBSUB_USER
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_USER
+
+  volumeMounts:
+    - mountPath: '{{ .Values.auditService.config.secretsMountPath }}'
+      name: runai-service-config
+
+  extraVolumes: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumes | toYaml }}
+    {{- end }}
+
+  extraVolumeMounts: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumeMounts | toYaml }}
+    {{- end }}
+
+  imagePullSecrets: []
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: 'audit-service'
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9090
+        protocol: TCP
+
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  config:
+    logLevel: Info
+    dbScheme: audit
+    migrationFiles: file:///migrations
+    serviceName: audit
+    runCleaner: true
+    auditEnabled: false
+    auditRecordCleanerEnabled: true
+    auditRecordCleanerIntervalHours: 24
+    auditRecordTtlDays: 90
+    secretsMountPath: /etc/secrets
+
+frontend:
+  name: frontend
+  enabled: true
+  envFrom:
+    - configMapRef:
+        name: runai-backend-frontend
+  exposedRules:
+    - PathPrefix(`/`)
+  image:
+    repository: frontend
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  imagePullSecrets: []
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: 'frontend'
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  volumes:
+    - name: nginx-run-pid
+      emptyDir: {}
+    - name: nginx-cache
+      emptyDir: {}
+    - name: nginx-lib
+      emptyDir: {}
+    - name: nginx-log
+      emptyDir: {}
+
+  volumeMounts:
+    - name: nginx-run-pid
+      mountPath: /nginx-run/pid
+    - name: nginx-cache
+      mountPath: /var/cache/nginx
+    - name: nginx-lib
+      mountPath: /var/lib/nginx
+    - name: nginx-log
+      mountPath: /var/log/nginx
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+
+  resources:
+    limits:
+      cpu: 300m
+      memory: 512Mi
+    requests:
+      cpu: 150m
+      memory: 256Mi
+
+  autoscaling:
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+identityManager:
+  name: identity-manager
+  exposedRules:
+    - PathPrefix(`/api/v1/users`)
+    - PathPrefix(`/api/v1/apps`)
+    - PathPrefix(`/api/v1/service-accounts`)
+    - PathPrefix(`/api/v1/idps`)
+    - PathPrefix(`/api/v1/me`)
+    - PathPrefix(`/api/v1/security/settings`)
+    - PathPrefix(`/api/v1/access-keys`)
+    - PathPrefix(`/api/v1/user-applications`)
+    - PathPrefix(`/api/v1/administration/access-keys`)
+    - PathPrefix(`/api/v1/administration/user-applications`)
+    - PathPrefix(`/api/v1/logout`)
+  exposedRulesUnauthenticated:
+    - Path(`/api/v1/token`)
+    - Path(`/api/v2/token`)
+    - Path(`/.well-known/openid-configuration`)
+    - Path(`/.well-known/oauth-authorization-server`)
+    - Path(`/v1/k8s/auth/oauth/apptoken`)
+    - Path(`/api/v1/login`)
+  exposedRulesUnauthenticatedWithHostname:
+    - Path(`/api/v1/config`)
+  image:
+    repository: identity-manager
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.identityManager.config.secretsMountPath }}'
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-identity-manager
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-identity-manager
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.cache.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.cache.password.secret.key" . }}'
+                  path: CACHE_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.keycloakx.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.keycloakx.password.secret.key" . }}'
+                  path: KEYCLOAK_ADMIN_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.password.secret.key" . }}'
+                  path: PUBSUB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.user.secret.key" . }}'
+                  path: PUBSUB_USER
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_USER
+
+  volumeMounts:
+    - mountPath: '{{ .Values.identityManager.config.secretsMountPath }}'
+      name: runai-service-config
+
+  extraVolumes: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumes | toYaml }}
+    {{- end }}
+
+  extraVolumeMounts: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumeMounts | toYaml }}
+    {{- end }}
+
+  livenessProbe:
+    failureThreshold: 15
+    httpGet:
+      path: /health
+      port: http
+
+  readinessProbe:
+    failureThreshold: 15
+    httpGet:
+      path: /health
+      port: http
+
+  imagePullSecrets: []
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: 'identity-manager'
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9090
+        protocol: TCP
+
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  config:
+    logLevel: info
+    ignoredRealms: ''
+    dbScheme: identity_manager
+    migrationFiles: file:///migrations
+    serviceAccountsVersion: v3
+    internalServiceAccountsVersion: v2
+    accessKeysVersion: v5
+    secretsMountPath: /etc/secrets
+    loginTheme: 'runai-theme'
+    clientCachingCleanup: 60
+    clientCachingExpiration: 1440 # 24 hours
+    cacheEnabled: true
+    server:
+      writeTimeout: 80s
+      readTimeout: 80s
+      idleTimeout: 80s
+      healthEndpoint: /health
+
+tenantsManager:
+  name: tenants-manager
+  enabled: true
+  exposedRules:
+    - PathPrefix(`/api/v1/tenants`) && Method(`GET`)
+    - Path(`/api/v1/logo`)
+  image:
+    repository: tenants-manager
+
+  args: {}
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-tenants-manager
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - configMap:
+        name: runai-backend-tenants-manager
+      name: config
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-tenants-manager
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.cache.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.cache.password.secret.key" . }}'
+                  path: CACHE_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.password.secret.key" . }}'
+                  path: PUBSUB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.user.secret.key" . }}'
+                  path: PUBSUB_USER
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_USER
+          - secret:
+              name: '{{ include "control-plane.tenantsManager.config.adminPassword.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.tenantsManager.config.adminPassword.secret.key" . }}'
+                  path: ADMIN_PASSWORD
+              optional: true
+          - secret:
+              name: '{{ include "control-plane.management.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.management.user.secret.key" . }}'
+                  path: TENANT_MNG_USER
+              optional: true
+          - secret:
+              name: '{{ include "control-plane.management.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.management.password.secret.key" . }}'
+                  path: TENANT_MNG_PASSWORD
+              optional: true
+  volumeMounts:
+    - mountPath: '{{ .Values.tenantsManager.config.secretsMountPath }}'
+      name: runai-service-config
+
+  extraVolumes: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumes | toYaml }}
+    {{- end }}
+
+  extraVolumeMounts: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumeMounts | toYaml }}
+    {{- end }}
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 15
+    timeoutSeconds: 120
+    failureThreshold: 100
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 15
+    timeoutSeconds: 120
+    failureThreshold: 100
+
+  imagePullSecrets: []
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: 'tenants-manager'
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9090
+        protocol: TCP
+
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  config:
+    logLevel: info
+    dbScheme: tenants_manager
+    migrationFiles: file:///migrations
+    adminUsername: test@run.ai
+    # Lands in runai-backend-gen-tenants-manager (key ADMIN_PASSWORD) via the
+    # secret-generator hook's chartValue path, which takes precedence over
+    # random generation. Flip to "" once CI/e2e/dev seed an existingSecret with
+    # this value, at which point the hook will produce a random 24-char password.
+    # Complexity rules in templates/tenants-manager/secret.yaml apply when set.
+    adminPassword: ""
+    existingSecret: ""
+    secretKeys:
+      adminPasswordKey: ADMIN_PASSWORD
+    tenantName: runai
+    cacheEnabled: true
+    migrationVersion: v1
+    secretsMountPath: /etc/secrets
+    pubsub:
+      subscriberRetries: 1
+      allowRetriesOnReject: true
+
+metricsService:
+  enabled: true
+  name: metrics-service
+
+  image:
+    repository: metrics-service
+
+  args: {}
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-metrics-service
+
+  env:
+    - name: CONF_PATH
+      value: /etc/metrics-service/config.yaml
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.metricsService.config.secretsMountPath }}'
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: config
+      configMap:
+        name: runai-backend-metrics-service
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-metrics-service
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.password.secret.key" . }}'
+                  path: PUBSUB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.user.secret.key" . }}'
+                  path: PUBSUB_USER
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_USER
+          - secret:
+              name: '{{ include "control-plane.metricsService.config.datasourceProvider.auth.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.metricsService.config.datasourceProvider.auth.secret.accessTokenKey" . }}'
+                  path: DATASOURCE_PROVIDER.DATASOURCE_AUTH.TOKEN
+              optional: true
+          - secret:
+              name: '{{ include "control-plane.metricsService.config.datasourceProvider.staticDatasource.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.metricsService.config.datasourceProvider.staticDatasource.secret.readUserKey" . }}'
+                  path: DATASOURCE_PROVIDER.STATIC_DATASOURCE.READ.AUTH.BASIC.USER
+                - key: '{{ include "control-plane.metricsService.config.datasourceProvider.staticDatasource.secret.readPasswordKey" . }}'
+                  path: DATASOURCE_PROVIDER.STATIC_DATASOURCE.READ.AUTH.BASIC.PASSWORD
+                - key: '{{ include "control-plane.metricsService.config.datasourceProvider.staticDatasource.secret.writeUserKey" . }}'
+                  path: DATASOURCE_PROVIDER.STATIC_DATASOURCE.WRITE.AUTH.BASIC.USER
+                - key: '{{ include "control-plane.metricsService.config.datasourceProvider.staticDatasource.secret.writePasswordKey" . }}'
+                  path: DATASOURCE_PROVIDER.STATIC_DATASOURCE.WRITE.AUTH.BASIC.PASSWORD
+              optional: true
+  volumeMounts:
+    - mountPath: '{{ .Values.metricsService.config.secretsMountPath }}'
+      name: runai-service-config
+    - name: config
+      mountPath: /etc/metrics-service
+      readOnly: true
+
+  extraVolumes: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumes | toYaml }}
+    {{- end }}
+
+  extraVolumeMounts: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumeMounts | toYaml }}
+    {{- end }}
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  imagePullSecrets: []
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: 'metrics-service'
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9090
+        protocol: TCP
+
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+    metricRelabelings:
+    - action: replace
+      regex: runai_reports_count_per_status
+      sourceLabels: [__name__]
+      targetLabel: pod
+      replacement: ""
+    - action: replace
+      regex: runai_reports_count_per_status
+      sourceLabels: [__name__]
+      targetLabel: service
+      replacement: ""
+    - action: replace
+      regex: runai_reports_count_per_status
+      sourceLabels: [__name__]
+      targetLabel: instance
+      replacement: ""
+    - action: replace
+      regex: runai_reports_count_per_status
+      sourceLabels: [__name__]
+      targetLabel: job
+      replacement: ""
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 2048Mi
+    requests:
+      cpu: 250m
+      memory: 1024Mi
+
+  autoscaling:
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  config:
+    logLevel: Info
+    datasourceUrl: http://runai-backend-thanos-query:9090
+    dbScheme: metrics
+    migrationFiles: file:///migrations
+    secretsMountPath: /etc/secrets
+    configKeyDelimiter: ;
+    server:
+      writeTimeout: 1m
+      readTimeout: 15s
+      idleTimeout: 15s
+    cleaner:
+      isCleanupEnabled: true
+      cleanerIntervalHours: 24
+      deleteReportsTTLDays: 90
+    dbCronJobs:
+      reports:
+        intervalSeconds: 60
+        maxRetryCount: 1
+        retryFailedReportsMinAgeMinutes: 1
+        retryFailedReportsMaxAgeMinutes: 30
+        failStuckProcessingReportsMinAgeMinutes: 30
+    datasourceProvider:
+      type: static
+      auth:
+        # Ignored if datasourceProvider.auth.existingSecret is set
+        accessToken: ''
+        existingSecret: ''
+        secretKeys:
+          accessTokenKey: DATASOURCE_AUTH_ACCESS_TOKEN
+      staticDatasource:
+        type: thanos
+        read:
+          url: http://runai-backend-thanos-query:9090
+          auth:
+            # Empty disables auth. Set to 'basic' to opt in; credentials are read from the secret.
+            type: ''
+            basic:
+              # Ignored if datasourceProvider.staticDatasource.existingSecret is set
+              username: ''
+              # Ignored if datasourceProvider.staticDatasource.existingSecret is set
+              password: ''
+        write:
+          url: ''
+          auth:
+            # Empty disables auth. Set to 'basic' to opt in; credentials are read from the secret.
+            type: ''
+            basic:
+              # Ignored if datasourceProvider.staticDatasource.existingSecret is set
+              username: ''
+              # Ignored if datasourceProvider.staticDatasource.existingSecret is set
+              password: ''
+        existingSecret: ''
+        secretKeys:
+          readUserKey: STATIC_DATASOURCE_READ_USER
+          readPasswordKey: STATIC_DATASOURCE_READ_PASSWORD
+          writeUserKey: STATIC_DATASOURCE_WRITE_USER
+          writePasswordKey: STATIC_DATASOURCE_WRITE_PASSWORD
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+metricStoresMigrator:
+  name: metric-stores-migrator
+  enabled: true
+  argoRollouts: false
+  replicaCount: 1
+
+  image:
+    repository: metric-stores-migrator
+    pullPolicy: Always
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-metric-stores-migrator
+
+  config:
+    logLevel: Info
+    secretsMountPath: /etc/secrets
+
+  annotations:
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  resources:
+    limits:
+      cpu: 100m
+      memory: 100Mi
+    requests:
+      cpu: 50m
+      memory: 50Mi
+
+researcherBackendService:
+  service:
+    type: ExternalName
+    externalName: researcher-service.runai.svc
+    port: 4180
+
+clusterApiBackendService:
+  service:
+    type: ExternalName
+    externalName: cluster-api.runai.svc
+    port: 4190
+
+keycloakx:
+  enabled: true
+  argoRollouts: false
+  serviceAccount:
+    name: keycloak-http
+    automountServiceAccountToken: false
+  name: keycloakx
+  fullnameOverride: keycloak
+  image:
+    repository: quay.io/keycloak/keycloak
+    tag: "26.6"
+  imagePullSecrets:
+    - name: runai-reg-creds
+  command:
+    - /bin/sh
+    - -c
+    - |
+      KC_BOOTSTRAP_ADMIN_USERNAME="$(cat /run/secrets/keycloak/admin-username)" \
+      KC_BOOTSTRAP_ADMIN_PASSWORD="$(cat /run/secrets/keycloak/admin-password)" \
+      exec /opt/keycloak/bin/kc.sh start \
+        --features=token-exchange,admin-fine-grained-authz:v1 \
+  proxy:
+    mode: xforwarded
+    http:
+      enabled: true
+      relativePath: /auth
+  database:
+    vendor: postgres
+    dbschema: keycloak
+  adminUser: admin
+  adminPassword: ""
+  existingSecret: ''
+  secretKeys:
+    adminPasswordKey: admin-password
+  config:
+    otelEnable: false
+    otelServiceName: keycloak
+    otelTracesExporter: otlp
+    otelLogsExporter: none
+    otelMetricsExporter: none
+    otelEndpoint: http://otel-collector:4318
+  resources:
+    requests:
+      cpu: '1'
+      memory: '2048Mi'
+    limits:
+      cpu: '2'
+      memory: '4096Mi'
+  affinity: |
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            matchExpressions:
+            - key: node-role.kubernetes.io/runai-system
+              operator: Exists
+  extraInitContainers: |-
+    {{- include "awaitingPostgresReadinessContainerFromMap" $ }}
+    - name: keycloak-schema-init
+      image: "{{ $.Values.global.postgresImage.registry }}/{{ $.Values.global.postgresImage.repository }}:{{ $.Values.global.postgresImage.tag }}"
+      volumeMounts:
+        - mountPath: /etc/secrets
+          name: db-password
+      imagePullPolicy: IfNotPresent
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 250m
+          memory: 256Mi
+      env:
+        - name: KC_DB_USERNAME
+          value: {{ .Values.global.postgresql.auth.username }}
+        - name: KC_DB_URL_HOST
+          value: {{ .Values.global.postgresql.auth.host }}
+        - name: KC_DB_URL_PORT
+          value: "{{ .Values.global.postgresql.auth.port }}"
+        - name: KC_DB_URL_DATABASE
+          value: {{ .Values.global.postgresql.auth.database }}
+        - name: KC_DB_SCHEMA
+          value: keycloak
+      command:
+      - sh
+      - -c
+      - PGPASSWORD="$(cat /etc/secrets/DB_PASSWORD)" psql "postgres://$(KC_DB_USERNAME)@$(KC_DB_URL_HOST):$(KC_DB_URL_PORT)/$(KC_DB_URL_DATABASE)" -c "create schema IF NOT EXISTS $(KC_DB_SCHEMA)"
+      securityContext:
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        {{- /* On OpenShift the keycloakx SCC injects its pinned uid; fixed uids
+        fail SCC admission. Elsewhere the root-default postgres image needs an
+        explicit non-root uid for runAsNonRoot. */}}
+        {{- if ne .Values.global.config.kubernetesDistribution "openshift" }}
+        runAsUser: 70
+        {{- end }}
+        seccompProfile:
+          type: RuntimeDefault
+        capabilities:
+          drop:
+            - ALL
+    - name: keycloak-copy-extensions
+      image: {{ .Values.global.image.registry }}/keycloak-extensions:{{ .Values.global.image.tag }}
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+        - mountPath: /providers
+          name: keycloak-providers
+        - mountPath: /themes
+          name: keycloak-themes
+        - mountPath: /agent
+          name: keycloak-agent
+        - mountPath: /opt/keycloak/conf/secrets
+          name: secret-configuration
+          readOnly: true
+        - mountPath: /conf
+          name: keycloak-runtime-conf
+      resources:
+        limits:
+          cpu: 500m
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          memory: 128Mi
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        {{- if ne .Values.global.config.kubernetesDistribution "openshift" }}
+        runAsUser: 65532
+        {{- end }}
+        seccompProfile:
+          type: RuntimeDefault
+        capabilities:
+          drop:
+            - ALL
+
+  extraVolumes: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumes | toYaml }}
+    {{- end }}
+    - name: db-password
+      secret:
+        secretName: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+        items:
+          - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+            path: DB_PASSWORD
+    - name: secret-configuration
+      projected:
+        sources:
+        - secret:
+            name: runai-backend-keycloakx
+        - secret:
+            name: {{ include "control-plane.postgresql.password.secret.name" . }}
+            items:
+            - key: {{ include "control-plane.postgresql.password.secret.key" . }}
+              path: KC_DB_PASSWORD
+    - name: keycloak-runtime-conf
+      emptyDir: {}
+    - name: keycloak-admin-secret
+      projected:
+        sources:
+        - secret:
+            name: runai-backend-keycloakx
+            items:
+            - key: KEYCLOAK_ADMIN
+              path: admin-username
+        - secret:
+            name: {{ include "control-plane.keycloakx.password.secret.name" . }}
+            items:
+            - key: {{ include "control-plane.keycloakx.password.secret.key" . }}
+              path: admin-password
+    - name: keycloak-providers
+      emptyDir: {}
+    - name: keycloak-themes
+      emptyDir: {}
+    - name: keycloak-agent
+      emptyDir: {}
+  extraVolumeMounts: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumeMounts | toYaml }}
+    {{- end }}
+    - name: keycloak-runtime-conf
+      mountPath: /opt/keycloak/conf/keycloak.conf
+      subPath: keycloak.conf
+    - name: keycloak-admin-secret
+      mountPath: /run/secrets/keycloak
+      readOnly: true
+    - name: keycloak-providers
+      mountPath: /opt/keycloak/providers
+    - name: keycloak-themes
+      mountPath: /opt/keycloak/themes
+    - name: keycloak-agent
+      mountPath: /opt/keycloak/agent
+  extraEnvFrom: |
+    - configMapRef:
+        name: runai-backend-keycloakx
+  extraEnv: ""
+  securityContextConstraints:
+    allowHostDirVolumePlugin: false
+    allowHostIPC: false
+    allowHostNetwork: false
+    allowHostPID: false
+    allowHostPorts: false
+    allowPrivilegeEscalation: false
+    allowPrivilegedContainer: false
+    allowedCapabilities: null
+    readOnlyRootFilesystem: false
+    runAsUser:
+      type: MustRunAs
+      uid: 1000
+    seLinuxContext:
+      type: MustRunAs
+    seccompProfiles:
+      - runtime/default
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+postgresql:
+  global:
+    compatibility:
+      openshift:
+        ## @param global.compatibility.openshift.adaptSecurityContext Adapt the securityContext sections of the deployment to make them compatible with Openshift restricted-v2 SCC: remove runAsUser, runAsGroup and fsGroup and let the platform use their allowed default IDs. Possible values: auto (apply if the detected running cluster is Openshift), force (perform the adaptation always), disabled (do not perform adaptation)
+        adaptSecurityContext: disabled
+  name: postgres-init
+  nameOverride: postgresql
+  fullnameOverride: runai-backend-postgresql
+  enabled: true
+  # Pre-upgrade MD5 guardrail. Disable only if the guard is causing
+  # problems on a specific cluster and you have confirmed the DB is not MD5.
+  md5Guard:
+    enabled: true
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
+    tag: "16"
+    debug: false
+  tls:
+    enabled: false
+    certificatesSecret: runai-backend-tls
+    certFilename: tls.crt
+    certKeyFilename: tls.key
+  serviceAccount:
+    create: true
+    name: runai-backend-postgresql
+  auth:
+    usePasswordFiles: true
+  readReplicas:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+  primary:
+    tlsSecretName: runai-backend-tls
+    initContainers: []
+    affinity: *affinity
+    priorityClassName: "system-cluster-critical"
+    initdb:
+      user: postgres
+      scriptsSecret: runai-backend-postgres-init
+    persistence:
+      enabled: true
+      subPath: data/16 # TODO: remove orig V11 data
+    resources:
+      requests:
+        cpu: 1
+        memory: 2Gi
+      limits:
+        cpu: 1
+        memory: 2Gi
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: false
+      runAsGroup: 0
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+          - ALL
+    extendedConfiguration: |
+      idle_session_timeout = 120000
+      idle_in_transaction_session_timeout = 120000
+  metrics:
+    enabled: false
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: false
+      runAsGroup: 0
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+          - ALL
+  volumePermissions:
+    enabled: false
+    image:
+      digest: sha256:308932799b147e42e0fb10ce673a31caf22fa28b902473e7a032cf5a270ebc36
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: false
+      runAsGroup: 0
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+          - ALL
+
+  securityContextConstraints:
+    allowHostDirVolumePlugin: false
+    allowHostIPC: false
+    allowHostNetwork: false
+    allowHostPID: false
+    allowHostPorts: false
+    allowPrivilegeEscalation: false
+    allowPrivilegedContainer: false
+    allowedCapabilities: null
+    readOnlyRootFilesystem: false
+    runAsUser:
+      type: RunAsAny
+    seLinuxContext:
+      type: RunAsAny
+    seccompProfiles:
+      - runtime/default
+  extraVolumes:
+    - name: tls-certs
+      secret:
+        secretName: runai-backend-tls
+
+thanos:
+  enabled: true
+  fullnameOverride: runai-backend-thanos
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/thanos
+    tag: 0.38.0-debian-12-r3
+  global:
+    compatibility:
+      openshift:
+        adaptSecurityContext: disabled
+    security:
+      allowInsecureImages: true
+  query:
+    dnsDiscovery:
+      enabled: false
+    affinity: *affinity
+    name: thanos-querier
+    replicaLabel:
+      - prometheus_replica
+      - tenant_id
+      - prometheus
+      - receive
+      - replica
+      - runai_replica
+      - __replica__
+      - cluster
+    stores:
+      - dnssrv+_grpc._tcp.runai-backend-thanos-receive
+    #- thanos-grpc-port-forwarder:10901
+    serviceAccount:
+      name: runai-backend-thanos-querier
+      automountServiceAccountToken: false
+    securityContextConstraints:
+      allowHostDirVolumePlugin: false
+      allowHostIPC: false
+      allowHostNetwork: false
+      allowHostPID: false
+      allowHostPorts: false
+      allowPrivilegeEscalation: false
+      allowPrivilegedContainer: false
+      allowedCapabilities: null
+      readOnlyRootFilesystem: false
+      runAsUser:
+        type: RunAsAny
+      seLinuxContext:
+        type: RunAsAny
+      seccompProfiles:
+        - runtime/default
+
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+          - ALL
+
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+  queryFrontend:
+    enabled: false
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+          - ALL
+  receive:
+    affinity: *affinity
+    enabled: true
+    tsdbRetention: 183d
+    name: thanos-receive
+    serviceAccount:
+      name: runai-backend-thanos-receive
+      automountServiceAccountToken: false
+    securityContextConstraints:
+      allowHostDirVolumePlugin: false
+      allowHostIPC: false
+      allowHostNetwork: false
+      allowHostPID: false
+      allowHostPorts: false
+      allowPrivilegeEscalation: false
+      allowPrivilegedContainer: false
+      allowedCapabilities: null
+      readOnlyRootFilesystem: false
+      runAsUser:
+        type: RunAsAny
+      seLinuxContext:
+        type: RunAsAny
+      seccompProfiles:
+        - runtime/default
+
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+          - ALL
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+    persistence:
+      enabled: true
+      size: 100Gi
+    replicaLabel: runai_replica
+  objstoreConfig: |-
+    type: FILESYSTEM
+    config:
+      directory: "/var/thanos/receive/default-tenant"
+
+
+
+nats:
+  name: nats
+  fullnameOverride: runai-backend-nats
+  enabled: true
+  argoRollouts: false
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/nats
+    tag: 2.11.8-debian-12-r0
+  global:
+    compatibility:
+      openshift:
+        ## @param global.compatibility.openshift.adaptSecurityContext Adapt the securityContext sections of the deployment to make them compatible with Openshift restricted-v2 SCC: remove runAsUser, runAsGroup and fsGroup and let the platform use their allowed default IDs. Possible values: auto (apply if the detected running cluster is Openshift), force (perform the adaptation always), disabled (do not perform adaptation)
+        adaptSecurityContext: disabled
+    security:
+      allowInsecureImages: true
+  # NATS server configuration defined in templates/nats/_helpers.tpl
+  configuration: '{{ include "control-plane.nats.configuration" . }}'
+  # Inject the secret as environment variables into NATS pods (same as gen-cache-pubsub)
+  # Override this if you want to use your own secret (must contain AUTH_TOKEN key)
+  extraEnvVarsSecret: "runai-backend-gen-cache-pubsub"
+  jetstream:
+    enabled: true
+  replicaCount: 3
+  affinity: *affinity
+  resources:
+    requests:
+      cpu: 1
+      memory: 1Gi
+    limits:
+      cpu: 2
+      memory: 2Gi
+  persistence:
+    enabled: true
+    size: 3Gi
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+      - ALL
+  securityContextConstraints:
+    allowHostDirVolumePlugin: false
+    allowHostIPC: false
+    allowHostNetwork: false
+    allowHostPID: false
+    allowHostPorts: false
+    allowPrivilegeEscalation: false
+    allowPrivilegedContainer: false
+    allowedCapabilities: null
+    defaultAllowPrivilegeEscalation: false
+    fsGroup:
+      type: RunAsAny
+    readOnlyRootFilesystem: false
+    requiredDropCapabilities:
+    - ALL
+    runAsUser:
+      type: RunAsAny
+    seLinuxContext:
+      type: RunAsAny
+    seccompProfiles:
+      - runtime/default
+  serviceAccount:
+    automountServiceAccountToken: false
+    name: runai-backend-nats
+
+authorization:
+  enabled: true
+  exposedRules:
+    - PathPrefix(`/api/v1/authorization`)
+    - PathPrefix(`/api/v2/authorization`)
+  shadow: false
+  name: authorization
+
+  image:
+    repository: authorization
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.authorization.config.secretsMountPath }}'
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-authorization
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-authorization
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.cache.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.cache.password.secret.key" . }}'
+                  path: CACHE_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.password.secret.key" . }}'
+                  path: PUBSUB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.user.secret.key" . }}'
+                  path: PUBSUB_USER
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_USER
+
+  extraVolumes: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumes | toYaml }}
+    {{- end }}
+
+  extraVolumeMounts: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumeMounts | toYaml }}
+    {{- end }}
+
+  volumeMounts:
+    - mountPath: '{{ .Values.authorization.config.secretsMountPath }}'
+      name: runai-service-config
+
+  imagePullSecrets: []
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  startupProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 3
+    periodSeconds: 10           # Check every 10 seconds
+    failureThreshold: 20        # 3s + (20 × 10s) = 203s ~ 3.4 minutes
+    timeoutSeconds: 2
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: 'authorization'
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9090
+        protocol: TCP
+
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  config:
+    logLevel: Info
+    dbScheme: authorization
+    server:
+      writeTimeout: 1m
+      readTimeout: 1m
+      idleTimeout: 1m
+    migrationFiles: file:///migrations
+    cacheEnabled: false
+    isCSPEnv: false
+    secretsMountPath: /runai-service-config
+    clusterCacheExpirationSeconds: 600
+    clusterCacheCleanupSeconds: 1200
+
+clusterService:
+  enabled: true
+  name: cluster-service
+  exposedRules:
+    - PathPrefix(`/api/v1/nodes`)
+    - PathPrefix(`/api/v1/node-pools`)
+    - PathPrefix(`/api/v1/network-topologies`)
+    - PathPrefix(`/api/v1/clusters`)
+    - PathPrefix(`/api/v2/clusters`)
+    - Path(`/v1/k8s/clusters`)
+    - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})$`)
+    - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/liveness`)
+    - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/cluster-info`)
+    - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/config/control-plane`)
+    - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/node-pools`)
+    - PathRegexp(`^/v1/k8s/clusters/versions`)
+  image:
+    repository: cluster-service
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-cluster-service
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-cluster-service
+          - secret:
+              name: '{{ include "control-plane.clusterService.applicationMetricsWrite.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.clusterService.applicationMetricsWrite.password.secret.key" . }}'
+                  path: APPLICATION_METRIC_STORE_WRITE_PASSWORD
+              # To support argoRollouts (in the current implementation, this secret reference is assumed to exist without a version suffix
+              # which is not the case for the Tenant's Manager secret, therefore we mark it as optional to avoid a pod crash)
+              optional: true
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.cache.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.cache.password.secret.key" . }}'
+                  path: CACHE_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.password.secret.key" . }}'
+                  path: PUBSUB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.user.secret.key" . }}'
+                  path: PUBSUB_USER
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_USER
+          - secret:
+              name: '{{ include "control-plane.image-pull-secret.name" . }}'
+              items:
+                - key: .dockerconfigjson
+                  path: STATIC_IMAGE_PULL_SECRET
+              optional: true
+
+  volumeMounts:
+    - mountPath: '{{ .Values.clusterService.config.secretsMountPath }}'
+      name: runai-service-config
+
+  extraVolumes: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumes | toYaml }}
+    {{- end }}
+
+  extraVolumeMounts: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumeMounts | toYaml }}
+    {{- end }}
+
+  imagePullSecrets: []
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.clusterService.config.secretsMountPath }}'
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  startupProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 3
+    periodSeconds: 10           # Check every 10 seconds
+    failureThreshold: 20        # 3s + (20 × 10s) = 203s ~ 3.4 minutes
+    timeoutSeconds: 2
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: 'cluster-service'
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9090
+        protocol: TCP
+
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  config:
+    logLevel: Info
+    dbScheme: cluster_service
+    migrationFiles: file:///migrations
+    awsElbSuffix: elb.amazonaws.com
+    cacheEnabled: false
+    runaiClusterDomainSuffix: ""
+    cacheTtl: 2
+    cacheMaxRecordSizeKb: 50
+    cacheMaxStoreSizeMb: 1000
+    asyncClusterDeletion:
+      enabled: true
+    clusterInstallation:
+      supportedVersionRange:
+        # Inclusive
+        min: 2.18
+        # Inclusive
+        # Defaults to the chart's app version
+        max: ''
+      helmRegistryUrl: https://helm.ngc.nvidia.com/nvidia/runai
+      helmRegistryUsername: ''
+      helmRegistryPasswordPlaceholder: ''
+    maxWaitForClusterRemoteConfigStatusUpdate: 5m
+    maxWaitForClusterGracefulDelete: 3h
+    clusterCleanerRunTiming: 6h
+    secretsMountPath: /etc/secrets
+    applicationMetricsWrite:
+      existingSecret: ""
+      secretKeys:
+        passwordKey: APPLICATION_METRIC_STORE_WRITE_PASSWORD
+    # When enabled, cluster-service surfaces the static image pull secret supplied
+    # via the global image-pull-secret (.dockerconfigjson, mounted as
+    # STATIC_IMAGE_PULL_SECRET) to clusters as DockerConfigJson. No database or
+    # external registry is involved.
+    imagePullSecret:
+      enabled: true
+
+  networkPolicy:
+    ## @param clusterService.networkPolicy.enabled Specifies whether a NetworkPolicy should be created
+    ##
+    enabled: true
+
+k8sObjectsTracker:
+  enabled: true
+  name: k8s-objects-tracker
+  exposedRules:
+    - PathPrefix(`/api/v1/secrets`)
+    - PathPrefix(`/api/v1/pvcs`)
+    - PathPrefix(`/api/v2/pvcs`)
+    - PathPrefix(`/api/v1/config-maps`)
+    - PathPrefix(`/api/v1/storage-class`)
+    - PathPrefix(`/api/v2/storage-class`)
+    - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/storage-classes.*`) # legacy
+    - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/(namespace:[^/]+)/pvcs`)
+    - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/(namespace:[^/]+)/secrets`)
+  image:
+    repository: k8s-objects-tracker
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.k8sObjectsTracker.config.secretsMountPath }}'
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-k8s-objects-tracker
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-k8s-objects-tracker
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.password.secret.key" . }}'
+                  path: PUBSUB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.user.secret.key" . }}'
+                  path: PUBSUB_USER
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_USER
+
+  volumeMounts:
+    - mountPath: '{{ .Values.k8sObjectsTracker.config.secretsMountPath }}'
+      name: runai-service-config
+
+  extraVolumes: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumes | toYaml }}
+    {{- end }}
+
+  extraVolumeMounts: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumeMounts | toYaml }}
+    {{- end }}
+
+  imagePullSecrets: []
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: 'k8s-objects-tracker'
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9090
+        protocol: TCP
+
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  autoscaling:
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  config:
+    logLevel: Info
+    dbScheme: k8s_objects_tracker
+    migrationFiles: file:///migrations
+    dbUseServiceSession: false # required for cross schema migration
+    secretsMountPath: /etc/secrets
+    cacheMaxRecordSizeKb: 100
+    cacheMaxStoreSizeMb: 1000
+
+orgUnitService:
+  name: org-unit-service
+  enabled: true
+  exposedRules:
+    - PathPrefix(`/api/v1/org-unit`)
+    - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/departments`)
+    - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/projects`)
+    - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/nodetypes`)
+
+  image:
+    repository: org-unit-service
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.orgUnitService.config.secretsMountPath }}'
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-org-unit-service
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-org-unit-service
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.cache.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.cache.password.secret.key" . }}'
+                  path: CACHE_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.password.secret.key" . }}'
+                  path: PUBSUB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.user.secret.key" . }}'
+                  path: PUBSUB_USER
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_USER
+
+  volumeMounts:
+    - mountPath: '{{ .Values.orgUnitService.config.secretsMountPath }}'
+      name: runai-service-config
+
+  extraVolumes: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumes | toYaml }}
+    {{- end }}
+
+  extraVolumeMounts: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumeMounts | toYaml }}
+    {{- end }}
+
+  imagePullSecrets: []
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  startupProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 3
+    periodSeconds: 10           # Check every 10 seconds
+    failureThreshold: 20        # 3s + (20 × 10s) = 203s ~ 3.4 minutes
+    timeoutSeconds: 2
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: 'org-unit-service'
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9090
+        protocol: TCP
+
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  config:
+    logLevel: Info
+    dbScheme: org_unit_service
+    server:
+      writeTimeout: 2m
+      readTimeout: 2m
+      idleTimeout: 2m
+    migrationFiles: file:///migrations
+    skipDefaultTransaction: true
+    fullSaveAssociations: true
+    cacheEnabled: false
+    cacheTTLSeconds: 3600
+    cacheMaxRecordSizeKb: 20000
+    cacheMaxStoreSizeMb: 3000
+    clusterCacheExpirationSeconds: 600
+    clusterCacheCleanupSeconds: 1200
+    secretsMountPath: /etc/secrets
+
+orgUnitHelper:
+  enabled: true
+  name: org-unit-helper
+  argoRollouts: false
+
+  image:
+    repository: org-unit-service
+
+  args:
+    - "job-mode"
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.orgUnitHelper.config.secretsMountPath }}'
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-org-unit-helper
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-org-unit-helper
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+
+  volumeMounts:
+    - mountPath: '{{ .Values.orgUnitHelper.config.secretsMountPath }}'
+      name: runai-service-config
+
+  config:
+    logLevel: Info
+    query24hRangeIntervalSeconds: 3600 # 1 hour
+    query7dRangeIntervalSeconds: 21600 # 6 hours
+    query30dRangeIntervalSeconds: 86400 # 24 hours
+    query24hRangeInitialSleepSeconds: 10 # 10 seconds
+    query7dRangeInitialSleepSeconds: 21 # 21 seconds
+    query30dRangeInitialSleepSeconds: 33 # 33 seconds
+    rateLimiterLimit: 1
+    rateLimiterBurst: 10
+    secretsMountPath: /etc/secrets
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: "org-unit-helper"
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 200Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
+
+policyService:
+  name: policy-service
+  exposedRules:
+    - PathPrefix(`/api/v1/policy`)
+    - PathPrefix(`/api/v2/policy`)
+    - PathPrefix(`/api/v1/policies`)
+  image:
+    repository: policy-service
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.policyService.config.secretsMountPath }}'
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-policy-service
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-policy-service
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.password.secret.key" . }}'
+                  path: PUBSUB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.user.secret.key" . }}'
+                  path: PUBSUB_USER
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_USER
+
+  volumeMounts:
+    - mountPath: '{{ .Values.policyService.config.secretsMountPath }}'
+      name: runai-service-config
+
+  extraVolumes: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumes | toYaml }}
+    {{- end }}
+
+  extraVolumeMounts: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumeMounts | toYaml }}
+    {{- end }}
+
+  imagePullSecrets: []
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: 'policy-service'
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9090
+        protocol: TCP
+
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  config:
+    logLevel: Info
+    dbScheme: policies
+    migrationFiles: file:///migrations
+    syncApiWorkers: 4
+    syncApiPoliciesPerBulk: 50
+    secretsMountPath: /etc/secrets
+
+traefik:
+  enabled: true
+  name: traefik
+
+  args:
+    - '--global.checknewversion=false'
+    - '--entrypoints.metrics.address=:9100/tcp'
+    - '--entrypoints.traefik.address=:9000/tcp'
+    - '--entrypoints.web.address=:8080/tcp'
+    - '--entryPoints.web.forwardedHeaders.insecure'
+    - '--entrypoints.web.http.middlewares=content-security-policy@file'
+    - '--entrypoints.websecure.address=:8443/tcp'
+    - '--ping=true'
+    - '--metrics.prometheus=true'
+    - '--metrics.prometheus.buckets=0.1,0.3,1.2,2.0,5.0'
+    - '--metrics.prometheus.entrypoint=metrics'
+    - '--metrics.prometheus.addServicesLabels=true'
+    - '--metrics.prometheus.addRoutersLabels=true'
+    - '--metrics.prometheus.headerlabels.useragent=User-Agent'
+    - '--metrics.prometheus.headerlabels.xforwardedhost=X-Forwarded-Host'
+    - '--metrics.prometheus.headerlabels.xrequestpath=X-Replaced-Path'
+    - '--entrypoints.websecure.http.tls=true'
+    - '--log.format=json'
+    - '--log.level=DEBUG'
+    - '--accesslog=true'
+    - '--accesslog.format=json'
+    - '--accesslog.fields.defaultmode=keep'
+    - '--accesslog.fields.headers.defaultmode=keep'
+    - '--accesslog.fields.headers.names.Authorization=redact'
+    - '--accesslog.filters.statuscodes=400-499,500-599'
+    - '--providers.file.directory=/etc/traefik'
+    - '--providers.file.watch=false'
+    - '--api.dashboard=true'
+    - '--api.insecure=true'
+    - '--tracing.otlp.http.endpoint=http://runai-backend-otelcollector:4318'
+
+  env:
+    - name: OTEL_PROPAGATORS
+      value: tracecontext
+
+  image:
+    registry: docker.io
+    repository: traefik
+    tag: v3.7
+
+  volumes:
+    - name: runai-backend-traefik
+      configMap:
+        name: runai-backend-traefik
+
+  volumeMounts:
+    - mountPath: /etc/traefik/
+      name: runai-backend-traefik
+
+  imagePullSecrets: []
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: 'traefik'
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    runAsUser: 65532
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  livenessProbe:
+    httpGet:
+      path: /ping
+      port: 9000
+
+  readinessProbe:
+    httpGet:
+      path: /ping
+      port: 9000
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9100
+        protocol: TCP
+      - name: ping
+        port: 9000
+        protocol: TCP
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  config: {}
+
+  gatewayHub:
+    host: localhost
+    port: 8181
+
+  initContainers:
+    - image:
+        name: gateway-hub
+        repository: gateway-hub
+        tag: ""
+      restartPolicy: Always
+      ports:
+        - containerPort: 8181
+          name: gateway-hub
+      envFrom:
+        - configMapRef:
+            name: runai-backend-gateway-hub
+      livenessProbe:
+        httpGet:
+          path: /healthz
+          port: 8181
+        initialDelaySeconds: 5
+        periodSeconds: 10
+      readinessProbe:
+        httpGet:
+          path: /healthz
+          port: 8181
+        initialDelaySeconds: 2
+        periodSeconds: 5
+      resources:
+        limits:
+          cpu: 100m
+          memory: 64Mi
+        requests:
+          cpu: 50m
+          memory: 32Mi
+      env:
+        - name: SECRETS_MOUNT_PATH
+          value: /etc/secrets
+      volumeMounts:
+        - name: gateway-hub-secrets
+          mountPath: /etc/secrets
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+        capabilities:
+          drop:
+            - ALL
+
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+
+# When set, /api/docs and /redoc/* paths redirect to this external URL (used in SaaS).
+# Leave empty for self-hosted (no API docs endpoint served).
+redoc:
+  docsSite:
+    url: ""
+
+# When enabled, the chart fails to render if the release namespace is not labeled
+# istio-injection=disabled. Run the following before installing/upgrading:
+#   kubectl label namespace <release-namespace> istio-injection=disabled
+disableIstioSidecarInjection:
+  enabled: false
+
+authorizationMigrator:
+  name: authorization-migrator
+  argoRollouts: false
+
+  image:
+    repository: authorization-migrator
+    pullPolicy: Always
+
+  env:
+  - name: SECRETS_MOUNT_PATH
+    value: '{{ .Values.authorizationMigrator.config.secretsMountPath }}'
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-authorization-migrator
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-authorization-migrator
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.keycloakx.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.keycloakx.password.secret.key" . }}'
+                  path: KEYCLOAK_ADMIN_PASSWORD
+
+  volumeMounts:
+    - mountPath: '{{ .Values.authorizationMigrator.config.secretsMountPath }}'
+      name: runai-service-config
+
+  config:
+    logLevel: Info
+    migrationVersion: v1
+    secretsMountPath: /etc/secrets
+    dbSchemaTarget: authorization
+    dbSchemaSourceTenants: tenants_manager
+
+  annotations:
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+clusterMigrator:
+  name: cluster-migrator
+  enabled: true
+  argoRollouts: false
+
+  image:
+    repository: cluster-migrator
+    pullPolicy: Always
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.clusterMigrator.config.secretsMountPath }}'
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-cluster-migrator
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-cluster-migrator
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+
+  volumeMounts:
+    - mountPath: '{{ .Values.clusterMigrator.config.secretsMountPath }}'
+      name: runai-service-config
+
+  config:
+    logLevel: Info
+    migrationVersion: v1
+    #   migrationType could be "clusters", "nodepools", "nodepool_system_settings" or "all". default "clusters"
+    migrationType: all
+    tenantsToMigrate: ''
+    tenantsToNotMigrate: ''
+    markCompleted: true
+    secretsMountPath: /etc/secrets
+
+  annotations:
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  resources:
+    limits:
+      cpu: 100m
+      memory: 100Mi
+    requests:
+      cpu: 50m
+      memory: 50Mi
+
+identityProviderReconciler:
+  enabled: true
+  name: identity-manager-reconciler
+
+  image:
+    repository: identity-manager
+    pullPolicy: Always
+
+  args:
+    - 'reconcile'
+    - 'updateTenantRealms'
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.identityProviderReconciler.config.secretsMountPath }}'
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-identity-manager
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-identity-manager
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.keycloakx.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.keycloakx.password.secret.key" . }}'
+                  path: KEYCLOAK_ADMIN_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.password.secret.key" . }}'
+                  path: PUBSUB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.user.secret.key" . }}'
+                  path: PUBSUB_USER
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_USER
+
+  volumeMounts:
+    - mountPath: '{{ .Values.identityProviderReconciler.config.secretsMountPath }}'
+      name: runai-service-config
+
+  config:
+    secretsMountPath: /etc/secrets
+
+  annotations:
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+workloads:
+  name: workloads
+  exposedRules:
+    - PathPrefix(`/api/v1/workloads`)
+    - PathPrefix(`/api/v1/workload-types`)
+    - PathPrefix(`/api/v1/workload-categories`)
+    - PathPrefix(`/api/v1/workload-priorities`)
+    - PathPrefix(`/api/v1/workload-cluster-priorities`)
+    - PathPrefix(`/api/v1/workload-templates`)
+    - PathPrefix(`/api/v1/ai-applications`)
+    - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/jobs`)
+    - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/podGroups`)
+    - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/pods`)
+    - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/podGroups/sync`)
+    - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/pods/sync`)
+  image:
+    repository: workloads
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.workloads.config.secretsMountPath }}'
+    - name: ANY_WORKLOAD_WORKSPACE_SUBMISSION
+      value: "true"
+    - name: ANY_WORKLOAD_TRAINING_SUBMISSION
+      value: "true"
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-workloads
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-workloads
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.cache.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.cache.password.secret.key" . }}'
+                  path: CACHE_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.password.secret.key" . }}'
+                  path: PUBSUB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.user.secret.key" . }}'
+                  path: PUBSUB_USER
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_USER
+
+  volumeMounts:
+    - mountPath: '{{ .Values.workloads.config.secretsMountPath }}'
+      name: runai-service-config
+
+  extraVolumes: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumes | toYaml }}
+    {{- end }}
+
+  extraVolumeMounts: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumeMounts | toYaml }}
+    {{- end }}
+
+  imagePullSecrets: []
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  startupProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 3
+    periodSeconds: 10           # Check every 10 seconds
+    failureThreshold: 20        # 20s + (20 × 10s) = 220s = 3.5 minutes
+    timeoutSeconds: 2
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: 'workloads'
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9090
+        protocol: TCP
+
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  config:
+    logLevel: Info
+    dbScheme: workloads
+    migrationFiles: file:///migrations
+    dbVerboseLogging: true
+    cacheEnabled: true
+    skipDefaultTransaction: true
+    auditEnabled: false
+    secretsMountPath: /etc/secrets
+    clusterCacheExpirationSeconds: 60
+    clusterCacheCleanupSeconds: 1200
+    # Max uploaded chart size (MB). Single source of truth: feeds both the backend
+    # limit (CHART_MAX_UPLOAD_BYTES) and the nginx ingress proxy-body-size on the
+    # upload path, so the ingress never rejects a body the backend would accept.
+    chartUploadMaxSizeMB: 10
+    # How long an uploaded chart is retained before the workloads cleaner reaps it
+    # (CHART_RETENTION_MINUTES). Charts referenced by an already-deployed application
+    # are removed regardless; this bounds abandoned/unclaimed uploads. Default 24h.
+    chartRetentionMinutes: 1440
+    server:
+      writeTimeout: 2m
+      readTimeout: 2m
+      idleTimeout: 2m
+
+workloadsHelper:
+  replicaCount: 1
+  enabled: true
+  name: workloads-helper
+  argoRollouts: false
+  exposedRules:
+    - Path(`/api/v1/workloads/scrapeable-metrics`)
+
+  image:
+    repository: workloads
+
+  args:
+    - 'job-mode'
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.workloadsHelper.config.secretsMountPath }}'
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-workloads-helper
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-workloads-helper
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+
+  volumeMounts:
+    - mountPath: '{{ .Values.workloadsHelper.config.secretsMountPath }}'
+      name: runai-service-config
+
+  config:
+    logLevel: Info
+    notifyBatchSize: 20
+    notifyBatchIntervalSeconds: 5
+    notifyPhaseChangeIntervalMillis: 180000
+    notifyTimeoutIntervalMillis: 180000
+    metricsWriterIntervalMinutes: 20
+    metricsWriterMaxTenantChunkSize: 2
+    metricsWriterMinTenantIntervalSeconds: 5
+    metricsExporterIntervalSeconds: 30
+    secretsMountPath: /etc/secrets
+    clusterCacheExpirationSeconds: 600
+    clusterCacheCleanupSeconds: 1200
+    server:
+      writeTimeout: 2m
+      readTimeout: 2m
+      idleTimeout: 2m
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: 'workloads-helper'
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9090
+        protocol: TCP
+
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+notificationsService:
+  enabled: true
+  name: notifications-service
+  image:
+    repository: notifications-service
+  service:
+    type: ClusterIP
+    port: 5000
+    configPort: 8080
+    protocol: TCP
+    extraPorts:
+      - name: alertmanger
+        port: 9093
+        targetPort: 9093
+        protocol: TCP
+      - name: tcp-smtplisten
+        port: 2525
+        targetPort: 2525
+        protocol: TCP
+      - name: metrics
+        port: 9090
+        targetPort: 9090
+        protocol: TCP
+      - name: listenchanges
+        port: 8080
+        targetPort: 8080
+        protocol: TCP
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: notifications-service
+  imagePullSecrets: []
+  podAnnotations: {}
+  podSecurityContext: {}
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+  autoscaling:
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+  livenessProbe:
+    httpGet:
+      path: /api/v1/config/health
+      port: listenchanges
+    initialDelaySeconds: 15
+    periodSeconds: 10
+    failureThreshold: 3
+  readinessProbe:
+    httpGet:
+      path: /api/v1/config/health
+      port: listenchanges
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 256Mi
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+  rbac:
+    clusterRole:
+      enabled: false
+      relevantResources:
+        - pods
+        - podgroups
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  settings:
+    configProvider: advanced
+
+  config:
+    app:
+      log_level: Info
+      api_port: 8080
+    database:
+      schema: 'notifications_service'
+      password: $__file{/etc/secrets/DB_PASSWORD}
+      user: '{{ .Values.global.postgresql.auth.username }}'
+      database: '{{ .Values.global.postgresql.auth.database }}'
+      port: '{{ .Values.global.postgresql.auth.port }}'
+      host: '{{ .Values.global.postgresql.auth.host }}'
+      ssl_mode: '{{ .Values.global.postgresql.auth.dbSslMode }}'
+    router:
+      concurrent_limit: 50
+      cached_events: 1000
+    listeners:
+      http-runai:
+        type: http_listener
+        port: 5000
+      smtp-runai:
+        type: smtp_listener
+        port: 2525
+  extraInitContainers: |
+    {{- include "awaitingPostgresReadinessContainerFromMap" $ }}
+  extraVolumes: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumes | toYaml }}
+    {{- end }}
+    - name: db-password
+      secret:
+        secretName: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+        items:
+        - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+          path: DB_PASSWORD
+  extraVolumeMounts: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumeMounts | toYaml }}
+    {{- end }}
+    - name: db-password
+      mountPath: /etc/secrets
+      readOnly: true
+
+cliExposer:
+  enabled: true
+  name: cli-exposer
+  exposedRules:
+    - PathPrefix(`/api/v1/cli`)
+    - PathPrefix(`/api/v1/cli-exposer`)
+  exposedRulesUnauthenticated:
+    - PathPrefix(`/api/v1/cli/docs`)
+    - PathPrefix(`/api/v1/cli-exposer/docs`)
+  image:
+    repository: cli-exposer
+  envFrom:
+    - configMapRef:
+        name: runai-backend-cli-exposer
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.cliExposer.config.secretsMountPath }}'
+
+  volumes:
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.cache.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.cache.password.secret.key" . }}'
+                  path: CACHE_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.password.secret.key" . }}'
+                  path: PUBSUB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.user.secret.key" . }}'
+                  path: PUBSUB_USER
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_USER
+    
+  volumeMounts:
+    - mountPath: '{{ .Values.cliExposer.config.secretsMountPath }}'
+      name: runai-service-config
+
+  imagePullSecrets: []
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: 'cli-exposer'
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9090
+        protocol: TCP
+
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  config:
+    logLevel: Info
+    secretsMountPath: /etc/secrets
+    server:
+      writeTimeout: 2m
+      readTimeout: 2m
+      idleTimeout: 2m
+
+datavolumes:
+  name: datavolumes
+  enabled: true
+  exposedRules:
+    - PathPrefix(`/api/v1/datavolumes`)
+
+  image:
+    repository: datavolumes-service
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.datavolumes.config.secretsMountPath }}'
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-datavolumes
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-datavolumes
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.cache.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.cache.password.secret.key" . }}'
+                  path: CACHE_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.password.secret.key" . }}'
+                  path: PUBSUB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.user.secret.key" . }}'
+                  path: PUBSUB_USER
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_USER
+
+  volumeMounts:
+    - mountPath: '{{ .Values.datavolumes.config.secretsMountPath }}'
+      name: runai-service-config
+
+  extraVolumes: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumes | toYaml }}
+    {{- end }}
+
+  extraVolumeMounts: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumeMounts | toYaml }}
+    {{- end }}
+
+  imagePullSecrets: []
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: 'datavolumes'
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9090
+        protocol: TCP
+
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 70m
+      memory: 128Mi
+
+  autoscaling:
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  config:
+    logLevel: Info
+    dbScheme: datavolumes
+    server:
+      writeTimeout: 2m
+      readTimeout: 2m
+      idleTimeout: 2m
+    migrationFiles: file:///migrations
+    cacheEnabled: false
+    secretsMountPath: /etc/secrets
+    clusterCacheExpirationSeconds: 600
+    clusterCacheCleanupSeconds: 1200
+
+catalogService:
+  name: catalog-service
+  enabled: true
+  exposedRules:
+    - PathPrefix(`/api/v1/catalog`)
+    - PathPrefix(`/api/v1/registries`)
+    - PathPrefix(`/api/v1/helm-repos`)
+    - PathPrefix(`/api/v1/huggingface/catalog`)
+
+  image:
+    repository: catalog-service
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.catalogService.config.secretsMountPath }}'
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-catalog-service
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-catalog-service
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.cache.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.cache.password.secret.key" . }}'
+                  path: CACHE_PASSWORD
+
+  volumeMounts:
+    - mountPath: '{{ .Values.catalogService.config.secretsMountPath }}'
+      name: runai-service-config
+
+  extraVolumes: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumes | toYaml }}
+    {{- end }}
+
+  extraVolumeMounts: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumeMounts | toYaml }}
+    {{- end }}
+
+  imagePullSecrets: []
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: 'catalog-service'
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9090
+        protocol: TCP
+
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 70m
+      memory: 128Mi
+
+  autoscaling:
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  config:
+    logLevel: Info
+    dbScheme: catalog
+    server:
+      writeTimeout: 2m
+      readTimeout: 2m
+      idleTimeout: 2m
+    migrationFiles: file:///migrations
+    secretsMountPath: /etc/secrets
+    cacheEnabled: true
+    cacheTTLSeconds: 600
+    cacheMaxRecordSizeKb: 10000
+    cacheMaxStoreSizeMb: 10000
+
+workloadsManager:
+  replicaCount: 1
+  name: workloads-manager
+  enabled: true
+  exposedRules:
+    - PathPrefix(`/api/v2/workloads`)
+
+  image:
+    repository: workloads-manager
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.workloadsManager.config.secretsMountPath }}'
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-workloads-manager
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-workloads-manager
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.cache.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.cache.password.secret.key" . }}'
+                  path: CACHE_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.password.secret.key" . }}'
+                  path: PUBSUB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.user.secret.key" . }}'
+                  path: PUBSUB_USER
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_USER
+
+  volumeMounts:
+    - mountPath: '{{ .Values.workloadsManager.config.secretsMountPath }}'
+      name: runai-service-config
+
+  extraVolumes: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumes | toYaml }}
+    {{- end }}
+
+  extraVolumeMounts: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumeMounts | toYaml }}
+    {{- end }}
+
+  imagePullSecrets: []
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: 'workloads-manager'
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9090
+        protocol: TCP
+
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 70m
+      memory: 128Mi
+
+  autoscaling:
+    minReplicas: 1
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  config:
+    logLevel: Info
+    dbScheme: workloads_manager
+    server:
+      writeTimeout: 2m
+      readTimeout: 2m
+      idleTimeout: 2m
+    migrationFiles: file:///migrations
+    secretsMountPath: /etc/secrets
+    cacheEnabled: true
+    cacheTTLSeconds: 600
+    cacheMaxRecordSizeKb: 10000
+    cacheMaxStoreSizeMb: 3000
+    clusterCacheExpirationSeconds: 60
+    clusterCacheCleanupSeconds: 1200
+    suspendDefCacheTTLSeconds: 300
+
+orgUnitsMigrator:
+  name: org-units-migrator
+  argoRollouts: false
+
+  image:
+    repository: org-units-migrator
+    pullPolicy: Always
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.orgUnitsMigrator.config.secretsMountPath }}'
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-org-units-migrator
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-org-units-migrator
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.password.secret.key" . }}'
+                  path: PUBSUB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.user.secret.key" . }}'
+                  path: PUBSUB_USER
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_USER
+
+  volumeMounts:
+    - mountPath: '{{ .Values.orgUnitsMigrator.config.secretsMountPath }}'
+      name: runai-service-config
+
+  config:
+    logLevel: Info
+    migrationVersion: v1
+    tenantsToMigrate: ''
+    tenantsToNotMigrate: ''
+    markCompleted: true
+    secretsMountPath: /etc/secrets
+
+  annotations:
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  resources:
+    limits:
+      cpu: 100m
+      memory: 100Mi
+    requests:
+      cpu: 50m
+      memory: 50Mi
+
+unleashEdge:
+  name: unleash-edge
+  nameOverride: unleash-edge
+  fullnameOverride: runai-backend-unleash-edge
+  enabled: false
+  argoRollouts: false
+  replicaCount: 1
+  image:
+    tag: v19.3
+  service:
+    port: 3063
+  env:
+    - name: LOG_LEVEL
+      value: info
+    - name: LOG_FORMAT
+      value: json
+    - name: STRICT
+      value: 'true'
+  resources:
+    limits:
+      cpu: 200m
+      memory: 64Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+  existingSecrets:
+    - name: TOKENS
+      valueFrom:
+        secretKeyRef:
+          name: runai-backend-unleash-edge
+          key: TOKENS
+
+  edge:
+    logLevel: info
+    logFormat: json
+  imagePullSecrets: []
+
+notificationsProxy:
+  name: notifications-proxy
+  enabled: true
+
+  exposedRules:
+    - PathPrefix(`/api/v1/notification-types`)
+    - PathPrefix(`/api/v1/notification-state`)
+    - PathPrefix(`/api/v1/notification-channels`)
+    - PathPrefix(`/api/v1/validate-notification-channel`)
+    - PathPrefix(`/api/v1/subscriptions`)
+    - PathPrefix(`/api/v1/email`)
+    - PathPrefix(`/api/v1/slack`)
+
+  exposedRulesUnauthenticated:
+    - Path(`/api/v1/slack/auth`)
+    - Path(`/api/v1/notification-channels/slack/auth-app`)
+
+  image:
+    repository: notifications-proxy
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.notificationsProxy.config.secretsMountPath }}'
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-notifications-proxy
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+        - secret:
+            name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+            items:
+            - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+              path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-notifications-proxy
+          - secret:
+              name: '{{ include "control-plane.notificationsProxy.encryptionKey.secret.name" . }}'
+              items:
+                - key: DB_ENCRYPTION_KEY
+                  path: DB_ENCRYPTION_KEY
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.password.secret.key" . }}'
+                  path: PUBSUB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.pubsub.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.user.secret.key" . }}'
+                  path: PUBSUB_USER
+          - secret:
+              name: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.key" . }}'
+                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_USER
+          - secret:
+              name: '{{ include "control-plane.cache.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.cache.password.secret.key" . }}'
+                  path: CACHE_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.notifications-proxy.slack.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.notifications-proxy.slack.client.id.key" . }}'
+                  path: SLACK_CLIENT_ID
+                - key: '{{ include "control-plane.notifications-proxy.slack.client.secret.key" . }}'
+                  path: SLACK_CLIENT_SECRET
+  volumeMounts:
+    - mountPath: '{{ .Values.notificationsProxy.config.secretsMountPath }}'
+      name: runai-service-config
+
+  imagePullSecrets: []
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: "notifications-proxy"
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9090
+        protocol: TCP
+
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  config:
+    db:
+      encryptionKey: ""
+    logLevel: Info
+    cacheEnabled: true
+    secretsMountPath: /etc/secrets
+    notifyClient:
+      notifyUrl: http://runai-backend-notifications-service:5000
+      configUrl: http://runai-backend-notifications-service:8080
+    slack:
+      existingSecret: ""
+      secretKeys:
+        clientId: SLACK_CLIENT_ID
+        clientSecret: SLACK_CLIENT_SECRET
+      clientId: ""
+      clientSecret: ""
+
+# =============================================================================
+# PostgreSQL User Init Configuration
+# =============================================================================
+# Helm post-install/post-upgrade hook that grants CREATEROLE to the 
+# application user. This hook is only used for Helm-managed DBs (postgresql.enabled=true).
+# =============================================================================
+postgresqlUserInit:
+  name: postgresql-user-init
+  argoRollouts: false
+
+  command:
+    - sh
+    - -c
+    - >-
+      export PGPASSWORD="$(cat /etc/secrets/ADMIN_DB_PASSWORD)" &&
+      psql -h "$PG_HOST" -p "$PG_PORT" -U postgres
+      -c "ALTER ROLE \"$PG_USER\" NOSUPERUSER CREATEROLE INHERIT LOGIN;"
+
+  env:
+    - name: PG_HOST
+      value: '{{ .Values.global.postgresql.auth.host }}'
+    - name: PG_PORT
+      value: '{{ .Values.global.postgresql.auth.port }}'
+    - name: PG_USER
+      value: '{{ .Values.global.postgresql.auth.username }}'
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.postgresql.admin.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.admin.password.secret.key" . }}'
+                  path: ADMIN_DB_PASSWORD
+
+  volumeMounts:
+    - mountPath: /etc/secrets
+      name: db-password
+
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    runAsUser: 70
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  resources:
+    limits:
+      cpu: 100m
+      memory: 100Mi
+    requests:
+      cpu: 50m
+      memory: 50Mi
+
+  serviceAccount:
+    create: false
+
+# =============================================================================
+# Secret Generator Configuration
+# =============================================================================
+# The Secret Generator is a Helm pre-install/pre-upgrade hook that automatically
+# generates and manages secrets for the control-plane. It:
+# - Eliminates hardcoded default credentials
+# - Preserves existing credentials across upgrades
+# - Supports existingSecret patterns for externally managed secrets
+# - Uses the cp-anchor ConfigMap for lifecycle ownership (garbage collection)
+# =============================================================================
+secretGenerator:
+  name: secret-generator
+  argoRollouts: false
+  replicaCount: 1
+
+  image:
+    repository: secret-generator
+    pullPolicy: IfNotPresent
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-secret-generator
+
+  env:
+    - name: NAMESPACE
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
+
+  volumes:
+    - name: secrets-config
+      configMap:
+        name: runai-backend-secret-generator-config
+
+  volumeMounts:
+    - name: secrets-config
+      mountPath: /etc/secret-generator
+      readOnly: true
+
+  config:
+    logLevel: Info
+    configFilePath: /etc/secret-generator/secrets.json
+    dryRun: false
+
+  # Helm hook annotations
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+
+  # Override annotations for the params ConfigMap (secrets.json) - runs before the Job
+  paramsConfigMap:
+    annotations:
+      helm.sh/hook: pre-install,pre-upgrade
+      helm.sh/hook-weight: "-10"
+      helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+
+  restartPolicy: OnFailure
+
+  # Pod annotations
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  # Resource limits and requests
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+  # Service account configuration
+  serviceAccount:
+    create: true
+    annotations:
+      helm.sh/hook: pre-install,pre-upgrade
+      helm.sh/hook-weight: "-5"
+      helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    name: secret-generator
+
+  # Node selection
+  nodeSelector: {}
+
+  # Affinity rules
+  affinity: {}
+
+  # Tolerations
+  tolerations: []
+
+bffService:
+  name: bff-service
+  exposedRules:
+    - PathPrefix(`/api/v1/ui-analytics/settings`)
+    - PathPrefix(`/api/v1/notifications/settings`)
+    - PathPrefix(`/api/v1/system-notification`)
+    - PathPrefix(`/api/v1/ui-workloads/settings`)
+    - PathPrefix(`/api/v1/ui-appearance/settings`)
+    - PathPrefix(`/api/v1/branding/settings`)
+  exposedRulesUnauthenticated:
+    - Path(`/_version`)
+    - Path(`/api/v1/boot-config`)
+  image:
+    repository: bff-service
+
+  # Browser-safe configuration returned by GET /api/v1/boot-config.
+  bootConfig:
+    distributionAssets:
+      profile: cc
+    docs:
+      baseUrl: https://run-ai-docs.nvidia.com/self-hosted
+      versioned: true
+      whatsNew:
+        urlTemplate: "{docsBaseUrl}/getting-started/whats-new/whats-new"
+    support:
+      url: ""
+      label: ""
+    version:
+      displayPrefix: ""
+    capabilities:
+      showsClusterLocationStep: true
+    unleash:
+      enabled: false
+      url: ""
+      clientKey: ""
+      appName: ""
+      environment: ""
+      project: ""
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.bffService.config.secretsMountPath }}'
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-bff-service
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-bff-service
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+          - secret:
+              name: '{{ include "control-plane.cache.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.cache.password.secret.key" . }}'
+                  path: CACHE_PASSWORD
+
+  volumeMounts:
+    - mountPath: '{{ .Values.bffService.config.secretsMountPath }}'
+      name: runai-service-config
+
+  extraVolumes: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumes | toYaml }}
+    {{- end }}
+
+  extraVolumeMounts: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumeMounts | toYaml }}
+    {{- end }}
+
+  livenessProbe:
+    failureThreshold: 15
+    httpGet:
+      path: /health
+      port: http
+
+  readinessProbe:
+    failureThreshold: 15
+    httpGet:
+      path: /health
+      port: http
+
+  imagePullSecrets: []
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: 'bff-service'
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9090
+        protocol: TCP
+
+  serviceMonitor:
+    port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 30s
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  autoscaling:
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  config:
+    logLevel: info
+    cacheEnabled: true
+    dbScheme: bff_service
+    migrationFiles: file:///migrations
+    secretsMountPath: /etc/secrets
+    server:
+      writeTimeout: 80s
+      readTimeout: 80s
+      idleTimeout: 80s
+      healthEndpoint: /health
+
+tempBackendSettings:
+  name: temp-backend-settings
+  enabled: true
+
+  exposedRules:
+    - PathPrefix(`/v1/k8s/setting`)
+    - PathPrefix(`/v1/k8s/`)
+
+  image:
+    repository: temp-backend-settings
+
+  args: {}
+
+  env:
+    - name: SECRETS_MOUNT_PATH
+      value: '{{ .Values.tempBackendSettings.config.secretsMountPath }}'
+
+  envFrom:
+    - configMapRef:
+        name: runai-backend-temp-backend-settings
+
+  volumes:
+    - name: db-password
+      projected:
+        sources:
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+    - name: runai-service-config
+      projected:
+        sources:
+          - secret:
+              name: runai-backend-temp-backend-settings
+          - secret:
+              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+              items:
+                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+                  path: DB_PASSWORD
+
+  volumeMounts:
+    - mountPath: '{{ .Values.tempBackendSettings.config.secretsMountPath }}'
+      name: runai-service-config
+
+  extraVolumes: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumes | toYaml }}
+    {{- end }}
+
+  extraVolumeMounts: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumeMounts | toYaml }}
+    {{- end }}
+
+  imagePullSecrets: []
+
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: http
+
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: http
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: "temp-backend-settings"
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+    extraPorts:
+      - name: metrics
+        port: 9090
+        protocol: TCP
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  autoscaling:
+    minReplicas: 1
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  config:
+    logLevel: Info
+    dbScheme: backend
+    migrationFiles: file:///migrations
+    secretsMountPath: /etc/secrets
+    showAlphaFlags: false
+    server:
+      healthEndpoint: /health
+
+telemetryService:
+  name: telemetry-service
+  nameOverride: telemetry-service
+  fullnameOverride: runai-backend-telemetry-service
+  replicaCount: 1
+
+  exposedRules:
+    - PathPrefix(`/api/v1/privacy-policy`)
+    - PathPrefix(`/api/v1/diagnostics`)
+
+  serviceAccount:
+    name: telemetry-service
+
+  service:
+    type: ClusterIP
+    port: 8080
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  extraInitContainers: |
+    {{- include "awaitingPostgresReadinessContainerFromMap" $ }}
+
+  extraVolumes: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumes | toYaml }}
+    {{- end }}
+    - name: db-password
+      secret:
+        secretName: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+        items:
+        - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+          path: DB_PASSWORD
+
+  extraVolumeMounts: |-
+    {{- if .Values.global.customCA.enabled | default false }}
+    {{- .Values.global.customCA.volumeMounts | toYaml }}
+    {{- end }}
+
+  secretsMountPath: /etc/secrets
+
+  customerId:
+    existingSecret: runai-backend-gen-telemetry-service
+    secretKey: CUSTOMER_ID
+
+  database:
+    host: '{{ .Values.global.postgresql.auth.host }}'
+    port: '{{ .Values.global.postgresql.auth.port }}'
+    name: '{{ .Values.global.postgresql.auth.database }}'
+    schema: diagnostics # existing production data; not renamed with the service
+    sslMode: '{{ .Values.global.postgresql.auth.dbSslMode }}'
+    migrationFiles: file:///migrations
+    user: '{{ .Values.global.postgresql.auth.username }}'
+    passwordExistingSecret: '{{ include "control-plane.postgresql.password.secret.name" . }}'
+    passwordSecretKey: '{{ include "control-plane.postgresql.password.secret.key" . }}'
+
+  config:
+    logLevel: Info
+    customerName: ""
+    ignorePolicy: true
+    enableBasicDiagnostics: true
+    metricsExportIntervalSeconds: 3600
+    exportTypes: telemetry
+    telemetryEndpoint: ""
+    centralMetricStoreUrl: https://not-supported.com
+    scrapeUrls:
+      - runai-backend-telemetry-service:8080
+    cloudRegisterUrl: https://not-supported.com
+    policyServiceUrl: https://not-supported.com
+    clusterServiceUrl: http://runai-backend-cluster-service:8080
+    bffServiceUrl: http://runai-backend-bff-service:8080
+    tenantsManagerUrl: http://runai-backend-tenants-manager:8080
+    clientsMaxRetries: 10
+    clientsRetryBackoffSeconds: 60
+
+# ResourceQuota for system-critical pods
+resourceQuota:
+  enabled: true
+  name: allow-system-critical-pods
+  hardLimit:
+    pods: "5"
+  scopeSelector:
+    priorityClasses:
+      - system-cluster-critical

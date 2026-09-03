@@ -1,0 +1,26 @@
+image: ubuntu
+ports:
+  - container: 8081
+    toolType: tensor
+    serviceType: NodePort
+  - name: port-1
+    exclude: true
+
+exposedUrls:
+  - container: 8081
+    toolType: tensor
+    name: my-tool-name
+  - container: 8082
+    toolType: custom
+    toolName: my-tool
+  - name: url-1
+    exclude: true
+
+relatedUrls:
+  - url: http://google.com/search
+    type: google
+  - url: http://wandb.com/stats
+    type: wandb
+    name: stats
+  - name: url-2
+    exclude: true

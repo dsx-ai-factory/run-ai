@@ -1,0 +1,24 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package test
+
+import (
+	"testing"
+
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/runtime-rules/pkg/logger"
+	"go.uber.org/zap"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+)
+
+func TestRuntimeRules(t *testing.T) {
+	logger.InitLogger(int(zap.DebugLevel))
+	zap.S().Infof("Started service tests")
+	RegisterFailHandler(Fail)
+	MockEnv(t)
+	RunSpecs(t, "runtime-rules service Test Suite")
+}

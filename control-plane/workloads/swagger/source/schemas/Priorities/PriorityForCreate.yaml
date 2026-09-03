@@ -1,0 +1,14 @@
+type: object
+required:
+  - name
+  - value
+properties:
+  name:
+    type: string
+    example: "train"
+    description: The name of the workload priority (e.g., Low, Medium High)
+  value:
+    type: integer
+    minimum: 0
+    example: 50
+    description: The scheduling value assigned to this priority

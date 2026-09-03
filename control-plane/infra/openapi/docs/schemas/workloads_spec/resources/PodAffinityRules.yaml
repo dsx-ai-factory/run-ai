@@ -1,0 +1,7 @@
+properties:
+  type:
+    $ref: "./PodAffinityTypeRules.yaml"
+  key:
+    $ref: "../../policy_rules/StringRules.yaml"
+nullable: true
+type: object

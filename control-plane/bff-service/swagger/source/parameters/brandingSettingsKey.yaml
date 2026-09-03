@@ -1,0 +1,6 @@
+name: key
+in: path
+required: true
+description: Identifier of the branding setting to retrieve or update
+schema:
+  $ref: "./brandingSettingsKeyEnum.yaml"

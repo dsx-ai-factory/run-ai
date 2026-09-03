@@ -1,0 +1,16 @@
+type: object
+properties:
+  email:
+    $ref: "./NotificationStateStatus.yaml"
+  slack:
+    allOf:
+      - $ref: "./NotificationStateStatus.yaml"
+      - $ref: "./SlackDetails.yaml"
+example:
+  email:
+    enabled: true
+  slack:
+    enabled: true
+    settings:
+      workspaceName: <your_workspace_name>
+      appCredentialsConfigured: true

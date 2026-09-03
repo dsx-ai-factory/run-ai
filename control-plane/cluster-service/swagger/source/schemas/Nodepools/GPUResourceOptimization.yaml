@@ -1,0 +1,34 @@
+type: object
+nullable: true
+deprecated: true
+properties:
+  swapEnabled:
+    type: boolean
+    description: Indicates if swap is enabled on the node pool
+    example: true
+    default: false
+    nullable: true
+    deprecated: true
+  cpuSwapMemorySize:
+    type: string
+    description: Size of the swap cpu memory. Only allowed when swapEnabled is true
+    example: 10000M
+    default: 100G
+    nullable: true
+    pattern: ^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$
+    deprecated: true
+  reservedGpuMemoryForSwapOperations:
+    type: string
+    description: Reserved GPU memory for swap operations. Only allowed when swapEnabled is true
+    example: 10G
+    default: 2G
+    nullable: true
+    pattern: ^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$
+    deprecated: true
+  nodeLevelSchedulerEnabled:
+    type: boolean
+    description: Indicates if node level scheduler is enabled on the node pool
+    example: true
+    default: false
+    nullable: true
+    deprecated: true

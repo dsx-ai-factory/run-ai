@@ -1,0 +1,19 @@
+rules:
+  ports:
+    attributes:
+      container:
+        min: 8000
+        max: 9000
+    instances:
+      locked:
+        - FIXED_PORT
+
+defaults:
+  ports:
+    attributes:
+      container: 8500
+    instances:
+      - name: FIXED_PORT
+        container: 8001
+      - name: CAN_CHANGE_PORT
+        container: 8002

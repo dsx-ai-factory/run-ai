@@ -1,0 +1,4 @@
+image: ubuntu
+
+compute:
+  gpuMemoryLimit: 10M

@@ -1,0 +1,134 @@
+policy:
+  id: test-policy
+  effectiveRules:
+    # 1. Add env var FOO from configMap to worker-1 (whole-instance set).
+    - field: environmentVariables-FromConfigMap
+      specSelector: appContainerByName
+      selectorParams:
+        containerName: worker-1
+      enforcements:
+        - set:
+            name: FOO
+            configMapName: cm-a
+            key: foo-key
+            optional: false
+
+    # 2. Add env var BAR from configMap to worker-2 (whole-instance set).
+    - field: environmentVariables-FromConfigMap
+      specSelector: appContainerByName
+      selectorParams:
+        containerName: worker-2
+      enforcements:
+        - set:
+            name: BAR
+            configMapName: cm-b
+            key: bar-key
+            optional: true
+
+    # 3. Add env var SHARED from configMap to worker-1 and worker-2
+    #    — same env var declared on both containers via two separate rules.
+    - field: environmentVariables-FromConfigMap
+      specSelector: appContainerByName
+      selectorParams:
+        containerName: worker-1
+      enforcements:
+        - set:
+            name: SHARED
+            configMapName: cm-shared
+            key: shared-key
+            optional: false
+    - field: environmentVariables-FromConfigMap
+      specSelector: appContainerByName
+      selectorParams:
+        containerName: worker-2
+      enforcements:
+        - set:
+            name: SHARED
+            configMapName: cm-shared
+            key: shared-key
+            optional: false
+
+    # 4. Override the configMap name on every configMap-sourced env var
+    #    across all containers — sub-field set. Demonstrates that a
+    #    subsequent rule can tweak a single field of the entries built
+    #    earlier (env vars added above) without touching siblings
+    #    (key / optional) or unrelated env vars.
+    - field: environmentVariables-ConfigMapName
+      specSelector: allContainers
+      itemSelector: envVarFromConfigMap
+      enforcements:
+        - set:
+            value: central-cm
+
+  # Mirrors the seed from
+  # control-plane/policy-service/pkg/services/system_mapping_deployment.go,
+  # system_mapping_podspec_field_groups.go, and system_mapping_podspec_formatters.go
+  # for apps/v1 Deployment.
+  breakdown:
+    fields:
+      # Whole-instance env-var field, built from multiple args via a custom
+      # (non-builtin) set expression. The arrayKey tells arrayMergeByKey to
+      # match env-array entries by their ".name" when merging into a
+      # container that already has env vars.
+      environmentVariables-FromConfigMap:
+        - specSelectors: [appContainerByName]
+          formatter:
+            setExpr: |
+              {
+                "env": [
+                  {
+                    "name": $ARGS.named.name,
+                    "valueFrom": {
+                      "configMapKeyRef": {
+                        "name": $ARGS.named.configMapName,
+                        "key": $ARGS.named.key,
+                        "optional": $ARGS.named.optional
+                      }
+                    }
+                  }
+                ]
+              }
+            arrayKey:
+              argName: name
+
+      # Sub-field of a single env var — standard KeyValue formatter, scoped
+      # to the envVarFromConfigMap item selector so only configMap-sourced
+      # env vars are targeted.
+      environmentVariables-ConfigMapName:
+        - specSelectors: [allContainers]
+          specRef: valueFrom.configMapKeyRef.name
+          formatter:
+            builtin: KeyValue
+          itemSelectors:
+            envVarFromConfigMap:
+              query: '(.env // [])[] | select(.valueFrom.configMapKeyRef != null)'
+
+    specSelectors:
+      allContainers:
+        query: |
+          (
+            .spec.template.spec.containers[]?,
+            .spec.template.spec.initContainers[]?
+          )
+          | select(.)
+      appContainerByName:
+        query: |
+          (
+            .spec.template.spec.containers[]?
+          )
+          | select(.name == $ARGS.named.containerName)
+        argsInfo:
+          containerName: string
+
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: test-deployment
+  spec:
+    template:
+      spec:
+        containers:
+          - name: worker-1                 # gets FOO + SHARED env vars
+          - name: worker-2                 # gets BAR + SHARED env vars
+          - name: worker-3                 # no matching rules, stays bare

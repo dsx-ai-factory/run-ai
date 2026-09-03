@@ -1,0 +1,27 @@
+# Minimal valid v1/Pod manifest used as the starting point for every
+# Layer 3+4 case under cases/.
+#
+# Why these particular fields are pre-populated:
+#
+#   - containers[0].image and initContainers[0].image are set to the
+#     placeholder "placeholder" so the skeleton itself validates against
+#     the K8s OpenAPI schema (image is a required field). The container
+#     case overrides both to the real value via SET rules.
+#
+#   - Container names are "test" so parameterised spec selectors
+#     (appContainerByName / initContainerByName) match.
+#
+# Note: Pod has no selector.matchLabels — that's only for controller
+# workloads (Deployment, Job, etc.). The metadata labels are populated
+# by the pod policy case via the labels field.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test
+spec:
+  containers:
+    - name: test
+      image: placeholder
+  initContainers:
+    - name: test
+      image: placeholder

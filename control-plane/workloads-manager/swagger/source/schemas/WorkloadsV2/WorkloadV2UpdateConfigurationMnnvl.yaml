@@ -1,0 +1,11 @@
+type: object
+additionalProperties: false
+properties:
+  mode:
+    $ref: "./MnnvlMode.yaml"
+  gpuNetworkAccelerationLabelKeys:
+    type: array
+    items:
+      type: string
+    description: List of GPU network acceleration label keys from the project's node pools
+    example: ["nvidia.com/gpu.clique", "topology.kubernetes.io/rack"]

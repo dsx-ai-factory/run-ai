@@ -1,0 +1,25 @@
+type: object
+required:
+  - access_token
+  - token_type
+properties:
+  access_token:
+    type: string
+    description: The access token issued by the authorization server
+  token_type:
+    type: string
+    description: The type of the token issued (typically "Bearer")
+    example: "Bearer"
+  expires_in:
+    type: integer
+    description: The lifetime in seconds of the access token
+    example: 3600
+  refresh_token:
+    type: string
+    description: The refresh token, which can be used to obtain new access tokens
+  id_token:
+    type: string
+    description: ID Token value associated with the authenticated session (OpenID Connect)
+  scope:
+    type: string
+    description: The scope of the access token

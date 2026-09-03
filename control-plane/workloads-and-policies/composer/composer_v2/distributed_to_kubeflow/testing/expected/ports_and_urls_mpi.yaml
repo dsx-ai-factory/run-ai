@@ -1,0 +1,485 @@
+DistributedTarget:
+  Config:
+    networking:
+    - externalAccess:
+        ingress:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: kf-ports_and_urls-url-worker-1
+          spec:
+            rules:
+            - host: test.run.ai
+              http:
+                paths:
+                - backend:
+                    service:
+                      name: kf-ports_and_urls-url-worker-1
+                      port:
+                        number: 80
+                  path: /test/ports_and_urls/url-worker-1
+                  pathType: Prefix
+      services:
+      - spec:
+          name: kf-ports_and_urls-url-worker-1
+          ports:
+          - name: port-4181
+            port: 80
+            protocol: TCP
+            targetPort: 4181
+          selector:
+            training.kubeflow.org/job-name: ports_and_urls
+            training.kubeflow.org/job-role: worker
+            training.kubeflow.org/replica-index: "0"
+          type: ClusterIP
+    - externalAccess:
+        ingress:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: kf-ports_and_urls-url-worker-my-tool-name
+          spec:
+            rules:
+            - host: test.run.ai
+              http:
+                paths:
+                - backend:
+                    service:
+                      name: kf-ports_and_urls-url-worker-my-tool-name
+                      port:
+                        number: 80
+                  path: /test/ports_and_urls/url-worker-my-tool-name
+                  pathType: Prefix
+      services:
+      - spec:
+          name: kf-ports_and_urls-url-worker-my-tool-name
+          ports:
+          - name: port-4180
+            port: 80
+            protocol: TCP
+            targetPort: 4180
+          selector:
+            training.kubeflow.org/job-name: ports_and_urls
+            training.kubeflow.org/job-role: worker
+            training.kubeflow.org/replica-index: "0"
+          type: ClusterIP
+    - services:
+      - spec:
+          name: kf-ports_and_urls-np-worker
+          ports:
+          - name: port-8081
+            port: 8081
+            protocol: TCP
+            targetPort: 8081
+          selector:
+            training.kubeflow.org/job-name: ports_and_urls
+            training.kubeflow.org/job-role: worker
+            training.kubeflow.org/replica-index: "0"
+          type: NodePort
+    - externalAccess:
+        ingress:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: kf-ports_and_urls-url-master-1
+          spec:
+            rules:
+            - host: test.run.ai
+              http:
+                paths:
+                - backend:
+                    service:
+                      name: kf-ports_and_urls-url-master-1
+                      port:
+                        number: 80
+                  path: /test/ports_and_urls
+                  pathType: Prefix
+      services:
+      - spec:
+          name: kf-ports_and_urls-url-master-1
+          ports:
+          - name: port-4181
+            port: 80
+            protocol: TCP
+            targetPort: 4181
+          selector:
+            training.kubeflow.org/job-name: ports_and_urls
+            training.kubeflow.org/job-role: launcher
+          type: ClusterIP
+    - externalAccess:
+        ingress:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: kf-ports_and_urls-url-master-my-tool-name
+          spec:
+            rules:
+            - host: test.run.ai
+              http:
+                paths:
+                - backend:
+                    service:
+                      name: kf-ports_and_urls-url-master-my-tool-name
+                      port:
+                        number: 80
+                  path: /test/ports_and_urls/url-master-my-tool-name
+                  pathType: Prefix
+      services:
+      - spec:
+          name: kf-ports_and_urls-url-master-my-tool-name
+          ports:
+          - name: port-4180
+            port: 80
+            protocol: TCP
+            targetPort: 4180
+          selector:
+            training.kubeflow.org/job-name: ports_and_urls
+            training.kubeflow.org/job-role: launcher
+          type: ClusterIP
+    - services:
+      - spec:
+          name: kf-ports_and_urls-np-launcher
+          ports:
+          - name: port-8081
+            port: 8081
+            protocol: TCP
+            targetPort: 8081
+          selector:
+            training.kubeflow.org/job-name: ports_and_urls
+            training.kubeflow.org/job-role: launcher
+          type: NodePort
+  Framework: MPI
+  JaxJob: null
+  MasterSpec: null
+  MpiJob:
+    apiVersion: kubeflow.org/v2beta1
+    kind: MPIJob
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: mpijob
+        createdBy: MPIJob
+        project: test
+        release: ports_and_urls
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: ports_and_urls
+      name: ports_and_urls
+      namespace: runai-test
+    spec:
+      mpiReplicaSpecs:
+        Launcher:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: mpijob
+                createdBy: MPIJob
+                project: test
+                release: ports_and_urls
+                workloadKind: Distributed
+                workloadName: ports_and_urls
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: ports_and_urls
+                - name: RUNAI_MPI_NUM_WORKERS
+                  value: "1"
+                image: ubuntu
+                name: mpi
+                ports:
+                - containerPort: 8082
+                  name: port-8082
+                  protocol: TCP
+                - containerPort: 8081
+                  name: port-8081
+                  protocol: TCP
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              initContainers:
+              - args:
+                - --provider=keycloak-oidc
+                - --upstream=http://localhost:8082
+                - --redirect-url=https://test.run.ai/test/ports_and_urls/oauth2/callback
+                - --oidc-issuer-url=/auth/realms/runai
+                - --scope=openid
+                - --http-address=0.0.0.0:4181
+                - --proxy-prefix=/test/ports_and_urls/oauth2
+                - --skip-provider-button=true
+                - --whitelist-domain=test.run.ai
+                - --cookie-domain=test.run.ai
+                - --cookie-httponly=true
+                - --cookie-secure=true
+                - --code-challenge-method=S256
+                - --cookie-refresh=10m
+                - --cookie-samesite=lax
+                - --skip-jwt-bearer-tokens=true
+                - --extra-jwt-issuers=/auth/realms/runai=runai
+                - --custom-templates-dir=/usr/share/oauth2-proxy
+                - --pass-authorization-header=false
+                - --cookie-name=ports_and_urls-url-master-1-auth-proxy
+                - --email-domain=*
+                env:
+                - name: OAUTH2_PROXY_COOKIE_PATH
+                  value: /test/ports_and_urls
+                envFrom:
+                - secretRef: {}
+                image: test.registry/oauth2-proxy:test
+                imagePullPolicy: IfNotPresent
+                name: runai-oauth2-proxy-0
+                ports:
+                - containerPort: 4181
+                  name: port-4181
+                  protocol: TCP
+                resources: {}
+                restartPolicy: Always
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  runAsNonRoot: true
+                volumeMounts:
+                - mountPath: /etc/runai/auth/users
+                  name: runai-auth
+              - args:
+                - --provider=keycloak-oidc
+                - --upstream=http://localhost:8081
+                - --redirect-url=https://test.run.ai/test/ports_and_urls/url-master-my-tool-name/oauth2/callback
+                - --oidc-issuer-url=/auth/realms/runai
+                - --scope=openid
+                - --http-address=0.0.0.0:4180
+                - --proxy-prefix=/test/ports_and_urls/url-master-my-tool-name/oauth2
+                - --skip-provider-button=true
+                - --whitelist-domain=test.run.ai
+                - --cookie-domain=test.run.ai
+                - --cookie-httponly=true
+                - --cookie-secure=true
+                - --code-challenge-method=S256
+                - --cookie-refresh=10m
+                - --cookie-samesite=lax
+                - --skip-jwt-bearer-tokens=true
+                - --extra-jwt-issuers=/auth/realms/runai=runai
+                - --custom-templates-dir=/usr/share/oauth2-proxy
+                - --pass-authorization-header=false
+                - --cookie-name=ports_and_urls-url-master-my-tool-name-auth-proxy
+                - --email-domain=*
+                env:
+                - name: OAUTH2_PROXY_COOKIE_PATH
+                  value: /test/ports_and_urls/url-master-my-tool-name
+                envFrom:
+                - secretRef: {}
+                image: test.registry/oauth2-proxy:test
+                imagePullPolicy: IfNotPresent
+                name: runai-oauth2-proxy-1
+                ports:
+                - containerPort: 4180
+                  name: port-4180
+                  protocol: TCP
+                resources: {}
+                restartPolicy: Always
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  runAsNonRoot: true
+                volumeMounts:
+                - mountPath: /etc/runai/auth/users
+                  name: runai-auth
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - emptyDir: {}
+                name: runai-auth
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: mpijob
+                createdBy: MPIJob
+                project: test
+                release: ports_and_urls
+                workloadKind: Distributed
+                workloadName: ports_and_urls
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: ports_and_urls
+                - name: RUNAI_MPI_NUM_WORKERS
+                  value: "1"
+                image: ubuntu
+                name: mpi
+                ports:
+                - containerPort: 8082
+                  name: port-8082
+                  protocol: TCP
+                - containerPort: 8081
+                  name: port-8081
+                  protocol: TCP
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              initContainers:
+              - args:
+                - --provider=keycloak-oidc
+                - --upstream=http://localhost:8082
+                - --redirect-url=https://test.run.ai/test/ports_and_urls/url-worker-1/oauth2/callback
+                - --oidc-issuer-url=/auth/realms/runai
+                - --scope=openid
+                - --http-address=0.0.0.0:4181
+                - --proxy-prefix=/test/ports_and_urls/url-worker-1/oauth2
+                - --skip-provider-button=true
+                - --whitelist-domain=test.run.ai
+                - --cookie-domain=test.run.ai
+                - --cookie-httponly=true
+                - --cookie-secure=true
+                - --code-challenge-method=S256
+                - --cookie-refresh=10m
+                - --cookie-samesite=lax
+                - --skip-jwt-bearer-tokens=true
+                - --extra-jwt-issuers=/auth/realms/runai=runai
+                - --custom-templates-dir=/usr/share/oauth2-proxy
+                - --pass-authorization-header=false
+                - --cookie-name=ports_and_urls-url-worker-1-auth-proxy
+                - --email-domain=*
+                env:
+                - name: OAUTH2_PROXY_COOKIE_PATH
+                  value: /test/ports_and_urls/url-worker-1
+                envFrom:
+                - secretRef: {}
+                image: test.registry/oauth2-proxy:test
+                imagePullPolicy: IfNotPresent
+                name: runai-oauth2-proxy-0
+                ports:
+                - containerPort: 4181
+                  name: port-4181
+                  protocol: TCP
+                resources: {}
+                restartPolicy: Always
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  runAsNonRoot: true
+                volumeMounts:
+                - mountPath: /etc/runai/auth/users
+                  name: runai-auth
+              - args:
+                - --provider=keycloak-oidc
+                - --upstream=http://localhost:8081
+                - --redirect-url=https://test.run.ai/test/ports_and_urls/url-worker-my-tool-name/oauth2/callback
+                - --oidc-issuer-url=/auth/realms/runai
+                - --scope=openid
+                - --http-address=0.0.0.0:4180
+                - --proxy-prefix=/test/ports_and_urls/url-worker-my-tool-name/oauth2
+                - --skip-provider-button=true
+                - --whitelist-domain=test.run.ai
+                - --cookie-domain=test.run.ai
+                - --cookie-httponly=true
+                - --cookie-secure=true
+                - --code-challenge-method=S256
+                - --cookie-refresh=10m
+                - --cookie-samesite=lax
+                - --skip-jwt-bearer-tokens=true
+                - --extra-jwt-issuers=/auth/realms/runai=runai
+                - --custom-templates-dir=/usr/share/oauth2-proxy
+                - --pass-authorization-header=false
+                - --cookie-name=ports_and_urls-url-worker-my-tool-name-auth-proxy
+                - --email-domain=*
+                env:
+                - name: OAUTH2_PROXY_COOKIE_PATH
+                  value: /test/ports_and_urls/url-worker-my-tool-name
+                envFrom:
+                - secretRef: {}
+                image: test.registry/oauth2-proxy:test
+                imagePullPolicy: IfNotPresent
+                name: runai-oauth2-proxy-1
+                ports:
+                - containerPort: 4180
+                  name: port-4180
+                  protocol: TCP
+                resources: {}
+                restartPolicy: Always
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  runAsNonRoot: true
+                volumeMounts:
+                - mountPath: /etc/runai/auth/users
+                  name: runai-auth
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - emptyDir: {}
+                name: runai-auth
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: Running
+    status: {}
+  ObjectMeta: null
+  PyTorchJob: null
+  RunPolicy: null
+  TFJob: null
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: MPIJob
+  environments:
+  - connections:
+    - connectionType: ExternalUrl
+      containerPort: 8082
+      correlationName: url-1
+      exposedUrlPath: /project/ports_and_urls
+      exposedUrlSubDomain: project-ports_and_urls
+      name: my-tool
+      toolType: custom
+    - connectionType: ExternalUrl
+      containerPort: 8081
+      correlationName: url-my-tool-name
+      exposedUrlPath: /project/ports_and_urls/url-my-tool-name
+      exposedUrlSubDomain: project-ports_and_urls-url-my-tool-name
+      name: url-my-tool-name
+      toolType: tensor
+    - connectionType: NodePort
+      containerPort: 8081
+      correlationName: port
+      name: port
+      portResourceName: port-8081
+      serviceResourceName: kf-ports_and_urls-np-worker
+      toolType: tensor
+    id: ""
+    name: ""
+    replicaType: null
+  externalConnections:
+  - connectionType: ""
+    name: ""
+    toolType: google
+    url: http://google.com/search
+  - connectionType: ""
+    name: stats
+    toolType: wandb
+    url: http://wandb.com/stats
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-ports_and_urls/, Framework: MPI'
+  images:
+  - ubuntu
+  name: 'ports_and_urls/, Framework: MPI'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

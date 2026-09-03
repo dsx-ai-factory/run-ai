@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InfW → WorkloadRunner — Inference Migration</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #1a1a2e;
+    --bg-slide: #16213e;
+    --bg-card: #0f3460;
+    --accent: #76b900;
+    --accent-dim: #5a8f00;
+    --text: #e8e8e8;
+    --text-dim: #a0a0b0;
+    --text-bright: #ffffff;
+    --code-bg: #0d1117;
+    --border: #2a3a5e;
+    --nvidia-green: #76b900;
+    --runai-purple: #7b61ff;
+  }
+  body.light {
+    --bg: #ffffff;
+    --bg-slide: #fafbfc;
+    --bg-card: #f0f3f9;
+    --accent: #5d9300;
+    --accent-dim: #4a7500;
+    --text: #1a1a2e;
+    --text-dim: #5d6a85;
+    --text-bright: #0b1020;
+    --code-bg: #f5f6fa;
+    --border: #d6dae3;
+    --nvidia-green: #5d9300;
+    --runai-purple: #6948e8;
+  }
+  .theme-toggle {
+    position: fixed; top: 16px; right: 140px; z-index: 200;
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bg-card); color: var(--text);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 8px 14px; font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 500; letter-spacing: 0.5px;
+    cursor: pointer; user-select: none;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .theme-toggle:hover { border-color: var(--nvidia-green); color: var(--text-bright); }
+  .theme-toggle svg { width: 14px; height: 14px; }
+  body.light .theme-toggle .sun  { display: none; }
+  body:not(.light) .theme-toggle .moon { display: none; }
+  body.light .theme-toggle .sun-label { display: none; }
+  body:not(.light) .theme-toggle .moon-label { display: none; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  .slide {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 60px 80px;
+    position: relative;
+  }
+
+  .slide.active { display: flex; }
+  .slide-content { max-width: 1100px; width: 100%; }
+
+  /* Header bar */
+  .top-bar {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--nvidia-green), var(--runai-purple));
+    z-index: 100;
+  }
+
+  .slide-number {
+    position: fixed; bottom: 24px; right: 40px;
+    font-size: 14px; color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace; z-index: 100;
+  }
+
+  .logo-bar {
+    position: fixed; bottom: 24px; left: 40px;
+    font-size: 13px; color: var(--text-dim);
+    letter-spacing: 1px; text-transform: uppercase; z-index: 100;
+  }
+
+  /* Typography */
+  h1 {
+    font-size: 48px; font-weight: 700;
+    color: var(--text-bright); margin-bottom: 16px; line-height: 1.15;
+  }
+  h1 .accent { color: var(--nvidia-green); }
+  h1 .purple { color: var(--runai-purple); }
+
+  h2 {
+    font-size: 36px; font-weight: 600;
+    color: var(--text-bright); margin-bottom: 12px;
+  }
+
+  h3 {
+    font-size: 15px; font-weight: 500;
+    color: var(--nvidia-green); text-transform: uppercase;
+    letter-spacing: 2px; margin-bottom: 20px;
+  }
+
+  .subtitle {
+    font-size: 22px; color: var(--text-dim); font-weight: 300;
+    margin-bottom: 40px; line-height: 1.5;
+  }
+
+  p, li { font-size: 20px; line-height: 1.7; color: var(--text); }
+
+  .quote {
+    font-size: 20px; color: var(--text);
+    background: var(--bg-card);
+    border-left: 4px solid var(--nvidia-green);
+    padding: 20px 28px; border-radius: 0 8px 8px 0;
+    margin: 24px 0; line-height: 1.6; font-style: italic;
+  }
+
+  ul { list-style: none; padding: 0; }
+  ul li { padding: 8px 0 8px 28px; position: relative; }
+  ul li::before {
+    content: '▸'; position: absolute; left: 0;
+    color: var(--nvidia-green); font-weight: 700;
+  }
+
+  ol { padding-left: 24px; counter-reset: ol-counter; list-style: none; }
+  ol li {
+    padding: 8px 0 8px 36px; position: relative; counter-increment: ol-counter;
+  }
+  ol li::before {
+    content: counter(ol-counter);
+    position: absolute; left: 0; top: 8px;
+    color: var(--nvidia-green); font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(118, 185, 0, 0.1);
+    width: 26px; height: 26px; line-height: 26px;
+    text-align: center; border-radius: 4px; font-size: 14px;
+  }
+
+  strong { color: var(--text-bright); font-weight: 600; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--code-bg); padding: 2px 8px; border-radius: 4px;
+    font-size: 0.85em; color: var(--nvidia-green);
+  }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 18px; }
+  th {
+    background: var(--bg-card); color: var(--nvidia-green);
+    text-align: left; padding: 14px 20px; font-weight: 600;
+    text-transform: uppercase; font-size: 13px; letter-spacing: 1px;
+    border-bottom: 2px solid var(--nvidia-green);
+  }
+  td { padding: 12px 20px; border-bottom: 1px solid var(--border); color: var(--text); }
+  tr:hover td { background: rgba(118, 185, 0, 0.05); }
+
+  /* Code blocks */
+  pre {
+    background: var(--code-bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 24px; margin: 20px 0;
+    overflow-x: auto; font-family: 'JetBrains Mono', monospace;
+    font-size: 15px; line-height: 1.6; color: var(--text);
+  }
+  .flow-node { color: var(--nvidia-green); font-weight: 500; }
+  .flow-arrow { color: var(--text-dim); }
+  .flow-desc { color: var(--text-dim); font-style: italic; }
+
+  /* Two-column layout */
+  .columns {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 20px 0;
+  }
+  .col {
+    background: var(--bg-card); border-radius: 12px;
+    padding: 28px; border: 1px solid var(--border);
+  }
+  .col h4 {
+    font-size: 18px; color: var(--nvidia-green);
+    margin-bottom: 16px; font-weight: 600;
+  }
+  .col pre {
+    margin: 12px 0 0 0; font-size: 16px; border: none; background: var(--code-bg);
+  }
+
+  /* Badges */
+  .badge {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .badge-green { background: rgba(118, 185, 0, 0.2); color: var(--nvidia-green); }
+  .badge-purple { background: rgba(123, 97, 255, 0.2); color: var(--runai-purple); }
+
+  /* Keyboard hint */
+  .keyboard-hint {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%); font-size: 12px;
+    color: var(--text-dim); opacity: 0.5; z-index: 100;
+  }
+  kbd {
+    background: var(--border); padding: 2px 8px; border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  }
+
+  /* Status indicators */
+  .status-ok { color: var(--nvidia-green); }
+  .status-redirect { color: #f0a030; }
+  .status-denied { color: #e04040; }
+
+  /* Box-flow diagrams (scenario slides) */
+  .fdiag { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 16px 0; flex-wrap: nowrap; }
+  .fdiag.stacked { flex-direction: column; align-items: stretch; gap: 12px; }
+  .fdiag-row { display: flex; align-items: center; gap: 8px; }
+  .fdiag-row .fdiag-label {
+    color: var(--nvidia-green); font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+    width: 90px; text-align: right; flex-shrink: 0;
+  }
+  .fnode {
+    background: var(--bg-card); border: 1px solid var(--border);
+    padding: 10px 14px; border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    color: var(--text); white-space: nowrap; line-height: 1.2;
+  }
+  .fnode.external { color: var(--text-dim); border-style: dashed; background: transparent; }
+  .fnode.user { border-color: var(--nvidia-green); color: var(--text-bright); background: rgba(118,185,0,0.08); }
+  .fnode.sidecar { border-color: var(--runai-purple); color: var(--runai-purple); background: rgba(123,97,255,0.08); }
+  .fnode.metrics { border-color: var(--nvidia-green); color: var(--nvidia-green); background: rgba(118,185,0,0.06); }
+  .fnode.optional { border-style: dashed; color: var(--text-dim); }
+  .farrow {
+    color: var(--nvidia-green); font-size: 18px; font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Title slide special */
+  .title-slide h1 { font-size: 56px; margin-bottom: 8px; }
+  .title-slide .subtitle { font-size: 24px; }
+
+  /* Section divider */
+  .part-divider { text-align: center; }
+  .part-divider h2 { font-size: 44px; margin-bottom: 16px; }
+  .part-divider .subtitle { font-size: 20px; }
+  .part-number {
+    font-size: 100px; font-weight: 700;
+    color: var(--nvidia-green); opacity: 0.2;
+    line-height: 1; margin-bottom: 10px;
+  }
+
+  /* View toggle (slide ⇄ document) */
+  .view-toggle {
+    position: fixed; top: 16px; right: 16px; z-index: 200;
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bg-card); color: var(--text);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 8px 14px; font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 500; letter-spacing: 0.5px;
+    cursor: pointer; user-select: none;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .view-toggle:hover { border-color: var(--nvidia-green); color: var(--text-bright); }
+  .view-toggle svg { width: 14px; height: 14px; }
+  .view-toggle .label-doc { display: inline; }
+  .view-toggle .label-slide { display: none; }
+  body.doc-mode .view-toggle .label-doc { display: none; }
+  body.doc-mode .view-toggle .label-slide { display: inline; }
+
+  /* Document (one-page) mode */
+  body.doc-mode { overflow: auto; height: auto; }
+  body.doc-mode .slide {
+    display: flex !important;
+    height: auto; min-height: auto;
+    padding: 56px 80px;
+    border-bottom: 1px solid var(--border);
+    page-break-after: always;
+    break-after: page;
+  }
+  body.doc-mode .slide:last-of-type { border-bottom: none; }
+  body.doc-mode .slide-number,
+  body.doc-mode .logo-bar,
+  body.doc-mode .keyboard-hint { display: none; }
+  body.doc-mode .top-bar { position: absolute; }
+
+  /* Print: always render as single document */
+  @media print {
+    body { overflow: visible; height: auto; background: #fff; color: #000; }
+    .view-toggle, .slide-number, .logo-bar, .keyboard-hint { display: none !important; }
+    .slide {
+      display: flex !important;
+      height: auto; min-height: auto;
+      padding: 40px 60px;
+      page-break-after: always;
+      break-after: page;
+    }
+    .slide:last-of-type { page-break-after: auto; break-after: auto; }
+    .top-bar { position: absolute; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar"></div>
+<div class="logo-bar">INFW → WORKLOADRUNNER</div>
+<div class="slide-number" id="slideNum"></div>
+<div class="keyboard-hint"><kbd>←</kbd> <kbd>→</kbd> or <kbd>Space</kbd> to navigate · <kbd>V</kbd> for one-page view</div>
+
+<button class="theme-toggle" id="themeToggle" title="Toggle light / dark theme (press T)">
+  <svg class="sun"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+  <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  <span class="sun sun-label">Light</span>
+  <span class="moon moon-label">Dark</span>
+</button>
+
+<button class="view-toggle" id="viewToggle" title="Toggle slide / one-page view (press V)">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+    <line x1="3" y1="10" x2="21" y2="10"></line>
+  </svg>
+  <span class="label-doc">One page</span>
+  <span class="label-slide">Slides</span>
+</button>
+
+<!-- 1: Title -->
+<div class="slide active title-slide">
+  <div class="slide-content" style="text-align:center;">
+    <h1><span class="accent">InfW</span> → WorkloadRunner<br><span class="purple">Inference Migration</span></h1>
+    <p class="subtitle">Sunsetting the legacy InferenceWorkload CRD onto a generic WorkloadRunner + plugins path</p>
+    <div style="margin-top:40px;">
+      <span class="badge badge-green">Part 1 of 2 · Single-replica only</span>
+    </div>
+    <p style="margin-top:48px; font-size:14px; color:var(--runai-purple);">
+      ⓘ <strong>Status surface</strong> — revision names, external URLs, phase mapping, <code>PluginStatus</code> — is tracked separately and covered later.
+    </p>
+  </div>
+</div>
+
+<!-- 2: TL;DR -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>TL;DR</h3>
+    <h2>Three things to remember</h2>
+    <div class="quote">
+      Composer is the heavy lift. The cluster-side controller knows nothing about inference — it follows the Karta for the target kind, applies plugins, and reconciles.
+    </div>
+    <ul style="margin-top:24px;">
+      <li><strong>Most fields map cleanly</strong> — <code>InferenceFields</code> become Knative annotations; Knative handles the runtime behaviour natively.</li>
+      <li><strong>The serving-port pattern doesn't change</strong> — port-bearing OAuth2-proxy sidecar composed into the Knative template by the <strong>CP composer</strong> (Liran's design — in review). No new <code>corev1.Service</code> for InfW.</li>
+      <li><strong>Tools (<code>exposedUrls</code>) need multi-endpoint</strong> — one OAuth2-proxy sidecar per URL. Blocking dependency on PR #19525.</li>
+    </ul>
+    <p style="margin-top:20px; font-size:14px; color:var(--runai-purple);">
+      ⚠ <strong>Schema-version note:</strong> every YAML in this deck uses the <strong>target</strong> WLR schema — <code>instructions.networking.endpoints[]</code> (post-PR #19525) for Service + Ingress. The OAuth2-proxy <strong>sidecar</strong> for auth is composed at the <strong>CP composer</strong> level (Liran's design — in review) directly into the Knative pod template's <code>containers[]</code>. <strong>There is no <code>instructions.initContainer.*</code> field on <code>WorkloadRunner</code></strong> — sidecar/init-container composition is a CP feature, not a runtime plugin. Nothing migrates until PR #19525 + Liran's CP composer design land.
+    </p>
+  </div>
+</div>
+
+<!-- 3: Section divider — Part 1 -->
+<div class="slide">
+  <div class="slide-content part-divider">
+    <div class="part-number">1</div>
+    <h2>Architecture</h2>
+    <p class="subtitle">Composer → WorkloadRunner → controller + plugins → Knative</p>
+  </div>
+</div>
+
+<!-- 4: Architecture flow -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>The new path</h3>
+    <h2>End-to-end</h2>
+    <pre style="font-size:16px; line-height:1.7;">
+<span class="flow-node">  [ User ]</span>  <span class="flow-desc">POST runai API</span>
+<span class="flow-arrow">       │</span>
+<span class="flow-arrow">       ▼</span>
+<span class="flow-node">  [ CP composer ]</span>  <span class="flow-desc">reads Knative-Service Karta; translates InferenceFields</span>
+<span class="flow-arrow">       │</span>  writes
+<span class="flow-arrow">       ▼</span>
+<span class="flow-node">  WorkloadRunner CR</span>
+<span class="flow-arrow">    ├─</span> <span class="flow-desc">spec.template      = serving.knative.dev/v1.Service</span>
+<span class="flow-arrow">    └─</span> <span class="flow-desc">spec.instructions  = networking.endpoints[], gpuOpt, storage, …</span>
+<span class="flow-arrow">       │</span>
+<span class="flow-arrow">       ▼</span>
+<span class="flow-node">  [ anyworkload-controller ]</span>  <span class="flow-desc">applies template, runs plugins</span>
+<span class="flow-arrow">       │</span>
+<span class="flow-arrow">       ▼</span>
+<span class="flow-node">  Knative Service</span>  <span class="flow-arrow">──</span>  <span class="flow-node">Configuration</span>  <span class="flow-arrow">──</span>  <span class="flow-node">Revision(s)</span>  <span class="flow-arrow">──</span>  <span class="flow-node">Pods</span>
+<span class="flow-arrow">                                                              ▲ OAuth2-proxy sidecar (composed into template by CP)</span>
+    </pre>
+  </div>
+</div>
+
+<!-- 5: Karta for Knative -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Already ships</h3>
+    <h2>Karta for the Knative Service</h2>
+    <pre style="font-size:13px;">
+<span style="color:var(--text-dim);">// control-plane/workloads/pkg/database/go_migrations/ri/source/knative.go:21</span>
+StructureDefinition: {
+  RootComponent: {
+    Name: <span style="color:#f0a030;">"knativeservice"</span>,
+    Kind: { <span style="color:var(--nvidia-green);">serving.knative.dev/v1.Service</span> },
+    StatusDefinition: { Ready / RoutesReady / ConfigurationsReady },
+  },
+  AdditionalChildKinds: [ { apps/v1.Deployment } ],
+  ChildComponents: [{
+    Name: <span style="color:#f0a030;">"revision"</span>,
+    Kind: { serving.knative.dev/v1.Revision },
+    OwnerRef: "knativeservice",
+    SpecDefinition: { <span style="color:var(--nvidia-green);">PodTemplateSpecPath: ".spec.template"</span> },
+    ScaleDefinition: {
+      MinReplicasPath: '.spec.template.metadata.annotations["autoscaling.knative.dev/min-scale"] // 1',
+      MaxReplicasPath: '.spec.template.metadata.annotations["autoscaling.knative.dev/max-scale"]',
+    },
+  }],
+},
+Instructions: { GangScheduling: <span style="color:var(--text-dim);">// revision pods grouped by serving.knative.dev/revision label</span> },</pre>
+    <div class="quote" style="margin-top:16px; font-size:17px;">
+      <strong>No Karta work for this migration.</strong> The Karta uses whole-template <code>PodTemplateSpecPath</code> (not fragmented). Anything it doesn't expose is the composer's / builder's problem — write straight into <code>spec.template</code>. Same rule for the LWS Karta in DistInfW.
+    </div>
+  </div>
+</div>
+
+<!-- 6: WLR shape -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>What the composer emits</h3>
+    <h2>The WorkloadRunner CR</h2>
+    <pre style="font-size:13px;">
+apiVersion: run.ai/v1alpha1
+kind: WorkloadRunner
+metadata: { name: my-llm, namespace: runai-team-a }
+spec:
+  template:
+    apiVersion: serving.knative.dev/v1
+    kind: Service
+    spec:
+      template:
+        metadata:
+          annotations:
+            <span style="color:var(--nvidia-green);">autoscaling.knative.dev/metric: rps</span>
+            <span style="color:var(--nvidia-green);">autoscaling.knative.dev/target: "100"</span>
+            <span style="color:var(--nvidia-green);">autoscaling.knative.dev/min-scale: "0"</span>
+        spec:
+          containers:
+          <span style="color:var(--text-dim);"># CP composer bakes OAuth2-proxy sidecar HERE when auth is on:</span>
+          - <span style="color:#f0a030;">name: oauth2-proxy</span>                          <span style="color:var(--text-dim);"># port-bearing 4180 → Knative routes here</span>
+            ports: [{ containerPort: 4180 }]
+          - name: model
+            image: my-llm:latest
+            ports: [{ containerPort: 8080 }]            <span style="color:var(--text-dim);"># user container — NOT port-bearing</span>
+          containerConcurrency: 0      <span style="color:var(--text-dim);"># concurrencyHardLimit</span>
+          timeoutSeconds: 300          <span style="color:var(--text-dim);"># requestTimeoutSeconds</span>
+  instructions:
+    networking:                                            <span style="color:var(--text-dim);"># network plugin: Service + Ingress only</span>
+      endpoints:
+      - services: [{ ref: { name: my-llm, port: 80 } }]    <span style="color:var(--text-dim);"># Knative auto-Service (→ 4180)</span>
+        externalAccess: { ingress: { ... } }
+    </pre>
+  </div>
+</div>
+
+<!-- 7: Section divider — Part 2 -->
+<div class="slide">
+  <div class="slide-content part-divider">
+    <div class="part-number">2</div>
+    <h2>Field Mapping</h2>
+    <p class="subtitle">~75 Inference API fields → WLR template + instructions</p>
+  </div>
+</div>
+
+<!-- 8: Field-mapping overview -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Coverage · 75 active rows</h3>
+    <h2>Field-mapping summary</h2>
+    <table style="font-size:15px;">
+      <tr><th style="width:200px;">API group</th><th style="width:60px;">Count</th><th>Mostly</th></tr>
+      <tr><td><strong>General</strong></td><td>14</td><td>image / command / args / labels / annotations / tolerations / probes → ksvc pod-template direct</td></tr>
+      <tr><td><strong><code>compute.*</code></strong></td><td>12</td><td>cpu/memory passthrough · fractional GPU + gpu-memory → Run:ai annotations + RUNAI_GPU_MEMORY_LIMIT env</td></tr>
+      <tr><td><strong><code>security.*</code></strong></td><td>10</td><td>securityContext + <span class="status-redirect">hostNetwork paired with dnsPolicy</span></td></tr>
+      <tr><td><strong><code>autoscaling.*</code></strong></td><td>10</td><td>translate → <code>autoscaling.knative.dev/*</code> annotations + <code>containerConcurrency</code></td></tr>
+      <tr><td><strong><code>storage.*</code></strong></td><td>8</td><td>volumes/mounts · 2 plugin-owned (pvc, git) · 1 deferred (dataVolume)</td></tr>
+      <tr><td><strong><code>servingPort.*</code></strong></td><td>6</td><td><span class="status-denied">special — networking endpoint + CP-composed sidecar</span></td></tr>
+      <tr><td><strong>Scheduling</strong></td><td>6</td><td>priorityClass / preemptibility / nodeType / nodePools / affinity</td></tr>
+      <tr><td><strong>Auto-injected</strong></td><td>3</td><td>schedulerName · enableServiceLinks · runai workload labels</td></tr>
+      <tr><td><strong><code>servingConfiguration.*</code></strong></td><td>2</td><td>request/init timeouts → ksvc <code>timeoutSeconds</code> + progress-deadline annotation</td></tr>
+      <tr><td><strong><code>ports[]</code></strong></td><td>1</td><td><span class="status-denied">special — networking plugin only (Knative single-port)</span></td></tr>
+      <tr><td><strong><code>exposedUrls[]</code></strong></td><td>1</td><td><span class="status-denied">special — multi-endpoint, sidecar per URL</span></td></tr>
+      <tr><td><strong>Label trigger (NIM)</strong></td><td>1</td><td><span class="status-denied">special — synth metrics endpoint</span></td></tr>
+      <tr><td><strong>Plugin-owned (per-user creds)</strong></td><td>1</td><td>personal-credentials plugin synth at admission</td></tr>
+    </table>
+    <p style="color:var(--text-dim); font-size:15px; margin-top:6px;">
+      Full filterable table → <code>infw-fields.html</code> (filters: group / difficulty / special-only / plugin-only / search). Plus 5 rows in &quot;Fields not in use&quot; (composer accepts and ignores).
+    </p>
+  </div>
+</div>
+
+<!-- 8.5: Worked examples · part 1 -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Worked examples · part 1</h3>
+    <h2>From the field-mapping table</h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:8px;">
+
+      <div class="col" style="padding:14px;">
+        <h4 style="font-size:14px; margin-bottom:6px;">General · <code>createHomeDir</code></h4>
+        <pre style="font-size:10.5px; line-height:1.45; margin:0;"><span style="color:var(--text-dim);"># API request body</span>
+{
+  "createHomeDir": true,
+  "security": { "runAsUid": 1001 }
+}
+
+<span style="color:var(--runai-purple);"># WLR</span>
+containers:
+- env: [{ name: HOME, value: /home/runai-1001 }]
+  volumeMounts: [{ name: home, mountPath: /home/runai-1001 }]
+volumes: [{ name: home, emptyDir: {} }]</pre>
+        <p style="font-size:12px; color:var(--text-dim); margin-top:6px; line-height:1.4;">
+          One flag → <strong>3 correlated</strong> pod-spec edits: volume + mount + <code>HOME</code> env.
+        </p>
+      </div>
+
+      <div class="col" style="padding:14px;">
+        <h4 style="font-size:14px; margin-bottom:6px;">Compute · <code>gpuPortionRequest</code> (fractional)</h4>
+        <pre style="font-size:10.5px; line-height:1.45; margin:0;"><span style="color:var(--text-dim);"># API request body</span>
+{
+  "compute": { "gpuPortionRequest": 0.5 }
+}
+
+<span style="color:var(--runai-purple);"># WLR</span>
+spec.template:
+  metadata.annotations:
+    <span style="color:var(--nvidia-green);">gpu-fraction: '0.5'</span>     <span style="color:var(--text-dim);"># Run:ai-specific</span>
+  spec.containers:
+  - name: model
+    <span style="color:var(--text-dim);"># NO nvidia.com/gpu — fractioner binds the device</span></pre>
+        <p style="font-size:12px; color:var(--text-dim); margin-top:6px; line-height:1.4;">
+          Fractional GPU is a Run:ai annotation, <strong>not</strong> a k8s resource limit.
+        </p>
+      </div>
+
+      <div class="col" style="padding:14px;">
+        <h4 style="font-size:14px; margin-bottom:6px;">Scheduling · <code>nodePools[]</code></h4>
+        <pre style="font-size:10.5px; line-height:1.45; margin:0;"><span style="color:var(--text-dim);"># API request body</span>
+{
+  "nodePools": ["gpu-pool-a", "gpu-pool-b"]
+}
+
+<span style="color:var(--runai-purple);"># WLR</span>
+pod.spec.affinity.nodeAffinity:
+  <span style="color:var(--nvidia-green);">preferredDuringScheduling...:</span>      <span style="color:var(--text-dim);"># ordered preference</span>
+  - { weight: 2, key: run.ai/nodepool, values: [gpu-pool-a] }
+  - { weight: 1, key: run.ai/nodepool, values: [gpu-pool-b] }</pre>
+        <p style="font-size:12px; color:var(--text-dim); margin-top:6px; line-height:1.4;">
+          <strong>Preferred</strong>, not required — input order = priority via decreasing weight.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 8.6: Worked examples · part 2 -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Worked examples · part 2</h3>
+    <h2>From the field-mapping table</h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:8px;">
+
+      <div class="col" style="padding:14px; border-color: var(--runai-purple);">
+        <h4 style="font-size:14px; margin-bottom:6px;">servingPort · port + auth</h4>
+        <pre style="font-size:10.5px; line-height:1.45; margin:0;"><span style="color:var(--text-dim);"># API request body</span>
+{
+  "servingPort": {
+    "container": 8080,
+    "authorizationType": "authorizedUsersOrGroups",
+    "authorizedUsers": ["alice@x.com"]
+  }
+}
+
+<span style="color:var(--runai-purple);"># WLR</span>
+spec.template.spec.template.spec.containers:            <span style="color:var(--text-dim);"># CP composer bakes sidecar here</span>
+- <span style="color:#f0a030;">name: oauth2-proxy</span>, ports: [{ containerPort: 4180 }]    <span style="color:var(--text-dim);"># port-bearing</span>
+- name: model, ports: [{ containerPort: 8080 }]
+instructions.networking.endpoints:                       <span style="color:var(--text-dim);"># network plugin only</span>
+- services: [{ <span style="color:#f0a030;">ref</span>: { name: my-llm, port: 80 } }]</pre>
+        <p style="font-size:12px; color:var(--text-dim); margin-top:6px; line-height:1.4;">
+          Composed-in sidecar becomes port-bearing — <strong>no new <code>corev1.Service</code></strong>. Networking plugin is unaware of the sidecar.
+        </p>
+      </div>
+
+      <div class="col" style="padding:14px;">
+        <h4 style="font-size:14px; margin-bottom:6px;">autoscaling · annotations + 1 spec field</h4>
+        <pre style="font-size:10.5px; line-height:1.45; margin:0;"><span style="color:var(--text-dim);"># API request body</span>
+{
+  "autoscaling": {
+    "metric": "throughput",
+    "metricThreshold": 100,
+    "concurrencyHardLimit": 32
+  }
+}
+
+<span style="color:var(--runai-purple);"># WLR</span>
+spec.template:
+  metadata.annotations:
+    <span style="color:var(--nvidia-green);">autoscaling.knative.dev/metric:</span> rps    <span style="color:var(--text-dim);"># enum rename</span>
+    <span style="color:var(--nvidia-green);">autoscaling.knative.dev/target:</span> '100'
+  spec.<span style="color:#f0a030;">containerConcurrency: 32</span>           <span style="color:var(--text-dim);"># direct field</span></pre>
+        <p style="font-size:12px; color:var(--text-dim); margin-top:6px; line-height:1.4;">
+          11/12 fields → stringified annotations. <code>concurrencyHardLimit</code> is the lone first-class spec field.
+        </p>
+      </div>
+
+      <div class="col" style="padding:14px;">
+        <h4 style="font-size:14px; margin-bottom:6px;">Auth · vocab mapping</h4>
+        <pre style="font-size:10.5px; line-height:1.45; margin:0;"><span style="color:var(--text-dim);"># API request body</span>
+{
+  "servingPort": {
+    "container": 8080,
+    "authorizationType": <span style="color:#f0a030;">"authorizedUsersOrGroups"</span>,
+    "authorizedUsers": ["alice@x.com", "bob@x.com"]
+  }
+}
+
+<span style="color:var(--runai-purple);"># WLR — chosen by which list is populated</span>
+endpoints[0].auth:
+  authorizationType: <span style="color:var(--nvidia-green);">authorizedUsers</span>     <span style="color:var(--text-dim);"># users-list set</span>
+  authorizedUsers: [alice@x.com, bob@x.com]</pre>
+        <p style="font-size:12px; color:var(--text-dim); margin-top:6px; line-height:1.4;">
+          When source is <code>authorizedUsersOrGroups</code>, the WLR target is chosen by which list is set.
+        </p>
+      </div>
+
+      <div class="col" style="padding:14px;">
+        <h4 style="font-size:14px; margin-bottom:6px;">Label trigger · NIM</h4>
+        <pre style="font-size:10.5px; line-height:1.45; margin:0;"><span style="color:var(--text-dim);"># API request body</span>
+{
+  "labels": [
+    { "name": <span style="color:#f0a030;">"runai.nim/workload"</span>, "value": "true" }
+  ]
+}
+
+<span style="color:var(--runai-purple);"># WLR — TWO effects from the one label</span>
+spec.template.spec.template.metadata.labels:
+  runai.nim/workload: 'true'              <span style="color:var(--text-dim);"># propagated to pod</span>
+instructions.networking.endpoints:
+- name: metrics                           <span style="color:var(--text-dim);"># extra endpoint</span>
+  services: [{ create: { ports: [{ port: 8000 }] } }]</pre>
+        <p style="font-size:12px; color:var(--text-dim); margin-top:6px; line-height:1.4;">
+          Label triggers <strong>two</strong> things: pod-label propagation + extra metrics endpoint (no auth, no Ingress).
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 9: Auth vocab -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Auth Translation</h3>
+    <h2>Vocabulary mapping</h2>
+    <table>
+      <tr><th>API <code>servingPort.authorizationType</code></th><th>WLR <code>auth.authorizationType</code></th><th>WLR list field</th></tr>
+      <tr><td><code>public</code></td><td>— <span class="status-redirect">(omit the auth block)</span></td><td>—</td></tr>
+      <tr><td><code>authenticatedUsers</code></td><td><code>authenticatedUsers</code></td><td>—</td></tr>
+      <tr><td><code>authorizedUsersOrGroups</code> + <code>authorizedUsers[]</code></td><td><code>authorizedUsers</code></td><td><code>auth.authorizedUsers</code></td></tr>
+      <tr><td><code>authorizedUsersOrGroups</code> + <code>authorizedGroups[]</code></td><td><code>authorizedGroups</code></td><td><code>auth.authorizedGroups</code></td></tr>
+    </table>
+    <div class="quote" style="margin-top:24px;">
+      Source: <code>servingPort.authorizationType</code> + <code>servingPort.authorizedUsers[]</code> / <code>servingPort.authorizedGroups[]</code> on the Inference API DTO (<code>model_serving_port.go:26-30</code>). Submitting both lists under <code>authorizedUsersOrGroups</code> → CP validation error.
+    </div>
+  </div>
+</div>
+
+<!-- 10: Section divider — Part 3 -->
+<div class="slide">
+  <div class="slide-content part-divider">
+    <div class="part-number">3</div>
+    <h2>Scenarios</h2>
+    <p class="subtitle">Today vs new path — basic · auth · NIM · tools</p>
+  </div>
+</div>
+
+<!-- 11: Scenario 1 — basic -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Scenario 1</h3>
+    <h2>Basic InfW · no auth · no tools · no NIM</h2>
+    <div class="fdiag">
+      <div class="fnode external">external</div>
+      <div class="farrow">▶</div>
+      <div class="fnode">Ingress</div>
+      <div class="farrow">▶</div>
+      <div class="fnode">ksvc auto-Service</div>
+      <div class="farrow">▶</div>
+      <div class="fnode user">user container</div>
+    </div>
+    <div class="columns" style="margin-top:12px;">
+      <div class="col">
+        <h4>Today (legacy controller)</h4>
+        <ul style="font-size:16px;">
+          <li>KnativeBuilder → Knative Service</li>
+          <li>Auto-Service routes to container</li>
+          <li>Ingress / Route built directly</li>
+        </ul>
+      </div>
+      <div class="col" style="border-color: var(--nvidia-green);">
+        <h4>WLR emitted by composer</h4>
+        <pre style="font-size:12px; line-height:1.5; margin:0;">spec:
+  <span style="color:var(--nvidia-green);">template:</span>
+    apiVersion: serving.knative.dev/v1
+    kind: Service
+    spec.template.spec.containers: [{ image: my-llm }]
+  <span style="color:var(--nvidia-green);">instructions.networking.endpoints:</span>
+  - services: [{ ref: { name: my-llm, port: 8080 } }]
+    externalAccess: { ingress: { rules: [...] } }
+    <span style="color:var(--text-dim);"># no auth block</span></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 12: Scenario 2 — auth -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Scenario 2</h3>
+    <h2>InfW + serving-port auth (sidecar composed by CP)</h2>
+    <div class="fdiag">
+      <div class="fnode external">external</div>
+      <div class="farrow">▶</div>
+      <div class="fnode">Ingress</div>
+      <div class="farrow">▶</div>
+      <div class="fnode">ksvc auto-Service</div>
+      <div class="farrow">▶</div>
+      <div class="fnode sidecar">OAuth2-proxy sidecar</div>
+      <div class="farrow">▶</div>
+      <div class="fnode user">user container</div>
+    </div>
+    <div class="columns" style="margin-top:12px;">
+      <div class="col">
+        <h4>Today</h4>
+        <ul style="font-size:15px;">
+          <li>Sidecar made port-bearing (<code>utils.go:458-481</code>)</li>
+          <li>Auto-Service routes <em>through</em> sidecar</li>
+          <li><strong>No new <code>corev1.Service</code></strong></li>
+        </ul>
+      </div>
+      <div class="col" style="border-color: var(--nvidia-green);">
+        <h4>WLR emitted by composer</h4>
+        <pre style="font-size:11.5px; line-height:1.5; margin:0;">spec:
+  template:
+    kind: Service                                <span style="color:var(--text-dim);"># Knative Service</span>
+    spec.template.spec.containers:               <span style="color:var(--text-dim);"># CP composer bakes:</span>
+    - <span style="color:#f0a030;">name: oauth2-proxy</span>                         <span style="color:var(--text-dim);"># port-bearing 4180</span>
+    - name: model, ports: [{ containerPort: 8080 }]
+  <span style="color:var(--nvidia-green);">instructions.networking.endpoints:</span>           <span style="color:var(--text-dim);"># network plugin only</span>
+  - services: [{ ref: { name: my-llm, port: 80 } }]
+    externalAccess: { ingress: { ... } }
+<span style="color:var(--text-dim);"># Composed-in sidecar is port-bearing → Knative routes through it.</span>
+<span style="color:var(--text-dim);"># Networking plugin doesn't know about the sidecar.</span></pre>
+      </div>
+    </div>
+    <p style="color: var(--runai-purple); font-size:15px; margin-top:8px;">
+      ⚠ Blocked on Liran's CP composer design landing.
+    </p>
+  </div>
+</div>
+
+<!-- 13: Scenario 3 — NIM -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Scenario 3</h3>
+    <h2>InfW + NIM (label-triggered)</h2>
+    <div class="fdiag stacked">
+      <div class="fdiag-row">
+        <span class="fdiag-label">serving</span>
+        <div class="fnode external">external</div>
+        <div class="farrow">▶</div>
+        <div class="fnode">Ingress</div>
+        <div class="farrow">▶</div>
+        <div class="fnode">ksvc auto-Service</div>
+        <div class="farrow">▶</div>
+        <div class="fnode sidecar optional">sidecar?</div>
+        <div class="farrow">▶</div>
+        <div class="fnode user">user container</div>
+      </div>
+      <div class="fdiag-row">
+        <span class="fdiag-label">metrics</span>
+        <div class="fnode external">Prometheus</div>
+        <div class="farrow">▶</div>
+        <div class="fnode metrics">metrics Service</div>
+        <div class="farrow">▶</div>
+        <div class="fnode user">user :8000</div>
+      </div>
+    </div>
+    <ul style="margin-top:10px; font-size:14px; line-height:1.5;">
+      <li><strong>Trigger:</strong> <code>runai.nim/workload=true</code> label — <em>not</em> a spec field.</li>
+      <li><strong>Why a label?</strong> NIM is a pure overlay on top of InfW — metrics on an unauthenticated port, NIM-specific service labels for Prometheus discovery, label propagated to the pod for <code>ServiceMonitor</code> matching. Keeping it label-driven lets the InfW spec stay stable while NIM behaviour is opted-in.</li>
+      <li><strong>How NIM metrics work:</strong> NIM containers expose Prometheus metrics on <code>:8000</code>. Composer emits a dedicated ClusterIP <code>&lt;workload&gt;-metrics</code> Service carrying <code>runai.nim/workload=true</code> + <code>runai.nim/workload-metrics-service=true</code> labels. A cluster-wide <code>ServiceMonitor</code> selects those labels and scrapes the pods directly — bypassing the OAuth2-proxy on the serving path. No auth, no Ingress. (Legacy: <code>BuildNIMMetricsService</code> at <code>utils.go:562-617</code>.)</li>
+    </ul>
+    <pre style="font-size:12px; line-height:1.5; margin-top:8px;">spec:
+  template:
+    spec.template.metadata.labels:
+      <span style="color:#f0a030;">runai.nim/workload: 'true'</span>     <span style="color:var(--text-dim);"># propagated from WLR labels</span>
+    spec.template.spec.containers:                <span style="color:var(--text-dim);"># CP composer bakes sidecar (auth on):</span>
+    - <span style="color:#f0a030;">name: oauth2-proxy</span>                          <span style="color:var(--text-dim);"># port-bearing 4180 for serving</span>
+    - name: model
+  <span style="color:var(--nvidia-green);">instructions.networking.endpoints:</span>
+  - name: serving
+    services: [{ ref: { name: my-llm, port: 80 } }]    <span style="color:var(--text-dim);"># → 4180 (proxy) under auth</span>
+    externalAccess: { ingress: { ... } }
+  - name: metrics                                      <span style="color:var(--text-dim);"># NIM-only extra endpoint</span>
+    services: [{ create: { spec: { ports: [{ port: 8000, name: metrics }] } } }]
+    <span style="color:var(--text-dim);"># NO externalAccess, NO sidecar — Prometheus scrape only</span></pre>
+  </div>
+</div>
+
+<!-- 14: Scenario 4 — tools -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Scenario 4 · the hard one</h3>
+    <h2>InfW + Tools (<code>exposedUrls</code>, N URLs)</h2>
+    <div class="fdiag stacked">
+      <div class="fdiag-row">
+        <span class="fdiag-label">jupyter</span>
+        <div class="fnode external">external</div>
+        <div class="farrow">▶</div>
+        <div class="fnode">Ingress</div>
+        <div class="farrow">▶</div>
+        <div class="fnode">ksvc :8888</div>
+        <div class="farrow">▶</div>
+        <div class="fnode sidecar">sidecar-1</div>
+        <div class="farrow">▶</div>
+        <div class="fnode user">user container</div>
+      </div>
+      <div class="fdiag-row">
+        <span class="fdiag-label">tensorboard</span>
+        <div class="fnode external">external</div>
+        <div class="farrow">▶</div>
+        <div class="fnode">Ingress</div>
+        <div class="farrow">▶</div>
+        <div class="fnode">ksvc :6006</div>
+        <div class="farrow">▶</div>
+        <div class="fnode sidecar">sidecar-2</div>
+        <div class="farrow">▶</div>
+        <div class="fnode user">user container</div>
+      </div>
+    </div>
+    <ul style="margin-top:8px; font-size:15px;">
+      <li><strong>Each <code>exposedUrls[]</code> entry has its own auth</strong> — own port, own cookie, own users/groups list.</li>
+      <li>CP composer bakes <strong>one OAuth2-proxy sidecar per URL</strong> into the Knative pod template.</li>
+    </ul>
+    <pre style="font-size:12px; line-height:1.5; margin-top:8px;">spec:
+  template.spec.template.spec.containers:        <span style="color:var(--text-dim);"># CP composer bakes one sidecar per URL:</span>
+  - <span style="color:#f0a030;">name: oauth2-proxy-jupyter</span>      <span style="color:var(--text-dim);"># port 4180, --upstream=http://localhost:8888</span>
+  - <span style="color:#f0a030;">name: oauth2-proxy-tensorboard</span>  <span style="color:var(--text-dim);"># port 4181, --upstream=http://localhost:6006</span>
+  - name: model
+  <span style="color:var(--nvidia-green);">instructions.networking.endpoints:</span>    <span style="color:var(--text-dim);"># network plugin only</span>
+  - name: jupyter
+    services: [{ ref: { name: my-llm, port: 4180 } }]
+    externalAccess: { ingress: { } }
+  - name: tensorboard
+    services: [{ ref: { name: my-llm, port: 4181 } }]
+    externalAccess: { ingress: { } }</pre>
+    <p style="color: var(--runai-purple); font-size:14px; margin-top:6px;">
+      ⚠ Hard-blocked on PR #19525 (multi-endpoint) <strong>and</strong> Liran's CP composer design.
+    </p>
+  </div>
+</div>
+
+<!-- 15: Scenario 5 — additional ports[] (Knative single-port constraint) -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Scenario 5 · multi-port InfW</h3>
+    <h2>Additional ports — networking plugin only</h2>
+    <div class="fdiag stacked">
+      <div class="fdiag-row">
+        <span class="fdiag-label">serving (:8080)</span>
+        <div class="fnode external">external</div>
+        <div class="farrow">▶</div>
+        <div class="fnode">Ingress</div>
+        <div class="farrow">▶</div>
+        <div class="fnode">ksvc auto-Service</div>
+        <div class="farrow">▶</div>
+        <div class="fnode sidecar optional">sidecar?</div>
+        <div class="farrow">▶</div>
+        <div class="fnode user">user container :8080</div>
+      </div>
+      <div class="fdiag-row">
+        <span class="fdiag-label">ports[0] :9090</span>
+        <div class="fnode external">consumer</div>
+        <div class="farrow">▶</div>
+        <div class="fnode metrics">plugin Service (ClusterIP)</div>
+        <div class="farrow">▶</div>
+        <div class="fnode user">user container :9090</div>
+      </div>
+      <div class="fdiag-row">
+        <span class="fdiag-label">ports[1] :7000</span>
+        <div class="fnode external">external</div>
+        <div class="farrow">▶</div>
+        <div class="fnode metrics">plugin Service (NodePort :30700)</div>
+        <div class="farrow">▶</div>
+        <div class="fnode user">user container :7000</div>
+      </div>
+    </div>
+    <ul style="margin-top:10px; font-size:14px; line-height:1.5;">
+      <li><strong>Knative pod-template allows exactly one <code>containerPort</code>.</strong> That slot is reserved for the <code>servingPort</code>. Every <code>ports[]</code> entry must therefore route through the networking plugin only — <strong>NOT</strong> declared on <code>containers[0].ports[]</code>.</li>
+      <li><strong>Composer behaviour:</strong> one networking endpoint per <code>ports[]</code> entry, with <code>services[].create</code> using the requested <code>serviceType</code> (ClusterIP / NodePort / LoadBalancer). The plugin's Service selects the Knative pod by its standard runai/workload label.</li>
+      <li><strong>Behavior change from legacy:</strong> legacy InfW silently drops non-serving ports (<code>utils.go:528-536</code>). The new path honors them — that's what the user asked for by setting <code>serviceType</code>.</li>
+    </ul>
+    <pre style="font-size:12px; line-height:1.5; margin-top:8px;"><span style="color:var(--text-dim);"># API request body</span>
+{
+  "servingPort": { "container": 8080 },
+  "ports": [
+    { "container": 9090, "serviceType": "ClusterIP", "name": "metrics" },
+    { "container": 7000, "serviceType": "NodePort", "external": 30700, "name": "admin" }
+  ]
+}
+
+<span style="color:var(--runai-purple);"># WLR — only servingPort goes on the Knative pod template</span>
+spec.template.spec.template.spec.containers:
+<span style="color:var(--text-dim);"># CP composer bakes the OAuth2-proxy sidecar here when auth is on:</span>
+<span style="color:var(--text-dim);"># - name: oauth2-proxy, port-bearing 4180</span>
+- name: model
+  ports: [{ containerPort: 8080 }]                <span style="color:var(--text-dim);"># ONLY the serving port on the user container</span>
+spec.instructions.networking.endpoints:
+- services: [{ ref: { name: my-llm, port: 80 } }]                            <span style="color:var(--text-dim);"># serving (→ 4180 under auth)</span>
+  externalAccess: { ingress: { ... } }
+- name: metrics                                                              <span style="color:var(--text-dim);"># ports[0]</span>
+  services:
+  - create:
+      spec: { type: ClusterIP, ports: [{ port: 9090, targetPort: 9090 }] }
+- name: admin                                                                <span style="color:var(--text-dim);"># ports[1]</span>
+  services:
+  - create:
+      spec: { type: NodePort, ports: [{ port: 7000, targetPort: 7000, nodePort: 30700 }] }</pre>
+  </div>
+</div>
+
+<!-- 16: Section divider — Part 4 -->
+<div class="slide">
+  <div class="slide-content part-divider">
+    <div class="part-number">4</div>
+    <h2>Dependencies & Deliverables</h2>
+    <p class="subtitle">What we ship · what we depend on</p>
+  </div>
+</div>
+
+<!-- 17: Plugin handoff — networking plugin + CP composer feature -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>One plugin + one CP composer feature</h3>
+    <h2>Networking plugin + sidecar composition (CP)</h2>
+    <p style="font-size:15px; color: var(--text-dim); margin-bottom:12px;">
+      The composer drives the runtime networking plugin <em>and</em> bakes the OAuth2-proxy sidecar directly into the template's pod spec. <strong>There is no <code>InPod</code> mode in the networking plugin; there is no <code>instructions.initContainer.*</code> field on <code>WorkloadRunner</code>.</strong> Sidecar/init-container composition is a CP responsibility, not a runtime plugin.
+    </p>
+    <div class="columns">
+      <div class="col">
+        <h4>Networking plugin · runtime · what it does</h4>
+        <ul style="font-size:15px;">
+          <li>Creates <code>corev1.Service</code> (or refs the Knative auto-Service)</li>
+          <li>Creates <code>Ingress</code> / <code>Route</code> / <code>HTTPRoute</code></li>
+          <li><strong>Does not</strong> inject sidecars or know about auth</li>
+          <li>Blocker: <strong>PR #19525</strong> for multi-endpoint (<code>maxItems &gt; 1</code>) needed for tools</li>
+        </ul>
+      </div>
+      <div class="col" style="border-color: var(--runai-purple);">
+        <h4>CP composer feature · Liran's design · what it does</h4>
+        <ul style="font-size:15px;">
+          <li>Bakes the <strong>OAuth2-proxy sidecar</strong> directly into the Knative pod template's <code>containers[]</code> (port-bearing → Knative auto-Service routes through it)</li>
+          <li>Same feature also bakes <strong>git-sync</strong> + <strong>S3</strong> as init-containers into the template</li>
+          <li>No new field on <code>WorkloadRunner</code> — sidecar appears in the template's pod spec</li>
+          <li>Blocker: <strong>Liran's CP composer design</strong> — in review</li>
+        </ul>
+      </div>
+    </div>
+    <div class="quote" style="margin-top:18px; font-size:16px;">
+      <strong>Decision:</strong> hard-block on both. Networking plugin's <code>Standalone</code> mode (separate Deployment) is <strong>not</strong> a fallback for inference — it'd regress every existing InfW (Knative's auto-Service would still target the unprotected user container).
+    </div>
+  </div>
+</div>
+
+<!-- 18: Dependencies table -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Sibling work</h3>
+    <h2>Dependencies</h2>
+    <table style="font-size:15px;">
+      <tr><th>What</th><th>How it touches InfW</th></tr>
+      <tr><td>Sunset epic</td><td>Parent</td></tr>
+      <tr><td>Status / phase alignment</td><td>Phase mapping (status out of scope here)</td></tr>
+      <tr><td>TW/IW/RunaiJob CP→Batch</td><td>Sibling design; auth diverges (sidecar vs Deployment)</td></tr>
+      <tr><td>TW/IW/DW gap matrix</td><td>Generic field gaps tracked there</td></tr>
+      <tr><td>Personal Credentials Plugin</td><td>Owns <code>imagePullSecrets</code> + env-creds</td></tr>
+      <tr><td>Storage Plugin</td><td>Owns new-PVC lifecycle (<code>pvcs</code>, <code>dataVolumes</code>)</td></tr>
+      <tr><td><strong>CP composer feature</strong> · Liran (in review) — <em>not</em> a runtime plugin</td><td class="status-denied">Blocking — composer bakes OAuth2-proxy sidecar (+ git-sync, S3) directly into the template's pod spec</td></tr>
+      <tr><td>Networking redesign · Multi-Endpoint (<code>PR #19525</code>)</td><td class="status-denied">Blocking — needed for tools (multi-endpoint); no InPod mode</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- 19: Deliverables -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>What we ship</h3>
+    <h2>Deliverables for InfW migration</h2>
+    <ol>
+      <li><strong>CP composer</strong> — every InfW field → WLR template or instructions. Translation rules per <code>infw-fields.html</code>. Also owns anything the Karta doesn't surface — writes straight into <code>spec.template</code>.</li>
+      <li><strong>Knative-Service Karta</strong> — already ships (<code>BuildKNativeServiceV1</code>). No work here.</li>
+      <li><strong>Networking-plugin v2</strong> — multi-endpoint per PR #19525 (Service + Ingress; no sidecar / no InPod here).</li>
+      <li><strong>CP composer feature (Liran)</strong> — composer bakes OAuth2-proxy sidecar (+ git-sync, S3 init-containers) directly into the template's pod spec. <em>Not a runtime plugin.</em></li>
+      <li><strong>Composer networking behaviour</strong> — emit one endpoint per <code>exposedUrls[]</code> entry; <code>services[].ref</code> at Knative auto-Service for serving; emit metrics endpoint when NIM label is present.</li>
+      <li><strong>Validation</strong> — reject ambiguous <code>authorizedUsersOrGroups</code> (both users-list and groups-list set).</li>
+    </ol>
+  </div>
+</div>
+
+<!-- 20.5: Fields not in use -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Schema parity only</h3>
+    <h2>Fields not in use</h2>
+    <p style="font-size:15px; color: var(--text-dim); margin-bottom:12px;">
+      Inference API fields the composer <strong>accepts and ignores</strong>, or that are deprecated / internal.
+      Composer mirrors legacy: accept, ignore, no error.
+    </p>
+    <table style="font-size:14px;">
+      <tr><th style="width:130px;">Category</th><th>API field</th><th>Reason</th></tr>
+      <tr><td><span class="badge badge-green" style="color:#e04040; background:rgba(239,68,68,0.15);">DEAD</span></td><td><code>compute.extendedResources[]</code></td><td>Legacy InfW silently drops; no users have surfaced a need. Composer mirrors legacy.</td></tr>
+      <tr><td><span class="badge badge-green" style="color:#eab308; background:rgba(234,179,8,0.15);">DEPRECATED</span></td><td><code>autoscaling.initializationTimeoutSeconds</code></td><td>Marked DEPRECATED in the API model itself — use <code>servingConfiguration.initializationTimeoutSeconds</code>.</td></tr>
+      <tr><td><span class="badge badge-purple" style="color:#a0a0b0; background:rgba(154,166,201,0.15);">INTERNAL</span></td><td><code>compute.gpuRequestType</code></td><td>API-side validation enum (memory vs portion). Resolved before reaching the WLR.</td></tr>
+      <tr><td><span class="badge badge-purple" style="color:#a0a0b0; background:rgba(154,166,201,0.15);">INTERNAL</span></td><td><code>security.uidGidSource</code></td><td>API-side enum (fromIdpToken / fromTheImage / custom). API/composer resolves; WLR carries concrete uid/gid.</td></tr>
+      <tr><td><span class="badge badge-purple" style="color:#a0a0b0; background:rgba(154,166,201,0.15);">INTERNAL</span></td><td><em>(no s3 field on the API)</em></td><td>Legacy CRD has <code>storage.s3</code> (composed as init-container today); the API doesn't expose it.</td></tr>
+    </table>
+    <p style="font-size:13px; color: var(--text-dim); margin-top:12px;">
+      Legacy CRD-only fields (<code>usage</code>, <code>baseWorkload</code>, <code>name</code>/<code>namePrefix</code>, <code>migProfile</code>, <code>nodePool</code>, <code>ingressUrl</code>, <code>restartPolicy</code>, <code>autoDeletionTime…</code>, <code>terminationGracePeriod…</code>, <code>preemptionLimit</code>) can't reach the composer — they're not on the API surface.
+    </p>
+  </div>
+</div>
+
+<!-- 22: End -->
+<div class="slide">
+  <div class="slide-content part-divider">
+    <h2>Questions?</h2>
+    <p class="subtitle" style="margin-top:20px;">
+      Companion docs: <code>infw-fields.html</code> (filterable table) · <code>infw-to-workloadrunner.md</code> (full narrative)
+    </p>
+    <p class="subtitle" style="margin-top:10px;">
+      <span class="badge badge-purple">DistInfW deck next</span>
+    </p>
+  </div>
+</div>
+
+<script>
+  // ===== Theme toggle =====
+  (function () {
+    const KEY = 'infw-slides-theme';
+    const body = document.body;
+    const saved = localStorage.getItem(KEY);
+    if (saved === 'light' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+      body.classList.add('light');
+    }
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      body.classList.toggle('light');
+      localStorage.setItem(KEY, body.classList.contains('light') ? 'light' : 'dark');
+    });
+  })();
+
+  const slides = document.querySelectorAll('.slide');
+  const slideNum = document.getElementById('slideNum');
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    slideNum.textContent = `${current + 1} / ${slides.length}`;
+  }
+
+  const viewToggle = document.getElementById('viewToggle');
+  function setDocMode(on) {
+    document.body.classList.toggle('doc-mode', on);
+    viewToggle.setAttribute('aria-pressed', String(on));
+    if (on) {
+      slides.forEach(s => s.classList.add('active'));
+    } else {
+      slides.forEach((s, i) => s.classList.toggle('active', i === current));
+      window.scrollTo(0, 0);
+    }
+  }
+  viewToggle.addEventListener('click', () => {
+    setDocMode(!document.body.classList.contains('doc-mode'));
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.closest('input, textarea, [contenteditable="true"]')) return;
+    if (e.key === 'v' || e.key === 'V') {
+      e.preventDefault();
+      setDocMode(!document.body.classList.contains('doc-mode'));
+      return;
+    }
+    if (document.body.classList.contains('doc-mode')) return;
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      showSlide(current + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      showSlide(current - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      showSlide(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      showSlide(slides.length - 1);
+    }
+  });
+
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    if (document.body.classList.contains('doc-mode')) return;
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      diff > 0 ? showSlide(current + 1) : showSlide(current - 1);
+    }
+  });
+
+  showSlide(0);
+</script>
+
+</body>
+</html>

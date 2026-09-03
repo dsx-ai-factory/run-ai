@@ -1,0 +1,25 @@
+get:
+  summary: List cluster histories.
+  x-service: cluster-service
+  x-test-coverage:
+    - cluster-service/pkg/services/api_clusters_histories_service_test.go
+  operationId: get_clusters_histories
+  tags:
+  - Internal
+  x-no-authorization: true
+  x-internal: true
+  parameters:
+  - $ref: "../parameters/query/clusterIds.yaml"
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Clusters/ClusterHistories.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,29 @@
+get:
+  summary: Get cluster by id internal.
+  description: Retrieve cluster details by Universally Unique Identifier (UUID).
+  x-service: cluster-service
+  x-test-coverage:
+    - cluster-service/pkg/services/api_clusters_service_test.go
+  operationId: get_cluster_internal
+  x-no-authorization: true
+  tags:
+    - Clusters
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Clusters/DisplayedCluster.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

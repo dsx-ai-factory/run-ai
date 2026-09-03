@@ -1,0 +1,81 @@
+Dinfw:
+  leaderSpec:
+    environment:
+      items:
+        RUNAI_JOB_NAME:
+          value: ${RUNAI_JOB_NAME}
+        RUNAI_PROJECT:
+          value: ${RUNAI_PROJECT}
+    image:
+      value: leader-image:latest
+    labels:
+      items:
+        run.ai/control-plane-managed:
+          value: "true"
+  metadata: {}
+  spec:
+    preemptibility:
+      value: preemptible
+    priorityClassName:
+      value: very-high
+    replicas:
+      value: 1
+    servingPorts:
+      items:
+        serving-port:
+          value:
+            exposeExternally: true
+            port: 8080
+            protocol: http
+    username:
+      value: test
+    workers:
+      value: 1
+  status: {}
+  workerSpec:
+    environment:
+      items:
+        RUNAI_JOB_NAME:
+          value: ${RUNAI_JOB_NAME}
+        RUNAI_PROJECT:
+          value: ${RUNAI_PROJECT}
+    image:
+      value: worker-image:latest
+    labels:
+      items:
+        run.ai/control-plane-managed:
+          value: "true"
+JobSpec: {}
+MasterSpec: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections:
+    - authorizationType: public
+      connectionType: ServingPort
+      containerPort: 8080
+      correlationName: serving-port
+      name: ServingPort
+      toolType: custom
+    id: ""
+    name: Leader
+    replicaType: Leader
+  - connections: []
+    id: ""
+    name: Worker
+    replicaType: Worker
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: dinfw_preemptibility, Rules: , Type: DistributedInference'
+  images:
+  - leader-image:latest
+  - worker-image:latest
+  name: 'Value: dinfw_preemptibility, Rules: , Type: DistributedInference'
+  projectId: project-654-321
+  requestedPods:
+    number: 2
+  submittedBy: test
+  type: DistributedInference
+  version: v1alpha1

@@ -1,0 +1,9 @@
+description: specific fields to override in the data source.
+type: object
+nullable: true
+properties:
+  containerPath:
+    type: string
+    minLength: 1
+    example: /container/directory
+    nullable: true

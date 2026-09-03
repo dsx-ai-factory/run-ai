@@ -1,0 +1,15 @@
+{{- if .Values.metricsService.enabled }}
+{{- include "common.deployment" (list . .Values.metricsService .Values.metricsService.autoscaling .Values.metricsService.serviceAccount "control-plane.metricsService.deployment" ) }}
+{{- end }}
+
+{{- define "control-plane.metricsService.deployment" -}}
+{{- $top := first . }}
+spec:
+  template:
+    spec:
+      initContainers:
+        {{- include "awaitingPostgresReadinessContainer" . | nindent 8 }}
+        {{- include "common.initContainer" . | nindent 8 }}
+      containers:
+      - {{- include "common.container" . | nindent 8 }}
+  {{- end }}

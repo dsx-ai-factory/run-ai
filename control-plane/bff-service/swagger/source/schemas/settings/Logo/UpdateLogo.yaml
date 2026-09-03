@@ -1,0 +1,9 @@
+type: object
+required:
+- logo
+properties:
+  logo:
+    type: string
+    description: "Logo image as a base64-encoded string. Accepts PNG or SVG up to 128 KB. Send an empty string to reset the logo"
+example:
+  logo: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+V4nEAAAAASUVORK5CYII="

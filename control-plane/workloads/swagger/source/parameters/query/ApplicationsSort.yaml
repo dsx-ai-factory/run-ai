@@ -1,0 +1,6 @@
+name: sortBy
+in: query
+required: false
+description: Sort results by a parameter.
+schema:
+  $ref: '../../schemas/Applications/AIApplicationsSortFilterFields.yaml'

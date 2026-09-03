@@ -1,0 +1,8 @@
+type: object
+properties:
+  enabled:
+    type: boolean
+    nullable: true
+    description: Whether NIM models deployment is enabled
+example:
+  enabled: true

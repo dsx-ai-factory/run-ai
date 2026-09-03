@@ -1,0 +1,96 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+allOf:
+- nullable: true
+  properties:
+    annotations:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
+    args:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    autoDeletionTimeAfterCompletionSeconds:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+    backoffLimit:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+    category:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    command:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    completions:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+    compute:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/SupersetRulesAllOfCompute.yaml
+    createHomeDir:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/BooleanRules.yaml
+    environmentVariables:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
+    exposedUrls:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/connectivity/ExposedUrlsRules.yaml
+    image:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    imagePullPolicy:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/ImagePullPolicyRules.yaml
+    imagePullSecrets:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/ImagePullSecretsRules.yaml
+    labels:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
+    nodeAffinityRequired:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/ArbitraryRules.yaml
+    nodePools:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/ArrayRules.yaml
+    nodeType:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    parallelism:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+    podAffinity:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/PodAffinityRules.yaml
+    ports:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/connectivity/PortsRules.yaml
+    preemptibility:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/PreemptibilityRules.yaml
+    priorityClass:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    probes:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/ProbesRules.yaml
+    relatedUrls:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/connectivity/RelatedUrlsRules.yaml
+    restartPolicy:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/RestartPolicyRule.yaml
+    security:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/SupersetRulesAllOfSecurity.yaml
+    stdin:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/BooleanRules.yaml
+    storage:
+      nullable: true
+      properties:
+        configMapVolume:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/ConfigMapsRules.yaml
+        dataVolume:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/DataVolumesRules.yaml
+        emptyDirVolume:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/EmptyDirsRules.yaml
+        git:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/GitsRules.yaml
+        hostPath:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/HostPathsRules.yaml
+        nfs:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/NfssRules.yaml
+        pvc:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/PvcsRules.yaml
+        s3:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/S3sRules.yaml
+        secretVolume:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/SecretsRules.yaml
+      type: object
+    terminateAfterPreemption:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/BooleanRules.yaml
+    terminationGracePeriodSeconds:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+    tolerations:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/TolerationsRules.yaml
+    tty:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/BooleanRules.yaml
+    workingDir:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+  type: object

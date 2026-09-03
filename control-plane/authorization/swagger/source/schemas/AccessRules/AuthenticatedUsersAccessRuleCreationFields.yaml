@@ -1,0 +1,26 @@
+type: object
+description: The role and scope to grant to all authenticated users and service accounts.
+required:
+  - roleId
+  - scopeId
+  - scopeType
+properties:
+  roleId:
+    type: integer
+    format: int32
+    description: The ID of the role to assign.
+    example: 53142648
+  scopeId:
+    type: string
+    description: The unique identifier of the scope.
+    example: "a418ed33-9399-48c0-a890-122cadd13bfd"
+  scopeType:
+    type: string
+    description: The type of scope the access rule applies to.
+    enum:
+      - tenant
+      - cluster
+      - department
+      - project
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"

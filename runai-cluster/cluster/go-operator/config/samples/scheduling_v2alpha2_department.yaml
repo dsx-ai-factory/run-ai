@@ -1,0 +1,6 @@
+apiVersion: scheduling.run.ai/v2alpha2
+kind: Department
+metadata:
+  name: department-sample
+spec:
+  # TODO(user): Add fields here

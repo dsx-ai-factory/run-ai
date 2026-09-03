@@ -1,0 +1,15 @@
+properties:
+  workspace:
+    $ref: "../WorkspaceV2/WorkspacePolicyV2.yaml"
+  training:
+    $ref: "../TrainingV2/TrainingPolicyV2.yaml"
+  distributed:
+    $ref: "../DistributedV2/DistributedPolicyV2.yaml"
+  inference:
+    $ref: "../InferenceV2/InferencePolicyV2.yaml"
+  distributedInference:
+    $ref: "../DistributedInferenceV2/DistributedInferencePolicyV2.yaml"
+  nimService:
+    $ref: "../NimService/NimServicePolicy.yaml"
+nullable: true
+type: object

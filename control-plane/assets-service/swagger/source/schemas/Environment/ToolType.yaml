@@ -1,0 +1,15 @@
+description: Super set of Internal and External tool types.
+type: string
+minLength: 1
+enum:
+  - jupyter-notebook
+  - pycharm
+  - visual-studio-code
+  - tensorboard
+  - rstudio
+  - mlflow
+  - custom
+  - wandb
+  - matlab
+  - comet
+  - chatbot-ui

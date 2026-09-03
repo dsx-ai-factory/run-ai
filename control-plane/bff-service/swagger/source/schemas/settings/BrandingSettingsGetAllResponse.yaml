@@ -1,0 +1,5 @@
+type: object
+description: Aggregated response containing all branding settings configured for the tenant
+properties:
+  logo:
+    $ref: './Logo/GetLogo.yaml'

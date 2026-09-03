@@ -1,0 +1,3 @@
+allOf:
+  - $ref: "./TrainingTemplate.yaml"
+  - $ref: "../policy/TemplateComplianceInfo.yaml"

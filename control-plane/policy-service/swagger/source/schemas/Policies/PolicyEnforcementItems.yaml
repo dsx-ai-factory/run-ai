@@ -1,0 +1,26 @@
+type: object
+properties:
+  items:
+    type: object
+    description: >
+      Enforces the number of items produced by a field's itemSelector to fall
+      within the inclusive range [min, max]. At least one of `min`/`max`
+      must be specified. Applies only to fields that declare itemSelectors.
+    nullable: true
+    properties:
+      min:
+        description: Enforces the minimum number of items.
+        type: integer
+        format: int32
+        minimum: 0
+        nullable: true
+      max:
+        description: Enforces the maximum number of items.
+        type: integer
+        format: int32
+        minimum: 0
+        nullable: true
+example:
+  items:
+    min: 1
+    max: 5

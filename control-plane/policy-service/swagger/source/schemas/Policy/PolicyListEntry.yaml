@@ -1,0 +1,16 @@
+properties:
+  type:
+    $ref: "./PolicyType.yaml"
+  meta:
+    $ref: "./PolicyMeta.yaml"
+  status:
+    allOf:
+      - $ref: "../Sync/PolicySyncStatus.yaml"
+      - $ref: "./PolicyValidationStatus.yaml"
+  availability:
+    allOf:
+      - $ref: "../Policies/PolicyStatus.yaml"
+    nullable: true
+    type: object
+nullable: true
+type: object

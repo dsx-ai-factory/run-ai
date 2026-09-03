@@ -1,0 +1,6 @@
+description: The resource was not modified
+headers:
+  Location:
+    schema:
+      type: string
+      format: uri

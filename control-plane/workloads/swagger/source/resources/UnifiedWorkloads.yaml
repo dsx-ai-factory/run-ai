@@ -1,0 +1,35 @@
+post:
+  summary: Request unified workload information (internal for UI purposes)
+  description: Request unified workload and policy information
+  operationId: get_unified_workload
+  x-service: workloads
+  x-internal: true
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/distributed_service_test.go
+  x-authorize:
+    resource-type: workloads
+    action: read
+  tags:
+    - Unified
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Crud/Unified/UnifiedWorkloadRequest.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Crud/Unified/UnifiedWorkload.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

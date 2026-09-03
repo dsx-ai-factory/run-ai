@@ -1,0 +1,14 @@
+{
+  "service_name": "runtime-rules",
+  "artifact_type": "container",
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "notifications": {
+    "slack": {
+      "mention": "@fox"
+    }
+  },
+  "jira": {
+    "team_name": "Fox Team"
+  }
+}

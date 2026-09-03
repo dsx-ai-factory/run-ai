@@ -1,0 +1,36 @@
+get:
+  summary: Get a list of nodes.
+  description: Retrieve a list of nodes from all the Kubernetes clusters of the tenant.
+  x-test-coverage:
+    - control-plane/cluster-service/pkg/test/node_db_test.go
+  operationId: get_tenant_nodes
+  x-service: cluster-service
+  x-authorize:
+    resource-type: nodes
+    action: read
+  tags:
+    - Nodes
+  parameters:
+    - $ref: "../parameters/query/NodesFilter.yaml"
+    - $ref: "../parameters/query/NodesSortBy.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Search.yaml"
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Nodes/Nodes.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

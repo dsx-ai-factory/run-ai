@@ -1,0 +1,51 @@
+get:
+  summary: Count workload structure elements.
+  description: >
+    Returns the total count of structure elements reported by the cluster and
+    the count of elements stored in the database for the given workload.
+    Requires cluster version >= 2.25.
+  operationId: count_workload_elements
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/workload_elements_test.go
+  x-authorize:
+    resource-type: workloads
+    action: read
+    resource-id: workloadId
+  tags:
+    - Workloads
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - totalElementsCount
+              - storedElementsCount
+            properties:
+              storedElementsCount:
+                type: integer
+                format: int32
+                minimum: 0
+                description: The number of structure elements stored for this workload. When truncation occurs, this will be less than totalElementsCount.
+              totalElementsCount:
+                type: integer
+                format: int32
+                minimum: 0
+                description: The total number of structure elements that exist for this workload. When no truncation occurred, this equals storedElementsCount.
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

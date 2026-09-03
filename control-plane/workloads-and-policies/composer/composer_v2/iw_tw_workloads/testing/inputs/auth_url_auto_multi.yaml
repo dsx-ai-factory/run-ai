@@ -1,0 +1,10 @@
+image: ubuntu
+exposedUrls:
+  - name: first
+    container: 8080
+    authorizationType: authenticatedUsers
+  - name: second
+    container: 9090
+    authorizationType: authorizedUsers
+    authorizedUsers:
+      - alice@example.com

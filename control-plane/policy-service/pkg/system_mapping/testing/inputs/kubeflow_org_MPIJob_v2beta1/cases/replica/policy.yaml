@@ -1,0 +1,40 @@
+description: |
+  Layer 3 case "replica" for kubeflow.org/MPIJob/v1. SETs replica-level
+  fields (replicas, restartPolicy) and pod metadata for each replica type.
+effectiveRules:
+  # ----- Launcher replica spec -----
+  - field: replicas
+    specSelector: launcherReplicaSpec
+    enforcements: [{ set: { value: 2 } }]
+  - field: restartPolicy
+    specSelector: launcherReplicaSpec
+    enforcements: [{ set: { value: OnFailure } }]
+
+  # ----- Launcher pod metadata -----
+  - field: labels
+    specSelector: launcherPodMetadata
+    enforcements: [{ set: { key: "replica.type", value: "launcher" } }]
+  - field: annotations
+    specSelector: launcherPodMetadata
+    enforcements: [{ set: { key: "replica.example.com/role", value: "launcher" } }]
+
+  # ----- Worker replica spec -----
+  - field: replicas
+    specSelector: workerReplicaSpec
+    enforcements: [{ set: { value: 3 } }]
+  - field: restartPolicy
+    specSelector: workerReplicaSpec
+    enforcements: [{ set: { value: OnFailure } }]
+
+  # ----- Worker pod metadata -----
+  - field: labels
+    specSelector: workerPodMetadata
+    enforcements: [{ set: { key: "replica.type", value: "worker" } }]
+  - field: annotations
+    specSelector: workerPodMetadata
+    enforcements: [{ set: { key: "replica.example.com/role", value: "worker" } }]
+
+  # ----- container image (verify policy modifies skeleton) -----
+  - field: image
+    specSelector: allContainers
+    enforcements: [{ set: { value: "mpioperator/mpi-horovod:2.0" } }]

@@ -1,0 +1,22 @@
+description:
+  This field is used by the system along with effective rules, in order to specify the org unit from
+  which this effective rule has been derived. It should be left empty when sending apply policy requests.
+required:
+  - scope
+properties:
+  scope:
+    $ref: "../scopes/ScopeType.yaml"
+  projectId:
+    $ref: "../scopes/ProjectIdOptional.yaml"
+  departmentId:
+    $ref: "../scopes/DepartmentIdOptional.yaml"
+  clusterId:
+    $ref: "../scopes/ClusterIdOptional.yaml"
+  isFallback:
+    description: source of this rule is the fallback policy
+    type: boolean
+example:
+  scope: project
+  projectId: 3
+nullable: true
+type: object

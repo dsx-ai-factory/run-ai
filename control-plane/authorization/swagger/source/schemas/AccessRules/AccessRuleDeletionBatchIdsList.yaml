@@ -1,0 +1,6 @@
+type: array
+description: List of access rule IDs that were successfully deleted.
+items:
+  type: string
+  format: uuid
+minLength: 1

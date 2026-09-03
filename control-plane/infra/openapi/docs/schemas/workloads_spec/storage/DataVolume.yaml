@@ -1,0 +1,16 @@
+properties:
+  id:
+    description: The unique identifier of the data volume. (mandatory)
+    type: string
+    format: uuid
+    example: 123e4567-e89b-12d3-a456-426614174000
+    nullable: true
+  mountPath:
+    description: The path where the data volume will be mounted. (mandatory)
+    type: string
+    example: /mnt/data
+    nullable: true
+    pattern: .*
+    maxLength: 4096
+nullable: true
+type: object

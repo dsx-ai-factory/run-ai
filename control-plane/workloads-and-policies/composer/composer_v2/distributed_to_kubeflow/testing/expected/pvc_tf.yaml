@@ -1,0 +1,198 @@
+DistributedTarget:
+  Config:
+    pvcs:
+    - metadata:
+        name: claim-rw
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10M
+        storageClassName: my-storage
+    - metadata:
+        name: access-modes
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        - ReadWriteMany
+        resources:
+          requests:
+            storage: 1G
+    pvcsConfig:
+      cleanupOnCompletion: true
+  Framework: TF
+  JaxJob: null
+  MasterSpec: null
+  MpiJob: null
+  ObjectMeta: null
+  PyTorchJob: null
+  RunPolicy: null
+  TFJob:
+    apiVersion: kubeflow.org/v1
+    kind: TFJob
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: tfjob
+        createdBy: TFJob
+        project: test
+        release: pvc
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: pvc
+      name: pvc
+      namespace: runai-test
+    spec:
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: Running
+      tfReplicaSpecs:
+        Chief:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: tfjob
+                createdBy: TFJob
+                project: test
+                release: pvc
+                workloadKind: Distributed
+                workloadName: pvc
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: pvc
+                image: ubuntu
+                name: tensorflow
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /path/ro
+                  name: pvc-master
+                  readOnly: true
+                - mountPath: /path/rw
+                  name: pvc-master-1
+                - mountPath: /path/access/modes
+                  name: pvc-master-2
+                - mountPath: /path/two
+                  name: pvc-master-3
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - name: pvc-master
+                persistentVolumeClaim:
+                  claimName: claim-existing
+                  readOnly: true
+              - name: pvc-master-1
+                persistentVolumeClaim:
+                  claimName: claim-rw
+              - name: pvc-master-2
+                persistentVolumeClaim:
+                  claimName: access-modes
+              - ephemeral:
+                  volumeClaimTemplate:
+                    metadata: {}
+                    spec:
+                      accessModes:
+                      - ReadWriteOnce
+                      resources:
+                        requests:
+                          storage: 1G
+                      storageClassName: my-storage
+                name: pvc-master-3
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: tfjob
+                createdBy: TFJob
+                project: test
+                release: pvc
+                workloadKind: Distributed
+                workloadName: pvc
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: pvc
+                image: ubuntu
+                name: tensorflow
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /path/ro
+                  name: pvc-worker
+                  readOnly: true
+                - mountPath: /path/rw
+                  name: pvc-worker-1
+                - mountPath: /path/access/modes
+                  name: pvc-worker-2
+                - mountPath: /path/two
+                  name: pvc-worker-3
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - name: pvc-worker
+                persistentVolumeClaim:
+                  claimName: claim-existing
+                  readOnly: true
+              - name: pvc-worker-1
+                persistentVolumeClaim:
+                  claimName: claim-rw
+              - name: pvc-worker-2
+                persistentVolumeClaim:
+                  claimName: access-modes
+              - ephemeral:
+                  volumeClaimTemplate:
+                    metadata: {}
+                    spec:
+                      accessModes:
+                      - ReadWriteOnce
+                      resources:
+                        requests:
+                          storage: 1G
+                      storageClassName: my-storage
+                name: pvc-worker-3
+    status: {}
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: TFJob
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-pvc/, Framework: TF'
+  images:
+  - ubuntu
+  name: 'pvc/, Framework: TF'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

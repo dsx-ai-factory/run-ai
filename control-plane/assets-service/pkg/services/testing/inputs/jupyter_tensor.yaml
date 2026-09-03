@@ -1,0 +1,7 @@
+assets:
+  environment: jupyter-tensor
+  compute: cpu-only
+specificRunParams:
+  environmentVariables:
+    - name: LOG_DIR
+      value: "log-dir-from-specific-run-params"

@@ -1,0 +1,10 @@
+{{- if .Values.metricStoresMigrator.enabled }}
+{{- include "common.configMap" (list . .Values.metricStoresMigrator "control-plane.metricStoresMigrator.configmap") }}
+{{- end }}
+
+{{- define "control-plane.metricStoresMigrator.configmap" -}}
+{{- $top := first . }}
+data:
+  LOG_LEVEL: {{ $top.Values.metricStoresMigrator.config.logLevel | quote }}
+  TENANTS_MANAGER_URL:  {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.tenantsManager.name ($top.Values.tenantsManager.service.port | toString) | quote }}
+{{- end }}

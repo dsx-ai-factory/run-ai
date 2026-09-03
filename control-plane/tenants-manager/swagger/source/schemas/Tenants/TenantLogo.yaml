@@ -1,0 +1,11 @@
+type: object
+required:
+  - tenantId
+  - logo
+properties:
+  tenantId:
+    type: integer
+    format: int64
+  logo:
+    type: string
+    description: Data URL of the logo (e.g. "data:image/png;base64,...")

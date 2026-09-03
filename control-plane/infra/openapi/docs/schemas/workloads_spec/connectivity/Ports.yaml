@@ -1,0 +1,6 @@
+description: Set of container ports that the workload exposes.
+type: array
+items:
+  $ref: "./Port.yaml"
+maxItems: 1000
+nullable: true

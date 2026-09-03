@@ -1,0 +1,43 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package components
+
+import (
+	configinput "github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/inputs"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/model"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/prereq/ids"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/prereq/steps"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
+	k8s "github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/k8sclient"
+)
+
+type lws struct {
+	*PreReqImpl
+}
+
+func NewLWS(k8sClient k8s.K8sClients) *lws {
+	return &lws{
+		PreReqImpl: NewPreReqComponentImpl(ids.PrerequisiteIdentifierLWS, "0.7.0", false, false, k8sClient),
+	}
+}
+
+func (l *lws) GetMandatoryInputs(runaiData *model.RunAIInstallData) []configinput.InstallInputType {
+	return []configinput.InstallInputType{}
+}
+
+func (l *lws) GetOptionalInputs(runaiData *model.RunAIInstallData) []configinput.InstallInputType {
+	return []configinput.InstallInputType{}
+}
+
+func (l *lws) GetInstallSteps(k8sClient k8s.K8sClients, _ step.HelmInstaller, _ step.RunAIAPIClientProvider, runaiData *model.RunAIInstallData) []step.InstallStep {
+	return []step.InstallStep{
+		steps.NewLWSInstallStep(k8sClient, l.GetVersion()),
+	}
+}
+
+func (l *lws) InstalledOnCluster(runaiData *model.RunAIInstallData) model.InstallPhase {
+	return steps.NewLWSInstallStep(l.k8sClient, l.GetVersion()).GetStatusSync(runaiData)
+}

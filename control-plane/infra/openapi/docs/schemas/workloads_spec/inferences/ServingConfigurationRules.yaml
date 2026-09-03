@@ -1,0 +1,7 @@
+properties:
+  initializationTimeoutSeconds:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  requestTimeoutSeconds:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+nullable: true
+type: object

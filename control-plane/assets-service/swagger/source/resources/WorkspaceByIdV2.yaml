@@ -1,0 +1,30 @@
+get:
+  summary: Get workspace data - assets based [Experimental]
+  description:
+    Retrieves the data of a training, i.e. its set of assets and specific env.
+  operationId: get_workspace_by_id_v2
+  x-service: assets-service
+  x-internal: true
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_workspaces_service_test.go
+    - e2e/src/test/suites/parallel/submitUI/connectToJupiterUI.test.ts
+  x-no-authorization: true
+  tags:
+    - Workspaces
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Workspace/WorkspaceV2.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

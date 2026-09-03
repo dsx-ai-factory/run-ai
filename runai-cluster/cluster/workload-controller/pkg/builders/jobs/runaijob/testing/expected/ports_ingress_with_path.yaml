@@ -1,0 +1,389 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      JobUrl: https://test.run.ai:8443/my/url, https://cluster-domain.mock/team-a/job-4,
+        http://this.is.port:8080/to/port/80
+      template: job-4
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      kai.scheduler/preemptibility: non-preemptible
+      priorityClassName: build
+      project: team-a
+      release: job-4
+      workloadKind: InteractiveWorkload
+      workloadName: job-4
+    name: job-4
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 0
+    completions: 1
+    maxIdleDurationSeconds: 1200
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          user: user.name
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          kai.scheduler/preemptibility: non-preemptible
+          priorityClassName: build
+          project: team-a
+          release: job-4
+          run.ai/top-owner-uid: ""
+          workloadKind: InteractiveWorkload
+          workloadName: job-4
+      spec:
+        containers:
+        - image: zembutsu/docker-sample-nginx
+          imagePullPolicy: Always
+          name: job-4
+          ports:
+          - containerPort: 70
+            name: port-70
+            protocol: TCP
+          - containerPort: 443
+            name: port-443
+            protocol: TCP
+          - containerPort: 80
+            name: port-80
+            protocol: TCP
+          resources: {}
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+        - args:
+          - --provider=keycloak-oidc
+          - --upstream=http://localhost:443
+          - --redirect-url=https://test.run.ai:8443/my/url/oauth2/callback
+          - --oidc-issuer-url=/auth/realms/runai
+          - --scope=openid
+          - --http-address=0.0.0.0:4180
+          - --proxy-prefix=/my/url/oauth2
+          - --skip-provider-button=true
+          - --whitelist-domain=test.run.ai:8443
+          - --cookie-domain=test.run.ai
+          - --cookie-httponly=true
+          - --cookie-secure=true
+          - --code-challenge-method=S256
+          - --cookie-refresh=10m
+          - --cookie-samesite=lax
+          - --skip-jwt-bearer-tokens=true
+          - --extra-jwt-issuers=/auth/realms/runai=runai
+          - --custom-templates-dir=/usr/share/oauth2-proxy
+          - --pass-authorization-header=false
+          - --cookie-name=InteractiveWorkload-runai-team-a-job-4-a
+          - --session-store-type=redis
+          - --redis-connection-url=redis://cluster-redis.runai.svc.cluster.local:6379
+          - --email-domain=*
+          env:
+          - name: OAUTH2_PROXY_COOKIE_PATH
+            value: /my/url
+          envFrom:
+          - secretRef: {}
+          imagePullPolicy: IfNotPresent
+          name: runai-oauth2-proxy-0
+          ports:
+          - containerPort: 4180
+            name: port-4180
+            protocol: TCP
+          resources: {}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+          volumeMounts:
+          - mountPath: /etc/runai/auth/users
+            name: runai-auth
+        - args:
+          - --provider=keycloak-oidc
+          - --upstream=http://localhost:443
+          - --redirect-url=https://cluster-domain.mock/team-a/job-4/oauth2/callback
+          - --oidc-issuer-url=/auth/realms/runai
+          - --scope=openid
+          - --http-address=0.0.0.0:4181
+          - --proxy-prefix=/team-a/job-4/oauth2
+          - --skip-provider-button=true
+          - --whitelist-domain=cluster-domain.mock
+          - --cookie-domain=cluster-domain.mock
+          - --cookie-httponly=true
+          - --cookie-secure=true
+          - --code-challenge-method=S256
+          - --cookie-refresh=10m
+          - --cookie-samesite=lax
+          - --skip-jwt-bearer-tokens=true
+          - --extra-jwt-issuers=/auth/realms/runai=runai
+          - --custom-templates-dir=/usr/share/oauth2-proxy
+          - --pass-authorization-header=false
+          - --cookie-name=InteractiveWorkload-runai-team-a-job-4-b
+          - --session-store-type=redis
+          - --redis-connection-url=redis://cluster-redis.runai.svc.cluster.local:6379
+          - --email-domain=*
+          env:
+          - name: OAUTH2_PROXY_COOKIE_PATH
+            value: /team-a/job-4
+          envFrom:
+          - secretRef: {}
+          imagePullPolicy: IfNotPresent
+          name: runai-oauth2-proxy-1
+          ports:
+          - containerPort: 4181
+            name: port-4181
+            protocol: TCP
+          resources: {}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+          volumeMounts:
+          - mountPath: /etc/runai/auth/users
+            name: runai-auth
+        - args:
+          - --provider=keycloak-oidc
+          - --upstream=http://localhost:80
+          - --redirect-url=http://this.is.port:8080/to/port/80/oauth2/callback
+          - --oidc-issuer-url=/auth/realms/runai
+          - --scope=openid
+          - --http-address=0.0.0.0:4182
+          - --proxy-prefix=/to/port/80/oauth2
+          - --skip-provider-button=true
+          - --whitelist-domain=this.is.port:8080
+          - --cookie-domain=this.is.port
+          - --cookie-httponly=true
+          - --cookie-secure=true
+          - --code-challenge-method=S256
+          - --cookie-refresh=10m
+          - --cookie-samesite=lax
+          - --skip-jwt-bearer-tokens=true
+          - --extra-jwt-issuers=/auth/realms/runai=runai
+          - --custom-templates-dir=/usr/share/oauth2-proxy
+          - --pass-authorization-header=false
+          - --cookie-name=InteractiveWorkload-runai-team-a-job-4-c
+          - --session-store-type=redis
+          - --redis-connection-url=redis://cluster-redis.runai.svc.cluster.local:6379
+          - --email-domain=*
+          env:
+          - name: OAUTH2_PROXY_COOKIE_PATH
+            value: /to/port/80
+          envFrom:
+          - secretRef: {}
+          imagePullPolicy: IfNotPresent
+          name: runai-oauth2-proxy-2
+          ports:
+          - containerPort: 4182
+            name: port-4182
+            protocol: TCP
+          resources: {}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+          volumeMounts:
+          - mountPath: /etc/runai/auth/users
+            name: runai-auth
+        restartPolicy: OnFailure
+        schedulerName: runai-scheduler
+        volumes:
+        - emptyDir: {}
+          name: runai-auth
+  status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    priorityClassName: build
+    project: team-a
+    release: job-4
+    workloadKind: InteractiveWorkload
+    workloadName: job-4
+  name: iw-job-4-0-clusterip
+  namespace: runai-team-a
+spec:
+  ports:
+  - name: port-job-4-70-0
+    port: 7000
+    protocol: TCP
+    targetPort: 70
+  selector:
+    release: job-4
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    priorityClassName: build
+    project: team-a
+    release: job-4
+    workloadKind: InteractiveWorkload
+    workloadName: job-4
+  name: iw-job-4-0
+  namespace: runai-team-a
+spec:
+  ports:
+  - name: port-job-4-4180-0
+    port: 8443
+    protocol: TCP
+    targetPort: 4180
+  selector:
+    release: job-4
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    priorityClassName: build
+    project: team-a
+    release: job-4
+    workloadKind: InteractiveWorkload
+    workloadName: job-4
+  name: iw-job-4-1
+  namespace: runai-team-a
+spec:
+  ports:
+  - name: port-job-4-4181-0
+    port: 80
+    protocol: TCP
+    targetPort: 4181
+  selector:
+    release: job-4
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    priorityClassName: build
+    project: team-a
+    release: job-4
+    workloadKind: InteractiveWorkload
+    workloadName: job-4
+  name: iw-job-4-2
+  namespace: runai-team-a
+spec:
+  ports:
+  - name: port-job-4-4182-0
+    port: 8080
+    protocol: TCP
+    targetPort: 4182
+  selector:
+    release: job-4
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 8g
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    priorityClassName: build
+    project: team-a
+    release: job-4
+    workloadKind: InteractiveWorkload
+    workloadName: job-4
+  name: iw-job-4-0
+  namespace: runai-team-a
+spec:
+  rules:
+  - host: test.run.ai
+    http:
+      paths:
+      - backend:
+          service:
+            name: iw-job-4-0
+            port:
+              number: 8443
+        path: /my/url
+        pathType: Prefix
+status:
+  loadBalancer: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 8g
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    priorityClassName: build
+    project: team-a
+    release: job-4
+    workloadKind: InteractiveWorkload
+    workloadName: job-4
+  name: iw-job-4-1
+  namespace: runai-team-a
+spec:
+  rules:
+  - host: cluster-domain.mock
+    http:
+      paths:
+      - backend:
+          service:
+            name: iw-job-4-1
+            port:
+              number: 80
+        path: /team-a/job-4
+        pathType: Prefix
+status:
+  loadBalancer: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 8g
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    priorityClassName: build
+    project: team-a
+    release: job-4
+    workloadKind: InteractiveWorkload
+    workloadName: job-4
+  name: iw-job-4-2
+  namespace: runai-team-a
+spec:
+  rules:
+  - host: this.is.port
+    http:
+      paths:
+      - backend:
+          service:
+            name: iw-job-4-2
+            port:
+              number: 8080
+        path: /to/port/80
+        pathType: Prefix
+status:
+  loadBalancer: {}

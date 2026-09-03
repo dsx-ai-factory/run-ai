@@ -1,0 +1,5 @@
+x-internal: true
+type: object
+description: Cluster configuration data - can be updated by the user
+allOf:
+  - $ref: "ConfigEmptyData.yaml"

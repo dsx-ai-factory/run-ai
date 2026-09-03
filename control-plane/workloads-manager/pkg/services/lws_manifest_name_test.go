@@ -1,0 +1,35 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package services
+
+import (
+	"testing"
+
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"github.com/stretchr/testify/require"
+)
+
+func TestShouldPreserveManifestName(t *testing.T) {
+	require.True(t, shouldPreserveManifestName(map[string]interface{}{
+		"apiVersion": constants.LwsGroup + "/" + constants.LwsVersion,
+		"kind":       constants.LwsKind,
+		"metadata": map[string]interface{}{
+			"name": "dist-inf-abcd",
+			"labels": map[string]interface{}{
+				ConvertedFromNativeLabel: TrueAsString,
+			},
+		},
+	}))
+	require.False(t, shouldPreserveManifestName(map[string]interface{}{
+		"apiVersion": constants.LwsGroup + "/" + constants.LwsVersion,
+		"kind":       constants.LwsKind,
+		"metadata":   map[string]interface{}{"name": "user-lws"},
+	}))
+	require.False(t, shouldPreserveManifestName(map[string]interface{}{
+		"apiVersion": "batch/v1",
+		"kind":       "Job",
+	}))
+}

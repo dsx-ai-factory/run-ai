@@ -1,0 +1,10 @@
+400BadRequest:
+  $ref: '../../../infra/openapi/docs/responses/400BadRequest.yaml'
+401Unauthorized:
+  $ref: '../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+403Forbidden:
+  $ref: '../../../infra/openapi/docs/responses/403Forbidden.yaml'
+500InternalServerError:
+  $ref: '../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+503ServiceUnavailable:
+  $ref: '../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

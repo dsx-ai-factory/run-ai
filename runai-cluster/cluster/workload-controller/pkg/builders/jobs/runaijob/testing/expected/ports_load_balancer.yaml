@@ -1,0 +1,88 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      template: load-balancer
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      kai.scheduler/preemptibility: non-preemptible
+      priorityClassName: build
+      project: team-a
+      release: load-balancer
+      workloadKind: InteractiveWorkload
+      workloadName: load-balancer
+    name: job-4
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 0
+    completions: 1
+    maxIdleDurationSeconds: 1200
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          user: user.name
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          kai.scheduler/preemptibility: non-preemptible
+          priorityClassName: build
+          project: team-a
+          release: load-balancer
+          run.ai/top-owner-uid: ""
+          workloadKind: InteractiveWorkload
+          workloadName: load-balancer
+      spec:
+        containers:
+        - image: ubuntu
+          imagePullPolicy: Always
+          name: job-4
+          ports:
+          - containerPort: 80
+            name: port-80
+            protocol: TCP
+          - containerPort: 90
+            name: port-90
+            protocol: TCP
+          resources: {}
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+        restartPolicy: Never
+        schedulerName: runai-scheduler
+  status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    priorityClassName: build
+    project: team-a
+    release: load-balancer
+    workloadKind: InteractiveWorkload
+    workloadName: load-balancer
+  name: iw-job-4-0-loadbalancer
+  namespace: runai-team-a
+spec:
+  ports:
+  - name: port-job-4-80-0
+    port: 8000
+    protocol: TCP
+    targetPort: 80
+  - name: port-job-4-90-1
+    port: 9000
+    protocol: TCP
+    targetPort: 90
+  selector:
+    release: load-balancer
+  type: LoadBalancer
+status:
+  loadBalancer: {}

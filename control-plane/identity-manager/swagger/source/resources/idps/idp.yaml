@@ -1,0 +1,136 @@
+get:
+  summary: Get external idp by alias
+  x-service: identity-manager
+  x-test-coverage:
+  - e2e/src/test/suites/ssoSuite/IDP/idpApi.test.ts
+  operationId: get_idp
+  x-authorize:
+    resource-type: security-settings
+    action: read
+  tags:
+  - Idps
+  parameters:
+  - $ref: '../../parameters/idp.yaml'
+  - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          examples:
+            saml:
+              value:
+                alias: "saml"
+                type: "saml"
+                redirectUri: "https://domain/auth/realms/name/broker/saml/endpoint"
+                samlData: { signingCertificate: "signingCertificateExample", singleSignOnServiceUrl: "https://authhost/protocol/saml", entityId: "example.run.ai/runai", serviceProviderMetadataUrl: "https://example.runai.com/auth/realms/runai/broker/saml/endpoint/descriptor" }
+                mappers: { "gid": "GID", "groups": "GROUPS", "supplementaryGroups": "SUPPLEMENTARYGROUPS", "uid": "UID", "email": "email" }
+            oidc:
+              value:
+                alias: "oidc"
+                type: "oidc"
+                redirectUri: "https://domain/auth/realms/name/broker/oidc/endpoint"
+                oidcData: { clientId: "my-client-id", clientSecret: "*******", scopes: [ "scope1", "scope2" ], mandatoryClaim: { claim: "my-claim", values: [ "val1", "val2" ] } }
+                mappers: { "gid": "GID", "groups": "GROUPS", "supplementaryGroups": "SUPPLEMENTARYGROUPS", "uid": "UID", "email": "email" }
+            openshift-v4:
+              value:
+                alias: "openshift-v4"
+                type: "openshift-v4"
+                redirectUri: "https://domain/auth/realms/name/broker/openshift-v4/endpoint"
+                ocpData: { clientId: "my-client-id", clientSecret: "*******", idpBaseUrl: "https://authhost/ocp", scopes: [ "scope1", "scope2" ] }
+                mappers: { "gid": "metadata.gid", "groups": "groups", "supplementaryGroups": "supplementarygroups", "uid": "metadata.uid", "email": "metadata.name" }
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+delete:
+  summary: Delete external idp by alias
+  x-service: identity-manager
+  x-test-coverage:
+  - e2e/src/test/suites/ssoSuite/IDP/idpApi.test.ts
+  operationId: delete_idp
+  x-authorize:
+    resource-type: security-settings
+    action: delete
+  x-audit: true
+  tags:
+  - Idps
+  parameters:
+  - $ref: '../../parameters/idp.yaml'
+  - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  responses:
+    '200':
+      description: Idp successfully deleted
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+put:
+  summary: Update external idp by alias
+  x-service: identity-manager
+  x-test-coverage:
+  - e2e/src/test/suites/ssoSuite/IDP/idpApi.test.ts
+  operationId: update_idp
+  x-authorize:
+    resource-type: security-settings
+    action: update
+  tags:
+  - Idps
+  parameters:
+  - $ref: '../../parameters/idp.yaml'
+  - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  requestBody:
+    description: Updated idp object
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/Idp/IdpCreationRequest.yaml'
+        examples:
+          saml (by url):
+            value:
+              type: "saml"
+              samlData: { metadataXmlType: "url", metadataXmlUrl: "https://authhost/saml/metadata.xml" }
+              mappers: { "gid": "GID", "groups": "GROUPS", "supplementaryGroups": "SUPPLEMENTARYGROUPS", "uid": "UID", "email": "email" }
+          saml (by file):
+            value:
+              type: "saml"
+              samlData: { metadataXmlType: "file", fileName: "descriptor.xml", metadataXmlFile: "<file content in base64>" }
+              mappers: { "gid": "GID", "groups": "GROUPS", "supplementaryGroups": "SUPPLEMENTARYGROUPS", "uid": "UID", "email": "email" }
+          oidc:
+            value:
+              type: "oidc"
+              oidcData: { clientId: "my-client-id", clientSecret: "my-client-secret", discoverDocumentUrl: "https://authhost/openid-configuration", mandatoryClaim: { claim: "my-claim", values: [ "val1", "val2" ] } }
+              mappers: { "gid": "GID", "groups": "GROUPS", "supplementaryGroups": "SUPPLEMENTARYGROUPS", "uid": "UID", "email": "email" }
+          openshift-v4:
+            value:
+              type: "openshift-v4"
+              ocpData: { clientId: "my-client-id", clientSecret: "my-client-secret", idpBaseUrl: "https://authhost/ocp" }
+              mappers: { "gid": "metadata.gid", "groups": "groups", "supplementaryGroups": "supplementarygroups", "uid": "metadata.uid", "email": "metadata.name" }
+  responses:
+    '200':
+      description: Idp successfully updated
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,84 @@
+openapi: 3.0.3
+info:
+  title: Notifications Service Config API
+  version: 1.0.0
+  description: API for notifications-service config endpoint
+  contact:
+    name: Run.AI
+    url: https://www.run.ai/
+    email: support@run.ai
+servers:
+  - url: https://app.run.ai
+  - url: https://staging.run.ai
+  - url: https://test.run.ai
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+paths:
+  /:
+    get:
+      x-internal: true
+      x-service: notifications-proxy
+      summary: health check
+      operationId: health
+      x-no-authorization: true
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Executed successfully.
+  /api/v1/notification-types:
+      $ref: "./requests/NotificationTypes.yaml"
+  /api/v1/notification-state:
+    $ref: "./requests/NotificationState.yaml"
+  /api/v1/notification-state/detailed:
+    $ref: "./requests/DetailedNotificationState.yaml"
+  /api/v1/email:
+      $ref: "./requests/Email.yaml"
+  /api/v1/email/state:
+      $ref: "./requests/EmailNotificationState.yaml"
+  /api/v1/email/validate:
+    $ref: "./requests/ValidateEmail.yaml"
+  /api/v1/notification-channels:
+      $ref: "./requests/NotificationChannels.yaml"
+  /api/v1/slack:
+    $ref: "./requests/Slack.yaml"
+  /api/v1/slack/state:
+    $ref: "./requests/SlackNotificationState.yaml"
+  /api/v1/slack/state/detailed:
+    $ref: "./requests/SlackDetailedNotificationState.yaml"
+  /api/v1/slack/app:
+    $ref: "./requests/SlackApp.yaml"
+  /api/v1/slack/workspace:
+    $ref: "./requests/SlackWorkspace.yaml"
+  /api/v1/slack/auth:
+    $ref: "./requests/AuthSlackApp.yaml"
+  /api/v1/slack/validate:
+    $ref: "./requests/ValidateSlack.yaml"
+  /api/v1/notification-channels/slack/auth-app:
+    $ref: "./requests/AuthSlackAppDeprecated.yaml"
+  /api/v1/notification-channels/slack/add-app:
+    $ref: "./requests/AddSlackAppDeprecated.yaml"
+  /api/v1/notification-channels/slack/create-app:
+    $ref: "./requests/CreateSlackAppDeprecated.yaml"
+  /api/v1/notification-channels/{name}:
+      parameters:
+        - $ref: "./parameters/NotificationChannelName.yaml"
+      $ref: "./requests/NotificationChannelsByName.yaml"
+  /api/v1/validate-notification-channel:
+    $ref: "./requests/ValidateNotificationChannel.yaml"
+  /api/v1/subscriptions:
+      $ref: "./requests/Subscriptions.yaml"
+  /api/v1/subscriptions/{id}:
+      parameters:
+        - $ref: "./parameters/SubscriptionId.yaml"
+      $ref: "./requests/SubscriptionById.yaml"
+      
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer authentication

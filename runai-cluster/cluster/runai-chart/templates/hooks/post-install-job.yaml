@@ -1,0 +1,75 @@
+{{- if .Values.helmHooksHandler.enabled }}
+{{- $runai_operator := index .Values "runai-operator" -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: post-install
+  namespace: runai
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "2"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- include "jobAnnotations" . | nindent 4 }}
+  labels:
+    run.ai/hook: post-install
+    {{- include "jobLabels" . | nindent 4 }}
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      annotations:
+        {{- include "jobAnnotations" . | nindent 8 }}
+      labels:
+        {{- include "jobLabels" . | nindent 8 }}
+        run.ai/hook: post-install
+    spec:
+      serviceAccountName: {{ .Values.global.serviceAccountName | default "runai-post-install" }}
+      restartPolicy: Never
+      containers:
+        - name: post-install
+          image: {{ include "helmHooksHandler.image" . }}
+          imagePullPolicy: {{ .Values.helmHooksHandler.image.pullPolicy }}
+          args:
+            - --post-install
+            - --control-plane-url={{ include "controlPlane.url" . }}
+            - --control-plane-client-id={{ include "controlPlane.clientID" . }}
+            - --control-plane-client-secret=@/runai/config/client_secret
+            - --control-plane-bootstrap-token={{ .Values.controlPlane.bootstrapToken }}
+            - --cluster-version={{ .Chart.AppVersion }}
+            - --cluster-uid={{ include "cluster.uid" . }}
+            - --cluster-url={{ include "cluster.url" . }}
+            - --development-headless={{ .Values.development.headless }}
+            - --development-skip-dependency-checks={{ .Values.development.skipDependeciesChecks }}
+            - --enable-rbac-escalation={{ .Values.cluster.rbac.escalate }}
+            - --fips-mode={{ include "globalFipsMode" . }}
+            {{- if .Values.global.nmc }}
+            - --nmc-enabled={{ .Values.global.nmc.enabled }}
+            - --nmc-remote-cluster-api-server-url={{ .Values.global.nmc.remoteCluster.apiServer.url }}
+            - --nmc-service-account-name={{ .Values.global.serviceAccountName }}
+            - --nmc-allowed-service-accounts={{ include "nmcServiceAccountArgs" . }}
+            {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            {{- toYaml .Values.helmHooksHandler.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /runai/config
+      imagePullSecrets:{{ include "imagePullSecretList" .| nindent 8 }}
+      affinity:{{- include "deploymentAffinity" .| nindent 8 }}
+      tolerations: {{- include "deploymentTolerations" .| nindent 8 }}
+      volumes:
+        - name: config
+          projected:
+            sources:
+            - configMap:
+                name: hooks-params
+            {{- include "controlPlane.secret.volume" . | nindent 12 }}
+{{- end }}

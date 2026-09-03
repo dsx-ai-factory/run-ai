@@ -1,0 +1,7 @@
+description: internal information about the order of calculating defaultFrom rules
+properties:
+  worker:
+    $ref: "DefaultFromOrderReplica.yaml"
+  master:
+    $ref: "DefaultFromOrderReplica.yaml"
+nullable: true

@@ -1,0 +1,17 @@
+{
+    "target": {
+        "path": {
+            "deployment": "runai-backend-authorization"
+        },
+        "namespace": "runai-backend"
+    },
+    "feature": {
+        "env": true,
+        "fs": "read",
+        "network": {
+            "incoming": {
+                "mode": "steal"
+            }
+        }
+    }
+}

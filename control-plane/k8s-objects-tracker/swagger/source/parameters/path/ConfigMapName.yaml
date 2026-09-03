@@ -1,0 +1,6 @@
+name: configMapName
+in: path
+description: The Config Map name.
+schema:
+  type: string
+required: true

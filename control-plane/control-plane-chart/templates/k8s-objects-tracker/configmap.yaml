@@ -1,0 +1,44 @@
+{{- if .Values.k8sObjectsTracker.enabled }}
+{{- include "common.configMap" (list . .Values.k8sObjectsTracker "control-plane.k8sObjectsTracker.configmap") }}
+{{- end }}
+
+{{- define "control-plane.k8sObjectsTracker.configmap" -}}
+{{- $top := first . }}
+data:
+  LOG_LEVEL: {{ $top.Values.k8sObjectsTracker.config.logLevel | quote }}
+  SERVICE_PORT: {{ $top.Values.k8sObjectsTracker.service.port | quote }}
+  SERVICE_NAME: {{ $top.Values.k8sObjectsTracker.name | quote }}
+  TRACING_ENABLED: {{ if hasKey $top.Values.k8sObjectsTracker.config "tracingEnabled" }}{{ $top.Values.k8sObjectsTracker.config.tracingEnabled | quote }}{{ else }}{{ $top.Values.global.config.tracingEnabled | quote }}{{ end }}
+  AUDIT_ENABLED: {{ if hasKey $top.Values.k8sObjectsTracker.config "auditEnabled" }}{{ $top.Values.k8sObjectsTracker.config.auditEnabled | quote }}{{ else }}{{ $top.Values.global.config.auditEnabled | quote }}{{ end }}
+  AUDIT_ENABLE_PRINT_TO_STDOUT: {{ if hasKey $top.Values.k8sObjectsTracker.config "auditEnablePrintToStdout" }}{{ $top.Values.k8sObjectsTracker.config.auditEnablePrintToStdout | quote }}{{ else }}{{ $top.Values.global.config.auditEnablePrintToStdout | quote }}{{ end }}
+  AUDIT_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.auditService.name ($top.Values.auditService.service.port | toString) | quote }}
+  ORG_UNIT_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.orgUnitService.name ($top.Values.orgUnitService.service.port | toString) | quote }}
+  AUTHORIZATION_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.authorization.name ($top.Values.authorization.service.port | toString) | quote }}
+  DB_NAME: {{ $top.Values.k8sObjectsTracker.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_VERBOSE_LOGGING: {{ $top.Values.k8sObjectsTracker.config.dbVerboseLogging | default $top.Values.global.postgresql.dbVerboseLogging | quote }}
+  DB_HOST: {{ $top.Values.k8sObjectsTracker.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SSL_MODE: {{ $top.Values.k8sObjectsTracker.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_MIGRATION_FILES: {{ $top.Values.k8sObjectsTracker.config.migrationFiles | quote }}
+
+  {{- if or ($top.Values.k8sObjectsTracker.config.dbUseServiceSession) ($top.Values.global.k8sObjectsTracker.config.dbUseServiceSession) }}
+  DB_USE_SERVICE_SESSION: {{ $top.Values.k8sObjectsTracker.config.dbUseServiceSession | default $top.Values.global.k8sObjectsTracker.config.dbUseServiceSession | quote }}
+  {{- end }}
+
+  {{- if or ($top.Values.global.postgresql.auth.readHost) ($top.Values.k8sObjectsTracker.config.dbReadHost) }}
+  DB_READ_HOST: {{ $top.Values.k8sObjectsTracker.config.dbReadHost | default $top.Values.global.postgresql.auth.readHost | quote }}
+  {{- end }}
+  {{- if or ($top.Values.global.postgresql.auth.dbReadPort) ($top.Values.k8sObjectsTracker.config.dbReadPort) }}
+  DB_READ_PORT: {{ $top.Values.k8sObjectsTracker.config.dbReadPort | default $top.Values.global.postgresql.auth.readPort | quote }}
+  {{- end }}
+  DB_PORT: {{ $top.Values.k8sObjectsTracker.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  DB_SCHEMA: {{ $top.Values.k8sObjectsTracker.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  PUBSUB_URL: {{ $top.Values.global.pubsub.url | quote }}
+  PUBSUB_TYPE: {{ $top.Values.global.pubsub.type | quote }}
+  PUBSUB_ENABLE_ADDITIONAL_SUBSCRIBER: {{ $top.Values.global.pubsub.additionalSubscriber.enabled | quote }}
+  {{- if $top.Values.global.pubsub.additionalSubscriber.enabled }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_TYPE: {{ $top.Values.global.pubsub.additionalSubscriber.type | quote }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_URL: {{ $top.Values.global.pubsub.additionalSubscriber.url | quote }}
+  {{- end }}
+  CACHE_MAX_RECORD_SIZE_KB: {{ $top.Values.k8sObjectsTracker.config.cacheMaxRecordSizeKb | quote }}
+  CACHE_MAX_STORE_SIZE_MB: {{ $top.Values.k8sObjectsTracker.config.cacheMaxStoreSizeMb | quote }}
+{{- end }}

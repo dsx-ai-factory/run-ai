@@ -1,0 +1,8 @@
+properties:
+  scaleDownDelaySeconds:
+    description: The minimum amount of time (in seconds) that a replica will remain active after a scale-down decision
+    type: integer
+    format: int32
+    minimum: 0
+    maximum: 3600
+    nullable: true

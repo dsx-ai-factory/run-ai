@@ -1,0 +1,4 @@
+description: A list of issues preventing the use of a template or asset for creating workloads in a given project.
+type: array
+items:
+  $ref: "./ComplianceInfoReason.yaml"

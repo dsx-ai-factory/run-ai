@@ -1,0 +1,21 @@
+type: object
+description: Compatibility ClusterIP Service create instruction for agent WorkloadRunner networking.
+nullable: true
+required:
+  - port
+properties:
+  port:
+    description: The port that the service exposes.
+    type: integer
+    format: int32
+    minimum: 1
+    maximum: 65535
+    example: 8000
+  selector:
+    description: Label selector to identify the pods that this service routes traffic to.
+    type: object
+    additionalProperties:
+      type: string
+    nullable: true
+    example:
+      app: my-app

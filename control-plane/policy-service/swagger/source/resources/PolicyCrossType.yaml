@@ -1,0 +1,32 @@
+get:
+  summary: Get policy cross workload types.
+  description: Retrieve the policy details of all workload types, for a given organizational unit.
+  operationId: get_policy_cross_type
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/get_test.go
+  x-no-authorization: true
+  tags:
+    - Policy
+  parameters:
+    - $ref: "../parameters/query/mandatory/PolicyScope.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByDepartment.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByProject.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml"
+    - $ref: "../parameters/query/optional/NoCreationMode.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/CrossType/PolicyCrossType.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+

@@ -1,0 +1,4 @@
+# nats.extraEnvVarsSecret routes the gen-cache-pubsub spec to a user-managed
+# secret -- the user is responsible for AUTH_TOKEN, CACHE_PASSWORD, PUBSUB_PASSWORD.
+nats:
+  extraEnvVarsSecret: user-managed-nats-secret

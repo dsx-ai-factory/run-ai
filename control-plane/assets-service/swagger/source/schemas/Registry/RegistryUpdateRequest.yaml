@@ -1,0 +1,6 @@
+required:
+  - meta
+  - spec
+properties:
+  meta:
+    $ref: "../Asset/AssetUpdateRequest.yaml"

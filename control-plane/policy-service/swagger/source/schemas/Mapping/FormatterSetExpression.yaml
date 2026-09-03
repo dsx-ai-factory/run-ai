@@ -1,0 +1,15 @@
+type: string
+description: The JQ expression used to write the field value into the workload spec. Consult https://jqlang.org/manual/ for further info.
+example: |
+  {
+    "env": [
+      {
+        "name": $ARGS.named.name,
+        "value": $ARGS.named.value
+      }
+    ]
+  }
+minLength: 1
+maxLength: 4095
+pattern: .*
+

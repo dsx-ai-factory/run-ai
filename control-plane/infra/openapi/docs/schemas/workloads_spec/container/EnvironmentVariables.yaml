@@ -1,0 +1,6 @@
+description: Set of environment variables to populate into the container running the workload.
+type: array
+items:
+  $ref: "./EnvironmentVariable.yaml"
+maxItems: 1000
+nullable: true

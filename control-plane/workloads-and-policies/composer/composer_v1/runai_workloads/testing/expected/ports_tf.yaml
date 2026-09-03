@@ -1,0 +1,156 @@
+Dinfw: null
+JobSpec:
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  environment:
+    items:
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  image:
+    value: ubuntu
+  jobType: TFJob
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  ports:
+    items:
+      port-worker:
+        value:
+          container: 8080
+          external: 32010
+          serviceType: ClusterIP
+      port-worker-1:
+        value:
+          autoGenerate: true
+          container: 8081
+          serviceType: LoadBalancer
+      port-worker-2:
+        value:
+          autoGenerate: true
+          container: 8082
+          serviceType: NodePort
+  priorityClassName:
+    value: low
+  username:
+    value: test
+  workers:
+    value: 3
+MasterSpec:
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  environment:
+    items:
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  exposedUrls:
+    items:
+      url-master-1:
+        value:
+          containerPort: 8082
+      url-master-my-tool-name:
+        value:
+          containerPort: 8081
+      url-master-url-1:
+        deleted: true
+  image:
+    value: ubuntu
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  ports:
+    items:
+      port-master:
+        value:
+          autoGenerate: true
+          container: 8081
+          serviceType: NodePort
+      port-master-port-1:
+        deleted: true
+  priorityClassName:
+    value: low
+  username:
+    value: test
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: TFJob
+  environments:
+  - connections:
+    - connectionType: NodePort
+      containerPort: 8080
+      correlationName: port-worker
+      name: my-jupyter
+      portResourceName: port-test-8080-0
+      serviceResourceName: dw-test-0-clusterip
+      toolType: jupyter
+    - connectionType: LoadBalancer
+      containerPort: 8081
+      correlationName: port-worker-1
+      name: port-worker-1
+      portResourceName: port-test-8081-1
+      serviceResourceName: dw-test-1-loadbalancer
+      toolType: tensor
+    - connectionType: NodePort
+      containerPort: 8082
+      correlationName: port-worker-2
+      name: my-tool
+      portResourceName: port-test-8082-2
+      serviceResourceName: dw-test-2-nodeport
+      toolType: ""
+    id: ""
+    name: Worker
+    replicaType: Worker
+  - connections:
+    - connectionType: ExternalUrl
+      containerPort: 8082
+      correlationName: url-master-1
+      exposedUrlPath: /project/test
+      exposedUrlSubDomain: project-test
+      name: my-tool
+      toolType: custom
+    - connectionType: ExternalUrl
+      containerPort: 8081
+      correlationName: url-master-my-tool-name
+      exposedUrlPath: /project/test/url-master-my-tool-name
+      exposedUrlSubDomain: project-test-url-master-my-tool-name
+      name: url-master-my-tool-name
+      toolType: tensor
+    - connectionType: NodePort
+      containerPort: 8081
+      correlationName: port-master
+      name: port-master
+      portResourceName: port-test-8081-0
+      serviceResourceName: dw-test-0-nodeport
+      toolType: tensor
+    id: ""
+    name: Master
+    replicaType: Master
+  externalConnections:
+  - connectionType: ""
+    name: ""
+    toolType: google
+    url: http://google.com/search
+  - connectionType: ""
+    name: stats
+    toolType: wandb
+    url: http://wandb.com/stats
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: ports, Rules: , Type: Distributed'
+  images:
+  - ubuntu
+  - ubuntu
+  name: 'Value: ports, Rules: , Type: Distributed'
+  projectId: project-654-321
+  requestedPods:
+    number: 4
+  submittedBy: test
+  type: Distributed
+  version: v2alpha1

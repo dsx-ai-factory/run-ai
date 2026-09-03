@@ -1,0 +1,42 @@
+apiVersion: optimization.nvidia.com/v1alpha1
+kind: ResourceInterface
+metadata:
+  creationTimestamp: "2026-05-10T06:38:29Z"
+  finalizers:
+  - rid.kai.bolt/finalize
+  generation: 1
+  labels:
+    run.ai/resource-interface-group: kubeflow.org
+    run.ai/resource-interface-kind: JAXJob
+    run.ai/resource-interface-updated-at: 2026-05-10T06-35-07Z
+    run.ai/resource-interface-version: v1
+    run.ai/workload-type-id: 6d8989bf-a9d4-48fd-965c-b88923adbb19
+  name: ri-v1-kubeflow-org-jaxjob
+  resourceVersion: "8531"
+  uid: f219320f-32dd-44c1-8bb1-7b3602c72603
+spec:
+  optimizationInstructions: {}
+  structureDefinition:
+    rootComponent:
+      kind:
+        group: kubeflow.org
+        kind: JAXJob
+        version: v1
+      name: ""
+status:
+  conditions:
+  - lastTransitionTime: "2026-05-10T06:38:42Z"
+    message: The RBAC permissions for the group/kind are not ready
+    reason: RBACReady
+    status: "False"
+    type: RBACReady
+  - lastTransitionTime: "2026-05-10T06:38:42Z"
+    message: The sync is not enabled
+    reason: SyncEnabled
+    status: "False"
+    type: SyncEnabled
+  - lastTransitionTime: "2026-05-10T06:38:42Z"
+    message: The CustomResourceDefinition for the group/kind does not exist
+    reason: CRDExists
+    status: "False"
+    type: CRDExists

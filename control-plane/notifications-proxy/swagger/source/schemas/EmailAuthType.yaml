@@ -1,0 +1,3 @@
+  type: string
+  enum: ["auth_login", "auth_plain", "auth_none", ""]
+  default: "auth_login"

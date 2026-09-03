@@ -1,0 +1,12 @@
+type: object
+description: >-
+  The origin of an effective rule. Identifies the scope at which the rule was
+  defined and the matching project, department, or cluster id. Set by the
+  server on effective rules in responses only; leave empty in requests.
+required:
+  - sourceOfRule
+properties:
+  sourceOfRule:
+    $ref: "../../../../../infra/openapi/docs/schemas/policy_rules/SourceOfRule.yaml"
+example:
+  scope: cluster

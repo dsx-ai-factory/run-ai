@@ -1,0 +1,8 @@
+properties:
+  connections:
+    type: array
+    items:
+      $ref: "./SpecificRunConnectionInfo.yaml"
+    nullable: true
+nullable: true
+type: object

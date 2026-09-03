@@ -1,0 +1,8 @@
+image: ubuntu
+
+tolerations:
+  - name: tol1
+    operator: Equal
+    key: key1
+    value: value1
+    effect: Any

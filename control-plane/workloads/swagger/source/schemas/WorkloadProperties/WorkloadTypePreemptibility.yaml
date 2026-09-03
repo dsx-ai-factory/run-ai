@@ -1,0 +1,7 @@
+type: string
+description: Indicates the default preemptibility level of the workload type. Only available for workloads submitted to clusters of versions 2.24+.
+  The default, if not specified, is if priority.value >= 100 - then 'non-preemptible', else 'preemptible'.
+example: non-preemptible
+enum:
+  - preemptible
+  - non-preemptible

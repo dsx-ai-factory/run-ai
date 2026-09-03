@@ -1,0 +1,4 @@
+type: array
+items:
+  $ref: './Event.yaml'
+x-schema-name: Events

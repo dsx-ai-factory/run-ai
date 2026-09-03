@@ -1,0 +1,25 @@
+description: Defines whether the volumeMode field is required when creating PVCs and specifies default and supported modes for the storage class.
+properties:
+  required:
+    type: boolean
+    description: Indicates whether the volumeMode field is mandatory when creating a PVC.
+    nullable: true
+  default:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/PvcVolumeMode.yaml"
+  supportedValues:
+    description: Lists which volume modes are supported for this storage class.
+    type: object
+    nullable: true
+    properties:
+      filesystem:
+        type: boolean
+        description: Indicates whether filesystem mode is supported. Filesystem allows the volume to be mounted as a filesystem, enabling the usage of directories and files.
+        default: true
+        nullable: true
+      block:
+        type: boolean
+        description: Indicates whether block mode is supported. Exposes the volume as a block storage, which can be formatted or used by applications directly without a filesystem.
+        default: true
+        nullable: true
+type: object
+nullable: true

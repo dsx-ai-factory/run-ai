@@ -1,0 +1,31 @@
+post:
+  summary: Create workspace.
+  description: Creates a workspace from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
+  operationId: create_workspace
+  x-service: assets-service
+  x-no-authorization: true
+  x-internal: true
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_workspaces_service_test.go
+  tags:
+    - Workspaces
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/Workload/V1/WorkloadCreationRequest.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/Workspace/V1/Workspace.yaml"
+    400:
+      $ref: "../../../../../infra/openapi/docs/responses/400SubmissionErrorV2.yaml"
+    401:
+      $ref: "../../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

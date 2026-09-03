@@ -1,0 +1,33 @@
+{{- /*
+Preflight guard.
+
+The postgresql / nats / thanos subcharts are pinned via fullnameOverride so
+their Service names stay stable under any Helm release name. On a cluster that
+was first installed on an OLDER (unpinned) chart under a non-default release
+name, those StatefulSets are still named "<release>-*". Applying the pinned
+names would create fresh StatefulSets and leave the original PVCs orphaned —
+i.e. the databases/metrics would start from empty volumes.
+
+This guard aborts such an upgrade BEFORE anything is applied. To proceed the
+operator must keep the existing name by overriding the subchart's
+fullnameOverride (an intentional migration to the new name means backing up
+and removing the old StatefulSet first, after which lookup finds nothing and
+the upgrade proceeds).
+
+It fires only on a live upgrade (lookup returns nothing during `helm template`
+/ client dry-run or a fresh install), and only when an old, differently-named
+StatefulSet actually exists.
+*/ -}}
+{{- $ns := .Release.Namespace }}
+{{- $checks := list
+  (dict "old" (printf "%s-postgresql" .Release.Name)     "new" .Values.postgresql.fullnameOverride                   "override" "postgresql.fullnameOverride" "set" (printf "%s-postgresql" .Release.Name))
+  (dict "old" (printf "%s-nats" .Release.Name)           "new" .Values.nats.fullnameOverride                         "override" "nats.fullnameOverride"       "set" (printf "%s-nats" .Release.Name))
+  (dict "old" (printf "%s-thanos-receive" .Release.Name) "new" (printf "%s-receive" .Values.thanos.fullnameOverride) "override" "thanos.fullnameOverride"     "set" (printf "%s-thanos" .Release.Name))
+}}
+{{- range $c := $checks }}
+{{- if ne $c.old $c.new }}
+{{- if lookup "apps/v1" "StatefulSet" $ns $c.old }}
+{{- fail (printf "\n\nUpgrade blocked: this release runs StatefulSet %q, but the chart would now create %q. That renames the workload and orphans the existing PersistentVolumeClaim, so it would start from an empty volume (data loss).\n\nTo upgrade without data loss, keep the current name by setting:\n    %s=%s\n(plus the matching global host override, if any).\n" $c.old $c.new $c.override $c.set) }}
+{{- end }}
+{{- end }}
+{{- end }}

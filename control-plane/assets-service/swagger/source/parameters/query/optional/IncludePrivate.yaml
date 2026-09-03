@@ -1,0 +1,7 @@
+name: includePrivate
+in: query
+required: false
+x-internal: true
+description: Whether the query should include private assets. mutually exclusive with `privateOnly` parameter.
+schema:
+  type: boolean

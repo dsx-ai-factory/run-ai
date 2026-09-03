@@ -1,0 +1,4 @@
+StartRequired:
+  $ref: '../../../infra/openapi/docs/parameters/query/mandatory/StartRequired.yaml'
+EndRequired:
+  $ref: '../../../infra/openapi/docs/parameters/query/mandatory/EndRequired.yaml'

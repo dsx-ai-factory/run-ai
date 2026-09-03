@@ -1,0 +1,11 @@
+name: scope
+in: query
+required: true
+description: The scope that the policy relates to.
+schema:
+  type: string
+  enum:
+    - tenant
+    - cluster
+    - department
+    - project

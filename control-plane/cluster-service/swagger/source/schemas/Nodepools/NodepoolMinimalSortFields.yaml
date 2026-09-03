@@ -1,0 +1,4 @@
+type: string
+enum: [ clusterId ]
+description: Fields available for sorting nodepool metadata
+

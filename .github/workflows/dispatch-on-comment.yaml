@@ -1,0 +1,245 @@
+name: Dispatch on comment
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  pull-requests: write
+  actions:       write
+  contents:      read
+  issues:        write
+
+concurrency:
+  group: dispatch-on-comment-${{ github.event.issue.number }}-${{ github.event.comment.id }}
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    name: Dispatch CI on /ok-to-test or /retest
+    if: github.event.issue.pull_request != null
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      # ── Step 1: parse command + verify this is a fork PR ──────────────────
+      # Sets skip=true for non-commands and for internal (org member) PRs.
+      - name: Parse comment
+        id: parse
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const body = context.payload.comment.body.trim();
+            const m = body.match(/^\/(ok-to-test|retest)(?:\s+([0-9a-fA-F]{7,40}))?$/);
+            if (!m) { core.setOutput('skip', 'true'); return; }
+
+            const requestedSha = (m[2] || '').toLowerCase();
+
+            const { data: pr } = await github.rest.pulls.get({
+              owner:       context.repo.owner,
+              repo:        context.repo.repo,
+              pull_number: context.issue.number,
+            });
+
+            // Skip internal PRs — org member PRs get CI automatically via pr-trigger.yaml
+            if (pr.head.repo.full_name === `${context.repo.owner}/${context.repo.repo}`) {
+              core.setOutput('skip', 'true');
+              return;
+            }
+
+            // An explicit SHA authorises exactly that commit. If the head has moved
+            // since the maintainer read it, refuse rather than build something else.
+            if (requestedSha && !pr.head.sha.toLowerCase().startsWith(requestedSha)) {
+              core.setOutput('skip',          'false');
+              core.setOutput('stale_sha',     'true');
+              core.setOutput('requested_sha', requestedSha);
+              core.setOutput('head_sha',      pr.head.sha);
+              return;
+            }
+
+            core.setOutput('skip',     'false');
+            core.setOutput('verb',     m[1]);
+            core.setOutput('sha',      pr.head.sha);
+            core.setOutput('ref',      pr.head.ref);
+            core.setOutput('base_ref', pr.base.ref);
+            core.setOutput('number',   String(pr.number));
+
+      # ── Step 2: verify run-ai/maintainers membership ──────────────────────
+      - name: Verify maintainers membership
+        if: steps.parse.outputs.skip != 'true'
+        id: verify
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.PAT_VALIDATE_TEAM_MEMBERS }}
+          result-encoding: string
+          script: |
+            const commenter = context.payload.comment.user.login;
+            try {
+              const resp = await github.rest.teams.getMembershipForUserInOrg({
+                org:       'run-ai',
+                team_slug: 'maintainers',
+                username:  commenter,
+              });
+              return resp.data.state === 'active' ? 'true' : 'false';
+            } catch (error) {
+              if (error.status === 404) { return 'false'; }
+              core.error(`Could not verify run-ai/maintainers membership (status ${error.status ?? 'unknown'})`);
+              return 'unknown';
+            }
+
+      # ── Step 2b: reject unauthorized commenter ─────────────────────────────
+      - name: Reject unauthorized commenter
+        if: |
+          !cancelled() &&
+          steps.parse.outputs.skip == 'false' &&
+          steps.verify.outputs.result != 'true'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          VERIFY_RESULT: ${{ steps.verify.outputs.result }}
+        with:
+          script: |
+            const commenter = context.payload.comment.user.login;
+            const unknown   = process.env.VERIFY_RESULT !== 'false';
+            const body = unknown
+              ? `@${commenter} CI was not triggered: the maintainers check could not run. This is a CI configuration problem, not a permissions decision — please contact a maintainer.`
+              : `@${commenter} Only members of the [run-ai/maintainers](https://github.com/orgs/run-ai/teams/maintainers) team can trigger CI.`;
+            await github.rest.reactions.createForIssueComment({
+              owner:      context.repo.owner,
+              repo:       context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content:    unknown ? 'eyes' : 'confused',
+            });
+            await github.rest.issues.createComment({
+              owner:        context.repo.owner,
+              repo:         context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+            core.setFailed(unknown
+              ? 'Maintainers membership could not be verified — failing closed'
+              : `@${commenter} is not in run-ai/maintainers`);
+
+      # ── Step 2c: refuse when the authorised SHA is no longer the head ──────
+      - name: Reject stale SHA
+        if: |
+          !cancelled() &&
+          steps.parse.outputs.stale_sha == 'true' &&
+          steps.verify.outputs.result == 'true'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          REQUESTED_SHA: ${{ steps.parse.outputs.requested_sha }}
+          HEAD_SHA:      ${{ steps.parse.outputs.head_sha }}
+        with:
+          script: |
+            const requested = process.env.REQUESTED_SHA;
+            const head      = process.env.HEAD_SHA;
+            await github.rest.reactions.createForIssueComment({
+              owner:      context.repo.owner,
+              repo:       context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content:    'confused',
+            });
+            await github.rest.issues.createComment({
+              owner:        context.repo.owner,
+              repo:         context.repo.repo,
+              issue_number: context.issue.number,
+              body: `CI was not triggered: \`${requested}\` is no longer the head of this pull request.\n\n` +
+                    `The head is now \`${head}\`. Review the current code and re-issue ` +
+                    `\`/ok-to-test ${head.substring(0, 8)}\`.`,
+            });
+            core.setFailed(`Authorised ${requested} but head is ${head}`);
+
+      # ── Step 3: rocket reaction ────────────────────────────────────────────
+      - name: React with rocket
+        if: steps.parse.outputs.skip != 'true' && steps.parse.outputs.stale_sha != 'true' && steps.verify.outputs.result == 'true'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              owner:      context.repo.owner,
+              repo:       context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content:    'rocket',
+            });
+
+      # ── Step 4: /ok-to-test and /retest — dispatch pr-trigger.yaml at the PR's current head
+      - name: Dispatch
+        if: |
+          steps.parse.outputs.skip != 'true' &&
+          steps.parse.outputs.stale_sha != 'true' &&
+          steps.verify.outputs.result == 'true' &&
+          (steps.parse.outputs.verb == 'ok-to-test' || steps.parse.outputs.verb == 'retest')
+        id: dispatch
+        env:
+          PR_SHA:      ${{ steps.parse.outputs.sha }}
+          PR_REF:      ${{ steps.parse.outputs.ref }}
+          PR_BASE_REF: ${{ steps.parse.outputs.base_ref }}
+          PR_NUMBER:   ${{ steps.parse.outputs.number }}
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          github-token: ${{ secrets.GIT_HUB_OSS }}
+          script: |
+            // Re-read the head immediately before dispatching. If it moved between
+            // Parse and now, the authorised commit is not what would be built.
+            const { data: fresh } = await github.rest.pulls.get({
+              owner:       context.repo.owner,
+              repo:        context.repo.repo,
+              pull_number: Number(process.env.PR_NUMBER),
+            });
+            if (fresh.head.sha !== process.env.PR_SHA) {
+              await github.rest.issues.createComment({
+                owner:        context.repo.owner,
+                repo:         context.repo.repo,
+                issue_number: context.issue.number,
+                body: `CI was not triggered: the head moved from \`${process.env.PR_SHA}\` ` +
+                      `to \`${fresh.head.sha}\` while this command was being processed.\n\n` +
+                      `Review the current code and re-issue \`/ok-to-test ${fresh.head.sha.substring(0, 8)}\`.`,
+              });
+              core.setFailed(`Head moved from ${process.env.PR_SHA} to ${fresh.head.sha}`);
+              return;
+            }
+
+            await github.rest.actions.createWorkflowDispatch({
+              owner:       context.repo.owner,
+              repo:        context.repo.repo,
+              workflow_id: 'pr-trigger.yaml',
+              ref:         context.payload.repository.default_branch,
+              inputs: {
+                'pr-number':    process.env.PR_NUMBER,
+                'pr-sha':       process.env.PR_SHA,
+                'pr-merge-sha': '',
+                'pin-sha':      fresh.merge_commit_sha || '',
+                'pr-ref':       process.env.PR_REF,
+                'base-ref':     process.env.PR_BASE_REF,
+              },
+            });
+
+      # ── Step 5: surface a failed dispatch on the PR, not only in Actions
+      - name: Report dispatch failure
+        if: |
+          !cancelled() &&
+          steps.parse.outputs.skip == 'false' &&
+          steps.verify.outputs.result == 'true' &&
+          steps.dispatch.outcome == 'failure'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          script: |
+            const commenter = context.payload.comment.user.login;
+            await github.rest.reactions.createForIssueComment({
+              owner:      context.repo.owner,
+              repo:       context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content:    'confused',
+            });
+            await github.rest.issues.createComment({
+              owner:        context.repo.owner,
+              repo:         context.repo.repo,
+              issue_number: context.issue.number,
+              body:         `@${commenter} CI was not started — dispatching \`pr-trigger.yaml\` failed. See the [workflow run](${process.env.RUN_URL}) for details.`,
+            });

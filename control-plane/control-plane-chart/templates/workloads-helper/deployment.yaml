@@ -1,0 +1,13 @@
+{{- if .Values.workloadsHelper.enabled }}
+{{- include "common.deployment" (list . .Values.workloadsHelper .Values.workloadsHelper.autoscaling .Values.workloadsHelper.serviceAccount "control-plane.workloadsHelper.deployment" ) }}
+{{- end }}
+
+{{- define "control-plane.workloadsHelper.deployment" -}}
+spec:
+  template:
+    spec:
+      initContainers:
+        {{- include "awaitingWorkloadsServiceReadiness" . | nindent 8 }}
+      containers:
+      - {{- include "common.container" . | nindent 8 }}
+{{- end }}

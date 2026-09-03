@@ -1,0 +1,24 @@
+#path
+kotClusterUuid:
+  $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+departmentId:
+  $ref: "../../../../infra/openapi/docs/parameters/path/DepartmentId.yaml"
+namespace:
+  $ref: "./path/Namespace.yaml"
+pvcName:
+  $ref: "./path/PVCName.yaml"
+secretName:
+  $ref: "./path/SecretName.yaml"
+#query
+name:
+  $ref: "./query/optional/nameFilter.yaml"
+type:
+  $ref: "./query/optional/secretTypeFilter.yaml"
+scopeId:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/ScopeId.yaml"
+ScopeType:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/ScopeType.yaml"
+FilterByCluster:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml"
+origin:
+  $ref: "./query/optional/originFilter.yaml"

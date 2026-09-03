@@ -1,0 +1,140 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Policies
+  description: An API for managing policies
+  contact:
+    email: support@run.ai
+servers:
+  - url: https://app.run.ai
+  - url: https://staging.run.ai
+  - url: https://test.run.ai
+security:
+  - bearerAuth: []
+tags:
+  - name: Policy
+    description: Administrator applied workload policies.
+  - name: Synchronization
+    description: Policy synchronization from the control panel to the cluster.
+
+paths:
+  /:
+    x-internal: true
+    get:
+      summary: health check
+      x-service: policy-service
+      x-no-authorization: true
+      operationId: health
+      tags:
+        - Health
+      responses:
+        200:
+          description: Executed successfully.
+
+  /api/v2/policy:
+    $ref: "./resources/Policy.yaml"
+
+  /api/v2/policy/fallback:
+    $ref: "./resources/FallbackPolicy.yaml"
+
+  /api/v2/policy/trainings:
+    $ref: "./resources/TrainingPolicyV2.yaml"
+  /api/v2/policy/trainings/sync:
+    $ref: "./resources/TrainingPolicySyncV2.yaml"
+  /api/v2/policy/trainings/sync/status:
+    $ref: "./resources/TrainingSyncStatus.yaml"
+
+  /api/v2/policy/workspaces:
+    $ref: "./resources/WorkspacePolicyV2.yaml"
+  /api/v2/policy/workspaces/sync:
+    $ref: "./resources/WorkspacePolicySyncV2.yaml"
+  /api/v2/policy/workspaces/sync/status:
+    $ref: "./resources/WorkspaceSyncStatus.yaml"
+
+  /api/v2/policy/distributed:
+    $ref: "./resources/DistributedPolicyV2.yaml"
+  /api/v2/policy/distributed/sync:
+    $ref: "./resources/DistributedPolicySyncV2.yaml"
+  /api/v2/policy/distributed/sync/status:
+    $ref: "./resources/DistributedSyncStatus.yaml"
+
+  /api/v2/policy/inferences:
+    $ref: "./resources/InferencePolicyV2.yaml"
+  /api/v2/policy/inferences/sync:
+    $ref: "./resources/InferencePolicySyncV2.yaml"
+  /api/v2/policy/inferences/sync/status:
+    $ref: "./resources/InferenceSyncStatus.yaml"
+
+  /api/v2/policy/distributed-inferences:
+    $ref: "./resources/DistributedInferencePolicyV2.yaml"
+  /api/v2/policy/distributed-inferences/sync:
+    $ref: "./resources/DistributedInferencePolicySyncV2.yaml"
+  /api/v2/policy/distributed-inferences/sync/status:
+    $ref: "./resources/DistributedInferenceSyncStatus.yaml"
+
+  /api/v2/policy/sync-config:
+    $ref: "./resources/SyncConfig.yaml"
+  /api/v2/policy/sync-config/{ClusterId}:
+    $ref: "./resources/SyncConfigById.yaml"
+
+  /api/v2/policy/nim-services:
+    $ref: "./resources/NimServicePolicy.yaml"
+
+  /internal/policy/cross-type:
+    $ref: "./resources/PolicyCrossType.yaml"
+  /internal/policy/asset/{AssetId}:
+    $ref: "./resources/PolicyAsset.yaml"
+
+
+  ################################################################
+  ####################  ANY-WORKLOAD POLICIES  ###################
+  ################################################################
+
+  /api/v1/policies/formatter:
+    $ref: "./resources/Formatter.yaml"
+  /api/v1/policies/formatter/{FormatterName}:
+    $ref: "./resources/FormatterByName.yaml"
+  /api/v1/policies/formatter/{FormatterName}/fields:
+    $ref: "./resources/FormatterFields.yaml"
+
+  /api/v1/policies/field-groups:
+    $ref: "./resources/FieldGroup.yaml"
+  /api/v1/policies/field-groups/{FieldGroupName}:
+    $ref: "./resources/FieldGroupByName.yaml"
+  /api/v1/policies/field-groups/{FieldGroupName}/fields:
+    $ref: "./resources/FieldGroupFields.yaml"
+  /api/v1/policies/field-groups/{FieldGroupName}/item-selectors:
+    $ref: "./resources/FieldGroupItemSelectors.yaml"
+
+  /api/v1/policies/mappings:
+    $ref: "./resources/Mapping.yaml"
+  /api/v1/policies/mappings/minimal:
+    $ref: "./resources/MappingMinimal.yaml"
+  /api/v1/policies/mappings/field-info:
+    $ref: "./resources/MappingFieldInfo.yaml"
+  /api/v1/policies/mappings/specSelectors:
+    $ref: "./resources/MappingSpecSelectors.yaml"
+
+  /api/v1/policies:
+    $ref: "./resources/Policies.yaml"
+  /api/v1/policies/effective:
+    $ref: "./resources/PoliciesEffective.yaml"
+  /api/v1/policies/{PolicyId}:
+    $ref: "./resources/PoliciesById.yaml"
+  /api/v1/policies/{PolicyId}/rules:
+    $ref: "./resources/PoliciesRules.yaml"
+  /internal/policies:
+    $ref: "./resources/PoliciesInternal.yaml"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer authentication
+  schemas:
+    supersetRules:
+      $ref: "../../../infra/openapi/docs/schemas/workloads_spec/SupersetRules.yaml"
+    crossTypePolicy:
+      $ref: "./schemas/CrossType/PolicyCrossType.yaml"

@@ -1,0 +1,6 @@
+ngcAuthSecret: "ngc-secret"
+servingPort:
+  port: 8000
+modelStore:
+  nimCache:
+    name: "nim-cache"

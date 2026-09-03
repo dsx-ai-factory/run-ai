@@ -1,0 +1,5 @@
+type: string
+description: The action to apply
+x-internal: true
+enum:
+  - CPU_QUOTAS_TO_DEFAULT

@@ -1,0 +1,12 @@
+type: object
+properties:
+  listener_id:
+    type: string
+  listener_type:
+    type: string
+  listener_config:
+    type: object
+required:
+  - listener_id
+  - listener_config
+  - listener_type

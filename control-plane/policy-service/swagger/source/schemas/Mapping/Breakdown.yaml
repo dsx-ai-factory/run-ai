@@ -1,0 +1,18 @@
+type: object
+description: >-
+  The detailed breakdown of a mapping's fields and spec selectors, including
+  per-field variations, formatter details, and item-selector queries. This is
+  the same payload returned by GET
+  /api/v1/policies/{policyId}?breakdown=true.
+properties:
+  breakdown:
+    type: object
+    nullable: true
+    description: >-
+      The detailed breakdown, keyed into per-field variations and per-spec-selector
+      details.
+    properties:
+      fields:
+        $ref: "./BreakdownFields.yaml"
+      specSelectors:
+        $ref: "./BreakdownSpecSelectors.yaml"

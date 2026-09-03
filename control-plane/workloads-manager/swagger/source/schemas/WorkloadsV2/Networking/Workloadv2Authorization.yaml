@@ -1,0 +1,14 @@
+type: object
+example:
+  forceJsonResponse: false
+  authorizationType: authenticatedUsers
+allOf:
+  - $ref: "../../../../../../infra/openapi/docs/schemas/workloads_spec/connectivity/Authorization.yaml"
+  - type: object
+    properties:
+      forceJsonResponse:
+        description: Force JSON errors instead of HTTP error pages or redirects.
+        type: boolean
+        default: false
+        nullable: true
+nullable: true

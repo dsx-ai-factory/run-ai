@@ -1,0 +1,14 @@
+{{- if .Values.auditService.enabled }}
+{{- include "common.deployment" (list . .Values.auditService .Values.auditService.autoscaling .Values.auditService.serviceAccount "control-plane.auditService.deployment" ) }}
+{{- end }}
+
+{{- define "control-plane.auditService.deployment" -}}
+spec:
+  template:
+    spec:
+      initContainers:
+        {{- include "awaitingPostgresReadinessContainer" . | nindent 8 }}
+        {{- include "common.initContainer" . | nindent 8 }}
+      containers:
+      - {{- include "common.container" . | nindent 8 }}
+{{- end }}

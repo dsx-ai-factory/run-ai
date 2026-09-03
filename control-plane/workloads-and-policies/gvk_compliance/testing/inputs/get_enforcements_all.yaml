@@ -1,0 +1,187 @@
+policy:
+  id: test-policy
+  effectiveRules:
+    # --- numeric (range bundles min/max/step) ---
+    - field: numRangeMax
+      specSelector: self
+      enforcements:
+        - range: { max: 5 }           # value 10 -> fails the max bound
+    - field: numRangeMin
+      specSelector: self
+      enforcements:
+        - range: { min: 5 }           # value 0 -> fails the min bound
+    - field: numRangeStep
+      specSelector: self
+      enforcements:
+        - range: { step: 5 }          # value 7 -> fails (not a multiple of 5 from 0)
+    - field: numRangeFull
+      specSelector: self
+      enforcements:
+        # min=11, step=4 -> allowed: 11, 15, 19, ..., 147. value 13 fails step.
+        - range: { min: 11, max: 150, step: 4 }
+
+    # --- text (length bundles min/max) ---
+    - field: txtLengthMax
+      specSelector: self
+      enforcements:
+        - length: { max: 5 }          # value "abcdefghij" (10) -> fails the max bound
+    - field: txtLengthMin
+      specSelector: self
+      enforcements:
+        - length: { min: 5 }          # value "ab" (2) -> fails the min bound
+    - field: txtOptions
+      specSelector: self
+      enforcements:
+        - options: [foo, bar]         # value "hello" -> fails
+    - field: txtMatch
+      specSelector: self
+      enforcements:
+        - match: "^[0-9]+$"          # value "abc" -> fails
+
+    # --- k8s quantity (quantityRange bundles min/max/step) ---
+    - field: qtyRangeMax
+      specSelector: self
+      enforcements:
+        - quantityRange: { max: "1Gi" }       # value "2Gi" -> fails max bound
+    - field: qtyRangeMin
+      specSelector: self
+      enforcements:
+        - quantityRange: { min: "1Gi" }       # value "100m" -> fails min bound
+    - field: qtyRangeStep
+      specSelector: self
+      enforcements:
+        - quantityRange: { step: "100m" }     # value "150m" -> fails step (not a multiple of 100m from 0)
+    - field: qtyRangeFull
+      specSelector: self
+      enforcements:
+        # min=10Mi, max=1Gi, step=500Mi -> allowed: 10Mi, 510Mi, 1010Mi. value
+        # 600Mi fails the step, which is the only constraint it breaks.
+        - quantityRange: { min: "10Mi", max: "1Gi", step: "500Mi" }
+
+    # --- slice count (elements bundles min/max) ---
+    - field: listMax
+      specSelector: self
+      enforcements:
+        - elements: { max: 2 }        # value has 5 elements -> fails the max bound
+    - field: listMin
+      specSelector: self
+      enforcements:
+        - elements: { min: 5 }        # value has 1 element -> fails the min bound
+
+    # --- presence ---
+    - field: missing
+      specSelector: self
+      enforcements:
+        - required: true              # field absent in workload -> fails
+
+    # --- item count (cycle 0) — items bundles min/max ---
+    - field: item
+      specSelector: items
+      enforcements:
+        - items: { max: 2 }           # items has 4 entries -> fails early (max checked during iteration)
+    - field: item
+      specSelector: items
+      enforcements:
+        - items: { min: 10 }          # items has 4 entries -> fails in finalize (min checked at end)
+
+  # Synthetic, minimal breakdown: every field sits at the root of the spec and
+  # uses the KeyValue builtin with specRef == fieldName. A single "self"
+  # selector hits the root; "items" iterates a top-level list for the item
+  # count enforcements.
+  breakdown:
+    fields:
+      numRangeMax:
+        - specSelectors: [self]
+          specRef: numRangeMax
+          formatter: { builtin: KeyValue }
+      numRangeMin:
+        - specSelectors: [self]
+          specRef: numRangeMin
+          formatter: { builtin: KeyValue }
+      numRangeStep:
+        - specSelectors: [self]
+          specRef: numRangeStep
+          formatter: { builtin: KeyValue }
+      numRangeFull:
+        - specSelectors: [self]
+          specRef: numRangeFull
+          formatter: { builtin: KeyValue }
+      txtLengthMax:
+        - specSelectors: [self]
+          specRef: txtLengthMax
+          formatter: { builtin: KeyValue }
+      txtLengthMin:
+        - specSelectors: [self]
+          specRef: txtLengthMin
+          formatter: { builtin: KeyValue }
+      txtOptions:
+        - specSelectors: [self]
+          specRef: txtOptions
+          formatter: { builtin: KeyValue }
+      txtMatch:
+        - specSelectors: [self]
+          specRef: txtMatch
+          formatter: { builtin: KeyValue }
+      qtyRangeMax:
+        - specSelectors: [self]
+          specRef: qtyRangeMax
+          formatter: { builtin: KeyValue }
+      qtyRangeMin:
+        - specSelectors: [self]
+          specRef: qtyRangeMin
+          formatter: { builtin: KeyValue }
+      qtyRangeStep:
+        - specSelectors: [self]
+          specRef: qtyRangeStep
+          formatter: { builtin: KeyValue }
+      qtyRangeFull:
+        - specSelectors: [self]
+          specRef: qtyRangeFull
+          formatter: { builtin: KeyValue }
+      listMax:
+        - specSelectors: [self]
+          specRef: listMax
+          formatter: { builtin: KeyValue }
+      listMin:
+        - specSelectors: [self]
+          specRef: listMin
+          formatter: { builtin: KeyValue }
+      missing:
+        - specSelectors: [self]
+          specRef: missing
+          formatter: { builtin: KeyValue }
+      # Pairs with the "items" selector. The count enforcements ignore the
+      # formatter, but the resolver still expects the pairing to exist.
+      item:
+        - specSelectors: [items]
+          specRef: name
+          formatter: { builtin: KeyValue }
+    specSelectors:
+      self:
+        query: "."
+      items:
+        query: "(.items // [])[]"
+
+# Top-level kind/version just so the test can derive a GVK. None of the
+# validation logic cares about the concrete GVK for this synthetic case.
+workload:
+  apiVersion: test/v1
+  kind: Synthetic
+  numRangeMax: 10
+  numRangeMin: 0
+  numRangeStep: 7
+  # min=11 keeps the min check happy, but 13 is not 11 + 4*k so step fails.
+  numRangeFull: 13
+  txtLengthMax: abcdefghij
+  txtLengthMin: ab
+  txtOptions: hello
+  txtMatch: abc
+  qtyRangeMax: 2Gi
+  qtyRangeMin: 100m
+  qtyRangeStep: 150m
+  # 600Mi sits inside [10Mi, 1Gi] but is not 10Mi + 500Mi*k so step fails.
+  qtyRangeFull: 600Mi
+  listMax: [a, b, c, d, e]
+  listMin: [a]
+  # "missing" intentionally absent.
+  items: [a, b, c, d]

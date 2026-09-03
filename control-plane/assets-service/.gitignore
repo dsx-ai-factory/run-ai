@@ -1,0 +1,23 @@
+cover.out
+
+generated/.openapi-generator
+
+generated/README.md
+generated/pkg/policy-service/README.md
+generated/pkg/policy-service/.openapi-generator
+
+generated-go-client/
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+bin
+
+# editor and IDE paraphernalia
+*.iml
+*.swp
+*.swo
+*~
+.vscode/
+vendor
+
+swagger.html

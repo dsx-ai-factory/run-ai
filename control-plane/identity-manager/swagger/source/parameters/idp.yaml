@@ -1,0 +1,6 @@
+name: idp
+in: path
+required: true
+description: The alias of the idp
+schema:
+  type: string

@@ -1,0 +1,100 @@
+apiVersion: kubeflow.org/v1
+kind: PyTorchJob
+metadata:
+  annotations:
+    image: ubuntu
+    kai.scheduler/topology: name
+    kai.scheduler/topology-preferred-placement: preferred
+    template: job-0-20220125-034942
+    user: user.name
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: pytorchjob
+    createdBy: PyTorchJob
+    project: team-a
+    release: job-0
+    run.ai/top-owner-uid: b5efa366-77be-4da3-1234-b59483d02a99
+    workloadKind: DistributedWorkload
+    workloadName: job-0-20220125-034942
+  name: job-0
+  namespace: runai-team-a
+spec:
+  pytorchReplicaSpecs:
+    Master:
+      replicas: 1
+      template:
+        metadata:
+          annotations:
+            gpu-fraction-num-devices: "1"
+            gpu-memory: "120"
+            runai-nodepools: default nodepoola
+            totalGPUs: "0"
+            totalGPUsMemory: "480"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-1234-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-0-20220125-034942
+        spec:
+          containers:
+          - env:
+            - name: ENV_0
+              value: env0
+            - name: ENV_1
+              value: env1
+            image: ubuntu
+            imagePullPolicy: Always
+            name: pytorch
+            resources: {}
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              seccompProfile:
+                type: Unconfined
+          schedulerName: runai-scheduler
+          tolerations:
+          - key: aaa
+            operator: Exists
+    Worker:
+      replicas: 3
+      template:
+        metadata:
+          annotations:
+            gpu-fraction-num-devices: "1"
+            gpu-memory: "120"
+            runai-nodepools: default nodepoola
+            totalGPUs: "0"
+            totalGPUsMemory: "480"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-1234-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-0-20220125-034942
+        spec:
+          containers:
+          - env:
+            - name: ENV_0
+              value: env0
+            - name: ENV_1
+              value: env1
+            image: ubuntu
+            imagePullPolicy: Always
+            name: pytorch
+            resources: {}
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              seccompProfile:
+                type: Unconfined
+          schedulerName: runai-scheduler
+          tolerations:
+          - key: aaa
+            operator: Exists
+  runPolicy:
+    backoffLimit: 5
+    cleanPodPolicy: None
+status: {}

@@ -1,0 +1,68 @@
+get:
+  summary: Get a NVIDIA NIM service. [Experimental]
+  description: Retrieve details of a specific NVIDIA NIM service, by id
+  operationId: get_nim_service_by_id
+  x-test-coverage:
+    - control-plane/workloads-manager/pkg/services/services_test.go
+  x-service: workloads-manager
+  x-authorize:
+    resource-type: inferences
+    action: read
+  tags:
+    - NVIDIA NIM
+  parameters:
+    - $ref: '../parameters/path/WorkloadV2Id.yaml'
+  responses:
+    200:
+      description: Successfully retrieved the workload
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/NIMServices/NimServiceResponse.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+patch:
+  summary: Update NVIDIA NIM service spec. [Experimental]
+  operationId: update_nim_service_spec
+  description: Update the specification of an existing NVIDIA NIM service.
+  x-service: workloads-manager
+  x-test-coverage:
+    - control-plane/workloads-manager/pkg/services/services_test.go
+  x-authorize:
+    resource-type: inferences
+    action: update
+  tags:
+    - NVIDIA NIM
+  parameters:
+    - $ref: '../parameters/path/WorkloadV2Id.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/NIMServices/NimServiceUpdateRequest.yaml"
+  responses:
+    202:
+      description: Workload update request accepted
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/NIMServices/NimServiceResponse.yaml'
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

@@ -1,0 +1,3 @@
+## used for generating the client enum, need to be aligned with WorkloadsSort.yaml and WorkloadsFilter.yaml
+type: string
+enum: [type, name, clusterId, projectId, projectName, departmentId, departmentName, createdAt, deletedAt, submittedBy, phase, completedAt, nodepool, distributedFramework, allocatedGPU, idleAllocatedGpus, totalPendingTimeSeconds, totalRunningTimeSeconds, phaseUpdatedAt, category, priority, priorityClassName, guaranteedRuntimeEndsAt, aiApplicationId, aiApplicationName]

@@ -1,0 +1,18 @@
+type: object
+nullable: true
+description: Defines the placement strategy for GPU pods within the node pool.
+properties:
+  node:
+    description: |
+      Specifies how GPU pods are placed across nodes.
+       - binpack - Place as many GPU pods as possible on each node to use fewer nodes and maximize available capacity.
+       - spread - Distribute GPU pods across as many nodes as possible to balance load across nodes.
+    allOf:
+      - $ref: "./PlacementStrategy.yaml"
+  device:
+    description: |
+      Specifies how GPU pods are placed across GPU devices within a node when using GPU fractions.
+       - binpack - Place as many GPU pods as possible on each GPU device to use fewer devices and maximize available capacity, minimizing GPU fraction fragmentation.
+       - spread - Distribute GPU pods across as many GPU devices as possible to balance load across devices.
+    allOf:
+      - $ref: "./PlacementStrategy.yaml"

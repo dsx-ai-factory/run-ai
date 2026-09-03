@@ -1,0 +1,8 @@
+type: string
+description: >-
+  The scope of the element. system is built-in and ships with the platform;
+  tenant is admin-defined at the tenant level. This is not the same as policy
+  scope.
+enum:
+  - system
+  - tenant

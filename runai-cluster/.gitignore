@@ -1,0 +1,16 @@
+.DS_Store
+
+# VSCode
+**/.vscode/*
+**/*.code-workspace
+
+# intellij
+.idea/
+
+# Local History for Visual Studio Code
+**/.history/
+
+# Built Visual Studio Code Extensions
+**/*.vsix
+
+vendor/

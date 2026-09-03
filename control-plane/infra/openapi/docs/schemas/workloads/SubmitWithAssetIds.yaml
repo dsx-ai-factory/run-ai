@@ -1,0 +1,4 @@
+x-internal: true
+properties:
+  assets:
+    $ref: "../assets/AssetSubmissionIds.yaml"

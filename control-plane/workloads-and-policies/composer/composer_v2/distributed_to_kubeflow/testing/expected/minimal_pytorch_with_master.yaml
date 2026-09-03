@@ -1,0 +1,131 @@
+DistributedTarget:
+  Config: {}
+  Framework: PyTorch
+  JaxJob: null
+  MasterSpec: null
+  MpiJob: null
+  ObjectMeta: null
+  PyTorchJob:
+    apiVersion: kubeflow.org/v1
+    kind: PyTorchJob
+    metadata:
+      annotations:
+        run.ai/auto-delete-after-completion-sec: "2592000"
+        run.ai/submitted-by: tester
+      labels:
+        app: pytorchjob
+        createdBy: PyTorchJob
+        project: test
+        release: minimal_pytorch_worker
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: minimal_pytorch_worker
+      name: minimal_pytorch_worker
+      namespace: runai-test
+    spec:
+      pytorchReplicaSpecs:
+        Master:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                runai-nodepools: default
+                user: tester
+              labels:
+                app: pytorchjob
+                createdBy: PyTorchJob
+                kai.scheduler/preemptibility: preemptible
+                project: test
+                release: minimal_pytorch_worker
+                workloadKind: Distributed
+                workloadName: minimal_pytorch_worker
+            spec:
+              containers:
+              - command:
+                - sleep
+                - "1000"
+                env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: minimal_pytorch_worker
+                image: alpine
+                imagePullPolicy: IfNotPresent
+                name: pytorch
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              priorityClassName: low
+              schedulerName: runai-scheduler
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                runai-nodepools: default
+                user: tester
+              labels:
+                app: pytorchjob
+                createdBy: PyTorchJob
+                kai.scheduler/preemptibility: preemptible
+                project: test
+                release: minimal_pytorch_worker
+                workloadKind: Distributed
+                workloadName: minimal_pytorch_worker
+            spec:
+              containers:
+              - command:
+                - sleep
+                - "1000"
+                env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: minimal_pytorch_worker
+                image: alpine
+                imagePullPolicy: IfNotPresent
+                name: pytorch
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              terminationGracePeriodSeconds: 30
+      runPolicy:
+        backoffLimit: 6
+        cleanPodPolicy: None
+        ttlSecondsAfterFinished: 2592000
+    status: {}
+  RunPolicy: null
+  TFJob: null
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: PyTorchJob
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-minimal_pytorch_worker/minimal_pytorch_master, Framework: PyTorch'
+  images:
+  - alpine
+  name: 'minimal_pytorch_worker/minimal_pytorch_master, Framework: PyTorch'
+  preemptibility: preemptible
+  projectId: project-654-321
+  requestedNodePools:
+  - default
+  requestedPods:
+    number: 2
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

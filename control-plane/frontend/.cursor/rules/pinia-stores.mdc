@@ -1,0 +1,25 @@
+---
+description: Pinia store conventions for Run:ai frontend
+globs: ["**/*.store.ts"]
+alwaysApply: false
+---
+
+# Pinia Stores
+
+## Key Patterns
+
+- Use Options API style (`state`, `getters`, `actions`)
+- Type state explicitly: `appVersion: "" as string`
+- Name stores with `use<Name>Store` pattern
+- Keep actions focused - one action per operation
+- Access other stores via `useOtherStore()` inside actions
+
+## Canonical Examples
+
+- **Store structure**: See `src/stores/app.store.ts`
+- **Store with actions**: See `src/stores/cluster.store.ts`
+- **Store testing**: See `src/stores/cluster.store.test.ts`
+
+## Testing
+
+Use `setActivePinia(createPinia())` in `beforeEach`. See `src/stores/cluster.store.test.ts`.

@@ -1,0 +1,22 @@
+get:
+  summary: Get the datavolume ancestors.
+  operationId: get_datavolume_ancestors
+  x-no-authorization: true
+  x-test-coverage: []
+  tags:
+    - Datavolumes
+  parameters:
+    - $ref: "../parameters/path/DatavolumeId.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/schemas/scopes/Ancestors.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

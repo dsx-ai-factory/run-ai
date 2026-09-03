@@ -1,0 +1,6 @@
+allOf:
+  - $ref: "./inferences/InferenceFieldsRules.yaml"
+  - $ref: "./distributed_inferences/DistributedInferenceLeaderRulesFields.yaml"
+  - $ref: "./distributed_inferences/DistributedInferenceWorkerRulesFields.yaml"
+  - $ref: "./distributed_inferences/DistributedInferenceCommonRules.yaml"
+  - replace: me

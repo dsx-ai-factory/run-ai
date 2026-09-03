@@ -1,0 +1,97 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      template: basic_params
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      kai.scheduler/preemptibility: preemptible
+      priorityClassName: interactive-preemptible
+      project: team-a
+      release: basic_params
+      workloadKind: InteractiveWorkload
+      workloadName: basic_params
+    name: testing-0
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 0
+    completions: 1
+    maxIdleDurationSeconds: 1800
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          gpu-fraction: "0.5"
+          gpu-fraction-num-devices: "1"
+          user: user.name
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          kai.scheduler/preemptibility: preemptible
+          priorityClassName: interactive-preemptible
+          project: team-a
+          release: basic_params
+          run.ai/top-owner-uid: ""
+          workloadKind: InteractiveWorkload
+          workloadName: basic_params
+      spec:
+        containers:
+        - env:
+          - name: HOME
+            value: /home/runai-home
+          - name: LDAP_UID
+            value: "501"
+          - name: LDAP_GID
+            value: "20"
+          image: ubuntu
+          imagePullPolicy: Never
+          name: testing-0
+          resources:
+            requests:
+              cpu: "3"
+              memory: 100M
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 20
+            runAsNonRoot: true
+            runAsUser: 501
+            seccompProfile:
+              type: RuntimeDefault
+          stdin: true
+          tty: true
+          volumeMounts:
+          - mountPath: /home/runai-home
+            name: user-data
+          workingDir: /home/test
+        restartPolicy: Never
+        schedulerName: runai-scheduler
+        securityContext:
+          fsGroup: 20
+          supplementalGroups:
+          - 20
+          - 12
+          - 61
+          - 79
+          - 80
+          - 81
+          - 98
+          - 33
+          - 100
+          - 204
+          - 250
+          - 395
+          - 101
+          - 399
+          - 400
+          - 701
+        terminationGracePeriodSeconds: 60
+        volumes:
+        - emptyDir: {}
+          name: user-data
+  status: {}

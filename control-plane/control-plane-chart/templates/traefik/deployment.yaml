@@ -1,0 +1,27 @@
+{{- if .Values.traefik.enabled }}
+{{- include "common.deployment" (list . .Values.traefik .Values.traefik.autoscaling .Values.traefik.serviceAccount "control-plane.traefik.deployment" ) }}
+{{- end }}
+
+{{- define "control-plane.traefik.deployment" -}}
+{{- $top := first . }}
+{{- $traefik := deepCopy (index . 1) }}
+{{- if eq $top.Values.global.config.kubernetesDistribution "openshift" }}
+{{- $_ := unset $traefik.securityContext "runAsUser" }}
+{{- end }}
+spec:
+  template:
+    spec:
+      initContainers:
+        {{- include "common.initContainer" . | nindent 8 }}
+      containers:
+      - {{- include "common.container" (list $top $traefik) | nindent 8 }}
+      volumes:
+      {{- if ($top.Values.global.customCA).enabled }}
+        {{- $top.Values.global.customCA.volumes | toYaml | nindent 6 }}
+      {{- end }}
+      - name: gateway-hub-secrets
+        emptyDir: {}
+      - name: {{ include "common.fullname" $top }}-{{ $top.Values.traefik.name }}
+        configMap:
+          name: {{ include "common.fullname" $top }}-{{ $top.Values.traefik.name }}
+{{- end }}

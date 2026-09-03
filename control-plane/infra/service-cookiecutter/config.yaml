@@ -1,0 +1,10 @@
+default_context:
+  app_name: "example-service"
+  go_version: "1.21"
+  use_redis: true
+  use_postgresql: true
+  use_nats: true
+  remove_gitkeep: false
+  add_service_to_ci: false
+  add_to_helm_chart: false
+replay_dir: "replay"

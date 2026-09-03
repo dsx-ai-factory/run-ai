@@ -1,0 +1,6 @@
+assets:
+  environment: basic
+  compute: memory
+  datasources:
+    - kind: git
+      id: existing-ssh

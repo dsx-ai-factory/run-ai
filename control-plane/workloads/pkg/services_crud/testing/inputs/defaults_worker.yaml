@@ -1,0 +1,24 @@
+defaults:
+  worker:
+    image: ubuntu-worker
+    environmentVariables:
+      instances:
+        - name: name_from_the_policy_worker
+          value: value_from_the_policy_worker
+    compute:
+      cpuCoreLimit: 10
+      extendedResources:
+        instances:
+          - resource: worker/bbb
+          - resource: worker/ddd
+            quantity: 110M
+        attributes:
+          quantity: 120M
+    storage:
+      pvc:
+        attributes:
+          claimInfo:
+            storageClass: standard-worker
+            size: 1G
+        instances:
+          - path: "/worker/bbb"

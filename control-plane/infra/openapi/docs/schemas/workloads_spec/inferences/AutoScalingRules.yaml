@@ -1,0 +1,27 @@
+properties:
+  metricThresholdPercentage:
+    $ref: "../../policy_rules/NumberRules.yaml"
+  minReplicas:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  maxReplicas:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  initialReplicas:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  activationReplicas:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  metric:
+    $ref: "./AutoScalingMetricRules.yaml"
+  metricThreshold:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  concurrencyHardLimit:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  scaleToZeroRetentionSeconds:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  scaleDownDelaySeconds:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  initializationTimeoutSeconds:
+    allOf:
+      - $ref: "../../policy_rules/IntegerRules.yaml"
+    deprecated: true
+nullable: true
+type: object

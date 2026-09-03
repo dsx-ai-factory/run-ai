@@ -1,0 +1,7 @@
+name: kind
+in: query
+required: true
+description: Filter results by asset kind.
+schema:
+  type: string
+  minLength: 1

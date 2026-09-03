@@ -1,0 +1,32 @@
+get:
+  summary: Get ranks
+  operationId: get_ranks
+  x-no-authorization: true
+  description: Get ranks.
+  x-service: org-unit-service
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/org_unit_test.go
+  tags:
+    - Org unit
+  responses:
+    200:
+      description: List of all ranks
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              ranks:
+                type: array
+                items:
+                  $ref: "../../schemas/Rank.yaml"
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    409:
+      $ref: "../../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

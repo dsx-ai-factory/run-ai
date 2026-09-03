@@ -1,0 +1,36 @@
+post:
+  summary: Sync access rules.
+  description: Use to synchronize the statuses of the access rules in the cluster.
+  operationId: sync_access_rules
+  x-service: authorization
+  x-internal: true
+  x-test-coverage:
+    - control-plane/authorization/pkg/services/access_rules_api_test.go
+  x-authorize:
+    resource-type: access_rules
+    action: sync
+  tags:
+    - Access rules
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+  requestBody:
+    description: The statuses to sync.
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/AccessRules/AccessRulesSyncRequest.yaml'
+  responses:
+    204:
+      $ref: '../../../../infra/openapi/docs/responses/204NoContent.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

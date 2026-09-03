@@ -1,0 +1,10 @@
+type: object
+description: Authorization configuration.
+nullable: true
+properties:
+  authorizationType:
+    $ref: "./AuthorizationType.yaml"
+  authorizedUsers:
+    $ref: "./AuthorizedUsers.yaml"
+  authorizedGroups:
+    $ref: "./AuthorizedGroups.yaml"

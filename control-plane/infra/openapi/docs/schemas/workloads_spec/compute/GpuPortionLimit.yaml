@@ -1,0 +1,7 @@
+description: Limitations on the portion consumed by the workload, per GPU device. The system guarantees
+  The gpuPotionLimit must be no less than the gpuPortionRequest.
+type: number
+format: double
+example: 0.5
+nullable: true
+minimum: 0

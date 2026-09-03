@@ -1,0 +1,46 @@
+get:
+  summary: Get login url
+  x-service: identity-manager
+  x-test-coverage:
+  - e2e/src/test/suites/parallel/login/login.test.ts
+  tags:
+  - Logins
+  x-no-authorization: true
+  description: |
+    Get redirected to the login screen for your client
+  operationId: getLoginScreenURL
+  parameters:
+  - in: header
+    name: User-Agent
+    schema:
+      type: string
+    required: true
+  - in: query
+    name: authentication_flow
+    schema:
+      type: string
+    required: false
+  - in: query
+    name: redirect_url
+    schema:
+      type: string
+    required: false
+  - in: query
+    name: code_challenge
+    schema:
+      type: string
+    required: false
+  - in: query
+    name: code_challenge_method
+    schema:
+      $ref: '../../schemas/Pkce/CodeChallengeMethod.yaml'
+    required: false
+  responses:
+    '307':
+      $ref: '../../../../../infra/openapi/docs/responses/307TemporaryRedirect.yaml'
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

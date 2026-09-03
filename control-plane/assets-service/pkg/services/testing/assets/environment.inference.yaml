@@ -1,0 +1,40 @@
+spec:
+  image: ubuntu
+  command: python3
+  args: -x myscript.py
+
+  environmentVariables:
+    - name: HOME
+      value: /my/home
+    - name: USER
+      value: my-user
+
+  workingDir: /my/home
+  createHomeDir: true
+
+  uidGidSource: custom
+  runAsUid: 500
+  runAsGid: 30
+  supplementalGroups: 2,3,5,8
+  runAsNonRoot: true
+  seccompProfileType: RuntimeDefault
+  allowPrivilegeEscalation: false
+
+  hostIpc: true
+  hostNetwork: true
+
+  overrideUidGidInWorkspace: true
+
+  connections:
+    - name: exposed-port-auto
+      internalToolInfo:
+        toolType: visual-studio-code
+        containerPort: 8000
+        connectionType: NodePort
+    - name: serving-port
+      internalToolInfo:
+        toolType: chatbot-ui
+        containerPort: 8001
+        connectionType: ServingPort
+        servingPortInfo:
+          protocol: grpc

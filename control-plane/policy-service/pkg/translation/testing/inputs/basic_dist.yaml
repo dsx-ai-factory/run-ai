@@ -1,0 +1,25 @@
+meta:
+  scope: project
+  projectId: 4500001
+  name: my-policy
+policy:
+  defaults:
+    master:
+      image: ubuntu
+    worker:
+      image: redhat
+  rules:
+    master:
+      image:
+        options:
+          - value: ubuntu
+          - value: ubuntu/latest
+        required: true
+        canEdit: false
+    worker:
+      image:
+        options:
+          - value: redhat
+          - value: redhat/latest
+        required: false
+        canEdit: true

@@ -1,0 +1,38 @@
+get:
+  summary: Count tenant nodes
+  operationId: count_tenant_nodes
+  x-service: cluster-service
+  description: Count nodes from all the Kubernetes clusters of the tenant.
+  x-test-coverage:
+    - control-plane/cluster-service/pkg/test/node_db_test.go
+  x-authorize:
+      resource-type: nodes
+      action: read
+  tags:
+    - Nodes
+  parameters:
+    - $ref: "../parameters/query/NodesFilter.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Search.yaml"
+  responses:
+    200:
+      description: ok
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              count:
+                type: integer
+                format: int64
+            required:
+              - count
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml' 

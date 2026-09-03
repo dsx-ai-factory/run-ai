@@ -1,0 +1,22 @@
+{
+  "service_name": "workloads",
+  "artifact_type": "container",
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "make": {
+    "test": {
+      "runs_on": "ubuntu-latest-4-cores"
+    },
+    "build": {
+      "runs_on": "ubuntu-latest-4-cores"
+    }
+  },
+  "notifications": {
+    "slack": {
+      "mention": "@suricata @viper"
+    }
+  },
+  "jira": {
+    "team_name": "Suricata Team"
+  }
+}

@@ -1,0 +1,60 @@
+parameters:
+  - $ref: "../../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+get:
+  tags:
+    - Trainings
+  summary: List training in the cluster
+  parameters:
+    - name: nodeId
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Unique identifier of the node.
+    - name: filter
+      in: query
+      required: false
+      schema:
+        type: string
+    - name: sortBy
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Order of the results.
+    - name: sortDirection
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [ ASC, DESC ]
+    - name: from
+      in: query
+      required: false
+      schema:
+        type: integer
+        format: int32
+      description: Start the response from a given number of result. Used
+        along with 'limit' to retrieve the results paginated.
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml"
+  operationId: listTrainings
+  x-service: assets-service
+  x-authorize:
+    resource-type: trainings
+    action: read
+  x-internal: true
+  deprecated: true
+  x-test-coverage: not-applicable
+  responses:
+    200:
+      description: An array of trainings, including their job information.
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/Training/V1/TrainingListResponse.yaml"
+    401:
+      $ref: "../../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

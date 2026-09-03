@@ -1,0 +1,7 @@
+leader:
+  image: python:3.8
+servingPort:
+  port: 8081
+  authorizationType: authenticatedUsers
+  authorizedUsers:
+    - user-a

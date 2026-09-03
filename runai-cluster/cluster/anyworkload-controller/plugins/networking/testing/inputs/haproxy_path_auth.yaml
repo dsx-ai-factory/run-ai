@@ -1,0 +1,30 @@
+runner:
+  name: nim-workload
+  namespace: runai-test
+
+networking:
+  services:
+  - ref:
+      name: nim-workload
+      port: 8000
+    auth:
+      authorizationType: authenticatedUsers
+  externalAccess:
+    ingress:
+      metadata:
+        name: nim-workload
+        annotations:
+          haproxy.org/path-rewrite: "/api/v1/team-a/nim-workload(/|$)(.*) /\\2"
+      spec:
+        ingressClassName: haproxy
+        rules:
+          - host: nim.example.com
+            http:
+              paths:
+                - path: /api/v1/team-a/nim-workload
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: nim-workload
+                      port:
+                        number: 8000

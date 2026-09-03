@@ -1,0 +1,12 @@
+allOf:
+  - $ref: "../templates/TemplateMeta.yaml"
+  - properties:
+      spec:
+        $ref: "TrainingTemplateSpec.yaml"
+  - $ref: "../templates/TemplateAssets.yaml"
+  - type: object
+    properties:
+      runnable:
+        $ref: "../templates/RunnableInfo.yaml"
+      combinedSpec:
+        $ref: "./TrainingTemplateSpec.yaml"

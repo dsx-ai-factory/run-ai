@@ -1,0 +1,154 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      template: job-2
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      kai.scheduler/preemptibility: non-preemptible
+      priorityClassName: build
+      project: team-a
+      release: job-2
+      workloadKind: InteractiveWorkload
+      workloadName: job-2
+    name: job-2
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 0
+    completions: 1
+    maxIdleDurationSeconds: 1200
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          user: user.name
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          kai.scheduler/preemptibility: non-preemptible
+          priorityClassName: build
+          project: team-a
+          release: job-2
+          run.ai/top-owner-uid: ""
+          workloadKind: InteractiveWorkload
+          workloadName: job-2
+      spec:
+        containers:
+        - image: ubuntu
+          imagePullPolicy: Always
+          name: job-2
+          resources: {}
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          volumeDevices:
+          - devicePath: /tmp/existing-block
+            name: pvc-volume-4
+          volumeMounts:
+          - mountPath: /container
+            mountPropagation: HostToContainer
+            name: host-path-volume-0
+            readOnly: true
+          - mountPath: /bbb
+            name: host-path-volume-1
+          - mountPath: /container-a
+            mountPropagation: HostToContainer
+            name: nfs-volume-0
+            readOnly: true
+          - mountPath: /container-b
+            mountPropagation: HostToContainer
+            name: nfs-volume-1
+          - mountPath: /tmp/storage
+            name: pvc-volume-0
+          - mountPath: /tmp/claim1
+            name: pvc-volume-1
+            readOnly: true
+          - mountPath: /tmp/existing
+            name: pvc-volume-2
+            readOnly: true
+          - mountPath: /tmp/not-exist
+            name: pvc-volume-2
+            readOnly: true
+        restartPolicy: Never
+        schedulerName: runai-scheduler
+        volumes:
+        - name: host-path-volume-0
+          nfs:
+            path: /host
+            server: nfs-server
+        - hostPath:
+            path: /aaa
+          name: host-path-volume-1
+        - name: nfs-volume-0
+          nfs:
+            path: /host-a
+            server: nfs-server-a
+        - name: nfs-volume-1
+          nfs:
+            path: /host-b
+            server: nfs-server-b
+        - name: pvc-volume-0
+          persistentVolumeClaim:
+            claimName: pvc-job-2-0
+        - name: pvc-volume-1
+          persistentVolumeClaim:
+            claimName: claim1
+            readOnly: true
+        - name: pvc-volume-2
+          persistentVolumeClaim:
+            claimName: existing
+            readOnly: true
+        - name: pvc-volume-3
+          persistentVolumeClaim:
+            claimName: existing-block
+  status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    priorityClassName: build
+    project: team-a
+    release: job-2
+    workloadKind: InteractiveWorkload
+    workloadName: job-2
+  name: pvc-job-2-0
+  namespace: runai-team-a
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10M
+  storageClassName: local-storage
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    priorityClassName: build
+    project: team-a
+    release: job-2
+    workloadKind: InteractiveWorkload
+    workloadName: job-2
+  name: claim1
+  namespace: runai-team-a
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20M
+status: {}

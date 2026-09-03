@@ -1,0 +1,36 @@
+meta:
+  scope: project
+  projectId: 4500001
+  name: my-policy
+policy:
+  defaults:
+    storage:
+      git:
+        instances:
+          - name: karta-main
+            repository: https://github.com/run-ai/karta
+            branch: main
+            path: /karta/test
+          - name: karts-test
+            repository: https://github.com/run-ai/karta
+            branch: test
+            path: /karta/main
+        attributes:
+          repository: https://github.com/example/default.git
+          branch: main
+  rules:
+    storage:
+      git:
+        instances:
+          canAdd: false
+          locked:
+            - karta-main
+        attributes:
+          repository:
+            required: true
+            options:
+              - value: https://github.com/example/default.git
+              - value: https://github.com/example/repo.git
+              - value: https://github.com/example/other-repo.git
+          branch:
+            canEdit: false

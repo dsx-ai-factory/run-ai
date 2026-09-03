@@ -1,0 +1,7 @@
+properties:
+  autoscaling:
+    $ref: "./AutoScalingRules.yaml"
+  servingConfiguration:
+    $ref: "./ServingConfigurationRules.yaml"
+nullable: true
+type: object

@@ -1,0 +1,61 @@
+compute:
+  extendedResources:
+  - quantity: 11M
+    resource: aaa/b1
+  - exclude: true
+    resource: aaa/b2
+  - quantity: 30M
+    resource: aaa/b3
+  - quantity: 21M
+    resource: aaa/workload1
+environmentVariables:
+- name: HOME
+  value: home-from-workload
+- name: USER
+  value: user-from-policy
+- exclude: true
+  name: GROUP
+- name: ADDED
+  value: added-from-workload
+image: ubuntu
+imagePullPolicy: Always
+nodePools:
+- np1-from-workload
+- np2-from-workload
+security:
+  capabilities:
+  - KILL
+  runAsNonRoot: false
+storage:
+  hostPath:
+  - mountPath: /mount/path/hp1
+    name: hp1
+    path: /path/hp1/from/workload
+  - mountPath: /mount/path/hp2
+    name: hp2
+    path: /path/hp2
+  - mountPath: /mount/path/noname
+    name: pol-2
+    path: /path/noname
+  - mountPath: /mount/path/noname/from/workload
+    path: /path/noname/from/workload
+  s3:
+  - bucket: /default/bucket
+    name: s3a
+    path: /path/s3a/from/workload
+    url: https://s3a.from.workload.amazonaws.com
+  - bucket: /default/bucket
+    name: pol-1
+    path: /path/noname
+    url: https://noname.amazonaws.com
+  - bucket: /default/bucket
+    name: s3b
+    path: /path/s3b
+    url: https://s3b.amazonaws.com
+  - bucket: /default/bucket
+    path: /path/noname/from/workload
+    url: https://noname.from.workload.amazonaws.com
+  - bucket: /default/bucket
+    name: s3w
+    path: /path/s3w/from/workload
+    url: https://s3w.from.workload.amazonaws.com

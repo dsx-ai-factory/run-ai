@@ -1,0 +1,10 @@
+type: string
+enum:
+  - "Creating"
+  - "Deleting"
+  - "Failed"
+  - "Deletion failed"
+  - "Issues found"
+  - "No issues found"
+  - "No status"
+  - "Updating"

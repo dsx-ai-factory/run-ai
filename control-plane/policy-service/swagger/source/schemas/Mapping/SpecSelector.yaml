@@ -1,0 +1,29 @@
+type: object
+description: >-
+  A spec selector: a JQ query that selects a subtree of the workload spec, the
+  type and enum information for any arguments referenced by the query, and the
+  field groups exposed by this selector.
+properties:
+  description:
+    $ref: "./MappingDescriptionOptional.yaml"
+  query:
+    $ref: "./SpecSelectorQuery.yaml"
+  argsInfo:
+    $ref: "./MappingArgsInfo.yaml"
+  argsEnum:
+    $ref: "./MappingArgsEnum.yaml"
+  fieldGroups:
+    description: The field groups exposed by this spec selector.
+    type: array
+    items:
+      $ref: "./FieldGroupName.yaml"
+  dependency:
+    $ref: "./SpecSelectorDependency.yaml"
+example:
+  description: Containers with a given name.
+  query: >
+    .spec.template.spec.containers[]
+    | select(.name == $ARGS.named.containerName)
+  fieldGroups:
+    - podSpecContainer
+    - podSpecAndContainer

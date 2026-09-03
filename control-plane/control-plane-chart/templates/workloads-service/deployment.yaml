@@ -1,0 +1,16 @@
+{{- include "common.deployment" (list . .Values.workloads .Values.workloads.autoscaling .Values.workloads.serviceAccount "control-plane.workloads.deployment" ) }}
+
+{{- define "control-plane.workloads.deployment" -}}
+{{- $top := first . }}
+spec:
+  template:
+    spec:
+      initContainers:
+        {{- include "awaitingPostgresReadinessContainer" . | nindent 8 }}
+        {{- if $top.Values.tempBackendSettings.enabled }}
+        {{- include "awaitingTempBackendSettingsReadiness" . | nindent 8 }}
+        {{- end }}
+        {{- include "common.initContainer" . | nindent 8 }}
+      containers:
+      - {{- include "common.container" . | nindent 8 }}
+{{- end }}

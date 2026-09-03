@@ -1,0 +1,12 @@
+type: object
+properties:
+  add:
+    type: array
+    items:
+      $ref: './SharedScopeBase.yaml'
+    maxLength: 50
+  remove:
+    type: array
+    items:
+      $ref: './SharedScopeBase.yaml'
+    maxLength: 50

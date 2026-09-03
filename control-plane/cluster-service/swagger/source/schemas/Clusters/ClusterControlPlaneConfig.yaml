@@ -1,0 +1,157 @@
+type: object
+description: The cluster's configuration for connecting to the control plane.
+properties:
+  fipsMode:
+    type: string
+    description: Go FIPS 140-3 runtime mode from control-plane configuration.
+    enum: ["off", "on", "only"]
+  agent:
+    type: object
+    description: The cluster's agent configuration for connecting to the control plane.
+    properties:
+      client:
+        type: object
+        description: Client configuration for connecting to the control plane.
+        properties:
+          id:
+            type: string
+            description: Client id.
+            example: 71f69d83-ba66-4822-adf5-55ce55efd210
+            minLength: 32  # Standard UUID format (with or without hyphens)
+            maxLength: 36  # Standard UUID format (with or without hyphens)
+          name:
+            type: string
+            description: Client name.
+            example: agent-client
+            minLength: 1  # Must have a value
+            maxLength: 253  # Generous limit; supports common identifier formats
+          secret:
+            type: string
+            description: Client secret.
+            example: abcdefghijklmnopqrstuvwxyz
+            minLength: 1  # Must have a value
+            maxLength: 500  # Keycloak client secret limit (enforced by identity-manager)
+  workloads:
+    type: object
+    description: The cluster's agent configuration for connecting to researcher's workspaces (notebook, visual studio, etc).
+    properties:
+      client:
+        type: object
+        description: Client configuration for connecting to researcher's workspaces.
+        properties:
+          id:
+            type: string
+            description: Client id.
+            example: 71f69d83-ba66-4822-adf5-55ce55efd210
+            minLength: 32  # Standard UUID format (with or without hyphens)
+            maxLength: 36  # Standard UUID format (with or without hyphens)
+          name:
+            type: string
+            description: Client name.
+            example: workloads-client
+            minLength: 1  # Must have a value
+            maxLength: 253  # Generous limit; supports common identifier formats
+          secret:
+            type: string
+            description: Client secret.
+            example: abcdefghijklmnopqrstuvwxyz
+            minLength: 1  # Must have a value
+            maxLength: 500  # Keycloak client secret limit (enforced by identity-manager)
+  metricsRemoteWrite:
+    $ref: "./ClusterControlPlaneConfigMetricsRemoteWrite.yaml"
+  metricsRemoteWrites:
+    type: array
+    description: Additional remote write configurations.
+    minItems: 0  # Remote write is optional
+    maxItems: 100  # Reasonable limit for multiple monitoring backends
+    items:
+      $ref: "./ClusterControlPlaneConfigMetricsRemoteWrite.yaml"
+  researcherService:
+    type: object
+    description: The cluster's researcher service configuration related to the control plane.
+    properties:
+      jwksURL:
+        type: string
+        description: URL to the endpoint that returns JWT validation keys
+        example: https://test.test.com/auth/realms/runai/protocol/openid-connect/certs
+        minLength: 1  # Must have a value
+        maxLength: 2048  # Standard maximum URL length
+      logoutLink:
+        type: string
+        description: Logout link. DEPRECARED from 2.9
+        example: https://researcher.example.com/logout
+        minLength: 1  # Must have a value
+        maxLength: 2048  # Standard maximum URL length
+      oauthProxy:
+        type: object
+        description: OAuth Proxy configuration. DEPRECARED from 2.18
+        properties:
+          oidcIssuerDN:
+            type: string
+            description: OAuth proxy oidc issuer DN.
+            example: oidcIssuerDN
+            minLength: 1  # Must have a value
+            maxLength: 253  # DNS name format
+          oidcIssuerUrl:
+            type: string
+            description: OAuth proxy oidc issuer url.
+            example: https://researcher.example.com/oidc
+            minLength: 1  # Must have a value
+            maxLength: 2048  # Standard maximum URL length
+          clientId:
+            type: string
+            description: OAuth proxy client id.
+            example: 71f69d83-ba66-4822-adf5-55ce55efd210
+            minLength: 32  # Standard UUID format (with or without hyphens)
+            maxLength: 36  # Standard UUID format (with or without hyphens)
+          clientSecret:
+            type: string
+            description: OAuth proxy client secret.
+            example: abcdefghijklmnopqrstuvwxyz
+            minLength: 1  # Must have a value
+            maxLength: 500  # Keycloak client secret limit (enforced by identity-manager)
+          providerType:
+            type: string
+            description: OAuth proxy provider type.
+            example: oidc
+            minLength: 1  # Must have a value
+            maxLength: 50  # Type identifier (e.g., "oidc", "saml")
+  clusterName:
+    type: string
+    description: The cluster's name.
+    example: cluster-1
+    minLength: 1  # Must have a value
+    maxLength: 253  # Kubernetes resource name limit
+  tenantId:
+    type: integer
+    description: the tenant's identifier
+    example: 1008
+    minimum: 0  # Optional field - 0 means "not set"
+    maximum: 2147483647  # int32 max - database type constraint (no practical business limit enforced)
+  releaseName:
+    type: string
+    description: the name of the release
+    example: release.name
+    minLength: 1  # Must have a value
+    maxLength: 253  # Helm release name limit
+  environment:
+    type: string
+    description: test/staging/production/self-hosted
+    example: production
+    minLength: 1  # Must have a value
+    maxLength: 50  # Environment identifier (e.g., "production", "staging")
+  installationType:
+    type: string
+    description: Control-plane installation flavor from cluster-service configuration (installation_type).
+    enum:
+      - selfhosted
+      - launchpad
+      - airgap
+      - saas
+    example: selfhosted
+  dockerConfigJson:
+    type: string
+    description: The cluster's docker config json.
+    example: dockerConfigJson
+    minLength: 1  # Must have a value
+    maxLength: 10240  # 10KB - supports ~10-20 image pull secrets from different registries

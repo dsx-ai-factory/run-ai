@@ -1,0 +1,7 @@
+# mapping b/w item selector name and its details (query, argsInfo, argsEnum)
+type: object
+description: >-
+  The item selectors that apply to the field, keyed by item-selector name,
+  with each value containing the item selector's JQ query and argument metadata.
+additionalProperties:
+  $ref: "./BreakdownItemSelector.yaml"

@@ -1,0 +1,70 @@
+apiVersion: run.ai/v2alpha1
+kind: DistributedWorkload
+metadata:
+  name: job-1
+  namespace: runai-team-a
+  uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+spec:
+  jobType: MPIJob
+  image:
+    value: ubuntu
+  name:
+    value: job-1
+  username:
+    value: user.name
+  workers:
+    value: 3
+masterSpec:
+  image:
+    value: ubuntu
+  command:
+    value: cmd1 cmd2 cmd3
+  arguments:
+    value: arg1 arg2 arg3
+  pvcs:
+    items:
+      pvc-job-1-0:
+        value:
+          path: /tmp/ofer
+          readOnly: false
+          size: 10M
+          storageClass: storage
+  volumes:
+    items:
+      vol--mypath:
+        value:
+          readOnly: true
+          sourcePath: /myvol
+          targetPath: /mypath
+  nodePools:
+    value: default nodepoola
+  podAffinity:
+    value: true
+  podAffinityTopology:
+    value: pod_affinity_topology_value
+  podAffinitySchedulingRule:
+    value: requiredDuringSchedulingIgnoredDuringExecution
+  ports:
+    items:
+      port-80:
+        value:
+          autoGenerate: false
+          container: 80
+          external: 8000
+      port-90:
+        value:
+          autoGenerate: false
+          container: 90
+          external: 9000
+  serviceType:
+    value: LoadBalancer
+  readinessProbe:
+    values:
+      httpGetPort:
+        value: 9090
+      httpGetPath:
+        value: /ready2
+  workers:
+    value: 1
+  username:
+    value: user.name

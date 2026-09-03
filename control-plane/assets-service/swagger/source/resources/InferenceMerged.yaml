@@ -1,0 +1,30 @@
+get:
+  summary: Get merged inference workload
+  description: Get combined policy and specificRunParams data for workload creation form
+  operationId: get_inference_merged
+  x-service: assets-service
+  x-internal: true
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_workloads_merge_test.go
+  x-no-authorization: true
+  tags:
+    - Inferences
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ProjectIdOptional.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/WorkloadIdOptional.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/TemplateIdOptional.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Inference/InferenceV2.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

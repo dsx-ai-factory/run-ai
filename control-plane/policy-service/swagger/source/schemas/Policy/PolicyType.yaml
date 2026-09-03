@@ -1,0 +1,10 @@
+description: The type of policy which determines the kind of workloads it is affecting
+type: string
+enum:
+  - workspace
+  - training
+  - distributed
+  - inference
+  - distributedInference
+  - nimService
+  - fallback

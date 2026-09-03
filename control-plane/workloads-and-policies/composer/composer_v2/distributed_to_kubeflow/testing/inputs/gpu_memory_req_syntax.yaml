@@ -1,0 +1,7 @@
+image: ubuntu
+
+compute:
+  gpuDevicesRequest: 1
+  gpuRequestType:    memory
+  gpuMemoryRequest:  10E!3
+  gpuMemoryLimit:    11M

@@ -1,0 +1,7 @@
+image: ubuntu
+servingPort:
+  container: 8080
+  protocol: http
+  authorizedGroups:
+    - group1
+    - group2

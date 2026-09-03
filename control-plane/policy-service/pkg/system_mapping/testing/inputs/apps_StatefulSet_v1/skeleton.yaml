@@ -1,0 +1,31 @@
+# Minimal valid apps/StatefulSet/v1 manifest used as the starting point for every
+# Layer 3+4 case under cases/. Mirrors apps_Deployment_v1/skeleton.yaml — the
+# pre-populated fields are there for the same reasons ("placeholder" container
+# images, container name "test" so the parameterised spec selectors find them).
+#
+# serviceName is required by K8s and pre-populated here.
+#
+# Note: selector.matchLabels and template.metadata.labels are populated by
+# the workload policy case via matchLabelsSelector and labels fields.
+# They MUST agree for K8s API server validation.
+#
+# The empty stubs below are required:
+#   - selector:{} — K8s OpenAPI schema requires selector for StatefulSet.
+#
+# Note: template.metadata is created automatically by the dependency mechanism
+# when a policy targets podMetadata with a SET action.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: test
+spec:
+  serviceName: "test"
+  selector: {}
+  template:
+    spec:
+      containers:
+        - name: test
+          image: placeholder
+      initContainers:
+        - name: test
+          image: placeholder

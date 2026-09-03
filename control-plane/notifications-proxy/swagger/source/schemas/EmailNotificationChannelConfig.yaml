@@ -1,0 +1,50 @@
+type: object
+properties:
+  username:
+    type: string
+    maxLength: 250
+  password:
+    type: string
+    maxLength: 250
+  smtpHost:
+    type: string
+    maxLength: 250
+  from:
+    type: string
+    maxLength: 250
+  smtpPort:
+    type: integer
+    default: 587
+    maximum: 65535
+  authType:
+    $ref: "./EmailAuthType.yaml"
+  smtpTlsEnabled: 
+    type: boolean
+    nullable: true
+  recipients:
+    type: array
+    items:
+      type: string
+    default: []
+    minItems: 0
+    maxItems: 100
+  fromDisplayName:
+    type: string
+    default: "Run:ai"
+    maxLength: 250
+  directNotifications:
+    type: boolean
+    nullable: true
+  useAttachments:
+    type: boolean
+    nullable: true
+  subject:
+    type: string
+    default: "Run:ai notification - {{ .category }} {{ .reason }}"
+    maxLength: 250
+example:
+  username: email@gmail.com
+  password: 123456
+  smtpHost: smtp.gmail.com
+  from: email@gmail.com
+  subject: My subject

@@ -1,0 +1,54 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      template: base1
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      kai.scheduler/preemptibility: non-preemptible
+      priorityClassName: build
+      project: team-a
+      release: base1
+      workloadKind: InteractiveWorkload
+      workloadName: base1
+    name: base1
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 3
+    completions: 1
+    maxIdleDurationSeconds: 1200
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          user: user.name
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          kai.scheduler/preemptibility: non-preemptible
+          priorityClassName: build
+          project: team-a
+          release: base1
+          run.ai/top-owner-uid: some-interactive-uid
+          workloadKind: InteractiveWorkload
+          workloadName: base1
+      spec:
+        containers:
+        - image: ubuntu
+          imagePullPolicy: IfNotPresent
+          name: base1
+          resources: {}
+          securityContext:
+            capabilities:
+              drop:
+              - all
+            seccompProfile:
+              type: Unconfined
+        restartPolicy: OnFailure
+        schedulerName: runai-scheduler
+  status: {}

@@ -1,0 +1,24 @@
+type: object
+required:
+  - name
+properties:
+  name:
+    type: string
+    minLength: 0  # Backwards compatibility - was previously allowing empty strings
+    maxLength: 253  # Kubernetes DNS subdomain limit (RFC 1035/1123)
+  domain:
+    type: string
+    minLength: 0  # Optional field - can be empty if provided
+    maxLength: 253  # DNS domain name limit (RFC 1035)
+  version:
+    type: string
+    minLength: 0  # Optional field - can be empty if provided
+    maxLength: 50  # Supports semantic version + metadata (e.g., "2.15.0-rc.1+build.12345")
+  tenantId:
+    x-internal: true
+    format: int32
+    type: integer
+    minimum: 0  # Optional field - 0 means "not set"
+    maximum: 2147483647  # int32 max - database type constraint (no practical business limit enforced)
+  defaultNodepoolConfig:
+    $ref: "./DefaultNodepoolConfig.yaml"

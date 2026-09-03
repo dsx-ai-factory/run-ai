@@ -1,0 +1,34 @@
+parameters:
+  - $ref: '../parameters/path/HelmRepoId.yaml'
+get:
+  summary: Browse helm repo charts. [Experimental]
+  description: Fetch and list all charts and their versions from a helm repo.
+  operationId: browse_helm_repo_charts
+  x-service: catalog-service
+  x-internal: true
+  x-authorize:
+    resource-type: registries
+    action: read
+  tags:
+    - HelmRepos
+  parameters:
+    - $ref: "../parameters/query/optional/AssetIdOptional.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/helmRepos/HelmChartListResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

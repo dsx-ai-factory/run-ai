@@ -1,0 +1,12 @@
+allOf:
+  - $ref: './AccessRuleStatusRequest.yaml'
+  - type: object
+    required:
+      - accessRuleId
+    properties:
+      accessRuleId:
+        type: integer
+        format: int32
+        minimum: 0
+        description: The id of the access rule to retrieve
+        example: 32

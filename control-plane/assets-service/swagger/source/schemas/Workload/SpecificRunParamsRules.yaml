@@ -1,0 +1,60 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+allOf:
+- nullable: true
+  properties:
+    annotations:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
+    args:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    autoDeletionTimeAfterCompletionSeconds:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+    backoffLimit:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+    category:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    command:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    completions:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+    environmentVariables:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
+    imagePullSecrets:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/ImagePullSecretsRules.yaml
+    labels:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
+    nodeAffinityRequired:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/ArbitraryRules.yaml
+    nodePools:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/ArrayRules.yaml
+    nodeType:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    parallelism:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+    podAffinity:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/PodAffinityRules.yaml
+    preemptibility:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/PreemptibilityRules.yaml
+    priorityClass:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    restartPolicy:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/RestartPolicyRule.yaml
+    runAsGid:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRulesOptional.yaml
+    runAsUid:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRulesOptional.yaml
+    supplementalGroups:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    terminateAfterPreemption:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/BooleanRules.yaml
+    terminationGracePeriodSeconds:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+    tolerations:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/TolerationsRules.yaml
+  type: object
+- $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/InferenceFieldsRules.yaml
+description: Rules which apply to specific workload.
+nullable: true
+type: object

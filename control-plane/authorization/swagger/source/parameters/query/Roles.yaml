@@ -1,0 +1,7 @@
+name: roles
+in: query
+required: false
+description: The roles we want to filter by.
+schema:
+  type: string
+  example: "ML engineer,L1 researcher"

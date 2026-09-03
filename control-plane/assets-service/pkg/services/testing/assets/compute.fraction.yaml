@@ -1,0 +1,19 @@
+spec:
+  gpuDevicesRequest: 1
+  gpuRequestType: portion
+  gpuPortionRequest: 0.5
+  gpuPortionLimit: 0.8
+
+  cpuCoreRequest: 0.5
+  cpuCoreLimit: 2
+  cpuMemoryRequest: 20M
+  cpuMemoryLimit: 30M
+
+  largeShmRequest: false
+
+  extendedResources:
+    - resource: "my/cpu"
+      quantity: 2M
+    - resource: "my/gpu"
+      quantity: 3M
+

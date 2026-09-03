@@ -1,0 +1,6 @@
+type: string
+description: Identifier of the source of the topology. Useful for tracking where the topology data originated (e.g. control-plane, cluster).
+example: "control-plane"
+minLength: 1
+maxLength: 63
+pattern: ^[a-zA-Z0-9][a-zA-Z0-9_.-]*[a-zA-Z0-9]$

@@ -1,0 +1,14 @@
+name: workloadFramework
+in: path
+required: true
+description: The workload framework
+schema:
+  type: string
+  enum:
+    - runai
+    - mpi
+    - pytorch
+    - tf
+    - xgboost
+    - any
+    - jax

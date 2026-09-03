@@ -1,0 +1,25 @@
+{
+  "service_name": "cluster-api",
+  "artifact_type": "container",
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "notifications": {
+    "slack": {
+      "mention": "@viper"
+    }
+  },
+  "make": {
+    "test": {
+      "runs_on": "ubuntu-latest-4-cores"
+    },
+    "build": {
+      "runs_on": "ubuntu-latest-4-cores"
+    },
+    "lint": {
+      "runs_on": "ubuntu-latest-4-cores"
+    }
+  },
+  "jira": {
+    "team_name": "Viper Team"
+  }
+}

@@ -1,0 +1,30 @@
+get:
+  summary: Get all workloads settings.
+  description: Retrieve the current values of all workloads-related settings for the tenant.
+  operationId: get_workloads_service_settings
+  x-service: workloads
+  x-test-coverage: not-applicable
+  x-authorize:
+    resource-type: settings
+    action: read
+  tags:
+    - Settings
+  parameters:
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml'
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Settings/WorkloadsSettingsGetResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

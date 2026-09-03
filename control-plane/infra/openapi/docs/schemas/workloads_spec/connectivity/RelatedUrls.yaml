@@ -1,0 +1,6 @@
+description: Set of URLs that are related to the workload.
+type: array
+items:
+  $ref: "./RelatedUrl.yaml"
+maxItems: 1000
+nullable: true

@@ -1,0 +1,42 @@
+image: ubuntu
+
+storage:
+  pvc:
+    - existingPvc: true
+      claimName: claim-existing
+      path: "/path/ro"
+      readOnly: true
+
+    - existingPvc: false
+      claimName: static
+      path: "/path/access/modes"
+      claimInfo:
+        storageClass: ""
+        size: 800M
+
+    - existingPvc: false
+      claimName: small-volume
+      path: "/path/rw"
+      readOnly: false
+      claimInfo:
+        storageClass: small
+        size: 10M
+
+    - existingPvc: false
+      claimName: persistent-volume
+      path: "/path/access/modes"
+      claimInfo:
+        storageClass: persistent
+        size: 1G
+        accessModes:
+          readWriteOnce: true
+          readWriteMany: true
+        volumeMode: Block
+
+    - existingPvc: false
+      claimName: ephemeral-volume
+      path: "/path/two"
+      claimInfo:
+        storageClass: ephemeral
+        size: 2T
+      ephemeral: true

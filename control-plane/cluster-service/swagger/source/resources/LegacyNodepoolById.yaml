@@ -1,0 +1,114 @@
+delete:
+  summary: Delete a Node Pool by id.
+  operationId: legacy_delete_nodepool
+  x-service: cluster-service
+  description: >-
+    Use to delete a node pool by Universally Unique Identifier (UUID). Deprecated, please use /api/v1/node-pools/{id} instead.
+  deprecated: true
+  x-test-coverage:
+    - cluster-service/pkg/services/api_nodepools_service_test.go
+  x-authorize:
+    resource-type: nodepools
+    resource-id: nodepoolId
+    action: delete
+  x-audit: true
+  tags:
+    - NodePools
+  parameters:
+    - name: clusterId
+      in: path
+      description: Unique identifier of the cluster
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        format: uuid
+    - $ref: "../parameters/path/NodepoolId.yaml"
+  responses:
+    202:
+      description: Node Pool deletion accepted
+    400:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyError.yaml'
+    403:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyError.yaml'
+    404:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyErrorInt32.yaml'
+    503:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyErrorInt32.yaml'
+put:
+  summary: Update a Node Pool.
+  operationId: legacy_update_nodepool
+  x-service: cluster-service
+  description: >-
+    Use to update the details of a node pool by Universally Unique Identifier (UUID). Deprecated, please use PATCH /api/v1/node-pools/{id} instead.
+  deprecated: true
+  x-test-coverage:
+    - cluster-service/pkg/services/api_nodepools_service_test.go
+  x-authorize:
+    resource-type: nodepools
+    resource-id: nodepoolId
+    action: update
+  x-audit: true
+  tags:
+    - NodePools
+  parameters:
+    - name: clusterId
+      in: path
+      description: Unique identifier of the cluster
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        format: uuid
+    - $ref: "../parameters/path/NodepoolId.yaml"
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Nodepools/LegacyUpdateNodePoolRequest.yaml"
+    required: true
+  responses:
+    202:
+      description: Node Pool update accepted.
+    400:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyError.yaml'
+    403:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyError.yaml'
+    404:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyErrorInt32.yaml'
+    503:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyErrorInt32.yaml'

@@ -1,0 +1,36 @@
+get:
+  deprecated: true
+  summary: List all departments.
+  description: List all the departments managed by the tenant on a specific cluster.
+  operationId: get_departments_v1
+  x-internal: true
+  x-service: org-unit-service
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/department_v1_api_test.go
+  x-authorize:
+    resource-type: department
+    action: read
+  tags:
+    - Departments v1
+  parameters:
+    - $ref: "../../parameters/v1/ClusterIdV1.yaml"
+    - $ref: "../../parameters/v1/ExcludePermissionsV1.yaml"
+    - $ref: "../../parameters/v1/MemoryUnitsV1.yaml"
+  responses:
+    200:
+      description: Successfully retrieved a list of Departments.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              allOf:
+                - $ref: "../../schemas/v1/DepartmentForGetV1.yaml"
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

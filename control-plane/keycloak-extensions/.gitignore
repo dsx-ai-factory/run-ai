@@ -1,0 +1,4 @@
+bin/
+.gradle/
+runai-custom-providers/build/
+runai-custom-providers/gradle/

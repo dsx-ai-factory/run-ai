@@ -1,0 +1,34 @@
+get:
+  summary: Asset name conflict validation
+  description:
+    Check if a given asset name creates naming conflicts under the given scope.
+    Returns conflict (409) in case the name is not available, or 204 (no content) if it is ok.
+  operationId: asset_name_conflict_validation
+  deprecated: true
+  x-service: assets-service
+  x-test-coverage:
+    - e2e/src/test/suites/defaultSuite/environment/environmentUI.test.ts
+    - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
+    - e2e/src/test/suites/parallel/submitUI/connectToJupiterUI.test.ts
+    - e2e/src/test/suites/advancedSuite/credential/credentialUI.test.ts
+    - e2e/src/test/suites/parallel/dataSource/dataSourceUI.test.ts
+    - e2e/src/test/suites/parallel/workloads/workspaceTemplateUI.test.ts
+  x-no-authorization: true
+  tags:
+    - Workload
+  parameters:
+    - $ref: "../parameters/query/mandatory/AssetKind.yaml"
+    - $ref: "../parameters/query/mandatory/AssetName.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ScopeType.yaml"
+    - $ref: "../parameters/query/optional/ScopeId.yaml"
+  responses:
+    204:
+      description: The name is available to use
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    409:
+      $ref: "../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

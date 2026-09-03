@@ -1,0 +1,13 @@
+type: object
+description: Compatibility service configuration for agent WorkloadRunner networking. Use 'create' or 'ref' (not both).
+nullable: true
+properties:
+  create:
+    description: Specification for a new ClusterIP service to create for this endpoint. Mutually exclusive with `ref`.
+    $ref: "./AgentServiceCreate.yaml"
+  ref:
+    description: Reference to an existing Kubernetes service. Mutually exclusive with `create`.
+    $ref: "./ServiceRef.yaml"
+  authorization:
+    description: Access control configuration for traffic through this endpoint.
+    $ref: "./Workloadv2Authorization.yaml"

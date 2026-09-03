@@ -1,0 +1,19 @@
+description: Set of assets comprising a workspace or a workspace template.
+required:
+  - environment
+properties:
+  environment:
+    $ref: "./AssetId.yaml"
+  compute:
+    nullable: true
+    type: string
+    allOf:
+      - $ref: "./AssetId.yaml"
+  datasources:
+    type: array
+    items:
+      $ref: "./AssetIdAndKind.yaml"
+  workloadVolumes:
+    type: array
+    items:
+      type: string

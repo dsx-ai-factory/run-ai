@@ -1,0 +1,13 @@
+ssl/*.key
+ssl/*.pem
+ssl/*.csr
+/runai-mutate
+.idea/
+deploy/mutatingwebhook-ca-bundle.yaml
+deploy/deployment.yaml
+!/scripts/deploy.sh
+.vscode
+.env
+cover.out
+bin
+vendor

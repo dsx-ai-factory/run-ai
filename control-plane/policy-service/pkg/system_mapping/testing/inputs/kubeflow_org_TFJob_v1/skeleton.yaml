@@ -1,0 +1,60 @@
+# Minimal valid kubeflow.org/TFJob/v1 manifest used as the starting point
+# for every Layer 3+4 case under cases/.
+#
+# TFJob has replica types (Chief, Worker, PS, Evaluator) under .spec.tfReplicaSpecs.
+# Each replica type has its own pod template.
+#
+# The empty stubs below are required:
+#   - tfReplicaSpecs.*.template.metadata:{} — the *PodMetadata spec selectors
+#     query these paths; if absent, SET actions won't execute.
+#   - initContainers with placeholder — required for initContainer SET actions to work.
+apiVersion: kubeflow.org/v1
+kind: TFJob
+metadata:
+  name: test
+spec:
+  tfReplicaSpecs:
+    Chief:
+      replicas: 1
+      template:
+        metadata: {}
+        spec:
+          initContainers:
+            - name: init
+              image: placeholder-chief-init
+          containers:
+            - name: tensorflow
+              image: placeholder-chief
+    Worker:
+      replicas: 2
+      template:
+        metadata: {}
+        spec:
+          initContainers:
+            - name: init
+              image: placeholder-worker-init
+          containers:
+            - name: tensorflow
+              image: placeholder-worker
+    PS:
+      replicas: 3
+      template:
+        metadata: {}
+        spec:
+          initContainers:
+            - name: init
+              image: placeholder-ps-init
+          containers:
+            - name: tensorflow
+              image: placeholder-ps
+    Evaluator:
+      replicas: 1
+      template:
+        metadata: {}
+        spec:
+          initContainers:
+            - name: init
+              image: placeholder-evaluator-init
+          containers:
+            - name: tensorflow
+              image: placeholder-evaluator

@@ -1,0 +1,42 @@
+apiVersion: optimization.nvidia.com/v1alpha1
+kind: ResourceInterface
+metadata:
+  creationTimestamp: "2026-05-10T06:38:29Z"
+  finalizers:
+  - rid.kai.bolt/finalize
+  generation: 1
+  labels:
+    run.ai/resource-interface-group: apps.nvidia.com
+    run.ai/resource-interface-kind: NIMCache
+    run.ai/resource-interface-updated-at: 2026-05-10T06-35-07Z
+    run.ai/resource-interface-version: v1alpha1
+    run.ai/workload-type-id: 6a37c23c-856a-4a45-83ab-177e5a99cdeb
+  name: ri-v1alpha1-apps-nvidia-com-nimcache
+  resourceVersion: "8510"
+  uid: 5afefa3c-00bb-4134-86a1-9cad6a097e00
+spec:
+  optimizationInstructions: {}
+  structureDefinition:
+    rootComponent:
+      kind:
+        group: apps.nvidia.com
+        kind: NIMCache
+        version: v1alpha1
+      name: ""
+status:
+  conditions:
+  - lastTransitionTime: "2026-05-10T06:38:41Z"
+    message: ""
+    reason: CRDExists
+    status: "True"
+    type: CRDExists
+  - lastTransitionTime: "2026-05-10T06:38:41Z"
+    message: ""
+    reason: RBACReady
+    status: "True"
+    type: RBACReady
+  - lastTransitionTime: "2026-05-10T06:38:41Z"
+    message: ""
+    reason: SyncEnabled
+    status: "True"
+    type: SyncEnabled

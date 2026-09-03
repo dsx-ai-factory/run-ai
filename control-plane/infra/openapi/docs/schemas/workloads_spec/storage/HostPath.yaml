@@ -1,0 +1,26 @@
+properties:
+  path:
+    description: Local path within the controller to which the host volume will be mapped. (mandatory)
+    type: string
+    minLength: 1
+    maxLength: 4096
+    example: /container/directory
+    nullable: true
+    pattern: .*
+  readOnly:
+    description: Force the volume to be mounted with read-only permissions. Defaults to false.
+    type: boolean
+    default: true
+    nullable: true
+  mountPath:
+    description: The path that the host volume will be mounted to when in use. (mandatory)
+    type: string
+    minLength: 1
+    maxLength: 4096
+    example: /local/directory
+    nullable: true
+    pattern: .*
+  mountPropagation:
+    $ref: "./HostPathMountPropagation.yaml"
+nullable: true
+type: object

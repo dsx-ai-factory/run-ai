@@ -1,0 +1,135 @@
+DistributedTarget:
+  Config: {}
+  Framework: TF
+  JaxJob: null
+  MasterSpec: null
+  MpiJob: null
+  ObjectMeta: null
+  PyTorchJob: null
+  RunPolicy: null
+  TFJob:
+    apiVersion: kubeflow.org/v1
+    kind: TFJob
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: tfjob
+        createdBy: TFJob
+        project: test
+        release: backoffLimit
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: backoffLimit
+      name: backoffLimit
+      namespace: runai-test
+    spec:
+      runPolicy:
+        backoffLimit: 12
+        cleanPodPolicy: Running
+      tfReplicaSpecs:
+        Chief:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                gpu-fraction: "0.5"
+                gpu-fraction-num-devices: "1"
+                user: tester
+              labels:
+                app: tfjob
+                createdBy: TFJob
+                project: test
+                release: backoffLimit
+                workloadKind: Distributed
+                workloadName: backoffLimit
+            spec:
+              containers:
+              - args:
+                - -x
+                - my-script.py
+                command:
+                - python-3.8
+                env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: backoffLimit
+                - name: HOME
+                  value: /home/my-folder
+                image: ubuntu
+                name: tensorflow
+                resources: {}
+                securityContext:
+                  runAsNonRoot: true
+                  seccompProfile:
+                    type: RuntimeDefault
+                workingDir: /home/my-folder
+              priorityClassName: low
+              schedulerName: runai-scheduler
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                gpu-fraction: "0.5"
+                gpu-fraction-num-devices: "1"
+                user: tester
+              labels:
+                app: tfjob
+                createdBy: TFJob
+                project: test
+                release: backoffLimit
+                workloadKind: Distributed
+                workloadName: backoffLimit
+            spec:
+              containers:
+              - args:
+                - -x
+                - my-script.py
+                command:
+                - python-3.8
+                env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: backoffLimit
+                - name: HOME
+                  value: /home/my-folder
+                image: ubuntu
+                name: tensorflow
+                resources: {}
+                securityContext:
+                  runAsNonRoot: true
+                  seccompProfile:
+                    type: RuntimeDefault
+                workingDir: /home/my-folder
+              priorityClassName: low
+              schedulerName: runai-scheduler
+    status: {}
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: TFJob
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-backoffLimit/, Framework: TF'
+  images:
+  - ubuntu
+  name: 'backoffLimit/, Framework: TF'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

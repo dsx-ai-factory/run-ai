@@ -1,0 +1,74 @@
+put:
+  summary: Update catalog setting by key
+  x-service: catalog-service
+  x-test-coverage: not-applicable
+  operationId: update_catalog_setting_by_key
+  x-authorize:
+    resource-type: settings
+    action: update
+  tags:
+    - Settings
+  parameters:
+    - $ref: "../../parameters/path/CatalogSettingsKey.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/Settings/UpdateCatalogSettingByKeyRequest.yaml"
+        examples:
+          enableNgcIntegration:
+            value:
+              enabled: false
+  responses:
+    "200":
+      description: Setting successfully updated
+    "400":
+      $ref: "../../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    "401":
+      $ref: "../../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    "403":
+      $ref: "../../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    "404":
+      $ref: "../../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    "500":
+      $ref: "../../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    "503":
+      $ref: "../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+get:
+  summary: Get catalog setting by key
+  x-service: catalog-service
+  x-test-coverage: not-applicable
+  operationId: get_catalog_setting_by_key
+  x-authorize:
+    resource-type: settings
+    action: read
+  tags:
+    - Settings
+  parameters:
+    - $ref: "../../parameters/path/CatalogSettingsKey.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  responses:
+    "200":
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/Settings/GetEnableNgcIntegration.yaml"
+          examples:
+            enableNgcIntegration:
+              value:
+                enabled: false
+    "400":
+      $ref: "../../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    "401":
+      $ref: "../../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    "403":
+      $ref: "../../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    "404":
+      $ref: "../../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    "500":
+      $ref: "../../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    "503":
+      $ref: "../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
