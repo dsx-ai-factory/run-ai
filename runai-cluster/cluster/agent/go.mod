@@ -3,14 +3,6 @@ module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent
 go 1.26.3
 
 require (
-	github.com/hashicorp/go-multierror v1.1.1
-	github.com/kai-scheduler/KAI-scheduler v0.16.9
-	github.com/onsi/ginkgo/v2 v2.32.0
-	github.com/onsi/gomega v1.42.1
-	github.com/openshift/api v0.0.0-20260727141720-967cc4c36c9b
-	github.com/prometheus/client_golang v1.24.1
-	github.com/rs/zerolog v1.35.1
-	github.com/run-ai/karta v0.1.0
 	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.11
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/concurrency v1.0.3
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.5
@@ -21,6 +13,14 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
+	github.com/hashicorp/go-multierror v1.1.1
+	github.com/kai-scheduler/KAI-scheduler v0.16.9
+	github.com/onsi/ginkgo/v2 v2.32.0
+	github.com/onsi/gomega v1.42.1
+	github.com/openshift/api v0.0.0-20260727141720-967cc4c36c9b
+	github.com/prometheus/client_golang v1.24.1
+	github.com/rs/zerolog v1.35.1
+	github.com/run-ai/karta v0.1.0
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.28.0
 	golang.org/x/oauth2 v0.36.0
@@ -34,8 +34,6 @@ require (
 )
 
 require (
-	github.com/go-logr/zerologr v1.2.3
-	github.com/google/uuid v1.6.0
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.5
@@ -48,6 +46,8 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0
+	github.com/go-logr/zerologr v1.2.3
+	github.com/google/uuid v1.6.0
 )
 
 require (
@@ -87,6 +87,15 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/distribution/reference v0.6.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.5 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
@@ -169,15 +178,6 @@ require (
 	github.com/puzpuzpuz/xsync/v2 v2.5.1 // indirect
 	github.com/redis/go-redis/v9 v9.14.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.5 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/spf13/afero v1.15.0 // indirect

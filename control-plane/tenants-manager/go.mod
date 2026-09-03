@@ -3,11 +3,6 @@ module github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager
 go 1.26.3
 
 require (
-	github.com/go-chi/chi/v5 v5.3.2
-	github.com/go-resty/resty/v2 v2.17.2
-	github.com/google/uuid v1.6.0
-	github.com/onsi/ginkgo/v2 v2.32.1
-	github.com/onsi/gomega v1.43.0
 	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.3
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.6
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3
@@ -16,6 +11,11 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.11
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25
+	github.com/go-chi/chi/v5 v5.3.2
+	github.com/go-resty/resty/v2 v2.17.2
+	github.com/google/uuid v1.6.0
+	github.com/onsi/ginkgo/v2 v2.32.1
+	github.com/onsi/gomega v1.43.0
 	github.com/testcontainers/testcontainers-go v0.43.0 // indirect
 	golang.org/x/sync v0.21.0
 	gorm.io/gorm v1.31.2
@@ -34,6 +34,9 @@ require (
 	github.com/cpuguy83/dockercfg v0.3.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/distribution/reference v0.6.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
@@ -77,9 +80,6 @@ require (
 	github.com/prometheus/procfs v0.17.0 // indirect
 	github.com/redis/go-redis/v9 v9.14.0 // indirect
 	github.com/rs/zerolog v1.35.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/segmentio/kafka-go v0.4.49 // indirect
 	github.com/sony/gobreaker v1.0.0 // indirect
@@ -152,10 +152,10 @@ require (
 
 require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1 // indirect
 	github.com/lithammer/shortuuid/v4 v4.2.0 // indirect
 	github.com/moby/moby/api v1.55.0 // indirect
 	github.com/moby/moby/client v0.5.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1 // indirect
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.43.0 // indirect
 	golang.org/x/mod v0.36.0 // indirect
 )

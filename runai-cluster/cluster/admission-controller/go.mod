@@ -3,14 +3,14 @@ module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/admission-controll
 go 1.26.6
 
 require (
-	github.com/dyson/certman v0.2.1
-	github.com/golang/mock v1.6.0
-	github.com/magiconair/properties v1.18.11
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20260902175900-d43f1b082f30
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20260902175900-d43f1b082f30
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
+	github.com/dyson/certman v0.2.1
+	github.com/golang/mock v1.6.0
+	github.com/magiconair/properties v1.18.11
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/exp v0.0.0-20260824195058-e88cd73687aa
 	gomodules.xyz/jsonpatch/v2 v2.5.0
@@ -34,6 +34,8 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
@@ -80,8 +82,6 @@ require (
 	github.com/prometheus/procfs v0.19.2 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/rs/zerolog v1.31.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 // indirect
 	github.com/sagikazarmark/locafero v0.7.0 // indirect
 	github.com/samber/lo v1.53.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect

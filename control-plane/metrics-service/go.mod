@@ -3,14 +3,6 @@ module github.com/dsx-ai-factory/run-ai/control-plane/metrics-service
 go 1.26.3
 
 require (
-	github.com/go-chi/chi/v5 v5.3.2
-	github.com/go-resty/resty/v2 v2.17.2
-	github.com/gocarina/gocsv v0.0.0-20260824135904-1713ebc4797a
-	github.com/google/uuid v1.6.0
-	github.com/lib/pq v1.12.3
-	github.com/minio/minio-go/v7 v7.3.0
-	github.com/onsi/ginkgo/v2 v2.32.1
-	github.com/onsi/gomega v1.43.0
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
@@ -30,6 +22,14 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/s3 v1.0.4
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25
+	github.com/go-chi/chi/v5 v5.3.2
+	github.com/go-resty/resty/v2 v2.17.2
+	github.com/gocarina/gocsv v0.0.0-20260824135904-1713ebc4797a
+	github.com/google/uuid v1.6.0
+	github.com/lib/pq v1.12.3
+	github.com/minio/minio-go/v7 v7.3.0
+	github.com/onsi/ginkgo/v2 v2.32.1
+	github.com/onsi/gomega v1.43.0
 	gorm.io/gorm v1.31.2
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
 )
@@ -61,6 +61,7 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.7.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/ebitengine/purego v0.10.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
@@ -122,7 +123,6 @@ require (
 	github.com/prometheus/procfs v0.16.1 // indirect
 	github.com/redis/go-redis/v9 v9.14.0 // indirect
 	github.com/rs/xid v1.6.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/segmentio/kafka-go v0.4.48 // indirect
@@ -173,6 +173,7 @@ require (
 )
 
 require (
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/hashicorp/go-version v1.9.0
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -186,7 +187,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.3.1 // indirect
 	github.com/rs/zerolog v1.35.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
