@@ -4,14 +4,6 @@ go 1.26.3
 
 require (
 	github.com/avast/retry-go/v4 v4.6.0
-	github.com/dustin/go-humanize v1.0.1
-	github.com/go-chi/chi/v5 v5.3.2
-	github.com/google/uuid v1.6.0
-	github.com/jackc/pgx/v5 v5.10.0
-	github.com/lib/pq v1.12.3
-	github.com/onsi/ginkgo/v2 v2.28.3
-	github.com/onsi/gomega v1.42.1
-	github.com/run-ai/karta v0.1.0
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
@@ -49,6 +41,14 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.7
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/setting v1.1.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25
+	github.com/dustin/go-humanize v1.0.1
+	github.com/go-chi/chi/v5 v5.3.2
+	github.com/google/uuid v1.6.0
+	github.com/jackc/pgx/v5 v5.10.0
+	github.com/lib/pq v1.12.3
+	github.com/onsi/ginkgo/v2 v2.28.3
+	github.com/onsi/gomega v1.42.1
+	github.com/run-ai/karta v0.1.0
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/exp v0.0.0-20260718201538-764159d718ef
 	gorm.io/gorm v1.31.2
@@ -58,10 +58,10 @@ require (
 
 require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
-	github.com/google/btree v1.1.3 // indirect
-	github.com/kai-scheduler/KAI-scheduler v0.16.9 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-20250716113405-6ec301e09307 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common v0.0.0 // indirect
+	github.com/google/btree v1.1.3 // indirect
+	github.com/kai-scheduler/KAI-scheduler v0.16.9 // indirect
 	github.com/segmentio/kafka-go v0.4.48 // indirect
 	golang.org/x/mod v0.38.0 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
@@ -72,9 +72,9 @@ require (
 	github.com/ThreeDotsLabs/watermill v1.3.5 // indirect
 	github.com/ThreeDotsLabs/watermill-redisstream v1.3.0 // indirect
 	github.com/cenkalti/backoff/v3 v3.2.2 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3
 	github.com/sony/gobreaker v0.5.0 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	google.golang.org/appengine v1.6.8 // indirect
@@ -95,6 +95,12 @@ require (
 	github.com/containerd/errdefs/pkg v0.3.0 // indirect
 	github.com/containerd/platforms v0.2.1 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels v1.0.1 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/validation v1.0.2 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcreds v0.0.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20251016112722-024bf1e7a8f1 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0 // indirect
 	github.com/ebitengine/purego v0.10.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
@@ -132,12 +138,6 @@ require (
 	github.com/openshift/api v0.0.0-20250901120840-a638ff2e96fb // indirect
 	github.com/paulmach/orb v0.13.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.27 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels v1.0.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/validation v1.0.2 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcreds v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20251016112722-024bf1e7a8f1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/shirou/gopsutil/v4 v4.26.5 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
@@ -178,6 +178,9 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/docker/go-connections v0.7.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
+	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v1.0.0
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
@@ -239,9 +242,6 @@ require (
 	github.com/prometheus/procfs v0.20.1 // indirect
 	github.com/redis/go-redis/v9 v9.14.0 // indirect
 	github.com/rs/zerolog v1.35.1
-	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v1.0.0
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/sethvargo/go-retry v0.3.0 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect

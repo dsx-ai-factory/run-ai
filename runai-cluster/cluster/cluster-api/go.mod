@@ -4,15 +4,6 @@ go 1.26.3
 
 require (
 	github.com/MicahParks/keyfunc v1.9.0
-	github.com/go-chi/chi/v5 v5.2.2
-	github.com/golang-jwt/jwt/v5 v5.3.0
-	github.com/golang/mock v1.6.0
-	github.com/google/uuid v1.6.0
-	github.com/kubeflow/training-operator v1.9.3
-	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee
-	github.com/onsi/ginkgo/v2 v2.28.1
-	github.com/onsi/gomega v1.41.0
-	github.com/rs/zerolog v1.35.1
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/getters v0.0.0-00010101000000-000000000000
@@ -28,6 +19,15 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.5
+	github.com/go-chi/chi/v5 v5.2.2
+	github.com/golang-jwt/jwt/v5 v5.3.0
+	github.com/golang/mock v1.6.0
+	github.com/google/uuid v1.6.0
+	github.com/kubeflow/training-operator v1.9.3
+	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee
+	github.com/onsi/ginkgo/v2 v2.28.1
+	github.com/onsi/gomega v1.41.0
+	github.com/rs/zerolog v1.35.1
 	golang.org/x/sync v0.20.0
 	gorm.io/gorm v1.25.7
 	k8s.io/api v0.35.4
@@ -74,12 +74,12 @@ require (
 )
 
 require (
-	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
-	github.com/google/btree v1.1.3 // indirect
-	github.com/kai-scheduler/KAI-scheduler v0.16.9 // indirect
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client v0.0.0
+	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
+	github.com/google/btree v1.1.3 // indirect
+	github.com/kai-scheduler/KAI-scheduler v0.16.9 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 )
@@ -99,6 +99,15 @@ require (
 	github.com/coreos/go-oidc/v3 v3.11.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.2 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1 v0.0.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common v0.0.0-00010101000000-000000000000 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/auth v0.0.0-20250428075130-be7291f11588 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
@@ -177,15 +186,6 @@ require (
 	github.com/prometheus/procfs v0.20.1 // indirect
 	github.com/redis/go-redis/v9 v9.14.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.2 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1 v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common v0.0.0-00010101000000-000000000000 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/auth v0.0.0-20250428075130-be7291f11588 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/segmentio/kafka-go v0.4.48 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect

@@ -16,6 +16,9 @@ require (
 	github.com/aws/smithy-go v1.27.8 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.3 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.24 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
 	github.com/go-faster/errors v0.7.1 // indirect
 	github.com/go-sql-driver/mysql v1.9.3 // indirect
@@ -36,9 +39,6 @@ require (
 	github.com/paulmach/orb v0.13.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.27 // indirect
 	github.com/redis/go-redis/v9 v9.7.3 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.3 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.24 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect

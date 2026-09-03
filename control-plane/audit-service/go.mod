@@ -5,10 +5,6 @@ go 1.26.3
 require (
 	github.com/Rican7/retry v0.3.1
 	github.com/aws/smithy-go v1.28.1
-	github.com/go-chi/chi/v5 v5.3.2
-	github.com/gocarina/gocsv v0.0.0-20260824135904-1713ebc4797a
-	github.com/google/uuid v1.6.0
-	github.com/rs/zerolog v1.35.1
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.6
@@ -22,6 +18,10 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.6
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25
+	github.com/go-chi/chi/v5 v5.3.2
+	github.com/gocarina/gocsv v0.0.0-20260824135904-1713ebc4797a
+	github.com/google/uuid v1.6.0
+	github.com/rs/zerolog v1.35.1
 	github.com/stretchr/testify v1.12.1
 	gorm.io/gorm v1.31.2
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
@@ -38,6 +38,9 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v3 v3.2.2 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.2 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
 	github.com/go-faster/errors v0.7.1 // indirect
 	github.com/go-sql-driver/mysql v1.9.3 // indirect
@@ -60,9 +63,6 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.64.0 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.2 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/segmentio/kafka-go v0.4.48 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
@@ -88,6 +88,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
@@ -113,7 +114,6 @@ require (
 	github.com/pelletier/go-toml/v2 v2.3.1 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/v9 v9.14.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect

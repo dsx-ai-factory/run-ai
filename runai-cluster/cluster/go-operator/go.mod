@@ -7,6 +7,18 @@ toolchain go1.26.6
 require (
 	github.com/aws/amazon-ssm-agent v0.0.0-20260407151232-1233a2a55f57
 	github.com/cert-manager/cert-manager v1.20.3
+	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
+	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.11
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipublic v0.0.0-00010101000000-000000000000
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils v0.0.0-00010101000000-000000000000
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1 v0.0.0
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-00010101000000-000000000000
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils v0.0.0-00010101000000-000000000000
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-00010101000000-000000000000
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/profiling v0.0.0-00010101000000-000000000000
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0-20250408104737-6a14b23817ad
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
 	github.com/go-logr/logr v1.4.3
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/cel-go v0.26.0
@@ -22,18 +34,6 @@ require (
 	github.com/openshift/cluster-monitoring-operator v0.1.1-0.20250903145546-4496a0a83b65
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.88.0
 	github.com/prometheus/client_golang v1.23.2
-	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
-	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.11
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipublic v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1 v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/profiling v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0-20250408104737-6a14b23817ad
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
 	github.com/samber/lo v1.47.0
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
@@ -78,6 +78,14 @@ require (
 	github.com/dennwc/varint v1.0.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/distribution/reference v0.6.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
@@ -155,14 +163,6 @@ require (
 	github.com/redis/go-redis/v9 v9.10.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/rs/zerolog v1.31.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/spf13/afero v1.15.0 // indirect

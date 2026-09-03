@@ -10,16 +10,16 @@ require (
 	github.com/charmbracelet/bubbles v0.21.1
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/lipgloss v1.1.0
+	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.11
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
+	github.com/dsx-ai-factory/run-ai/runai-installer/clients v0.0.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/go-containerregistry v0.21.9
 	github.com/onsi/ginkgo/v2 v2.32.1
 	github.com/onsi/gomega v1.43.0
 	github.com/pkg/errors v0.9.1
 	github.com/pterm/pterm v0.12.83
-	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.11
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
-	github.com/dsx-ai-factory/run-ai/runai-installer/clients v0.0.0
 	github.com/sirupsen/logrus v1.10.2
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1
@@ -67,6 +67,9 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/docker/cli v29.6.2+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.9.5 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/evanphx/json-patch v5.9.11+incompatible // indirect
@@ -147,9 +150,6 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rs/zerolog v1.34.0 // indirect
 	github.com/rubenv/sql-migrate v1.8.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 // indirect

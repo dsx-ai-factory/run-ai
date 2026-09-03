@@ -3,18 +3,19 @@ module github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/clien
 go 1.26.3
 
 require (
-	github.com/pkg/errors v0.9.1
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25
+	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
 )
 
 require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.10.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
@@ -30,7 +31,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.3.1 // indirect
 	github.com/rs/zerolog v1.31.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
