@@ -1,0 +1,7 @@
+type: object
+description: Request body for changing the run state of a workload.
+required:
+  - value
+properties:
+  value:
+    $ref: './RunState.yaml'

@@ -1,0 +1,209 @@
+description: |
+  Layer 3 case "workload" for apps.nvidia.com/NIMService/v1alpha1. SETs every
+  field reachable through the nimServiceSpec field group plus the metadata
+  FGs bound by workloadMetadata and podMetadata.
+
+  This policy uses object-level fields (hostPathStorage, nimCacheStorage)
+  rather than granular xxx-yyy fields. In a real policy you would typically
+  pick ONE storage type; here we set both to exercise each field-group entry's
+  write path.
+
+  Custom formatters used here:
+    * inferencePlatform, image-PullPolicy, exposeService-Type,
+      multiNode-BackendType use runai-nimServiceSpec (enum-enforced).
+    * hostPathStorage, nimCacheStorage use runai-nimServiceSpec (object-level
+      writes; nimCacheStorage also enforces pvcVolumeAccessMode enum).
+    * nodeSelectors + tolerations use runai-podSpec (reused — array/map
+      shapes are identical to K8s's PodSpec ones).
+
+  Storage modeling note:
+    * hostPathStorage's readOnly and nimCacheStorage's readOnly both map to
+      .spec.storage.readOnly (the CRD stores readOnly as a single sibling
+      of hostPath and pvc). Using them in the same policy means the last
+      write wins; we include both here to exercise the write path.
+
+  Read together with cases/workload/golden.yaml.
+effectiveRules:
+  # ----- workloadMetadata (CR-level metadata) -----
+  - field: labels
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "app", value: "test" } }]
+  - field: annotations
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "example.com/annotation", value: "test-value" } }]
+
+  # ----- podMetadata (pod labels/annotations at .spec.labels/.spec.annotations) -----
+  - field: labels
+    specSelector: podMetadata
+    enforcements: [{ set: { key: "pod.app", value: "test" } }]
+  - field: annotations
+    specSelector: podMetadata
+    enforcements: [{ set: { key: "pod.example.com/annotation", value: "pod-test-value" } }]
+
+  # ----- spec scalars -----
+  - field: authSecret
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: ngc-api-key } }]
+  - field: replicas
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 1 } }]
+  - field: runtimeClassName
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: gvisor } }]
+  - field: schedulerName
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: default-scheduler } }]
+  - field: userID
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 1000 } }]
+  - field: groupID
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 2000 } }]
+  - field: inferencePlatform
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: standalone } }]
+
+  # ----- podAffinity / probes (opaque OBJECTs) -----
+  - field: podAffinity
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: {} } }]
+  - field: livenessProbe
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: {} } }]
+  - field: readinessProbe
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: {} } }]
+  - field: startupProbe
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: {} } }]
+
+  # ----- storage (object-level SET) -----
+  # hostPathStorage and nimCacheStorage both include readOnly, which maps to
+  # storage.readOnly. The last rule wins, so nimCacheStorage's readOnly value
+  # will be the final one in the golden.
+  - field: hostPathStorage
+    specSelector: workloadSpec
+    enforcements:
+      - set:
+          path: /data/nim-cache
+          readOnly: false
+
+  - field: nimCacheStorage
+    specSelector: workloadSpec
+    enforcements:
+      - set:
+          name: my-nim-cache
+          profile: throughput
+          pvcName: nim-service-pvc
+          pvcCreate: true
+          pvcStorageClass: standard
+          pvcSize: "10Gi"
+          pvcSubPath: cache
+          pvcVolumeAccessMode: ReadWriteOnce
+          readOnly: false
+
+  - field: sharedMemorySizeLimit
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "1Gi" } }]
+
+  # ----- expose.service -----
+  - field: exposeService-Type
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: ClusterIP } }]
+  - field: exposeService-Name
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: my-service } }]
+  - field: exposeService-Port
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 8000 } }]
+  - field: exposeService-GrpcPort
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 9000 } }]
+  - field: exposeService-MetricsPort
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 9001 } }]
+  - field: exposeService-Annotations
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: { "service.example.com/annotation": "svc-value" } } }]
+
+  # ----- expose.ingress -----
+  - field: exposeIngress-Enabled
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: false } }]
+  - field: exposeIngress-Annotations
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: { "ingress.example.com/annotation": "ing-value" } } }]
+
+  # ----- multiNode -----
+  - field: multiNode-BackendType
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: lws } }]
+  - field: multiNode-PipelineParallelism
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 2 } }]
+  - field: multiNode-TensorParallelism
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 4 } }]
+  - field: multiNode-MpiStartTimeout
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 300 } }]
+
+  # ----- scale -----
+  - field: scale-Enabled
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: true } }]
+  - field: scale-Annotations
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: { "scale.example.com/annotation": "scale-value" } } }]
+  - field: scale-HpaMinReplicas
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 1 } }]
+  - field: scale-HpaMaxReplicas
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 5 } }]
+
+  # ----- metrics -----
+  - field: metrics-Enabled
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: true } }]
+  - field: metricsServiceMonitor-Annotations
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: { "monitor.example.com/annotation": "monitor-value" } } }]
+  - field: metricsServiceMonitor-AdditionalLabels
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: { "additional-label": "label-value" } } }]
+  - field: metricsServiceMonitor-Interval
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "30s" } }]
+  - field: metricsServiceMonitor-ScrapeTimeout
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "10s" } }]
+
+  # ----- proxy -----
+  - field: proxy-HttpProxy
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "http://proxy.example.com:3128" } }]
+  - field: proxy-HttpsProxy
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "http://proxy.example.com:3128" } }]
+  - field: proxy-NoProxy
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "localhost,.cluster.local" } }]
+  - field: proxy-CertConfigMap
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: proxy-certs } }]
+
+  # ----- nodeSelector + tolerations (runai-podSpec, reused) -----
+  - field: nodeSelectors
+    specSelector: workloadSpec
+    enforcements:
+      - set: { key: test, value: somevalue }
+  - field: tolerations
+    specSelector: workloadSpec
+    enforcements:
+      - set:
+          key: test
+          operator: Equal
+          value: somevalue
+          effect: NoSchedule
+          seconds: 60

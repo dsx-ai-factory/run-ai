@@ -1,0 +1,6 @@
+name: namespace
+in: path
+description: The namespace of the project.
+schema:
+  type: string
+required: true

@@ -1,0 +1,42 @@
+.q-select__dropdown-icon {
+  font-size: 18px;
+}
+
+// Match the q-btn-dropdown arrow to the standard q-select dropdown icon color
+// for neutral button variants (outline / flat). Filled q-btn-dropdowns
+// (e.g. color="primary") keep their inherited text color so the arrow stays
+// readable on the colored background.
+.q-btn-dropdown.q-btn--outline .q-btn-dropdown__arrow,
+.q-btn-dropdown.q-btn--flat .q-btn-dropdown__arrow {
+  color: var(--b-text-sub);
+}
+
+.runai-slim-select {
+  &.q-field--with-bottom {
+    padding-bottom: unset;
+  }
+
+  height: 30px;
+
+  .q-field__control {
+    height: 100%;
+    min-height: unset;
+    & > .q-field__append,
+    .q-field__control-container,
+    .q-field__native {
+      height: 100%;
+      min-height: unset;
+    }
+  }
+}
+
+.q-menu.nim-model-selector-dropdown {
+  max-width: 770px !important;
+}
+
+.select-italic-placeholder {
+  .q-field__label,
+  .select-placeholder {
+    font-style: italic;
+  }
+}

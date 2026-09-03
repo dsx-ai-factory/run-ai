@@ -1,0 +1,22 @@
+type: object
+properties:
+  value:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        nullable: true
+        description: Whether to view deleted workloads in the Workloads view.
+  displayName:
+    type: string
+    description: Human-readable name for this setting
+    readOnly: true
+  description:
+    type: string
+    description: Short explanation of what this setting controls, shown alongside the setting
+    readOnly: true
+example:
+  value:
+    enabled: true
+  displayName: Deleted workloads view
+  description: Enable to view deleted workloads in the Workloads view.

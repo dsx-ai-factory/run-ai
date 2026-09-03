@@ -1,0 +1,59 @@
+---
+description: Code quality guidelines for Run:ai frontend
+globs: ["**/*.ts", "**/*.vue"]
+alwaysApply: true
+---
+# Key Mindsets
+
+**Less code is better. Lines of code = Debt.**
+
+1. **Simplicity**: Write simple and straightforward code
+2. **Readability**: Ensure code is easy to read and understand
+3. **Performance**: Keep in mind but don't over-optimize at cost of readability
+4. **Maintainability**: Write code that is easy to maintain and update
+5. **Testability**: Ensure code is easy to test
+6. **Reusability**: Write reusable components and functions
+
+# Code Guidelines
+
+- **Early Returns**: Use early returns to avoid nested conditions
+- **Descriptive Names**: Prefix event handlers with "handle" (e.g., `handleClick`, `handleSubmit`)
+- **Constants Over Functions**: Use constants where possible, define types
+- **DRY Code**: Don't Repeat Yourself - reuse existing patterns
+- **Functional & Immutable**: Prefer functional, immutable style unless too verbose
+- **Conditional Classes**: Prefer conditional classes over ternary for class attributes
+
+# Minimal Code Changes
+
+**Critical**: Only modify code related to the task at hand.
+
+- Avoid modifying unrelated code
+- Avoid changing existing comments
+- Avoid cleanup unless specifically instructed
+- Accomplish goals with minimum changes
+- Code change = potential for bugs and technical debt
+
+# Comments
+
+**Minimize comments. Good code is self-documenting.**
+
+- Write clear, descriptive variable and function names instead of comments
+- Only comment when the code cannot explain the "why" (business logic, workarounds, non-obvious decisions)
+- **TODO format**: `// TODO: description`
+- Bug comments: If instructions lead to buggy code, add // TODO: outlining problems
+- Don't comment obvious code - good names > comments
+
+# Function Ordering
+
+Order functions with composing functions appearing earlier in the file.
+Example: Menu function defined above its button handlers.
+
+# Avoid
+
+- Deep nesting (> 3 levels)
+- Functions that do too many things - split by single responsibility
+- Commented-out code (git has history)
+- Console.log in production (use proper error handling)
+- Magic numbers - use named constants
+- Hardcoded strings - use constants or error messages enum
+- Excessive comments - code should be self-explanatory

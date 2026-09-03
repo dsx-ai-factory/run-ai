@@ -1,0 +1,30 @@
+{{- $runai_operator := index .Values "runai-operator" -}}
+{{- $createRunaiConfig := eq (include "createRunaiConfig" .) "true" -}}
+{{- if and $runai_operator.config $createRunaiConfig }}
+{{- $config := deepCopy $runai_operator.config -}}
+{{- $anyworkload := deepCopy (default (dict) (index $config "anyworkload-controller")) -}}
+{{- $migratedFields := list "openshiftRouteConfiguration" "gitSyncImage" "s3FileSystemImage" "runaiOauth2ProxyImage" "runaiOauth2ProxyRedisFQDN" "runaiOauth2ProxyWorkloadAuthSecretName" "runaiOauth2ProxySessionStoreType" "runaiOauth2ProxyUsernameLoaderImage" "externalAuthUrlEnabled" -}}
+{{- range $legacyName := list "workload-controller" "inference-workload-controller" -}}
+  {{- $legacy := default (dict) (index $config $legacyName) -}}
+  {{- range $field := $migratedFields -}}
+    {{- if and (hasKey $legacy $field) (not (hasKey $anyworkload $field)) -}}
+      {{- $_ := set $anyworkload $field (deepCopy (index $legacy $field)) -}}
+    {{- end -}}
+  {{- end -}}
+  {{- if and (hasKey $legacy "GPUNetworkAccelerationEnabled") (eq (index $legacy "GPUNetworkAccelerationEnabled") true) -}}
+    {{- $_ := set $anyworkload "GPUNetworkAccelerationEnabled" true -}}
+  {{- end -}}
+{{- end -}}
+{{- if gt (len $anyworkload) 0 -}}
+  {{- $_ := set $config "anyworkload-controller" $anyworkload -}}
+{{- end -}}
+{{- $_ := unset $config "workload-controller" -}}
+{{- $_ := unset $config "inference-workload-controller" -}}
+{{- $_ := unset $config "job-controller" -}}
+apiVersion: run.ai/v1
+kind: RunaiConfig
+metadata:
+  name: runai
+spec:
+{{- $config | toYaml | nindent 2 -}}
+{{- end }}

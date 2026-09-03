@@ -1,0 +1,143 @@
+{
+  "metadata": {
+    "name": "runai",
+    "namespace": "runai"
+  },
+  "spec": {
+    "serviceMonitorSelector": {
+      "matchExpressions": [
+        {
+          "key": "kai.scheduler/accounting",
+          "operator": "NotIn",
+          "values": [
+            "true"
+          ]
+        }
+      ]
+    },
+    "serviceMonitorNamespaceSelector": {
+      "matchExpressions": [
+        {
+          "key": "kubernetes.io/metadata.name",
+          "operator": "In",
+          "values": [
+            "runai",
+            "openshift-monitoring",
+            "monitoring",
+            "kube-system",
+            "dgxc-system",
+            "monitoring"
+          ]
+        }
+      ]
+    },
+    "podMonitorSelector": {},
+    "podMonitorNamespaceSelector": {
+      "matchExpressions": [
+        {
+          "key": "kubernetes.io/metadata.name",
+          "operator": "In",
+          "values": [
+            "runai",
+            "openshift-monitoring",
+            "monitoring",
+            "kube-system",
+            "dgxc-system",
+            "monitoring"
+          ]
+        }
+      ]
+    },
+    "image": "image",
+    "imagePullSecrets": [
+      {
+        "name": "runai-reg-creds"
+      }
+    ],
+    "replicas": 2,
+    "replicaExternalLabelName": "__replica__",
+    "scrapeInterval": "1m",
+    "externalLabels": {
+      "__replica__": "$(POD_NAME)",
+      "cluster": "uuid",
+      "prometheus": "p",
+      "prometheus_replica": "pr"
+    },
+    "storage": {
+      "emptyDir": {
+        "medium": "Memory"
+      },
+      "volumeClaimTemplate": {
+        "metadata": {},
+        "spec": {
+          "resources": {}
+        },
+        "status": {}
+      }
+    },
+    "resources": {
+      "limits": {
+        "cpu": "1",
+        "memory": "1Gi"
+      },
+      "requests": {
+        "cpu": "1",
+        "memory": "1Gi"
+      }
+    },
+    "serviceAccountName": "runai-prometheus",
+    "remoteWrite": [
+      {
+        "url": "http://localhost:1234"
+      }
+    ],
+    "securityContext": {
+      "runAsUser": 10000,
+      "runAsNonRoot": true,
+      "seccompProfile": {
+        "type": "RuntimeDefault"
+      }
+    },
+    "arbitraryFSAccessThroughSMs": {},
+    "retention": "1d",
+    "retentionSize": "1KB",
+    "rules": {
+      "alert": {}
+    },
+    "ruleSelector": {
+      "matchExpressions": [
+        {
+          "key": "kai.scheduler/accounting",
+          "operator": "NotIn",
+          "values": [
+            "true"
+          ]
+        }
+      ]
+    },
+    "ruleNamespaceSelector": {
+      "matchExpressions": [
+        {
+          "key": "kubernetes.io/metadata.name",
+          "operator": "In",
+          "values": [
+            "runai",
+            "openshift-monitoring",
+            "monitoring",
+            "kube-system",
+            "dgxc-system",
+            "monitoring"
+          ]
+        }
+      ]
+    },
+    "evaluationInterval": "1m"
+  },
+  "status": {
+    "paused": false,
+    "replicas": 0,
+    "updatedReplicas": 0,
+    "availableReplicas": 0,
+    "unavailableReplicas": 0
+  }
+}

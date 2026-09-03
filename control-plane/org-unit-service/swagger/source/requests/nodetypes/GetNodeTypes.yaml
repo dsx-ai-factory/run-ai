@@ -1,0 +1,35 @@
+summary: Get node types
+operationId: get_node_types
+x-service: org-unit-service
+deprecated: true
+description: 'Deprecated: use a workload policy node selector to target node types instead. Get node types'
+x-test-coverage:
+  - control-plane/org-unit-service/pkg/test/node_type_api_test.go
+x-authorize:
+  resource-type: project
+  action: read
+tags:
+  - Node types
+parameters:
+  - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml"
+responses:
+  200:
+    description: ok
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            nodeTypes:
+              type: array
+              items:
+                allOf:
+                  - $ref: "../../schemas/nodetypes/NodeType.yaml"
+  400:
+    $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+  401:
+    $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+  403:
+    $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+  503:
+    $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

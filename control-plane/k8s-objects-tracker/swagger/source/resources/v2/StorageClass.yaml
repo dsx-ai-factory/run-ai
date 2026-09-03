@@ -1,0 +1,37 @@
+get:
+  summary: get a Storage Class/Classes for a given cluster
+  operationId: getStorageClassesV2
+  tags:
+    - Storage Classes
+  x-audit: false
+  x-authorize:
+    resource-type: pvc-assets
+    action: read
+  x-service: k8s-objects-tracker
+  x-test-coverage:
+    - k8s-objects-tracker/pkg/services/api_storage_classes_service_test.go
+  parameters:
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
+    - $ref: '../../parameters/query/optional/nameFilter.yaml'
+    - name: includeNone
+      in: query
+      description: Include runai-none storage class, which is used for static provisioning of PVC.
+        In static provisioning storage is omitted.
+      required: false
+      schema:
+        type: boolean
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/StorageClass/StorageClassesV2.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

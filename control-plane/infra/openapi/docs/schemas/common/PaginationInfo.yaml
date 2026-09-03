@@ -1,0 +1,13 @@
+properties:
+  limit:
+    type: number
+    format: int64
+    description: the number of entries included in this bulk of entries
+  offset:
+    type: number
+    format: int64
+    description: the first entry that was requested to be included in this bulk
+  nextOffset:
+    type: number
+    format: int64
+    description: the offset of the next bulk of entries

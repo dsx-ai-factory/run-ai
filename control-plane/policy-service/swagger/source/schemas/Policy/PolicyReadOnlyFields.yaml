@@ -1,0 +1,31 @@
+required:
+  - id
+  - createdBy
+  - createdAt
+  - updatedBy
+  - updatedAt
+properties:
+  id:
+    $ref: "./PolicyId.yaml"
+  tenantId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml"
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterIdOptional.yaml"
+  createdBy:
+    description: The user who created the policy.
+    type: string
+    minLength: 1
+  createdAt:
+    description: The time at which the policy wes created
+    type: string
+    minLength: 1
+    format: date-time
+  updatedBy:
+    description: The user who updated the policy.
+    type: string
+    minLength: 1
+  updatedAt:
+    description: The time at which the policy has been updated
+    type: string
+    minLength: 1
+    format: date-time

@@ -1,0 +1,27 @@
+type: object
+description: Specifies the features configuration to apply to a workload.
+properties:
+  mnnvl:
+    allOf:
+      - $ref: "./MnnvlMode.yaml"
+      - default: None
+    type: string
+    nullable: true
+  networking:
+    x-internal: true
+    $ref: "./Networking/NetworkingConfiguration.yaml"
+  userCredentials:
+    $ref: "./WorkloadV2UpdateConfigurationUserCredentials.yaml"
+  pvcs:
+    x-internal: true
+    type: array
+    nullable: true
+    maxItems: 1000
+    description: PVCs to create and reconcile alongside the workload.
+    items:
+      $ref: "./WorkloadV2UpdateConfigurationPvc.yaml"
+  pvcsConfig:
+    x-internal: true
+    nullable: true
+    description: Configuration applied to PVCs that are created and reconciled alongside the workload.
+    $ref: "./WorkloadV2UpdateConfigurationPvcsConfig.yaml"

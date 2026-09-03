@@ -1,0 +1,31 @@
+type: object
+required:
+  - id
+  - tenantId
+  - createdAt
+  - createdBy
+  - status
+  - statusUpdatedAt
+properties:
+  id:
+    type: string
+    format: uuid
+  createdAt:
+    type: string
+    format: date-time
+  createdBy:
+    type: string
+    example: 'user@run.ai'
+  tenantId:
+    type: integer
+    format: int32
+    description: ID of the tenant where the project is located.
+    example: 2
+  status:
+    $ref: './ReportStatus.yaml'
+  statusUpdatedAt:
+    type: string
+    format: date-time
+  statusMessage:
+    type: string
+    example: "Report in queue"

@@ -1,0 +1,131 @@
+DistributedTarget:
+  Config: {}
+  Framework: JAX
+  JaxJob:
+    apiVersion: kubeflow.org/v1
+    kind: JAXJob
+    metadata:
+      annotations:
+        run.ai/auto-delete-after-completion-sec: "864000"
+        run.ai/submitted-by: tester
+      labels:
+        app: jaxjob
+        createdBy: JAXJob
+        project: test
+        release: basic_node_pools
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: basic_node_pools
+      name: basic_node_pools
+      namespace: runai-test
+    spec:
+      jaxReplicaSpecs:
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                gpu-fraction: "0.5"
+                gpu-fraction-num-devices: "1"
+                runai-nodepools: my-node-pool-a my-node-pool-b
+                user: tester
+              labels:
+                app: jaxjob
+                createdBy: JAXJob
+                project: test
+                release: basic_node_pools
+                workloadKind: Distributed
+                workloadName: basic_node_pools
+            spec:
+              affinity:
+                nodeAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                    - matchExpressions:
+                      - key: my-node-pool-a-key
+                        operator: In
+                        values:
+                        - my-node-pool-a-value
+                    - matchExpressions:
+                      - key: my-node-pool-b-key
+                        operator: In
+                        values:
+                        - my-node-pool-b-value
+              containers:
+              - args:
+                - -x
+                - my-script.py
+                command:
+                - python-3.8
+                env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: basic_node_pools
+                - name: HOME
+                  value: /home/my-folder
+                image: ubuntu
+                name: jax
+                resources: {}
+                securityContext:
+                  runAsNonRoot: true
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /local/directory
+                  name: host-path-worker
+                  readOnly: true
+                - mountPath: /local/nfs
+                  name: nfs-worker
+                  readOnly: true
+                workingDir: /home/my-folder
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - hostPath:
+                  path: /container/directory
+                name: host-path-worker
+              - name: nfs-worker
+                nfs:
+                  path: /container/nfs
+                  server: my.nfs.com
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: None
+        ttlSecondsAfterFinished: 864000
+    status: {}
+  MasterSpec: null
+  MpiJob: null
+  ObjectMeta: null
+  PyTorchJob: null
+  RunPolicy: null
+  TFJob: null
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: JAXJob
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-basic_node_pools/, Framework: JAX'
+  images:
+  - ubuntu
+  name: 'basic_node_pools/, Framework: JAX'
+  projectId: project-654-321
+  requestedNodePools:
+  - my-node-pool-a
+  - my-node-pool-b
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

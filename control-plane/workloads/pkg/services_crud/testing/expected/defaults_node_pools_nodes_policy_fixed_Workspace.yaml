@@ -1,0 +1,23 @@
+policyInfo:
+  worker:
+    defaults:
+      image: ubuntu
+      nodePools:
+      - node-pool-2
+    rules:
+      nodePools:
+        options:
+        - value: node-pool-1
+        - value: node-pool-2
+        - value: node-pool-3
+      nodeType:
+        options:
+        - value: node-1
+        - value: node-2
+projectInfo:
+  name: project-1
+spec:
+  worker:
+    image: ubuntu
+    nodePools:
+    - node-pool-2

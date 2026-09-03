@@ -1,0 +1,7 @@
+name: deleteType
+in: query
+required: false
+description: Define project deletion type.
+x-internal: true
+schema:
+  $ref: "../schemas/projects/DeletionTypes.yaml"

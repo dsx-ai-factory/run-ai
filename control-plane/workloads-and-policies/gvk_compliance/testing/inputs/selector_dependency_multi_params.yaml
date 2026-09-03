@@ -1,0 +1,57 @@
+# Tests that spec selector dependencies work correctly when multiple rules
+# target the same selector with different params. Each (selector, params)
+# combination should have its path created independently.
+policy:
+  id: test-dependency-multi-params
+  effectiveRules:
+    # Set annotation on worker container's metadata
+    - field: annotations
+      specSelector: containerMeta
+      selectorParams:
+        containerName: worker
+      enforcements:
+        - set:
+            key: role
+            value: worker
+
+    # Set annotation on main container's metadata (different params, same selector)
+    - field: annotations
+      specSelector: containerMeta
+      selectorParams:
+        containerName: main
+      enforcements:
+        - set:
+            key: role
+            value: main
+
+  breakdown:
+    fields:
+      annotations:
+        - specSelectors: [containerMeta]
+          formatter:
+            setExpr: |
+              { "annotations": { ($ARGS.named.key): $ARGS.named.value } }
+    specSelectors:
+      containerByName:
+        query: '.spec.containers[] | select(.name == $ARGS.named.containerName)'
+        argsInfo:
+          containerName: string
+      containerMeta:
+        query: '.spec.containers[] | select(.name == $ARGS.named.containerName) | .metadata'
+        argsInfo:
+          containerName: string
+        dependency:
+          specSelector: containerByName
+          path: metadata
+
+workload:
+  apiVersion: test/v1
+  kind: TestWorkload
+  spec:
+    containers:
+      - name: worker
+        image: worker:latest
+        # Note: no .metadata - dependency should create it
+      - name: main
+        image: main:latest
+        # Note: no .metadata - dependency should create it

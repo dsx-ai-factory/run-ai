@@ -1,0 +1,32 @@
+get:
+  x-internal: true
+  x-authorize:
+    resource-type: notification-settings
+    action: read
+  x-service: notifications-proxy
+  x-test-coverage:
+    - src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts
+  tags:
+    - Slack
+  operationId: getDetailedSlackNotificationState
+  summary: Get detailed slack notification state
+  description: Get detailed slack notification state
+  responses:
+    '200':
+      description: Detailed slack notification state
+      content:
+        application/json:
+          schema:
+              $ref: '../schemas/DetailedSlackNotificationsState.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    501:
+      $ref: '../../../../infra/openapi/docs/responses/501NotImplemented.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

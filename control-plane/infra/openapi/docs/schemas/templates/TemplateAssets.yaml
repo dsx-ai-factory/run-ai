@@ -1,0 +1,3 @@
+properties:
+  assets:
+    $ref: "./TemplateAssetsIds.yaml"

@@ -1,0 +1,51 @@
+{{- define "common.hpa.tpl" -}}
+{{- $top := first . }}
+{{- $autoscaling := index . 1 }}
+{{- $obj := index . 2 }}
+{{- if semverCompare ">=1.23-0" $top.Capabilities.KubeVersion.GitVersion -}}
+apiVersion: autoscaling/v2
+{{- else -}}
+apiVersion: autoscaling/v2beta2
+{{- end }}
+kind: HorizontalPodAutoscaler
+metadata:
+  {{- include "common.metadata" (list $top $obj) | nindent 2 }}
+  name: {{ include "common.fullname" $top }}-{{ $obj.name }}
+spec:
+  scaleTargetRef:
+{{- if ($top.Values.global.config).argoRollouts }}
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
+{{- else }}
+    apiVersion: apps/v1
+    kind: Deployment
+{{- end }}
+    name: {{ include "common.fullname" $top }}-{{ $obj.name }}
+  minReplicas: {{ $autoscaling.minReplicas }}
+  maxReplicas: {{ $autoscaling.maxReplicas }}
+  metrics:
+  {{- with $autoscaling.memoryUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ . }}
+  {{- end }}
+  {{- with $autoscaling.cpuUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ . }}
+  {{- end }}
+{{- end }}
+
+{{- define "common.hpa" -}}
+{{- $top := first . }}
+{{- $autoscaling := index . 1 }}
+{{- if $autoscaling.enabled | default $top.Values.global.config.hpaEnabled }}
+  {{- include "common.utils.merge" (append . "common.hpa.tpl") }}
+{{- end }}
+{{- end }}

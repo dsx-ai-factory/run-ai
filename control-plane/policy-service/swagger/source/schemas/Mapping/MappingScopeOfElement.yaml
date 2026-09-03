@@ -1,0 +1,7 @@
+type: object
+description: Scope of a mapping element
+required:
+  - scope
+properties:
+  scope:
+    $ref: './MappingScope.yaml'

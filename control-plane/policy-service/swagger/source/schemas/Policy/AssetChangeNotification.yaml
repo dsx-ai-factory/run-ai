@@ -1,0 +1,8 @@
+description: message from assets-service to policy-service about a change in a potentially imposed asset
+properties:
+  changeType:
+    $ref: "./AssetChangeType.yaml"
+  scopeType:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ScopeType.yaml"
+  scopeId:
+    $ref: "../General/ScopeId.yaml"

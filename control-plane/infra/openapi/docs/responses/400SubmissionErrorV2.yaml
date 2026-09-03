@@ -1,0 +1,8 @@
+description: Bad submission request.
+content:
+  application/json:
+    schema:
+      $ref: "../schemas/workloads/SubmissionErrorV2.yaml"
+    example:
+      code: 400
+      message: "The workload request does not comply with the policy set by the administrator"

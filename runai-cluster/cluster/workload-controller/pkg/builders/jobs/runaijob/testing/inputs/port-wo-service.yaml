@@ -1,0 +1,37 @@
+apiVersion: run.ai/v2alpha1
+kind: InteractiveWorkload
+metadata:
+  name: test1
+spec:
+  name:
+    value: test1
+  hostIpc:
+    value: true
+  image:
+    value: ubuntu
+  imagePullPolicy:
+    value: Always
+  command:
+    value: sleep 100
+  environment:
+    items:
+      CLUSTER_USER:
+        value: test
+  allowPrivilegeEscalation:
+    value: true
+  largeShm:
+    value: true
+  ports:
+    items:
+      notebook:
+        value:
+          container: 8888
+      jupyter:
+        value:
+          container: 6006
+      ssh:
+        value:
+          container: 22
+      pvserver:
+        value:
+          container: 11111

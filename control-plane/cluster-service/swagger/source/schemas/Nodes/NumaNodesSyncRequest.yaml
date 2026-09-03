@@ -1,0 +1,23 @@
+type: object
+x-internal: true
+required:
+  - nodes
+properties:
+  nodes:
+    type: array
+    description: Physical nodes and their complete NUMA-node snapshots.
+    items:
+      $ref: './NodeNumaForSync.yaml'
+  deleteMissing:
+    type: boolean
+    default: false
+    description: When true, delete NUMA-node details for physical nodes in the requested range that are missing from nodes. Used for full-cluster reconciliation.
+  from:
+    type: string
+    description: The inclusive lower physical-node-name boundary for deletion when deleteMissing is true. If omitted, the range is unbounded below.
+    example: worker-node-0001
+  to:
+    type: string
+    description: The inclusive upper physical-node-name boundary for deletion when deleteMissing is true. If omitted, the range is unbounded above.
+    example: worker-node-0100
+x-schema-name: NumaNodesSyncRequest

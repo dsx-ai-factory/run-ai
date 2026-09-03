@@ -1,0 +1,34 @@
+post:
+  summary: Reconcile runai realm
+  x-service: identity-manager
+  x-test-coverage: not-applicable
+  description: |
+    Create a new realm for runai tenant.
+  operationId: reconcile_realm
+  x-no-authorization: true
+  tags:
+    - Realm
+  parameters:
+    - $ref: '../parameters/realm.yaml'
+  requestBody:
+    description: how to run reconcile
+    required: false
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Realms/RealmReconcileRequest.yaml'
+  responses:
+    '202':
+      description: Reconciling
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '409':
+      $ref: '../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

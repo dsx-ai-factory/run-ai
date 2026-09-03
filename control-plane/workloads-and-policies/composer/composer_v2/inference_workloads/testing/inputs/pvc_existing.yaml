@@ -1,0 +1,11 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+storage:
+  pvc:
+    - name: models
+      path: /models
+      readOnly: true
+      claimName: existing-models-pvc
+      existingPvc: true

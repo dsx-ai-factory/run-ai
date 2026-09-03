@@ -1,0 +1,28 @@
+type: object
+required:
+  - clusterId
+  - scopeType
+  - scopeId
+  - name
+  - origin
+properties:
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  scopeType:
+    $ref: "../Scopes/ScopeType.yaml"
+  scopeId:
+    $ref: "../Scopes/ScopeId.yaml"
+  name:
+    $ref: "./PVCName.yaml"
+  origin:
+    $ref: "../Common/Origin.yaml"
+  phase:
+    $ref: "./PvcPhaseOptional.yaml"
+  requestedCapacity:
+    $ref: "./PvcCapacityOptional.yaml"
+  actualCapacity:
+    $ref: "./PvcCapacityOptional.yaml"
+  storageClassName:
+    $ref: "../StorageClassConfiguration/StorageClassNameOptional.yaml"
+  dataSharing:
+    $ref: "./PvcDataSharingOptional.yaml"

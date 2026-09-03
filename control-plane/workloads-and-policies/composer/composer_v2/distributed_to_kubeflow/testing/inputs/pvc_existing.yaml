@@ -1,0 +1,7 @@
+image: ubuntu
+storage:
+  pvc:
+    - existingPvc: true
+      claimName: claim-existing
+      path: "/path/ro"
+      readOnly: true

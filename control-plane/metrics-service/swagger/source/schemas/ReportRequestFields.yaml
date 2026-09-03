@@ -1,0 +1,13 @@
+type: object
+allOf:
+  - type: object
+    required:
+      - metrics
+    properties:
+      metrics:
+        type: array
+        maxItems: 100
+        minItems: 1
+        items:
+          $ref: './MetricInformationForReport.yaml'
+  - $ref: './ReportCommonFields.yaml'

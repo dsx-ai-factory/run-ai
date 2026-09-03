@@ -1,0 +1,20 @@
+type: object
+required:
+  - name
+  - range
+properties:
+  name:
+    type: string
+    example: '2023 GPU report'
+  description:
+    type: string
+    example: 'This report shows the GPU usage of all projects in the organization'
+  labels:
+    type: array
+    items:
+      $ref: './Label.yaml'
+  range:
+    $ref: '../../../../infra/openapi/docs/schemas/metrics/Range.yaml'
+  additionalFields:
+    type: object
+    additionalProperties: true

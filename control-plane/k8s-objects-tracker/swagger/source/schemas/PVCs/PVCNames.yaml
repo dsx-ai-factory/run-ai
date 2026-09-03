@@ -1,0 +1,8 @@
+type: object
+required:
+  - pvcs
+properties:
+  pvcs:
+    type: array
+    items:
+      $ref: "./PVCName.yaml"

@@ -1,0 +1,107 @@
+parameters:
+  - $ref: "../../../../infra/openapi/docs/parameters/path/AssetId.yaml"
+get:
+  tags:
+    - Credentials
+  summary: Get an access key.
+  description: Use to retrieve the details of an S3-compatible access key credential by id.
+  operationId: get_access_key_by_id
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_credentials_service_test.go
+    - control-plane/assets-service/pkg/services/api_credentials_service_access_keys_test.go
+    - e2e/src/test/suites/advancedSuite/credential/credentialUI.test.ts
+    - e2e/src/test/suites/advancedSuite/credential/existingSecrestsUI.test.ts
+  x-authorize:
+    resource-type: credentials
+    action: read
+  parameters:
+    - $ref: "../parameters/query/optional/IncludeUsageInfo.yaml"
+    - $ref: "../parameters/query/optional/IncludeStatus.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/AccessKey/AccessKey.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+put:
+  tags:
+    - Credentials
+  summary: Update an access key.
+  description: Use to update the details of an S3-compatible access key credential by id.
+  operationId: update_access_key
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_credentials_service_test.go
+    - control-plane/assets-service/pkg/services/api_credentials_service_access_keys_test.go
+    - e2e/src/test/suites/advancedSuite/credential/credentialUI.test.ts
+  x-authorize:
+    resource-type: credentials
+    action: update
+  x-audit: true
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/AccessKey/AccessKeyUpdateRequest.yaml"
+  responses:
+    202:
+      description: Request accepted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/AccessKey/AccessKey.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+delete:
+  tags:
+    - Credentials
+  summary: Delete an access key.
+  description: Use to delete an S3-compatible access key credential by id.
+  operationId: delete_access_key
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_credentials_service_test.go
+    - control-plane/assets-service/pkg/services/api_credentials_service_access_keys_test.go
+    - e2e/src/test/suites/advancedSuite/credential/credentialUI.test.ts
+    - e2e/src/test/suites/advancedSuite/credential/existingSecrestsUI.test.ts
+    - e2e/src/test/suites/advancedSuite/credential/existingSecrestsApi.test.ts
+  x-authorize:
+    resource-type: credentials
+    action: delete
+  x-audit: true
+  responses:
+    202:
+      $ref: "../../../../infra/openapi/docs/responses/202Accepted.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    412:
+      $ref: "../../../../infra/openapi/docs/responses/412PreconditionFailed.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

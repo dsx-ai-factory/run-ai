@@ -1,0 +1,118 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+allOf:
+- $ref: ./inferences/InferenceFields.yaml
+- $ref: ./distributed_inferences/DistributedInferenceLeaderDefaultsFields.yaml
+- $ref: ./distributed_inferences/DistributedInferenceWorkerDefaultsFields.yaml
+- $ref: ./distributed_inferences/DistributedInferenceCommonDefaults.yaml
+- nullable: true
+  properties:
+    annotations:
+      $ref: ./advanced/AnnotationsDefaults.yaml
+    args:
+      $ref: ./container/Args.yaml
+    autoDeletionTimeAfterCompletionSeconds:
+      $ref: ./advanced/AutoDeletionTimeAfterPreemption.yaml
+    backoffLimit:
+      $ref: ./advanced/BackoffLimit.yaml
+    category:
+      $ref: ./resources/Category.yaml
+    cleanPodPolicy:
+      $ref: ./distributed/CleanPodPolicy.yaml
+    command:
+      $ref: ./container/Command.yaml
+    completions:
+      $ref: ./trainings/Completions.yaml
+    compute:
+      $ref: ./compute/SupersetDefaultsAllOfCompute.yaml
+    createHomeDir:
+      $ref: ./container/CreateHomeDir.yaml
+    distributedFramework:
+      $ref: ./distributed/DistributedFramework.yaml
+    environmentVariables:
+      $ref: ./container/EnvironmentVariablesDefaults.yaml
+    exposedUrls:
+      $ref: ./connectivity/ExposedUrlsDefaults.yaml
+    image:
+      $ref: ./container/Image.yaml
+    imagePullPolicy:
+      $ref: ./container/ImagePullPolicy.yaml
+    imagePullSecrets:
+      $ref: ./advanced/ImagePullSecretsDefaults.yaml
+    labels:
+      $ref: ./advanced/LabelsDefaults.yaml
+    maxReplicas:
+      $ref: ./distributed/MaxReplicas.yaml
+    minReplicas:
+      $ref: ./distributed/MinReplicas.yaml
+    mpiLauncherCreationPolicy:
+      $ref: ./distributed/MpiLauncherCreationPolicy.yaml
+    nodeAffinityRequired:
+      $ref: ./resources/NodeAffinityRequired.yaml
+    nodePools:
+      $ref: ./resources/NodePools.yaml
+    nodeType:
+      $ref: ./resources/NodeType.yaml
+    numWorkers:
+      $ref: ./distributed/NumWorkers.yaml
+    parallelism:
+      $ref: ./trainings/Parallelism.yaml
+    podAffinity:
+      $ref: ./resources/PodAffinity.yaml
+    ports:
+      $ref: ./connectivity/PortsDefaults.yaml
+    preemptibility:
+      $ref: ./advanced/Preemptibility.yaml
+    priorityClass:
+      $ref: ./resources/PriorityClass.yaml
+    probes:
+      $ref: ./container/Probes.yaml
+    relatedUrls:
+      $ref: ./connectivity/RelatedUrlsDefaults.yaml
+    restartPolicy:
+      $ref: ./supersetHack/SupersetRestartPolicy.yaml
+    security:
+      $ref: ./security/SupersetDefaultsAllOfSecurity.yaml
+    servingPort:
+      $ref: ./supersetHack/SupersetServingPort.yaml
+    slotsPerWorker:
+      $ref: ./distributed/SlotsPerWorker.yaml
+    sshAuthMountPath:
+      $ref: ./distributed/SshAuthMountPath.yaml
+    stdin:
+      $ref: ./container/Stdin.yaml
+    storage:
+      nullable: true
+      properties:
+        configMapVolume:
+          $ref: ./storage/ConfigMapsDefaults.yaml
+        dataVolume:
+          $ref: ./storage/DataVolumesDefaults.yaml
+        emptyDirVolume:
+          $ref: ./storage/EmptyDirsDefaults.yaml
+        git:
+          $ref: ./storage/GitsDefaults.yaml
+        hostPath:
+          $ref: ./storage/HostPathsDefaults.yaml
+        nfs:
+          $ref: ./storage/NfssDefaults.yaml
+        pvc:
+          $ref: ./storage/PvcsDefaults.yaml
+        s3:
+          $ref: ./storage/S3sDefaults.yaml
+        secretVolume:
+          $ref: ./storage/SecretsDefaults.yaml
+      type: object
+    terminateAfterPreemption:
+      $ref: ./advanced/TerminateAfterPreemption.yaml
+    terminationGracePeriodSeconds:
+      $ref: ./advanced/TerminationGracePeriod.yaml
+    tolerations:
+      $ref: ./advanced/TolerationsDefaults.yaml
+    tty:
+      $ref: ./container/Tty.yaml
+    workingDir:
+      $ref: ./container/WorkingDir.yaml
+  type: object

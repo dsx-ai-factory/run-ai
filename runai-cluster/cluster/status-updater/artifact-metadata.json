@@ -1,0 +1,14 @@
+{
+  "service_name": "status-updater",
+  "artifact_type": "container",
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "notifications": {
+    "slack": {
+      "mention": "@scheduler"
+    }
+  },
+  "jira": {
+    "team_name": "Vaquita Team"
+  }
+}

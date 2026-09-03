@@ -1,0 +1,5 @@
+type: string
+description: The action to perform on the workload.
+enum:
+  - suspend
+  - resume

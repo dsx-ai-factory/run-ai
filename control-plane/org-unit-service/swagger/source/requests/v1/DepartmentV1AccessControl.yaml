@@ -1,0 +1,40 @@
+put:
+  deprecated: true
+  summary: Set the department admins.
+  description: Deprecated. Instead, use the accessrules API to add the department-admin permissions to a specific subject.
+  operationId: set_department_admins_v1
+  x-service: org-unit-service
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/department_v1_api_test.go
+  x-internal: true
+  x-authorize:
+    resource-type: department
+    action: update
+    resource-id: department-id
+  x-audit: true
+  tags:
+    - Departments v1
+  parameters:
+    - $ref: "../../parameters/v1/ClusterIdV1.yaml"
+    - $ref: "../../parameters/v1/DepartmentIdV1.yaml"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/v1/DepartmentV1AccessControl.yaml"
+  responses:
+    201:
+      description: Department admin set successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/v1/DepartmentV1AccessControl.yaml"
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

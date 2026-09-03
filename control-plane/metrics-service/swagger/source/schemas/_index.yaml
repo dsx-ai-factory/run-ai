@@ -1,0 +1,22 @@
+Result:
+  $ref: "./Result.yaml"
+Measurement:
+  $ref: './Measurement.yaml'
+Range:
+  $ref: '../../../../infra/openapi/docs/schemas/metrics/Range.yaml'
+Filters:
+  $ref: './Filters.yaml'
+MetricInformation:
+  $ref: './MetricInformation.yaml'
+MetricInformationForReport:
+  $ref: './MetricInformationForReport.yaml'
+Report:
+  $ref: "./Report.yaml"
+ReportCalculatedFields:
+  $ref: "../../../../infra/openapi/docs/schemas/reports/ReportCalculatedFields.yaml"
+ReportRequestFields:
+  $ref: "./ReportRequestFields.yaml"
+ReportsIdsBatchRequest:
+  $ref: "./ReportsIdsBatchRequest.yaml"
+ReportsBatchGetResponse:
+  $ref: "./ReportsBatchGetResponse.yaml"

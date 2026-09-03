@@ -1,0 +1,18 @@
+properties:
+  sourceOfRule:
+    $ref: "./SourceOfRule.yaml"
+  required:
+    description: Whether this array is mandatory. Mandatory array must include at least one item. default to false.
+    type: boolean
+    nullable: true
+  options:
+    description: Set of options that the value of each item of the array must be chosen from.
+    type: array
+    items:
+      $ref: "./StringOption.yaml"
+  canEdit:
+    description: Whether the value of the array, as a whole, is editable. default to false.
+    type: boolean
+    nullable: true
+nullable: true
+type: object

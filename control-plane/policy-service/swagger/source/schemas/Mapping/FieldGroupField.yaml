@@ -1,0 +1,27 @@
+type: object
+description: >-
+  A single policy-controllable field of a field group. The field references a
+  formatter (or a direct specRef) that reads and writes its value, declares its
+  data type, and may list the item selectors that apply to it.
+properties:
+  description:
+    $ref: "./MappingDescriptionOptional.yaml"
+  formatter:
+    description: The name of the formatter used to read and write the field.
+    allOf:
+      - $ref: "./FormatterName.yaml"
+  specRef:
+    description: >-
+      A direct dotted path into the workload spec, used in place of a formatter
+      for simple fields. For example, securityContext.privileged.
+    allOf:
+      - $ref: "./SpecReference.yaml"
+  type:
+    description: The data type of the field.
+    allOf:
+      - $ref: "./MappingFieldType.yaml"
+  itemSelectors:
+    description: The item selectors that apply to this field.
+    type: array
+    items:
+      $ref: "./ItemSelectorName.yaml"

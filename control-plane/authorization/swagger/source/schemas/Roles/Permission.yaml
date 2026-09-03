@@ -1,0 +1,18 @@
+type: object
+required:
+  - resourceType
+  - actions
+  - groupId
+  - displayName
+properties:
+  resourceType:
+    $ref: './ResourceType.yaml'
+  displayName:
+    type: string
+    example: 'Projects'
+  groupId:
+    $ref: './ResourceTypeGroupId.yaml'
+  actions:
+    type: array
+    items:
+      $ref: './Action.yaml'

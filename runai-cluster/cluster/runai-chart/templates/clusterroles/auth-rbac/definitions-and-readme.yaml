@@ -1,0 +1,258 @@
+# "runai-researcher" ClusterRole (in base.yaml) -
+#   project-controller used to create 1 RoleBinding in each project's namespace, the subjects being all Permissions.Users+Groups of the project;
+#   it is now embedded as part of the ClusterRoles here, in the "$extraJobsDeploymentsReadNamespaced..." and "$extraJobsDeploymentsCRUDNamespaced...".
+# "runai-storageclass-lister" ClusterRole + ClusterRoleBinding (in base.yaml) -
+#   agent used to update the ClusterRoleBinding, assigning the subjects to be all users and groups in the system that are "researcher"s.
+#   it is now embedded as part of the ClusterRoles here, in the "$extraJobsDeploymentsReadClustered...".
+# "runai-cluster-viewer" ClusterRole + ClusterRoleBinding (in base.yaml) -
+#   agent used to update the ClusterRoleBinding, assigning the subjects to be all users and groups in the system.
+#   it is now embedded as part of the ClusterRoles here, in the "extraJobsDeployments...". //TODO: validate
+# "runai-template-viewer" Role + RoleBinding in "runai" namespace (in base.yaml) -
+#   agent used to update the RoleBinding, assigning the subjects to be all users and groups in the system.
+#   it is now embedded as part of the ClusterRoles here, in the "$policies..." and "$templates..." ("$policiesAndTemplatesApiGroups..."). //TODO: do
+# "runai-cli-index-map-editor" Role + RoleBinding in "runai" namespace (in base.yaml) -
+#   agent used to update the RoleBinding, assigning the subjects to be all users and groups in the system.
+#   it is now embedded as part of the ClusterRoles here, in the "$runaiCliIndexMapEditor...". //TODO: do
+# "runai-research-manager" ClusterRoleBinding (that points to "runai-researcher" ClusterRole) (in base.yaml) -
+#   agent used to update the ClusterRoleBinding, assigning the subjects to be all users and groups in the system that are "researcher manager"s.
+#   it is now embedded as part of the ClusterRoles here.
+#
+#   $extraJobsDeploymentsCRUDNamespaced ApiGroups and Resources -> for namespaced ClusterRoles that include CRUD on jobs and/or deployments
+#   $extraJobsDeploymentsReadNamespaced ApiGroups and Resources -> for namespaced ClusterRoles that include Read on jobs and/or deployments
+#   $extraJobsDeploymentsWatchNamespaced ApiGroups and Resources -> also for namespaced ClusterRoles that include Read on jobs and/or deployments; but those with "watch" verbs
+#   $extraJobsDeploymentsReadClustered ApiGroups and Resources -> for cluster-scoped ClusterRoles that include Read on jobs and/or deployments
+#   $runaiCliIndexMapEditor ApiGroups, Resources, ResourceNames and Verbs ->
+#       a specific configmap rule, to be placed in the Role (and RoleBinding..) of "runai" namespace, ONLY for roles that include CRUD on jobs and/or deployments.
+
+
+################################
+# ClusterRoles Explanation:
+# For each backend Role, we will have 3 or 4 ClusterRoles existing.
+# And for each backend AccessRule, the following will occur:
+# "runai-<ROLE_NAME>"          - accessrule's subject should exist in same-named ClusterRoleBinding.
+# "runai-<ROLE_NAME>-ns"       - accessrule's subject should exist in RoleBinding in each namespace of the scope.
+# "runai-<ROLE_NAME>-runai"    - accessrule's subject should exist in RoleBinding in "runai" namespace.
+# "runai-<ROLE_NAME>-runai-cs" - only if the scope is CLUSTER_SCOPE - accessrule's subject should exist in RoleBinding in "runai" namespace.
+#
+# Note: when adding a new role: add it to the "resourceNames" in the "runai-accessrule-controller" ClusterRole (in accessrule_controller.yaml).
+
+{{- define "$readVerbs" -}}
+- get
+- list
+- watch
+{{- end }}
+{{- define "$CRUDVerbs" -}}
+- get
+- list
+- watch
+- create
+- update
+- patch
+- delete
+{{- end }}
+
+{{- define "$jobsApiGroups" -}}
+- run.ai
+- scheduling.run.ai
+- batch
+- kubeflow.org
+- apps
+- workspace.devfile.io
+- ray.io
+- machinelearning.seldon.io
+- kubevirt.io
+- amlarc.azureml.com
+- serving.knative.dev
+- knative.dev
+- argoproj.io
+- tekton.dev
+{{- end }}
+{{- define "$jobsResources" -}}
+- interactiveworkloads
+- trainingworkloads
+- inferenceworkloads
+- distributedinferenceworkloads
+- distributedinferenceworkloads/status
+- distributedinferenceworkloads/scale
+- distributedworkloads
+- jobs
+- mpijobs
+- tfjobs
+- pytorchjobs
+- xgboostjobs
+- statefulsets
+- replicasets
+- deployments
+- devworkspaces
+- rayclusters
+- rayjobs
+- rayservices
+- notebooks
+- seldondeployments
+- virtualmachines
+- virtualmachineinstances
+- amljobs
+- revisions
+- configurations
+- services
+- cronjobs
+- scheduledworkflows
+- workflows
+- pipelineruns
+- taskruns
+{{- end }}
+
+{{- define "$runaiApiGroups" -}}
+- run.ai
+- scheduling.run.ai
+{{- end }}
+{{- define "$runaijobsPodgroupsResources" -}}
+- runaijobs
+- podgroups
+{{- end }}
+
+{{- define "$podsApiGroups" -}}
+- ""
+{{- end }}
+{{- define "$podsResources" -}}
+- pods
+- pods/log
+- pods/exec
+- pods/attach
+- pods/portforward
+{{- end }}
+
+{{- define "$deploymentsApiGroups" -}}
+- scheduling.run.ai
+- run.ai
+- apps
+{{- end }}
+{{- define "$deploymentsResources" -}}
+- runaijobs
+- podgroups
+- inferenceworkloads
+- distributedinferenceworkloads
+- distributedinferenceworkloads/status
+- distributedinferenceworkloads/scale
+- statefulsets
+- replicasets
+- deployments
+{{- end }}
+
+{{- define "$jobsPodsApiGroups" -}}
+{{ include "$jobsApiGroups" . }}
+{{ include "$podsApiGroups" . }}
+{{- end }}
+{{- define "$jobsPodsResources" -}}
+{{ include "$jobsResources" . }}
+{{ include "$podsResources" . }}
+{{- end }}
+
+{{- define "$dataSourcesApiGroups" -}}
+- ""
+{{- end }}
+{{- define "$dataSourcesResources" -}}
+- persistentvolumeclaims
+{{- end }}
+
+{{- define "$credentialsApiGroups" -}}
+- ""
+{{- end }}
+{{- define "$credentialsResources" -}}
+- secrets
+{{- end }}
+
+{{- define "$policiesApiGroups" -}}
+- run.ai
+{{- end }}
+{{- define "$policiesResources" -}}
+- interactivepolicies
+- trainingpolicies
+- inferencepolicies
+- distributedinferencepolicies
+- distributedpolicies
+{{- end }}
+
+{{- define "$templatesApiGroups" -}}
+- run.ai
+{{- end }}
+{{- define "$templatesResources" -}}
+- interactiveworkloads
+- trainingworkloads
+- inferenceworkloads
+- distributedinferenceworkloads
+- distributedinferenceworkloads/status
+- distributedinferenceworkloads/scale
+- distributedworkloads
+{{- end }}
+
+{{- define "$policiesAndTemplatesApiGroups" -}}
+- run.ai
+{{- end }}
+{{- define "$policiesAndTemplatesResources" -}}
+{{ include "$policiesResources" . }}
+{{ include "$templatesResources" . }}
+{{- end }}
+
+{{- define "$extraJobsDeploymentsCRUDNamespacedApiGroups" -}}
+- ""
+- extensions
+- networking.k8s.io
+- route.openshift.io
+{{- end }}
+{{- define "$extraJobsDeploymentsCRUDNamespacedResources" -}}
+- configmaps
+- services
+- ingresses
+- routes
+- routes/custom-host
+{{- end }}
+
+{{- define "$extraJobsDeploymentsReadNamespacedApiGroups" -}}
+- ""
+- discovery.k8s.io
+- route.openshift.io
+{{ include "$extraJobsDeploymentsCRUDNamespacedApiGroups" . }}
+{{- end }}
+{{- define "$extraJobsDeploymentsReadNamespacedResources" -}}
+- endpoints
+- events
+- endpointslices
+- routes
+{{ include "$extraJobsDeploymentsCRUDNamespacedResources" . }}
+{{- end }}
+
+{{- define "$extraJobsDeploymentsWatchNamespacedApiGroups" -}}
+- ""
+{{- end }}
+{{- define "$extraJobsDeploymentsWatchNamespacedResources" -}}
+- pods/log
+{{- end }}
+
+{{- define "$extraJobsDeploymentsReadClusteredApiGroups" -}}
+- ""
+- run.ai
+- storage.k8s.io
+{{- end }}
+{{- define "$extraJobsDeploymentsReadClusteredResources" -}}
+- namespaces
+- nodes
+- services/proxy
+- projects
+- nodepools
+- storageclasses
+{{- end }}
+
+{{- define "$runaiCliIndexMapEditorApiGroups" -}}
+- ""
+{{- end }}
+{{- define "$runaiCliIndexMapEditorResources" -}}
+- configmaps
+{{- end }}
+{{- define "$runaiCliIndexMapEditorResourceNames" -}}
+- runai-cli-index
+{{- end }}
+{{- define "$runaiCliIndexMapEditorVerbs" -}}
+- update
+- patch
+{{- end }}

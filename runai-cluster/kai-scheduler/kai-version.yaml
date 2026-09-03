@@ -1,0 +1,5 @@
+kai:
+  human-readable-version: v0.16.9
+  commit-hash: 724da8388358b7673495a935948ea0a67a86140b
+  go-module-version: v0.16.9
+  chart-version: v0.16.9

@@ -1,0 +1,7 @@
+name: environmentId
+in: query
+required: false
+description: The id of the environment to which the asset belongs.
+schema:
+  type: string
+  format: uuid

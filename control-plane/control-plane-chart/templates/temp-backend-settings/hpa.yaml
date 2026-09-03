@@ -1,0 +1,3 @@
+{{- if .Values.tempBackendSettings.enabled }}
+{{- include "common.hpa" (list . .Values.tempBackendSettings.autoscaling .Values.tempBackendSettings) -}}
+{{- end }}

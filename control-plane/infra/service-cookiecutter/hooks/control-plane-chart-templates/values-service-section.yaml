@@ -1,0 +1,84 @@
+
+
+[[ cookiecutter_app_name_camel_case_lower ]]:
+  name: [[ cookiecutter_app_name ]]
+  enabled: true
+  replicaCount: 1
+
+  image:
+    repository: [[ cookiecutter_app_name ]]
+
+  env:
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: "{{ include \"control-plane.postgresql.password.secret.name\" . }}"
+          key: "{{ include \"control-plane.postgresql.password.secret.key\" . }}"
+
+  envFrom:
+    - secretRef:
+        name: runai-backend-[[ cookiecutter_app_name ]]
+    - configMapRef:
+        name: runai-backend-[[ cookiecutter_app_name ]]
+
+  imagePullSecrets: []
+
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: "[[ cookiecutter_app_name ]]"
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+
+  service:
+    type: ClusterIP
+    port: 8080
+    protocol: TCP
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 4
+    cpuUtilizationPercentage: 80
+    memoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  config:
+    logLevel: Info
+DB-CC-PREFIX    dbScheme: [[ cookiecutter_app_name_underscore_lower ]]
+DB-CC-PREFIX    migrationFiles: file:///migrations
+CACHE-CC-PREFIX    cacheEnabled: false

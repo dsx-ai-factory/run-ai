@@ -1,0 +1,88 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      template: job-1
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      jupyter: "true"
+      kai.scheduler/preemptibility: non-preemptible
+      priorityClassName: build
+      project: team-a
+      release: job-1
+      workloadKind: InteractiveWorkload
+      workloadName: job-1
+    name: job-1
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 0
+    completions: 1
+    maxIdleDurationSeconds: 1200
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          user: user.name
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          kai.scheduler/preemptibility: non-preemptible
+          priorityClassName: build
+          project: team-a
+          release: job-1
+          run.ai/top-owner-uid: ""
+          workloadKind: InteractiveWorkload
+          workloadName: job-1
+      spec:
+        containers:
+        - args:
+          - --NotebookApp.token=''
+          - --NotebookApp.password=''
+          command:
+          - my-command.sh
+          image: jupyter/scipy-notebook
+          imagePullPolicy: Always
+          name: job-1
+          ports:
+          - containerPort: 8888
+            name: port-8888
+            protocol: TCP
+          resources: {}
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+        restartPolicy: Never
+        schedulerName: runai-scheduler
+  status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    jupyter: "true"
+    priorityClassName: build
+    project: team-a
+    release: job-1
+    workloadKind: InteractiveWorkload
+    workloadName: job-1
+  name: iw-job-1-0-clusterip
+  namespace: runai-team-a
+spec:
+  ports:
+  - name: port-job-1-8888-0
+    port: 8888
+    protocol: TCP
+    targetPort: 8888
+  selector:
+    release: job-1
+  type: ClusterIP
+status:
+  loadBalancer: {}

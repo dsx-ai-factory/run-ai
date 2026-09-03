@@ -1,0 +1,21 @@
+name: filterBy
+in: query
+required: false
+description: "Filter results by a parameter. Use the format field-name operator value. Supported operators: 
+  == Equals 
+  != Not equals 
+  <= Less than or equal 
+  >= Greater than or equal 
+  =@ Contains !@ Does not contain 
+  =^ Starts with 
+  =$ Ends with
+  Date values must be in ISO 8601 timestamp format.
+  Only the following operators support dates: ==, !=, <=, >=."
+schema:
+  type: array
+  maxItems: 10
+  items:
+    type: string
+    pattern: "^(name|clusterId|source|phase)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
+  example: [ "clusterId==123e4567-e89b-12d3-a456-426614174000", "source=@Run.ai" ]
+explode: false 

@@ -1,0 +1,95 @@
+policy:
+  effectiveRules:
+  - enforcements:
+    - set:
+        configMapName: cm-a
+        key: foo-key
+        name: FOO
+        optional: false
+    field: environmentVariables-FromConfigMap
+    selectorParams:
+      containerName: worker-1
+    sourceOfRule: null
+    specSelector: appContainerByName
+  - enforcements:
+    - set:
+        configMapName: cm-b
+        key: bar-key
+        name: BAR
+        optional: true
+    field: environmentVariables-FromConfigMap
+    selectorParams:
+      containerName: worker-2
+    sourceOfRule: null
+    specSelector: appContainerByName
+  - enforcements:
+    - set:
+        configMapName: cm-shared
+        key: shared-key
+        name: SHARED
+        optional: false
+    field: environmentVariables-FromConfigMap
+    selectorParams:
+      containerName: worker-1
+    sourceOfRule: null
+    specSelector: appContainerByName
+  - enforcements:
+    - set:
+        configMapName: cm-shared
+        key: shared-key
+        name: SHARED
+        optional: false
+    field: environmentVariables-FromConfigMap
+    selectorParams:
+      containerName: worker-2
+    sourceOfRule: null
+    specSelector: appContainerByName
+  - enforcements:
+    - set:
+        value: central-cm
+    field: environmentVariables-ConfigMapName
+    itemSelector: envVarFromConfigMap
+    sourceOfRule: null
+    specSelector: allContainers
+  workloadType:
+    group: apps
+    kind: Deployment
+    version: v1
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: test-deployment
+  spec:
+    template:
+      spec:
+        containers:
+        - env:
+          - name: FOO
+            valueFrom:
+              configMapKeyRef:
+                key: foo-key
+                name: central-cm
+                optional: false
+          - name: SHARED
+            valueFrom:
+              configMapKeyRef:
+                key: shared-key
+                name: central-cm
+                optional: false
+          name: worker-1
+        - env:
+          - name: BAR
+            valueFrom:
+              configMapKeyRef:
+                key: bar-key
+                name: central-cm
+                optional: true
+          - name: SHARED
+            valueFrom:
+              configMapKeyRef:
+                key: shared-key
+                name: central-cm
+                optional: false
+          name: worker-2
+        - name: worker-3

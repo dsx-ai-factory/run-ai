@@ -1,0 +1,45 @@
+runai-none:
+  customization:
+    accessMode:
+      default:
+        readWriteOnce: true
+    volumeMode:
+      default: Filesystem
+    claimSize:
+      default: 1G
+
+small:
+  customization:
+    accessMode:
+      default:
+        readWriteMany: true
+        readWriteOnce: false
+        readOnlyMany: true
+    volumeMode:
+      default: Block
+    claimSize:
+      default: 100M
+
+persistent:
+  customization:
+    accessMode:
+      default:
+        readWriteMany: true
+        readWriteOnce: false
+        readOnlyMany: true
+    volumeMode:
+      default: Filesystem
+    claimSize:
+      default: 100M
+
+ephemeral:
+  customization:
+    accessMode:
+      default:
+        readWriteMany: true
+        readWriteOnce: true
+        readOnlyMany: true
+    volumeMode:
+      default: Filesystem
+    claimSize:
+      default: 3T

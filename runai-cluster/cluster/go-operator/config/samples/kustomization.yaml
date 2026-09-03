@@ -1,0 +1,20 @@
+## Append samples you want in your CSV to this file as resources ##
+resources:
+- _v1_runaiconfig.yaml
+- scheduling_v1_department.yaml
+- _v1_project.yaml
+- run_v1_runaijob.yaml
+- run_v2alpha1_project.yaml
+- scheduling_v2alpha1_department.yaml
+- scheduling_v2alpha2_department.yaml
+- run_v2alpha2_project.yaml
+- run_v1alpha1_nodepool.yaml
+- installation_v1alpha1_cluster.yaml
+- run_v2_project.yaml
+- run_v1alpha1_accessrule.yaml
+- run_v1alpha1_externalworkload.yaml
+- run_v1alpha1_datavolume.yaml
+- _v1_remoteconfig.yaml
+- _v1_remoteconfigsync.yaml
+- _v1_cluster.yaml
+#+kubebuilder:scaffold:manifestskustomizesamples

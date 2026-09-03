@@ -1,0 +1,74 @@
+get:
+  summary: Get a list of clusters.
+  x-service: cluster-service
+  description: Retrieve a list of clusters with details.
+  x-test-coverage:
+    - src/test/suites/advancedSuite/clusterService/clusterServiceApi.test.ts
+    - cluster-service/pkg/services/api_clusters_service_test.go
+  operationId: get_clusters
+  x-authorize:
+    resource-type: cluster
+    action: read
+  tags:
+    - Clusters
+  parameters:
+    - $ref: '../parameters/query/QueryVerbosity.yaml'
+    - $ref: '../parameters/query/TenantIds.yaml'
+    - $ref: '../parameters/query/QueryIncludeRequestedForDelete.yaml'
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../schemas/Clusters/DisplayedCluster.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+post:
+  summary: Create a cluster.
+  x-service: cluster-service
+  x-test-coverage:
+    - src/test/suites/advancedSuite/clusterService/clusterServiceApi.test.ts
+    - cluster-service/pkg/services/api_clusters_service_test.go
+  description: Use to create a Kubernetes cluster.
+  operationId: create_cluster
+  x-authorize:
+    resource-type: cluster
+    action: create
+  x-audit: true
+  tags:
+    - Clusters
+  requestBody:
+    description: The cluster to create.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Clusters/ClusterCreationRequest.yaml'
+  responses:
+    201:
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Clusters/DisplayedCluster.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

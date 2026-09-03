@@ -1,0 +1,9 @@
+type: object
+required:
+- timeTag
+properties:
+  timeTag:
+    type: integer
+    format: int64
+    minimum: 0  # Unix timestamps are non-negative
+    maximum: 9223372036854775000  # Slightly below int64 max to avoid code generator overflow

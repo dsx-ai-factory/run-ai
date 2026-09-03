@@ -1,0 +1,41 @@
+# Minimal valid kubeflow.org/MPIJob/v2beta1 manifest used as the starting point
+# for every Layer 3+4 case under cases/.
+#
+# MPIJob has a structure similar to PyTorchJob with replica types (Launcher, Worker)
+# under .spec.mpiReplicaSpecs. Each replica type has its own pod template.
+#
+# The empty stubs below are required:
+#   - mpiReplicaSpecs.*.template.metadata:{} — the *PodMetadata spec selectors
+#     query these paths; if absent, SET actions won't execute.
+#   - initContainers with placeholder — required for initContainer SET actions to work.
+#
+# Container names are "mpi" (following the Kubeflow convention) so parameterised
+# spec selectors (appContainerByReplicaTypeAndName) match.
+apiVersion: kubeflow.org/v2beta1
+kind: MPIJob
+metadata:
+  name: test
+spec:
+  mpiReplicaSpecs:
+    Launcher:
+      replicas: 1
+      template:
+        metadata: {}
+        spec:
+          initContainers:
+            - name: init
+              image: placeholder-launcher-init
+          containers:
+            - name: mpi
+              image: placeholder-launcher
+    Worker:
+      replicas: 2
+      template:
+        metadata: {}
+        spec:
+          initContainers:
+            - name: init
+              image: placeholder-worker-init
+          containers:
+            - name: mpi
+              image: placeholder-worker

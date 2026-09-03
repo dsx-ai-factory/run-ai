@@ -1,0 +1,6 @@
+name: deleted
+in: query
+description: Include soft-deleted tenants in the response when `true`.
+schema:
+  type: boolean
+  default: false 

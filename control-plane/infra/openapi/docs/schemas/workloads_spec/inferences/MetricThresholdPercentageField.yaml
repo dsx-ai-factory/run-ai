@@ -1,0 +1,8 @@
+properties:
+  metricThresholdPercentage:
+    description: The percentage of metric threshold value to use for autoscaling. Defaults to 70. Applicable only with the 'throughput' and 'concurrency' metrics
+    type: number
+    format: float
+    minimum: 1
+    maximum: 100
+    nullable: true

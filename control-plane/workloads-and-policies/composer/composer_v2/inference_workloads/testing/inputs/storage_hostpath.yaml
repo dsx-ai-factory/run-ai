@@ -1,0 +1,9 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+storage:
+  hostPath:
+    - name: scratch
+      path: /tmp/scratch
+      mountPath: /scratch

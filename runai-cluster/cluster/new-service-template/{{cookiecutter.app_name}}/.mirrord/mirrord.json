@@ -1,0 +1,12 @@
+{
+    "target": {
+        "path": {
+            "deployment": "{{cookiecutter.app_name}}"
+        },
+        "namespace": "runai"
+    },
+    "feature": {
+        "env": true,
+        "fs": "read"
+    }
+}

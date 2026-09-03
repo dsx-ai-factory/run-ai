@@ -1,0 +1,23 @@
+type: object
+description: >-
+  A single field defined by a formatter. Carries the JQ expressions that read
+  (getExpr) and write (setExpr) the field's value in a workload spec, plus an
+  optional arrayKey for itemized fields and argument type/enum information for
+  the arguments referenced by those expressions.
+properties:
+  setExpr:
+    allOf:
+      - $ref: "./FormatterSetExpression.yaml"
+    nullable: true
+  getExpr:
+    allOf:
+      - $ref: "./FormatterGetExpression.yaml"
+    nullable: true
+  arrayKey:
+    allOf:
+      - $ref: "./FormatterArrayKey.yaml"
+    nullable: true
+  argsInfo:
+    $ref: "./MappingArgsInfo.yaml"
+  argsEnum:
+    $ref: "./MappingArgsEnum.yaml"

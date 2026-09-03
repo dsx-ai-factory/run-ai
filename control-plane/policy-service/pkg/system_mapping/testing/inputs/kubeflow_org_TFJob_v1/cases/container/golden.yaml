@@ -1,0 +1,146 @@
+apiVersion: kubeflow.org/v1
+kind: TFJob
+metadata:
+  name: test
+spec:
+  tfReplicaSpecs:
+    Chief:
+      replicas: 1
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - image: tensorflow/tensorflow:2.12.0
+            imagePullPolicy: IfNotPresent
+            name: tensorflow
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 1000
+          initContainers:
+          - image: tensorflow/tensorflow:2.12.0
+            imagePullPolicy: IfNotPresent
+            name: init
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 1000
+    Evaluator:
+      replicas: 1
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - image: tensorflow/tensorflow:2.12.0
+            imagePullPolicy: IfNotPresent
+            name: tensorflow
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 1000
+          initContainers:
+          - image: tensorflow/tensorflow:2.12.0
+            imagePullPolicy: IfNotPresent
+            name: init
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 1000
+    PS:
+      replicas: 3
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - image: tensorflow/tensorflow:2.12.0
+            imagePullPolicy: IfNotPresent
+            name: tensorflow
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 1000
+          initContainers:
+          - image: tensorflow/tensorflow:2.12.0
+            imagePullPolicy: IfNotPresent
+            name: init
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 1000
+    Worker:
+      replicas: 2
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - image: tensorflow/tensorflow:2.12.0
+            imagePullPolicy: IfNotPresent
+            name: tensorflow
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 1000
+          initContainers:
+          - image: tensorflow/tensorflow:2.12.0
+            imagePullPolicy: IfNotPresent
+            name: init
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 1000

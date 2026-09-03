@@ -1,0 +1,30 @@
+get:
+  summary: sum projects node pool resources
+  operationId: sum_project_node_pool_resources
+  x-service: org-unit-service
+  description: sum projects node pool resources
+  x-authorize:
+    resource-type: project
+    action: read
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/node_pool_resources_api_test.go
+  tags:
+    - Projects
+  parameters:
+    - $ref: "../../parameters/NodepoolIdQuery.yaml"
+    - $ref: "../../parameters/ProjectNodePoolResourcesSumFilterBy.yaml"
+  responses:
+    200:
+      description: ok
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/nodePoolResources/SumResponse.yaml"
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,18 @@
+{
+  "service_name": "goofys",
+  "artifact_type": "container",
+  "skip_container_validation": true,
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "notifications": {
+    "slack": {
+      "mention": "@viper"
+    }
+  },
+  "jira": {
+    "team_name": "viper Team"
+  },
+  "ngc": {
+    "guest_access": true
+  }
+}

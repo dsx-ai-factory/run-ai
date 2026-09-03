@@ -1,0 +1,101 @@
+description: |
+  Layer 3 case "workload" for batch/Job/v1. SETs every field reachable
+  through the jobSpec and selector field groups (i.e. everything in .spec
+  at or above the pod template).
+
+  Custom formatters used here:
+    * completionMode, podReplacementPolicy use runai-jobSpec for enum
+      enforcement (single-arg setExpr that drops the value at the named key).
+    * podFailurePolicyRules / successPolicyRules use runai-jobSpec to build
+      whole-rule entries; the sub-field variants
+      (podFailurePolicyRules-onExitCodes / -onPodConditions /
+      successPolicyRules-Succeeded*) are not exercised here because the
+      whole-entry setExpr already populates them. They remain available for
+      policies that want to mutate one piece of an existing rule.
+    * matchExprSelector uses runai-selector (one rule per match expression).
+
+  Read together with cases/workload/golden.yaml.
+effectiveRules:
+  # ----- jobSpec scalars (KeyValue) -----
+  - field: parallelism
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 1 } }]
+  - field: completions
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 1 } }]
+  - field: manualSelector
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: false } }]
+  - field: managedBy
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: example.com/manager } }]
+  - field: suspend
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: false } }]
+  - field: activeDeadlineSeconds
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 60 } }]
+  - field: ttlSecondsAfterFinished
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 60 } }]
+  - field: backoffLimit
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 1 } }]
+  - field: backoffLimitPerIndex
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 1 } }]
+  - field: maxFailedIndexes
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 1 } }]
+
+  # ----- jobSpec enum-enforced (custom formatter) -----
+  - field: completionMode
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: Indexed } }]
+  - field: podReplacementPolicy
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: Failed } }]
+
+  # ----- jobSpec policies (custom formatter; whole-rule entries) -----
+  - field: podFailurePolicyRules
+    specSelector: workloadSpec
+    enforcements:
+      - set:
+          action: FailJob
+          onExitCodes:
+            containerName: test
+            operator: In
+            values: [1]
+          onPodConditions:
+            - type: Test
+              status: "True"
+
+  - field: successPolicyRules
+    specSelector: workloadSpec
+    enforcements:
+      - set:
+          succeededCount: 1
+          succeededIndexes: "0-1"
+
+  # ----- selector ----
+  # matchLabelsSelector uses KeyValueMap to add entries to selector.matchLabels.
+  # matchExprSelector uses runai-selector (one rule per match expression).
+  - field: matchLabelsSelector
+    specSelector: workloadSpec
+    enforcements: [{ set: { key: "app", value: "test" } }]
+  - field: matchExprSelector
+    specSelector: workloadSpec
+    enforcements:
+      - set:
+          key: test
+          operator: In
+          values: ["v1", "v2"]
+
+  # ----- pod template metadata -----
+  # Add a label via policy (must match selector.matchLabels for K8s validation)
+  - field: labels
+    specSelector: podMetadata
+    enforcements: [{ set: { key: "app", value: "test" } }]
+  - field: annotations
+    specSelector: podMetadata
+    enforcements: [{ set: { key: "example.com/annotation", value: "test-value" } }]

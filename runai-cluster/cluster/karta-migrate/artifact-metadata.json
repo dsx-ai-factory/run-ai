@@ -1,0 +1,15 @@
+{
+  "service_name": "karta-migrate",
+  "artifact_type": "container",
+  "skip_container_validation": true,
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "notifications": {
+    "slack": {
+      "mention": "@fox"
+    }
+  },
+  "jira": {
+    "team_name": "Fox Team"
+  }
+}

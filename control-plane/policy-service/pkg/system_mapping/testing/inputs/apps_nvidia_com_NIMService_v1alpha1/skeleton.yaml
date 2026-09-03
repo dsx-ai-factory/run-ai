@@ -1,0 +1,22 @@
+# Minimal valid apps.nvidia.com/NIMService/v1alpha1 manifest used as the
+# starting point for every Layer 3+4 case under cases/.
+#
+# Required fields per CRD:
+#   - spec.authSecret (the NGC API key secret reference)
+#   - spec.image.repository and spec.image.tag
+#
+# Why these particular fields are pre-populated:
+#
+#   - image.repository and image.tag are required by the CRD's OpenAPI
+#     schema. The "container" case overrides both to the real values via
+#     SET rules.
+#   - authSecret is required; the "workload" case overrides it.
+apiVersion: apps.nvidia.com/v1alpha1
+kind: NIMService
+metadata:
+  name: test
+spec:
+  authSecret: placeholder
+  image:
+    repository: placeholder
+    tag: placeholder

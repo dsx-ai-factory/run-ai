@@ -1,0 +1,3 @@
+image: redhat
+command: run-master
+args: "-x master-script.py"

@@ -1,0 +1,27 @@
+delete:
+  summary: delete realm
+  x-service: identity-manager
+  x-test-coverage:
+    - /runai/control-plane/identity-manager/pkg/services/api_realm_service_test.go
+  operationId: delete_realm
+  x-no-authorization: true
+  tags:
+  - Realm
+  parameters:
+  - $ref: '../parameters/realm.yaml'
+  - $ref: '../parameters/isHardDelete.yaml'
+  responses:
+    '200':
+      description: realm successfully deleted
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

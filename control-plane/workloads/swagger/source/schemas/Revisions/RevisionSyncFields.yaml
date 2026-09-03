@@ -1,0 +1,88 @@
+type: object
+required:
+  - type
+  - name
+  - id
+  - workloadId
+  - clusterId
+  - departmentId
+  - projectId
+  - createdAt
+  - phase
+properties:
+  type:
+    type: string
+    example: "runai-revision"
+  name:
+    type: string
+    example: "my-workload-00001"
+  id:
+    type: string
+    format: uuid
+  workloadId:
+    type: string
+    format: uuid
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  departmentId:
+    type: string
+    example: "1"
+  projectId:
+    type: string
+    example: "1"
+  createdAt:
+    type: string
+    format: date-time
+    example: 2022-01-01T03:49:52.531Z
+  requestedResources:
+    $ref: "../Workloads/WorkloadRequestResources.yaml"
+  requestedPods:
+    $ref: "../Workloads/RequestedPods.yaml"
+  requestedNodePools:
+    type: array
+    items:
+      type: string
+      example: "default"
+  images:
+    type: array
+    items:
+      type: string
+      example: "alpine:latest"
+  environmentVariables:
+    type: object
+    additionalProperties:
+      type: string
+  command:
+    type: string
+    example: "sleep"
+  arguments:
+    type: string
+    example: "1000"
+  childrenIds:
+    type: array
+    writeOnly: true
+    items:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+  conditions:
+    $ref: "../Common/Conditions.yaml"
+  phase:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads/Phase.yaml"
+  phaseMessage:
+    type: string
+    example : 'Not enough resources in the requested nodepool'
+  phaseUpdatedAt:
+    type: string
+    format: date-time
+    example: 2022-06-08T11:28:24.131Z
+  additionalFields:
+    type: string
+    format: json
+    example: '{"someSpecialField":"value"}'

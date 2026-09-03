@@ -1,0 +1,7 @@
+description: Specifies the number of worker nodes to use when running the NIM service in multi-node.
+type: integer
+format: int32
+minimum: 1
+maximum: 1000
+example: 3
+nullable: true

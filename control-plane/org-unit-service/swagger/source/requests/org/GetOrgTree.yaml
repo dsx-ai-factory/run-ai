@@ -1,0 +1,31 @@
+get:
+  summary: Get org tree
+  operationId: get_org_tree
+  x-no-authorization: true
+  x-test-coverage:
+    - e2e/src/test/suites/defaultSuite/orgUnit/getOrgApi.test.ts
+  x-service: org-unit-service
+  tags:
+    - Org unit
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - orgUnits
+            properties:
+              orgUnits:
+                type: array
+                items:
+                  $ref: '../../schemas/OrgUnit.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

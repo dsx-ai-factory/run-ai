@@ -1,0 +1,7 @@
+properties:
+  leader:
+    description: Defines the pod specification for the leader. Must always be provided, regardless of the number of workers.
+    allOf:
+      - $ref: "../../../../../../policy-service/swagger/source/schemas/DistributedInferenceV2/DistributedInferenceLeaderWorkerRulesV2.yaml"
+    nullable: true
+    type: object

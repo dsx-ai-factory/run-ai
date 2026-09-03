@@ -1,0 +1,5 @@
+type: object
+description: Response containing all appearance settings
+properties:
+  bannerConfig:
+    $ref: './BannerConfig/GetBannerConfig.yaml'

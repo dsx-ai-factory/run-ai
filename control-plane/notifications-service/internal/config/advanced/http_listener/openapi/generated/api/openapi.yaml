@@ -1,0 +1,1456 @@
+openapi: 3.0.3
+info:
+  description: API for notifications-service config endpoint
+  title: Notifications Service Config API
+  version: 1.0.0
+servers:
+- url: /
+tags:
+- description: Global configuration API
+  name: global
+paths:
+  /api/v1/listeners:
+    post:
+      description: Creates a listener config
+      operationId: createListener
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListenerData"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Bad request - Resource should have a name
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Bad request
+        "409":
+          content:
+            application/json:
+              example:
+                code: 409
+                message: The specified resource already exists
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource already exists
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - listener
+  /api/v1/listeners/{listenerId}:
+    delete:
+      description: Deletes a listener
+      operationId: deleteListener
+      parameters:
+      - description: ID of relevant listener to delete
+        explode: false
+        in: path
+        name: listenerId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: The specified resource was not found
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - listener
+    get:
+      description: Get a listener
+      operationId: getListener
+      parameters:
+      - description: ID of relevant listener to retrieve
+        explode: false
+        in: path
+        name: listenerId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListenerData"
+          description: OK
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: The specified resource was not found
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - listener
+    put:
+      description: Updates a listener config
+      operationId: updateListener
+      parameters:
+      - description: ID of relevant listener to update
+        explode: false
+        in: path
+        name: listenerId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListenerDataForUpdate"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Bad request - Resource should have a name
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: The specified resource was not found
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - listener
+  /api/v1/tenants/{tenantId}/routes:
+    get:
+      description: Get list of tenant routes
+      operationId: getRoutes
+      parameters:
+      - description: ID of relevant tenant
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/RouteData"
+                type: array
+          description: OK
+      tags:
+      - tenant_route
+    post:
+      description: Creates a tenant route
+      operationId: createRoute
+      parameters:
+      - description: ID of relevant tenant
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RouteData"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Bad request - Resource should have a name
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Bad request
+        "409":
+          content:
+            application/json:
+              example:
+                code: 409
+                message: The specified resource already exists
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource already exists
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - tenant_route
+  /api/v1/tenants/{tenantId}/routes/{routeId}:
+    delete:
+      description: Deletes a tenant route
+      operationId: deleteRoute
+      parameters:
+      - description: ID of relevant tenant
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: ID of relevant tenant route
+        explode: false
+        in: path
+        name: routeId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: The specified resource was not found
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - tenant_route
+    get:
+      description: Get a single tenant route config
+      operationId: getRoute
+      parameters:
+      - description: ID of relevant tenant
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: ID of relevant tenant route
+        explode: false
+        in: path
+        name: routeId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RouteData"
+          description: Route data for a given tenant and route id
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: The specified resource was not found
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - tenant_route
+    put:
+      description: Updates a tenant route
+      operationId: updateRoute
+      parameters:
+      - description: ID of relevant tenant
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: ID of relevant tenant route
+        explode: false
+        in: path
+        name: routeId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RouteDataForUpdate"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Bad request - Resource should have a name
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: The specified resource was not found
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource was not found
+      tags:
+      - tenant_route
+  /api/v1/tenants/{tenantId}/users/routes:
+    delete:
+      description: Deletes all user routes of a tenant
+      operationId: deleteAllUserRoutes
+      parameters:
+      - description: ID of relevant tenant
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - user_route
+  /api/v1/tenants/{tenantId}/users/routes/notify/{notifyId}:
+    delete:
+      description: Deletes a notifyId from all user routes of a tenant
+      operationId: deleteNotifyIdFromAllUserRoutes
+      parameters:
+      - description: ID of the relevant tenant
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: ID of the relevant notify/sink
+        explode: false
+        in: path
+        name: notifyId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Bad request - Resource should have a name
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Bad request
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - user_route
+  /api/v1/tenants/{tenantId}/users/{userId}/routes:
+    get:
+      description: Get current user routes of a user
+      operationId: getUserRoutes
+      parameters:
+      - description: ID of the relevant tenant
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: ID of the relevant user
+        explode: false
+        in: path
+        name: userId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/RouteData"
+                type: array
+          description: OK
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - user_route
+    post:
+      description: Creates a user route for a user
+      operationId: createUserRoute
+      parameters:
+      - description: ID of the relevant tenant
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: ID of the relevant user
+        explode: false
+        in: path
+        name: userId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRouteData"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Bad request - Resource should have a name
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Bad request
+        "409":
+          content:
+            application/json:
+              example:
+                code: 409
+                message: The specified resource already exists
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource already exists
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - user_route
+  /api/v1/tenants/{tenantId}/users/{userId}/routes/{routeId}:
+    delete:
+      description: Deletes a user route
+      operationId: deleteUserRoute
+      parameters:
+      - description: ID of the relevant tenant
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: ID of the relevant user
+        explode: false
+        in: path
+        name: userId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: ID of the relevant route
+        explode: false
+        in: path
+        name: routeId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: The specified resource was not found
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - user_route
+    put:
+      description: Updates a user route for a user
+      operationId: updateUserRoute
+      parameters:
+      - description: ID of the relevant tenant
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: ID of the relevant user
+        explode: false
+        in: path
+        name: userId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: ID of the relevant route
+        explode: false
+        in: path
+        name: routeId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRouteDataForUpdate"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Bad request - Resource should have a name
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: The specified resource was not found
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - user_route
+  /api/v1/sinks:
+    get:
+      description: Get all sinks
+      operationId: getSinks
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/SinkData"
+                type: array
+          description: OK
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - sinks
+    post:
+      description: Creates a sink
+      operationId: createSink
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SinkData"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Bad request - Resource should have a name
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Bad request
+        "409":
+          content:
+            application/json:
+              example:
+                code: 409
+                message: The specified resource already exists
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource already exists
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - sinks
+  /api/v1/sinks/{sinkId}:
+    delete:
+      description: Deletes a sink
+      operationId: deleteSink
+      parameters:
+      - description: ID of the sink
+        explode: false
+        in: path
+        name: sinkId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: The specified resource was not found
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - sinks
+    get:
+      description: Get a sink configuration
+      operationId: getSink
+      parameters:
+      - description: ID of the sink
+        explode: false
+        in: path
+        name: sinkId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SinkData"
+          description: OK
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: The specified resource was not found
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - sinks
+    put:
+      description: Updates a sink
+      operationId: updateSink
+      parameters:
+      - description: ID of the sink
+        explode: false
+        in: path
+        name: sinkId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SinkDataForUpdate"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: The specified resource was not found
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - sinks
+  /api/v1/sinks/validate:
+    post:
+      description: Verify that the provided sink settings are correct
+      operationId: ValidateSink
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SinkData"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidateSink_200_response"
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Bad request - Resource should have a name
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Bad request
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - sinks
+  /api/v1/config/health:
+    get:
+      description: Get health state
+      operationId: health
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+      tags:
+      - health
+  /api/v1/tenants:
+    get:
+      description: Get a list of tenants with routes in the system
+      operationId: GetAllTenantsWithRoutes
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  type: string
+                type: array
+          description: Distinct list of tenant ids with routes
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - tenant_route
+  /api/v1/notification-kinds:
+    delete:
+      description: delete a notification kind
+      operationId: deleteNotificationKind
+      parameters:
+      - explode: true
+        in: query
+        name: category
+        required: true
+        schema:
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: type
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: The specified resource was not found
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - register_notification
+    get:
+      description: get notification kinds
+      operationId: getNotificationKinds
+      parameters:
+      - explode: true
+        in: query
+        name: origin
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: category
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: type
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/NotificationKind"
+                type: array
+          description: OK
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - register_notification
+    post:
+      description: create a new notification kind
+      operationId: createNotificationKind
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotificationKind"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "409":
+          content:
+            application/json:
+              example:
+                code: 409
+                message: The specified resource already exists
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource already exists
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - register_notification
+    put:
+      description: update a notification kind
+      operationId: updateNotificationKind
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotificationKind"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "409":
+          content:
+            application/json:
+              example:
+                code: 409
+                message: The specified resource already exists
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource already exists
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - register_notification
+components:
+  responses:
+    OkRequest:
+      content:
+        application/json:
+          schema:
+            example: OK
+            type: string
+      description: OK
+    BadRequest:
+      content:
+        application/json:
+          example:
+            code: 400
+            message: Bad request - Resource should have a name
+          schema:
+            $ref: "#/components/schemas/APIError"
+      description: Bad request
+    Conflict:
+      content:
+        application/json:
+          example:
+            code: 409
+            message: The specified resource already exists
+          schema:
+            $ref: "#/components/schemas/APIError"
+      description: The specified resource already exists
+    InternalServerError:
+      content:
+        application/json:
+          example:
+            code: 500
+            message: Internal server error
+          schema:
+            $ref: "#/components/schemas/APIError"
+      description: Internal server error
+    ListenerResponse:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ListenerData"
+      description: OK
+    NotFound:
+      content:
+        application/json:
+          example:
+            code: 404
+            message: The specified resource was not found
+          schema:
+            $ref: "#/components/schemas/APIError"
+      description: The specified resource was not found
+    Routes:
+      content:
+        application/json:
+          schema:
+            items:
+              $ref: "#/components/schemas/RouteData"
+            type: array
+      description: OK
+    Route:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/RouteData"
+      description: Route data for a given tenant and route id
+    Sinks:
+      content:
+        application/json:
+          schema:
+            items:
+              $ref: "#/components/schemas/SinkData"
+            type: array
+      description: OK
+    Sink:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SinkData"
+      description: OK
+    ValidateSinkResponse:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValidateSink_200_response"
+    NotificationKinds:
+      content:
+        application/json:
+          schema:
+            items:
+              $ref: "#/components/schemas/NotificationKind"
+            type: array
+      description: OK
+  schemas:
+    ListenerData:
+      example:
+        listener_type: listener_type
+        listener_id: listener_id
+        listener_config: "{}"
+      properties:
+        listener_id:
+          type: string
+        listener_type:
+          type: string
+        listener_config:
+          type: object
+      required:
+      - listener_config
+      - listener_id
+      - listener_type
+      type: object
+    APIError:
+      example:
+        code: 400
+        message: Bad request - Resource should have a name
+      properties:
+        code:
+          maximum: 599
+          minimum: 100
+          type: integer
+        message:
+          type: string
+        details:
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    ListenerDataForUpdate:
+      example:
+        listener_type: listener_type
+        listener_config: "{}"
+      properties:
+        listener_type:
+          type: string
+        listener_config:
+          type: object
+      required:
+      - listener_config
+      - listener_type
+      type: object
+    RouteData:
+      example:
+        tenant_id: "12345"
+        route_id: route_id
+        route_config: "{}"
+      properties:
+        tenant_id:
+          example: "12345"
+          type: string
+        route_id:
+          type: string
+        route_config:
+          type: object
+      required:
+      - route_config
+      - route_id
+      - tenant_id
+      type: object
+    RouteDataForUpdate:
+      example:
+        tenant_id: "12345"
+        route_config: "{}"
+      properties:
+        tenant_id:
+          example: "12345"
+          type: string
+        route_config:
+          type: object
+      required:
+      - route_config
+      - tenant_id
+      type: object
+    UserRouteData:
+      example:
+        tenant_id: tenant_id
+        route_id: route_id
+        user_id: user_id
+        route_config: "{}"
+      properties:
+        tenant_id:
+          type: string
+        user_id:
+          type: string
+        route_id:
+          type: string
+        route_config:
+          type: object
+      required:
+      - route_config
+      - route_id
+      - tenant_id
+      - user_id
+      type: object
+    UserRouteDataForUpdate:
+      example:
+        tenant_id: tenant_id
+        user_id: user_id
+        route_config: "{}"
+      properties:
+        tenant_id:
+          type: string
+        user_id:
+          type: string
+        route_config:
+          type: object
+      required:
+      - route_config
+      - tenant_id
+      - user_id
+      type: object
+    SinkData:
+      example:
+        id: id
+        type: email
+        config:
+          key: ""
+      properties:
+        id:
+          type: string
+        type:
+          enum:
+          - email
+          - slack
+          - postgres
+          type: string
+        config:
+          additionalProperties: true
+          type: object
+      required:
+      - id
+      - type
+      type: object
+    SinkDataForUpdate:
+      example:
+        type: email
+        config:
+          key: ""
+      properties:
+        type:
+          enum:
+          - email
+          - slack
+          - postgres
+          type: string
+        config:
+          additionalProperties: true
+          type: object
+      required:
+      - type
+      type: object
+    NotificationKind:
+      example:
+        template: template
+        origin: origin
+        description: description
+        category: category
+        type: type
+      properties:
+        origin:
+          type: string
+        category:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+        template:
+          type: string
+      required:
+      - category
+      - description
+      - origin
+      - template
+      - type
+      type: object
+    ValidateSink_200_response:
+      example:
+        error_message: error_message
+        error_code: 0
+      properties:
+        error_code:
+          type: integer
+        error_message:
+          type: string
+      type: object

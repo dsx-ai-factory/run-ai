@@ -1,0 +1,16 @@
+type: object
+required:
+  - source
+  - name
+  - levels
+properties:
+  source:
+    $ref: './NetworkTopologiesSource.yaml'
+  name:
+    $ref: './NetworkTopologyName.yaml'
+  levels:
+    $ref: './NetworkTopologyLevels.yaml'
+  grove:
+    $ref: './NetworkTopologySyncGrove.yaml'
+  action:
+    $ref: './NetworkTopologySyncAction.yaml'

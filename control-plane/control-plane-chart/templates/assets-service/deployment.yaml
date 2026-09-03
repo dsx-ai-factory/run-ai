@@ -1,0 +1,12 @@
+{{- include "common.deployment" (list . .Values.assetsService .Values.assetsService.autoscaling .Values.assetsService.serviceAccount "control-plane.assetsService.deployment" ) }}
+
+{{- define "control-plane.assetsService.deployment" -}}
+spec:
+  template:
+    spec:
+      initContainers:
+        {{- include "awaitingPostgresReadinessContainer" . | nindent 8 }}
+        {{- include "common.initContainer" . | nindent 8 }}
+      containers:
+      - {{- include "common.container" . | nindent 8 }}
+{{- end }}

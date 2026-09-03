@@ -1,0 +1,5 @@
+allOf:
+  - $ref: './NodeInfo.yaml'
+  - $ref: './NodeAdditionalFields.yaml'
+  - $ref: './NodeAdditionalReadFields.yaml'
+x-schema-name: Node

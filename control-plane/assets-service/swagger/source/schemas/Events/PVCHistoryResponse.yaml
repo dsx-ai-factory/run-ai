@@ -1,0 +1,9 @@
+type: object
+required:
+- records
+properties:
+  next:
+    type: integer
+    example: 1
+  records:
+    $ref: "./HistoryRecords.yaml"

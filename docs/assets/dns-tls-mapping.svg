@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="320" viewBox="0 0 760 320">
+
+  <!-- White background -->
+  <rect width="760" height="320" fill="#FFFFFF"/>
+
+  <!-- ── Row backgrounds ── -->
+  <rect x="0" y="40"  width="760" height="93" fill="#FFFFFF"/>
+  <rect x="0" y="133" width="760" height="93" fill="#F8FAFC"/>
+  <rect x="0" y="226" width="760" height="94" fill="#FFFFFF"/>
+
+  <!-- ── Header background ── -->
+  <rect x="0" y="0" width="760" height="40" fill="#F1F5F9"/>
+
+  <!-- ── Horizontal dividers ── -->
+  <line x1="0" y1="40"  x2="760" y2="40"  stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="0" y1="133" x2="760" y2="133" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="0" y1="226" x2="760" y2="226" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- ── Vertical column dividers ── -->
+  <line x1="228" y1="0" x2="228" y2="320" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="416" y1="0" x2="416" y2="320" stroke="#E2E8F0" stroke-width="1"/>
+  <line x1="598" y1="0" x2="598" y2="320" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- ── Outer border ── -->
+  <rect x="0.5" y="0.5" width="759" height="319" fill="none" stroke="#CBD5E1" stroke-width="1.5"/>
+
+  <!-- ════════════════════════════════════════
+       COLUMN HEADERS
+       Col 1 center: 114  Col 2 center: 322  Col 3 center: 507  Col 4 center: 679
+       ════════════════════════════════════════ -->
+  <text x="114" y="25" text-anchor="middle"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="bold" fill="#475569">
+    Request Hostname
+  </text>
+  <text x="322" y="25" text-anchor="middle"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="bold" fill="#475569">
+    DNS Record
+  </text>
+  <text x="507" y="25" text-anchor="middle"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="bold" fill="#475569">
+    TLS Certificate
+  </text>
+  <text x="679" y="25" text-anchor="middle"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="12" font-weight="bold" fill="#475569">
+    Destination
+  </text>
+
+  <!-- ════════════════════════════════════════
+       ROW 1  (y band 40–133, mid-value row: y=68, connector: y=108)
+       ════════════════════════════════════════ -->
+
+  <!-- Values -->
+  <text x="114" y="68" text-anchor="middle"
+        font-family="'Courier New', Courier, monospace" font-size="11" fill="#1E293B">
+    runai.example.com
+  </text>
+  <text x="322" y="68" text-anchor="middle"
+        font-family="'Courier New', Courier, monospace" font-size="11" fill="#1E293B">
+    runai.example.com
+  </text>
+  <text x="507" y="68" text-anchor="middle"
+        font-family="'Courier New', Courier, monospace" font-size="11" fill="#1E293B">
+    runai.example.com
+  </text>
+
+  <!-- Destination pill — blue (control plane) -->
+  <rect x="613" y="56" width="132" height="24" rx="12"
+        fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.25"/>
+  <text x="679" y="72" text-anchor="middle"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="11" fill="#1D4ED8">
+    Run:ai control plane
+  </text>
+
+  <!-- Dashed vertical drops → connector -->
+  <line x1="114" y1="74" x2="114" y2="108" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="3,2.5"/>
+  <line x1="322" y1="74" x2="322" y2="108" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="3,2.5"/>
+  <line x1="507" y1="74" x2="507" y2="108" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="3,2.5"/>
+  <line x1="679" y1="81" x2="679" y2="108" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="3,2.5"/>
+
+  <!-- Horizontal connector -->
+  <line x1="28" y1="108" x2="732" y2="108" stroke="#CBD5E1" stroke-width="1.5"/>
+  <circle cx="28"  cy="108" r="3.5" fill="#CBD5E1"/>
+  <circle cx="732" cy="108" r="3.5" fill="#CBD5E1"/>
+
+  <!-- ════════════════════════════════════════
+       ROW 2  (y band 133–226, mid-value row: y=161, connector: y=201)
+       ════════════════════════════════════════ -->
+
+  <!-- Values -->
+  <text x="114" y="161" text-anchor="middle"
+        font-family="'Courier New', Courier, monospace" font-size="10" fill="#1E293B">
+    workspace-a.runai.example.com
+  </text>
+  <text x="322" y="161" text-anchor="middle"
+        font-family="'Courier New', Courier, monospace" font-size="11" fill="#1E293B">
+    *.runai.example.com
+  </text>
+  <text x="507" y="161" text-anchor="middle"
+        font-family="'Courier New', Courier, monospace" font-size="11" fill="#1E293B">
+    *.runai.example.com
+  </text>
+
+  <!-- Destination pill — teal (workspace) -->
+  <rect x="627" y="149" width="104" height="24" rx="12"
+        fill="#F0FDFA" stroke="#14B8A6" stroke-width="1.25"/>
+  <text x="679" y="165" text-anchor="middle"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="11" fill="#0F766E">
+    Workspace A
+  </text>
+
+  <!-- Dashed vertical drops → connector -->
+  <line x1="114" y1="167" x2="114" y2="201" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="3,2.5"/>
+  <line x1="322" y1="167" x2="322" y2="201" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="3,2.5"/>
+  <line x1="507" y1="167" x2="507" y2="201" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="3,2.5"/>
+  <line x1="679" y1="174" x2="679" y2="201" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="3,2.5"/>
+
+  <!-- Horizontal connector -->
+  <line x1="28" y1="201" x2="732" y2="201" stroke="#CBD5E1" stroke-width="1.5"/>
+  <circle cx="28"  cy="201" r="3.5" fill="#CBD5E1"/>
+  <circle cx="732" cy="201" r="3.5" fill="#CBD5E1"/>
+
+  <!-- ════════════════════════════════════════
+       ROW 3  (y band 226–320, mid-value row: y=254, connector: y=294)
+       ════════════════════════════════════════ -->
+
+  <!-- Values -->
+  <text x="114" y="254" text-anchor="middle"
+        font-family="'Courier New', Courier, monospace" font-size="10.5" fill="#1E293B">
+    model-a.inference.example.com
+  </text>
+  <text x="322" y="254" text-anchor="middle"
+        font-family="'Courier New', Courier, monospace" font-size="11" fill="#1E293B">
+    *.inference.example.com
+  </text>
+  <text x="507" y="254" text-anchor="middle"
+        font-family="'Courier New', Courier, monospace" font-size="11" fill="#1E293B">
+    *.inference.example.com
+  </text>
+
+  <!-- Destination pill — purple (model endpoint) -->
+  <rect x="617" y="242" width="124" height="24" rx="12"
+        fill="#F5F3FF" stroke="#8B5CF6" stroke-width="1.25"/>
+  <text x="679" y="258" text-anchor="middle"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="11" fill="#6D28D9">
+    Model A endpoint
+  </text>
+
+  <!-- Dashed vertical drops → connector -->
+  <line x1="114" y1="260" x2="114" y2="294" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="3,2.5"/>
+  <line x1="322" y1="260" x2="322" y2="294" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="3,2.5"/>
+  <line x1="507" y1="260" x2="507" y2="294" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="3,2.5"/>
+  <line x1="679" y1="267" x2="679" y2="294" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="3,2.5"/>
+
+  <!-- Horizontal connector -->
+  <line x1="28" y1="294" x2="732" y2="294" stroke="#CBD5E1" stroke-width="1.5"/>
+  <circle cx="28"  cy="294" r="3.5" fill="#CBD5E1"/>
+  <circle cx="732" cy="294" r="3.5" fill="#CBD5E1"/>
+
+</svg>

@@ -1,0 +1,4 @@
+description: Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform.
+type: string
+nullable: true
+pattern: .*

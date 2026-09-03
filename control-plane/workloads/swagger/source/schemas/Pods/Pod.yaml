@@ -1,0 +1,4 @@
+allOf:
+  - $ref: "./PodSyncFields.yaml"
+  - $ref: "./PodComputedFields.yaml"
+  - $ref: "./PodVerbosityFields.yaml"

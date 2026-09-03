@@ -1,0 +1,4 @@
+type: object
+properties:
+  limitQuotaOverSubscription:
+    $ref: "./OrgUnitSetting.yaml"

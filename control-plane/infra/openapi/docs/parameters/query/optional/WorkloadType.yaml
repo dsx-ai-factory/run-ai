@@ -1,0 +1,13 @@
+name: workloadType
+in: query
+required: false
+description: Policy for a specific workload type.
+schema:
+  type: string
+  minLength: 1
+  enum:
+    - Workspace
+    - Training
+    - Distributed
+    - Inference
+    - DistributedInference

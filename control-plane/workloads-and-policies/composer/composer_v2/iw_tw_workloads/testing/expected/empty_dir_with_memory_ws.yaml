@@ -1,0 +1,80 @@
+BatchJobTarget:
+  Config: {}
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: empty_dir_with_memory
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: empty_dir_with_memory
+      name: empty_dir_with_memory
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: empty_dir_with_memory
+            workloadKind: Workspace
+            workloadName: empty_dir_with_memory
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: empty_dir_with_memory
+            image: ubuntu
+            name: empty_dir_with_memory
+            resources: {}
+            volumeMounts:
+            - mountPath: /mount/empty/1
+              name: empty-dir
+            - mountPath: /mount/empty/2
+              name: empty-dir-1
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+          volumes:
+          - emptyDir:
+              medium: Memory
+              sizeLimit: 256Mi
+            name: empty-dir
+          - emptyDir:
+              medium: Memory
+            name: empty-dir-1
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: empty_dir_with_memory, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: empty_dir_with_memory, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

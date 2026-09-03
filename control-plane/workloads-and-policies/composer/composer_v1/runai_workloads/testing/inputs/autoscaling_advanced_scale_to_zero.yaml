@@ -1,0 +1,16 @@
+image: ubuntu
+servingPort:
+  container: 8081
+  protocol: http
+autoscaling:
+  minReplicas: 0
+  maxReplicas: 3
+  initialReplicas: 0
+  activationReplicas: 1
+  metric: throughput
+  metricThreshold: 80
+  metricThresholdPercentage: 55.5
+  scaleToZeroRetentionSeconds: 60
+  scaleDownDelaySeconds: 120
+  initializationTimeoutSeconds: 240
+

@@ -1,0 +1,264 @@
+BatchJobTarget:
+  Config:
+    networking:
+    - externalAccess:
+        ingress:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: job-ports_and_urls-url-1
+          spec:
+            rules:
+            - host: test.run.ai
+              http:
+                paths:
+                - backend:
+                    service:
+                      name: job-ports_and_urls-url-1
+                      port:
+                        number: 80
+                  path: /test/ports_and_urls
+                  pathType: Prefix
+      services:
+      - spec:
+          name: job-ports_and_urls-url-1
+          ports:
+          - name: port-4181
+            port: 80
+            protocol: TCP
+            targetPort: 4181
+          selector:
+            release: ports_and_urls
+          type: ClusterIP
+    - externalAccess:
+        ingress:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: job-ports_and_urls-url-my-tool-name
+          spec:
+            rules:
+            - host: test.run.ai
+              http:
+                paths:
+                - backend:
+                    service:
+                      name: job-ports_and_urls-url-my-tool-name
+                      port:
+                        number: 80
+                  path: /test/ports_and_urls/url-my-tool-name
+                  pathType: Prefix
+      services:
+      - spec:
+          name: job-ports_and_urls-url-my-tool-name
+          ports:
+          - name: port-4180
+            port: 80
+            protocol: TCP
+            targetPort: 4180
+          selector:
+            release: ports_and_urls
+          type: ClusterIP
+    - services:
+      - spec:
+          name: job-ports_and_urls-np
+          ports:
+          - name: port-8081
+            port: 8081
+            protocol: TCP
+            targetPort: 8081
+          selector:
+            release: ports_and_urls
+          type: NodePort
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: ports_and_urls
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: ports_and_urls
+      name: ports_and_urls
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: ports_and_urls
+            workloadKind: Workspace
+            workloadName: ports_and_urls
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: ports_and_urls
+            image: ubuntu
+            name: ports_and_urls
+            ports:
+            - containerPort: 8082
+              name: port-8082
+              protocol: TCP
+            - containerPort: 8081
+              name: port-8081
+              protocol: TCP
+            resources: {}
+          initContainers:
+          - args:
+            - --provider=keycloak-oidc
+            - --upstream=http://localhost:8082
+            - --redirect-url=https://test.run.ai/test/ports_and_urls/oauth2/callback
+            - --oidc-issuer-url=/auth/realms/runai
+            - --scope=openid
+            - --http-address=0.0.0.0:4181
+            - --proxy-prefix=/test/ports_and_urls/oauth2
+            - --skip-provider-button=true
+            - --whitelist-domain=test.run.ai
+            - --cookie-domain=test.run.ai
+            - --cookie-httponly=true
+            - --cookie-secure=true
+            - --code-challenge-method=S256
+            - --cookie-refresh=10m
+            - --cookie-samesite=lax
+            - --skip-jwt-bearer-tokens=true
+            - --extra-jwt-issuers=/auth/realms/runai=runai
+            - --custom-templates-dir=/usr/share/oauth2-proxy
+            - --pass-authorization-header=false
+            - --cookie-name=ports_and_urls-url-1-auth-proxy
+            - --email-domain=*
+            env:
+            - name: OAUTH2_PROXY_COOKIE_PATH
+              value: /test/ports_and_urls
+            envFrom:
+            - secretRef: {}
+            image: test.registry/oauth2-proxy:test
+            imagePullPolicy: IfNotPresent
+            name: runai-oauth2-proxy-0
+            ports:
+            - containerPort: 4181
+              name: port-4181
+              protocol: TCP
+            resources: {}
+            restartPolicy: Always
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+            volumeMounts:
+            - mountPath: /etc/runai/auth/users
+              name: runai-auth
+          - args:
+            - --provider=keycloak-oidc
+            - --upstream=http://localhost:8081
+            - --redirect-url=https://test.run.ai/test/ports_and_urls/url-my-tool-name/oauth2/callback
+            - --oidc-issuer-url=/auth/realms/runai
+            - --scope=openid
+            - --http-address=0.0.0.0:4180
+            - --proxy-prefix=/test/ports_and_urls/url-my-tool-name/oauth2
+            - --skip-provider-button=true
+            - --whitelist-domain=test.run.ai
+            - --cookie-domain=test.run.ai
+            - --cookie-httponly=true
+            - --cookie-secure=true
+            - --code-challenge-method=S256
+            - --cookie-refresh=10m
+            - --cookie-samesite=lax
+            - --skip-jwt-bearer-tokens=true
+            - --extra-jwt-issuers=/auth/realms/runai=runai
+            - --custom-templates-dir=/usr/share/oauth2-proxy
+            - --pass-authorization-header=false
+            - --cookie-name=ports_and_urls-url-my-tool-name-auth-proxy
+            - --email-domain=*
+            env:
+            - name: OAUTH2_PROXY_COOKIE_PATH
+              value: /test/ports_and_urls/url-my-tool-name
+            envFrom:
+            - secretRef: {}
+            image: test.registry/oauth2-proxy:test
+            imagePullPolicy: IfNotPresent
+            name: runai-oauth2-proxy-1
+            ports:
+            - containerPort: 4180
+              name: port-4180
+              protocol: TCP
+            resources: {}
+            restartPolicy: Always
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+            volumeMounts:
+            - mountPath: /etc/runai/auth/users
+              name: runai-auth
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+          volumes:
+          - emptyDir: {}
+            name: runai-auth
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections:
+    - connectionType: ExternalUrl
+      containerPort: 8082
+      correlationName: url-1
+      exposedUrlPath: /test/ports_and_urls
+      exposedUrlSubDomain: test-ports_and_urls
+      name: my-tool
+      serviceResourceName: job-ports_and_urls-url-1
+      toolType: custom
+    - connectionType: ExternalUrl
+      containerPort: 8081
+      correlationName: url-my-tool-name
+      exposedUrlPath: /test/ports_and_urls/url-my-tool-name
+      exposedUrlSubDomain: test-ports_and_urls-url-my-tool-name
+      name: url-my-tool-name
+      serviceResourceName: job-ports_and_urls-url-my-tool-name
+      toolType: tensor
+    - connectionType: NodePort
+      containerPort: 8081
+      correlationName: port
+      name: port
+      portResourceName: port-8081
+      serviceResourceName: job-ports_and_urls-np
+      toolType: tensor
+    id: ""
+    name: ""
+    replicaType: null
+  externalConnections:
+  - connectionType: ""
+    name: ""
+    toolType: google
+    url: http://google.com/search
+  - connectionType: ""
+    name: stats
+    toolType: wandb
+    url: http://wandb.com/stats
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: ports_and_urls, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: ports_and_urls, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

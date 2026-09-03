@@ -1,0 +1,373 @@
+# Reference manifest showing ALL fields reachable by the ray.io/RayJob/v1
+# mapping. Used by Layer 1 (structure) tests.
+#
+# Layout:
+#   - workloadSpec (.spec): rayJobSpec FG — entrypoint, runtimeEnvYAML,
+#     shutdownAfterJobFinishes, ttlSecondsAfterFinished, activeDeadlineSeconds,
+#     backoffLimit, entrypointNumCpus, entrypointNumGpus, entrypointResources,
+#     deletionPolicy, managedBy, suspend, metadata, clusterSelector,
+#     submitterConfig.backoffLimit.
+#   - workloadMetadata (.metadata): metadata FG — labels, annotations.
+#   - rayClusterSpec (.spec.rayClusterSpec): rayClusterSpec FG — same shape as
+#     RayCluster's workloadSpec but anchored under .spec.rayClusterSpec.
+#   - headPodSpec (.spec.rayClusterSpec.headGroupSpec.template.spec): full
+#     kitchen-sink pod template with containers[0].name=test and
+#     initContainers[0].name=test.
+#   - workerGroupSpecs[0] (groupName=test) under .spec.rayClusterSpec: rayWorkerGroupSpec FG.
+#   - submitterPodSpec (.spec.submitterPodTemplate.spec): minimal pod template
+#     with containers[0].name=test and initContainers[0].name=test so the
+#     submitterAppContainerByName / submitterInitContainerByName selectors
+#     resolve. All other pod-spec & container fields resolve through head.
+apiVersion: ray.io/v1
+kind: RayJob
+metadata:
+  name: test
+  labels:
+    app: test
+  annotations:
+    example.com/annotation: "test-value"
+spec:
+  # ----- rayJobSpec FG (workloadSpec) -----
+  entrypoint: "python -c 'print(1)'"
+  runtimeEnvYAML: |
+    pip:
+      - requests==2.32.0
+  shutdownAfterJobFinishes: true
+  ttlSecondsAfterFinished: 3600
+  activeDeadlineSeconds: 86400
+  backoffLimit: 3
+  entrypointNumCpus: 1.5
+  entrypointNumGpus: 1.0
+  entrypointResources: "{\"custom\": 1}"
+  deletionPolicy: DeleteCluster
+  managedBy: ray.io/rayjob-controller
+  suspend: false
+  metadata:
+    app: rayjob
+  clusterSelector:
+    ray.io/cluster: shared-cluster
+  submitterConfig:
+    backoffLimit: 2
+
+  rayClusterSpec:
+    # ----- rayClusterSpec FG (anchored at .spec.rayClusterSpec) -----
+    rayVersion: "2.10.0"
+    enableInTreeAutoscaling: true
+    managedBy: ray.io/raycluster-controller
+    suspend: false
+    gcsFaultToleranceOptions:
+      redisAddress: "redis://1.1.1.1:6379"
+      redisUsername:
+        name: redis-username
+        key: username
+      redisPassword:
+        name: redis-password
+        key: password
+    autoscalerOptions:
+      image: gcr.io/test/autoscaler:v1
+      imagePullPolicy: IfNotPresent
+      idleTimeoutSeconds: 60
+      upscalingMode: Default
+      version: v2
+    headServiceAnnotations:
+      example.com/head-ann: "head-value"
+
+    headGroupSpec:
+      rayStartParams:
+        dashboard-host: "0.0.0.0"
+      template:
+        metadata:
+          labels:
+            app: head
+          annotations:
+            example.com/annotation: "test-value"
+        spec:
+          # ----- podSpec FG (kitchen sink) -----
+          activeDeadlineSeconds: 60
+          automountServiceAccountToken: true
+          dnsConfig:
+            nameservers: ["1.1.1.1"]
+            searches: ["example.com"]
+            options:
+              - name: ndots
+                value: "5"
+          hostAliases:
+            - ip: "127.0.0.1"
+              hostnames: ["foo"]
+          dnsPolicy: ClusterFirst
+          enableServiceLinks: true
+          hostIPC: false
+          hostNetwork: false
+          hostPID: false
+          hostUsers: true
+          hostname: test
+          setHostnameAsFQDN: false
+          shareProcessNamespace: false
+          subdomain: test
+          terminationGracePeriodSeconds: 30
+          affinity:
+            nodeAffinity: {}
+            podAffinity: {}
+            podAntiAffinity: {}
+          tolerations:
+            - key: test
+              operator: Equal
+              value: somevalue
+              effect: NoSchedule
+              tolerationSeconds: 60
+          nodeSelector:
+            test: somevalue
+          overhead:
+            cpu: "100m"
+            memory: "256Mi"
+          imagePullSecrets:
+            - name: test
+          readinessGates:
+            - conditionType: ContainersReady
+          schedulingGates:
+            - name: example.com/gate
+          resourceClaims:
+            - name: claimRefByName
+              resourceClaimName: shared-claim
+            - name: claimRefByTemplate
+              resourceClaimTemplateName: shared-template
+          volumes:
+            - name: cm-vol
+              configMap:
+                name: cm
+                defaultMode: 420
+                items:
+                  - key: foo
+                    path: foo
+                optional: false
+            - name: empty-vol
+              emptyDir:
+                medium: Memory
+                sizeLimit: "1Gi"
+            - name: host-vol
+              hostPath:
+                path: /tmp
+                type: Directory
+            - name: nfs-vol
+              nfs:
+                server: "1.1.1.1"
+                path: /export
+                readOnly: false
+            - name: pvc-vol
+              persistentVolumeClaim:
+                claimName: pvc
+                readOnly: false
+            - name: secret-vol
+              secret:
+                secretName: secret
+                defaultMode: 420
+                items:
+                  - key: foo
+                    path: foo
+                optional: false
+          nodeName: test
+          preemptionPolicy: PreemptLowerPriority
+          priority: 1
+          priorityClassName: test
+          restartPolicy: Never
+          runtimeClassName: test
+          serviceAccountName: test
+
+          # ----- podSpecAndContainer FG (pod-scope security context) -----
+          securityContext:
+            fsGroup: 1
+            fsGroupChangePolicy: OnRootMismatch
+            supplementalGroups: [1, 2]
+            supplementalGroupsPolicy: Strict
+            appArmorProfile:
+              type: Localhost
+              localhostProfile: foo
+            runAsGroup: 1
+            runAsNonRoot: true
+            runAsUser: 1
+            seccompProfile:
+              type: Localhost
+              localhostProfile: foo
+
+          containers:
+            - name: test
+              args: ["arg-1"]
+              command: ["cmd-1"]
+              env:
+                - name: AS_VALUE
+                  value: somevalue
+                - name: FROM_CM
+                  valueFrom:
+                    configMapKeyRef:
+                      name: cm
+                      key: key
+                      optional: false
+                - name: FROM_FIELD
+                  valueFrom:
+                    fieldRef:
+                      apiVersion: v1
+                      fieldPath: metadata.name
+                - name: FROM_RESOURCE
+                  valueFrom:
+                    resourceFieldRef:
+                      containerName: test
+                      divisor: "1"
+                      resource: limits.cpu
+                - name: FROM_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: secret
+                      key: key
+                      optional: false
+              envFrom:
+                - prefix: cm_
+                  configMapRef:
+                    name: cm
+                    optional: false
+                - prefix: secret_
+                  secretRef:
+                    name: secret
+                    optional: false
+              image: test
+              imagePullPolicy: IfNotPresent
+              ports:
+                - name: http
+                  containerPort: 80
+                  protocol: TCP
+                  hostPort: 81
+                  hostIP: "127.0.0.1"
+              resources:
+                limits:
+                  cpu: "1"
+                  memory: "1Gi"
+                requests:
+                  cpu: "1"
+                  memory: "1Gi"
+                claims:
+                  - name: claim
+                    request: shared-request
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  add: ["NET_BIND_SERVICE"]
+                  drop: ["ALL"]
+                privileged: false
+                procMount: Default
+                readOnlyRootFilesystem: false
+                appArmorProfile:
+                  type: Localhost
+                  localhostProfile: foo
+                runAsGroup: 1
+                runAsNonRoot: true
+                runAsUser: 1
+                seccompProfile:
+                  type: Localhost
+                  localhostProfile: foo
+              stdin: false
+              stdinOnce: false
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              tty: false
+              workingDir: /tmp
+              volumeMounts:
+                - name: cm-vol
+                  mountPath: /etc/cm
+                  mountPropagation: None
+                  readOnly: true
+                  recursiveReadOnly: Disabled
+                  subPath: foo
+                  subPathExpr: foo
+
+          initContainers:
+            - name: test
+              args: ["init-arg"]
+              command: ["init-cmd"]
+              env:
+                - name: AS_VALUE
+                  value: somevalue
+              envFrom:
+                - prefix: cm_
+                  configMapRef:
+                    name: cm
+                    optional: false
+              image: test
+              imagePullPolicy: IfNotPresent
+              ports:
+                - name: http
+                  containerPort: 80
+                  protocol: TCP
+              resources:
+                limits:
+                  cpu: "1"
+                  memory: "1Gi"
+                requests:
+                  cpu: "1"
+                  memory: "1Gi"
+                claims:
+                  - name: claim
+                    request: shared-request
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsGroup: 1
+                runAsNonRoot: true
+                runAsUser: 1
+              stdin: false
+              stdinOnce: false
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              tty: false
+              workingDir: /tmp
+              volumeMounts:
+                - name: cm-vol
+                  mountPath: /etc/cm
+                  mountPropagation: None
+                  readOnly: true
+                  recursiveReadOnly: Disabled
+                  subPath: foo
+                  subPathExpr: foo
+
+    workerGroupSpecs:
+      - groupName: test
+        # ----- rayWorkerGroupSpec FG -----
+        replicas: 2
+        minReplicas: 1
+        maxReplicas: 5
+        numOfHosts: 1
+        idleTimeoutSeconds: 60
+        rayStartParams:
+          num-gpus: "1"
+        template:
+          metadata:
+            labels:
+              app: worker
+            annotations:
+              example.com/annotation: "test-value"
+          spec:
+            restartPolicy: Never
+            serviceAccountName: test
+            containers:
+              - name: test
+                image: test
+                imagePullPolicy: IfNotPresent
+            initContainers:
+              - name: test
+                image: test
+                imagePullPolicy: IfNotPresent
+
+  submitterPodTemplate:
+    metadata:
+      labels:
+        app: submitter
+      annotations:
+        example.com/annotation: "test-value"
+    spec:
+      restartPolicy: Never
+      serviceAccountName: test
+      containers:
+        - name: test
+          image: test
+          imagePullPolicy: IfNotPresent
+      initContainers:
+        - name: test
+          image: test
+          imagePullPolicy: IfNotPresent

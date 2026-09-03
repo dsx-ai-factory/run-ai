@@ -1,0 +1,6 @@
+defaults:
+  image: default-image:latest
+rules:
+  image:
+    canEdit: false
+

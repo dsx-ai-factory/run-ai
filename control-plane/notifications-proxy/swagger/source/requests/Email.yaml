@@ -1,0 +1,182 @@
+post:
+  x-authorize:
+    resource-type: notification-settings
+    action: create
+  x-service: notifications-proxy
+  x-test-coverage:
+    - src/test/suites/advancedSuite/notificationsService/notifications.test.ts
+  x-audit: true
+  tags:
+    - Email
+  operationId: createEmail
+  summary: Create email notification channel
+  description: Create email notification channel
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/EmailChannel.yaml'
+  responses:
+    '200':
+      description: Email notification channel created
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/EmailChannel.yaml'
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '409':
+      $ref: '../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '501':
+      $ref: '../../../../infra/openapi/docs/responses/501NotImplemented.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+delete:
+  x-authorize:
+    resource-type: notification-settings
+    action: delete
+  x-service: notifications-proxy
+  x-audit: true
+  x-test-coverage:
+    - src/test/suites/advancedSuite/notificationsService/notifications.test.ts
+  tags:
+    - Email
+  operationId: deleteEmail
+  summary: Delete email notification channel
+  description: Delete email notification channel
+  responses:
+    '204':
+      description: Email notification channel deleted
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '501':
+      $ref: '../../../../infra/openapi/docs/responses/501NotImplemented.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+get:
+  x-authorize:
+    resource-type: notification-settings
+    action: update
+  x-service: notifications-proxy
+  x-test-coverage:
+    - src/test/suites/advancedSuite/notificationsService/notifications.test.ts
+  tags:
+    - Email
+  operationId: getEmail
+  summary: Get email notification channel
+  description: Get email notification channel
+  responses:
+    '200':
+      description: Email notification channel
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/EmailChannel.yaml'
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '501':
+      $ref: '../../../../infra/openapi/docs/responses/501NotImplemented.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+put:
+  x-authorize:
+    resource-type: notification-settings
+    action: update
+  x-service: notifications-proxy
+  x-audit: true
+  x-test-coverage:
+    - src/test/suites/advancedSuite/notificationsService/notifications.test.ts
+  tags:
+    - Email
+  operationId: updateEmail
+  summary: Update email notification channel
+  description: Update email notification channel
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/EmailChannel.yaml'
+  responses:
+    '200':
+      description: Email notification channel updated
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/EmailChannel.yaml'
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '501':
+      $ref: '../../../../infra/openapi/docs/responses/501NotImplemented.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+patch:
+  x-authorize:
+    resource-type: notification-settings
+    action: update
+  x-service: notifications-proxy
+  x-audit: true
+  x-test-coverage:
+    - src/test/suites/advancedSuite/notificationsService/notifications.test.ts
+  tags:
+    - Email
+  operationId: patchEmail
+  summary: Patch email notification channel
+  description: Patch email notification channel
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/EmailChannelForPatch.yaml'
+  responses:
+    '200':
+      description: Email notification channel patched
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/EmailChannel.yaml'
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '501':
+      $ref: '../../../../infra/openapi/docs/responses/501NotImplemented.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

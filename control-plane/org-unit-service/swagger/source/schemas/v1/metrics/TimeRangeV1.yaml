@@ -1,0 +1,9 @@
+type: object
+description: Overtime metrics data. Returned only if both start and end query parameters are set.
+required:
+  - resources
+properties:
+  resources:
+    type: array
+    items:
+      $ref: './ResourcesDataOvertimeV1.yaml'

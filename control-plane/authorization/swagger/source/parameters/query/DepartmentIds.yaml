@@ -1,0 +1,7 @@
+name: departmentIds
+in: query
+required: false
+description: The department scope resource ids that we want to filter by.
+schema:
+  type: string
+  example: "1,2"

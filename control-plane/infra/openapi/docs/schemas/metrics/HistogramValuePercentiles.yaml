@@ -1,0 +1,10 @@
+allOf:
+  - $ref: './HistogramValue.yaml'
+  - type: object
+    properties:
+      data:
+        example:
+          p50: "120"
+          p95: "220"
+          p99: "400"
+

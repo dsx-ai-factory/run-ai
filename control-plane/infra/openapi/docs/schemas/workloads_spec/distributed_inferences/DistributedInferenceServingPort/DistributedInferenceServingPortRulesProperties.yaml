@@ -1,0 +1,17 @@
+properties:
+  port:
+    $ref: "../../../policy_rules/IntegerRules.yaml"
+  protocol:
+    $ref: "../../../policy_rules/StringRules.yaml"
+  authorizationType:
+    $ref: "./DistributedInferenceServingPortAuthorizationTypeRules.yaml"
+  authorizedUsers:
+    $ref: "../../../policy_rules/ArrayRules.yaml"
+  authorizedGroups:
+    $ref: "../../../policy_rules/ArrayRules.yaml"
+  exposeExternally:
+    $ref: "../../../policy_rules/BooleanRules.yaml"
+  exposedUrl:
+    $ref: "../../../policy_rules/StringRules.yaml"
+nullable: true
+type: object

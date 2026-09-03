@@ -1,0 +1,49 @@
+openapi: 3.0.3
+info:
+  title: gateway-hub
+  version: '1.0'
+  description: API for the gateway-hub sidecar
+  contact:
+    name: Run.AI
+    url: 'https://www.run.ai/'
+    email: support@run.ai
+servers:
+- url: 'http://localhost:8181'
+paths:
+  /healthz:
+    x-internal: true
+    get:
+      summary: health check
+      x-service: gateway-hub
+      operationId: healthz
+      x-no-authorization: true
+      x-test-coverage: not-applicable
+      tags:
+      - Health
+      responses:
+        200:
+          description: Executed successfully.
+  /internal/plugins/authentication-handler:
+    x-internal: true
+    $ref: './resources/authentication_handler.yaml'
+  /internal/plugins/extract-tenant-id:
+    x-internal: true
+    $ref: './resources/extract_tenant_id.yaml'
+  /internal/plugins/workload-redirect-validation:
+    x-internal: true
+    $ref: './resources/workload_redirect_validation.yaml'
+security:
+- bearerAuth: []
+components:
+  parameters:
+    $ref: "./parameters/_index.yaml"
+  schemas:
+    $ref: "./schemas/_index.yaml"
+  responses:
+    $ref: "../../../infra/openapi/docs/responses/_index.yaml"
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer authentication

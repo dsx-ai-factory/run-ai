@@ -1,0 +1,3 @@
+properties:
+  meta:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads/WorkloadCreationMeta.yaml"

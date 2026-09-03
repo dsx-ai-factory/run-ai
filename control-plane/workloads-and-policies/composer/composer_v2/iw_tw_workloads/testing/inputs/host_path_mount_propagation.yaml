@@ -1,0 +1,7 @@
+image: ubuntu
+
+storage:
+  hostPath:
+    - path: /my/volume/1
+      mountPath: /mount/path/vol/1
+      mountPropagation: HostToContainer

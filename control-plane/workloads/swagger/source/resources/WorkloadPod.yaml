@@ -1,0 +1,36 @@
+get:
+  summary: Get a single pod scoped to a workload.
+  description: Retrieve pod data by `podId` within the given `workloadId`. Returns 404 when the pod doesn't exist or belongs to a different workload — used by cluster-api k8s-object handlers to fetch a pod without paginating GetWorkloadPods.
+  operationId: get_workload_pod
+  x-internal: true
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/pods_api_test.go
+  x-authorize:
+    resource-type: workloads
+    action: read
+    resource-id: workloadId
+  tags:
+    - Pods
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/path/PodId.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Pods/Pod.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

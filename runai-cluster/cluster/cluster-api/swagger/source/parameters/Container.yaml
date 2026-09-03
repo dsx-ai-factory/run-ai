@@ -1,0 +1,5 @@
+in: query
+name: container
+description: The container in which to execute the command. Defaults to only container if there is only one container in the pod.
+schema:
+  type: string

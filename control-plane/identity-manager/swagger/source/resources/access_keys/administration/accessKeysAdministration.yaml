@@ -1,0 +1,47 @@
+get:
+  summary: Get a list of all access keys.
+  description: Retrieve a list of all access keys.
+  x-service: identity-manager
+  operationId: get_access_keys_administration
+  x-test-coverage:
+  - integration-tests/tests/api_access_keys_test.go
+  - pkg/services/api_access_keys_service_test.go
+  - e2e/src/test/suites/parallel/personalApplications/userAppAdmin.test.ts
+  x-authorize:
+    resource-type: access-keys
+    action: read
+  tags:
+  - Access Keys
+  parameters:
+  - description: Filter results by clientId
+    in: query
+    name: clientId
+    required: false
+    schema:
+      type: string
+    example: '3434c-12323ab-4ce2ea6-b44fc-db344d'
+  - description: Filter results by creatdBy
+    in: query
+    name: createdBy
+    required: false
+    schema:
+      type: string
+    example: 'test@run.ai'
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../schemas/AccessKeys/Administration/AccessKeysAdministration.yaml'
+    '401':
+      $ref: '../../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+

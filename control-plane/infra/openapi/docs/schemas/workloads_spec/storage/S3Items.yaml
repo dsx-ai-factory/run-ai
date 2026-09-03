@@ -1,0 +1,5 @@
+description: Set of s3 buckets to use in the workload.
+type: array
+items:
+  $ref: "./S3Instance.yaml"
+nullable: true

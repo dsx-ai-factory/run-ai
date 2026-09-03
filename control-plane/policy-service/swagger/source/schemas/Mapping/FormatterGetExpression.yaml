@@ -1,0 +1,7 @@
+type: string
+description: The JQ expression used to read the field value from the workload spec. Consult https://jqlang.org/manual/ for further info.
+example: ".securityContext | .privileged"
+minLength: 1
+maxLength: 4095
+pattern: .*
+

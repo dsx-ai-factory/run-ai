@@ -1,0 +1,31 @@
+type: object
+required:
+  - id
+  - orgUnitId
+  - orgUnitName
+  - nodePoolId
+  - nodePoolName
+  - rank
+  - resources
+  - clusterId
+properties:
+  id:
+    description: The unique ID of the resources.
+    type: string
+  orgUnitId:
+    description: The project/department ID.
+    type: string
+  orgUnitName:
+    description: The project/department name.
+    type: string
+    example: organization1
+  clusterId:
+    type: string
+  nodePoolId:
+    type: string
+  nodePoolName:
+    type: string
+  rank:
+    type: string
+  resources:
+    $ref: "../../schemas/ResourcesPerNodePool.yaml"

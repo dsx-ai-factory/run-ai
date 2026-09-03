@@ -1,0 +1,30 @@
+get:
+  summary: Get workload priorities for agent.
+  operationId: get_sync_workload_priorities
+  x-service: workloads
+  x-authorize:
+    resource-type: workload-properties
+    action: sync
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/workload_properties_api_test.go
+  tags:
+    - Workload properties
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Priorities/SyncPriorities.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

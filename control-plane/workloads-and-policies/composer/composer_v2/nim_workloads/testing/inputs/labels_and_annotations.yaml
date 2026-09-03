@@ -1,0 +1,19 @@
+ngcAuthSecret: "ngc-secret"
+servingPort:
+  port: 8000
+image: "nvidia/nim-llama3-8b-instruct:1.0.0"
+modelStore:
+  nimCache:
+    name: "nim-cache"
+labels:
+  - name: "app"
+    value: "nim-service"
+  - name: "environment"
+    value: "production"
+  - name: "version"
+    # No value field - should be allowed
+annotations:
+  - name: "deployment.kubernetes.io/revision"
+    value: "1"
+  - name: "kubectl.kubernetes.io/last-applied-configuration"
+    # No value field - should be allowed

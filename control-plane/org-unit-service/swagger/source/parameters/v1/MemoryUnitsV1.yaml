@@ -1,0 +1,7 @@
+in: query
+name: memoryUnitMb
+schema:
+  type: boolean
+required: false
+description: Memory returned in MB. When set to `false` (default) memory will be returned in MiB.
+example: true

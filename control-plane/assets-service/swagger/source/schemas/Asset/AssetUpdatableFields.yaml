@@ -1,0 +1,7 @@
+required:
+  - name
+properties:
+  name:
+    $ref: "../Asset/AssetName.yaml"
+  description:
+    $ref: "../Asset/AssetDescription.yaml"

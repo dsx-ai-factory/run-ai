@@ -1,0 +1,11 @@
+ngcAuthSecret: "ngc-secret"
+servingPort:
+  port: 8000
+image: "nvidia/nim-llama3-8b-instruct:1.0.0"
+modelStore:
+  nimCache:
+    name: "nim-cache"
+replicas: 3
+autoscaling:
+  metric: "cpu"
+  metricThreshold: 80

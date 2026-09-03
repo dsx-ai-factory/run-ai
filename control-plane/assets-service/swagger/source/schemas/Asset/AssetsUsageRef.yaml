@@ -1,0 +1,24 @@
+description: Reference information about usage of assets by other assets, for example datasources that uses credentials.
+properties:
+  environment:
+    nullable: true
+    type: object
+    description: environment asset.
+    allOf:
+      - $ref: "../Environment/EnvironmentAssetRef.yaml"
+    deprecated: true
+  environments:
+    type: array
+    items:
+      $ref: "./AssetRef.yaml"
+  compute:
+    $ref: "./AssetsUsageRefCompute.yaml"
+    deprecated: true
+  computes:
+    type: array
+    items:
+      $ref: "./AssetRef.yaml"
+  datasources:
+    type: array
+    items:
+      $ref: "./AssetDatasourceRef.yaml"

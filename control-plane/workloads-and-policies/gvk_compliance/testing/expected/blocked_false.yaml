@@ -1,0 +1,23 @@
+policy:
+  effectiveRules:
+  - enforcements:
+    - blocked: false
+    field: image
+    sourceOfRule: null
+    specSelector: allContainers
+  workloadType:
+    group: apps
+    kind: Deployment
+    version: v1
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: blocked-false
+  spec:
+    template:
+      spec:
+        containers:
+        - image: ubuntu
+          name: with-image
+        - name: no-image

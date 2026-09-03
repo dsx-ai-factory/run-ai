@@ -1,0 +1,8 @@
+required:
+  - meta
+  - spec
+properties:
+  meta:
+    $ref: "../Asset/AssetUpdateRequest.yaml"
+  spec:
+    $ref: "../NFS/NFSAssetSpec.yaml"

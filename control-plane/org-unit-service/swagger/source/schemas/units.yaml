@@ -1,0 +1,6 @@
+type: string
+description: The unit of measurement for CPU memory values.
+enum:
+  - Mib
+  - MB
+  - GB

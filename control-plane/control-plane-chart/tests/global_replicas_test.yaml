@@ -1,0 +1,60 @@
+suite: Test Global Replicas
+
+excludeTemplates:
+  # Excluding subcharts which will not be affected by global replicas
+  - charts/*
+  - templates/workloads-helper/deployment.yaml
+  - templates/workloads-manager/deployment.yaml
+
+tests:
+  - it: should render deployments with global replicas
+    set:
+      global.replicaCount: 3
+    documentSelector:
+      path: kind
+      value: Deployment
+      matchMany: true
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: spec.replicas
+          value: 3
+  - it: Auto scaling should take precedence over global and specific replica counts
+    set:
+      global.replicaCount: 3
+      global.config.hpaEnabled: true
+      assetsService.replicaCount: 2
+    documentSelector:
+      path: kind
+      value: Deployment
+      matchMany: true
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: Deployment
+      - notExists:
+          path: spec.replicas
+  - it: Specific replica count should take precedence over global replicas
+    set:
+      global.replicaCount: 3
+      assetsService.replicaCount: 2
+    templates:
+      - templates/assets-service/deployment.yaml
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 2
+  - it: Default replica count should be 1
+    documentSelector:
+      path: kind
+      value: Deployment
+      matchMany: true
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: spec.replicas
+          value: 1

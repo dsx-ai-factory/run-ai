@@ -1,0 +1,48 @@
+{{- if .Values.helmHooksHandler.enabled }}
+{{- $runai_operator := index .Values "runai-operator" -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pre-delete
+  namespace: runai
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- include "jobAnnotations" . | nindent 4 }}
+  labels:
+    run.ai/hook: pre-delete
+    {{- include "jobLabels" . | nindent 4 }}
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      annotations:
+        {{- include "jobAnnotations" . | nindent 8 }}
+      labels:
+        {{- include "jobLabels" . | nindent 8 }}
+        run.ai/hook: pre-delete
+    spec:
+      serviceAccountName: {{ .Values.global.serviceAccountName | default "runai-pre-delete" }}
+      restartPolicy: Never
+      containers:
+        - name: pre-delete
+          image: {{ include "helmHooksHandler.image" . }}
+          imagePullPolicy: {{ .Values.helmHooksHandler.image.pullPolicy }}
+          args:
+            - --pre-delete
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            {{- toYaml .Values.helmHooksHandler.resources | nindent 12 }}
+      imagePullSecrets:{{ include "imagePullSecretList" .| nindent 8 }}
+      affinity:{{- include "deploymentAffinity" .| nindent 8 }}
+      tolerations: {{- include "deploymentTolerations" .| nindent 8 }}
+{{- end }}

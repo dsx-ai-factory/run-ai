@@ -1,0 +1,11 @@
+required:
+  - meta
+  - spec
+properties:
+  meta:
+    $ref: "../Asset/AssetUpdateRequest.yaml"
+  spec:
+    allOf:
+      - $ref: "../Compute/ComputeAssetSpec.yaml"
+    nullable: true
+    type: object

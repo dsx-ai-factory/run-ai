@@ -1,0 +1,9 @@
+name: groupBy
+in: query
+required: false
+description: |
+  attribute to group cluster by.
+example: subdomain
+schema:
+  type: string
+  enum: [subdomain]

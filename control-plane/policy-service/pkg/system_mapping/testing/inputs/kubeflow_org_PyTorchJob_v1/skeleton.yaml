@@ -1,0 +1,41 @@
+# Minimal valid kubeflow.org/PyTorchJob/v1 manifest used as the starting point
+# for every Layer 3+4 case under cases/.
+#
+# PyTorchJob has a unique structure with replica types (Master, Worker) under
+# .spec.pytorchReplicaSpecs. Each replica type has its own pod template.
+#
+# The empty stubs below are required:
+#   - pytorchReplicaSpecs.*.template.metadata:{} — the *PodMetadata spec selectors
+#     query these paths; if absent, SET actions won't execute.
+#   - initContainers with placeholder — required for initContainer SET actions to work.
+#
+# Container names are "pytorch" (the Kubeflow default) so parameterised spec
+# selectors (appContainerByReplicaTypeAndName) match.
+apiVersion: kubeflow.org/v1
+kind: PyTorchJob
+metadata:
+  name: test
+spec:
+  pytorchReplicaSpecs:
+    Master:
+      replicas: 1
+      template:
+        metadata: {}
+        spec:
+          initContainers:
+            - name: init
+              image: placeholder-master-init
+          containers:
+            - name: pytorch
+              image: placeholder-master
+    Worker:
+      replicas: 2
+      template:
+        metadata: {}
+        spec:
+          initContainers:
+            - name: init
+              image: placeholder-worker-init
+          containers:
+            - name: pytorch
+              image: placeholder-worker

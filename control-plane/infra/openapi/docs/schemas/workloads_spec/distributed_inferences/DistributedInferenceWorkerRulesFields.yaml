@@ -1,0 +1,7 @@
+properties:
+  worker:
+    description: Defines the pod specification for the workers. Required only if the number of workers is greater than 0.
+    allOf:
+      - $ref: "../../../../../../policy-service/swagger/source/schemas/DistributedInferenceV2/DistributedInferenceLeaderWorkerRulesV2.yaml"
+    nullable: true
+    type: object

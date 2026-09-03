@@ -1,0 +1,14 @@
+name: groupBy
+in: query
+description: |
+  Labels to group the returned metrics data by. Grouping availability depends on the selected metric type. Supported values: "category" (workload category) or "node pool".
+explode: false
+required: false
+schema:
+  type: string
+  enum:
+      - Category
+      - Nodepool
+      - Project
+      - Department
+example: Category

@@ -1,0 +1,9 @@
+properties:
+  size:
+    $ref: "../../policy_rules/StringRules.yaml"
+  storageClass:
+    $ref: "../../policy_rules/StringRules.yaml"
+  accessModes:
+    $ref: "./PvcAccessModesRules.yaml"
+nullable: true
+type: object

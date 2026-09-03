@@ -1,0 +1,73 @@
+Dinfw: null
+JobSpec:
+  activationScale:
+    value: 1
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  environment:
+    items:
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  image:
+    value: ubuntu
+  initialScale:
+    value: 0
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  maxScale:
+    value: 3
+  metric:
+    value: throughput
+  minScale:
+    value: 0
+  ports:
+    items:
+      serving-port:
+        value:
+          container: 8081
+          protocol: http
+          serviceType: ServingPort
+  priorityClassName:
+    value: very-high
+  scaleDownDelaySeconds:
+    value: 120
+  scaleToZeroRetentionSeconds:
+    value: 60
+  target:
+    value: 80
+  targetUtilizationPercentage:
+    value: "55.5"
+  username:
+    value: test
+MasterSpec: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections:
+    - authorizationType: public
+      connectionType: ServingPort
+      containerPort: 8081
+      correlationName: serving-port
+      name: ServingPort
+      toolType: custom
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: autoscaling_advanced_scale_to_zero, Rules: , Type: Inference'
+  images:
+  - ubuntu
+  name: 'Value: autoscaling_advanced_scale_to_zero, Rules: , Type: Inference'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Inference
+  version: v2alpha1

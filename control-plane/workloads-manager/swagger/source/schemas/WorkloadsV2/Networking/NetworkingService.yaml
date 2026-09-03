@@ -1,0 +1,13 @@
+type: object
+description: Service configuration for routing traffic to the workload. Use 'spec' or 'ref' (not both).
+nullable: true
+properties:
+  spec:
+    description: Specification for a new Kubernetes service to create for this endpoint. Mutually exclusive with `ref`.
+    $ref: "./ServiceSpec.yaml"
+  ref:
+    description: Reference to an existing Kubernetes service. Mutually exclusive with `spec`.
+    $ref: "./ServiceRef.yaml"
+  authorization:
+    description: Access control configuration for traffic through this endpoint.
+    $ref: "./Workloadv2Authorization.yaml"

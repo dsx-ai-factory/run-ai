@@ -1,0 +1,25 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+allOf:
+- nullable: true
+  properties:
+    category:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    nodePools:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/ArrayRules.yaml
+    preemptibility:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/PreemptibilityRules.yaml
+    priorityClass:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    restartPolicy:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/distributed_inferences/DistributedInferenceRestartPolicyRules.yaml
+    servingPort:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/distributed_inferences/DistributedInferenceServingPortRules.yaml
+  type: object
+- $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/distributed_inferences/DistributedInferenceStartupPolicyFieldRules.yaml
+- $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/distributed_inferences/DistributedInferenceWorkersFieldRules.yaml
+- $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/distributed_inferences/DistributedInferenceReplicasFieldRules.yaml
+nullable: true
+type: object

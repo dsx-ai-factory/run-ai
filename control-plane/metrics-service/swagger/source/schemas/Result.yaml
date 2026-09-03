@@ -1,0 +1,13 @@
+type: object
+required:
+  - metricLabels
+  - measurements
+properties:
+  metricLabels:
+    type: object
+    additionalProperties:
+      type: string
+  measurements:
+    type: array
+    items:
+      $ref: './Measurement.yaml'

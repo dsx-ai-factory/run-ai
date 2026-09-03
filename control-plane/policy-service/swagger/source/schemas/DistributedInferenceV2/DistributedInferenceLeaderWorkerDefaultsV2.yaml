@@ -1,0 +1,52 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+properties:
+  annotations:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/AnnotationsDefaults.yaml
+  args:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/Args.yaml
+  command:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/Command.yaml
+  compute:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/SupersetDefaultsAllOfCompute.yaml
+  createHomeDir:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/CreateHomeDir.yaml
+  environmentVariables:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/EnvironmentVariablesDefaults.yaml
+  image:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/Image.yaml
+  imagePullPolicy:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/ImagePullPolicy.yaml
+  imagePullSecrets:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/ImagePullSecretsDefaults.yaml
+  labels:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/LabelsDefaults.yaml
+  nodeAffinityRequired:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/NodeAffinityRequired.yaml
+  nodeType:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/NodeType.yaml
+  podAffinity:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/PodAffinity.yaml
+  probes:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/Probes.yaml
+  security:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/DistributedInferenceLeaderWorkerDefaultsV2Security.yaml
+  storage:
+    nullable: true
+    properties:
+      configMapVolume:
+        $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/ConfigMapsDefaults.yaml
+      emptyDirVolume:
+        $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/EmptyDirsDefaults.yaml
+      pvc:
+        $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/PvcsDefaults.yaml
+      secretVolume:
+        $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/SecretsDefaults.yaml
+    type: object
+  tolerations:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/TolerationsDefaults.yaml
+  workingDir:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/WorkingDir.yaml
+type: object

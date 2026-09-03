@@ -1,0 +1,4 @@
+delete:
+  $ref: "./DeleteNodeType.yaml"
+put:
+  $ref: "./UpdateNodeType.yaml"

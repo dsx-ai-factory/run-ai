@@ -1,0 +1,3 @@
+allOf:
+  - $ref: "./DistributedInferenceTemplate.yaml"
+  - $ref: "../policy/TemplateComplianceInfo.yaml"

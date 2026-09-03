@@ -1,0 +1,7 @@
+name: projectName
+in: path
+required: true
+description: The project name
+example: project1
+schema:
+  type: string

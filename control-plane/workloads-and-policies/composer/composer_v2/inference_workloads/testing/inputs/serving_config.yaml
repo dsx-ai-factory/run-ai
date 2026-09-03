@@ -1,0 +1,7 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+servingConfiguration:
+  initializationTimeoutSeconds: 300
+  requestTimeoutSeconds: 120

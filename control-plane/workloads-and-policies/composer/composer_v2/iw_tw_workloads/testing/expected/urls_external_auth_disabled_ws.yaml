@@ -1,0 +1,173 @@
+BatchJobTarget:
+  Config:
+    networking:
+    - externalAccess:
+        ingress:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: job-urls_tensor_and_jupyter-url-jupyter
+          spec:
+            rules:
+            - host: test.run.ai
+              http:
+                paths:
+                - backend:
+                    service:
+                      name: job-urls_tensor_and_jupyter-url-jupyter
+                      port:
+                        number: 80
+                  path: /test/urls_tensor_and_jupyter
+                  pathType: Prefix
+      services:
+      - spec:
+          name: job-urls_tensor_and_jupyter-url-jupyter
+          ports:
+          - name: port-8888
+            port: 80
+            protocol: TCP
+            targetPort: 8888
+          selector:
+            release: urls_tensor_and_jupyter
+          type: ClusterIP
+    - externalAccess:
+        ingress:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: job-urls_tensor_and_jupyter-url-tensorboard
+          spec:
+            rules:
+            - host: test.run.ai
+              http:
+                paths:
+                - backend:
+                    service:
+                      name: job-urls_tensor_and_jupyter-url-tensorboard
+                      port:
+                        number: 80
+                  path: /test/urls_tensor_and_jupyter/url-tensorboard
+                  pathType: Prefix
+      services:
+      - spec:
+          name: job-urls_tensor_and_jupyter-url-tensorboard
+          ports:
+          - name: port-6006
+            port: 80
+            protocol: TCP
+            targetPort: 6006
+          selector:
+            release: urls_tensor_and_jupyter
+          type: ClusterIP
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: urls_tensor_and_jupyter
+        run.ai/category: Build
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: urls_tensor_and_jupyter
+      name: urls_tensor_and_jupyter
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            kai.scheduler/preemptibility: preemptible
+            project: test
+            release: urls_tensor_and_jupyter
+            workloadKind: Workspace
+            workloadName: urls_tensor_and_jupyter
+        spec:
+          containers:
+          - args:
+            - -c
+            - tensorboard --logdir=/tmp/logs --bind_all --port 6006 & start-notebook.sh
+              --NotebookApp.token=''
+            command:
+            - /bin/bash
+            env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: urls_tensor_and_jupyter
+            - name: JUPYTER_PORT
+              value: "8888"
+            image: jupyter/tensorflow-notebook
+            imagePullPolicy: IfNotPresent
+            name: urls_tensor_and_jupyter
+            ports:
+            - containerPort: 8888
+              name: port-8888
+              protocol: TCP
+            - containerPort: 6006
+              name: port-6006
+              protocol: TCP
+            resources:
+              limits:
+                nvidia.com/gpu: "1"
+              requests:
+                nvidia.com/gpu: "1"
+            securityContext:
+              privileged: false
+          priorityClassName: medium-high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+    status: {}
+Notification:
+  category: Build
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections:
+    - connectionType: ExternalUrl
+      containerPort: 8888
+      correlationName: url-jupyter
+      exposedUrlPath: /test/urls_tensor_and_jupyter
+      exposedUrlSubDomain: test-urls_tensor_and_jupyter
+      name: Jupyter
+      serviceResourceName: job-urls_tensor_and_jupyter-url-jupyter
+      toolType: jupyter-notebook
+    - connectionType: ExternalUrl
+      containerPort: 6006
+      correlationName: url-tensorboard
+      exposedUrlPath: /test/urls_tensor_and_jupyter/url-tensorboard
+      exposedUrlSubDomain: test-urls_tensor_and_jupyter-url-tensorboard
+      name: TensorBoard
+      serviceResourceName: job-urls_tensor_and_jupyter-url-tensorboard
+      toolType: tensorboard
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: urls_tensor_and_jupyter, Rules: , Type: Workspace'
+  images:
+  - jupyter/tensorflow-notebook
+  name: 'Value: urls_tensor_and_jupyter, Rules: , Type: Workspace'
+  preemptibility: preemptible
+  projectId: project-654-321
+  requestedNodePools:
+  - default
+  requestedPods:
+    number: 1
+  requestedResources:
+    gpu:
+      request: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

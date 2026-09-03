@@ -1,0 +1,1914 @@
+openapi: 3.0.3
+info:
+  contact:
+    email: support@run.ai
+    name: Run.AI
+    url: https://www.run.ai/
+  description: An API for querying metrics
+  title: Metrics
+  version: "1.0"
+servers:
+- url: https://app.run.ai
+- url: https://staging.run.ai
+- url: https://test.run.ai
+- url: http://localhost:8080
+security:
+- bearerAuth: []
+paths:
+  /:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: Executed successfully.
+      summary: health check
+      tags:
+      - Health
+      x-service: metrics-service
+      x-no-authorization: true
+  /internal/metrics:
+    post:
+      operationId: getMetrics
+      parameters:
+      - description: "The tenant Id of the current request, overrides the tenantId\
+          \ in the header."
+        explode: true
+        in: query
+        name: overrideTenantId
+        required: false
+        schema:
+          example: 123
+          format: int32
+          type: integer
+        style: form
+        x-internal: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MetricInformation'
+        description: Requested Metric Information
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getMetrics_200_response'
+          description: Metric data.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "501":
+          content:
+            application/json:
+              example:
+                code: 501
+                message: Not implemented
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get metrics.
+      tags:
+      - Metrics
+      x-service: metrics-service
+      x-test-coverage:
+      - metrics-service/integration-tests/tests/metric_test.go
+      x-no-authorization: true
+  /internal/reports:
+    get:
+      operationId: list_reports
+      parameters:
+      - description: "Filter results by a parameter. Use the format field-name operator\
+          \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
+          \ >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts\
+          \ with and =$ Ends with. Dates are in ISO 8601 timestamp format and available\
+          \ for operators ==, !=, <= and >=."
+        explode: false
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          example:
+          - name!=some-name
+          items:
+            pattern: ^(name|createdAt|createdBy|status)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            type: string
+          maxItems: 10
+          type: array
+        style: form
+      - description: Sort results by a parameters.
+        explode: true
+        in: query
+        name: sortBy
+        required: false
+        schema:
+          $ref: '#/components/schemas/ReportFilterAndSortFields'
+        style: form
+      - description: Sort results in descending or ascending order.
+        explode: true
+        in: query
+        name: sortOrder
+        required: false
+        schema:
+          default: asc
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          type: integer
+        style: form
+      - description: The maximum number of entries to return.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          maximum: 500
+          minimum: 1
+          type: integer
+        style: form
+      - description: Filter results by a free text search.
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          example: test project
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/list_reports_200_response'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List reports
+      tags:
+      - Reports
+      x-no-authorization: true
+      x-service: metrics-service
+      x-test-coverage:
+      - metrics-service/integration-tests/tests/report_test.go
+    post:
+      operationId: create_report
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportRequestFields'
+        description: Report to create.
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+          description: Accepted.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create a new report.
+      tags:
+      - Reports
+      x-no-authorization: true
+      x-service: metrics-service
+      x-test-coverage:
+      - metrics-service/integration-tests/tests/report_test.go
+  /internal/reports/count:
+    get:
+      operationId: count_reports
+      parameters:
+      - description: "Filter results by a parameter. Use the format field-name operator\
+          \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
+          \ >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts\
+          \ with and =$ Ends with. Dates are in ISO 8601 timestamp format and available\
+          \ for operators ==, !=, <= and >=."
+        explode: false
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          example:
+          - name!=some-name
+          items:
+            pattern: ^(name|createdAt|createdBy|status)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            type: string
+          maxItems: 10
+          type: array
+        style: form
+      - description: Filter results by a free text search.
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          example: test project
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/count_reports_200_response'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: count reports
+      tags:
+      - Reports
+      x-no-authorization: true
+      x-service: metrics-service
+      x-test-coverage:
+      - metrics-service/integration-tests/tests/report_test.go
+  /internal/reports/{reportId}:
+    delete:
+      operationId: delete_report_by_id
+      parameters:
+      - description: The report id
+        example: 575c19e8-c7c3-45b0-8290-2f47397a8383
+        explode: false
+        in: path
+        name: reportId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: No Content.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Delete report
+      tags:
+      - Reports
+      x-no-authorization: true
+      x-service: metrics-service
+      x-test-coverage:
+      - metrics-service/integration-tests/tests/report_test.go
+    get:
+      operationId: get_report_by_id
+      parameters:
+      - description: The report id
+        example: 575c19e8-c7c3-45b0-8290-2f47397a8383
+        explode: false
+        in: path
+        name: reportId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get report
+      tags:
+      - Reports
+      x-no-authorization: true
+      x-service: metrics-service
+      x-test-coverage:
+      - metrics-service/integration-tests/tests/report_test.go
+  /internal/reports/batch-delete:
+    post:
+      operationId: batch_delete_reports
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportsIdsBatchRequest'
+        description: Report ids to get
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchResponseAsync'
+          description: Accepted for deletion.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Batch delete reports
+      tags:
+      - Reports
+      x-no-authorization: true
+      x-service: metrics-service
+      x-test-coverage:
+      - metrics-service/integration-tests/tests/report_test.go
+  /internal/reports/batch-get:
+    post:
+      operationId: batch_get_reports_by_ids
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportsIdsBatchRequest'
+        description: Report ids to get.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportsBatchGetResponse'
+          description: Status Ok. Reports retrieved successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get a batch of reports.
+      tags:
+      - Reports
+      x-no-authorization: true
+      x-service: metrics-service
+      x-test-coverage:
+      - metrics-service/integration-tests/tests/report_test.go
+  /internal/metric-stores:
+    delete:
+      description: Delete tenant metric stores
+      operationId: deleteMetricStores
+      parameters:
+      - description: "The tenant Id of the current request, overrides the tenantId\
+          \ in the header."
+        explode: true
+        in: query
+        name: overrideTenantId
+        required: false
+        schema:
+          example: 123
+          format: int32
+          type: integer
+        style: form
+        x-internal: true
+      responses:
+        "204":
+          description: No Content.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Delete tenant metric stores
+      tags:
+      - MetricStores
+      x-service: metrics-service
+      x-test-coverage:
+      - metrics-service/integration-tests/tests/metric_store_test.go
+      x-no-authorization: true
+    get:
+      description: Get tenant metric stores
+      operationId: getMetricStores
+      parameters:
+      - description: "The tenant Id of the current request, overrides the tenantId\
+          \ in the header."
+        explode: true
+        in: query
+        name: overrideTenantId
+        required: false
+        schema:
+          example: 123
+          format: int32
+          type: integer
+        style: form
+        x-internal: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/MetricStore'
+                type: array
+          description: Tenant Metric Stores
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get tenant metric stores
+      tags:
+      - MetricStores
+      x-service: metrics-service
+      x-test-coverage:
+      - metrics-service/integration-tests/tests/metric_store_test.go
+      x-no-authorization: true
+    post:
+      description: Create metric store for tenant or save an existing one
+      operationId: createMetricStore
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MetricStore'
+        description: metrics store
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricStore'
+          description: Created.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "409":
+          content:
+            application/json:
+              example:
+                code: 409
+                message: Resource with this name already exists
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource already exists
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create/Save metric store for tenant
+      tags:
+      - MetricStores
+      x-service: metrics-service
+      x-test-coverage:
+      - metrics-service/integration-tests/tests/metric_store_test.go
+      x-no-authorization: true
+components:
+  parameters:
+    override_tenant_id:
+      description: "The tenant Id of the current request, overrides the tenantId in\
+        \ the header."
+      explode: true
+      in: query
+      name: overrideTenantId
+      required: false
+      schema:
+        example: 123
+        format: int32
+        type: integer
+      style: form
+      x-internal: true
+    ReportsFilterBy:
+      description: "Filter results by a parameter. Use the format field-name operator\
+        \ value. Operators are == Equals, != Not equals, <= Less than or equal, >=\
+        \ Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with\
+        \ and =$ Ends with. Dates are in ISO 8601 timestamp format and available for\
+        \ operators ==, !=, <= and >=."
+      explode: false
+      in: query
+      name: filterBy
+      required: false
+      schema:
+        example:
+        - name!=some-name
+        items:
+          pattern: ^(name|createdAt|createdBy|status)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+          type: string
+        maxItems: 10
+        type: array
+      style: form
+    ReportsSortBy:
+      description: Sort results by a parameters.
+      explode: true
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        $ref: '#/components/schemas/ReportFilterAndSortFields'
+      style: form
+    SortOrder:
+      description: Sort results in descending or ascending order.
+      explode: true
+      in: query
+      name: sortOrder
+      required: false
+      schema:
+        default: asc
+        enum:
+        - asc
+        - desc
+        type: string
+      style: form
+    Offset:
+      description: The offset of the first item returned in the collection.
+      explode: true
+      in: query
+      name: offset
+      required: false
+      schema:
+        example: 100
+        format: int32
+        type: integer
+      style: form
+    Limit:
+      description: The maximum number of entries to return.
+      explode: true
+      in: query
+      name: limit
+      required: false
+      schema:
+        default: 50
+        format: int32
+        maximum: 500
+        minimum: 1
+        type: integer
+      style: form
+    Search:
+      description: Filter results by a free text search.
+      explode: true
+      in: query
+      name: search
+      required: false
+      schema:
+        example: test project
+        type: string
+      style: form
+    ReportId:
+      description: The report id
+      example: 575c19e8-c7c3-45b0-8290-2f47397a8383
+      explode: false
+      in: path
+      name: reportId
+      required: true
+      schema:
+        format: uuid
+        type: string
+      style: simple
+  responses:
+    "401Unauthorized":
+      content:
+        application/json:
+          example:
+            code: 401
+            message: Issuer is not familiar.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unauthorized
+    "403Forbidden":
+      content:
+        application/json:
+          example:
+            code: 403
+            message: You do not have sufficient permissions.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Forbidden
+    "404NotFound":
+      content:
+        application/json:
+          example:
+            code: 404
+            message: Resource id not found.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource was not found
+    "500InternalServerError":
+      content:
+        application/json:
+          example:
+            code: 500
+            message: Something went wrong.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+    "501NotImplemented":
+      content:
+        application/json:
+          example:
+            code: 501
+            message: Not implemented
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+    "503ServiceUnavailable":
+      content:
+        application/json:
+          example:
+            code: 503
+            message: Please try again in few minutes.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+    "400BadRequest":
+      content:
+        application/json:
+          example:
+            code: 400
+            message: Required parameter is missing
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Bad request.
+    "204NoContent":
+      description: No Content.
+    "409Conflict":
+      content:
+        application/json:
+          example:
+            code: 409
+            message: Resource with this name already exists
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource already exists
+    "400BadSubmissionRequest":
+      content:
+        application/json:
+          example:
+            code: 400
+            message: The workload request does not comply with the policy set by the
+              administrator
+          schema:
+            $ref: '#/components/schemas/SubmissionError'
+      description: Bad submission request.
+    "406NotAcceptable":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Not acceptable request
+    "412PreconditionFailed":
+      content:
+        application/json:
+          example:
+            code: 412
+            message: Precondition failed
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource was not found.
+    "413RequestEntityTooLarge":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Request entity too large
+    "415UnsupportedMediaType":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unsupported media type
+  schemas:
+    Filters:
+      additionalProperties:
+        items:
+          type: string
+        maxItems: 100
+        minItems: 0
+        type: array
+      maxProperties: 100
+      minProperties: 0
+      type: object
+    Range:
+      example:
+        start: 2000-01-23T04:56:07.000+00:00
+        end: 2000-01-23T04:56:07.000+00:00
+      nullable: true
+      properties:
+        start:
+          description: timestamp from when to fetch data in UTC
+          format: date-time
+          type: string
+        end:
+          description: timestamp until when to fetch data in UTC
+          format: date-time
+          type: string
+      required:
+      - end
+      - start
+      type: object
+    Quantile:
+      description: the quantile value to calculate
+      example: 0.5
+      maximum: 1
+      minimum: 0
+      nullable: true
+      type: number
+    MetricInformation:
+      example:
+        responseLabels:
+        - responseLabels
+        - responseLabels
+        - responseLabels
+        - responseLabels
+        - responseLabels
+        quantile: 0.5
+        name: name
+        range:
+          start: 2000-01-23T04:56:07.000+00:00
+          numOfSamples: 20
+          end: 2000-01-23T04:56:07.000+00:00
+          aggregation: false
+        filters:
+          key:
+          - filters
+          - filters
+          - filters
+          - filters
+          - filters
+      properties:
+        name:
+          maxLength: 250
+          minLength: 1
+          type: string
+        filters:
+          additionalProperties:
+            items:
+              type: string
+            maxItems: 100
+            minItems: 0
+            type: array
+          maxProperties: 100
+          minProperties: 0
+          type: object
+        responseLabels:
+          items:
+            type: string
+          maxItems: 100
+          minItems: 0
+          type: array
+        range:
+          $ref: '#/components/schemas/MetricInformation_range'
+        quantile:
+          description: the quantile value to calculate
+          example: 0.5
+          maximum: 1
+          minimum: 0
+          nullable: true
+          type: number
+      required:
+      - name
+      type: object
+    Measurement:
+      example:
+        value: value
+        timestamp: 2000-01-23T04:56:07.000+00:00
+      properties:
+        timestamp:
+          format: date-time
+          type: string
+        value:
+          type: string
+      required:
+      - timestamp
+      - value
+      type: object
+    Result:
+      example:
+        metricLabels:
+          key: metricLabels
+        measurements:
+        - value: value
+          timestamp: 2000-01-23T04:56:07.000+00:00
+        - value: value
+          timestamp: 2000-01-23T04:56:07.000+00:00
+      properties:
+        metricLabels:
+          additionalProperties:
+            type: string
+          type: object
+        measurements:
+          items:
+            $ref: '#/components/schemas/Measurement'
+          type: array
+      required:
+      - measurements
+      - metricLabels
+      type: object
+    Error:
+      example:
+        code: 400
+        message: Bad request - Resource should have a name
+      properties:
+        code:
+          maximum: 599
+          minimum: 100
+          type: integer
+        message:
+          type: string
+        details:
+          type: string
+      required:
+      - code
+      - message
+    ReportFilterAndSortFields:
+      enum:
+      - name
+      - createdAt
+      - createdBy
+      - status
+      type: string
+    Label:
+      example:
+        displayName: Node pool
+        name: nodepoolName
+      properties:
+        name:
+          example: nodepoolName
+          type: string
+        displayName:
+          example: Node pool
+          type: string
+      required:
+      - displayName
+      - name
+      type: object
+    ReportCommonFields:
+      properties:
+        name:
+          example: 2023 GPU report
+          type: string
+        description:
+          example: This report shows the GPU usage of all projects in the organization
+          type: string
+        labels:
+          items:
+            $ref: '#/components/schemas/Label'
+          type: array
+        range:
+          $ref: '#/components/schemas/Range'
+        additionalFields:
+          additionalProperties: true
+          type: object
+      required:
+      - name
+      - range
+      type: object
+    ReportStatus:
+      enum:
+      - Pending
+      - Processing
+      - Ready
+      - Failed
+      - PendingDelete
+      - Deleting
+      - DeletionFailed
+      type: string
+    ReportCalculatedFields:
+      properties:
+        id:
+          format: uuid
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        createdBy:
+          example: user@run.ai
+          type: string
+        tenantId:
+          description: ID of the tenant where the project is located.
+          example: 2
+          format: int32
+          type: integer
+        status:
+          $ref: '#/components/schemas/ReportStatus'
+        statusUpdatedAt:
+          format: date-time
+          type: string
+        statusMessage:
+          example: Report in queue
+          type: string
+      required:
+      - createdAt
+      - createdBy
+      - id
+      - status
+      - statusUpdatedAt
+      - tenantId
+      type: object
+    Report:
+      allOf:
+      - $ref: '#/components/schemas/ReportCommonFields'
+      - $ref: '#/components/schemas/ReportCalculatedFields'
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        additionalFields:
+          key: ""
+        createdBy: user@run.ai
+        statusUpdatedAt: 2000-01-23T04:56:07.000+00:00
+        name: 2023 GPU report
+        tenantId: 2
+        description: This report shows the GPU usage of all projects in the organization
+        range:
+          start: 2000-01-23T04:56:07.000+00:00
+          end: 2000-01-23T04:56:07.000+00:00
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        statusMessage: Report in queue
+        labels:
+        - displayName: Node pool
+          name: nodepoolName
+        - displayName: Node pool
+          name: nodepoolName
+        status: Pending
+    Reports:
+      items:
+        $ref: '#/components/schemas/Report'
+      type: array
+    MetricInformationForReport:
+      example:
+        displayName: GPU allocation hours
+        quantile: 0.5
+        name: gpu_allocation_hours
+        filters:
+          key:
+          - filters
+          - filters
+          - filters
+          - filters
+          - filters
+      properties:
+        name:
+          example: gpu_allocation_hours
+          maxLength: 250
+          minLength: 1
+          type: string
+        displayName:
+          example: GPU allocation hours
+          maxLength: 250
+          minLength: 1
+          type: string
+        filters:
+          additionalProperties:
+            items:
+              type: string
+            maxItems: 100
+            minItems: 0
+            type: array
+          maxProperties: 100
+          minProperties: 0
+          type: object
+        quantile:
+          description: the quantile value to calculate
+          example: 0.5
+          maximum: 1
+          minimum: 0
+          nullable: true
+          type: number
+      required:
+      - displayName
+      - name
+      type: object
+    ReportRequestFields:
+      allOf:
+      - properties:
+          metrics:
+            items:
+              $ref: '#/components/schemas/MetricInformationForReport'
+            maxItems: 100
+            minItems: 1
+            type: array
+        required:
+        - metrics
+        type: object
+      - $ref: '#/components/schemas/ReportCommonFields'
+      example:
+        additionalFields:
+          key: ""
+        name: 2023 GPU report
+        description: This report shows the GPU usage of all projects in the organization
+        range:
+          start: 2000-01-23T04:56:07.000+00:00
+          end: 2000-01-23T04:56:07.000+00:00
+        metrics:
+        - displayName: GPU allocation hours
+          quantile: 0.5
+          name: gpu_allocation_hours
+          filters:
+            key:
+            - filters
+            - filters
+            - filters
+            - filters
+            - filters
+        - displayName: GPU allocation hours
+          quantile: 0.5
+          name: gpu_allocation_hours
+          filters:
+            key:
+            - filters
+            - filters
+            - filters
+            - filters
+            - filters
+        - displayName: GPU allocation hours
+          quantile: 0.5
+          name: gpu_allocation_hours
+          filters:
+            key:
+            - filters
+            - filters
+            - filters
+            - filters
+            - filters
+        - displayName: GPU allocation hours
+          quantile: 0.5
+          name: gpu_allocation_hours
+          filters:
+            key:
+            - filters
+            - filters
+            - filters
+            - filters
+            - filters
+        - displayName: GPU allocation hours
+          quantile: 0.5
+          name: gpu_allocation_hours
+          filters:
+            key:
+            - filters
+            - filters
+            - filters
+            - filters
+            - filters
+        labels:
+        - displayName: Node pool
+          name: nodepoolName
+        - displayName: Node pool
+          name: nodepoolName
+      type: object
+    IdsList:
+      description: List of ids to perform the action on.
+      items:
+        description: Id to perform the action on.
+        format: uuid
+        type: string
+      minLength: 1
+      type: array
+    ReportsIdsBatchRequest:
+      example:
+        ids:
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        ids:
+          description: List of ids to perform the action on.
+          items:
+            description: Id to perform the action on.
+            format: uuid
+            type: string
+          minLength: 1
+          type: array
+      required:
+      - ids
+      type: object
+    BatchId:
+      description: The ID of the batch operation.
+      format: uuid
+      type: string
+    ErrorCode:
+      description: A numeric code representing the error type.
+      format: int32
+      type: integer
+    ErrorMessage:
+      description: The error message.
+      type: string
+    BatchResponseFailureItem:
+      example:
+        code: 0
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        message: message
+      properties:
+        id:
+          format: uuid
+          type: string
+        code:
+          description: A numeric code representing the error type.
+          format: int32
+          type: integer
+        message:
+          description: The error message.
+          type: string
+      required:
+      - code
+      - id
+      - message
+      type: object
+    BatchResponseAsync:
+      example:
+        accepted:
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        failed:
+        - code: 0
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          message: message
+        - code: 0
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          message: message
+      properties:
+        id:
+          description: The ID of the batch operation.
+          format: uuid
+          type: string
+        accepted:
+          description: List of ids to perform the action on.
+          items:
+            description: Id to perform the action on.
+            format: uuid
+            type: string
+          minLength: 1
+          type: array
+        failed:
+          description: The IDs that failed to update.
+          items:
+            $ref: '#/components/schemas/BatchResponseFailureItem'
+          type: array
+      required:
+      - id
+      type: object
+    ReportsBatchGetResponse:
+      example:
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        failed:
+        - code: 0
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          message: message
+        - code: 0
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          message: message
+        succeeded:
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          additionalFields:
+            key: ""
+          createdBy: user@run.ai
+          statusUpdatedAt: 2000-01-23T04:56:07.000+00:00
+          name: 2023 GPU report
+          tenantId: 2
+          description: This report shows the GPU usage of all projects in the organization
+          range:
+            start: 2000-01-23T04:56:07.000+00:00
+            end: 2000-01-23T04:56:07.000+00:00
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          statusMessage: Report in queue
+          labels:
+          - displayName: Node pool
+            name: nodepoolName
+          - displayName: Node pool
+            name: nodepoolName
+          status: Pending
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          additionalFields:
+            key: ""
+          createdBy: user@run.ai
+          statusUpdatedAt: 2000-01-23T04:56:07.000+00:00
+          name: 2023 GPU report
+          tenantId: 2
+          description: This report shows the GPU usage of all projects in the organization
+          range:
+            start: 2000-01-23T04:56:07.000+00:00
+            end: 2000-01-23T04:56:07.000+00:00
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          statusMessage: Report in queue
+          labels:
+          - displayName: Node pool
+            name: nodepoolName
+          - displayName: Node pool
+            name: nodepoolName
+          status: Pending
+      properties:
+        id:
+          description: The ID of the batch operation.
+          format: uuid
+          type: string
+        succeeded:
+          description: Reports that were found for the tenant.
+          items:
+            $ref: '#/components/schemas/Report'
+          type: array
+        failed:
+          description: "Report ids that could not be returned, with per-id error details."
+          items:
+            $ref: '#/components/schemas/BatchResponseFailureItem'
+          type: array
+      required:
+      - id
+      type: object
+    MetricStoreType:
+      enum:
+      - grafanalabs
+      - mimir
+      - thanos
+      type: string
+    MetricStoreEndpointAuthType:
+      enum:
+      - basic
+      type: string
+    MetricStoreEndpointAuthBasic:
+      example:
+        password: password
+        username: username
+      nullable: true
+      properties:
+        username:
+          maxLength: 250
+          type: string
+        password:
+          maxLength: 1000
+          type: string
+      required:
+      - password
+      - username
+      type: object
+    MetricStoreEndpoint:
+      example:
+        headers:
+          X-Scope-OrgID: abcd
+        auth:
+          type: basic
+          basic:
+            password: password
+            username: username
+        url: http://mimir-nginx.mimir-test.svc:80/api/v1/query
+      properties:
+        url:
+          example: http://mimir-nginx.mimir-test.svc:80/api/v1/query
+          format: uri
+          maxLength: 2000
+          minLength: 1
+          type: string
+        auth:
+          $ref: '#/components/schemas/MetricStoreEndpoint_auth'
+        headers:
+          additionalProperties:
+            maxLength: 250
+            minLength: 1
+            type: string
+          example:
+            X-Scope-OrgID: abcd
+          maxProperties: 20
+          minProperties: 0
+          type: object
+      required:
+      - url
+      type: object
+    MetricStoreDetails:
+      description: |
+        Optional on create requests; always populated on responses. When null on create,
+        the metrics-service generates the metric store via the configured datasource provider.
+      example:
+        read:
+          headers:
+            X-Scope-OrgID: abcd
+          auth:
+            type: basic
+            basic:
+              password: password
+              username: username
+          url: http://mimir-nginx.mimir-test.svc:80/api/v1/query
+        type: grafanalabs
+        write:
+          headers:
+            X-Scope-OrgID: abcd
+          auth:
+            type: basic
+            basic:
+              password: password
+              username: username
+          url: http://mimir-nginx.mimir-test.svc:80/api/v1/query
+      nullable: true
+      properties:
+        type:
+          $ref: '#/components/schemas/MetricStoreType'
+        read:
+          $ref: '#/components/schemas/MetricStoreEndpoint'
+        write:
+          $ref: '#/components/schemas/MetricStoreEndpoint'
+      required:
+      - read
+      - type
+      - write
+      type: object
+    MetricStore:
+      allOf:
+      - properties:
+          tenantId:
+            description: The id of the tenant.
+            format: int32
+            type: integer
+          datasourceId:
+            description: |
+              Id of the datasource. Optional - when empty, the metrics-service either
+              (a) generates a new datasource via the configured provider when metricStoreDetails is null, or
+              (b) saves an external metric store with datasourceId="external" when metricStoreDetails is provided.
+            maxLength: 255
+            type: string
+        type: object
+      - properties:
+          metricStoreDetails:
+            $ref: '#/components/schemas/MetricStoreDetails'
+        type: object
+      example:
+        metricStoreDetails:
+          read:
+            headers:
+              X-Scope-OrgID: abcd
+            auth:
+              type: basic
+              basic:
+                password: password
+                username: username
+            url: http://mimir-nginx.mimir-test.svc:80/api/v1/query
+          type: grafanalabs
+          write:
+            headers:
+              X-Scope-OrgID: abcd
+            auth:
+              type: basic
+              basic:
+                password: password
+                username: username
+            url: http://mimir-nginx.mimir-test.svc:80/api/v1/query
+        tenantId: 0
+        datasourceId: datasourceId
+      required:
+      - tenantId
+      type: object
+    ComplianceIssues:
+      nullable: true
+      properties:
+        complianceIssues:
+          items:
+            $ref: '#/components/schemas/ComplianceIssues_complianceIssues_inner'
+          type: array
+      type: object
+    SubmissionError:
+      allOf:
+      - $ref: '#/components/schemas/Error'
+      - $ref: '#/components/schemas/ComplianceIssues'
+    getMetrics_200_response:
+      example:
+        data:
+        - metricLabels:
+            key: metricLabels
+          measurements:
+          - value: value
+            timestamp: 2000-01-23T04:56:07.000+00:00
+          - value: value
+            timestamp: 2000-01-23T04:56:07.000+00:00
+        - metricLabels:
+            key: metricLabels
+          measurements:
+          - value: value
+            timestamp: 2000-01-23T04:56:07.000+00:00
+          - value: value
+            timestamp: 2000-01-23T04:56:07.000+00:00
+        query: query
+        status: status
+        isRange: true
+      properties:
+        status:
+          type: string
+        query:
+          type: string
+        isRange:
+          type: boolean
+        data:
+          items:
+            $ref: '#/components/schemas/Result'
+          type: array
+      required:
+      - data
+      - isRange
+      - query
+      - status
+      type: object
+    list_reports_200_response:
+      example:
+        reports:
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          additionalFields:
+            key: ""
+          createdBy: user@run.ai
+          statusUpdatedAt: 2000-01-23T04:56:07.000+00:00
+          name: 2023 GPU report
+          tenantId: 2
+          description: This report shows the GPU usage of all projects in the organization
+          range:
+            start: 2000-01-23T04:56:07.000+00:00
+            end: 2000-01-23T04:56:07.000+00:00
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          statusMessage: Report in queue
+          labels:
+          - displayName: Node pool
+            name: nodepoolName
+          - displayName: Node pool
+            name: nodepoolName
+          status: Pending
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          additionalFields:
+            key: ""
+          createdBy: user@run.ai
+          statusUpdatedAt: 2000-01-23T04:56:07.000+00:00
+          name: 2023 GPU report
+          tenantId: 2
+          description: This report shows the GPU usage of all projects in the organization
+          range:
+            start: 2000-01-23T04:56:07.000+00:00
+            end: 2000-01-23T04:56:07.000+00:00
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          statusMessage: Report in queue
+          labels:
+          - displayName: Node pool
+            name: nodepoolName
+          - displayName: Node pool
+            name: nodepoolName
+          status: Pending
+      properties:
+        reports:
+          items:
+            $ref: '#/components/schemas/Report'
+          type: array
+      type: object
+    count_reports_200_response:
+      example:
+        count: 1
+      properties:
+        count:
+          example: 1
+          format: int64
+          type: integer
+      required:
+      - count
+      type: object
+    MetricInformation_range:
+      allOf:
+      - $ref: '#/components/schemas/Range'
+      - properties:
+          numOfSamples:
+            default: 20
+            description: the number of samples to take in the time range from start
+              to end.
+            example: 20
+            maximum: 1000
+            minimum: 0
+            type: integer
+        type: object
+      - properties:
+          aggregation:
+            default: false
+            description: whether to aggregate the samples or not.
+            type: boolean
+        type: object
+      example:
+        start: 2000-01-23T04:56:07.000+00:00
+        numOfSamples: 20
+        end: 2000-01-23T04:56:07.000+00:00
+        aggregation: false
+      nullable: true
+      type: object
+    MetricStoreEndpoint_auth:
+      example:
+        type: basic
+        basic:
+          password: password
+          username: username
+      nullable: true
+      properties:
+        type:
+          $ref: '#/components/schemas/MetricStoreEndpointAuthType'
+        basic:
+          $ref: '#/components/schemas/MetricStoreEndpointAuthBasic'
+      type: object
+    ComplianceIssues_complianceIssues_inner:
+      properties:
+        field:
+          example: compute.gpuDevicesRequest
+          type: string
+        details:
+          example: value must be no less than 3
+          type: string
+      required:
+      - details
+      - field
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      description: Bearer authentication
+      scheme: bearer
+      type: http

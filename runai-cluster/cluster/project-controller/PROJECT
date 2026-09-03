@@ -1,0 +1,37 @@
+
+layout: go.kubebuilder.io/v2
+projectName: project-controller
+repo: github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/project-controller
+resources:
+-
+  group: scheduling.run.ai
+  kind: Queue
+  path: github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/scheduling/v1
+  version: v1
+-
+  controller: true
+  group: run.ai
+  kind: Project
+  path: github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1
+  version: v1
+-
+  controller: true
+  group: run.ai
+  kind: Project
+  path: github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v2alpha1
+  version: v2alpah1
+-
+  controller: true
+  group: run.ai
+  kind: Project
+  path: github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v2alpha2
+  version: v2alpah2
+-
+  controller: true
+  group: run.ai
+  kind: Project
+  path: github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v2
+  version: v2
+version: "3"
+plugins:
+  go.sdk.operatorframework.io/v2-alpha: {}

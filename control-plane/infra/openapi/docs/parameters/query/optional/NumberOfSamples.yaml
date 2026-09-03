@@ -1,0 +1,10 @@
+name: numberOfSamples
+in: query
+description: The number of samples to take in the specified time range.
+required: false
+schema:
+  type: integer
+  example: 20
+  maximum: 1000
+  minimum: 0
+  default: 20

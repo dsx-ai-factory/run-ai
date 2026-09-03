@@ -1,0 +1,108 @@
+Config:
+  mnnvl: None
+  networking:
+  - externalAccess:
+      ingress:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: dinfw-test-lws-sp-0
+        spec:
+          rules:
+          - host: test.run.ai
+            http:
+              paths:
+              - backend:
+                  service:
+                    name: dinfw-test-lws-sp-0
+                    port:
+                      number: 80
+                path: /team-a/test-lws
+                pathType: Prefix
+    services:
+    - spec:
+        name: dinfw-test-lws-sp-0
+        ports:
+        - name: serving-port
+          port: 80
+          protocol: TCP
+          targetPort: 8081
+        selector:
+          leaderworkerset.sigs.k8s.io/name: test-lws-1234
+          leaderworkerset.sigs.k8s.io/worker-index: "0"
+        type: ClusterIP
+LeaderWorkerSet:
+  apiVersion: leaderworkerset.x-k8s.io/v1
+  kind: LeaderWorkerSet
+  metadata:
+    annotations:
+      run.ai/submitted-by: tester
+    labels:
+      app: leaderworkerset
+      createdBy: LeaderWorkerSet
+      project: team-a
+      release: test-lws
+      run.ai/control-plane-managed: "true"
+      run.ai/converted-from-native: "true"
+      workloadKind: DistributedInference
+      workloadName: test-lws
+    name: test-lws-1234
+    namespace: runai-team-a
+  spec:
+    leaderWorkerTemplate:
+      leaderTemplate:
+        metadata:
+          labels:
+            app: leaderworkerset
+            createdBy: LeaderWorkerSet
+            project: team-a
+            release: test-lws
+            workloadKind: DistributedInference
+            workloadName: test-lws
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: team-a
+            - name: RUNAI_JOB_NAME
+              value: test-lws
+            image: python:3.8
+            name: leader
+            ports:
+            - containerPort: 8081
+              name: port-8081
+              protocol: TCP
+            readinessProbe:
+              tcpSocket:
+                port: 8081
+            resources: {}
+          priorityClassName: very-high
+          schedulerName: runai-scheduler
+      restartPolicy: RecreateGroupOnPodRestart
+      size: 3
+      workerTemplate:
+        metadata:
+          labels:
+            app: leaderworkerset
+            createdBy: LeaderWorkerSet
+            project: team-a
+            release: test-lws
+            workloadKind: DistributedInference
+            workloadName: test-lws
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: team-a
+            - name: RUNAI_JOB_NAME
+              value: test-lws
+            image: python:3.8
+            name: worker
+            resources: {}
+          priorityClassName: very-high
+          schedulerName: runai-scheduler
+    replicas: 1
+    rolloutStrategy:
+      type: RollingUpdate
+    startupPolicy: LeaderCreated
+  status: {}

@@ -1,0 +1,13 @@
+type: object
+required:
+  - roleName
+  - scopeName
+properties:
+  roleName:
+    type: string
+    description: The name of the assigned role (e.g., admin, viewer).
+    example: "admin"
+  scopeName:
+    type: string
+    description: Human-readable name of the scope (e.g., tenant-x).
+    example: "tenant-x"

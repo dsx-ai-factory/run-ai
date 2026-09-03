@@ -1,0 +1,38 @@
+nodePools:
+  - np1-from-workload
+  - np2-from-workload
+environmentVariables:
+  - name: HOME
+    value: home-from-workload
+  - name: GROUP
+    exclude: true
+  - name: ADDED
+    value: added-from-workload
+security:
+  capabilities:
+    - KILL
+  runAsNonRoot: false
+compute:
+  extendedResources:
+    - resource: aaa/b1
+      quantity: 11M
+    - resource: aaa/b2
+      exclude: true
+    - resource: aaa/workload1
+      quantity: 21M
+storage:
+  hostPath:
+    - name: hp1
+      path: /path/hp1/from/workload
+      mountPath: /mount/path/hp1
+    - path: /path/noname/from/workload
+      mountPath: /mount/path/noname/from/workload
+  s3:
+    - name: s3a
+      path: /path/s3a/from/workload
+      url: https://s3a.from.workload.amazonaws.com
+    - path: /path/noname/from/workload
+      url: https://noname.from.workload.amazonaws.com
+    - name: s3w
+      path: /path/s3w/from/workload
+      url: https://s3w.from.workload.amazonaws.com

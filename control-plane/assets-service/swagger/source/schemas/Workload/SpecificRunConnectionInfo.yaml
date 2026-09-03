@@ -1,0 +1,33 @@
+required:
+  - connectionName
+properties:
+  name:
+    type: string
+    minLength: 1
+    description: Unique identifier of the connection. Will be used to
+      correlate between the information given here and the
+      information provided for the connection in the environment asset.
+  nodePort:
+    description: Port number of the host that will be connected with the container port. Required if and only if isCustomPort is set to true in the environment asset.
+    type: integer
+    format: int32
+    minimum: 0
+    maximum: 65535
+    nullable: true
+  externalUrl:
+    description: URL to associated with the container port. Required if and only if isCustomExternalUrl is set to true in the environment asset.
+    type: string
+    minLength: 1
+    nullable: true
+  authorizedUsers:
+    description: List of users or applications that are allowed to access the URL. Note that authorizedUsers and authorizedGroups are mutually exclusive.
+    type: array
+    items:
+      type: string
+    nullable: true
+  authorizedGroups:
+    description: Specifies the names of those groups that are allowed to access the connection. Note that authorizedUsers and authorizedGroups are mutually exclusive.
+    type: array
+    items:
+      type: string
+    nullable: true

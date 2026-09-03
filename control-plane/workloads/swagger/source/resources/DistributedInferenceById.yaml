@@ -1,0 +1,94 @@
+delete:
+  summary: Delete a distributed inference.
+  operationId: delete_distributed_inference
+  description: Delete a distributed inference using a workload id.
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/distributed_inferences_service_test.go
+  x-authorize:
+    resource-type: inferences
+    action: delete
+  tags:
+    - Distributed Inferences
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+  responses:
+    202:
+      $ref: "../../../../infra/openapi/docs/responses/202Accepted.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+get:
+  summary: Get a distributed inference data.
+  operationId: get_distributed_inference
+  description: Retrieve a distributed inference details using a workload id.
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/distributed_inferences_service_test.go
+  x-authorize:
+    resource-type: inferences
+    action: read
+  tags:
+    - Distributed Inferences
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../../../infra/openapi/docs/schemas/distributed_inferences/DistributedInference.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+patch:
+  summary: Update distributed inference spec.
+  operationId: update_distributed_inference_spec
+  description: Update the specification of an existing distributed inference workload.
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/distributed_inferences_service_test.go
+  x-authorize:
+    resource-type: inferences
+    action: update
+  tags:
+    - Distributed Inferences
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../../../infra/openapi/docs/schemas/distributed_inferences/UpdateRequest.yaml"
+  responses:
+    202:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../../../infra/openapi/docs/schemas/distributed_inferences/DistributedInference.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

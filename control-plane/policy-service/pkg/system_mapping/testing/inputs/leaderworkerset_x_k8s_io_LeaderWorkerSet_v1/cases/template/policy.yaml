@@ -1,0 +1,20 @@
+description: |
+  Layer 3 case "template" for leaderworkerset.x-k8s.io/LeaderWorkerSet/v1. SETs
+  template-level fields (size, restartPolicy, subGroupPolicy) under
+  .spec.leaderWorkerTemplate.
+effectiveRules:
+  # ----- leaderWorkerTemplate fields -----
+  - field: size
+    specSelector: leaderWorkerTemplate
+    enforcements: [{ set: { value: 4 } }]
+  - field: restartPolicy
+    specSelector: leaderWorkerTemplate
+    enforcements: [{ set: { value: RecreateGroupOnPodRestart } }]
+  - field: subGroupPolicy-SubGroupSize
+    specSelector: leaderWorkerTemplate
+    enforcements: [{ set: { value: 2 } }]
+
+  # ----- container image (verify policy modifies skeleton) -----
+  - field: image
+    specSelector: allContainers
+    enforcements: [{ set: { value: "lws/worker:v1" } }]

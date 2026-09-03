@@ -1,0 +1,30 @@
+type: object
+required:
+  - id
+  - createdBy
+  - createdAt
+  - updatedBy
+  - updatedAt
+properties:
+  id:
+    description: The unique identifier for the policy.
+    type: string
+    format: uuid
+  createdBy:
+    description: Identifier of the user who created the policy.
+    type: string
+    minLength: 1
+  createdAt:
+    description: The timestamp for when the policy was created.
+    type: string
+    minLength: 1
+    format: date-time
+  updatedBy:
+    description: Identifier of the user who last updated the policy.
+    type: string
+    minLength: 1
+  updatedAt:
+    description: The timestamp for when the policy was last updated.
+    type: string
+    minLength: 1
+    format: date-time

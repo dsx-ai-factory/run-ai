@@ -1,0 +1,30 @@
+type: object
+required:
+  - name
+  - scope
+  - originPvcName
+properties:
+  name:
+    type: string
+    maxLength: 63
+    pattern: "^[a-z][-a-z0-9]{0,62}$"
+    example: "datavolume-a"
+  scope:
+    $ref: "../SharedScopes/ScopeType.yaml"
+  departmentId:
+    description: The ID of the department that in its namespace the origin pvc is located (mandatory if scope is department)
+    type: string
+    example: "4500001"
+  clusterId:
+    description: The ID of the cluster that in its namespace the origin pvc is located (mandatory if scope is cluster)
+    type: string
+    format: uuid
+    example: "cf8c8ea0-94e4-4177-a050-bbf9b10d9cc5"
+  description:
+    type: string
+    maxLength: 127
+    example: "Results of experiment X"
+  originPvcName:
+    description: The name of the PVC that the datavolume is based on
+    type: string
+    example: "pvc-a"

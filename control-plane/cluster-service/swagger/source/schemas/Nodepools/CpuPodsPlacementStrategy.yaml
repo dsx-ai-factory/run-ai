@@ -1,0 +1,11 @@
+type: object
+nullable: true
+description: Defines the placement strategy for CPU pods within the node pool.
+properties:
+  node:
+    description: |
+      Specifies how CPU pods are placed across nodes.
+       - binpack - Place as many CPU pods as possible on each node to use fewer nodes and maximize available capacity.
+       - spread - Distribute CPU pods across as many nodes as possible to balance load across nodes.
+    allOf:
+      - $ref: "./PlacementStrategy.yaml"

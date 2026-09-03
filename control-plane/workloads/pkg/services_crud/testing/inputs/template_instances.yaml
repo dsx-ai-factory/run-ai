@@ -1,0 +1,11 @@
+defaults:
+  environmentVariables:
+    instances:
+      - name: env-1
+        value: changed-from-policy
+      - name: env-2
+        value: env-value-2
+      - name: env-3
+        exclude: true
+      - name: env-4
+        value: added-from-template

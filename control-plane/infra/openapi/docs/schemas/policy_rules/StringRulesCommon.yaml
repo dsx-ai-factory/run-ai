@@ -1,0 +1,19 @@
+properties:
+  sourceOfRule:
+    $ref: "./SourceOfRule.yaml"
+  required:
+    description: Whether the field is mandatory, default to false.
+    type: boolean
+    nullable: true
+  canEdit:
+    description: Whether the value of the field is editable, default to true
+    type: boolean
+    nullable: true
+  blocked:
+    description: Blocks the field to prevent workloads from specifying any value for it.
+    type: boolean
+    nullable: true
+example:
+  required: true
+  canEdit: false
+  blocked: false

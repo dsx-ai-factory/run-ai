@@ -1,0 +1,13 @@
+type: string
+description: Specify which metric data to request for an element.
+enum:
+  - GPU_UTILIZATION
+  - GPU_ALLOCATION
+  - GPU_MEMORY_USAGE_BYTES
+  - GPU_MEMORY_REQUEST_BYTES
+  - CPU_USAGE_CORES
+  - CPU_REQUEST_CORES
+  - CPU_LIMIT_CORES
+  - CPU_MEMORY_USAGE_BYTES
+  - CPU_MEMORY_REQUEST_BYTES
+  - CPU_MEMORY_LIMIT_BYTES

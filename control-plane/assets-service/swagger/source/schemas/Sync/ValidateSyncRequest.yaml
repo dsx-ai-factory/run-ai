@@ -1,0 +1,19 @@
+description: A list of all the assets of a given kind that was marked for deletion
+required:
+  - clusterId
+  - projectId
+  - assetKind
+  - assetNames
+properties:
+  clusterId:
+    type: string
+    format: uuid
+  projectId:
+    type: string
+  assetKind:
+    $ref: "../../../../../infra/openapi/docs/schemas/assets/AssetKind.yaml"
+  assetNames:
+    description: List of the assets which was marked for deletion
+    type: array
+    items:
+      type: string

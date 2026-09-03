@@ -1,0 +1,22 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: test
+  labels:
+    app: knative-test
+  annotations:
+    example.com/annotation: test-value
+spec:
+  template:
+    metadata:
+      annotations:
+        example.com/annotation: test-value
+      labels:
+        app: test
+    spec:
+      containers:
+      - image: placeholder
+        name: test
+      initContainers:
+      - image: placeholder
+        name: test

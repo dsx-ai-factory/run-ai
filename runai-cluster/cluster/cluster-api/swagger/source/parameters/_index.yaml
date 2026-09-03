@@ -1,0 +1,42 @@
+Project:
+  $ref: "./ProjectName.yaml"
+WorkloadId:
+  $ref: "./WorkloadId.yaml"
+PodId:
+  $ref: "./PodId.yaml"
+ElementId:
+  $ref: "./ElementId.yaml"
+WorkloadType:
+  $ref: "./WorkloadType.yaml"
+WorkloadName:
+  $ref: "./WorkloadName.yaml"
+Stdout:
+  $ref: "./Stdout.yaml"
+Stdin:
+  $ref: "./Stdin.yaml"
+Stderr:
+  $ref: "./Stderr.yaml"
+Container:
+  $ref: "./Container.yaml"
+Pod:
+  $ref: "./Pod.yaml"
+Tty:
+  $ref: "./Tty.yaml"
+Command:
+  $ref: "./Command.yaml"
+Ports:
+  $ref: "./Ports.yaml"
+Follow:
+  $ref: "./Follow.yaml"
+InsecureSkipTLSVerifyBackend:
+  $ref: "./InsecureSkipTLSVerifyBackend.yaml"
+LimitBytes:
+  $ref: "./LimitBytes.yaml"
+Previous:
+  $ref: "./Previous.yaml"
+SinceSeconds:
+  $ref: "./SinceSeconds.yaml"
+Timestamps:
+  $ref: "./Timestamps.yaml"
+TailLines:
+  $ref: "./TailLines.yaml"

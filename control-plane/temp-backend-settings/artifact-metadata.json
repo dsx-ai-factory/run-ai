@@ -1,0 +1,10 @@
+{
+  "service_name": "temp-backend-settings",
+  "enabled": true,
+  "artifact_type": "container",
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "jira": {
+    "team_name": "Suricata Team"
+  }
+}

@@ -1,0 +1,38 @@
+# Minimal valid kubeflow.org/XGBoostJob/v1 manifest used as the starting point
+# for every Layer 3+4 case under cases/.
+#
+# XGBoostJob has replica types (Master, Worker) under .spec.xgbReplicaSpecs.
+# Each replica type has its own pod template.
+#
+# The empty stubs below are required:
+#   - xgbReplicaSpecs.*.template.metadata:{} — the *PodMetadata spec selectors
+#     query these paths; if absent, SET actions won't execute.
+#   - initContainers with placeholder — required for initContainer SET actions to work.
+apiVersion: kubeflow.org/v1
+kind: XGBoostJob
+metadata:
+  name: test
+spec:
+  xgbReplicaSpecs:
+    Master:
+      replicas: 1
+      template:
+        metadata: {}
+        spec:
+          initContainers:
+            - name: init
+              image: placeholder-master-init
+          containers:
+            - name: xgboost
+              image: placeholder-master
+    Worker:
+      replicas: 2
+      template:
+        metadata: {}
+        spec:
+          initContainers:
+            - name: init
+              image: placeholder-worker-init
+          containers:
+            - name: xgboost
+              image: placeholder-worker

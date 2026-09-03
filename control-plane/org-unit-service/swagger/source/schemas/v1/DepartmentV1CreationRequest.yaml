@@ -1,0 +1,4 @@
+allOf:
+  - required:
+    - name
+  - $ref: './DepartmentV1CommonFields.yaml'

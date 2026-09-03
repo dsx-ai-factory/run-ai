@@ -1,0 +1,3 @@
+{{- if and .Values.telemetryService.enabled (not .Values.supportEntitled) }}
+{{- fail "telemetryService (call-home) is available only on a support-entitled release; set supportEntitled=true to enable it" }}
+{{- end }}

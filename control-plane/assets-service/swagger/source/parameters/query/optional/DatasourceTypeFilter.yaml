@@ -1,0 +1,17 @@
+name: type
+x-internal: true
+in: query
+required: false
+description: Filter datasources by type. If provided, only datasources of the specified type will be returned.
+schema:
+  type: string
+  enum:
+    - hostPath
+    - nfs
+    - pvc
+    - git
+    - s3
+    - configMap
+    - secretVolume
+    - dataVolume
+

@@ -1,0 +1,14 @@
+image: ubuntu
+annotations:
+  - name: a1
+    value: v1
+  - name: a2
+    value: v2
+storage:
+  s3:
+    - name: s1
+      path: /path/s1
+      url: https://s1.com
+    - name: s2
+      path: /path/s1
+      url: https://s2.com

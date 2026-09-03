@@ -1,0 +1,33 @@
+type: object
+description: Sum of all resources assigned to the projects under this department per Node Pool
+required:
+  - nodePool
+properties:
+  nodePool:
+    type: object
+    description: the node pool which the resources refer to
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: string
+        description: node pool id
+        example: 22
+      name:
+        type: string
+        description: node pool name
+        example: default
+  gpu:
+    $ref: "./DeservedResource.yaml"
+  cpu:
+    $ref: "./DeservedResource.yaml"
+  memory:
+    allOf:
+      - $ref: "./DeservedResource.yaml"
+      - type: object
+        required:
+          - units
+        properties:
+          units:
+            $ref: "./units.yaml"

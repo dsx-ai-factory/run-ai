@@ -1,0 +1,7 @@
+type: string
+enum:
+  - system
+  - tenant
+  - cluster
+  - department
+  - project

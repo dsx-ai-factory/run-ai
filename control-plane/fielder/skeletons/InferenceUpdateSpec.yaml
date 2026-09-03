@@ -1,0 +1,7 @@
+description: The specifications of the inference to be updated.
+properties:
+  spec:
+    allOf:
+      - replace: me
+      - $ref: "./InferenceUpdateSpecAutoscaling.yaml"
+      - $ref: "./InferenceUpdateSpecServingConfiguration.yaml"

@@ -1,0 +1,8 @@
+type: object
+required:
+  - workload
+properties:
+  workload:
+    $ref: "./WorkloadV2.yaml"
+  syncInfo:
+    $ref: "./WorkloadV2SyncInfo.yaml"

@@ -1,0 +1,11 @@
+type: object
+description: The resource interface for the workload type.
+additionalProperties: true
+example:
+  spec:
+    structureDefinition:
+      rootComponent:
+        kind:
+          group: "apps"
+          version: "v1"
+          kind: "Deployment"

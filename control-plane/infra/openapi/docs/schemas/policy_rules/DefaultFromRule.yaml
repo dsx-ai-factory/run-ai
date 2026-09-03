@@ -1,0 +1,18 @@
+properties:
+  field:
+    description: The default of this field is taken from another field, with optional factor.
+      The specified field must belong to the same workload section (compute, security, etc).
+      For itemized field, the value of the field will be taken from the same instance.
+    type: string
+    nullable: true
+    pattern: .*
+  factor:
+    description: Multiple the value of the fromField by this factor to get the value for this field
+      For example, if factor is 2 and defaultFrom field has value of 8, the calculated default will
+      be determined to be 16. 
+    type: number
+    format: double
+    nullable: true
+    default: 1
+nullable: true
+type: object

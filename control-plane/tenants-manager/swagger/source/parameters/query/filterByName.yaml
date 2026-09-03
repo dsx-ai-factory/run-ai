@@ -1,0 +1,6 @@
+name: name
+in: query
+required: false
+description: Filter tenants by name
+schema:
+  type: string

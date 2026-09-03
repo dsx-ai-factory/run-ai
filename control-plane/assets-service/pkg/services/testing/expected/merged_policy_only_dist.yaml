@@ -1,0 +1,127 @@
+training:
+  assets:
+    environment:
+      id: ""
+      name: ""
+  distributed:
+    master:
+      policyInfo:
+        attributeDefaults:
+          assets:
+            datasources:
+              pvc: {}
+              s3:
+                bucket: bucket1-master
+              secretVolume: {}
+          specificRunParams:
+            tolerations:
+              effect: NoSchedule
+              key: key1-master
+              operator: Exists
+        rules:
+          assets:
+            datasources:
+              nfs:
+                instances:
+                  canAdd: false
+              s3:
+                attributes:
+                  bucket:
+                    options:
+                    - value: bucket1-master
+                    - value: bucket2-master
+          specificRunParams:
+            command:
+              options:
+              - displayed: command1
+                value: my-command-master-1
+              - displayed: command2
+                value: my-command-master-2
+            runAsUid:
+              min: 10
+            tolerations:
+              instances:
+                locked:
+                - tolerations2
+      specificRunParams:
+        command: my-command-master-2
+        environmentVariables:
+        - name: LOG_DIR
+          value: policy-master-to-be-ignored
+        - name: ADDED_VAR
+          value: policy-master-added
+        runAsUid: 800
+        tolerations:
+        - effect: NoSchedule
+          key: key1-master
+          name: pol-0
+          operator: Exists
+        - effect: NoSchedule
+          key: key2-master
+          name: tolerations2
+          operator: Exists
+    numWorkers: 0
+  meta:
+    clusterId: ""
+    createdAt: "0001-01-01T00:00:00Z"
+    createdBy: ""
+    desiredPhase: ""
+    name: ""
+    projectId: ""
+    requestedName: ""
+    workloadId: ""
+  policyInfo:
+    attributeDefaults:
+      assets:
+        datasources:
+          pvc: {}
+          s3:
+            bucket: bucket1-worker
+          secretVolume: {}
+      specificRunParams:
+        tolerations:
+          effect: NoSchedule
+          key: key1-worker
+          operator: Exists
+    rules:
+      assets:
+        datasources:
+          nfs:
+            instances:
+              canAdd: false
+          s3:
+            attributes:
+              bucket:
+                options:
+                - value: bucket1-worker
+                - value: bucket2-worker
+      specificRunParams:
+        command:
+          options:
+          - displayed: command1
+            value: my-command-worker-1
+          - displayed: command2
+            value: my-command-worker-2
+        runAsUid:
+          min: 10
+        tolerations:
+          instances:
+            locked:
+            - tolerations2
+  specificRunParams:
+    command: my-command-worker-1
+    environmentVariables:
+    - name: LOG_DIR
+      value: policy-worker-to-be-ignored
+    - name: ADDED_VAR
+      value: policy-worker-added
+    runAsUid: 500
+    tolerations:
+    - effect: NoSchedule
+      key: key1-worker
+      name: pol-0
+      operator: Exists
+    - effect: NoSchedule
+      key: key2-worker
+      name: tolerations2
+      operator: Exists

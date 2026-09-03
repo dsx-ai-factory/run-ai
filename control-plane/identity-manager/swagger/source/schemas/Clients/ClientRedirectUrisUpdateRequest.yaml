@@ -1,0 +1,17 @@
+type: object
+x-internal: true
+required:
+  - redirectUris
+
+properties:
+  redirectUris:
+    type: array
+    minItems: 0
+    maxItems: 100
+    items:
+      type: string
+      minLength: 1
+      maxLength: 2048
+
+example:
+  redirectUris: ["https://url1", "https://url2"]

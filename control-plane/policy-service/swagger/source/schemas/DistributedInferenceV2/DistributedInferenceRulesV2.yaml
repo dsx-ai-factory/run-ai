@@ -1,0 +1,4 @@
+allOf:
+  - $ref: "./DistributedInferenceCommonRulesV2.yaml"
+  - $ref: "./DistributedInferenceLeaderRules.yaml"
+  - $ref: "./DistributedInferenceWorkerRules.yaml"

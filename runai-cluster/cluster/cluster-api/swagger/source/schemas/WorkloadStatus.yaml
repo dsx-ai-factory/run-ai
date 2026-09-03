@@ -1,0 +1,16 @@
+type: object
+properties:
+  status:
+    description: Status of a workload
+    type: string
+    enum:
+      - Creating
+      - Initializing
+      - Running
+      - Degraded
+      - Pending
+      - Stopped
+      - Completed
+      - Failed
+      - Terminating
+      - Unknown

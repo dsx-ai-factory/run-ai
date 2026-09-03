@@ -1,0 +1,21 @@
+ngcAuthSecret: "ngc-secret"
+servingPort:
+  port: 8000
+image: "nvidia/nim-llama3-8b-instruct:1.0.0"
+modelStore:
+  nimCache:
+    name: "nim-cache"
+environmentVariables:
+  - name: "DIRECT_VALUE"
+    value: "test-value"
+  - name: "FROM_SECRET"
+    secret:
+      name: "my-secret"
+      key: "password"
+  - name: "FROM_CONFIGMAP"
+    configMap:
+      name: "my-config"
+      key: "config-key"
+  - name: "FROM_POD_FIELD"
+    podFieldRef:
+      path: "metadata.name"

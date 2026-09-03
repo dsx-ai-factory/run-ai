@@ -1,0 +1,25 @@
+type: object
+required:
+  - name
+  - url
+  - scopeType
+  - scopeId
+properties:
+  name:
+    type: string
+    description: The name of the helm repo.
+  url:
+    type: string
+    description: The URL of the helm repo.
+  isPrivate:
+    type: boolean
+    description: Whether the helm repo requires authentication to browse.
+  scopeType:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/ScopeType.yaml'
+  scopeId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/ScopeId.yaml'
+    description: The ID of the scope. Mandatory for non-system scope helm repos.
+    nullable: true
+  description:
+    type: string
+    description: The description of the helm repo.

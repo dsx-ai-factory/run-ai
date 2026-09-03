@@ -1,0 +1,3 @@
+{{- if and .Values.nats.enabled (eq .Values.global.config.kubernetesDistribution "openshift") }}
+{{- include "common.scc" (list . .Values.nats .Values.nats.securityContextConstraints) }}
+{{- end }}

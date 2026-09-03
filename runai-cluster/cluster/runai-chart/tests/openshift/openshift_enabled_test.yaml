@@ -1,0 +1,113 @@
+suite: Test OpenShift resources based on openShift.mode
+
+tests:
+  # Generic test - all OCP directory resources should be rendered when Enabled
+  - it: should render OpenShift-specific resources when mode is Enabled
+    set:
+      openShift.mode: Enabled
+      openShift.securityContextConstraints.create: true
+    templates:
+      - templates/ocp/admission-webhooks.yaml
+    asserts:
+      - isNotEmpty: {}
+
+  - it: should render only surviving OpenShift admission webhooks
+    set:
+      openShift.mode: Enabled
+    templates:
+      - templates/ocp/admission-webhooks.yaml
+    asserts:
+      - hasDocuments:
+          count: 7
+
+  - it: should retain the WorkloadRunner RestartRequest validator
+    set:
+      openShift.mode: Enabled
+    templates:
+      - templates/ocp/admission-webhooks.yaml
+    documentSelector:
+      path: metadata.name
+      value: runai-restartrequest-validation
+    asserts:
+      - equal:
+          path: webhooks[0].clientConfig.service.name
+          value: anyworkload-controller
+      - equal:
+          path: webhooks[0].clientConfig.service.path
+          value: /validate-restartrequest
+      - equal:
+          path: webhooks[0].rules[0].resources
+          value:
+            - restartrequests
+
+  - it: should preserve the shared pod-controller rules without RunaiJob
+    set:
+      openShift.mode: Enabled
+    templates:
+      - templates/ocp/admission-webhooks.yaml
+    documentSelector:
+      path: metadata.name
+      value: runai-pod-controller-mutation
+    asserts:
+      - equal:
+          path: webhooks[0].rules[0].resources
+          value:
+            - statefulsets
+            - jobs
+            - deployments
+
+  # Generic test - all OCP directory resources should NOT be rendered when Disabled
+  - it: should NOT render OpenShift-specific resources when mode is Disabled
+    set:
+      openShift.mode: Disabled
+      openShift.securityContextConstraints.create: true
+    templates:
+      - templates/ocp/admission-webhooks.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # Test hooks don't contain openshift-monitoring namespace when Disabled
+  - it: should NOT render openshift-monitoring resources in hooks when mode is Disabled
+    set:
+      openShift.mode: Disabled
+      helmHooksHandler.enabled: true
+    templates:
+      - templates/hooks/post-install-rbac.yaml
+      - templates/hooks/post-upgrade-rbac.yaml
+    asserts:
+      - notMatchRegex:
+          path: metadata.namespace
+          pattern: ^openshift-monitoring$
+
+  # Test hooks contain openshift-monitoring namespace when Enabled
+  - it: should render openshift-monitoring resources in hooks when mode is Enabled
+    set:
+      openShift.mode: Enabled
+      helmHooksHandler.enabled: true
+    templates:
+      - templates/hooks/post-install-rbac.yaml
+    documentSelector:
+      path: metadata.namespace
+      value: openshift-monitoring
+      matchMany: true
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: openshift-monitoring
+
+  # Test clusterroles don't contain openshift-monitoring when Disabled
+  - it: should NOT render openshift-monitoring resources in clusterroles when mode is Disabled
+    set:
+      openShift.mode: Disabled
+      operands.rbac.prometheus.create: true
+      runai-operator.enabled: true
+    templates:
+      - templates/clusterroles/base.yaml
+    asserts:
+      - notMatchRegex:
+          path: metadata.namespace
+          pattern: ^openshift-monitoring$
+      - notMatchRegex:
+          path: subjects[*].namespace
+          pattern: ^openshift-monitoring$

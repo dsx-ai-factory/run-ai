@@ -1,0 +1,20 @@
+---
+description: API service conventions for Run:ai frontend
+globs: ["**/services/**/*.ts"]
+alwaysApply: false
+---
+
+# Services
+
+## Canonical Examples
+
+- **Service structure**: See `src/services/control-plane/app.service/app.service.ts`
+- **controlPlaneService usage**: See `src/services/control-plane/control-plane.service/control-plane.service.ts`
+- **Service testing**: See `src/services/control-plane/audit.service/audit.service.test.ts`
+
+## Key Patterns
+
+- Export service as object: `export const userService = { getAll, getById };`
+- Keep functions private, expose only through the object
+- Use `controlPlaneService` for API calls (handles auth, base URL)
+- Always specify explicit return types

@@ -1,0 +1,7 @@
+allOf:
+  - $ref: "./StorageInstanceName.yaml"
+  - $ref: "./S3Common.yaml"
+  - $ref: "./S3AccessKey.yaml"
+  - $ref: "../ExcludeField.yaml"
+nullable: true
+type: object

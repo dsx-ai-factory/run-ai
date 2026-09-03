@@ -1,0 +1,8 @@
+{
+    "packageVersion" : "1.18",
+    "gitUserId" : "run-ai",
+    "gitRepoId" : "backend/tenants-manager",
+    "sourceFolder" : "pkg/api",
+    "packageName" : "api"
+}
+

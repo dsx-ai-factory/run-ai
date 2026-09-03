@@ -1,0 +1,38 @@
+description: Details about resources that use the asset.
+properties:
+  workspaces:
+    description: workspaces that rely on this asset.
+    type: array
+    items:
+      $ref: "../Workload/WorkloadRefAndStatus.yaml"
+  trainings:
+    description: trainings that rely on this asset.
+    type: array
+    items:
+      $ref: "../Workload/WorkloadRefAndStatus.yaml"
+  distributed:
+    description: distributed trainings that rely on this asset.
+    type: array
+    items:
+      $ref: "../Workload/WorkloadRefAndStatus.yaml"
+  inferences:
+    description: inferences that rely on this asset.
+    type: array
+    items:
+      $ref: "../Workload/WorkloadRefAndStatus.yaml"
+  templates:
+    description: templates that rely on this asset.
+    type: array
+    items:
+      $ref: "./AssetRef.yaml"
+  assets:
+    description: list of other assets that use this asset. 
+      specifically, accessKeys used by s3, and passwords used by git.
+    $ref: "../Asset/AssetsUsageRef.yaml"
+  usedByDataVolumes:
+    description: whether the asset is used by data volumes.
+    type: boolean
+    nullable: true
+    x-internal: true
+nullable: true
+type: object

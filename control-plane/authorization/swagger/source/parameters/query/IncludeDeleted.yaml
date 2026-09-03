@@ -1,0 +1,8 @@
+name: includeDeleted
+in: query
+required: false
+description: True to include deleted objects in the result.
+schema:
+  type: boolean
+  example: false
+  default: false

@@ -1,0 +1,3 @@
+properties:
+  replicas:
+    $ref: "../../policy_rules/IntegerRules.yaml"

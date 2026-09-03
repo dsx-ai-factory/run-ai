@@ -1,0 +1,32 @@
+get:
+  deprecated: true
+  x-internal: true
+  x-authorize:
+    resource-type: notification-settings
+    action: update
+  x-service: notifications-proxy
+  x-audit: true
+  x-test-coverage: not-applicable
+  tags:
+    - Slack
+  operationId: addSlackAppDeprecated
+  summary: Add Slack app
+  description: Add Slack app
+  responses:
+    200:
+      description: Slack OAuth redirect URL
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              redirectUrl:
+                type: string
+                format: uri
+                example: "https://slack.com/oauth/v2/authorize?..."
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'

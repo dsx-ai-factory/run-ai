@@ -1,0 +1,38 @@
+type: object
+required:
+  - name
+properties:
+  name:
+    type: string
+    maxLength: 250
+    minLength: 1
+  filters:
+    $ref: './Filters.yaml'
+  responseLabels:
+    type: array
+    maxItems: 100
+    minItems: 0
+    items:
+      type: string
+  range:
+    type: object
+    nullable: true
+    allOf:
+      - $ref: '../../../../infra/openapi/docs/schemas/metrics/Range.yaml'
+      - type: object
+        properties:
+          numOfSamples:
+            type: integer
+            default: 20
+            description: the number of samples to take in the time range from start to end.
+            example: 20
+            maximum: 1000
+            minimum: 0
+      - type: object
+        properties:
+          aggregation:
+            type: boolean
+            default: false
+            description: whether to aggregate the samples or not.
+  quantile:
+    $ref: './Quantile.yaml'

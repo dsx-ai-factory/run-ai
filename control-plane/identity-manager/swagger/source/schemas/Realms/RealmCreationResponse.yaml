@@ -1,0 +1,15 @@
+type: object
+x-internal: true
+required:
+- realm_name
+- domain
+- clients
+properties:
+  realm_name:
+    type: string
+  domain:
+    type: string
+  clients:
+    type: array
+    items:
+      $ref: '../Clients/Client.yaml'

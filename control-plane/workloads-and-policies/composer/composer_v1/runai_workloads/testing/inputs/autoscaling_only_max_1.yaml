@@ -1,0 +1,6 @@
+image: ubuntu
+servingPort:
+  container: 8081
+  protocol: http
+autoscaling:
+  maxReplicas: 1

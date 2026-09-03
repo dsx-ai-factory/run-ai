@@ -1,0 +1,8 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+storage:
+  dataVolume:
+    - id: dv-models
+      mountPath: /models

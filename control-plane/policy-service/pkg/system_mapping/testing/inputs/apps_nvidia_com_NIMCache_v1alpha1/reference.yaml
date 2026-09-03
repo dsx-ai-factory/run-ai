@@ -1,0 +1,116 @@
+# Kitchen-sink reference manifest for apps.nvidia.com/NIMCache/v1alpha1.
+# Contains every field covered by nimCacheSpec + nimCacheContainer + metadata
+# field groups — used by Layer 1/2 tests to verify that every mapped field
+# resolves correctly from the JQ spec selectors.
+#
+# Note: the three source flavors (ngc/dataStore/hf) are mutually exclusive per
+# the NIMCache CRD; here we populate all three so Layer 1 can exercise every
+# source-* field. (The manifest is NOT intended to be submitted to K8s as-is;
+# it's only used for GET-side structural checks. Layer 3 uses the skeleton +
+# goldens which respect the CRD's exclusivity rules.)
+apiVersion: apps.nvidia.com/v1alpha1
+kind: NIMCache
+metadata:
+  name: test
+  labels:
+    app: test
+  annotations:
+    example.com/annotation: "test-value"
+spec:
+  runtimeClassName: gvisor
+  userID: 1000
+  groupID: 2000
+
+  certConfig:
+    name: my-certs
+    mountPath: /etc/ssl/certs
+
+  proxy:
+    httpProxy: http://proxy.example.com:3128
+    httpsProxy: http://proxy.example.com:3128
+    noProxy: "localhost,.cluster.local"
+    certConfigMap: proxy-certs
+
+  source:
+    ngc:
+      authSecret: ngc-api-key
+      modelPuller: nvcr.io/nim/model-puller:v1
+      pullSecret: ngc-pull-secret
+      modelEndpoint: https://api.nvcf.nvidia.com
+      model:
+        profiles: ["profile-a", "profile-b"]
+        precision: fp16
+        engine: tensorrt_llm
+        tensorParallelism: "2"
+        qosProfile: throughput
+        lora: false
+        buildable: true
+    dataStore:
+      endpoint: https://ds.example.com/v1/hf/
+      namespace: default
+      authSecret: hf-token
+      modelPuller: nvcr.io/nim/hf-puller:v1
+      pullSecret: hf-pull-secret
+      modelName: my-model
+      datasetName: my-dataset
+      revision: main
+    hf:
+      endpoint: https://huggingface.co
+      namespace: my-org
+      authSecret: hf-token
+      modelPuller: nvcr.io/nim/hf-puller:v1
+      pullSecret: hf-pull-secret
+      modelName: my-model
+      datasetName: my-dataset
+      revision: main
+
+  storage:
+    hostPath: /data/nim-cache
+    pvc:
+      name: nim-cache-pvc
+      create: true
+      storageClass: standard
+      size: "10Gi"
+      subPath: cache
+      volumeAccessMode: ReadWriteOnce
+
+  resources:
+    cpu: "4"
+    memory: "16Gi"
+
+  nodeSelector:
+    test: somevalue
+
+  tolerations:
+    - key: test
+      operator: Equal
+      value: somevalue
+      effect: NoSchedule
+      tolerationSeconds: 60
+
+  env:
+    - name: ENV_VALUE
+      value: "direct"
+    - name: ENV_CONFIGMAP
+      valueFrom:
+        configMapKeyRef:
+          name: my-config
+          key: config-key
+          optional: false
+    - name: ENV_FIELD
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.name
+    - name: ENV_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: my-secret
+          key: secret-key
+          optional: true
+    - name: ENV_RESOURCE
+      valueFrom:
+        resourceFieldRef:
+          containerName: test
+          divisor: "1"
+          resource: limits.cpu

@@ -1,0 +1,14 @@
+allOf:
+  - $ref: "../templates/TemplateMeta.yaml"
+  - type: object
+    properties:
+      spec:
+        $ref: "DistributedInferenceTemplateSpec.yaml"
+  - type: object
+    properties:
+      runnable:
+        $ref: "../templates/RunnableInfo.yaml"
+      combinedSpec:
+        $ref: "./DistributedInferenceTemplateSpec.yaml"
+    nullable: true
+

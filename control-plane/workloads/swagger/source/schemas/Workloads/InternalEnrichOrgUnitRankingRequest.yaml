@@ -1,0 +1,27 @@
+type: object
+required:
+  - clusterId
+  - orgUnitType
+  - ids
+properties:
+  clusterId:
+    type: string
+    description: The cluster ID
+    example: "abc-cluster-123"
+  orgUnitType:
+    type: string
+    enum: [project, department]
+    description: Whether these are projects or departments (all IDs must be same type)
+    example: "project"
+  nodePoolName:
+    type: string
+    nullable: true
+    description: Optional node pool filter for scoped counting
+    example: "gpu-pool"
+  ids:
+    type: array
+    items:
+      type: string
+    description: Array of project or department IDs to enrich
+    example: ["123", "456", "789"]
+

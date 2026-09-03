@@ -1,0 +1,13 @@
+image: ubuntu
+nodeAffinityRequired:
+  nodeSelectorTerms:
+    - matchExpressions:
+      - key: disktype
+        operator: In
+        values:
+        - ssd
+      - key: region
+        operator: In
+        values:
+        - us-west1
+        - us-west2

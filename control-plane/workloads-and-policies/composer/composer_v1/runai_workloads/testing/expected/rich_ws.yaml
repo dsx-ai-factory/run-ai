@@ -1,0 +1,86 @@
+Dinfw: null
+JobSpec:
+  allowPrivilegeEscalation:
+    value: true
+  arguments:
+    value: --log-dir xxx
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  capabilities:
+    items:
+      capability-0:
+        value:
+          capability: KILL
+      capability-1:
+        value:
+          capability: CHOWN
+  command:
+    value: start
+  createHomeDir:
+    value: true
+  environment:
+    items:
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  hostIpc:
+    value: true
+  hostNetwork:
+    value: true
+  image:
+    value: tensorboard:latest
+  imagePullPolicy:
+    value: Always
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  priorityClassName:
+    value: build
+  readOnlyRootFilesystem:
+    value: true
+  runAsGid:
+    value: 30
+  runAsNonRoot:
+    value: false
+  runAsUid:
+    value: 500
+  runAsUser:
+    value: true
+  seccompProfileType:
+    value: RuntimeDefault
+  stdin:
+    value: true
+  terminateAfterPreemption:
+    value: false
+  terminationGracePeriodSeconds:
+    value: 55
+  tty:
+    value: true
+  username:
+    value: test
+  workingDir:
+    value: /my/home
+MasterSpec: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: rich, Rules: , Type: Workspace'
+  images:
+  - tensorboard:latest
+  name: 'Value: rich, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

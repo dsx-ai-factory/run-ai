@@ -1,0 +1,13 @@
+type: object
+properties:
+  tenant_id:
+    type: string
+    example: 12345
+  route_id:
+    type: string
+  route_config:
+    type: object
+required:
+  - tenant_id
+  - route_id
+  - route_config

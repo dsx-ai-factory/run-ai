@@ -1,0 +1,13 @@
+properties:
+  sourceOfRule:
+    $ref: "./SourceOfRule.yaml"
+  required:
+    description: Whether this arbitrary object is mandatory. default to false.
+    type: boolean
+    nullable: true
+  canEdit:
+    description: Whether the value of the field, as a whole, is editable. default to false.
+    type: boolean
+    nullable: true
+nullable: true
+type: object

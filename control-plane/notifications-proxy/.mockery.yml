@@ -1,0 +1,71 @@
+dir: '{{.InterfaceDir}}/mocks'
+structname: '{{.InterfaceName}}'
+filename: "{{.InterfaceName}}.go" 
+pkgname: mocks
+template: testify
+packages:
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/internal/channel:
+    interfaces:
+      Clienter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/internal/clients/channel:
+    interfaces:
+      SinksClienter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/internal/clients/notification_types:
+    interfaces:
+      NotificationKindsClienter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/internal/clients/notify:
+    interfaces:
+      UserRoutesClienter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/internal/clients/state:
+    interfaces:
+      SlackCredentialsGetter: {}
+      TenantRoutesClienter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/internal/clients/subscription:
+    interfaces:
+      UserRoutesClienter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/internal/clients/tenant_delete:
+    interfaces:
+      SinksClienter: {}
+      TenantRoutesClienter: {}
+      UserRoutesClienter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/internal/clients/tenant_migration:
+    interfaces:
+      TenantRoutesClienter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/internal/email:
+    interfaces:
+      SinkClienter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/internal/events_listeners:
+    interfaces:
+      TenantDeleteClienter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/internal/notification_state:
+    interfaces:
+      ChannelClienter: {}
+      StateClienter: {}
+      StateMigrationClient: {}
+      SubUserClienter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/internal/notification_types:
+    interfaces:
+      NotificationKindsClienter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/internal/services:
+    interfaces:
+      Authorizer: {}
+      ChannelsManager: {}
+      EmailManager: {}
+      EmailNotificationStateManager: {}
+      NotificationStateManager: {}
+      NotificationTypesManager: {}
+      SlackManager: {}
+      SlackNotificationStateManager: {}
+      SubscriptionsManager: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/internal/slack:
+    interfaces:
+      ChannelClienter: {}
+      NotificationStateClienter: {}
+      Notifier: {}
+      SlackAuthSessionHandlerer: {}
+      SlackClienter: {}
+      SlackCredentialsDaoer: {}
+      UserSubscriptionsClienter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-proxy/internal/subscription:
+    interfaces:
+      UserRoutesClienter: {}

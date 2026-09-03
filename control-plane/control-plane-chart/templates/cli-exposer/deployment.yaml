@@ -1,0 +1,11 @@
+{{- include "common.deployment" (list . .Values.cliExposer .Values.cliExposer.autoscaling .Values.cliExposer.serviceAccount "control-plane.cliExposer.deployment" ) }}
+
+{{- define "control-plane.cliExposer.deployment" -}}
+spec:
+  template:
+    spec:
+      initContainers:
+        {{- include "common.initContainer" . | nindent 8 }}
+      containers:
+      - {{- include "common.container" . | nindent 8 }}
+{{- end }}

@@ -1,0 +1,10 @@
+properties:
+  name:
+    description: unique name to identify the instance. primarily used for policy locked rules.
+    type: string
+    minLength: 1
+    maxLength: 63
+    example: storage-instance-a
+    nullable: true
+nullable: true
+type: object

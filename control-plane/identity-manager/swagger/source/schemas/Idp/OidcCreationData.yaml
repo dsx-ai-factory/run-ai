@@ -1,0 +1,32 @@
+type: object
+nullable: true
+
+required:
+- clientId
+- clientSecret
+- discoverDocumentUrl
+
+properties:
+  clientId:
+    type: string
+    minLength: 1
+    maxLength: 255
+  clientSecret:
+    type: string
+    minLength: 1
+    maxLength: 500
+  discoverDocumentUrl:
+    type: string
+    pattern: '/^(https?://)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(:[0-9]{1,5})?(/[^\s]*)?$|^$/'
+    maxLength: 2048
+  scopes:
+    type: array
+    minItems: 0
+    maxItems: 50
+    items:
+      type: string
+      pattern: '^([a-zA-Z0-9-._:]+)(\s[a-zA-Z0-9-._:]+)*$' # Regex to match strings of 5 to 10 alphanumeric characters
+      minLength: 1
+      maxLength: 100
+  mandatoryClaim:
+    $ref: './MandatoryClaim.yaml'

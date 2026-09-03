@@ -1,0 +1,32 @@
+properties:
+  nodePoolsResources:
+    type: array
+    items:
+      $ref: "./NodePoolAssignedResourcesV1.yaml"
+    description: Resources assigned to the Department per node pool.
+  name:
+    type: string
+    description: The name of the department.
+    example: default
+  deservedGpus:
+    type: number
+    description: Deprecated. Instead, use `deserved` for the relevant resource type under `NodePoolResources`. Deserved GPUs for the department.
+    example: 2
+    deprecated: true
+  allowOverQuota:
+    type: boolean
+    description: >-
+      Deprecated. Instead, use `maxAllowed` for the relevant resource type under `NodePoolResources`. Is over quota allowed for the department.
+    example: false
+    deprecated: true
+  maxAllowedGpus:
+    type: number
+    description: Deprecated. Instead, use `maxAllowed` for the relevant resource type under `NodePoolResources`. Max allowed GPUs for the department.
+    example: 2
+    deprecated: true
+  resources:
+    allOf:
+      - $ref: "./AssignedResourcesV1.yaml"
+    description: Deprecated. Instead, use 'nodePoolsResources'. Total resources assigned to the Department. Can only be used in PUT/POST when there is a single Node Pool in the system. The resources returned in GET are the sum of all Node Pool Resources.
+    deprecated: true
+additionalProperties: true

@@ -1,0 +1,33 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+nullable: true
+properties:
+  master:
+    $ref: ./ReplicaRulesV2.yaml
+  worker:
+    allOf:
+    - $ref: ./ReplicaRulesV2.yaml
+    - nullable: true
+      properties:
+        cleanPodPolicy:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/distributed/CleanPodPolicyRules.yaml
+        distributedFramework:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/distributed/DistributedFrameworkRules.yaml
+        maxReplicas:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+        minReplicas:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+        mpiLauncherCreationPolicy:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/distributed/MpiLauncherCreationPolicyRules.yaml
+        numWorkers:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+        slotsPerWorker:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+        sshAuthMountPath:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+      type: object
+    nullable: true
+    type: object
+type: object

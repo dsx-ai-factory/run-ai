@@ -1,0 +1,1636 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Tenant Management",
+    "version": "1.0",
+    "description": "An API for managing tenants objects and their associated resources."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/": {
+      "x-internal": true,
+      "get": {
+        "x-service": "tenants-manager",
+        "description": "health check",
+        "summary": "health check",
+        "operationId": "health",
+        "x-no-authorization": true,
+        "tags": [
+          "health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully."
+          }
+        }
+      }
+    },
+    "/api/v1/tenants": {
+      "x-scope": [
+        "system"
+      ],
+      "get": {
+        "summary": "Get a list of tenants.",
+        "description": "Retrieve a list of tenants and their details.",
+        "x-service": "tenants-manager",
+        "x-test-coverage": [
+          "e2e/src/test/suites/sphinxSuite/tenant.test.ts"
+        ],
+        "operationId": "get_tenants",
+        "x-authorize": {
+          "resource-type": "tenant",
+          "action": "read"
+        },
+        "tags": [
+          "Tenant"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/deleted"
+          },
+          {
+            "$ref": "#/components/parameters/filterByName"
+          },
+          {
+            "$ref": "#/components/parameters/filterByAlias"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tenants",
+                  "x-schema-name": "Tenants"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create tenant",
+        "x-service": "tenants-manager",
+        "x-test-coverage": [
+          "e2e/src/test/suites/sphinxSuite/tenant.test.ts"
+        ],
+        "operationId": "create_tenant",
+        "x-authorize": {
+          "resource-type": "tenant",
+          "action": "create"
+        },
+        "tags": [
+          "Tenant"
+        ],
+        "requestBody": {
+          "description": "The tenant to create.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantCreationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/409Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/tenants/{tenantId}": {
+      "x-scope": [
+        "system"
+      ],
+      "get": {
+        "summary": "Get tenant",
+        "x-service": "tenants-manager",
+        "x-test-coverage": [
+          "e2e/src/test/suites/sphinxSuite/tenantCreation.test.ts"
+        ],
+        "operationId": "get_tenant_by_id",
+        "x-authorize": {
+          "resource-type": "tenant",
+          "action": "read",
+          "resource-id": "tenantId"
+        },
+        "tags": [
+          "Tenant"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tenantId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tenant"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update tenant",
+        "description": "Update tenant properties such as alias.",
+        "x-service": "tenants-manager",
+        "operationId": "update_tenant_by_id",
+        "x-test-coverage": "not-applicable",
+        "x-authorize": {
+          "resource-type": "tenant",
+          "action": "update",
+          "resource-id": "tenantId"
+        },
+        "tags": [
+          "Tenant"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tenantId"
+          }
+        ],
+        "requestBody": {
+          "description": "The tenant properties to update.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tenant updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tenant"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/409Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "soft/hard delete tenant",
+        "x-service": "tenants-manager",
+        "x-test-coverage": [
+          "e2e/src/test/suites/sphinxSuite/delete_scripts/deleteScript.test.ts"
+        ],
+        "operationId": "delete_tenant_by_id",
+        "x-authorize": {
+          "resource-type": "tenant",
+          "action": "delete",
+          "resource-id": "tenantId"
+        },
+        "tags": [
+          "Tenant"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tenantId"
+          },
+          {
+            "$ref": "#/components/parameters/isHardDelete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "tenant uid that was deleted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "uid"
+                  ],
+                  "properties": {
+                    "uid": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/internal/management/api/v1/tenants": {
+      "x-internal": true,
+      "get": {
+        "summary": "Get tenants list internal",
+        "x-service": "tenants-manager",
+        "x-test-coverage": "not-applicable",
+        "operationId": "management_get_tenants_internal",
+        "x-no-authorization": true,
+        "tags": [
+          "internal"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tenants"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/internal/api/v1/tenants": {
+      "x-internal": true,
+      "post": {
+        "summary": "Create tenant",
+        "x-service": "tenants-manager",
+        "x-test-coverage": [
+          "e2e/src/test/suites/sphinxSuite/tenant.test.ts"
+        ],
+        "operationId": "create_tenant_internal",
+        "x-no-authorization": true,
+        "tags": [
+          "tenants"
+        ],
+        "requestBody": {
+          "description": "The tenant to create.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantCreationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/409Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get tenant",
+        "x-service": "tenants-manager",
+        "x-test-coverage": [
+          "src/test/suites/tenantSuite/tenantUserApi/tenantSystemApi.test.ts"
+        ],
+        "operationId": "get_tenant",
+        "x-no-authorization": true,
+        "tags": [
+          "tenants"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tenantName"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tenant"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/internal/api/v1/tenants/{tenantId}": {
+      "x-internal": true,
+      "get": {
+        "summary": "Get tenant by id",
+        "x-service": "tenants-manager",
+        "x-test-coverage": "not-applicable",
+        "operationId": "get_tenant_by_id_internal",
+        "x-no-authorization": true,
+        "tags": [
+          "tenants"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tenantId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tenant"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "soft/hard delete tenant",
+        "x-service": "tenants-manager",
+        "x-test-coverage": "not-applicable",
+        "operationId": "delete_tenant_by_id_internal",
+        "x-no-authorization": true,
+        "tags": [
+          "tenants"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tenantId"
+          },
+          {
+            "$ref": "#/components/parameters/isHardDelete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "tenant uid that was deleted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "uid"
+                  ],
+                  "properties": {
+                    "uid": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/internal/api/v1/tenants/resolve": {
+      "x-internal": true,
+      "get": {
+        "summary": "Get tenant by name or alias",
+        "x-service": "tenants-manager",
+        "x-test-coverage": "not-applicable",
+        "operationId": "get_tenant_by_name_or_alias",
+        "x-no-authorization": true,
+        "tags": [
+          "Internal"
+        ],
+        "parameters": [
+          {
+            "name": "tenantName",
+            "in": "query",
+            "required": true,
+            "description": "The name or alias of the tenant to resolve",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tenant found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tenant"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/internal/api/v1/tenants/{tenantId}/domain": {
+      "x-internal": true,
+      "get": {
+        "summary": "Get tenant domain",
+        "x-service": "tenants-manager",
+        "x-test-coverage": [
+          "/runai/control-plane/tenants-manager/pkg/services/api_tenant_service_test.go"
+        ],
+        "operationId": "get_tenant_domain",
+        "x-no-authorization": true,
+        "tags": [
+          "Internal"
+        ],
+        "parameters": [
+          {
+            "name": "tenantId",
+            "in": "path",
+            "required": true,
+            "description": "The id of the tenant to retrieve",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tenant domain",
+            "content": {
+              "text/plain": {
+                "x-default": true,
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/logo": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "summary": "Get tenant logo. (base64)",
+        "description": "Retrieve the base64 logo file. This endpoint is deprecated and will be removed in a future release. Use GET /api/v1/branding/settings/logo instead.",
+        "x-test-coverage": [
+          "src/test/suites/tenantSuite/tenantUserApi/tenantSystemApi.test.ts"
+        ],
+        "x-service": "tenants-manager",
+        "operationId": "get_tenant_logo",
+        "x-no-authorization": true,
+        "deprecated": true,
+        "tags": [
+          "Logo"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tenantId-2"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tenant logo (PNG or SVG).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "logo"
+                  ],
+                  "properties": {
+                    "logo": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "post": {
+        "summary": "Upload logo for tenant. (base64)",
+        "description": "Use to upload a base64 logo file (PNG or SVG). Max size 128kb. This endpoint is deprecated and will be removed in a future release. Use PUT /api/v1/branding/settings/logo instead.",
+        "x-test-coverage": [
+          "src/test/suites/tenantSuite/tenantUserApi/tenantSystemApi.test.ts"
+        ],
+        "x-service": "tenants-manager",
+        "operationId": "upload_tenant_logo",
+        "x-authorize": {
+          "resource-type": "branding-settings",
+          "action": "update"
+        },
+        "x-audit": true,
+        "deprecated": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tenantId-2"
+          }
+        ],
+        "tags": [
+          "Logo"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Logo uploaded."
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "413": {
+            "$ref": "#/components/responses/413RequestEntityTooLarge"
+          },
+          "415": {
+            "$ref": "#/components/responses/415UnsupportedMediaType"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/internal/api/v1/tenants/{tenantId}/metric-store": {
+      "get": {
+        "summary": "Get tenant Metric Store",
+        "x-service": "tenants-manager",
+        "x-test-coverage": "not-applicable",
+        "operationId": "get_tenant_metric_store",
+        "x-no-authorization": true,
+        "tags": [
+          "Internal"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tenantId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricStore"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/internal/api/v1/tenants/{tenantId}/extended-metric-store": {
+      "get": {
+        "summary": "Get tenant Metric Store with type and datasouce id",
+        "x-service": "tenants-manager",
+        "x-test-coverage": "not-applicable",
+        "operationId": "get_tenant_extended_metric_store",
+        "x-no-authorization": true,
+        "tags": [
+          "Internal"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tenantId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtendedMetricStore"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/internal/api/v1/logos": {
+      "x-internal": true,
+      "get": {
+        "summary": "Get all tenant logos (paginated)",
+        "x-service": "tenants-manager",
+        "x-test-coverage": [
+          "api/internal/service/api_internal_service_test.go"
+        ],
+        "operationId": "get_all_logos",
+        "x-no-authorization": true,
+        "tags": [
+          "Internal"
+        ],
+        "parameters": [
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "description": "Number of logos to skip (default 0)",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of logos to return (default 50, max 100)",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50,
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of tenant logos for the requested page.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantLogosResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "deleted": {
+        "name": "deleted",
+        "in": "query",
+        "description": "Include soft-deleted tenants in the response when `true`.",
+        "schema": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "filterByName": {
+        "name": "name",
+        "in": "query",
+        "required": false,
+        "description": "Filter tenants by name",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "filterByAlias": {
+        "name": "alias",
+        "in": "query",
+        "required": false,
+        "description": "Filter tenants by alias",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "tenantId": {
+        "name": "tenantId",
+        "in": "path",
+        "required": true,
+        "description": "The id of the tenant to retrieve",
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 0
+        }
+      },
+      "isHardDelete": {
+        "name": "isHardDelete",
+        "in": "query",
+        "description": "Boolean indicator for soft/hard delete",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "tenantName": {
+        "name": "tenantName",
+        "in": "query",
+        "required": true,
+        "description": "The name of the tenant to retrieve",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "tenantId-2": {
+        "name": "tenantId",
+        "in": "query",
+        "required": false,
+        "x-scope": [
+          "system"
+        ],
+        "description": "If exists will return the relevant resource for the tenant ID",
+        "example": "1008",
+        "schema": {
+          "type": "string",
+          "default": ""
+        }
+      }
+    },
+    "schemas": {
+      "TenantId": {
+        "description": "The id of the tenant.",
+        "type": "integer",
+        "format": "int32",
+        "example": 1001
+      },
+      "Tenant": {
+        "type": "object",
+        "required": [
+          "id",
+          "uuid",
+          "name",
+          "status",
+          "contractType",
+          "createdAt",
+          "updatedAt",
+          "smg"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/TenantId"
+          },
+          "mimirId": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The universally unique identifier of the tenant."
+          },
+          "name": {
+            "type": "string",
+            "description": "The internal system name of the tenant."
+          },
+          "displayName": {
+            "type": "string",
+            "description": "The name of the tenant as shown to users within the tenant."
+          },
+          "alias": {
+            "type": "string",
+            "description": "An optional alias for the tenant."
+          },
+          "smg": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Creating",
+              "Failed",
+              "Updating",
+              "Deleted",
+              "Deleting",
+              "Ready"
+            ],
+            "description": "The current status of the tenant.\nPossible values:\n- Creating\n- Failed\n- Updating\n- Deleted\n- Deleting\n- Ready\n"
+          },
+          "diagnostics": {
+            "type": "string",
+            "description": "Most recent provisioning failure message. Only populated by GET /tenants/{id} when status is Failed."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the tenant was created."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the tenant was last updated."
+          },
+          "contractType": {
+            "type": "string",
+            "enum": [
+              "normal",
+              "trial"
+            ]
+          }
+        },
+        "example": {
+          "id": 1,
+          "name": "example",
+          "displayName": "Example",
+          "alias": "example-alias",
+          "status": "Ready",
+          "tenantId": 123,
+          "createdAt": "2020-01-01T00:00:00Z",
+          "updatedAt": "2020-01-02T00:00:00Z",
+          "deletedAt": null
+        }
+      },
+      "Tenants": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Tenant"
+        },
+        "x-schema-name": "Tenants"
+      },
+      "Error": {
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "code": 400,
+          "message": "Bad request - Resource should have a name"
+        }
+      },
+      "Roles": {
+        "type": "string",
+        "description": "The role assigned to the tenant's admin user. Possible value: System administrator.",
+        "nullable": true,
+        "enum": [
+          "System administrator",
+          "Cloud operator"
+        ]
+      },
+      "MetricStoreEndpoint": {
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "example": "http://mimir-nginx.mimir-test.svc:80/api/v1/query",
+            "minLength": 1,
+            "maxLength": 2048
+          },
+          "auth": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "basic": {
+                "nullable": true,
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 255
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  }
+                }
+              }
+            }
+          },
+          "headers": {
+            "nullable": true,
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 1000
+            },
+            "minProperties": 0,
+            "maxProperties": 50,
+            "example": {
+              "X-Scope-OrgID": "id"
+            }
+          }
+        }
+      },
+      "MetricStore": {
+        "required": [
+          "read",
+          "write"
+        ],
+        "type": "object",
+        "properties": {
+          "read": {
+            "$ref": "#/components/schemas/MetricStoreEndpoint"
+          },
+          "write": {
+            "$ref": "#/components/schemas/MetricStoreEndpoint"
+          }
+        }
+      },
+      "TenantCreationRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "email"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$",
+            "description": "The name of the tenant.",
+            "example": "name",
+            "minLength": 2,
+            "maxLength": 255
+          },
+          "alias": {
+            "type": "string",
+            "nullable": true,
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$",
+            "description": "An optional alias for the tenant. Must be unique across all tenant names and aliases.",
+            "example": "tenant-alias",
+            "minLength": 2,
+            "maxLength": 255
+          },
+          "email": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            "description": "The email of the tenant's admin user.",
+            "example": "admin@example.com",
+            "minLength": 5,
+            "maxLength": 254
+          },
+          "password": {
+            "type": "string",
+            "nullable": true,
+            "description": "The password for the tenant's admin user. Must contain at least 1 special character, 1 uppercase letter, 1 lowercase letter, 1 digit, and be at least 8 characters long.",
+            "minLength": 8,
+            "maxLength": 255
+          },
+          "contractType": {
+            "type": "string",
+            "enum": [
+              "normal",
+              ""
+            ]
+          },
+          "role": {
+            "$ref": "#/components/schemas/Roles"
+          },
+          "metricStore": {
+            "writeOnly": true,
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MetricStore"
+              }
+            ]
+          }
+        }
+      },
+      "TenantCreationResponse": {
+        "type": "object",
+        "required": [
+          "tenant"
+        ],
+        "properties": {
+          "tenant": {
+            "$ref": "#/components/schemas/Tenant"
+          },
+          "additionalData": {
+            "description": "additional data for tenant creation",
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "example": {
+          "tenant": {
+            "id": 1,
+            "name": "example",
+            "displayName": "Example",
+            "status": "Ready",
+            "tenantId": 123,
+            "created_at": "2020-01-01T00:00:00Z",
+            "updated_at": "2020-01-02T00:00:00Z",
+            "deleted_at": null
+          },
+          "additionalData": {
+            "tenantDomain": "tenant.example.com",
+            "customerUser": {
+              "user@tenant": "Abc!23"
+            }
+          }
+        }
+      },
+      "TenantUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "alias": {
+            "type": "string",
+            "nullable": true,
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$",
+            "description": "An optional alias for the tenant. Must be unique across all tenant names and aliases.",
+            "example": "tenant-alias",
+            "minLength": 2,
+            "maxLength": 255
+          }
+        }
+      },
+      "LogoCreationRequest": {
+        "type": "object",
+        "required": [
+          "logo"
+        ],
+        "properties": {
+          "logo": {
+            "type": "string",
+            "description": "Base64 logo file",
+            "minLength": 1,
+            "maxLength": 500000
+          }
+        }
+      },
+      "ExtendedMetricStore": {
+        "required": [
+          "tenantId",
+          "type",
+          "datasourceId",
+          "read",
+          "write"
+        ],
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "description": "The id of the tenant.",
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "grafanalabs",
+              "mimir",
+              "thanos"
+            ]
+          },
+          "datasourceId": {
+            "description": "Id of datasource",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "read": {
+            "$ref": "#/components/schemas/MetricStoreEndpoint"
+          },
+          "write": {
+            "$ref": "#/components/schemas/MetricStoreEndpoint"
+          }
+        }
+      },
+      "TenantLogo": {
+        "type": "object",
+        "required": [
+          "tenantId",
+          "logo"
+        ],
+        "properties": {
+          "tenantId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "logo": {
+            "type": "string",
+            "description": "Data URL of the logo (e.g. \"data:image/png;base64,...\")"
+          }
+        }
+      },
+      "TenantLogosResponse": {
+        "type": "object",
+        "required": [
+          "logos"
+        ],
+        "properties": {
+          "logos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TenantLogo"
+            }
+          }
+        }
+      },
+      "ComplianceIssues": {
+        "properties": {
+          "complianceIssues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "details",
+                "field"
+              ],
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "example": "compute.gpuDevicesRequest"
+                },
+                "details": {
+                  "type": "string",
+                  "example": "value must be no less than 3"
+                }
+              }
+            }
+          }
+        },
+        "nullable": true,
+        "type": "object"
+      },
+      "SubmissionError": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "$ref": "#/components/schemas/ComplianceIssues"
+          }
+        ]
+      }
+    },
+    "responses": {
+      "400BadRequest": {
+        "description": "Bad request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 400,
+              "message": "Required parameter is missing"
+            }
+          }
+        }
+      },
+      "401Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 401,
+              "message": "Issuer is not familiar."
+            }
+          }
+        }
+      },
+      "403Forbidden": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 403,
+              "message": "You do not have sufficient permissions."
+            }
+          }
+        }
+      },
+      "500InternalServerError": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 500,
+              "message": "Something went wrong."
+            }
+          }
+        }
+      },
+      "503ServiceUnavailable": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 503,
+              "message": "Please try again in few minutes."
+            }
+          }
+        }
+      },
+      "404NotFound": {
+        "description": "The specified resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 404,
+              "message": "Resource id not found."
+            }
+          }
+        }
+      },
+      "409Conflict": {
+        "description": "The specified resource already exists",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 409,
+              "message": "Resource with this name already exists"
+            }
+          }
+        }
+      },
+      "204NoContent": {
+        "description": "No Content."
+      },
+      "413RequestEntityTooLarge": {
+        "description": "Request entity too large",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "415UnsupportedMediaType": {
+        "description": "Unsupported media type",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "400BadSubmissionRequest": {
+        "description": "Bad submission request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SubmissionError"
+            },
+            "example": {
+              "code": 400,
+              "message": "The workload request does not comply with the policy set by the administrator"
+            }
+          }
+        }
+      },
+      "406NotAcceptable": {
+        "description": "Not acceptable request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "412PreconditionFailed": {
+        "description": "The specified resource was not found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 412,
+              "message": "Precondition failed"
+            }
+          }
+        }
+      },
+      "501NotImplemented": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 501,
+              "message": "Not implemented"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Bearer authentication"
+      }
+    }
+  }
+}

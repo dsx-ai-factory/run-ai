@@ -1,0 +1,4 @@
+type: array
+items:
+  $ref: './Tenant.yaml'
+x-schema-name: Tenants

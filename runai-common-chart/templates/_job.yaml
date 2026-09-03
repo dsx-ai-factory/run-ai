@@ -1,0 +1,27 @@
+{{- define "common.job.tpl" -}}
+{{- $top := first . }}
+{{- $deployment := index . 1 }}
+{{- $serviceAccount := index . 2 }}
+{{- $obj := index . 1 }}
+{{- $additionalAnnotations := dict -}}
+{{- if not $deployment.podLabels }}
+{{- $_ := set $deployment "podLabels" (dict) }}
+{{- end }}
+{{- $_ := set $deployment.podLabels "sidecar.istio.io/inject" "false" }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  {{- include "common.metadata" (list $top $obj) | nindent 2 }}
+  name: {{ include "common.fullname" $top }}-{{ $obj.name }}
+  {{- with $obj.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  template:
+    {{- include "common.pod.template" (list $top $deployment $serviceAccount $obj $additionalAnnotations) | nindent 4 }}
+{{- end }}
+
+{{- define "common.job" -}}
+{{- include "common.utils.merge" (append . "common.job.tpl") }}
+{{- end }}

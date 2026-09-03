@@ -1,0 +1,96 @@
+type: object
+required:
+  - isStaticData
+properties:
+  isStaticData:
+    type: boolean
+  resultTotal:
+    type: integer
+    maximum: 100000
+    example: 547
+  resultPageTotal:
+    type: integer
+    maximum: 1000
+    example: 274
+  params:
+    type: object
+    properties:
+      orderBy:
+        type: array
+        maxItems: 10
+        items:
+          type: object
+          properties:
+            field:
+              type: string
+              maxLength: 250
+            value:
+              type: string
+              maxLength: 1000
+      queryFields:
+        type: array
+        maxItems: 50
+        items:
+          type: string
+          maxLength: 250
+      scoredSize:
+        type: integer
+        maximum: 1000
+      pageSize:
+        type: integer
+        maximum: 500
+      fields:
+        type: array
+        maxItems: 100
+        items:
+          type: string
+          maxLength: 250
+      page:
+        type: integer
+        maximum: 10000
+      filters:
+        type: array
+        maxItems: 20
+        items:
+          type: object
+          properties:
+            field:
+              type: string
+              maxLength: 250
+            value:
+              type: string
+              maxLength: 1000
+      query:
+        type: string
+        maxLength: 1000
+  resources:
+    type: array
+    maxItems: 500
+    items:
+      type: object
+      properties:
+        orgName:
+          type: string
+          maxLength: 250
+          example: nvidia
+        resourceId:
+          type: string
+          maxLength: 500
+          example: nvidia/jps/zero_shot_detection_infer
+        displayName:
+          type: string
+          maxLength: 500
+          example: Zero Shot Inference Service (Jetson)
+        name:
+          type: string
+          maxLength: 250
+          example: zero_shot_detection_infer
+        resourceType:
+          type: string
+          maxLength: 100
+          example: CONTAINER
+        description:
+          type: string
+          maxLength: 2000
+        isPublic:
+          type: boolean

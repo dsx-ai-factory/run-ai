@@ -1,0 +1,42 @@
+post:
+  x-authorize:
+    resource-type: notification-settings
+    action: read
+  x-service: notifications-proxy
+  deprecated: true
+  x-test-coverage:
+    - src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts
+  tags:
+    - NotificationChannels
+  operationId: validateNotificationChannel
+  summary: Validate configuration of Notification Channel
+  description: Validate configuration of Notification Channel
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/NotificationChannelForValidate.yaml'
+  responses:
+    '200':
+      description: Notification Channel validity
+      content:
+        application/json:
+          schema:
+            example: true
+            type: boolean
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    409:
+      $ref: '../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    501:
+      $ref: '../../../../infra/openapi/docs/responses/501NotImplemented.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

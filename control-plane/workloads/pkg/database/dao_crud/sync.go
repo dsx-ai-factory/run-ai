@@ -1,0 +1,28 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package dao_crud
+
+import (
+	"context"
+	"net/http"
+
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
+	dao_utils "github.com/dsx-ai-factory/run-ai/runai-common-packages/dao-utils"
+)
+
+const (
+	SequenceLastValue     = "last_value"
+	SequenceWorkloadsCrud = "crud_workloads_sequence"
+)
+
+func GetHighestUpdateCount(ctx context.Context) (int64, *api.Error) {
+	var currentValue int64
+	result := dao_utils.DB().WithContext(ctx).Table(SequenceWorkloadsCrud).Select(SequenceLastValue).Scan(&currentValue)
+	if result.Error != nil {
+		return 0, api.NewError(http.StatusServiceUnavailable, "failed to read highest update count", result.Error).WithDetailsFromDb(result)
+	}
+	return currentValue, nil
+}

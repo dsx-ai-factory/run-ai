@@ -1,0 +1,7 @@
+name: WorkloadV2Id
+in: path
+required: true
+schema:
+  type: string
+  format: uuid
+  description: The ID of the workload.

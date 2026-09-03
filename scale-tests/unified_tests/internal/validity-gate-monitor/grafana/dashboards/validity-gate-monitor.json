@@ -1,0 +1,764 @@
+{
+  "title": "Validity Gate Monitor",
+  "uid": "validity-gate-monitor",
+  "schemaVersion": 38,
+  "refresh": "10s",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "1. API Server Request Latency P50 (LIST/GET) \u2014 threshold 500ms",
+      "description": "P50 rises only under genuine API server saturation. P99 is skewed by large LIST operations the test itself generates. Simulate: flood concurrent kubectl requests to push the median up.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.5
+              }
+            ]
+          },
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(apiserver_request_duration_seconds_bucket{verb=~\"LIST|GET\"}[5m])) by (le))",
+          "legendFormat": "P50 latency",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "2. etcd WAL Fsync P99 \u2014 threshold 100ms (UNAVAILABLE if 0)",
+      "description": "etcd metrics are at loopback:2381 \u2014 expected to show no data in this environment",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.1
+              }
+            ]
+          },
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(etcd_disk_wal_fsync_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "P99 WAL fsync",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "3. etcd Proposals Pending \u2014 threshold >10 sustained 2m (UNAVAILABLE if 0)",
+      "description": "etcd metrics not available in-cluster. Would spike under write contention.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "max(etcd_server_proposals_pending)",
+          "legendFormat": "Pending proposals",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "4. etcd DB Size Ratio \u2014 threshold 70% (UNAVAILABLE if 0)",
+      "description": "etcd metrics not available in-cluster.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.7
+              }
+            ]
+          },
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "max(etcd_mvcc_db_total_size_in_bytes / etcd_server_quota_backend_bytes)",
+          "legendFormat": "DB size ratio",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "5. Pod Restarts (runai + runai-backend + monitoring) \u2014 threshold 0",
+      "description": "Simulate: kubectl rollout restart deployment/<any> -n runai",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=~\"runai|runai-backend|monitoring\"}[5m]))",
+          "legendFormat": "Restarts in 5m",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "6. Node NotReady Count \u2014 threshold 0",
+      "description": "Simulate: kubectl cordon <node> then kubectl taint nodes <node> node.kubernetes.io/not-ready=:NoExecute",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "count(kube_node_status_condition{condition=\"Ready\",status=\"false\"} == 1) or vector(0)",
+          "legendFormat": "NotReady nodes",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "7. System Pods Unhealthy (runai + runai-backend + monitoring) \u2014 threshold 0",
+      "description": "Simulate: kubectl delete pod <any-system-pod> -n runai and watch the pod restart (brief spike)",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 24,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "count(kube_pod_status_phase{namespace=~\"runai|runai-backend|monitoring\", phase!~\"Running|Succeeded\"} == 1) or vector(0)",
+          "legendFormat": "Unhealthy system pods",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "8. Prometheus Scrape Gaps (any target in runai/runai-backend/monitoring down) \u2014 threshold 0",
+      "description": "Simulate: kubectl scale deployment metrics-exporter --replicas=0 -n runai, then restore",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 24,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "min_over_time(up{namespace=~\"runai|runai-backend|monitoring\"}[5m])",
+          "legendFormat": "{{pod}} min(up) in 5m",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "9. Node CPU Utilization Peak (all nodes) \u2014 Hardware Sufficiency (threshold 80%)",
+      "description": "Per-node CPU utilization from node-exporter. k8s control-plane saturation invalidates etcd/apiserver panels; worker saturation invalidates backend and scheduler panels. Simulate: run a CPU stress pod on a specific node (kubectl run stress --image=progrium/stress -- --cpu 4).",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 32,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.6
+              },
+              {
+                "color": "red",
+                "value": 0.8
+              }
+            ]
+          },
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "1 - avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))",
+          "legendFormat": "{{instance}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "10. Scheduler Allocate Cycle Latency \u2014 Degraded above 30000ms peak",
+      "description": "runai_action_scheduling_latency_milliseconds{action=allocate}: time for the scheduler to run one full allocate pass over ALL pending workloads. Rises when the scheduling algorithm is under strain. Simulate: submit many workloads (W > W_cap) to force long allocate cycles.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 32,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        }
+      },
+      "targets": [
+        {
+          "expr": "runai_action_scheduling_latency_milliseconds{action=\"allocate\"}",
+          "legendFormat": "allocate cycle ms",
+          "refId": "A"
+        },
+        {
+          "expr": "runai_action_scheduling_latency_milliseconds{action=\"preempt\"}",
+          "legendFormat": "preempt cycle ms",
+          "refId": "B"
+        },
+        {
+          "expr": "runai_action_scheduling_latency_milliseconds{action=\"consolidation\"}",
+          "legendFormat": "consolidation cycle ms",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "11. Reconciliation Latency P99 by Controller \u2014 Degraded above 1s",
+      "description": "Simulate: create/delete queue or department objects (kubectl apply/delete) to trigger reconciliation",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 40,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(controller_runtime_reconcile_time_seconds_bucket[5m])) by (le, controller))",
+          "legendFormat": "{{controller}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "12. Work Queue Depth \u2014 Degraded above 25 sustained 2m",
+      "description": "Simulate: create many resources rapidly (batch kubectl apply) to build up queue depth",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 40,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      },
+      "targets": [
+        {
+          "expr": "max_over_time(workqueue_depth[5m]) > 0",
+          "legendFormat": "{{namespace}}/{{pod}}{{job}} {{name}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "title": "13. Workload Submission API Latency P50/P99 \u2014 Degraded above 2s p99",
+      "description": "Simulate: submit workloads via the run:ai API (runai submit / kubectl apply). Metric: runai_http_request_duration_seconds_bucket{path=~\".*orkload.*\"} from runai-backend services.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 48,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(runai_http_request_duration_seconds_bucket{method=\"POST\",path=~\"/api/v[12]/workloads/(trainings|workspaces|inferences|distributed|distributed-inferences|unified)\"}[5m])) by (le))",
+          "legendFormat": "P50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(runai_http_request_duration_seconds_bucket{method=\"POST\",path=~\"/api/v[12]/workloads/(trainings|workspaces|inferences|distributed|distributed-inferences|unified)\"}[5m])) by (le))",
+          "legendFormat": "P99",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "title": "14. Workload List API Latency P95 \u2014 Degraded (threshold 2s)",
+      "description": "P95 latency for GET /api/v1/workloads \u2014 the endpoint the UI polls for the workload list. A breach (>2s) sets ui_degraded=true in the report without failing the run or setting infra_limited. Fallback: if no UI traffic exists, wire up the api-exerciser histogram (RUN-41495).",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 48,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "thresholdsStyle": {
+          "mode": "line"
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(runai_http_request_duration_seconds_bucket{method=\"GET\",path=\"/api/v1/workloads\"}[5m])) by (le))",
+          "legendFormat": "P95",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "title": "15. Node Memory Utilization (all nodes) \u2014 Hardware Sufficiency",
+      "description": "Per-node memory utilization from node-exporter (MemTotal - MemAvailable) / MemTotal. Mirrors the CPU utilization panel. High sustained memory pressure on control-plane nodes can destabilise etcd and the API server.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 56,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.6
+              },
+              {
+                "color": "red",
+                "value": 0.8
+              }
+            ]
+          },
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes",
+          "legendFormat": "{{instance}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "title": "16. Container Memory Working Set by Container \u2014 Hardware Sufficiency (runai + runai-backend + monitoring)",
+      "description": "Memory working set (RSS + cache evictable by the kernel) per container in the runai, runai-backend, and monitoring namespaces. Excludes project workload namespaces. Useful for spotting memory-hungry control-plane and Prometheus components under load.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 56,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (namespace, pod, container) (container_memory_working_set_bytes{namespace=~\"runai|runai-backend|monitoring\", container!=\"\", container!=\"POD\"})",
+          "legendFormat": "{{namespace}}/{{pod}}/{{container}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "title": "17. Container CPU Usage by Container \u2014 Hardware Sufficiency (runai + runai-backend + monitoring)",
+      "description": "CPU usage rate per container in the runai, runai-backend, and monitoring namespaces. Excludes project workload namespaces. Complements the memory working set panel \u2014 use together to spot resource-hungry control-plane and Prometheus components under load.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 64,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "cores",
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (namespace, pod, container) (rate(container_cpu_usage_seconds_total{namespace=~\"runai|runai-backend|monitoring\", container!=\"\", container!=\"POD\"}[5m]))",
+          "legendFormat": "{{namespace}}/{{pod}}/{{container}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "title": "18. kube-system Container CPU \u2014 control plane (apiserver, etcd, scheduler)",
+      "description": "CPU usage rate per container in the runai, runai-backend, and monitoring namespaces. Excludes project workload namespaces. Complements the memory working set panel \u2014 use together to spot resource-hungry control-plane and Prometheus components under load.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 64,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "cores",
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (pod, container) (rate(container_cpu_usage_seconds_total{namespace=\"kube-system\", container!=\"\", container!=\"POD\"}[5m]))",
+          "legendFormat": "{{pod}}/{{container}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "title": "19. kube-system Container Memory Working Set \u2014 control plane",
+      "description": "CPU usage rate per container in the runai, runai-backend, and monitoring namespaces. Excludes project workload namespaces. Complements the memory working set panel \u2014 use together to spot resource-hungry control-plane and Prometheus components under load.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 72,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (pod, container) (container_memory_working_set_bytes{namespace=\"kube-system\", container!=\"\", container!=\"POD\"})",
+          "legendFormat": "{{pod}}/{{container}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "title": "20. Work Queue Wait \u2014 how stale each controller's view is",
+      "description": "Depth says how many items wait; this says how long they waited before reconcile.",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 80,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum by (name, namespace, pod, le) (rate(workqueue_queue_duration_seconds_bucket[5m]))) > 0",
+          "legendFormat": "p50 {{namespace}}/{{pod}} {{name}}",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum by (name, namespace, pod, le) (rate(workqueue_queue_duration_seconds_bucket[5m]))) > 0",
+          "legendFormat": "p95 {{namespace}}/{{pod}} {{name}}",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum by (name, namespace, pod, le) (rate(workqueue_queue_duration_seconds_bucket[5m]))) > 0",
+          "legendFormat": "p99 {{namespace}}/{{pod}} {{name}}",
+          "refId": "C"
+        }
+      ]
+    }
+  ],
+  "timezone": "browser"
+}

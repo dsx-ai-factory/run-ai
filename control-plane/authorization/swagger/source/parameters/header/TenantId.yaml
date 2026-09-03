@@ -1,0 +1,10 @@
+# OpenAPI Spec for TenantId
+name: X-Runai-Tenant-Id
+in: header
+required: true
+description: The id of the tenant
+example: 1
+schema:
+  type: integer
+  format: int32
+  minimum: 0

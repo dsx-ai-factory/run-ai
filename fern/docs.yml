@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://schema.buildwithfern.dev/docs-yml.json
+
+instances:
+- url: nvidia-runai-self-hosted-staging.docs.buildwithfern.com/run-ai
+title: NVIDIA Run:ai Self-Hosted Product Documentation
+global-theme: nvidia-product
+logo:
+  right-text: Run:ai
+navbar-links:
+- type: github
+  value: https://github.com/dsx-ai-factory/run-ai
+
+products:
+  - display-name: Self-Hosted
+    slug: self-hosted
+    path: products/self-hosted.yml
+    icon: fa-solid fa-server
+    subtitle: Open Source & Enterprise · Self-hosted
+    versions:
+      - display-name: "3.0"
+        slug: v3.0
+        path: products/self-hosted.yml
+      - display-name: "2.26"
+        slug: v2.26
+        path: archived-versions.yml
+      - display-name: "2.25"
+        slug: v2.25
+        path: archived-versions.yml
+      - display-name: "2.24"
+        slug: v2.24
+        path: archived-versions.yml
+  - display-name: Multi-Tenant
+    slug: multi-tenant
+    path: products/multi-tenant.yml
+    icon: fa-solid fa-building
+    subtitle: Open Source & Enterprise · Multi-tenant
+    versions:
+      - display-name: "3.0"
+        slug: v3.0
+        path: products/multi-tenant.yml
+      - display-name: "2.26"
+        slug: v2.26
+        path: archived-versions.yml
+      - display-name: "2.25"
+        slug: v2.25
+        path: archived-versions.yml
+      - display-name: "2.24"
+        slug: v2.24
+        path: archived-versions.yml
+
+redirects:
+  - source: /self-hosted/v2.26/:slug*
+    destination: https://run-ai-docs.nvidia.com/self-hosted
+    permanent: false
+  - source: /self-hosted/v2.25/:slug*
+    destination: https://run-ai-docs.nvidia.com/self-hosted/2.25
+    permanent: false
+  - source: /self-hosted/v2.24/:slug*
+    destination: https://run-ai-docs.nvidia.com/self-hosted/2.24
+    permanent: false
+  - source: /self-hosted/v2.23/:slug*
+    destination: https://run-ai-docs.nvidia.com/self-hosted/2.23
+    permanent: false
+  - source: /multi-tenant/v2.26/:slug*
+    destination: https://run-ai-docs.nvidia.com/multi-tenant
+    permanent: false
+  - source: /multi-tenant/v2.25/:slug*
+    destination: https://run-ai-docs.nvidia.com/multi-tenant/2.25
+    permanent: false
+  - source: /multi-tenant/v2.24/:slug*
+    destination: https://run-ai-docs.nvidia.com/multi-tenant/2.24
+    permanent: false

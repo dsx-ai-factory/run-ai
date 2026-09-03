@@ -1,0 +1,32 @@
+summary: "Get a specific department."
+description: "Retrieves the details of a specific department. Requires  the`view` permission for the department."
+operationId: get_department_v1
+x-service: org-unit-service
+x-internal: true
+x-test-coverage:
+  - control-plane/org-unit-service/pkg/test/department_v1_api_test.go
+x-authorize:
+  resource-type: department
+  action: read
+  resource-id: department-id
+tags:
+  - Departments v1
+parameters:
+  - $ref: "../../parameters/v1/ClusterIdV1.yaml"
+  - $ref: "../../parameters/v1/DepartmentIdV1.yaml"
+  - $ref: "../../parameters/v1/ExcludePermissionsV1.yaml"
+responses:
+  200:
+    description: Successfully retrieved department details.
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/v1/DepartmentForGetV1.yaml"
+  400:
+    $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+  401:
+    $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+  403:
+    $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+  503:
+    $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

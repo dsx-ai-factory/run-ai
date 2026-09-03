@@ -1,0 +1,9 @@
+type: object
+description: The cluster's displayed status.
+nullable: true
+allOf:
+  - $ref: './ClusterReportedStatus.yaml'
+  - type: object
+    properties:
+      state:
+        $ref: "./ClusterState.yaml"

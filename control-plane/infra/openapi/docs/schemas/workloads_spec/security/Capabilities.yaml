@@ -1,0 +1,9 @@
+description: Add POSIX capabilities to running containers.
+  Defaults to the default set of capabilities granted by the container runtime.
+type: array
+items:
+  $ref: "./Capability.yaml"
+example:
+  - CHOWN
+  - KILL
+nullable: true

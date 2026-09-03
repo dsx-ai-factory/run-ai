@@ -1,0 +1,52 @@
+type: object
+required:
+- id
+- username
+- createdBy
+- createdAt
+- updatedAt
+- lastLogin
+- isLocal
+properties:
+  id:
+    type: string
+  username:
+    type: string
+  createdBy:
+    type: string
+  createdAt:
+    type: string
+    format: date-time
+    nullable: true
+  updatedAt:
+    type: string
+    format: date-time
+    nullable: true
+  lastLogin:
+    type: string
+    format: date-time
+    nullable: true
+  isLocal:
+    type: boolean
+    nullable: true
+  groups:
+    type: array
+    items:
+      type: string
+    nullable: true
+  firstName:
+    type: string
+    maxLength: 255
+  lastName:
+    type: string
+    maxLength: 255
+
+example:
+  id: 3434c-12323ab-4ce2ea6-b44fc-db344d
+  username: test@run.ai
+  createdBy: devops@run.ai
+  createdAt: 2020-01-01T00:00:00Z
+  updatedAt: 2022-01-01T00:00:00Z
+  lastLogin: 2023-02-01T00:00:00Z
+  isLocal: true
+  groups: ["groupA", "groupB"]

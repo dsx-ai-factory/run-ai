@@ -1,0 +1,19 @@
+ngcAuthSecret: "ngc-secret"
+servingPort:
+  port: 8000
+image: "nvidia/nim-llama3-8b-instruct:1.0.0"
+modelStore:
+  pvc:
+    existingPvc: false
+    readOnly: false
+    claimInfo:
+      size: "50Gi"
+      storageClass: "fast-ssd"
+      volumeMode: "Filesystem"
+      accessModes:
+        readWriteMany: true
+      addedAttrValues:
+        - key: "storage.example.com/tier"
+          value: "premium"
+        - key: "backup.example.com/policy"
+          value: "daily"

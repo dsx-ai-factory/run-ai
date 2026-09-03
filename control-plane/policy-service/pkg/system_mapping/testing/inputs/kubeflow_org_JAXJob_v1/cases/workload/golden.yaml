@@ -1,0 +1,27 @@
+apiVersion: kubeflow.org/v1
+kind: JAXJob
+metadata:
+  annotations:
+    example.com/annotation: test-value
+  labels:
+    app: jax-test
+  name: test
+spec:
+  jaxReplicaSpecs:
+    Worker:
+      replicas: 2
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - image: jax/jax:0.4.0
+            name: jax
+          initContainers:
+          - image: jax/jax:0.4.0
+            name: init
+  runPolicy:
+    activeDeadlineSeconds: 86400
+    backoffLimit: 3
+    cleanPodPolicy: Running
+    suspend: false
+    ttlSecondsAfterFinished: 3600

@@ -1,0 +1,37 @@
+summary: Create node type
+operationId: create_node_type
+x-service: org-unit-service
+deprecated: true
+description: 'Deprecated: use a workload policy node selector to target node types instead. Create node types'
+x-test-coverage:
+  - control-plane/org-unit-service/pkg/test/node_type_api_test.go
+x-authorize:
+  resource-type: project
+  action: create
+x-audit: true
+tags:
+  - Node types
+requestBody:
+  description: NodeType to create.
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: "../../schemas/nodetypes/NodeTypeCreateRequest.yaml"
+responses:
+  201:
+    description: Created
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/nodetypes/NodeType.yaml"
+  400:
+    $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+  401:
+    $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+  403:
+    $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+  409:
+    $ref: "../../../../../infra/openapi/docs/responses/409Conflict.yaml"
+  503:
+    $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

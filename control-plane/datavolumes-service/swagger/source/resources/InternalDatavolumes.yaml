@@ -1,0 +1,37 @@
+post:
+  summary: Create a datavolume
+  operationId: internal_create_datavolume
+  x-service: datavolumes-service
+  x-test-coverage:
+    - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+  x-authorize:
+    resource-type: datavolumes
+    action: create
+  x-no-authorization: true
+  x-audit: true
+  tags:
+    - Datavolumes
+  requestBody:
+    description: The datavolume to create.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Datavolumes/InternalDatavolumeCreationFields.yaml'
+  responses:
+    201:
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Datavolumes/InternalDatavolume.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

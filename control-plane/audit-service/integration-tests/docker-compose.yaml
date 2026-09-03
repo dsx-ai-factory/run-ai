@@ -1,0 +1,71 @@
+services:
+  audit-integration-test:
+    profiles:
+      - run-tests
+    build:
+      context: ../
+      dockerfile: ./integration-tests/Dockerfile
+    depends_on:
+      audit-service:
+        condition: service_healthy
+    links:
+      - audit-service
+      - redis
+      - postgres
+    volumes:
+      - ./secrets:/secrets
+
+  audit-service:
+    profiles:
+      - run-setup
+    container_name: audit-service
+    build: ../
+    env_file: config/config.yaml
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/audit-service", "--health"]
+      interval: 2s
+      timeout: 10s
+      retries: 10
+      start_period: 2s
+    ports: 
+      - 8080:8080
+    volumes:
+    - ./secrets:/etc/secrets
+    links:
+      - postgres
+      - redis
+
+  postgres:
+    # profiles:
+    #   - run-setup
+    image: postgres:18.4
+    container_name: postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: runai
+      POSTGRES_PASSWORD: admin
+    ports:
+      - 5432:5432
+    expose:
+      - 5432
+    volumes:
+      - ./config/initdb:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:8.8-alpine
+    container_name: redis
+    ports:
+      - '6379:6379'
+    command: redis-server
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]

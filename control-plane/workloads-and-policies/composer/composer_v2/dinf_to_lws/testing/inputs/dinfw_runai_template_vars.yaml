@@ -1,0 +1,11 @@
+servingPort:
+  port: 8080
+  exposeExternally: false
+leader:
+  image: leader:latest
+  command: serve.sh
+  args: "--project=${RUNAI_PROJECT} --job=${RUNAI_JOB_NAME} --uid=${RUNAI_UID} --gid=${RUNAI_GID}"
+  security:
+    uidGidSource: custom
+    runAsUid: 501
+    runAsGid: 20

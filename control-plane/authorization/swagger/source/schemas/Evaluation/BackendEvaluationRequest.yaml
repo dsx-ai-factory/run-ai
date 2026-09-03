@@ -1,0 +1,14 @@
+type: object
+properties:
+  resourceId:
+    type: string
+    example: "a418ed33-9399-48c0-a890-122cadd13bfd"
+    nullable: true
+  resourceType:
+    allOf:
+      - $ref: "../Roles/ResourceType.yaml"
+    nullable: true
+  requestAction:
+    allOf:
+      - $ref: "../Roles/Action.yaml"
+    nullable: true

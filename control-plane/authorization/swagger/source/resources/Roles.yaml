@@ -1,0 +1,83 @@
+post:
+  summary: Create a role.
+  description: Creates a custom role with the specified permission sets.
+  operationId: create_role
+  x-service: authorization
+  x-test-coverage:
+    - e2e/src/test/suites/playwright/serial/sphinx/systemScopedCostumeRoles.test.ts
+  x-authorize:
+    resource-type: roles
+    action: create
+  tags:
+    - Roles
+  requestBody:
+    description: The role to create.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Roles/RoleCreationFieldsInternal.yaml'
+  responses:
+    '201':
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Roles/Role.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+get:
+  summary: Get a list of roles.
+  description: Retrieves a list of all available roles, including both NVIDIA Run:ai predefined roles and custom roles. Use this endpoint to review role configurations, permission sets and permissions.
+  operationId: get_roles
+  x-service: authorization
+  x-test-coverage:
+    - e2e/src/test/suites/advancedSuite/permissions/applicationAggregatedApi.test.ts
+    - e2e/src/test/suites/advancedSuite/permissions/accessRulesApi.test.ts
+    - e2e/src/test/suites/playwright/serial/sphinx/systemScopedCostumeRoles.test.ts
+  x-authorize:
+    resource-type: roles
+    action: read
+  tags:
+    - Roles
+  parameters:
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+    - $ref: '../parameters/query/RolesSort.yaml'
+    - $ref: '../parameters/query/RolesFilter.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Search.yaml'
+    - $ref: '../parameters/query/IncludeInternal.yaml'
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - roles
+            properties:
+              roles:
+                $ref: '../schemas/Roles/Roles.yaml'
+              next:
+                type: integer
+                example: 1
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

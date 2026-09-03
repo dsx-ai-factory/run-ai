@@ -1,0 +1,29 @@
+put:
+  summary: Asset changed hook for asset service
+  description: Hook for asset service to report a change in spec of a given asset
+  operationId: asset_changed_hook
+  x-service: policy-service
+  x-no-authorization: true
+  x-internal: true
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/sync_test.go
+  tags:
+    - Policy
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/AssetId.yaml"
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Policy/AssetChangeNotification.yaml"
+  responses:
+    204:
+      description: asset change acknowledged
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

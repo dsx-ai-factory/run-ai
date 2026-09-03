@@ -1,0 +1,4 @@
+{
+  "service_name": "workloads-client",
+  "artifact_type": "go"
+}

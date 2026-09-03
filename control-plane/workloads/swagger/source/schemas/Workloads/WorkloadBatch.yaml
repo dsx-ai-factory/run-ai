@@ -1,0 +1,11 @@
+type: object
+description: The ids and action to perform on a batch of workloads.
+  The number of ids is limited to 100.
+required:
+  - ids
+  - action
+properties:
+  ids:
+    $ref: "../../../../../infra/openapi/docs/schemas/batch/IdsList.yaml"
+  action:
+    $ref: "../../../../../infra/openapi/docs/schemas/batch/Action.yaml"

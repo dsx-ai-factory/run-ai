@@ -1,0 +1,15 @@
+.idea/
+*.iml
+**/charts/*.tgz
+.vscode
+Chart.lock
+
+# Binaries
+bin/
+
+# Helm unittest
+.debug
+
+# Cursor IDE configuration
+.cursorrules
+.cursor/

@@ -1,0 +1,23 @@
+{
+    "inputs": [
+      {
+        "inputFile": "../../../redoc/swagger/rootApi.yaml"
+      },
+
+      {
+        "inputFile": "../../../backend/js/backend/swagger/backendApiGenerated.yaml",
+        "operationSelection": {
+          "includeTags": ["Internal"]
+        }
+      },
+      {
+        "inputFile": "../../../backend/js/backend/swagger/projectsDepartmentsApi.yaml",
+        "operationSelection": {
+          "includeTags": ["Projects"]
+        }
+      }
+
+    ],
+    "output": "../../swagger/_build/services.swagger.yaml"
+  }
+  

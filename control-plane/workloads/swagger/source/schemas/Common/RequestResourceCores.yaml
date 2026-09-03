@@ -1,0 +1,13 @@
+type: object
+properties:
+  limit:
+    type: number
+    nullable: true
+    format: double
+    example: 1.5
+  request:
+    type: number
+    nullable: true
+    format: double
+    example: 1
+nullable: true

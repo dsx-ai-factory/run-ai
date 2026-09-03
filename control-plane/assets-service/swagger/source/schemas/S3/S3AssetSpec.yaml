@@ -1,0 +1,3 @@
+allOf:
+  - $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/S3Common.yaml"
+  - $ref: "./S3AccessKeyAsset.yaml"

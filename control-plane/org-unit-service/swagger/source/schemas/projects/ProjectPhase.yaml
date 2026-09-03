@@ -1,0 +1,11 @@
+type: string
+enum:
+  - Creating
+  - Updating
+  - Deleting
+  - Deleted
+  - Initializing
+  - Ready
+  - NotReady
+  - Unknown
+

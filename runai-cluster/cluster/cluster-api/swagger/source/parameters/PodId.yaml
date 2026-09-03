@@ -1,0 +1,7 @@
+name: podId
+in: path
+required: true
+description: The unique identifier (UUID) of the pod within the workload.
+schema:
+  type: string
+  format: uuid

@@ -1,0 +1,7 @@
+properties:
+  attributes:
+    $ref: "./NfsInstance.yaml"
+  instances:
+    $ref: "./NfsItems.yaml"
+nullable: true
+type: object

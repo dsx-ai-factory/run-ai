@@ -1,0 +1,3 @@
+get:
+  deprecated: true
+  $ref: "./GetProjectsV1.yaml"

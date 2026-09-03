@@ -1,0 +1,41 @@
+SERVICE_PORT: "8080"
+ENVIRONMENT: production
+LOG_LEVEL: info
+
+# DB
+DB_NAME: runai
+DB_SCHEMA: identity_manager
+DB_HOST: postgres
+DB_PORT: "5432"
+DB_SSL_MODE: disable
+
+# Keycloak
+KEYCLOAK_ADMIN_USERNAME: admin
+KEYCLOAK_ADMIN_PASSWORD: admin
+KEYCLOAK_HOST: http://keycloak:8080
+
+# Queue
+PUBSUB_TYPE: nats
+SERVICE_NAME: identity-manager
+PUBSUB_URL: nats://n1:4222
+PUBSUB_REPLICAS: 1
+# Other
+APP_URL: https://localhost.runailabs.com
+ACCESS_KEYS_VERSION: v1
+
+AUDIT_ENABLE_PRINT_TO_STDOUT: "false"
+AUDIT_ENABLED: "false"
+
+IGNORED_REALMS: ""
+LOGIN_THEME: runai-theme
+MIGRATION_FILES: file:///migrations
+MULTI_TENANCY_ENABLED: "true"
+HOST_HEADER: "FakeHostHeader"
+TENANT_DOMAIN_TEMPLATE: https://localhost.runailabs.com
+TRACING_ENABLED: "false"
+USE_MOCKS: "true"
+ALLOW_HTTP_IDP_URLS: "true"
+
+CACHE_TYPE: redis
+CACHE_URL: redis:6379
+NOTIFY_ENABLED: "false"

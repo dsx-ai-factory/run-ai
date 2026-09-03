@@ -1,0 +1,26 @@
+type: object
+required:
+- alias
+
+properties:
+  gid:
+    type: string
+    maxLength: 255
+  uid:
+    type: string
+    maxLength: 255
+  groups:
+    type: string
+    maxLength: 255
+  supplementaryGroups:
+    type: string
+    maxLength: 255
+  email:
+    type: string
+    maxLength: 254
+  firstName:
+    type: string
+    maxLength: 255
+  lastName:
+    type: string
+    maxLength: 255

@@ -1,0 +1,4 @@
+type: string
+description: Field to group the metrics data by. Currently only supported for WORKLOADS_COUNT metric type.
+enum:
+  - Category

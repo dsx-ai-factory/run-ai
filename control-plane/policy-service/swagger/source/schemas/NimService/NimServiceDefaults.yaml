@@ -1,0 +1,94 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+allOf:
+- nullable: true
+  properties:
+    annotations:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/AnnotationsDefaults.yaml
+    autoscaling:
+      nullable: true
+      properties:
+        maxReplicas:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/nim_services/AutoScalingMaxReplicas.yaml
+        metric:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/nim_services/AutoScalingMetricNim.yaml
+        metricThreshold:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/nim_services/AutoScalingMetricThreshold.yaml
+        minReplicas:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/nim_services/AutoScalingMinReplicas.yaml
+        scaleWindowSeconds:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/nim_services/AutoScalingScaleWindowSeconds.yaml
+      type: object
+    category:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/Category.yaml
+    compute:
+      nullable: true
+      properties:
+        cpuCoreLimit:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/CpuCoreLimit.yaml
+        cpuCoreRequest:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/CpuCoreRequest.yaml
+        cpuMemoryLimit:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/CpuMemoryLimit.yaml
+        cpuMemoryRequest:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/CpuMemoryRequest.yaml
+        gpuDevicesRequest:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuDevicesRequest.yaml
+        gpuMemoryLimit:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuMemoryLimit.yaml
+        gpuMemoryRequest:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuMemoryRequest.yaml
+        gpuPortionLimit:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuPortionLimit.yaml
+        gpuPortionRequest:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuPortionRequest.yaml
+        gpuRequestType:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuRequestType.yaml
+      type: object
+    environmentVariables:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/EnvironmentVariablesDefaults.yaml
+    image:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/Image.yaml
+    imagePullPolicy:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/ImagePullPolicy.yaml
+    imagePullSecrets:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/ImagePullSecretsDefaults.yaml
+    labels:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/LabelsDefaults.yaml
+    modelStore:
+      nullable: true
+      properties:
+        nimCache:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/nim_services/NimCache.yaml
+        pvc:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/nim_services/NimServicePvc.yaml
+      type: object
+    multiNode:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/nim_services/NimServiceMultiNode.yaml
+    ngcAuthSecret:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/nim_services/NimServiceNgcAuthSecret.yaml
+    nodePools:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/NodePools.yaml
+    preemptibility:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/Preemptibility.yaml
+    priorityClass:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/PriorityClass.yaml
+    probes:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/Probes.yaml
+    replicas:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/nim_services/NimServiceReplicas.yaml
+    security:
+      nullable: true
+      properties:
+        runAsGid:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/RunAsGid.yaml
+        runAsUid:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/RunAsUid.yaml
+      type: object
+    servingPort:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/nim_services/NimServiceServingPort.yaml
+    tolerations:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/TolerationsDefaults.yaml
+  type: object

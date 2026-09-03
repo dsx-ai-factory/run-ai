@@ -1,0 +1,9 @@
+description: The lowest and highest update counts included in this bulk of updates.
+  for example, it is possible that agent requester for afterUpdate=10 and received a bulk
+  of four updates - 12, 13, 16, 18. in this case lowestUpdate=12, highestUpdate=18.
+properties:
+  lowestUpdate:
+    $ref: "./UpdateCount.yaml"
+  highestUpdate:
+    $ref: "./UpdateCount.yaml"
+

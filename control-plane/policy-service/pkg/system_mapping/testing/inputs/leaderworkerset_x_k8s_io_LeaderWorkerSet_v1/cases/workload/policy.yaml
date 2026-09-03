@@ -1,0 +1,37 @@
+description: |
+  Layer 3 case "workload" for leaderworkerset.x-k8s.io/LeaderWorkerSet/v1. SETs
+  workload-level fields (replicas, startupPolicy, networkConfig, rolloutStrategy)
+  and workloadMetadata (labels, annotations on the LeaderWorkerSet itself).
+effectiveRules:
+  # ----- workloadMetadata (LWS labels/annotations) -----
+  - field: labels
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "app", value: "lws-test" } }]
+  - field: annotations
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "example.com/annotation", value: "test-value" } }]
+
+  # ----- workloadSpec fields -----
+  - field: replicas
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 4 } }]
+  - field: startupPolicy
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: LeaderReady } }]
+  - field: networkConfig-SubdomainPolicy
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: Shared } }]
+  - field: rolloutStrategy-Type
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: RollingUpdate } }]
+  - field: rolloutStrategy-MaxSurge
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "25%" } }]
+  - field: rolloutStrategy-MaxUnavailable
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "0" } }]
+
+  # ----- container image (verify policy modifies skeleton) -----
+  - field: image
+    specSelector: allContainers
+    enforcements: [{ set: { value: "lws/worker:v1" } }]

@@ -1,0 +1,4 @@
+{
+  "service_name": "authorization-client",
+  "artifact_type": "go"
+}

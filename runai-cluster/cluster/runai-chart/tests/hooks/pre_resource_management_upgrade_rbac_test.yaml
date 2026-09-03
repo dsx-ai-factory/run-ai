@@ -1,0 +1,117 @@
+suite: Test pre-resource-management-upgrade hook permissions
+
+templates:
+  - templates/hooks/pre-resource-management-upgrade-rbac.yaml
+
+tests:
+  - it: should grant delete on every re-owned resource
+    set:
+      helmHooksHandler.enabled: true
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - scheduling.run.ai
+            resources:
+              - queues
+            verbs:
+              - get
+              - list
+              - update
+              - patch
+              - delete
+        documentIndex: 1
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - kai.scheduler
+            resources:
+              - schedulingshards
+            verbs:
+              - get
+              - list
+              - update
+              - patch
+              - delete
+        documentIndex: 1
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - ""
+            resources:
+              - limitranges
+              - secrets
+              - persistentvolumeclaims
+              - configmaps
+            verbs:
+              - get
+              - list
+              - update
+              - patch
+              - delete
+        documentIndex: 1
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - rbac.authorization.k8s.io
+            resources:
+              - rolebindings
+            verbs:
+              - get
+              - list
+              - update
+              - patch
+              - delete
+        documentIndex: 1
+
+  # The managed-nodes-config migration reads the legacy singleton and patches its
+  # finalizers away, then creates the kai twin.
+  - it: should grant access to the managed-nodes-config in both groups
+    set:
+      helmHooksHandler.enabled: true
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - run.ai
+            resources:
+              - managednodesconfigs
+            verbs:
+              - get
+              - patch
+        documentIndex: 1
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - kai.resources
+            resources:
+              - departments
+              - departments/finalizers
+              - projects
+              - projects/finalizers
+              - nodepools
+              - nodepools/finalizers
+              - managednodesconfigs
+              - managednodesconfigs/finalizers
+            verbs:
+              - get
+              - list
+              - create
+              - update
+              - patch
+              - delete
+        documentIndex: 1
+
+  - it: should not be rendered when a global service account is set
+    set:
+      helmHooksHandler.enabled: true
+      global.serviceAccountName: my-sa
+    asserts:
+      - hasDocuments:
+          count: 0

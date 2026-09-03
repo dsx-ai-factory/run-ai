@@ -1,0 +1,75 @@
+get:
+  summary: Get users.
+  description: Retrieve a list of platform users.
+  x-service: identity-manager
+  x-test-coverage:
+  - src/test/suites/parallel/users/usersApi.test.ts
+  operationId: get_users
+  x-authorize:
+    resource-type: users
+    action: read
+  tags:
+  - Users
+  parameters:
+  - $ref: "../../parameters/usersFilterBy.yaml"
+  - $ref: "../../parameters/usersSortBy.yaml"
+  - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+  - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+  - $ref: '../../parameters/limit.yaml'
+  - $ref: '../../parameters/search.yaml'
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Users/Users.yaml'
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+post:
+  summary: Create a local user.
+  description: Use to create a local platform user.
+  x-service: identity-manager
+  x-test-coverage:
+  - src/test/suites/parallel/users/usersApi.test.ts
+  operationId: create_user
+  x-authorize:
+    resource-type: users
+    action: create
+  x-audit: true
+  tags:
+  - Users
+  requestBody:
+    description: User object to create
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/Users/UserCreationRequest.yaml'
+  responses:
+    '201':
+      description: Created successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Users/UserPostResponse.yaml'
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '409':
+      $ref: '../../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

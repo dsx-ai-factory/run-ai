@@ -1,0 +1,21 @@
+type: object
+required:
+  - tenantId
+allOf:
+  - type: object
+    properties:
+      tenantId:
+        description: The id of the tenant.
+        type: integer
+        format: int32
+      datasourceId:
+        description: |
+          Id of the datasource. Optional - when empty, the metrics-service either
+          (a) generates a new datasource via the configured provider when metricStoreDetails is null, or
+          (b) saves an external metric store with datasourceId="external" when metricStoreDetails is provided.
+        type: string
+        maxLength: 255
+  - type: object
+    properties:
+      metricStoreDetails:
+        $ref: "./MetricStoreDetails.yaml"

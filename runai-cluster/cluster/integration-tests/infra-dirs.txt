@@ -1,0 +1,2 @@
+runai-chart
+go-operator

@@ -1,0 +1,30 @@
+suite: Test ConfigMaps Data Values
+# This test validates that all ConfigMaps have non-empty values for all data keys
+# This is used to validate that ArgoCD can successfully deploy the chart
+# Without being stuck in a reconciliation loop because of empty values
+
+tests:
+  - it: "fails if any configmap data values are empty or null by default"
+    documentSelector:
+      path: kind
+      value: ConfigMap
+      matchMany: true
+      skipEmptyTemplates: true
+
+    asserts:
+
+      # For all configmaps
+      - isKind:
+          of: ConfigMap
+
+      # 'data' must exist
+      - isNotNull:
+          path: data
+
+      # All data.* values must NOT be null
+      - isNotNull:
+          path: data.*
+
+      # All data.* values must NOT be empty strings
+      - isNotEmpty:
+          path: data.*

@@ -1,0 +1,22 @@
+runner:
+  name: standalone-ingress-workload
+  namespace: runai-test
+
+networking:
+  # No services - just creating Ingress for cluster defaults
+  externalAccess:
+    ingress:
+      metadata:
+        name: standalone-ingress
+      spec:
+        rules:
+          - host: external-app.example.com
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: external-service
+                      port:
+                        number: 9000

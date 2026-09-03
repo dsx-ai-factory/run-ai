@@ -1,0 +1,7 @@
+required:
+  - name
+properties:
+  name:
+    $ref: "./TemplateName.yaml"
+  description:
+    $ref: "./TemplateDescription.yaml"

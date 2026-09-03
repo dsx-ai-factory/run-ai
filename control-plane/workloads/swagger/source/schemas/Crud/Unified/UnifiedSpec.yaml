@@ -1,0 +1,16 @@
+x-internal: true
+description: unified spec containing all possible fields, per replica type. 
+  for non-distributed, worker replica is used as the container for the spec.
+properties:
+  worker:
+    allOf:
+      - $ref: "../../../../../../infra/openapi/docs/schemas/workloads_spec/SupersetSpec.yaml"
+    nullable: true
+  masterSpecSameAsWorker:
+    $ref: "../../../../../../infra/openapi/docs/schemas/distributed/MasterSpecSameAsWorker.yaml"
+  master:
+    allOf:
+      - $ref: "../../../../../../infra/openapi/docs/schemas/distributed/MasterSpec.yaml"
+    nullable: true
+type: object
+nullable: true

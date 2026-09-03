@@ -1,0 +1,10 @@
+type: object
+properties:
+  alias:
+    type: string
+    nullable: true
+    pattern: "^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$"
+    description: An optional alias for the tenant. Must be unique across all tenant names and aliases.
+    example: tenant-alias
+    minLength: 2
+    maxLength: 255

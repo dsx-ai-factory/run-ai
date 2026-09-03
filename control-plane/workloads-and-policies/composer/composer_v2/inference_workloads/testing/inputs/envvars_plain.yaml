@@ -1,0 +1,9 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+environmentVariables:
+  - name: FOO
+    value: bar
+  - name: LOG_LEVEL
+    value: info

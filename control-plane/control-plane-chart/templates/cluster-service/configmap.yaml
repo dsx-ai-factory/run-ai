@@ -1,0 +1,95 @@
+{{- if .Values.clusterService.enabled }}
+{{- include "common.configMap" (list . .Values.clusterService "control-plane.clusterService.configmap") }}
+{{- end }}
+
+{{- define "control-plane.clusterService.configmap" -}}
+{{- $top := first . }}
+data:
+  LOG_LEVEL: {{ $top.Values.clusterService.config.logLevel | quote }}
+  SERVICE_PORT: {{ $top.Values.clusterService.service.port | quote }}
+  SERVICE_NAME: {{ $top.Values.clusterService.name | quote }}
+  TRACING_ENABLED: {{ if hasKey $top.Values.clusterService.config "tracingEnabled" }}{{ $top.Values.clusterService.config.tracingEnabled | quote }}{{ else }}{{ $top.Values.global.config.tracingEnabled | quote }}{{ end }}
+  AUDIT_ENABLED: {{ if hasKey $top.Values.clusterService.config "auditEnabled" }}{{ $top.Values.clusterService.config.auditEnabled | quote }}{{ else }}{{ $top.Values.global.config.auditEnabled | quote }}{{ end }}
+  AUDIT_ENABLE_PRINT_TO_STDOUT: {{ if hasKey $top.Values.clusterService.config "auditEnablePrintToStdout" }}{{ $top.Values.clusterService.config.auditEnablePrintToStdout | quote }}{{ else }}{{ $top.Values.global.config.auditEnablePrintToStdout | quote }}{{ end }}
+  AUDIT_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.auditService.name ($top.Values.auditService.service.port | toString) | quote }}
+  DB_MIGRATION_FILES: {{ $top.Values.clusterService.config.migrationFiles | quote }}
+  IMAGE_PULL_SECRET_ENABLED: {{ include "control-plane.image-pull-secret.enabled" $top | quote }}
+  IDENTITY_MNG_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.identityManager.name ($top.Values.identityManager.service.port | toString ) }}
+  TEMP_BACKEND_SETTINGS_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.tempBackendSettings.name ($top.Values.tempBackendSettings.service.port | toString) | quote }}
+  KEYCLOAK_EXTERNAL_ENDPOINT: {{ $top.Values.global.domain | quote }}
+  APP_HOST: {{ $top.Values.global.domain | quote}}
+  DB_NAME: {{ $top.Values.clusterService.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_VERBOSE_LOGGING: {{ $top.Values.clusterService.config.dbVerboseLogging | default $top.Values.global.postgresql.dbVerboseLogging | quote }}
+  DB_HOST: {{ $top.Values.clusterService.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SSL_MODE: {{ $top.Values.clusterService.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_PORT: {{ $top.Values.clusterService.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  {{- if or ($top.Values.global.postgresql.auth.readHost) ($top.Values.clusterService.config.dbReadHost) }}
+  DB_READ_HOST: {{ $top.Values.clusterService.config.dbReadHost | default $top.Values.global.postgresql.auth.readHost | quote }}
+  {{- end }}
+  {{- if or ($top.Values.global.postgresql.auth.dbReadPort) ($top.Values.clusterService.config.dbReadPort) }}
+  DB_READ_PORT: {{ $top.Values.clusterService.config.dbReadPort | default $top.Values.global.postgresql.auth.readPort | quote }}
+  {{- end }}
+  DB_SCHEMA: {{ $top.Values.clusterService.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  AWS_ELB_SUFFIX: {{ $top.Values.clusterService.config.awsElbSuffix | quote }}
+  {{- $cacheEnabled := $top.Values.clusterService.config.cacheEnabled | default false }}
+  CACHE_ENABLED: {{ $cacheEnabled | quote }}
+  {{- if eq (toString $cacheEnabled) "true" }}
+  CACHE_URL: {{ $top.Values.clusterService.config.cacheUrl | default $top.Values.global.cache.url | quote }}
+  CACHE_READ_URL: {{ $top.Values.clusterService.config.cacheReadUrl | default $top.Values.global.cache.readUrl | quote }}
+  CACHE_TYPE: {{ $top.Values.clusterService.config.cacheType | default $top.Values.global.cache.type | quote }}
+  CACHE_MAX_RECORD_SIZE_KB: {{ $top.Values.clusterService.config.cacheMaxRecordSizeKb | quote }}
+  CACHE_MAX_STORE_SIZE_MB: {{ $top.Values.clusterService.config.cacheMaxStoreSizeMb | quote }}
+  {{- end }}
+  {{- if $top.Values.clusterService.config.runaiClusterDomainSuffix }}
+  RUNAI_CLUSTER_DOMAIN_SUFFIX: {{ $top.Values.clusterService.config.runaiClusterDomainSuffix | quote }}
+  {{- end }}
+  IMAGE_REGISTRY: {{ $top.Values.global.image.registry | quote}}
+  VERSION: {{ $top.Chart.AppVersion | toString | quote }}
+  FIPS_MODE: {{ $top.Values.global.fipsMode | default "off" | quote }}
+  {{- $helmRegistryConfig := $top.Values.clusterService.config.clusterInstallation }}
+  {{- $helmRegistryUrl := $helmRegistryConfig.helmRegistryUrl | default "" }}
+  {{- $helmRegistryUsername := $helmRegistryConfig.helmRegistryUsername | default "" }}
+  {{- $helmRegistryPasswordPlaceholder := $helmRegistryConfig.helmRegistryPasswordPlaceholder | default "" }}
+  {{- $isNgcHelmRegistry := or (eq $helmRegistryUrl "https://helm.ngc.nvidia.com") (hasPrefix "https://helm.ngc.nvidia.com/" $helmRegistryUrl) }}
+  CLUSTER_INSTALLATION_HELM_REGISTRY_URL: {{ $helmRegistryUrl | quote }}
+  {{- if $helmRegistryUsername }}
+  CLUSTER_INSTALLATION_HELM_REGISTRY_USERNAME: {{ $helmRegistryUsername | quote }}
+  CLUSTER_INSTALLATION_HELM_REGISTRY_PASSWORD_PLACEHOLDER: {{ required "helmRegistryPasswordPlaceholder is required when helmRegistryUsername is set" $helmRegistryPasswordPlaceholder | quote }}
+  {{- else if and $isNgcHelmRegistry $helmRegistryPasswordPlaceholder }}
+  CLUSTER_INSTALLATION_HELM_REGISTRY_USERNAME: "$oauthtoken"
+  CLUSTER_INSTALLATION_HELM_REGISTRY_PASSWORD_PLACEHOLDER: {{ $helmRegistryPasswordPlaceholder | quote }}
+  {{- else if $helmRegistryPasswordPlaceholder }}
+  {{- fail "helmRegistryUsername is required when configuring authentication for a non-NGC repository" }}
+  {{- end }}
+  CLUSTER_INSTALLATION_FIPS_MODE: {{ $top.Values.global.fipsMode | default "off" | quote }}
+  CLUSTER_INSTALLATION_MIN_VERSION: {{ $top.Values.clusterService.config.clusterInstallation.supportedVersionRange.min | quote }}
+  CLUSTER_INSTALLATION_MAX_VERSION: {{ $top.Values.clusterService.config.clusterInstallation.supportedVersionRange.max | default $top.Chart.AppVersion | quote }}
+  {{- if $top.Values.clusterService.config.clusterInstallation.supportedVersionRange.exclude }}
+  CLUSTER_INSTALLATION_EXCLUDED_VERSIONS: |
+  {{- range $top.Values.clusterService.config.clusterInstallation.supportedVersionRange.exclude }}
+    - {{ . |  quote }}
+  {{- end }}
+  {{- end }}
+  ENVIRONMENT_RELEASE_NAME: {{ $top.Release.Name | quote }}
+  ENVIRONMENT_IDENTIFIER: {{ $top.Values.global.config.environment | quote }}
+
+  ORG_UNIT_SVC_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.orgUnitService.name (toString $top.Values.orgUnitService.service.port) }}
+  WORKLOADS_SVC_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.workloads.name ($top.Values.workloads.service.port | toString) }}
+  {{- if $top.Values.clusterService.config.applicationMetricsWrite.url }}
+  APPLICATION_METRIC_STORE_WRITE_URL: {{ $top.Values.clusterService.config.applicationMetricsWrite.url | quote }}
+  {{- end }}
+  PUBSUB_URL: {{ $top.Values.global.pubsub.url | quote }}
+  PUBSUB_TYPE: {{ $top.Values.global.pubsub.type | quote }}
+  PUBSUB_ENABLE_ADDITIONAL_SUBSCRIBER: {{ $top.Values.global.pubsub.additionalSubscriber.enabled | quote }}
+  {{- if $top.Values.global.pubsub.additionalSubscriber.enabled }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_TYPE: {{ $top.Values.global.pubsub.additionalSubscriber.type | quote }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_URL: {{ $top.Values.global.pubsub.additionalSubscriber.url | quote }}
+  {{- end }}
+  ASYNC_CLUSTER_DELETE_ENABLED: {{ $top.Values.clusterService.config.asyncClusterDeletion.enabled | quote }}
+  NODEPOOL_OVERRIDE_BACKEND: {{ $top.Values.clusterMigrator.config.markCompleted | quote }}
+  MAX_WAIT_FOR_CLUSTER_REMOTE_CONFIG_STATUS_UPDATE: {{ $top.Values.clusterService.config.maxWaitForClusterRemoteConfigStatusUpdate | quote }}
+  CACHE_TTL_HOURS: {{ $top.Values.clusterService.config.cacheTtl | quote }}
+  MAX_WAIT_FOR_CLUSTER_GRACEFUL_DELETE: {{ $top.Values.clusterService.config.maxWaitForClusterGracefulDelete | quote }}
+  CLUSTER_CLEANER_RUN_TIMING: {{ $top.Values.clusterService.config.clusterCleanerRunTiming | quote }}
+  INSTALLATION_TYPE: {{ $top.Values.global.installationType | quote }}  
+{{- end }}

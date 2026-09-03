@@ -1,0 +1,5 @@
+allOf:
+  - $ref: "../workloads/WorkloadCreationMeta.yaml"
+  - $ref: "../workloads/SubmitWithTemplateId.yaml"
+  - $ref: "./DistributedInferenceAssets.yaml"
+  - $ref: "./DistributedInferenceSpec.yaml"

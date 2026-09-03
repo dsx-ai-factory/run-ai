@@ -1,0 +1,213 @@
+DistributedTarget:
+  Config:
+    networking:
+    - services:
+      - spec:
+          name: kf-ports-cip-worker
+          ports:
+          - name: port-8080
+            port: 32010
+            protocol: TCP
+            targetPort: 8080
+          selector:
+            training.kubeflow.org/job-name: ports
+            training.kubeflow.org/replica-index: "0"
+            training.kubeflow.org/replica-type: worker
+          type: ClusterIP
+    - services:
+      - spec:
+          name: kf-ports-lb-worker
+          ports:
+          - name: port-8081
+            port: 8081
+            protocol: TCP
+            targetPort: 8081
+          selector:
+            training.kubeflow.org/job-name: ports
+            training.kubeflow.org/replica-index: "0"
+            training.kubeflow.org/replica-type: worker
+          type: LoadBalancer
+    - services:
+      - spec:
+          name: kf-ports-np-worker
+          ports:
+          - name: port-8082
+            port: 8082
+            protocol: TCP
+            targetPort: 8082
+          selector:
+            training.kubeflow.org/job-name: ports
+            training.kubeflow.org/replica-index: "0"
+            training.kubeflow.org/replica-type: worker
+          type: NodePort
+    - services:
+      - spec:
+          name: kf-ports-cip-master
+          ports:
+          - name: port-8080
+            port: 32010
+            protocol: TCP
+            targetPort: 8080
+          selector:
+            training.kubeflow.org/job-name: ports
+            training.kubeflow.org/replica-index: "0"
+            training.kubeflow.org/replica-type: master
+          type: ClusterIP
+    - services:
+      - spec:
+          name: kf-ports-lb-master
+          ports:
+          - name: port-8081
+            port: 8081
+            protocol: TCP
+            targetPort: 8081
+          selector:
+            training.kubeflow.org/job-name: ports
+            training.kubeflow.org/replica-index: "0"
+            training.kubeflow.org/replica-type: master
+          type: LoadBalancer
+    - services:
+      - spec:
+          name: kf-ports-np-master
+          ports:
+          - name: port-8082
+            port: 8082
+            protocol: TCP
+            targetPort: 8082
+          selector:
+            training.kubeflow.org/job-name: ports
+            training.kubeflow.org/replica-index: "0"
+            training.kubeflow.org/replica-type: master
+          type: NodePort
+  Framework: PyTorch
+  JaxJob: null
+  MasterSpec: null
+  MpiJob: null
+  ObjectMeta: null
+  PyTorchJob:
+    apiVersion: kubeflow.org/v1
+    kind: PyTorchJob
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: pytorchjob
+        createdBy: PyTorchJob
+        project: test
+        release: ports
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: ports
+      name: ports
+      namespace: runai-test
+    spec:
+      pytorchReplicaSpecs:
+        Master:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: pytorchjob
+                createdBy: PyTorchJob
+                project: test
+                release: ports
+                workloadKind: Distributed
+                workloadName: ports
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: ports
+                image: ubuntu
+                name: pytorch
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              priorityClassName: low
+              schedulerName: runai-scheduler
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: pytorchjob
+                createdBy: PyTorchJob
+                project: test
+                release: ports
+                workloadKind: Distributed
+                workloadName: ports
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: ports
+                image: ubuntu
+                name: pytorch
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              priorityClassName: low
+              schedulerName: runai-scheduler
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: None
+    status: {}
+  RunPolicy: null
+  TFJob: null
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: PyTorchJob
+  environments:
+  - connections:
+    - connectionType: NodePort
+      containerPort: 8080
+      correlationName: port
+      name: my-jupyter
+      portResourceName: port-8080
+      serviceResourceName: kf-ports-cip-worker
+      toolType: jupyter
+    - connectionType: LoadBalancer
+      containerPort: 8081
+      correlationName: port-1
+      name: port-1
+      portResourceName: port-8081
+      serviceResourceName: kf-ports-lb-worker
+      toolType: tensor
+    - connectionType: NodePort
+      containerPort: 8082
+      correlationName: port-2
+      name: my-tool
+      portResourceName: port-8082
+      serviceResourceName: kf-ports-np-worker
+      toolType: ""
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-ports/, Framework: PyTorch'
+  images:
+  - ubuntu
+  name: 'ports/, Framework: PyTorch'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

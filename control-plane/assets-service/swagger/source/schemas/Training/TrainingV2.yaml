@@ -1,0 +1,15 @@
+description:  information about a training created based on assets.
+required:
+  - meta
+  - assets
+properties:
+  meta:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads/WorkloadMeta.yaml"
+  assets:
+    $ref: "../Asset/AssetsRef.yaml"
+  specificRunParams:
+    $ref: "./TrainingSpecificRunParams.yaml"
+  policyInfo:
+    $ref: "../Policy/PolicyInfo.yaml"
+  distributed:
+    $ref: "./DistributedData.yaml"

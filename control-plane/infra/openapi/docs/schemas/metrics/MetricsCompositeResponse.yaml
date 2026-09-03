@@ -1,0 +1,63 @@
+type: object
+required:
+  - measurements
+properties:
+  measurements:
+    type: array
+    items:
+      $ref: './MeasurementResponse.yaml'
+  histogram:
+    type: array
+    nullable: true
+    items:
+      $ref: './HistogramSeries.yaml'
+example:
+  measurements:
+    - type: "ALLOCATED_GPU"
+      labels:
+        gpu: "0"
+      values:
+        - value: "85"
+          timestamp: "2024-12-20T14:30:00Z"
+        - value: "92"
+          timestamp: "2024-12-20T14:30:30Z"
+        - value: "78"
+          timestamp: "2024-12-20T14:37:00Z"
+  histogram:
+    - type: "NIM_TIME_TO_FIRST_TOKEN_SECONDS"
+      values:
+        - timestamp: "2024-12-20T14:30:00Z"
+          data:
+            "0.001": "45"
+            "0.005": "178"
+            "0.01": "312"
+            "0.05": "624"
+            "0.1": "812"
+            "0.5": "980"
+            "1.0": "1004"
+            "2.0": "1015"
+            "+Inf": "1024"
+        - timestamp: "2024-12-20T14:30:30Z"
+          data:
+            "0.001": "32"
+            "0.005": "152"
+            "0.01": "288"
+            "0.05": "576"
+            "0.1": "756"
+            "0.5": "908"
+            "1.0": "932"
+            "2.0": "943"
+            "+Inf": "960"
+    - type: "NIM_TIME_TO_FIRST_TOKEN_SECONDS_PERCENTILES"
+      values:
+        - timestamp: "2024-12-20T14:30:00Z"
+          data:
+            "p50": "0.0734"
+            "p90": "0.1892"
+            "p99": "0.2847"
+        - timestamp: "2024-12-20T14:30:30Z"
+          data:
+            "p50": "0.0823"
+            "p90": "0.2134"
+            "p99": "0.3156"
+

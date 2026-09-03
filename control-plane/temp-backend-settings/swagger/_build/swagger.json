@@ -1,0 +1,681 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Temp Backend Settings Service",
+    "version": "1.0",
+    "description": "Temporary backend settings service that manages tenant-level feature flags\nand configuration settings. Migrated from the TypeScript backend's\nSettingController and InternalTenantController.\n",
+    "contact": {
+      "name": "Run.AI",
+      "url": "https://www.run.ai/",
+      "email": "support@run.ai"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://app.run.ai"
+    },
+    {
+      "url": "https://staging.run.ai"
+    },
+    {
+      "url": "https://test.run.ai"
+    },
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "paths": {
+    "/health": {
+      "x-internal": true,
+      "get": {
+        "summary": "Health check",
+        "operationId": "health",
+        "x-no-authorization": true,
+        "x-service": "temp-backend-settings",
+        "tags": [
+          "Health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully."
+          }
+        }
+      }
+    },
+    "/v1/k8s/setting": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "operationId": "getTenantSettings",
+        "tags": [
+          "Tenant"
+        ],
+        "summary": "Get all tenant settings.",
+        "deprecated": true,
+        "x-no-authorization": true,
+        "x-service": "temp-backend-settings",
+        "x-test-coverage": [
+          "src/test/suites/tenantSuite/tenantUserApi/tenantSystemApi.test.ts"
+        ],
+        "description": "Retrieve all tenant settings. This endpoint is deprecated and will be removed in a future release. Migrated settings are available under [/api/docs#tag/Settings](/api/docs#tag/Settings).",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/excludeMigrated"
+          },
+          {
+            "$ref": "#/components/parameters/tenantId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The complete set of tenant settings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Setting"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateTenantSetting",
+        "tags": [
+          "Tenant"
+        ],
+        "summary": "Update a tenant setting.",
+        "deprecated": true,
+        "x-authorize": {
+          "resource-type": "settings",
+          "action": "update"
+        },
+        "x-service": "temp-backend-settings",
+        "x-test-coverage": [
+          "src/test/suites/tenantSuite/tenantUserApi/tenantSystemApi.test.ts"
+        ],
+        "description": "Use to update tenant settings. This endpoint is deprecated and will be removed in a future release. Migrated settings are available under [/api/docs#tag/Settings](/api/docs#tag/Settings).",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tenantId"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantSettingCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated tenant setting.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantSettingCreationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/k8s/setting/{settingKey}": {
+      "x-scope": [
+        "system",
+        "tenant"
+      ],
+      "get": {
+        "operationId": "getTenantSettingsByKey",
+        "tags": [
+          "Tenant"
+        ],
+        "summary": "Get a tenant setting by key.",
+        "deprecated": true,
+        "x-no-authorization": true,
+        "x-service": "temp-backend-settings",
+        "x-test-coverage": [
+          "src/test/suites/tenantSuite/tenantUserApi/tenantSystemApi.test.ts"
+        ],
+        "description": "Retrieve a specific tenant setting by key. This endpoint is deprecated and will be removed in a future release. Migrated settings are available under [/api/docs#tag/Settings](/api/docs#tag/Settings).",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/settingKey"
+          },
+          {
+            "$ref": "#/components/parameters/tenantId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested setting.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "A boolean value that indicates if the requested setting is enabled.",
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/internal/tenants/all-tenants/setting/{key}": {
+      "x-internal": true,
+      "get": {
+        "summary": "Get setting by key for all tenants",
+        "description": "Retrieve a specific setting value for all tenants in the system",
+        "operationId": "getSettingByKeyForAllTenants",
+        "x-no-authorization": true,
+        "x-service": "temp-backend-settings",
+        "tags": [
+          "Internal"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/key"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved setting for all tenants",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "description": "Map of tenant IDs to setting values"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Setting": {
+        "type": "object",
+        "required": [
+          "key",
+          "source",
+          "category",
+          "label",
+          "description",
+          "type",
+          "active"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "tenant.limit_quota_over_subscription"
+          },
+          "source": {
+            "type": "string",
+            "example": "Tenant"
+          },
+          "category": {
+            "type": "string",
+            "example": "Tenant"
+          },
+          "label": {
+            "type": "string",
+            "example": "Limit projects from exceeding department quota"
+          },
+          "description": {
+            "type": "string",
+            "example": "Enable to prevent projects' total quota from exceeding the department's quota"
+          },
+          "stage": {
+            "type": "string",
+            "example": "Beta"
+          },
+          "type": {
+            "type": "string",
+            "example": "Boolean"
+          },
+          "value": {
+            "example": true
+          },
+          "active": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "Error": {
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "code": 400,
+          "message": "Bad request - Resource should have a name"
+        }
+      },
+      "TenantSettingCreationRequest": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "example": "tenant.limit_quota_over_subscription"
+          },
+          "value": {
+            "example": true
+          }
+        },
+        "example": {
+          "key": "tenant.limit_quota_over_subscription",
+          "value": true
+        }
+      },
+      "TenantSettingCreationResponse": {
+        "type": "object",
+        "properties": {
+          "msg": {
+            "type": "string",
+            "example": "done"
+          }
+        }
+      },
+      "TenantSettingValue": {
+        "type": "object",
+        "description": "A setting value for a specific tenant",
+        "properties": {
+          "tenantId": {
+            "type": "integer",
+            "description": "The tenant ID"
+          },
+          "value": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "object"
+              }
+            ],
+            "description": "The setting value (type varies based on the setting)"
+          }
+        }
+      },
+      "TenantSettingsByKey": {
+        "type": "object",
+        "description": "A setting value across all tenants",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TenantSettingValue"
+            }
+          }
+        },
+        "example": {
+          "key": "CPUResourcesQuota",
+          "values": [
+            {
+              "tenantId": 1,
+              "value": true
+            },
+            {
+              "tenantId": 2,
+              "value": false
+            }
+          ]
+        }
+      },
+      "TenantSetting": {
+        "$ref": "#/components/schemas/Setting"
+      },
+      "ComplianceIssues": {
+        "properties": {
+          "complianceIssues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "details",
+                "field"
+              ],
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "example": "compute.gpuDevicesRequest"
+                },
+                "details": {
+                  "type": "string",
+                  "example": "value must be no less than 3"
+                }
+              }
+            }
+          }
+        },
+        "nullable": true,
+        "type": "object"
+      },
+      "SubmissionError": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "$ref": "#/components/schemas/ComplianceIssues"
+          }
+        ]
+      }
+    },
+    "responses": {
+      "401Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 401,
+              "message": "Issuer is not familiar."
+            }
+          }
+        }
+      },
+      "403Forbidden": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 403,
+              "message": "You do not have sufficient permissions."
+            }
+          }
+        }
+      },
+      "500InternalServerError": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 500,
+              "message": "Something went wrong."
+            }
+          }
+        }
+      },
+      "503ServiceUnavailable": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 503,
+              "message": "Please try again in few minutes."
+            }
+          }
+        }
+      },
+      "400BadRequest": {
+        "description": "Bad request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 400,
+              "message": "Required parameter is missing"
+            }
+          }
+        }
+      },
+      "404NotFound": {
+        "description": "The specified resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 404,
+              "message": "Resource id not found."
+            }
+          }
+        }
+      },
+      "204NoContent": {
+        "description": "No Content."
+      },
+      "400BadSubmissionRequest": {
+        "description": "Bad submission request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SubmissionError"
+            },
+            "example": {
+              "code": 400,
+              "message": "The workload request does not comply with the policy set by the administrator"
+            }
+          }
+        }
+      },
+      "406NotAcceptable": {
+        "description": "Not acceptable request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "409Conflict": {
+        "description": "The specified resource already exists",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 409,
+              "message": "Resource with this name already exists"
+            }
+          }
+        }
+      },
+      "412PreconditionFailed": {
+        "description": "The specified resource was not found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 412,
+              "message": "Precondition failed"
+            }
+          }
+        }
+      },
+      "413RequestEntityTooLarge": {
+        "description": "Request entity too large",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "415UnsupportedMediaType": {
+        "description": "Unsupported media type",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "501NotImplemented": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 501,
+              "message": "Not implemented"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "bearerFormat": "JWT",
+        "description": "Bearer authentication",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    },
+    "parameters": {
+      "excludeMigrated": {
+        "name": "excludeMigrated",
+        "in": "query",
+        "required": false,
+        "description": "When true, excludes settings that have been migrated to external services (e.g., Identity Manager).",
+        "schema": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "tenantId": {
+        "name": "tenantId",
+        "in": "query",
+        "x-internal": true,
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "settingKey": {
+        "name": "settingKey",
+        "in": "path",
+        "required": true,
+        "description": "The setting key to retrieve",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "key": {
+        "name": "key",
+        "in": "path",
+        "required": true,
+        "description": "The setting key to retrieve",
+        "schema": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

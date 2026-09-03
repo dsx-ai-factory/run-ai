@@ -1,0 +1,36 @@
+{{- define "common.cronJob.tpl" -}}
+{{- $top := first . }}
+{{- $obj := index . 1 }}
+{{- $additionalAnnotations := dict -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  {{- include "common.metadata" (list $top $obj) | nindent 2 }}
+  name: {{ include "common.fullname" $top }}-{{ $obj.name }}
+  {{- with $obj.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  schedule: {{ quote $obj.schedule }}
+  {{- if hasKey $obj "concurrencyPolicy" -}}
+  concurrencyPolicy: {{ $obj.concurrencyPolicy }}
+  {{- end }}
+  {{- if hasKey $obj "successfulJobsHistoryLimit" -}}
+  successfulJobsHistoryLimit: {{ $obj.successfulJobsHistoryLimit }}
+  {{- end }}
+  {{- if hasKey $obj "failedJobsHistoryLimit" -}}
+  failedJobsHistoryLimit: {{ $obj.failedJobsHistoryLimit }}
+  {{- end }}
+  {{- if hasKey $obj "startingDeadlineSeconds" -}}
+  startingDeadlineSeconds: {{ $obj.startingDeadlineSeconds }}
+  {{- end }}
+  jobTemplate:
+    spec:
+      template:
+        {{- include "common.pod.template" (list $top $obj $obj.serviceAccount $obj $additionalAnnotations) | nindent 10 }}
+{{- end }}
+
+  {{- define "common.cronJob" -}}
+  {{- include "common.utils.merge" (append . "common.cronJob.tpl") }}
+  {{- end }}

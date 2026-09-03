@@ -1,0 +1,18 @@
+properties:
+  existingSecretName:
+    description: optional name of existing secret in the cluster from which the access key id and secret should
+      be taken. If omitted, you will have to provide those credentials in the accessKeyId and secretAccessKey fields.
+      The provided credentials are encrypted into the control plane database and cloned to a kubernetes secret in the cluster.
+    nullable: true
+    type: string
+    minLength: 1
+  accessKeyId:
+    description: The access key id of the S3-compatible bucket, required only when not using existing secret.
+    type: string
+    nullable: true
+    minLength: 1
+  secretAccessKey:
+    description: The secret access key of the S3-compatible bucket, required only when not using existing secret.
+    type: string
+    nullable: true
+    minLength: 1

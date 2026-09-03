@@ -1,0 +1,12 @@
+name: scope
+in: query
+required: false
+description: the scope level of the asset. If empty - tenant scoped assets.
+schema:
+  type: string
+  minLength: 1
+  enum:
+    - tenant
+    - cluster
+    - department
+    - project

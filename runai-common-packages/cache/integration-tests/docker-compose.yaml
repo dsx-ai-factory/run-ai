@@ -1,0 +1,160 @@
+
+services:
+  cache-tests-inememory:
+    container_name: cache-tests-inmemory
+    profiles:
+      - inmemory-test
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    image: cache-tests-redis
+    environment:
+      CACHE_TYPE: inmemory
+      CACHE_READ_URL: redis:6379
+      CACHE_URL: redis:6379
+
+  cache-tests-redis:
+    container_name: cache-tests-redis
+    profiles:
+      - redis-test
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    image: cache-tests-redis
+    environment:
+      CACHE_TYPE: redis
+      CACHE_READ_URL: redis:6379
+      CACHE_URL: redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  cache-tests-valkey:
+    container_name: cache-tests-valkey
+    profiles:
+      - valkey-test
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    image: cache-tests-valkey
+    environment:
+      CACHE_TYPE: valkey
+      CACHE_READ_URL: valkey:6379
+      CACHE_URL: valkey:6379
+    depends_on:
+      valkey:
+        condition: service_healthy
+
+  cache-tests-nats:
+    container_name: cache-tests-nats
+    profiles:
+      - nats-test
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    image: cache-tests-nats
+    environment:
+      CACHE_TYPE: nats
+      CACHE_URL: n1:4222
+      CACHE_READ_URL: n2:4223
+    depends_on:
+      n1:
+        condition: service_healthy
+      n2:
+        condition: service_healthy
+
+  cache-tests-keydb:
+    container_name: cache-tests-keydb
+    profiles:
+      - keydb-test
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    image: cache-tests-keydb
+    environment:
+      CACHE_TYPE: keydb
+      CACHE_READ_URL: keydb:6379
+      CACHE_URL: keydb:6379
+    depends_on:
+      keydb:
+        condition: service_healthy
+
+  redis:
+    attach: false
+    image: redis:7.4-alpine
+    container_name: redis
+    profiles:
+      - redis-setup
+    ports:
+      - '6379:6379'
+    command: redis-server
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+      interval: 2s
+      timeout: 10s
+      retries: 10
+      start_period: 2s
+
+  n1:
+    attach: false
+    container_name: n1
+    profiles:
+      - nats-setup
+    image: nats:alpine
+    command: --name N1 --js -m 8222  -p 4222  --cluster_name NATS --cluster nats://0.0.0.0:4245 --routes nats://n1:4245,nats://n2:4245
+    ports:
+    - 4222:4222
+    - 8222:8222
+    healthcheck:
+      test: wget -qO- http://localhost:8222/varz || exit 1
+      interval: 2s
+      timeout: 10s
+      retries: 10
+      start_period: 2s
+
+  n2:
+    attach: false
+    container_name: n2
+    profiles:
+      - nats-setup
+    image: nats:alpine
+    command: --name N2 --js -m 8222  -p 4222  --cluster_name NATS --cluster nats://0.0.0.0:4245 --routes nats://n1:4245,nats://n2:4245
+    ports:
+    - 4223:4222
+    - 8223:8222
+    healthcheck:
+      test: wget -qO- http://localhost:8222/varz || exit 1
+      interval: 2s
+      timeout: 10s
+      retries: 10
+      start_period: 2s
+
+  keydb:
+    image: eqalpha/keydb
+    container_name: keydb
+    profiles:
+      - keydb-setup
+    ports:
+      - "6380:6379"
+    command: keydb-server
+    healthcheck:
+      test: ["CMD", "keydb-cli", "ping"]
+      interval: 2s
+      timeout: 10s
+      retries: 10
+      start_period: 2s
+
+  valkey:
+    image: valkey/valkey:9.0-alpine
+    container_name: valkey
+    profiles:
+      - valkey-setup
+    ports:
+      - '6381:6379'
+    command: valkey-server
+    healthcheck:
+      test: [ "CMD", "valkey-cli", "ping" ]
+      interval: 2s
+      timeout: 10s
+      retries: 10
+      start_period: 2s

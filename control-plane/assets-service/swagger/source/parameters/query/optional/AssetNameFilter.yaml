@@ -1,0 +1,6 @@
+name: name
+in: query
+required: false
+description: Filter results by name.
+schema:
+  type: string

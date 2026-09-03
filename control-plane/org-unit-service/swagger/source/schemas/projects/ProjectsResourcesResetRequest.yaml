@@ -1,0 +1,8 @@
+allOf:
+  - $ref: "../departments/DepartmentsResourcesResetRequest.yaml"
+  - type: object
+    properties:
+      parentId:
+        type: string
+        description: apply only to projects under the specified department id
+        example: 15

@@ -1,0 +1,39 @@
+type: object
+description: Service port specification.
+nullable: true
+properties:
+  name:
+    description: The Service port name.
+    type: string
+    minLength: 1
+    maxLength: 63
+    example: http
+    nullable: true
+  port:
+    description: The port exposed by the Service.
+    type: integer
+    format: int32
+    minimum: 1
+    maximum: 65535
+    example: 8000
+  targetPort:
+    description: The container port that receives traffic from the Service.
+    type: integer
+    format: int32
+    minimum: 1
+    maximum: 65535
+    example: 8000
+    nullable: true
+  nodePort:
+    description: The externally allocated port for NodePort Services.
+    type: integer
+    format: int32
+    minimum: 1
+    maximum: 65535
+    example: 30080
+    nullable: true
+  protocol:
+    description: Network protocol for the port.
+    $ref: "./ServiceProtocol.yaml"
+required:
+  - port

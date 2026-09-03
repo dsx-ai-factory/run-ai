@@ -1,0 +1,17 @@
+required:
+  - name
+  - projectId
+  - clusterId
+properties:
+  name:
+    $ref: "./WorkloadName.yaml"
+  useGivenNameAsPrefix:
+    description: When true, the requested name will be treated as a prefix. The final
+      name of the workload will be composed of the name followed by a random set of characters.
+    type: boolean
+    example: true
+    default: false
+  projectId:
+    $ref: "../scopes/ProjectId.yaml"
+  clusterId:
+    $ref: "../scopes/ClusterId.yaml"

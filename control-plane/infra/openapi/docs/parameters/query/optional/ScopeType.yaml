@@ -1,0 +1,7 @@
+name: scopeType
+in: query
+required: false
+description: The type of resource we want to filter by.
+schema:
+  type: string
+  example: "project"

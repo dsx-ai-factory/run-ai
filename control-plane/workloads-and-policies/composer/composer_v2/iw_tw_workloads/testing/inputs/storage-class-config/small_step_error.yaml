@@ -1,0 +1,5 @@
+small:
+  customization:
+    claimSize:
+      min: 1M
+      step: 2M

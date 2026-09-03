@@ -1,0 +1,31 @@
+get:
+  deprecated: true
+  summary: Download Linux installer script
+  description: |
+    This endpoint returns a Linux script that can be used to install the Run:ai CLI.
+  operationId: get_installer_linux_deprecated
+  x-service: cli-exposer
+  x-test-coverage:
+    - cli-exposer/pkg/services/api_cli_service_test.go
+  x-no-authorization: true
+  tags:
+    - Researcher Command Line Interface Deprecated
+  responses:
+    '200':
+      description: File download successful
+      content:
+        text/plain:
+          x-default: true
+          schema:
+            type: string
+          example: "Contents of the file"
+    400:
+        $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

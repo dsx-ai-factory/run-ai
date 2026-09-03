@@ -1,0 +1,22 @@
+apiVersion: kubeflow.org/v1
+kind: JAXJob
+metadata:
+  name: test
+spec:
+  jaxReplicaSpecs:
+    Worker:
+      replicas: 4
+      restartPolicy: OnFailure
+      template:
+        metadata:
+          annotations:
+            replica.example.com/role: worker
+          labels:
+            replica.type: worker
+        spec:
+          containers:
+          - image: jax/jax:0.4.0
+            name: jax
+          initContainers:
+          - image: jax/jax:0.4.0
+            name: init

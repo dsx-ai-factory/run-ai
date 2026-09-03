@@ -1,0 +1,226 @@
+nodePools:
+    - gpu-pool-a
+    - gpu-pool-b
+    - cpu-pool
+servingPort:
+    port: 8081
+    protocol: http
+    authorizationType: authorizedUsers
+    authorizedUsers:
+        - user-a@example.com
+        - user-b@example.com
+    exposeExternally: true
+    exposedUrl: "https://my-distributed-inference.example.com"
+restartPolicy: RecreateGroupOnPodRestart
+startupPolicy: LeaderReady
+workers: 3
+replicas: 2
+category: Train
+priorityClass: low
+leader:
+    command: python
+    args: -x my-script.py
+    image: python:3.8
+    nodeType: my-node-type
+    imagePullPolicy: IfNotPresent
+    createHomeDir: true
+    workingDir: /home/leader-folder
+    compute:
+        gpuDevicesRequest: 2
+        gpuRequestType: portion
+        gpuPortionRequest: 0.5
+        cpuCoreRequest: 1.0
+        cpuCoreLimit: 4
+        cpuMemoryRequest: 2Gi
+        cpuMemoryLimit: 8Gi
+    storage:
+        pvc:
+            - existingPvc: false
+              path: "/data/leader-pvc"
+              readOnly: false
+              claimInfo:
+                  size: 5Gi
+                  storageClass: fast-ssd
+        configMapVolume:
+            - configMap: leader-config
+              mountPath: "/config/leader"
+              name: leader-app-config
+        secretVolume:
+            - secret: leader-secret
+              mountPath: "/secrets/leader"
+              name: leader-credentials
+        emptyDirVolume:
+            - path: "/tmp/leader-scratch"
+              name: leader-temp-storage
+              sizeLimit: 1Gi
+    security:
+        runAsUid: 1000
+        runAsGid: 1000
+        capabilities:
+            - KILL
+            - CHOWN
+            - DAC_OVERRIDE
+    nodeAffinityRequired:
+        nodeSelectorTerms:
+            - matchExpressions:
+                  - key: disktype
+                    operator: In
+                    values:
+                        - ssd
+                  - key: region
+                    operator: In
+                    values:
+                        - us-west1
+                        - us-west2
+                  - key: gpu-type
+                    operator: In
+                    values:
+                        - nvidia-a100
+                        - nvidia-v100
+    probes:
+        readiness:
+            handler:
+                httpGet:
+                    port: 8080
+        liveness:
+            handler:
+                httpGet:
+                    port: 8080
+    environmentVariables:
+        - name: HOME
+          value: "/home/leader-folder"
+        - name: LEADER_ID
+          value: "leader-001"
+        - name: DISTRIBUTED_ROLE
+          value: "leader"
+    tolerations:
+      - name: gpu-taint
+        operator: Equal
+        key: nvidia.com/gpu
+        value: "true"
+        effect: NoSchedule
+      - name: leader-taint
+        operator: Exists
+        key: distributed-inference/leader
+        effect: NoExecute
+    labels:
+      - name: component
+        value: distributed-inference-leader
+      - name: version
+        value: v1.0.0
+    annotations:
+      - name: deployment.kubernetes.io/revision
+        value: "1"
+      - name: distributed-inference/role
+        value: leader
+    imagePullSecrets:
+      - name: registry-secret
+      - name: leader-user-credential
+        userCredential: true
+      - name: shared-registry
+        userCredential: false
+    podAffinity:
+      type: Required
+      key: distributed-inference-group
+worker:
+    command: python
+    args: -x wrk-script.py
+    image: python:2.7
+    nodeType: wrk-node-type
+    imagePullPolicy: Always
+    createHomeDir: true
+    workingDir: /home/wrk-folder
+    compute:
+        gpuDevicesRequest: 1
+        gpuRequestType: memory
+        gpuMemoryRequest: 8Gi
+        cpuCoreRequest: 0.5
+        cpuCoreLimit: 2
+        cpuMemoryRequest: 1Gi
+        cpuMemoryLimit: 4Gi
+    storage:
+        pvc:
+            - existingPvc: false
+              path: "/data/wrk-pvc"
+              readOnly: false
+              claimInfo:
+                  size: 2Gi
+                  storageClass: standard-ssd
+        configMapVolume:
+            - configMap: wrk-config
+              mountPath: "/config/worker"
+              name: wrk-app-config
+        secretVolume:
+            - secret: wrk-secret
+              mountPath: "/secrets/worker"
+              name: wrk-credentials
+        emptyDirVolume:
+            - path: "/tmp/wrk-scratch"
+              name: wrk-temp-storage
+              sizeLimit: 512Mi
+    security:
+        runAsUid: 1001
+        runAsGid: 1001
+        capabilities:
+            - NET_BIND_SERVICE
+            - SYS_TIME
+    nodeAffinityRequired:
+        nodeSelectorTerms:
+            - matchExpressions:
+                  - key: wrk-type
+                    operator: In
+                    values:
+                        - gpu-worker
+                        - compute-worker
+                  - key: zone
+                    operator: In
+                    values:
+                        - zone-a
+                        - zone-b
+    probes:
+        readiness:
+            handler:
+                httpGet:
+                    port: 9090
+        liveness:
+            handler:
+                httpGet:
+                    port: 9090
+    environmentVariables:
+        - name: HOME
+          value: "/home/wrk-folder"
+        - name: WORKER_ID
+          value: "wrk-${POD_NAME}"
+        - name: DISTRIBUTED_ROLE
+          value: "worker"
+        - name: LEADER_ADDRESS
+          value: "${LEADER_SERVICE_HOST}"
+    tolerations:
+      - name: gpu-wrk-taint
+        operator: Equal
+        key: nvidia.com/gpu
+        value: "true"
+        effect: NoSchedule
+      - name: wrk-taint
+        operator: Exists
+        key: distributed-inference/worker
+        effect: PreferNoSchedule
+    labels:
+      - name: component
+        value: distributed-inference-worker
+      - name: version
+        value: v1.0.0
+    annotations:
+      - name: deployment.kubernetes.io/revision
+        value: "1"
+      - name: distributed-inference/role
+        value: worker
+    imagePullSecrets:
+      - name: registry-secret
+      - name: wrk-user-credential
+        userCredential: true
+      - name: shared-registry
+        userCredential: false
+    podAffinity:
+      type: Preferred
+      key: distributed-inference-wrk-group

@@ -1,0 +1,285 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.3
+  name: externalworkloads.run.ai
+spec:
+  group: run.ai
+  names:
+    kind: ExternalWorkload
+    listKind: ExternalWorkloadList
+    plural: externalworkloads
+    shortNames:
+    - ew
+    singular: externalworkload
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: ExternalWorkload is the Schema for the externalworkloads API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ExternalWorkloadSpec defines the desired state of ExternalWorkload
+            properties:
+              additionalFields:
+                description: if we have more fields we want to pass to the server,
+                  we can use this field
+                type: string
+              creationTimestamp:
+                description: the CreationTimestamp of the associated workload object
+                format: date-time
+                type: string
+              departmentId:
+                type: string
+              departmentName:
+                type: string
+              imageName:
+                type: string
+              originalWorkloadName:
+                type: string
+              originalWorkloadUID:
+                description: |-
+                  UID is a type that holds unique ID values, including UUIDs.  Because we
+                  don't ONLY use UUIDs, this is an alias to string.  Being a type captures
+                  intent and helps make sure that UIDs and names do not get conflated.
+                type: string
+              priorityClassName:
+                type: string
+              projectId:
+                type: string
+              projectName:
+                type: string
+              requestedNodePools:
+                description: the following fields will be populated if the workload
+                  object contains the info
+                items:
+                  type: string
+                type: array
+              requestedPods:
+                properties:
+                  completions:
+                    description: Specifies the maximum desired number of pods the
+                      workload should run at any given time.
+                    format: int32
+                    type: integer
+                  maxReplicas:
+                    description: MaxReplicas denotes the maximum number of desired
+                      pods.
+                    format: int32
+                    type: integer
+                  minReplicas:
+                    description: MinReplicas denotes the minimum number of desired
+                      pods.
+                    format: int32
+                    type: integer
+                  parallelism:
+                    description: |-
+                      Parallelism - used with Hyperparameter Optimization. Specifies the number of successful pods
+                      the job should reach to be completed. The 'parallelism' flag should be smaller or equal to 'completions'
+                    format: int32
+                    type: integer
+                  replicas:
+                    description: Replicas is the number of desired pods.
+                    format: int32
+                    type: integer
+                type: object
+              requestedResources:
+                description: request and limit of each resource type we need
+                properties:
+                  claims:
+                    description: |-
+                      Claims lists the names of resources, defined in spec.resourceClaims,
+                      that are used by this container.
+
+                      This is an alpha field and requires enabling the
+                      DynamicResourceAllocation feature gate.
+
+                      This field is immutable. It can only be set for containers.
+                    items:
+                      description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                      properties:
+                        name:
+                          description: |-
+                            Name must match the name of one entry in pod.spec.resourceClaims of
+                            the Pod where this field is used. It makes that resource available
+                            inside a container.
+                          type: string
+                        request:
+                          description: |-
+                            Request is the name chosen for a request in the referenced claim.
+                            If empty, everything from the claim is made available, otherwise
+                            only the result of this request.
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                    x-kubernetes-list-map-keys:
+                    - name
+                    x-kubernetes-list-type: map
+                  limits:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: |-
+                      Limits describes the maximum amount of compute resources allowed.
+                      More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    type: object
+                  requests:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: |-
+                      Requests describes the minimum amount of compute resources required.
+                      If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                      otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                      More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    type: object
+                type: object
+              type:
+                description: the type of the workload - usually the k8s object's kind
+                type: string
+              urls:
+                description: urls of the workload, if exist
+                items:
+                  type: string
+                type: array
+            type: object
+          status:
+            description: ExternalWorkloadStatus defines the observed state of ExternalWorkload
+            properties:
+              observedStatus:
+                description: ExternalWorkloadObservedStatus defines the observed status
+                  of the referred ExternalWorkload object
+                properties:
+                  childIds:
+                    description: the k8s UUIDs of all child objects of the workload
+                    items:
+                      properties:
+                        type:
+                          type: string
+                        uid:
+                          type: string
+                      required:
+                      - type
+                      - uid
+                      type: object
+                    type: array
+                  conditions:
+                    description: Represents the latest observed conditions of the
+                      original workload, if any.
+                    items:
+                      description: ObservedCondition describes the state of the original
+                        workload at a certain point.
+                      properties:
+                        lastTransitionTime:
+                          description: Last time the condition transitioned from one
+                            status to another.
+                          format: date-time
+                          nullable: true
+                          type: string
+                        message:
+                          description: A human readable message indicating details
+                            about the transition.
+                          type: string
+                        reason:
+                          description: The reason for the condition's last transition.
+                          type: string
+                        status:
+                          description: Status of the condition, one of True, False,
+                            Unknown.
+                          type: string
+                        type:
+                          description: Type of the condition.
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  k8sStatus:
+                    description: native k8s status
+                    type: string
+                  lastStatusChangeTime:
+                    description: the timestamp of the last status update (except sync
+                      status)
+                    format: date-time
+                    type: string
+                  message:
+                    description: a string describing the reason for the phase, if
+                      exists
+                    type: string
+                  phase:
+                    description: mapping native k8s statuses to pre-defined list of
+                      phases
+                    type: string
+                type: object
+              syncStatus:
+                description: WorkloadSyncStatus defines the status of the sync, reported
+                  by cluster-sync
+                properties:
+                  lastAttemptedSyncGeneration:
+                    description: the last generation that was attempted to be synced
+                      - in case sync failed
+                    format: int64
+                    type: integer
+                  lastAttemptedSyncStatusChangeTime:
+                    description: the last statusChangeTime that was attempted to be
+                      synced - in case sync failed
+                    format: date-time
+                    type: string
+                  lastSyncGeneration:
+                    description: the last object Generation that was observed and
+                      synced to control-plane - "Generation" is only for spec fields
+                    format: int64
+                    type: integer
+                  lastSyncStatusChangeTime:
+                    description: the last status change time that was observed and
+                      synced to control-plane.
+                    format: date-time
+                    type: string
+                  lastSyncStatusChecksum:
+                    description: the last observed and synced status change time (LastStatusChangeTime)
+                    format: int32
+                    type: integer
+                  lastSyncTimestamp:
+                    description: should be populated by the cluster-sync when syncing
+                      the object
+                    format: date-time
+                    type: string
+                  syncErrorMsg:
+                    description: in case of an error - a string describing the error
+                    type: string
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

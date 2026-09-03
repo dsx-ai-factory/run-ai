@@ -1,0 +1,35 @@
+post:
+  summary: create internal user
+  x-service: identity-manager
+  x-test-coverage:
+    - /runai/control-plane/identity-manager/pkg/services/api_users_service_test.go
+  operationId: create_intenral_user
+  x-no-authorization: true
+  tags:
+  - Users
+  requestBody:
+    description: Internal user object to create
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/Users/InternalUserCreationRequest.yaml'
+  responses:
+    '201':
+      description: Created successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Users/UserPostResponse.yaml'
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '409':
+      $ref: '../../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

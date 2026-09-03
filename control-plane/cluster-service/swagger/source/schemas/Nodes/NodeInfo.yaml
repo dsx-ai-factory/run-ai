@@ -1,0 +1,46 @@
+type: object
+required:
+  - status
+  - nodePool
+  - createdAt
+properties:
+  status:
+    type: string
+    enum:
+      - Ready
+      - NotReady
+      - Unknown
+      - MissingPrerequisites
+    description: The calculated status of the node.
+  conditions:
+    type: array
+    items:
+      $ref: './NodeStatusConditionDetails.yaml'
+  taints:
+    type: array
+    items:
+      $ref: './NodeTaint.yaml'
+  nodePool:
+    type: string
+    description: The node's NodePool.
+    example: node-pool-1
+  createdAt:
+    type: string
+    format: date-time
+  gpuInfo:
+    $ref: './GpuInfo.yaml'
+  nvLinkDomainUid:
+    type: string
+    description: NV Link Domain Uid
+    example: nvlink-domain-uid
+    nullable: true
+  nvLinkCliqueId:
+    type: string
+    description: NV Link Clique Id
+    example: clique-id
+    nullable: true
+  networkTopologyLabels:
+    $ref: '../../../../../infra/openapi/docs/schemas/resources/NetworkTopologyLabelsOptional.yaml'
+  numa:
+    $ref: './NumaInfo.yaml'
+x-schema-name: NodeInfo

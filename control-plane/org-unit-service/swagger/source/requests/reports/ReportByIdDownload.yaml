@@ -1,0 +1,29 @@
+get:
+  summary: Download report
+  operationId: download_report_by_id
+  x-authorize:
+    resource-type: project
+    action: read
+  x-service: org-unit-service
+  x-test-coverage:
+    - e2e/src/test/suites/advancedSuite/reportsApi/consumptionReport.test.ts
+  parameters:
+    - $ref: '../../../../../infra/openapi/docs/parameters/path/ReportId.yaml'
+  tags:
+    - Reports
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        text/csv:
+          x-default: true
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

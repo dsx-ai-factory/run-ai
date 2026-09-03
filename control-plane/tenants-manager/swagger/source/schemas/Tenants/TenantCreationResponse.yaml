@@ -1,0 +1,23 @@
+type: object
+required:
+  - tenant
+properties:
+   tenant:
+     $ref: './Tenant.yaml'
+   additionalData:
+    description: additional data for tenant creation
+    type: object
+    nullable: true
+example:
+  tenant:
+    id: 1
+    name: example
+    displayName: Example
+    status: Ready
+    tenantId: 123
+    created_at: '2020-01-01T00:00:00Z'
+    updated_at: '2020-01-02T00:00:00Z'
+    deleted_at: null
+  additionalData:
+    tenantDomain: tenant.example.com
+    customerUser: { user@tenant: 'Abc!23'}

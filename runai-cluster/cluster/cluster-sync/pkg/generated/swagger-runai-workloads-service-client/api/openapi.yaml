@@ -1,0 +1,4165 @@
+openapi: 3.0.3
+info:
+  contact:
+    email: support@run.ai
+    name: Run.AI
+    url: https://www.run.ai/
+  description: An API for managing RunAi scheduler managed workloads.
+  title: WorkloadsService
+  version: "1.0"
+servers:
+- url: https://app.run.ai
+- url: https://staging.run.ai
+- url: https://test.run.ai
+- url: http://localhost:8080
+security:
+- bearerAuth: []
+paths:
+  /:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: Executed successfully.
+      summary: health check
+      tags:
+      - Health
+      x-no-authorization: true
+    x-internal: true
+  /internal/workloads:
+    post:
+      operationId: internal_create_workload
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkloadCreationFields'
+        description: The workload info in the control plane.
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workload'
+          description: Created successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "409":
+          content:
+            application/json:
+              example:
+                code: 409
+                message: Resource with this name already exists
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource already exists
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create a workload by the control plane.
+      tags:
+      - Workloads
+      x-internal: true
+      x-no-authorization: true
+  /internal/workloads/sync:
+    post:
+      operationId: internal_sync_workloads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalWorkloadsSyncRequest'
+        description: The workloads to sync.
+      responses:
+        "204":
+          description: No Content.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: issuer is not familiar
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Sync workloads.
+      tags:
+      - Workloads
+      x-internal: true
+      x-authorize:
+        resource-type: workloads
+        action: sync
+  /api/v1/workloads:
+    get:
+      operationId: get_workloads
+      parameters:
+      - description: "if true, return only deleted resources."
+        explode: true
+        in: query
+        name: deleted
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: The offset from which to start fetching records.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          format: int32
+          type: integer
+        style: form
+      - description: The limit of returned records count.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          format: int32
+          type: integer
+        style: form
+      - description: Sort results by a descending or ascending order.
+        explode: true
+        in: query
+        name: sortOrder
+        required: false
+        schema:
+          default: asc
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Sort results by a parameters.
+        explode: true
+        in: query
+        name: sortBy
+        required: false
+        schema:
+          enum:
+          - type
+          - name
+          - clusterId
+          - projectId
+          - projectName
+          - departmentId
+          - departmentName
+          - createdAt
+          - deletedAt
+          - submittedBy
+          - phase
+          - completedAt
+          type: string
+        style: form
+      - description: "Filter results by a parameter. Use the format field-name operator\
+          \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
+          \ >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts\
+          \ with and =$ Ends with. Dates are in ISO 8601 timestamp format and available\
+          \ for operators ==, !=, <= and >=."
+        explode: true
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          example:
+          - name!=some-workload-name
+          items:
+            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_workloads_200_response'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: issuer is not familiar
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: "List workloads. [Experimental]"
+      tags:
+      - Workloads
+      x-authorize:
+        resource-type: workloads
+        action: read
+    post:
+      operationId: sync_workloads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkloadsSyncRequest'
+        description: The workloads to sync.
+      responses:
+        "204":
+          description: No Content.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: issuer is not familiar
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Sync workloads.
+      tags:
+      - Workloads
+      x-internal: true
+      x-authorize:
+        resource-type: workloads
+        action: sync
+  /internal/workloads/{workloadId}/ancestors:
+    get:
+      operationId: get_workload_ancestors
+      parameters:
+      - description: The requested workload id.
+        explode: false
+        in: path
+        name: workloadId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ancestors'
+          description: Executed successfully.
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id was not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get the workload ancestors.
+      tags:
+      - Workloads
+      x-no-authorization: true
+  /api/v1/workloads/{workloadId}:
+    delete:
+      operationId: delete_workload
+      parameters:
+      - description: The requested workload id.
+        explode: false
+        in: path
+        name: workloadId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: No Content.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: issuer is not familiar
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Delete the workload as is does not exist in the cluster anymore.
+      tags:
+      - Workloads
+      x-internal: true
+      x-authorize:
+        resource-type: workloads
+        action: sync
+    get:
+      operationId: get_workload
+      parameters:
+      - description: The requested workload id.
+        explode: false
+        in: path
+        name: workloadId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workload'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: issuer is not familiar
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id was not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: "Get the workload data. [Experimental]"
+      tags:
+      - Workloads
+      x-authorize:
+        resource-type: workloads
+        action: read
+        resource-id: workloadId
+    put:
+      operationId: upsert_workload
+      parameters:
+      - description: The requested workload id.
+        explode: false
+        in: path
+        name: workloadId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkloadSyncFields'
+        description: The workload info in the cluster.
+        required: true
+      responses:
+        "204":
+          description: No Content.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: issuer is not familiar
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Upsert the workload info from the cluster.
+      tags:
+      - Workloads
+      x-internal: true
+      x-authorize:
+        resource-type: workloads
+        action: sync
+  /api/v1/workloads/count:
+    get:
+      operationId: count_workloads
+      parameters:
+      - description: "if true, return only deleted resources."
+        explode: true
+        in: query
+        name: deleted
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: "Filter results by a parameter. Use the format field-name operator\
+          \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
+          \ >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts\
+          \ with and =$ Ends with. Dates are in ISO 8601 timestamp format and available\
+          \ for operators ==, !=, <= and >=."
+        explode: true
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          example:
+          - name!=some-workload-name
+          items:
+            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/count_workloads_200_response'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: issuer is not familiar
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: "Count workloads. [Experimental]"
+      tags:
+      - Workloads
+      x-authorize:
+        resource-type: workloads
+        action: read
+  /api/v1/workloads/pods:
+    post:
+      operationId: sync_workloads_pods
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PodsSyncRequest'
+        description: The pods to sync.
+      responses:
+        "204":
+          description: No Content.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: issuer is not familiar
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Sync workloads pods.
+      tags:
+      - Pods
+      x-internal: true
+      x-authorize:
+        resource-type: workloads
+        action: sync
+  /api/v1/workloads/{workloadId}/pods:
+    get:
+      operationId: get_workload_pods
+      parameters:
+      - description: The requested workload id.
+        explode: false
+        in: path
+        name: workloadId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: "if true, return only deleted resources."
+        explode: true
+        in: query
+        name: deleted
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: The offset from which to start fetching records.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          format: int32
+          type: integer
+        style: form
+      - description: The limit of returned records count.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          format: int32
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_workload_pods_200_response'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: issuer is not familiar
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id was not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: "Get the workload pods. [Experimental]"
+      tags:
+      - Pods
+      x-authorize:
+        resource-type: workloads
+        action: read
+        resource-id: workloadId
+  /api/v1/workloads/pods/{podId}:
+    delete:
+      operationId: delete_pod
+      parameters:
+      - description: The requested pod id.
+        explode: false
+        in: path
+        name: podId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: No Content.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: issuer is not familiar
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Delete a pod as it does not exist in the cluster anymore.
+      tags:
+      - Pods
+      x-internal: true
+      x-authorize:
+        resource-type: workloads
+        action: sync
+    put:
+      operationId: upsert_pod
+      parameters:
+      - description: The requested pod id.
+        explode: false
+        in: path
+        name: podId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PodSyncFields'
+        description: The pod info in the cluster.
+        required: true
+      responses:
+        "204":
+          description: No Content.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: issuer is not familiar
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Upsert a single pod info from the cluster.
+      tags:
+      - Pods
+      x-internal: true
+      x-authorize:
+        resource-type: workloads
+        action: sync
+  /api/v1/workloads/events:
+    post:
+      operationId: sync_events
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventsSyncRequest'
+        description: The events to sync.
+      responses:
+        "204":
+          description: No Content.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: issuer is not familiar
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Sync events.
+      tags:
+      - Events
+      x-internal: true
+      x-authorize:
+        resource-type: events-history
+        action: sync
+  /api/v1/workloads/{workloadId}/events:
+    get:
+      operationId: get_workload_events
+      parameters:
+      - description: The requested workload id.
+        explode: false
+        in: path
+        name: workloadId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: The offset from which to start fetching records.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          format: int32
+          type: integer
+        style: form
+      - description: The limit of returned records count.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          format: int32
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_workload_events_200_response'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: issuer is not familiar
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id was not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: "Get the workload events. [Experimental]"
+      tags:
+      - Events
+      x-authorize:
+        resource-type: workloads
+        action: read
+        id: workloadId
+  /api/v1/workloads/{workloadId}/history:
+    get:
+      operationId: get_workload_history
+      parameters:
+      - description: The requested workload id.
+        explode: false
+        in: path
+        name: workloadId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: The offset from which to start fetching records.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          format: int32
+          type: integer
+        style: form
+      - description: The limit of returned records count.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          format: int32
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_workload_history_200_response'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: issuer is not familiar
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id was not found
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: "Get the workload history. [Experimental]"
+      tags:
+      - Events
+      x-authorize:
+        resource-type: workloads
+        action: read
+        id: workloadId
+components:
+  parameters:
+    Deleted:
+      description: "if true, return only deleted resources."
+      explode: true
+      in: query
+      name: deleted
+      required: false
+      schema:
+        type: boolean
+      style: form
+    Offset:
+      description: The offset from which to start fetching records.
+      explode: true
+      in: query
+      name: offset
+      required: false
+      schema:
+        format: int32
+        type: integer
+      style: form
+    Limit:
+      description: The limit of returned records count.
+      explode: true
+      in: query
+      name: limit
+      required: false
+      schema:
+        format: int32
+        type: integer
+      style: form
+    SortOrder:
+      description: Sort results by a descending or ascending order.
+      explode: true
+      in: query
+      name: sortOrder
+      required: false
+      schema:
+        default: asc
+        enum:
+        - asc
+        - desc
+        type: string
+      style: form
+    WorkloadsSort:
+      description: Sort results by a parameters.
+      explode: true
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        enum:
+        - type
+        - name
+        - clusterId
+        - projectId
+        - projectName
+        - departmentId
+        - departmentName
+        - createdAt
+        - deletedAt
+        - submittedBy
+        - phase
+        - completedAt
+        type: string
+      style: form
+    WorkloadsFilter:
+      description: "Filter results by a parameter. Use the format field-name operator\
+        \ value. Operators are == Equals, != Not equals, <= Less than or equal, >=\
+        \ Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with\
+        \ and =$ Ends with. Dates are in ISO 8601 timestamp format and available for\
+        \ operators ==, !=, <= and >=."
+      explode: true
+      in: query
+      name: filterBy
+      required: false
+      schema:
+        example:
+        - name!=some-workload-name
+        items:
+          pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+          type: string
+        type: array
+      style: form
+    WorkloadId:
+      description: The requested workload id.
+      explode: false
+      in: path
+      name: workloadId
+      required: true
+      schema:
+        format: uuid
+        type: string
+      style: simple
+    PodId:
+      description: The requested pod id.
+      explode: false
+      in: path
+      name: podId
+      required: true
+      schema:
+        format: uuid
+        type: string
+      style: simple
+    ClusterId:
+      description: filter resources by cluster id.
+      explode: true
+      in: query
+      name: clusterId
+      required: false
+      schema:
+        format: uuid
+        type: string
+      style: form
+    ProjectId:
+      description: filter resources by project id.
+      explode: true
+      in: query
+      name: projectId
+      required: false
+      schema:
+        type: string
+      style: form
+    workloadId:
+      $ref: '#/components/parameters/WorkloadId'
+    podId:
+      $ref: '#/components/parameters/PodId'
+    clusterId:
+      $ref: '#/components/parameters/ClusterId'
+    deleted:
+      $ref: '#/components/parameters/Deleted'
+    limit:
+      $ref: '#/components/parameters/Limit'
+    offset:
+      $ref: '#/components/parameters/Offset'
+    projectId:
+      $ref: '#/components/parameters/ProjectId'
+  responses:
+    "400BadRequest":
+      content:
+        application/json:
+          example:
+            code: 400
+            message: Required parameter is missing
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Bad request.
+    "409Conflict":
+      content:
+        application/json:
+          example:
+            code: 409
+            message: Resource with this name already exists
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource already exists
+    "500InternalServerError":
+      content:
+        application/json:
+          example:
+            code: 500
+            message: Something went wrong
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+    "503ServiceUnavailable":
+      content:
+        application/json:
+          example:
+            code: 503
+            message: Please try again in few minutes
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+    "204NoContent":
+      description: No Content.
+    "401Unauthorized":
+      content:
+        application/json:
+          example:
+            code: 401
+            message: issuer is not familiar
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unauthorized
+    "403Forbidden":
+      content:
+        application/json:
+          example:
+            code: 403
+            message: You do not have sufficient permissions
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Forbidden
+    "404NotFound":
+      content:
+        application/json:
+          example:
+            code: 404
+            message: Resource id was not found
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource was not found
+    "406NotAcceptable":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Not acceptable request
+    "412PreconditionFailed":
+      content:
+        application/json:
+          example:
+            code: 412
+            message: Precondition failed
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource was not found.
+    "413RequestEntityTooLarge":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Request entity too large
+    "415UnsupportedMediaType":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unsupported media type
+    "501NotImplemented":
+      content:
+        application/json:
+          example:
+            code: 501
+            message: Not implemented
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+  schemas:
+    GpuRequestType:
+      description: "Whether the request for GPU resources is stated in terms of portion,\
+        \ memory or mig profile."
+      enum:
+      - portion
+      - memory
+      - migProfile
+      nullable: true
+      type: string
+    RequestResourceCores:
+      example:
+        request: 1
+        limit: 1.5
+      nullable: true
+      properties:
+        limit:
+          example: 1.5
+          format: double
+          nullable: true
+          type: number
+        request:
+          example: 1
+          format: double
+          nullable: true
+          type: number
+      type: object
+    RequestResourceQuantity:
+      example:
+        request: 200M
+        limit: 2G
+      nullable: true
+      properties:
+        limit:
+          example: 2G
+          nullable: true
+          pattern: "^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+          type: string
+        request:
+          example: 200M
+          nullable: true
+          pattern: "^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+          type: string
+      type: object
+    MigProfile:
+      description: Required if and only if gpuRequestType is migProfile. States the
+        memory profile to be used for workload running on NVIDIA Multi-Instance GPU
+        (MIG) technology.
+      enum:
+      - 1g.5gb
+      - 1g.10gb
+      - 2g.10gb
+      - 2g.20gb
+      - 3g.20gb
+      - 3g.40gb
+      - 4g.20gb
+      - 4g.40gb
+      - 7g.40gb
+      - 7g.80gb
+      type: string
+    ExtendedResources:
+      description: Set of extended resources
+      items:
+        $ref: '#/components/schemas/ExtendedResources_inner'
+      nullable: true
+      type: array
+    WorkloadRequestResources:
+      example:
+        gpuMemory:
+          request: 200M
+          limit: 2G
+        extendedResources:
+        - request: 200M
+          limit: 2G
+          name: example.com/foo
+        - request: 200M
+          limit: 2G
+          name: example.com/foo
+        cpuMemory:
+          request: 200M
+          limit: 2G
+        migProfile:
+        - null
+        - null
+        cpu:
+          request: 1
+          limit: 1.5
+        gpuRequestType: null
+        gpu:
+          request: 1
+          limit: 1.5
+      nullable: true
+      properties:
+        gpuRequestType:
+          $ref: '#/components/schemas/GpuRequestType'
+        gpu:
+          $ref: '#/components/schemas/RequestResourceCores'
+        gpuMemory:
+          $ref: '#/components/schemas/RequestResourceQuantity'
+        cpu:
+          $ref: '#/components/schemas/RequestResourceCores'
+        cpuMemory:
+          $ref: '#/components/schemas/RequestResourceQuantity'
+        migProfile:
+          items:
+            $ref: '#/components/schemas/MigProfile'
+          nullable: true
+          type: array
+        extendedResources:
+          description: Set of extended resources
+          items:
+            $ref: '#/components/schemas/ExtendedResources_inner'
+          nullable: true
+          type: array
+      type: object
+    RequestedPods:
+      example:
+        number: 1
+        min: 2
+        max: 5
+        parallelism: 3
+        completions: 5
+      properties:
+        number:
+          example: 1
+          format: int32
+          nullable: true
+          type: integer
+        min:
+          example: 2
+          format: int32
+          nullable: true
+          type: integer
+        max:
+          example: 5
+          format: int32
+          nullable: true
+          type: integer
+        parallelism:
+          description: specifies how many Pods can run in parallel
+          example: 3
+          format: int32
+          nullable: true
+          type: integer
+        completions:
+          description: specifies how many Pods should terminate successfully before
+            the Workload is completed
+          example: 5
+          format: int32
+          nullable: true
+          type: integer
+      type: object
+    Datasource:
+      example:
+        name: my-pvc-datasource-1
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        type: pvc
+      properties:
+        type:
+          example: pvc
+          type: string
+        name:
+          example: my-pvc-datasource-1
+          type: string
+        id:
+          format: uuid
+          type: string
+      required:
+      - id
+      - name
+      type: object
+    Connection:
+      description: "Connection that either expose port from the container (a port\
+        \ is associated with a tool that the container runs), or URL to be used for\
+        \ connecting to an external tool that is related to the action of the container\
+        \ (such as Weights & Biases)."
+      example:
+        name: my-pytorch-env
+        toolType: pytorch
+        url: http://wandb.com/yourproject
+      properties:
+        name:
+          example: my-pytorch-env
+          type: string
+        toolType:
+          example: pytorch
+          type: string
+        url:
+          example: http://wandb.com/yourproject
+          type: string
+      required:
+      - name
+      - toolType
+      type: object
+    ReplicaType:
+      enum:
+      - Master
+      - Worker
+      nullable: true
+      type: string
+    Environment:
+      example:
+        name: pytorch
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        connections:
+        - name: my-pytorch-env
+          toolType: pytorch
+          url: http://wandb.com/yourproject
+        - name: my-pytorch-env
+          toolType: pytorch
+          url: http://wandb.com/yourproject
+        replicaType: null
+      properties:
+        connections:
+          items:
+            $ref: '#/components/schemas/Connection'
+          type: array
+        name:
+          example: pytorch
+          type: string
+        id:
+          format: uuid
+          type: string
+        replicaType:
+          $ref: '#/components/schemas/ReplicaType'
+      required:
+      - connections
+      - id
+      - name
+      type: object
+    WorkloadCreationFields:
+      example:
+        submittedBy: researcher@run.ai
+        images:
+        - busybox:latest
+        - busybox:latest
+        environments:
+        - name: pytorch
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          connections:
+          - name: my-pytorch-env
+            toolType: pytorch
+            url: http://wandb.com/yourproject
+          - name: my-pytorch-env
+            toolType: pytorch
+            url: http://wandb.com/yourproject
+          replicaType: null
+        - name: pytorch
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          connections:
+          - name: my-pytorch-env
+            toolType: pytorch
+            url: http://wandb.com/yourproject
+          - name: my-pytorch-env
+            toolType: pytorch
+            url: http://wandb.com/yourproject
+          replicaType: null
+        externalConnections:
+        - name: my-pytorch-env
+          toolType: pytorch
+          url: http://wandb.com/yourproject
+        - name: my-pytorch-env
+          toolType: pytorch
+          url: http://wandb.com/yourproject
+        clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        requestedNodePools:
+        - default
+        - default
+        type: runai-job
+        createdAt: 2022-01-01T03:49:52.531Z
+        requestedPods:
+          number: 1
+          min: 2
+          max: 5
+          parallelism: 3
+          completions: 5
+        datasources:
+        - name: my-pvc-datasource-1
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          type: pvc
+        - name: my-pvc-datasource-1
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          type: pvc
+        name: very-important-job
+        distributedFramework: Pytorch
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        projectId: "1"
+        requestedResources:
+          gpuMemory:
+            request: 200M
+            limit: 2G
+          extendedResources:
+          - request: 200M
+            limit: 2G
+            name: example.com/foo
+          - request: 200M
+            limit: 2G
+            name: example.com/foo
+          cpuMemory:
+            request: 200M
+            limit: 2G
+          migProfile:
+          - null
+          - null
+          cpu:
+            request: 1
+            limit: 1.5
+          gpuRequestType: null
+          gpu:
+            request: 1
+            limit: 1.5
+      properties:
+        type:
+          example: runai-job
+          type: string
+        name:
+          example: very-important-job
+          type: string
+        id:
+          format: uuid
+          type: string
+        submittedBy:
+          example: researcher@run.ai
+          type: string
+        clusterId:
+          format: uuid
+          type: string
+        projectId:
+          example: "1"
+          type: string
+        createdAt:
+          example: 2022-01-01T03:49:52.531Z
+          format: date-time
+          type: string
+        requestedResources:
+          $ref: '#/components/schemas/WorkloadRequestResources'
+        requestedPods:
+          $ref: '#/components/schemas/RequestedPods'
+        requestedNodePools:
+          items:
+            example: default
+            type: string
+          type: array
+        datasources:
+          items:
+            $ref: '#/components/schemas/Datasource'
+          type: array
+        environments:
+          items:
+            $ref: '#/components/schemas/Environment'
+          type: array
+        externalConnections:
+          items:
+            $ref: '#/components/schemas/Connection'
+          type: array
+        distributedFramework:
+          example: Pytorch
+          type: string
+        images:
+          items:
+            example: busybox:latest
+            type: string
+          type: array
+      required:
+      - clusterId
+      - createdAt
+      - id
+      - name
+      - projectId
+      - type
+      type: object
+    Source:
+      enum:
+      - CLI
+      - Control-plane
+      - Other
+      type: string
+    WorkloadAllocatedResources:
+      example:
+        gpuMemory: 200Mi
+        extendedResources:
+        - request: 200M
+          limit: 2G
+          name: example.com/foo
+        - request: 200M
+          limit: 2G
+          name: example.com/foo
+        cpuMemory: 0B
+        migProfile:
+        - null
+        - null
+        cpu: 0.5
+        gpu: 1.5
+      nullable: true
+      properties:
+        gpu:
+          description: Required if and only if gpuRequestType is portion. States the
+            number of GPUs allocated for the created workload. The default is no allocated
+            GPUs.
+          example: 1.5
+          format: double
+          nullable: true
+          type: number
+        migProfile:
+          items:
+            $ref: '#/components/schemas/MigProfile'
+          nullable: true
+          type: array
+        gpuMemory:
+          example: 200Mi
+          nullable: true
+          pattern: "^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+          type: string
+        cpu:
+          description: States the amount of CPU cores used by the workload running.
+          example: 0.5
+          format: double
+          nullable: true
+          type: number
+        cpuMemory:
+          example: 0B
+          nullable: true
+          pattern: "^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+          type: string
+        extendedResources:
+          description: Set of extended resources
+          items:
+            $ref: '#/components/schemas/ExtendedResources_inner'
+          nullable: true
+          type: array
+      type: object
+    ActionsSupport:
+      description: The actions support provided for the workload.
+      example:
+        suspend: true
+        delete: true
+      properties:
+        delete:
+          example: true
+          type: boolean
+        suspend:
+          description: This permission includes resume as well as suspend.
+          example: true
+          type: boolean
+      type: object
+    Phase:
+      enum:
+      - Creating
+      - Initializing
+      - Resuming
+      - Pending
+      - Deleting
+      - Running
+      - Updating
+      - Stopped
+      - Stopping
+      - Degraded
+      - Failed
+      - Completed
+      - Terminating
+      - Unknown
+      type: string
+    Condition:
+      example:
+        reason: ErrorConfig
+        type: Ready
+        message: "Resource validation failed: ..."
+        lastTransitionTime: 2022-01-01T03:49:52.531Z
+        status: "False"
+      properties:
+        type:
+          description: "The type of the condition, such as Failed or Available. See\
+            \ Types of domain status conditions."
+          example: Ready
+          type: string
+        status:
+          description: "The status of the condition, such as True, False or Unknown."
+          example: "False"
+          type: string
+        message:
+          description: "An optional, human-readable message providing more details\
+            \ about the condition."
+          example: "Resource validation failed: ..."
+          type: string
+        reason:
+          description: The reason for the Failed condition. Not applicable to other
+            types of condition.
+          example: ErrorConfig
+          type: string
+        lastTransitionTime:
+          description: A timestamp of when the condition was created or the last time
+            time the condition transitioned from one status to another.
+          example: 2022-01-01T03:49:52.531Z
+          format: date-time
+          nullable: true
+          type: string
+      required:
+      - lastTransitionTime
+      - status
+      - type
+      type: object
+    Conditions:
+      items:
+        $ref: '#/components/schemas/Condition'
+      type: array
+      x-schema-name: Conditions
+    Workload:
+      example:
+        workloadRequestedResources:
+          gpuMemory:
+            request: 200M
+            limit: 2G
+          extendedResources:
+          - request: 200M
+            limit: 2G
+            name: example.com/foo
+          - request: 200M
+            limit: 2G
+            name: example.com/foo
+          cpuMemory:
+            request: 200M
+            limit: 2G
+          migProfile:
+          - null
+          - null
+          cpu:
+            request: 1
+            limit: 1.5
+          gpuRequestType: null
+          gpu:
+            request: 1
+            limit: 1.5
+        podsRequestedResources:
+          gpuMemory:
+            request: 200M
+            limit: 2G
+          extendedResources:
+          - request: 200M
+            limit: 2G
+            name: example.com/foo
+          - request: 200M
+            limit: 2G
+            name: example.com/foo
+          cpuMemory:
+            request: 200M
+            limit: 2G
+          migProfile:
+          - null
+          - null
+          cpu:
+            request: 1
+            limit: 1.5
+          gpuRequestType: null
+          gpu:
+            request: 1
+            limit: 1.5
+        actionsSupport:
+          suspend: true
+          delete: true
+        additionalFields: "{\"someSpecialField\":\"value\"}"
+        environments:
+        - name: pytorch
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          connections:
+          - name: my-pytorch-env
+            toolType: pytorch
+            url: http://wandb.com/yourproject
+          - name: my-pytorch-env
+            toolType: pytorch
+            url: http://wandb.com/yourproject
+          replicaType: null
+        - name: pytorch
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          connections:
+          - name: my-pytorch-env
+            toolType: pytorch
+            url: http://wandb.com/yourproject
+          - name: my-pytorch-env
+            toolType: pytorch
+            url: http://wandb.com/yourproject
+          replicaType: null
+        departmentId: "1"
+        priorityClassName: high-priority
+        source: null
+        clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        type: runai-job
+        createdAt: 2022-01-01T03:49:52.531Z
+        urls:
+        - urls
+        - urls
+        k8sPhaseUpdatedAt: 2022-06-08T11:28:24.131Z
+        distributedFramework: Pytorch
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        phaseUpdatedAt: 2022-06-08T11:28:24.131Z
+        updatedAt: 2022-06-08T11:28:24.131Z
+        submittedBy: researcher@run.ai
+        departmentName: department-1
+        phase: null
+        phaseMessage: Not enough resources in the requested nodepool
+        completedAt: 2022-01-01T03:49:52.531Z
+        images:
+        - busybox:latest
+        - busybox:latest
+        k8sPhase: Pending
+        externalConnections:
+        - name: my-pytorch-env
+          toolType: pytorch
+          url: http://wandb.com/yourproject
+        - name: my-pytorch-env
+          toolType: pytorch
+          url: http://wandb.com/yourproject
+        childrenIds:
+        - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          type: type
+        - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          type: type
+        runningPods: 1
+        requestedNodePools:
+        - default
+        - default
+        allocatedResources:
+          gpuMemory: 200Mi
+          extendedResources:
+          - request: 200M
+            limit: 2G
+            name: example.com/foo
+          - request: 200M
+            limit: 2G
+            name: example.com/foo
+          cpuMemory: 0B
+          migProfile:
+          - null
+          - null
+          cpu: 0.5
+          gpu: 1.5
+        requestedPods:
+          number: 1
+          min: 2
+          max: 5
+          parallelism: 3
+          completions: 5
+        deletedAt: 2022-08-12T19:28:24.131Z
+        currentNodePools:
+        - default
+        - default
+        datasources:
+        - name: my-pvc-datasource-1
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          type: pvc
+        - name: my-pvc-datasource-1
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          type: pvc
+        tenantId: 1
+        name: very-important-job
+        namespace: runai-proj-1
+        projectName: proj-1
+        conditions:
+        - reason: ErrorConfig
+          type: Ready
+          message: "Resource validation failed: ..."
+          lastTransitionTime: 2022-01-01T03:49:52.531Z
+          status: "False"
+        - reason: ErrorConfig
+          type: Ready
+          message: "Resource validation failed: ..."
+          lastTransitionTime: 2022-01-01T03:49:52.531Z
+          status: "False"
+        projectId: "1"
+      properties:
+        tenantId:
+          example: 1
+          format: int32
+          type: integer
+        runningPods:
+          example: 1
+          format: int32
+          type: integer
+        phaseUpdatedAt:
+          example: 2022-06-08T11:28:24.131Z
+          format: date-time
+          type: string
+        k8sPhaseUpdatedAt:
+          example: 2022-06-08T11:28:24.131Z
+          format: date-time
+          type: string
+        updatedAt:
+          example: 2022-06-08T11:28:24.131Z
+          format: date-time
+          type: string
+        source:
+          $ref: '#/components/schemas/Source'
+        deletedAt:
+          example: 2022-08-12T19:28:24.131Z
+          format: date-time
+          nullable: true
+          type: string
+        type:
+          example: runai-job
+          type: string
+        name:
+          example: very-important-job
+          type: string
+        id:
+          format: uuid
+          type: string
+        priorityClassName:
+          example: high-priority
+          type: string
+        submittedBy:
+          example: researcher@run.ai
+          type: string
+        clusterId:
+          format: uuid
+          type: string
+        projectName:
+          example: proj-1
+          type: string
+        projectId:
+          example: "1"
+          type: string
+        departmentName:
+          example: department-1
+          type: string
+        departmentId:
+          example: "1"
+          type: string
+        namespace:
+          example: runai-proj-1
+          type: string
+        createdAt:
+          example: 2022-01-01T03:49:52.531Z
+          format: date-time
+          type: string
+        workloadRequestedResources:
+          $ref: '#/components/schemas/WorkloadRequestResources'
+        podsRequestedResources:
+          $ref: '#/components/schemas/WorkloadRequestResources'
+        allocatedResources:
+          $ref: '#/components/schemas/WorkloadAllocatedResources'
+        actionsSupport:
+          $ref: '#/components/schemas/ActionsSupport'
+        phase:
+          $ref: '#/components/schemas/Phase'
+        conditions:
+          items:
+            $ref: '#/components/schemas/Condition'
+          type: array
+          x-schema-name: Conditions
+        phaseMessage:
+          example: Not enough resources in the requested nodepool
+          type: string
+        k8sPhase:
+          example: Pending
+          type: string
+        requestedPods:
+          $ref: '#/components/schemas/RequestedPods'
+        requestedNodePools:
+          items:
+            example: default
+            type: string
+          type: array
+        currentNodePools:
+          items:
+            example: default
+            type: string
+          type: array
+        completedAt:
+          example: 2022-01-01T03:49:52.531Z
+          format: date-time
+          nullable: true
+          type: string
+        images:
+          items:
+            example: busybox:latest
+            type: string
+          type: array
+        childrenIds:
+          items:
+            $ref: '#/components/schemas/Workload_childrenIds_inner'
+          type: array
+          writeOnly: true
+        urls:
+          items:
+            type: string
+          type: array
+        datasources:
+          items:
+            $ref: '#/components/schemas/Datasource'
+          type: array
+        environments:
+          items:
+            $ref: '#/components/schemas/Environment'
+          type: array
+        externalConnections:
+          items:
+            $ref: '#/components/schemas/Connection'
+          type: array
+        distributedFramework:
+          example: Pytorch
+          type: string
+        additionalFields:
+          example: "{\"someSpecialField\":\"value\"}"
+          format: json
+          type: string
+      required:
+      - clusterId
+      - conditions
+      - createdAt
+      - deletedAt
+      - departmentId
+      - departmentName
+      - id
+      - k8sPhase
+      - k8sPhaseUpdatedAt
+      - name
+      - namespace
+      - phase
+      - phaseUpdatedAt
+      - priorityClassName
+      - projectId
+      - projectName
+      - runningPods
+      - source
+      - tenantId
+      - type
+      - updatedAt
+      type: object
+    Error:
+      example:
+        code: 400
+        message: Bad request - Resource should have a name
+      properties:
+        code:
+          maximum: 599
+          minimum: 100
+          type: integer
+        message:
+          type: string
+        details:
+          type: string
+      required:
+      - code
+      - message
+    WorkloadSyncFields:
+      example:
+        actionsSupport:
+          suspend: true
+          delete: true
+        additionalFields: "{\"someSpecialField\":\"value\"}"
+        departmentId: "1"
+        priorityClassName: high-priority
+        clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        source: null
+        type: runai-job
+        createdAt: 2022-01-01T03:49:52.531Z
+        urls:
+        - urls
+        - urls
+        distributedFramework: Pytorch
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        submittedBy: researcher@run.ai
+        departmentName: department-1
+        phase: null
+        phaseMessage: Not enough resources in the requested nodepool
+        images:
+        - busybox:latest
+        - busybox:latest
+        k8sPhase: Pending
+        childrenIds:
+        - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          type: type
+        - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          type: type
+        requestedNodePools:
+        - default
+        - default
+        requestedPods:
+          number: 1
+          min: 2
+          max: 5
+          parallelism: 3
+          completions: 5
+        name: very-important-job
+        namespace: runai-proj-1
+        projectName: proj-1
+        conditions:
+        - reason: ErrorConfig
+          type: Ready
+          message: "Resource validation failed: ..."
+          lastTransitionTime: 2022-01-01T03:49:52.531Z
+          status: "False"
+        - reason: ErrorConfig
+          type: Ready
+          message: "Resource validation failed: ..."
+          lastTransitionTime: 2022-01-01T03:49:52.531Z
+          status: "False"
+        projectId: "1"
+        requestedResources:
+          gpuMemory:
+            request: 200M
+            limit: 2G
+          extendedResources:
+          - request: 200M
+            limit: 2G
+            name: example.com/foo
+          - request: 200M
+            limit: 2G
+            name: example.com/foo
+          cpuMemory:
+            request: 200M
+            limit: 2G
+          migProfile:
+          - null
+          - null
+          cpu:
+            request: 1
+            limit: 1.5
+          gpuRequestType: null
+          gpu:
+            request: 1
+            limit: 1.5
+      properties:
+        type:
+          example: runai-job
+          type: string
+        name:
+          example: very-important-job
+          type: string
+        id:
+          format: uuid
+          type: string
+        submittedBy:
+          example: researcher@run.ai
+          type: string
+        priorityClassName:
+          example: high-priority
+          type: string
+        clusterId:
+          format: uuid
+          type: string
+        projectName:
+          example: proj-1
+          type: string
+        projectId:
+          example: "1"
+          type: string
+        departmentName:
+          example: department-1
+          type: string
+        departmentId:
+          example: "1"
+          type: string
+        namespace:
+          example: runai-proj-1
+          type: string
+        createdAt:
+          example: 2022-01-01T03:49:52.531Z
+          format: date-time
+          type: string
+        requestedResources:
+          $ref: '#/components/schemas/WorkloadRequestResources'
+        actionsSupport:
+          $ref: '#/components/schemas/ActionsSupport'
+        phase:
+          $ref: '#/components/schemas/Phase'
+        source:
+          $ref: '#/components/schemas/Source'
+        conditions:
+          items:
+            $ref: '#/components/schemas/Condition'
+          type: array
+          x-schema-name: Conditions
+        phaseMessage:
+          example: Not enough resources in the requested nodepool
+          type: string
+        k8sPhase:
+          example: Pending
+          type: string
+        requestedPods:
+          $ref: '#/components/schemas/RequestedPods'
+        requestedNodePools:
+          items:
+            example: default
+            type: string
+          type: array
+        images:
+          items:
+            example: busybox:latest
+            type: string
+          type: array
+        distributedFramework:
+          example: Pytorch
+          type: string
+        childrenIds:
+          items:
+            $ref: '#/components/schemas/Workload_childrenIds_inner'
+          type: array
+          writeOnly: true
+        urls:
+          items:
+            type: string
+          type: array
+        additionalFields:
+          example: "{\"someSpecialField\":\"value\"}"
+          format: json
+          type: string
+      required:
+      - clusterId
+      - createdAt
+      - departmentId
+      - departmentName
+      - id
+      - k8sPhase
+      - name
+      - namespace
+      - phase
+      - priorityClassName
+      - projectId
+      - projectName
+      - source
+      - type
+      type: object
+    InternalWorkloadsSyncRequest:
+      example:
+        workloads:
+        - actionsSupport:
+            suspend: true
+            delete: true
+          additionalFields: "{\"someSpecialField\":\"value\"}"
+          departmentId: "1"
+          priorityClassName: high-priority
+          clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          source: null
+          type: runai-job
+          createdAt: 2022-01-01T03:49:52.531Z
+          urls:
+          - urls
+          - urls
+          distributedFramework: Pytorch
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          submittedBy: researcher@run.ai
+          departmentName: department-1
+          phase: null
+          phaseMessage: Not enough resources in the requested nodepool
+          images:
+          - busybox:latest
+          - busybox:latest
+          k8sPhase: Pending
+          childrenIds:
+          - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            type: type
+          - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            type: type
+          requestedNodePools:
+          - default
+          - default
+          requestedPods:
+            number: 1
+            min: 2
+            max: 5
+            parallelism: 3
+            completions: 5
+          name: very-important-job
+          namespace: runai-proj-1
+          projectName: proj-1
+          conditions:
+          - reason: ErrorConfig
+            type: Ready
+            message: "Resource validation failed: ..."
+            lastTransitionTime: 2022-01-01T03:49:52.531Z
+            status: "False"
+          - reason: ErrorConfig
+            type: Ready
+            message: "Resource validation failed: ..."
+            lastTransitionTime: 2022-01-01T03:49:52.531Z
+            status: "False"
+          projectId: "1"
+          requestedResources:
+            gpuMemory:
+              request: 200M
+              limit: 2G
+            extendedResources:
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            cpuMemory:
+              request: 200M
+              limit: 2G
+            migProfile:
+            - null
+            - null
+            cpu:
+              request: 1
+              limit: 1.5
+            gpuRequestType: null
+            gpu:
+              request: 1
+              limit: 1.5
+        - actionsSupport:
+            suspend: true
+            delete: true
+          additionalFields: "{\"someSpecialField\":\"value\"}"
+          departmentId: "1"
+          priorityClassName: high-priority
+          clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          source: null
+          type: runai-job
+          createdAt: 2022-01-01T03:49:52.531Z
+          urls:
+          - urls
+          - urls
+          distributedFramework: Pytorch
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          submittedBy: researcher@run.ai
+          departmentName: department-1
+          phase: null
+          phaseMessage: Not enough resources in the requested nodepool
+          images:
+          - busybox:latest
+          - busybox:latest
+          k8sPhase: Pending
+          childrenIds:
+          - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            type: type
+          - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            type: type
+          requestedNodePools:
+          - default
+          - default
+          requestedPods:
+            number: 1
+            min: 2
+            max: 5
+            parallelism: 3
+            completions: 5
+          name: very-important-job
+          namespace: runai-proj-1
+          projectName: proj-1
+          conditions:
+          - reason: ErrorConfig
+            type: Ready
+            message: "Resource validation failed: ..."
+            lastTransitionTime: 2022-01-01T03:49:52.531Z
+            status: "False"
+          - reason: ErrorConfig
+            type: Ready
+            message: "Resource validation failed: ..."
+            lastTransitionTime: 2022-01-01T03:49:52.531Z
+            status: "False"
+          projectId: "1"
+          requestedResources:
+            gpuMemory:
+              request: 200M
+              limit: 2G
+            extendedResources:
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            cpuMemory:
+              request: 200M
+              limit: 2G
+            migProfile:
+            - null
+            - null
+            cpu:
+              request: 1
+              limit: 1.5
+            gpuRequestType: null
+            gpu:
+              request: 1
+              limit: 1.5
+        clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        clusterId:
+          format: uuid
+          type: string
+        workloads:
+          items:
+            $ref: '#/components/schemas/WorkloadSyncFields'
+          type: array
+      required:
+      - clusterId
+      - workloads
+      type: object
+    Workloads:
+      items:
+        $ref: '#/components/schemas/Workload'
+      type: array
+      x-schema-name: Workloads
+    WorkloadsSyncRequest:
+      example:
+        idsToIgnore:
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        workloads:
+        - actionsSupport:
+            suspend: true
+            delete: true
+          additionalFields: "{\"someSpecialField\":\"value\"}"
+          departmentId: "1"
+          priorityClassName: high-priority
+          clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          source: null
+          type: runai-job
+          createdAt: 2022-01-01T03:49:52.531Z
+          urls:
+          - urls
+          - urls
+          distributedFramework: Pytorch
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          submittedBy: researcher@run.ai
+          departmentName: department-1
+          phase: null
+          phaseMessage: Not enough resources in the requested nodepool
+          images:
+          - busybox:latest
+          - busybox:latest
+          k8sPhase: Pending
+          childrenIds:
+          - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            type: type
+          - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            type: type
+          requestedNodePools:
+          - default
+          - default
+          requestedPods:
+            number: 1
+            min: 2
+            max: 5
+            parallelism: 3
+            completions: 5
+          name: very-important-job
+          namespace: runai-proj-1
+          projectName: proj-1
+          conditions:
+          - reason: ErrorConfig
+            type: Ready
+            message: "Resource validation failed: ..."
+            lastTransitionTime: 2022-01-01T03:49:52.531Z
+            status: "False"
+          - reason: ErrorConfig
+            type: Ready
+            message: "Resource validation failed: ..."
+            lastTransitionTime: 2022-01-01T03:49:52.531Z
+            status: "False"
+          projectId: "1"
+          requestedResources:
+            gpuMemory:
+              request: 200M
+              limit: 2G
+            extendedResources:
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            cpuMemory:
+              request: 200M
+              limit: 2G
+            migProfile:
+            - null
+            - null
+            cpu:
+              request: 1
+              limit: 1.5
+            gpuRequestType: null
+            gpu:
+              request: 1
+              limit: 1.5
+        - actionsSupport:
+            suspend: true
+            delete: true
+          additionalFields: "{\"someSpecialField\":\"value\"}"
+          departmentId: "1"
+          priorityClassName: high-priority
+          clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          source: null
+          type: runai-job
+          createdAt: 2022-01-01T03:49:52.531Z
+          urls:
+          - urls
+          - urls
+          distributedFramework: Pytorch
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          submittedBy: researcher@run.ai
+          departmentName: department-1
+          phase: null
+          phaseMessage: Not enough resources in the requested nodepool
+          images:
+          - busybox:latest
+          - busybox:latest
+          k8sPhase: Pending
+          childrenIds:
+          - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            type: type
+          - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            type: type
+          requestedNodePools:
+          - default
+          - default
+          requestedPods:
+            number: 1
+            min: 2
+            max: 5
+            parallelism: 3
+            completions: 5
+          name: very-important-job
+          namespace: runai-proj-1
+          projectName: proj-1
+          conditions:
+          - reason: ErrorConfig
+            type: Ready
+            message: "Resource validation failed: ..."
+            lastTransitionTime: 2022-01-01T03:49:52.531Z
+            status: "False"
+          - reason: ErrorConfig
+            type: Ready
+            message: "Resource validation failed: ..."
+            lastTransitionTime: 2022-01-01T03:49:52.531Z
+            status: "False"
+          projectId: "1"
+          requestedResources:
+            gpuMemory:
+              request: 200M
+              limit: 2G
+            extendedResources:
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            cpuMemory:
+              request: 200M
+              limit: 2G
+            migProfile:
+            - null
+            - null
+            cpu:
+              request: 1
+              limit: 1.5
+            gpuRequestType: null
+            gpu:
+              request: 1
+              limit: 1.5
+        from: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        to: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        projectId: "1"
+      properties:
+        projectId:
+          example: "1"
+          type: string
+        workloads:
+          items:
+            $ref: '#/components/schemas/WorkloadSyncFields'
+          type: array
+        from:
+          description: "the first workload id to sync. if empty, all workloads before\
+            \ the first one sent will be deleted."
+          format: uuid
+          type: string
+        to:
+          description: "the last workload to sync. if empty, all workloads after the\
+            \ last one sent will be deleted."
+          format: uuid
+          type: string
+        idsToIgnore:
+          description: workload ids to ignore when deleting.
+          items:
+            format: uuid
+            type: string
+          type: array
+      required:
+      - projectId
+      - workloads
+      type: object
+    Ancestors:
+      example:
+        tenant_id: "1"
+        cluster_uuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        department_id: "1"
+        project_id: "1"
+      properties:
+        tenant_id:
+          example: "1"
+          type: string
+        cluster_uuid:
+          format: uuid
+          nullable: true
+          type: string
+        department_id:
+          example: "1"
+          nullable: true
+          type: string
+        project_id:
+          example: "1"
+          nullable: true
+          type: string
+      required:
+      - tenant_id
+      type: object
+    Container:
+      example:
+        image: busybox:latest
+        name: busybox
+        startedAt: 2022-01-01T03:49:52.531Z
+      properties:
+        name:
+          example: busybox
+          type: string
+        image:
+          example: busybox:latest
+          type: string
+        startedAt:
+          example: 2022-01-01T03:49:52.531Z
+          format: date-time
+          nullable: true
+          type: string
+      required:
+      - image
+      - name
+      type: object
+    PodRequestResources:
+      example:
+        gpuMemory:
+          request: 200M
+          limit: 2G
+        extendedResources:
+        - request: 200M
+          limit: 2G
+          name: example.com/foo
+        - request: 200M
+          limit: 2G
+          name: example.com/foo
+        cpuMemory:
+          request: 200M
+          limit: 2G
+        migProfile: 1g.5gb
+        cpu:
+          request: 1
+          limit: 1.5
+        gpuRequestType: null
+        gpu:
+          request: 1
+          limit: 1.5
+      nullable: true
+      properties:
+        gpuRequestType:
+          $ref: '#/components/schemas/GpuRequestType'
+        gpu:
+          $ref: '#/components/schemas/RequestResourceCores'
+        gpuMemory:
+          $ref: '#/components/schemas/RequestResourceQuantity'
+        cpu:
+          $ref: '#/components/schemas/RequestResourceCores'
+        cpuMemory:
+          $ref: '#/components/schemas/RequestResourceQuantity'
+        migProfile:
+          description: Required if and only if gpuRequestType is migProfile. States
+            the memory profile to be used for workload running on NVIDIA Multi-Instance
+            GPU (MIG) technology.
+          enum:
+          - 1g.5gb
+          - 1g.10gb
+          - 2g.10gb
+          - 2g.20gb
+          - 3g.20gb
+          - 3g.40gb
+          - 4g.20gb
+          - 4g.40gb
+          - 7g.40gb
+          - 7g.80gb
+          nullable: true
+          type: string
+        extendedResources:
+          description: Set of extended resources
+          items:
+            $ref: '#/components/schemas/ExtendedResources_inner'
+          nullable: true
+          type: array
+      type: object
+    AllocatedResources:
+      example:
+        gpuMemory: 200Mi
+        extendedResources:
+        - request: 200M
+          limit: 2G
+          name: example.com/foo
+        - request: 200M
+          limit: 2G
+          name: example.com/foo
+        cpuMemory: 0B
+        migProfile: 1g.5gb
+        cpu: 0.5
+        gpu: 1.5
+      nullable: true
+      properties:
+        gpu:
+          description: Required if and only if gpuRequestType is portion. States the
+            number of GPUs allocated for the created workload. The default is no allocated
+            GPUs.
+          example: 1.5
+          format: double
+          nullable: true
+          type: number
+        migProfile:
+          description: Required if and only if gpuRequestType is migProfile. States
+            the memory profile to be used for workload running on NVIDIA Multi-Instance
+            GPU (MIG) technology.
+          enum:
+          - 1g.5gb
+          - 1g.10gb
+          - 2g.10gb
+          - 2g.20gb
+          - 3g.20gb
+          - 3g.40gb
+          - 4g.20gb
+          - 4g.40gb
+          - 7g.40gb
+          - 7g.80gb
+          nullable: true
+          type: string
+        gpuMemory:
+          example: 200Mi
+          nullable: true
+          pattern: "^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+          type: string
+        cpu:
+          description: States the amount of CPU cores used by the workload running.
+          example: 0.5
+          format: double
+          nullable: true
+          type: number
+        cpuMemory:
+          example: 0B
+          nullable: true
+          pattern: "^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+          type: string
+        extendedResources:
+          description: Set of extended resources
+          items:
+            $ref: '#/components/schemas/ExtendedResources_inner'
+          nullable: true
+          type: array
+      type: object
+    Toleration:
+      example:
+        effect: NoExecute
+        value: ""
+        tolerationSeconds: 10
+        key: ""
+        operator: Exists
+      properties:
+        key:
+          description: Key is the taint key that the toleration applies to. Empty
+            means match all taint keys.
+          example: ""
+          type: string
+        operator:
+          description: Operator represents a key's relationship to the value.
+          example: Exists
+          type: string
+        value:
+          description: Value is the taint value the toleration matches to.
+          example: ""
+          type: string
+        effect:
+          description: Effect indicates the taint effect to match. Empty means match
+            all taint effects.
+          example: NoExecute
+          type: string
+        tolerationSeconds:
+          description: "TolerationSeconds represents the period of time the toleration\
+            \ (which must be of effect NoExecute, otherwise this field is ignored)\
+            \ tolerates the taint."
+          example: 10
+          nullable: true
+          type: integer
+      type: object
+    Tolerations:
+      items:
+        $ref: '#/components/schemas/Toleration'
+      type: array
+      x-schema-name: Tolerations
+    PodSyncFields:
+      example:
+        nodeName: gpu-node-1
+        completedAt: 2022-01-01T03:49:52.531Z
+        k8sPhase: Pending
+        priorityClassName: high-priority
+        clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        requestedNodePools:
+        - default
+        - default
+        createdAt: 2022-01-01T03:49:52.531Z
+        allocatedResources:
+          gpuMemory: 200Mi
+          extendedResources:
+          - request: 200M
+            limit: 2G
+            name: example.com/foo
+          - request: 200M
+            limit: 2G
+            name: example.com/foo
+          cpuMemory: 0B
+          migProfile: 1g.5gb
+          cpu: 0.5
+          gpu: 1.5
+        tolerations:
+        - effect: NoExecute
+          value: ""
+          tolerationSeconds: 10
+          key: ""
+          operator: Exists
+        - effect: NoExecute
+          value: ""
+          tolerationSeconds: 10
+          key: ""
+          operator: Exists
+        workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        currentNodePool: default
+        name: pod-of-a-very-important-job
+        containers:
+        - image: busybox:latest
+          name: busybox
+          startedAt: 2022-01-01T03:49:52.531Z
+        - image: busybox:latest
+          name: busybox
+          startedAt: 2022-01-01T03:49:52.531Z
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        projectId: "1"
+        requestedResources:
+          gpuMemory:
+            request: 200M
+            limit: 2G
+          extendedResources:
+          - request: 200M
+            limit: 2G
+            name: example.com/foo
+          - request: 200M
+            limit: 2G
+            name: example.com/foo
+          cpuMemory:
+            request: 200M
+            limit: 2G
+          migProfile: 1g.5gb
+          cpu:
+            request: 1
+            limit: 1.5
+          gpuRequestType: null
+          gpu:
+            request: 1
+            limit: 1.5
+      properties:
+        name:
+          example: pod-of-a-very-important-job
+          type: string
+        priorityClassName:
+          example: high-priority
+          type: string
+        id:
+          format: uuid
+          type: string
+        workloadId:
+          format: uuid
+          type: string
+        clusterId:
+          format: uuid
+          type: string
+        projectId:
+          example: "1"
+          type: string
+        nodeName:
+          example: gpu-node-1
+          nullable: true
+          type: string
+        createdAt:
+          example: 2022-01-01T03:49:52.531Z
+          format: date-time
+          type: string
+        completedAt:
+          example: 2022-01-01T03:49:52.531Z
+          format: date-time
+          nullable: true
+          type: string
+        containers:
+          items:
+            $ref: '#/components/schemas/Container'
+          type: array
+        currentNodePool:
+          example: default
+          nullable: true
+          type: string
+        requestedNodePools:
+          items:
+            example: default
+            type: string
+          type: array
+        requestedResources:
+          $ref: '#/components/schemas/PodRequestResources'
+        allocatedResources:
+          $ref: '#/components/schemas/AllocatedResources'
+        tolerations:
+          items:
+            $ref: '#/components/schemas/Toleration'
+          type: array
+          x-schema-name: Tolerations
+        k8sPhase:
+          example: Pending
+          type: string
+      required:
+      - clusterId
+      - containers
+      - createdAt
+      - id
+      - k8sPhase
+      - name
+      - priorityClassName
+      - projectId
+      - workloadId
+      type: object
+    PodsSyncRequest:
+      example:
+        idsToIgnore:
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        pods:
+        - nodeName: gpu-node-1
+          completedAt: 2022-01-01T03:49:52.531Z
+          k8sPhase: Pending
+          priorityClassName: high-priority
+          clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          requestedNodePools:
+          - default
+          - default
+          createdAt: 2022-01-01T03:49:52.531Z
+          allocatedResources:
+            gpuMemory: 200Mi
+            extendedResources:
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            cpuMemory: 0B
+            migProfile: 1g.5gb
+            cpu: 0.5
+            gpu: 1.5
+          tolerations:
+          - effect: NoExecute
+            value: ""
+            tolerationSeconds: 10
+            key: ""
+            operator: Exists
+          - effect: NoExecute
+            value: ""
+            tolerationSeconds: 10
+            key: ""
+            operator: Exists
+          workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          currentNodePool: default
+          name: pod-of-a-very-important-job
+          containers:
+          - image: busybox:latest
+            name: busybox
+            startedAt: 2022-01-01T03:49:52.531Z
+          - image: busybox:latest
+            name: busybox
+            startedAt: 2022-01-01T03:49:52.531Z
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          projectId: "1"
+          requestedResources:
+            gpuMemory:
+              request: 200M
+              limit: 2G
+            extendedResources:
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            cpuMemory:
+              request: 200M
+              limit: 2G
+            migProfile: 1g.5gb
+            cpu:
+              request: 1
+              limit: 1.5
+            gpuRequestType: null
+            gpu:
+              request: 1
+              limit: 1.5
+        - nodeName: gpu-node-1
+          completedAt: 2022-01-01T03:49:52.531Z
+          k8sPhase: Pending
+          priorityClassName: high-priority
+          clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          requestedNodePools:
+          - default
+          - default
+          createdAt: 2022-01-01T03:49:52.531Z
+          allocatedResources:
+            gpuMemory: 200Mi
+            extendedResources:
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            cpuMemory: 0B
+            migProfile: 1g.5gb
+            cpu: 0.5
+            gpu: 1.5
+          tolerations:
+          - effect: NoExecute
+            value: ""
+            tolerationSeconds: 10
+            key: ""
+            operator: Exists
+          - effect: NoExecute
+            value: ""
+            tolerationSeconds: 10
+            key: ""
+            operator: Exists
+          workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          currentNodePool: default
+          name: pod-of-a-very-important-job
+          containers:
+          - image: busybox:latest
+            name: busybox
+            startedAt: 2022-01-01T03:49:52.531Z
+          - image: busybox:latest
+            name: busybox
+            startedAt: 2022-01-01T03:49:52.531Z
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          projectId: "1"
+          requestedResources:
+            gpuMemory:
+              request: 200M
+              limit: 2G
+            extendedResources:
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            cpuMemory:
+              request: 200M
+              limit: 2G
+            migProfile: 1g.5gb
+            cpu:
+              request: 1
+              limit: 1.5
+            gpuRequestType: null
+            gpu:
+              request: 1
+              limit: 1.5
+        from: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        to: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        projectId: "1"
+      properties:
+        projectId:
+          example: "1"
+          type: string
+        pods:
+          items:
+            $ref: '#/components/schemas/PodSyncFields'
+          type: array
+        from:
+          description: "the first pod id to sync. if empty, all pods before the first\
+            \ one sent will be deleted."
+          format: uuid
+          type: string
+        to:
+          description: "the last pod to sync. if empty, all pods after the last one\
+            \ sent will be deleted."
+          format: uuid
+          type: string
+        idsToIgnore:
+          description: pod ids to ignore when deleting.
+          items:
+            format: uuid
+            type: string
+          type: array
+      required:
+      - pods
+      - projectId
+      type: object
+    PodComputedFields:
+      properties:
+        tenantId:
+          example: 1
+          format: int32
+          type: integer
+        k8sPhaseUpdatedAt:
+          example: 2022-06-08T11:28:24.131Z
+          format: date-time
+          type: string
+        updatedAt:
+          example: 2022-06-08T11:28:24.131Z
+          format: date-time
+          type: string
+        deletedAt:
+          example: 2022-08-12T19:28:24.131Z
+          format: date-time
+          nullable: true
+          type: string
+      required:
+      - k8sPhaseUpdatedAt
+      - tenantId
+      - updatedAt
+      type: object
+    Pod:
+      allOf:
+      - $ref: '#/components/schemas/PodSyncFields'
+      - $ref: '#/components/schemas/PodComputedFields'
+    Pods:
+      items:
+        $ref: '#/components/schemas/Pod'
+      type: array
+      x-schema-name: Pods
+    InvolvedObject:
+      example:
+        uid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        kind: Pod
+        name: test-0-1
+        namespace: runai-test
+      properties:
+        uid:
+          format: uuid
+          type: string
+        kind:
+          example: Pod
+          type: string
+        name:
+          example: test-0-1
+          type: string
+        namespace:
+          example: runai-test
+          type: string
+      required:
+      - kind
+      - name
+      - namespace
+      - uid
+      type: object
+    EventSyncFields:
+      example:
+        reason: Started
+        createdAt: 2022-01-01T03:49:52.531Z
+        involvedObject:
+          uid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          kind: Pod
+          name: test-0-1
+          namespace: runai-test
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        source: kubelet
+        type: Normal
+        message: Started container z
+      properties:
+        id:
+          format: uuid
+          type: string
+        clusterId:
+          format: uuid
+          type: string
+        type:
+          example: Normal
+          type: string
+        message:
+          example: Started container z
+          type: string
+        reason:
+          example: Started
+          type: string
+        createdAt:
+          example: 2022-01-01T03:49:52.531Z
+          format: date-time
+          type: string
+        source:
+          example: kubelet
+          type: string
+        involvedObject:
+          $ref: '#/components/schemas/InvolvedObject'
+      required:
+      - clusterId
+      - createdAt
+      - id
+      - involvedObject
+      - message
+      - reason
+      - source
+      - type
+      type: object
+    EventsSyncRequest:
+      example:
+        events:
+        - reason: Started
+          createdAt: 2022-01-01T03:49:52.531Z
+          involvedObject:
+            uid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            kind: Pod
+            name: test-0-1
+            namespace: runai-test
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          source: kubelet
+          type: Normal
+          message: Started container z
+        - reason: Started
+          createdAt: 2022-01-01T03:49:52.531Z
+          involvedObject:
+            uid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            kind: Pod
+            name: test-0-1
+            namespace: runai-test
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          source: kubelet
+          type: Normal
+          message: Started container z
+      properties:
+        events:
+          items:
+            $ref: '#/components/schemas/EventSyncFields'
+          type: array
+      required:
+      - events
+      type: object
+    Event:
+      example:
+        createdAt: 2022-01-01T03:49:52.531Z
+        reason: Started
+        involvedObject:
+          uid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          kind: Pod
+          name: test-0-1
+          namespace: runai-test
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        source: kubelet
+        type: Normal
+        message: Started container z
+      nullable: true
+      properties:
+        createdAt:
+          example: 2022-01-01T03:49:52.531Z
+          format: date-time
+          type: string
+        id:
+          format: uuid
+          type: string
+        type:
+          example: Normal
+          type: string
+        clusterId:
+          format: uuid
+          type: string
+        message:
+          example: Started container z
+          type: string
+        reason:
+          example: Started
+          type: string
+        source:
+          example: kubelet
+          type: string
+        involvedObject:
+          $ref: '#/components/schemas/InvolvedObject'
+      required:
+      - clusterId
+      - createdAt
+      - message
+      - type
+      type: object
+    Events:
+      items:
+        $ref: '#/components/schemas/Event'
+      type: array
+      x-schema-name: Events
+    HistoryRecordType:
+      enum:
+      - Event
+      - PhaseUpdate
+      type: string
+    HistoryRecordMeta:
+      example:
+        creationTimestamp: 2022-01-01T03:49:52.531Z
+        type: null
+      properties:
+        creationTimestamp:
+          example: 2022-01-01T03:49:52.531Z
+          format: date-time
+          type: string
+        type:
+          $ref: '#/components/schemas/HistoryRecordType'
+      required:
+      - creationTimestamp
+      - type
+      type: object
+    PhaseUpdate:
+      example:
+        phase: null
+        phaseMessage: Not enough resources in the requested nodepool
+      nullable: true
+      properties:
+        phase:
+          $ref: '#/components/schemas/Phase'
+        phaseMessage:
+          example: Not enough resources in the requested nodepool
+          type: string
+      required:
+      - phase
+      - phaseMessage
+      type: object
+    HistoryRecord:
+      example:
+        meta:
+          creationTimestamp: 2022-01-01T03:49:52.531Z
+          type: null
+        spec:
+          phaseUpdate:
+            phase: null
+            phaseMessage: Not enough resources in the requested nodepool
+          event:
+            createdAt: 2022-01-01T03:49:52.531Z
+            reason: Started
+            involvedObject:
+              uid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              kind: Pod
+              name: test-0-1
+              namespace: runai-test
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            source: kubelet
+            type: Normal
+            message: Started container z
+      properties:
+        meta:
+          $ref: '#/components/schemas/HistoryRecordMeta'
+        spec:
+          $ref: '#/components/schemas/HistoryRecord_spec'
+      required:
+      - meta
+      - spec
+      type: object
+    HistoryRecords:
+      items:
+        $ref: '#/components/schemas/HistoryRecord'
+      type: array
+      x-schema-name: HistoryRecords
+    WorkloadSortFilterFields:
+      enum:
+      - type
+      - name
+      - clusterId
+      - projectId
+      - projectName
+      - departmentId
+      - departmentName
+      - createdAt
+      - deletedAt
+      - submittedBy
+      - phase
+      - completedAt
+      type: string
+    EventComputedFields:
+      properties:
+        tenantId:
+          example: 1
+          format: int32
+          type: integer
+      required:
+      - tenantId
+      type: object
+    get_workloads_200_response:
+      example:
+        next: 1
+        workloads:
+        - workloadRequestedResources:
+            gpuMemory:
+              request: 200M
+              limit: 2G
+            extendedResources:
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            cpuMemory:
+              request: 200M
+              limit: 2G
+            migProfile:
+            - null
+            - null
+            cpu:
+              request: 1
+              limit: 1.5
+            gpuRequestType: null
+            gpu:
+              request: 1
+              limit: 1.5
+          podsRequestedResources:
+            gpuMemory:
+              request: 200M
+              limit: 2G
+            extendedResources:
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            cpuMemory:
+              request: 200M
+              limit: 2G
+            migProfile:
+            - null
+            - null
+            cpu:
+              request: 1
+              limit: 1.5
+            gpuRequestType: null
+            gpu:
+              request: 1
+              limit: 1.5
+          actionsSupport:
+            suspend: true
+            delete: true
+          additionalFields: "{\"someSpecialField\":\"value\"}"
+          environments:
+          - name: pytorch
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            connections:
+            - name: my-pytorch-env
+              toolType: pytorch
+              url: http://wandb.com/yourproject
+            - name: my-pytorch-env
+              toolType: pytorch
+              url: http://wandb.com/yourproject
+            replicaType: null
+          - name: pytorch
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            connections:
+            - name: my-pytorch-env
+              toolType: pytorch
+              url: http://wandb.com/yourproject
+            - name: my-pytorch-env
+              toolType: pytorch
+              url: http://wandb.com/yourproject
+            replicaType: null
+          departmentId: "1"
+          priorityClassName: high-priority
+          source: null
+          clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          type: runai-job
+          createdAt: 2022-01-01T03:49:52.531Z
+          urls:
+          - urls
+          - urls
+          k8sPhaseUpdatedAt: 2022-06-08T11:28:24.131Z
+          distributedFramework: Pytorch
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          phaseUpdatedAt: 2022-06-08T11:28:24.131Z
+          updatedAt: 2022-06-08T11:28:24.131Z
+          submittedBy: researcher@run.ai
+          departmentName: department-1
+          phase: null
+          phaseMessage: Not enough resources in the requested nodepool
+          completedAt: 2022-01-01T03:49:52.531Z
+          images:
+          - busybox:latest
+          - busybox:latest
+          k8sPhase: Pending
+          externalConnections:
+          - name: my-pytorch-env
+            toolType: pytorch
+            url: http://wandb.com/yourproject
+          - name: my-pytorch-env
+            toolType: pytorch
+            url: http://wandb.com/yourproject
+          childrenIds:
+          - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            type: type
+          - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            type: type
+          runningPods: 1
+          requestedNodePools:
+          - default
+          - default
+          allocatedResources:
+            gpuMemory: 200Mi
+            extendedResources:
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            cpuMemory: 0B
+            migProfile:
+            - null
+            - null
+            cpu: 0.5
+            gpu: 1.5
+          requestedPods:
+            number: 1
+            min: 2
+            max: 5
+            parallelism: 3
+            completions: 5
+          deletedAt: 2022-08-12T19:28:24.131Z
+          currentNodePools:
+          - default
+          - default
+          datasources:
+          - name: my-pvc-datasource-1
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            type: pvc
+          - name: my-pvc-datasource-1
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            type: pvc
+          tenantId: 1
+          name: very-important-job
+          namespace: runai-proj-1
+          projectName: proj-1
+          conditions:
+          - reason: ErrorConfig
+            type: Ready
+            message: "Resource validation failed: ..."
+            lastTransitionTime: 2022-01-01T03:49:52.531Z
+            status: "False"
+          - reason: ErrorConfig
+            type: Ready
+            message: "Resource validation failed: ..."
+            lastTransitionTime: 2022-01-01T03:49:52.531Z
+            status: "False"
+          projectId: "1"
+        - workloadRequestedResources:
+            gpuMemory:
+              request: 200M
+              limit: 2G
+            extendedResources:
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            cpuMemory:
+              request: 200M
+              limit: 2G
+            migProfile:
+            - null
+            - null
+            cpu:
+              request: 1
+              limit: 1.5
+            gpuRequestType: null
+            gpu:
+              request: 1
+              limit: 1.5
+          podsRequestedResources:
+            gpuMemory:
+              request: 200M
+              limit: 2G
+            extendedResources:
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            cpuMemory:
+              request: 200M
+              limit: 2G
+            migProfile:
+            - null
+            - null
+            cpu:
+              request: 1
+              limit: 1.5
+            gpuRequestType: null
+            gpu:
+              request: 1
+              limit: 1.5
+          actionsSupport:
+            suspend: true
+            delete: true
+          additionalFields: "{\"someSpecialField\":\"value\"}"
+          environments:
+          - name: pytorch
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            connections:
+            - name: my-pytorch-env
+              toolType: pytorch
+              url: http://wandb.com/yourproject
+            - name: my-pytorch-env
+              toolType: pytorch
+              url: http://wandb.com/yourproject
+            replicaType: null
+          - name: pytorch
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            connections:
+            - name: my-pytorch-env
+              toolType: pytorch
+              url: http://wandb.com/yourproject
+            - name: my-pytorch-env
+              toolType: pytorch
+              url: http://wandb.com/yourproject
+            replicaType: null
+          departmentId: "1"
+          priorityClassName: high-priority
+          source: null
+          clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          type: runai-job
+          createdAt: 2022-01-01T03:49:52.531Z
+          urls:
+          - urls
+          - urls
+          k8sPhaseUpdatedAt: 2022-06-08T11:28:24.131Z
+          distributedFramework: Pytorch
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          phaseUpdatedAt: 2022-06-08T11:28:24.131Z
+          updatedAt: 2022-06-08T11:28:24.131Z
+          submittedBy: researcher@run.ai
+          departmentName: department-1
+          phase: null
+          phaseMessage: Not enough resources in the requested nodepool
+          completedAt: 2022-01-01T03:49:52.531Z
+          images:
+          - busybox:latest
+          - busybox:latest
+          k8sPhase: Pending
+          externalConnections:
+          - name: my-pytorch-env
+            toolType: pytorch
+            url: http://wandb.com/yourproject
+          - name: my-pytorch-env
+            toolType: pytorch
+            url: http://wandb.com/yourproject
+          childrenIds:
+          - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            type: type
+          - id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            type: type
+          runningPods: 1
+          requestedNodePools:
+          - default
+          - default
+          allocatedResources:
+            gpuMemory: 200Mi
+            extendedResources:
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            - request: 200M
+              limit: 2G
+              name: example.com/foo
+            cpuMemory: 0B
+            migProfile:
+            - null
+            - null
+            cpu: 0.5
+            gpu: 1.5
+          requestedPods:
+            number: 1
+            min: 2
+            max: 5
+            parallelism: 3
+            completions: 5
+          deletedAt: 2022-08-12T19:28:24.131Z
+          currentNodePools:
+          - default
+          - default
+          datasources:
+          - name: my-pvc-datasource-1
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            type: pvc
+          - name: my-pvc-datasource-1
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            type: pvc
+          tenantId: 1
+          name: very-important-job
+          namespace: runai-proj-1
+          projectName: proj-1
+          conditions:
+          - reason: ErrorConfig
+            type: Ready
+            message: "Resource validation failed: ..."
+            lastTransitionTime: 2022-01-01T03:49:52.531Z
+            status: "False"
+          - reason: ErrorConfig
+            type: Ready
+            message: "Resource validation failed: ..."
+            lastTransitionTime: 2022-01-01T03:49:52.531Z
+            status: "False"
+          projectId: "1"
+      properties:
+        next:
+          example: 1
+          type: integer
+        workloads:
+          items:
+            $ref: '#/components/schemas/Workload'
+          type: array
+          x-schema-name: Workloads
+      required:
+      - workloads
+      type: object
+    count_workloads_200_response:
+      example:
+        count: 1
+      properties:
+        count:
+          example: 1
+          format: int64
+          type: integer
+      required:
+      - count
+      type: object
+    get_workload_pods_200_response:
+      example:
+        next: 1
+        pods:
+        - null
+        - null
+      properties:
+        next:
+          example: 1
+          type: integer
+        pods:
+          items:
+            $ref: '#/components/schemas/Pod'
+          type: array
+          x-schema-name: Pods
+      required:
+      - pods
+      type: object
+    get_workload_events_200_response:
+      example:
+        next: 1
+        events:
+        - createdAt: 2022-01-01T03:49:52.531Z
+          reason: Started
+          involvedObject:
+            uid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            kind: Pod
+            name: test-0-1
+            namespace: runai-test
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          source: kubelet
+          type: Normal
+          message: Started container z
+        - createdAt: 2022-01-01T03:49:52.531Z
+          reason: Started
+          involvedObject:
+            uid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            kind: Pod
+            name: test-0-1
+            namespace: runai-test
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          source: kubelet
+          type: Normal
+          message: Started container z
+      properties:
+        next:
+          example: 1
+          type: integer
+        events:
+          items:
+            $ref: '#/components/schemas/Event'
+          type: array
+          x-schema-name: Events
+      required:
+      - events
+      type: object
+    get_workload_history_200_response:
+      example:
+        next: 1
+        records:
+        - meta:
+            creationTimestamp: 2022-01-01T03:49:52.531Z
+            type: null
+          spec:
+            phaseUpdate:
+              phase: null
+              phaseMessage: Not enough resources in the requested nodepool
+            event:
+              createdAt: 2022-01-01T03:49:52.531Z
+              reason: Started
+              involvedObject:
+                uid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+                kind: Pod
+                name: test-0-1
+                namespace: runai-test
+              id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              source: kubelet
+              type: Normal
+              message: Started container z
+        - meta:
+            creationTimestamp: 2022-01-01T03:49:52.531Z
+            type: null
+          spec:
+            phaseUpdate:
+              phase: null
+              phaseMessage: Not enough resources in the requested nodepool
+            event:
+              createdAt: 2022-01-01T03:49:52.531Z
+              reason: Started
+              involvedObject:
+                uid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+                kind: Pod
+                name: test-0-1
+                namespace: runai-test
+              id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              source: kubelet
+              type: Normal
+              message: Started container z
+      properties:
+        next:
+          example: 1
+          type: integer
+        records:
+          items:
+            $ref: '#/components/schemas/HistoryRecord'
+          type: array
+          x-schema-name: HistoryRecords
+      required:
+      - records
+      type: object
+    ExtendedResources_inner:
+      example:
+        request: 200M
+        limit: 2G
+        name: example.com/foo
+      properties:
+        limit:
+          example: 2G
+          nullable: true
+          pattern: "^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+          type: string
+        request:
+          example: 200M
+          nullable: true
+          pattern: "^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+          type: string
+        name:
+          example: example.com/foo
+          type: string
+      type: object
+    Workload_childrenIds_inner:
+      example:
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        type: type
+      properties:
+        id:
+          format: uuid
+          type: string
+        type:
+          type: string
+      required:
+      - id
+      type: object
+    HistoryRecord_spec:
+      example:
+        phaseUpdate:
+          phase: null
+          phaseMessage: Not enough resources in the requested nodepool
+        event:
+          createdAt: 2022-01-01T03:49:52.531Z
+          reason: Started
+          involvedObject:
+            uid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            kind: Pod
+            name: test-0-1
+            namespace: runai-test
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          source: kubelet
+          type: Normal
+          message: Started container z
+      properties:
+        event:
+          $ref: '#/components/schemas/Event'
+        phaseUpdate:
+          $ref: '#/components/schemas/PhaseUpdate'
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      description: Bearer authentication
+      scheme: bearer
+      type: http

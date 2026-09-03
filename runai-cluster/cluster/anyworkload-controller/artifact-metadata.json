@@ -1,0 +1,16 @@
+{
+  "service_name": "anyworkload-controller",
+  "enabled": true,
+  "skip_container_validation": true,
+  "artifact_type": "container",
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "notifications": {
+    "slack": {
+      "mention": "@viper"
+    }
+  },
+  "jira": {
+    "team_name": "Viper Team"
+  }
+}

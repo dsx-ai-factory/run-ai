@@ -1,0 +1,85 @@
+Name:                               my-workspace-demo-123
+ID:                                 eeaac0d9-db0b-4053-9839-86b808e4a7c5
+Type:                               Workspace
+Phase:                              Pending
+Created At:                         2025-12-15T08:58:28Z
+Updated At:                         2025-12-15T08:59:22Z
+Project:                            team-b
+Department:                         default
+Submitted By:                       test@run.ai
+Priority:                           high (125)
+Category:                           Build
+Preemptible:                        false
+Requested Node Pool:                default
+Image:                              jupyter/scipy-notebook
+Image Pull Policy:                  IfNotPresent
+Working Directory:                  /home/jovyan
+Node Type:                          gpu-nodes
+Run as User:                        1000
+Run as Group:                       100
+Capabilities:                       NET_BIND_SERVICE
+Tolerations:                        nvidia.com/gpu=true:NoSchedule
+Labels:                             [team:ml-platform,
+                                     purpose:development,
+                                     tool:jupyter]
+Annotations:                        [description:Jupyter workspace with auth,
+                                     runai-submit-command:/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai workspace submit my-workspace-demo-123 --project team-b --image jupyter/scipy-notebook --image-pull-policy IfNotPresent -g 1 --stdin --tty --port service-type=NodePort,container=8888,external=31888 --external-url container=8888,authusers=user1:user2:demo-user --environment-variable USER=developer --environment-variable WORKSPACE=demo --environment-variable JUPYTER_ENABLE_LAB=yes --label team=ml-platform --label purpose=development --label tool=jupyter --annotation 'description=Jupyter workspace with auth' --existing-pvc claimname=my-simple-pvc,path=/home/jovyan/work --restart-policy OnFailure --working-dir /home/jovyan --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 100 --capability NET_BIND_SERVICE --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --command -- start-notebook.sh --NotebookApp.token= --NotebookApp.password=]
+Command:                            start-notebook.sh --NotebookApp.token= --NotebookApp.password=
+Environment Variables:              [JUPYTER_ENABLE_LAB: yes,
+                                    RUNAI_JOB_NAME    : ${RUNAI_JOB_NAME},
+                                    RUNAI_PROJECT     : ${RUNAI_PROJECT},
+                                    USER              : developer,
+                                    WORKSPACE         : demo]
+CLI Command:                        /Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai workspace submit my-workspace-demo-123 --project team-b --image jupyter/scipy-notebook --image-pull-policy IfNotPresent -g 1 --stdin --tty --port service-type=NodePort,container=8888,external=31888 --external-url container=8888,authusers=user1:user2:demo-user --environment-variable USER=developer --environment-variable WORKSPACE=demo --environment-variable JUPYTER_ENABLE_LAB=yes --label team=ml-platform --label purpose=development --label tool=jupyter --annotation 'description=Jupyter workspace with auth' --existing-pvc claimname=my-simple-pvc,path=/home/jovyan/work --restart-policy OnFailure --working-dir /home/jovyan --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 100 --capability NET_BIND_SERVICE --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --command -- start-notebook.sh --NotebookApp.token= --NotebookApp.password=
+
+
+Compute Resources
+
+ Resource              Requested   Limit       Allocated  
+──────────────────────────────────────────────────────────
+ GPU Compute           1.00                    0.00       
+ CPU Cores             0.00                    0.00       
+ GPU Memory                                               
+ CPU Memory                                               
+
+
+Storage
+
+ Type          Name                       Mount Path       Size      ReadOnly    Ephemeral   Data Sharing    Storage Class   
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ PVC           my-simple-pvc              /local/pvc       -         No          -           -               -               
+ PVC           claim-24mqhfjj7j           /local/vol       1G        -           No          -               standard        
+ Git           https://github.com/run-ai  /git             -         -           -           -               -               
+ HostPath      /host/path                 /hostpath        -         -           -           -               -               
+ S3            bucket-name                /s3              -         -           -           -               -               
+
+
+Network
+
+ Name             Tool Type        Connection Type  Container Port   URL                                                             
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ url              custom           ExternalUrl      8888             https://nael-env-001.runailabs.com/team-b/my-workspace-demo-123 
+ port                              NodePort         8888             172.18.0.2:31888                                                
+
+  Access Control:
+  url (Port 8888):
+    Authorized Users / Service Accounts: user1, user2, demo-user
+
+
+Pods
+
+  Running Pods:                       0/1
+ Name                       Node             Phase            Completed At     Node Pool       
+───────────────────────────────────────────────────────────────────────────────────────────────
+ my-workspace-demo-123-0-0                   Pending                                           
+
+
+Events
+
+ Date & Timestamp           Event             Event Issuer              Component                                                        Details                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ 2025-12-15T08:58:39Z       Unschedulable     runai-scheduler           pg-my-workspace-demo-123-0-4229a79c-e60f-43be-a713-30a1dd3a71f0  PodSchedulingErrors: Resources were not found for pod runai-team-b/my-workspace-demo-123-0-0 due to: no nodes with enough resources were found: 1 node(s) didn't match Pod's node affinity/selector. 3 node(s) didn't have enough resources: GPUs.                                                                                                                                                                                                       
+ 2025-12-15T08:58:39Z       Unschedulable     runai-scheduler           my-workspace-demo-123-0-0                                        <runai-cluster-control-plane>: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.<runai-cluster-system-0-0>: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.<runai-cluster-system-0-1>: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.<runai-cluster-worker-0-0>: node(s) didn't match Pod's node affinity/selector.no nodes with enough resources were found.      
+ 2025-12-15T08:58:36Z       Pending           status-updater            pg-my-workspace-demo-123-0-4229a79c-e60f-43be-a713-30a1dd3a71f0  Job status is Pending                                                                                                                                                                                                                                                                                                                                                                                                                                    
+ 2025-12-15T08:58:34Z       SuccessfulCreate  runaijobcontroller        my-workspace-demo-123                                            Created pod: my-workspace-demo-123-0-0                                                                                                                                                                                                                                                                                                                                                                                                                   
+ 2025-12-15T08:58:34Z       Sync              nginx-ingress-controller  iw-my-workspace-demo-123-0                                       Scheduled for sync                                                                                                                                                                                                                                                                                                                                                                                                                                       

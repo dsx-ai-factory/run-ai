@@ -1,0 +1,72 @@
+get:
+  summary: List inference updates.
+  description: Retrieve inferences that were updated.
+  operationId: list_inferences_updates
+  x-internal: true
+  x-service: workloads
+  x-test-coverage:
+    - e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+  x-authorize:
+    resource-type: inferences
+    action: sync
+  tags:
+    - Inferences
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/UpdatesAfter.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Crud/Sync/WorkloadsSyncResponse.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+
+post:
+  summary: Request inference updates
+  description: Retrieve inference workloads that were updated in the control plane, and reports about success/failures in applying previous updates at the cluster
+  operationId: request_inferences_updates
+  x-internal: true
+  x-service: workloads
+  x-test-coverage:
+    - e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+  x-authorize:
+    resource-type: inferences
+    action: sync
+  tags:
+    - Inferences
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/UpdatesAfter.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../../../infra/openapi/docs/schemas/sync/ClusterSyncReport.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Crud/Sync/WorkloadsSyncResponse.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

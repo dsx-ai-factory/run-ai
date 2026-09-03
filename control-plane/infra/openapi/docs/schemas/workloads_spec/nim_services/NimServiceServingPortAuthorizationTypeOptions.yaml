@@ -1,0 +1,17 @@
+properties:
+  options:
+    type: array
+    items:
+      required:
+        - value
+      properties:
+        value:
+          $ref: "./NimServiceServingPortAuthorizationType.yaml"
+        displayed:
+          description: Textual description of the value
+          type: string
+          nullable: true
+          pattern: .*
+    nullable: true
+nullable: true
+type: object

@@ -1,0 +1,7 @@
+properties:
+  attributes:
+    $ref: "./ExposedUrl.yaml"
+  instances:
+    $ref: "./ExposedUrls.yaml"
+nullable: true
+type: object

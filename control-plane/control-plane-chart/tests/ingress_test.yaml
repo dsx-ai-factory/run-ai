@@ -1,0 +1,197 @@
+suite: Test Ingress Class and Annotations
+
+templates:
+  - templates/common/ingress.yaml
+
+tests:
+  - it: should render ingress with nginx ingressClass and default nginx annotations
+    set:
+      global.ingress.enabled: true
+      global.ingress.ingressClass: nginx
+      global.config.kubernetesDistribution: kubernetes
+    documentSelector:
+      path: kind
+      value: Ingress
+      matchMany: true
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: spec.ingressClassName
+          value: nginx
+      - equal:
+          path: metadata.annotations["nginx.ingress.kubernetes.io/proxy-buffer-size"]
+          value: '16k'
+      - equal:
+          path: metadata.annotations["nginx.ingress.kubernetes.io/proxy_buffers"]
+          value: "4 16k"
+      - equal:
+          path: metadata.annotations["nginx.ingress.kubernetes.io/proxy-busy-buffers-size"]
+          value: "48k"
+      - equal:
+          path: metadata.annotations["nginx.ingress.kubernetes.io/x-content-type-options"]
+          value: nosniff
+      - equal:
+          path: metadata.annotations["nginx.ingress.kubernetes.io/x-frame-options"]
+          value: DENY
+      - equal:
+          path: metadata.annotations["nginx.ingress.kubernetes.io/referrer-policy"]
+          value: "strict-origin-when-cross-origin"
+      - isNull:
+          path: metadata.annotations["nginx.ingress.kubernetes.io/content-security-policy"]
+
+  - it: should render ingress with haproxy ingressClass and default haproxy annotations
+    set:
+      global.ingress.enabled: true
+      global.ingress.ingressClass: haproxy
+      global.config.kubernetesDistribution: kubernetes
+    documentSelector:
+      path: kind
+      value: Ingress
+      matchMany: true
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: spec.ingressClassName
+          value: haproxy
+      - equal:
+          path: metadata.annotations["haproxy.org/response-set-header"]
+          value: |-
+            X-Content-Type-Options nosniff
+            X-Frame-Options DENY
+            Referrer-Policy strict-origin-when-cross-origin
+
+  - it: should render ingress with nginx ingressClass and merge extraAnnotations
+    set:
+      global.ingress.enabled: true
+      global.ingress.ingressClass: nginx
+      global.config.kubernetesDistribution: kubernetes
+      global.ingress.extraAnnotations:
+        custom.annotation/test: "test-value"
+        custom.annotation/another: "another-value"
+    documentSelector:
+      path: kind
+      value: Ingress
+      matchMany: true
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: spec.ingressClassName
+          value: nginx
+      - equal:
+          path: metadata.annotations["nginx.ingress.kubernetes.io/proxy-buffer-size"]
+          value: '16k'
+      - equal:
+          path: metadata.annotations["custom.annotation/test"]
+          value: "test-value"
+      - equal:
+          path: metadata.annotations["custom.annotation/another"]
+          value: "another-value"
+
+  - it: should render ingress with haproxy ingressClass and merge extraAnnotations
+    set:
+      global.ingress.enabled: true
+      global.ingress.ingressClass: haproxy
+      global.config.kubernetesDistribution: kubernetes
+      global.ingress.extraAnnotations:
+        custom.annotation/test: "test-value"
+    documentSelector:
+      path: kind
+      value: Ingress
+      matchMany: true
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: spec.ingressClassName
+          value: haproxy
+      - equal:
+          path: metadata.annotations["haproxy.org/response-set-header"]
+          value: |-
+            X-Content-Type-Options nosniff
+            X-Frame-Options DENY
+            Referrer-Policy strict-origin-when-cross-origin
+      - equal:
+          path: metadata.annotations["custom.annotation/test"]
+          value: "test-value"
+
+  - it: should render ingress with non-standard ingressClass without controller-specific annotations
+    set:
+      global.ingress.enabled: true
+      global.ingress.ingressClass: traefik
+      global.config.kubernetesDistribution: kubernetes
+    documentSelector:
+      path: kind
+      value: Ingress
+      matchMany: true
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: spec.ingressClassName
+          value: traefik
+      - isNull:
+          path: metadata.annotations["nginx.ingress.kubernetes.io/proxy-buffer-size"]
+      - isNull:
+          path: metadata.annotations["haproxy.org/response-set-header"]
+
+  - it: should render ingress with non-standard ingressClass and extraAnnotations
+    set:
+      global.ingress.ingressClass: traefik
+      global.ingress.extraAnnotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        custom.annotation/test: "test-value"
+    documentSelector:
+      path: kind
+      value: Ingress
+      matchMany: true
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: spec.ingressClassName
+          value: traefik
+      - equal:
+          path: metadata.annotations["traefik.ingress.kubernetes.io/router.entrypoints"]
+          value: websecure
+      - equal:
+          path: metadata.annotations["custom.annotation/test"]
+          value: "test-value"
+      - isNull:
+          path: metadata.annotations["nginx.ingress.kubernetes.io/proxy-buffer-size"]
+      - isNull:
+          path: metadata.annotations["haproxy.org/response-set-header"]
+
+  - it: should allow extraAnnotations to override controller default annotations
+    set:
+      global.ingress.enabled: true
+      global.ingress.ingressClass: nginx
+      global.config.kubernetesDistribution: kubernetes
+      global.ingress.extraAnnotations:
+        nginx.ingress.kubernetes.io/proxy-buffer-size: '32k'
+    documentSelector:
+      path: kind
+      value: Ingress
+      matchMany: true
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: spec.ingressClassName
+          value: nginx
+      - equal:
+          path: metadata.annotations["nginx.ingress.kubernetes.io/proxy-buffer-size"]
+          value: '32k'
+      - equal:
+          path: metadata.annotations["nginx.ingress.kubernetes.io/proxy_buffers"]
+          value: "4 16k"
+

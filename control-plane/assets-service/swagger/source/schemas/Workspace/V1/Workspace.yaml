@@ -1,0 +1,12 @@
+required:
+  - meta
+  - spec
+properties:
+  meta:
+    $ref: "../../Workload/V1/WorkloadMetaV1.yaml"
+  spec:
+    $ref: "../../Workload/V1/SpecificRunInfoFields.yaml"
+  workload:
+    $ref: "../../Workload/V1/InteractiveWorkload.yaml"
+  job:
+    $ref: "../../Job/DisplayedJob.yaml"

@@ -1,0 +1,54 @@
+suite: Test project-controller deletion blocker permissions
+
+templates:
+  - templates/clusterroles/base.yaml
+
+tests:
+  - it: should watch blockers that have active project-controller watches
+    documentSelector:
+      path: rules[0].resources[0]
+      value: projects
+    asserts:
+      - isKind:
+          of: ClusterRole
+      - equal:
+          path: metadata.name
+          value: runai-project-controller
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - run.ai
+            resources:
+              - trainingworkloads
+              - interactiveworkloads
+              - inferenceworkloads
+              - distributedworkloads
+              - externalworkloads
+              - datavolumes
+              - workloadrunners
+            verbs:
+              - get
+              - list
+              - watch
+
+  - it: should only list legacy blockers that are checked during deletion
+    documentSelector:
+      path: rules[0].resources[0]
+      value: projects
+    asserts:
+      - isKind:
+          of: ClusterRole
+      - equal:
+          path: metadata.name
+          value: runai-project-controller
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - run.ai
+            resources:
+              - distributedinferenceworkloads
+              - runaijobs
+            verbs:
+              - list

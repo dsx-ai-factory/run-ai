@@ -1,0 +1,31 @@
+delete:
+  summary: delete client
+  x-service: identity-manager
+  x-test-coverage:
+    - /runai/control-plane/identity-manager/pkg/services/api_clients_service_test.go
+  operationId: delete_client
+  x-no-authorization: true
+  tags:
+  - Clients
+  parameters:
+  - description: ID of the client
+    in: path
+    name: id
+    required: true
+    schema:
+      type: string
+  responses:
+    '204':
+      description: Executed successfully.
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

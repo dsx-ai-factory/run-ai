@@ -1,0 +1,37 @@
+post:
+  summary: upload the details of PVC to the control plane
+  description: this API is used by cluster versions < 2.15
+  operationId: obsolete_create_pvc
+  tags:
+    - PVCs
+  x-internal: true
+  x-authorize:
+    resource-type: credentials
+    action: sync
+  x-service: k8s-objects-tracker
+  x-test-coverage:
+    - k8s-objects-tracker/pkg/services/api_pvcs_service_test.go
+  parameters:
+    - $ref: "../../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+    - $ref: "../../parameters/path/Namespace.yaml"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/PVCs/Obsolete/SinglePVC.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/PVCs/Obsolete/SinglePVC.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

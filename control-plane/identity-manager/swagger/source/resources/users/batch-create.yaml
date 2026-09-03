@@ -1,0 +1,36 @@
+post:
+  summary: Create multiple local users in batch.
+  description: Use to create multiple local platform users in a single request
+  x-service: identity-manager
+  x-test-coverage: not-applicable
+  operationId: batch_create_users
+  x-authorize:
+    resource-type: users
+    action: create
+  x-audit: true
+  tags:
+  - Users
+  requestBody:
+    description: Bulk user creation request containing array of max 10 users
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/Users/BulkUserCreationRequest.yaml'
+  responses:
+    '200':
+      description: Batch creation completed (may include both successes and failures).
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Users/BulkUserCreationResponse.yaml'
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

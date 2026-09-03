@@ -1,0 +1,26 @@
+errors:
+- code: 400
+  message: 'field notANumber failed range validation: quantities must match the regular
+    expression ''^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$'''
+policy:
+  effectiveRules:
+  - enforcements:
+    - required: true
+    field: present
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        step: 5
+    field: notANumber
+    sourceOfRule: null
+    specSelector: self
+  workloadType:
+    group: test
+    kind: Synthetic
+    version: v1
+workload:
+  apiVersion: test/v1
+  kind: Synthetic
+  notANumber: hello
+  present: anything

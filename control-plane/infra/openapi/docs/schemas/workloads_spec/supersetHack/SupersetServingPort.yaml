@@ -1,0 +1,41 @@
+properties:
+  port:
+    type: integer
+    format: int32
+    nullable: true
+  container:
+    type: integer
+    format: int32
+    nullable: true
+  protocol:
+    type: string
+    nullable: true
+    pattern: .*
+  authorizationType:
+    type: string
+    nullable: true
+    pattern: .*
+  authorizedUsers:
+    type: array
+    items:
+      type: string
+      pattern: .*
+    nullable: true
+  authorizedGroups:
+    type: array
+    items:
+      type: string
+      pattern: .*
+    nullable: true
+  clusterLocalAccessOnly:
+    type: boolean
+    nullable: true
+  exposeExternally:
+    type: boolean
+    nullable: true
+  exposedUrl:
+    type: string
+    nullable: true
+    pattern: .*
+type: object
+nullable: true

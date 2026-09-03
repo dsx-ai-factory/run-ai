@@ -1,0 +1,61 @@
+# Manual Fern docs publish, for GA releases.
+#
+# GA publishes are driven by the product team, so this is workflow_dispatch
+# only. Automatic SaaS publishes are NOT here — they hang off the existing
+# tag-trigger.yaml lane, which already fires on *-saas.* tags and gates on the
+# reject-master-tags check. Adding a second `on: push: tags` workflow would race
+# that lane and publish tags it had explicitly rejected.
+#
+# As with previews, DOCS_FERN_TOKEN lives in the private
+# run-ai/saas-configuration; this workflow only dispatches.
+#
+# NOTE: docs/ and fern/ currently exist only on master. Publishing an older ref
+# will fail fast on the saas side with an explanatory message rather than
+# publishing an empty site.
+
+name: Publish Fern Docs (trigger)
+run-name: "Publish docs: ${{ inputs.ref }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "dsx-ai-factory/run-ai ref to publish (branch or tag). Docs currently exist only on master."
+        required: true
+        type: string
+        default: master
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-fern-docs
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    name: Dispatch publish to saas-configuration
+    # Never fire from a fork of this repo.
+    if: github.repository == 'dsx-ai-factory/run-ai' || github.repository == 'run-ai/run-ai' || github.repository == 'run-ai/runai-oss-test'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      # toJSON() on every string — see the note in fern-docs-preview.yaml.
+      - name: Cross-repo dispatch to saas-configuration/publish-fern-docs.yml
+        uses: benc-uk/workflow-dispatch@31e2b3319479a63f0ab15bf800eff9e913504e26 # v1
+        with:
+          workflow: publish-fern-docs.yml
+          repo: run-ai/saas-configuration
+          ref: master
+          token: ${{ secrets.GIT_HUB_OSS }}
+          inputs: |
+            {
+              "ref":         ${{ toJSON(inputs.ref) }},
+              "reason":      ${{ toJSON(format('manual GA publish by @{0}', github.actor)) }},
+              "caller_repo": ${{ toJSON(github.repository) }}
+            }

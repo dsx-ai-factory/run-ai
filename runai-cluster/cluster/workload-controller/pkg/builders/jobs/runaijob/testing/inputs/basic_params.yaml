@@ -1,0 +1,55 @@
+apiVersion: run.ai/v2alpha1
+kind: InteractiveWorkload
+metadata:
+  name: basic_params
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  allowPrivilegeEscalation:
+    value: false
+  cpu:
+    value: "3"
+  createHomeDir:
+    value: true
+  gpu:
+    value: "0.5"
+  image:
+    value: ubuntu
+  imagePullPolicy:
+    value: Never
+  namePrefix:
+    value: testing
+  memory:
+    value: 100M
+  name:
+    value: testing-0
+  preemptibility:
+    value: preemptible
+  runAsGid:
+    value: 20
+  runAsUid:
+    value: 501
+  runAsUser:
+    value: true
+  runAsNonRoot:
+    value: true
+  readOnlyRootFilesystem:
+    value: true
+  serviceType:
+    value: ClusterIP
+  stdin:
+    value: true
+  supplementalGroups:
+    value: 20;12;61;79;80;81;98;33;100;204;250;395;101;399;400;701
+  tty:
+    value: true
+  username:
+    value: user.name
+  workingDir:
+    value: /home/test
+  seccompProfileType:
+    value: RuntimeDefault
+  terminationGracePeriodSeconds:
+    value: 60
+
+

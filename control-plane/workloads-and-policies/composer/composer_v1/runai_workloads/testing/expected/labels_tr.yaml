@@ -1,0 +1,52 @@
+Dinfw: null
+JobSpec:
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  environment:
+    items:
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  image:
+    value: ubuntu
+  labels:
+    items:
+      ADDED1:
+        value: added1
+      Lbl1:
+        value: lbl1
+      Lbl22:
+        deleted: true
+      NO_VALUE:
+        value: ""
+      NOT_EXIST:
+        deleted: true
+      run.ai/control-plane-managed:
+        value: "true"
+  priorityClassName:
+    value: low
+  username:
+    value: test
+MasterSpec: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: labels, Rules: , Type: Training'
+  images:
+  - ubuntu
+  name: 'Value: labels, Rules: , Type: Training'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Training
+  version: v2alpha1

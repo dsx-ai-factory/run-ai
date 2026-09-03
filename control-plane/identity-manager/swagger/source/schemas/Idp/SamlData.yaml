@@ -1,0 +1,13 @@
+type: object
+nullable: true
+
+properties:
+  signingCertificate:
+    type: string
+  singleSignOnServiceUrl:
+    type: string
+  entityId:
+    type: string
+  serviceProviderMetadataUrl:
+    type: string
+    description: "Service Provider (SP) metadata url"
