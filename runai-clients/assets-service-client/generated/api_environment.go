@@ -22,6 +22,7 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+//
 //go:generate mockery --name EnvironmentAPI --output ../mocks/
 type EnvironmentAPI interface {
 

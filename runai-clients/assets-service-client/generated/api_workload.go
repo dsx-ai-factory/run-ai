@@ -21,6 +21,7 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+//
 //go:generate mockery --name WorkloadAPI --output ../mocks/
 type WorkloadAPI interface {
 

@@ -22,6 +22,7 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+//
 //go:generate mockery --name StorageClassesAPI --output ../mocks/
 type StorageClassesAPI interface {
 

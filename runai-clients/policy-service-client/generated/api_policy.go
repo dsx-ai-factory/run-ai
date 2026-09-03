@@ -22,6 +22,7 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+//
 //go:generate mockery --name PolicyAPI --output ../mocks/
 type PolicyAPI interface {
 
