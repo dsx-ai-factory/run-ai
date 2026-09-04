@@ -1,0 +1,8 @@
+description: The taint effect to match. (mandatory)
+type: string
+enum:
+  - NoSchedule
+  - NoExecute
+  - PreferNoSchedule
+  - Any
+nullable: true

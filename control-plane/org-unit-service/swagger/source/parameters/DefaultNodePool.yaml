@@ -1,0 +1,7 @@
+name: default
+in: query
+required: true
+description: is created/deleted nodepool is default nodepool
+example: true
+schema:
+  type: boolean

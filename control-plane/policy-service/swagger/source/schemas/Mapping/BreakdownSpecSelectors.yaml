@@ -1,0 +1,4 @@
+type: object
+description: The detailed breakdown of spec selectors, keyed by spec-selector name.
+additionalProperties:
+  $ref: "./BreakdownSpecSelector.yaml"

@@ -1,0 +1,115 @@
+{
+  "workloads": [
+    {
+      "tenantId": 1001,
+      "runningPods": 0,
+      "phaseUpdatedAt": "2025-12-15T08:58:34.901396Z",
+      "k8sPhaseUpdatedAt": "2025-12-15T08:58:34.901396Z",
+      "updatedAt": "2025-12-15T08:59:44.717168Z",
+      "source": "CLI",
+      "deletedAt": null,
+      "type": "DistributedInference",
+      "name": "my-dist-inference-full-123",
+      "id": "78c1c79e-81fa-484e-961c-b2168ec5c0a3",
+      "priority": 150,
+      "priorityClassName": "very-high",
+      "submittedBy": "test@run.ai",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "projectName": "team-b",
+      "projectId": "4500002",
+      "departmentName": "default",
+      "departmentId": "4500000",
+      "namespace": "runai-team-b",
+      "createdAt": "2025-12-15T08:58:27.277697Z",
+      "workloadRequestedResources": {
+        "gpuRequestType": "memory",
+        "gpuMemory": {
+          "limit": "120G",
+          "request": "120G"
+        }
+      },
+      "podsRequestedResources": {
+        "gpuRequestType": "memory",
+        "gpuMemory": {
+          "limit": "120G",
+          "request": "120G"
+        },
+        "cpu": {
+          "request": 0.6
+        },
+        "cpuMemory": {
+          "request": "629145600"
+        }
+      },
+      "allocatedResources": {},
+      "actionsSupport": {
+        "delete": true
+      },
+      "phase": "Pending",
+      "conditions": null,
+      "phaseMessage": "Replicas: 2; Pending: 2",
+      "k8sPhase": "Pending",
+      "requestedPods": {
+        "number": 6
+      },
+      "requestedNodePools": [
+        "default"
+      ],
+      "images": [
+        "vllm/vllm-openai:latest"
+      ],
+      "environments": [
+        {
+          "connections": [
+            {
+              "name": "ServingPort",
+              "toolType": "custom",
+              "connectionType": "ServingPort",
+              "authorizationType": "authenticatedUsers",
+              "containerPort": 8080,
+              "correlationName": "serving-port"
+            }
+          ],
+          "name": "Leader",
+          "id": "",
+          "replicaType": "Leader"
+        },
+        {
+          "name": "Worker",
+          "id": "",
+          "replicaType": "Worker"
+        }
+      ],
+      "additionalFields": {
+        "cliCommand": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai inference distributed submit my-dist-inference-full-123 --project team-b --replicas 2 --workers 2 --image vllm/vllm-openai:latest --image-pull-policy Always --working-dir /app --command 'python -m vllm.entrypoints.openai.api_server' --arguments '--model meta-llama/Llama-2-7b --port 8080' -g 1 --gpu-memory-request 20G --environment-variable MODEL_NAME=llama-2-7b --environment-variable TENSOR_PARALLEL_SIZE=1 --environment-variable MASTER_ADDR=localhost --label role=leader --label version=v1.0 --label framework=vllm --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 1000 --capability NET_BIND_SERVICE --capability SYS_NICE --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --worker-image vllm/vllm-openai:latest --worker-image-pull-policy Always --worker-working-dir /app --worker-command 'python -m vllm.entrypoints.worker' --worker-arguments '--model meta-llama/Llama-2-7b' --worker-gpu-devices-request 1 --worker-environment WORKER_ID=${POD_INDEX} --worker-environment MASTER_ADDR=leader-0 --worker-label role=worker --worker-label version=v1.0 --worker-label framework=vllm --worker-node-type gpu-nodes --worker-run-as-uid 1000 --worker-run-as-gid 1000 --worker-capability NET_BIND_SERVICE --worker-capability SYS_NICE --worker-toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --existing-pvc claimname=my-simple-pvc,path=/models --worker-existing-pvc claimname=my-simple-pvc,path=/models --serving-port=container=8080,authorization-type=authenticatedUsers,protocol=http,authorized-users=admin:developer:tester:reviewer --restart-policy RecreateGroupOnPodRestart --startup-policy LeaderCreated",
+        "restartPolicy": "RecreateGroupOnPodRestart",
+        "servingPorts": {
+          "serving-port": {
+            "authorizationType": "authenticatedUsers",
+            "exposeExternally": true,
+            "port": 8080,
+            "protocol": "http"
+          }
+        },
+        "specReplicas": 2,
+        "startupPolicy": "LeaderCreated",
+        "statusReplicas": 2,
+        "workers": 2
+      },
+      "preemptible": false,
+      "fullySaasWorkload": true,
+      "environmentVariables": {
+        "MASTER_ADDR": "localhost",
+        "MODEL_NAME": "llama-2-7b",
+        "RUNAI_JOB_NAME": "${RUNAI_JOB_NAME}",
+        "RUNAI_PROJECT": "${RUNAI_PROJECT}",
+        "TENSOR_PARALLEL_SIZE": "1",
+        "WORKER_ID": "${POD_INDEX}"
+      },
+      "command": "python -m vllm.entrypoints.openai.api_server",
+      "arguments": "--model meta-llama/Llama-2-7b --port 8080",
+      "totalPendingTimeSeconds": 581,
+      "category": "Deploy"
+    }
+  ]
+}

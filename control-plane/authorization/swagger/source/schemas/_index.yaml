@@ -1,0 +1,129 @@
+# Roles
+RoleV1:
+  $ref: "./Roles/RoleV1.yaml"
+Role:
+  $ref: "./Roles/Role.yaml"
+RoleActiveFields:
+  $ref: "./Roles/RoleActiveFields.yaml"
+RoleEnabledDisabledFields:
+  $ref: "./Roles/RoleEnabledDisabledFields.yaml"
+RoleCalculatedFields:
+  $ref: "./Roles/RoleCalculatedFields.yaml"
+RolesSortFilterFields:
+  $ref: "./Roles/RolesSortFilterFields.yaml"
+KubernetesPermissions:
+  $ref: "./Roles/KubernetesPermissions.yaml"
+Roles:
+  $ref: "./Roles/Roles.yaml"
+RolesV1:
+  $ref: "./Roles/RolesV1.yaml"
+RoleCreationFieldsInternal:
+  $ref: "./Roles/RoleCreationFieldsInternal.yaml"
+RoleCreationFields:
+  $ref: "./Roles/RoleCreationFields.yaml"
+ResourceType:
+  $ref: "./Roles/ResourceType.yaml"
+Action:
+  $ref: "./Roles/Action.yaml"
+PermissionAction:
+  $ref: "./Roles/PermissionAction.yaml"
+RolePermission:
+  $ref: "./Roles/RolePermission.yaml"
+PostPermission:
+  $ref: "./Roles/PostPermission.yaml"
+PermissionSets:
+  $ref: "./Roles/PermissionSets.yaml"
+PermissionSet:
+  $ref: "./Roles/PermissionSet.yaml"
+RolePermissionSet:
+  $ref: "./Roles/RolePermissionSet.yaml"
+RolePermissions:
+  $ref: "./Roles/RolePermissions.yaml"
+# AccessRules
+AccessRuleSync:
+  $ref: "./AccessRules/AccessRuleSync.yaml"
+AccessRule:
+  $ref: "./AccessRules/AccessRule.yaml"
+AccessRules:
+  $ref: "./AccessRules/AccessRules.yaml"
+AccessRuleCreationFields:
+  $ref: "./AccessRules/AccessRuleCreationFields.yaml"
+AccessRuleCreationFieldsInternal:
+  $ref: "./AccessRules/AccessRuleCreationFieldsInternal.yaml"
+AccessRuleStatusRequest:
+  $ref: "./AccessRules/AccessRuleStatusRequest.yaml"
+AccessRuleStatusResponse:
+  $ref: "./AccessRules/AccessRuleStatusResponse.yaml"
+AccessRulesSyncRequest:
+  $ref: "./AccessRules/AccessRulesSyncRequest.yaml"
+AccessRuleForSync:
+  $ref: "./AccessRules/AccessRuleForSync.yaml"
+AccessRulePhase:
+  $ref: "./AccessRules/AccessRulePhase.yaml"
+AccessRuleClusterPhase:
+  $ref: "./AccessRules/AccessRuleClusterPhase.yaml"
+AccessRulesBatchAction:
+  $ref: "./AccessRules/AccessRulesBatchAction.yaml"
+AccessRulesBatchFields:
+  $ref: "./AccessRules/AccessRulesBatchFields.yaml"
+AccessRulesBatchCreateFields:
+  $ref: "./AccessRules/AccessRulesBatchCreateFields.yaml"
+AccessRulesBatchCreateResponse:
+  $ref: "./AccessRules/AccessRulesBatchCreateResponse.yaml"
+AccessRulesMigrateDeprecatedFields:
+  $ref: "./AccessRules/AccessRulesMigrateDeprecatedFields.yaml"
+AccessRulesMigrateDeprecatedResponse:
+  $ref: "./AccessRules/AccessRulesMigrateDeprecatedResponse.yaml"
+AccessRulesMigrateDeprecatedFailureItem:
+  $ref: "./AccessRules/AccessRulesMigrateDeprecatedFailureItem.yaml"
+AccessRuleSubjects:
+  $ref: "./AccessRules/AccessRuleSubjects.yaml"
+AccessRuleScopes:
+  $ref: "./AccessRules/AccessRuleScopes.yaml"
+BatchResponse:
+  $ref: "../../../../infra/openapi/docs/schemas/batch/BatchResponse.yaml"
+IdsList:
+  $ref: "../../../../infra/openapi/docs/schemas/batch/IdsList.yaml"
+SubjectType:
+  $ref: "./AccessRules/SubjectType.yaml"
+SubjectTypeExtended:
+  $ref: "./AccessRules/SubjectTypeExtended.yaml"
+ScopeType:
+  $ref: "../../../../infra/openapi/docs/schemas/scopes/ScopeType.yaml"
+EnrichmentDataFields:
+  $ref: "./AccessRules/EnrichmentDataFields.yaml"
+AccessRulesFilterFields:
+  $ref: './AccessRules/AccessRulesSortFilterFields.yaml'
+AccessRuleMetadataFields:
+  $ref: "./AccessRules/AccessRuleMetadataFields.yaml"
+# Evaluation
+PermittedScopes:
+  $ref: "./Evaluation/PermittedScopes.yaml"
+PermittedScopesActions:
+  $ref: "./Evaluation/PermittedScopesActions.yaml"
+BackendEvaluationRequest:
+  $ref: "./Evaluation/BackendEvaluationRequest.yaml"
+# AdminUser
+InternalCreateAccessRuleRequest:
+  $ref: "./InternalCreateAccessRule/InternalCreateAccessRuleRequest.yaml"
+# Common
+TenantId:
+  $ref: '../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml'
+# Me
+MeAccessRulesResponse:
+  $ref: "./Me/MeAccessRulesResponse.yaml"
+MeAccessRules:
+  $ref: "./Me/MeAccessRules.yaml"
+MeAccessRule:
+  $ref: "./Me/MeAccessRule.yaml"
+# Settings
+AuthorizationSettingsKeyEnum:
+  $ref: "./Settings/AuthorizationSettingsKeyEnum.yaml"
+EnableScopedAuthorizationSetting:
+  $ref: "./Settings/EnableScopedAuthorizationSetting.yaml"
+TenantIsCspManagedSetting:
+  $ref: "./Settings/TenantIsCspManagedSetting.yaml"
+AuthorizationSettingsGetResponse:
+  $ref: "./Settings/AuthorizationSettingsGetResponse.yaml"
+UpdateAuthorizationSettingByKeyRequest:
+  $ref: "./Settings/UpdateAuthorizationSettingByKeyRequest.yaml"

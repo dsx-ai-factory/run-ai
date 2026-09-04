@@ -1,0 +1,10 @@
+x-internal: true
+type: object
+required:
+- deactivated
+description: Cluster configuration data - can be updated by the system only
+properties:
+  deactivated:
+    type: boolean
+    description: Whether the cluster is deactivated.
+    default: false

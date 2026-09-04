@@ -1,0 +1,9 @@
+allOf:
+  - $ref: './NodeAdditionalFields.yaml'
+  - type: object
+    required:
+      - nodeInfo
+    properties:
+      nodeInfo:
+        $ref: './NodeInfo.yaml'
+x-schema-name: NodeForSync

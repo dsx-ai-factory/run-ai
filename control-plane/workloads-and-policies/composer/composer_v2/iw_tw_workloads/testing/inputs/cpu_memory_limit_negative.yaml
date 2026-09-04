@@ -1,0 +1,4 @@
+image: ubuntu
+
+compute:
+  cpuMemoryLimit:    "-3"

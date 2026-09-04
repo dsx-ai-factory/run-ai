@@ -1,0 +1,19 @@
+apiVersion: v2
+name: runai-cluster
+description: "Run:ai Cluster Installation"
+version: 0.0.0-dev
+appVersion: CHART_APP_VERSION
+kubeVersion: '>=1.30.0-0'
+dependencies:
+  - name: kai-scheduler
+    condition: kai-scheduler.enabled
+    repository: oci://ghcr.io/kai-scheduler/kai-scheduler
+    version: v0.16.9
+  - name: karta
+    condition: karta.enabled
+    repository: oci://ghcr.io/run-ai/karta
+    version: 0.2.3
+  - name: crds
+    condition: development.includeCRDsInReleaseManifest
+    repository: file://charts/crds
+    version: 0.0.0

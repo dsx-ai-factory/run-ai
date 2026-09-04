@@ -1,0 +1,32 @@
+put:
+  summary: Update Department status from cluster
+  operationId: update_department_status
+  x-internal: true
+  x-authorize:
+    resource-type: department
+    action: sync
+  x-service: org-unit-service
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/org_unit_sync_test.go
+  tags:
+    - Departments
+  parameters:
+    - $ref: "../../../../../infra/openapi/docs/parameters/path/DepartmentId.yaml"
+  requestBody:
+    description: Department to update by name
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/departments/DepartmentStatusUpdateRequest.yaml"
+  responses:
+    204:
+      description: Updated
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

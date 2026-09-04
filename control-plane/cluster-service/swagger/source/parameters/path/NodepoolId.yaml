@@ -1,0 +1,8 @@
+name: nodepoolId
+in: path
+required: true
+description: The unique id identifying the Node Pool.
+schema:
+  type: string
+  example: 17
+

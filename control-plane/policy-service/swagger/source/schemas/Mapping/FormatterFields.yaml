@@ -1,0 +1,8 @@
+type: object
+description: |
+  A map of the formatter fields.
+  Map **keys** are field names. OpenAPI `additionalProperties` only constrains the **value** shape (`FormatterField`);
+  it does **not** validate keys. The API enforces each key to match `MappingFieldName` (1–63 chars,
+  `^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?$` — alphanumeric with optional internal hyphens; no leading/trailing hyphen).
+additionalProperties:
+  $ref: "./FormatterField.yaml"

@@ -1,0 +1,14 @@
+properties:
+  defaults:
+    $ref: "./DistributedPolicyDefaultsV2.yaml"
+  rules:
+    $ref: "./DistributedPolicyRulesV2.yaml"
+  imposedAssets:
+    $ref: "./DistributedImposedAssets.yaml"
+  status:
+      $ref: "../Policy/PolicyValidationStatus.yaml"
+  defaultFromOrder:
+    x-internal: true
+    $ref: "../Policy/DefaultFromOrder.yaml"
+nullable: true
+type: object

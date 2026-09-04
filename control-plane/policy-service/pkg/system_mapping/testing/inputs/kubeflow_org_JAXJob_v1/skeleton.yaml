@@ -1,0 +1,27 @@
+# Minimal valid kubeflow.org/JAXJob/v1 manifest used as the starting point
+# for every Layer 3+4 case under cases/.
+#
+# JAXJob has replica type (Worker) under .spec.jaxReplicaSpecs.
+# Each replica type has its own pod template.
+#
+# The empty stubs below are required:
+#   - jaxReplicaSpecs.*.template.metadata:{} — the *PodMetadata spec selectors
+#     query these paths; if absent, SET actions won't execute.
+#   - initContainers with placeholder — required for initContainer SET actions to work.
+apiVersion: kubeflow.org/v1
+kind: JAXJob
+metadata:
+  name: test
+spec:
+  jaxReplicaSpecs:
+    Worker:
+      replicas: 2
+      template:
+        metadata: {}
+        spec:
+          initContainers:
+            - name: init
+              image: placeholder-worker-init
+          containers:
+            - name: jax
+              image: placeholder-worker

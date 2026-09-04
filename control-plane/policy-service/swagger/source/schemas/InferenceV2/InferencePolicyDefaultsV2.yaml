@@ -1,0 +1,101 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+allOf:
+- nullable: true
+  properties:
+    annotations:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/AnnotationsDefaults.yaml
+    args:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/Args.yaml
+    category:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/Category.yaml
+    command:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/Command.yaml
+    compute:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/SupersetDefaultsAllOfCompute.yaml
+    createHomeDir:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/CreateHomeDir.yaml
+    environmentVariables:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/EnvironmentVariablesDefaults.yaml
+    exposedUrls:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/connectivity/ExposedUrlsDefaults.yaml
+    image:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/Image.yaml
+    imagePullPolicy:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/ImagePullPolicy.yaml
+    imagePullSecrets:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/ImagePullSecretsDefaults.yaml
+    labels:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/LabelsDefaults.yaml
+    nodeAffinityRequired:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/NodeAffinityRequired.yaml
+    nodePools:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/NodePools.yaml
+    nodeType:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/NodeType.yaml
+    podAffinity:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/PodAffinity.yaml
+    ports:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/connectivity/PortsDefaults.yaml
+    preemptibility:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/Preemptibility.yaml
+    priorityClass:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/PriorityClass.yaml
+    probes:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/Probes.yaml
+    relatedUrls:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/connectivity/RelatedUrlsDefaults.yaml
+    security:
+      nullable: true
+      properties:
+        capabilities:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/Capabilities.yaml
+        hostIpc:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/HostIpc.yaml
+        hostNetwork:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/HostNetwork.yaml
+        readOnlyRootFilesystem:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/ReadOnlyRootFileSystem.yaml
+        runAsGid:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/RunAsGid.yaml
+        runAsNonRoot:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/RunAsNonRoot.yaml
+        runAsUid:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/RunAsUid.yaml
+        seccompProfileType:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/SeccompProfileType.yaml
+        supplementalGroups:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/SupplementalGroups.yaml
+        uidGidSource:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/UidGidSource.yaml
+      type: object
+    servingPort:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/ServingPort.yaml
+    storage:
+      nullable: true
+      properties:
+        configMapVolume:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/ConfigMapsDefaults.yaml
+        dataVolume:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/DataVolumesDefaults.yaml
+        emptyDirVolume:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/EmptyDirsDefaults.yaml
+        git:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/GitsDefaults.yaml
+        hostPath:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/HostPathsDefaults.yaml
+        nfs:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/NfssDefaults.yaml
+        pvc:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/PvcsDefaults.yaml
+        secretVolume:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/SecretsDefaults.yaml
+      type: object
+    tolerations:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/TolerationsDefaults.yaml
+    workingDir:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/WorkingDir.yaml
+  type: object
+- $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/InferenceFields.yaml

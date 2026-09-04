@@ -1,0 +1,33 @@
+apiVersion: ray.io/v1
+kind: RayService
+metadata:
+  name: test
+spec:
+  rayClusterConfig:
+    headGroupSpec:
+      template:
+        spec:
+          containers:
+          - image: placeholder-head
+            name: test
+          initContainers:
+          - image: placeholder-head-init
+            name: test
+    workerGroupSpecs:
+    - groupName: test
+      maxReplicas: 5
+      minReplicas: 1
+      rayStartParams:
+        num-gpus: "1"
+      replicas: 3
+      template:
+        metadata:
+          labels:
+            ray.io/group: test
+        spec:
+          containers:
+          - image: placeholder-worker
+            name: test
+          initContainers:
+          - image: placeholder-worker-init
+            name: test

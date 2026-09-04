@@ -1,0 +1,29 @@
+# Minimal valid serving.knative.dev/Service/v1 manifest used as the starting point for
+# every Layer 3+4 case under cases/.
+#
+# Why these particular fields are pre-populated:
+#
+#   - containers[0].image and initContainers[0].image are set to the
+#     placeholder "placeholder" so the skeleton itself validates against
+#     the Knative OpenAPI schema (image is a required field). The container
+#     case overrides both to the real value via SET rules.
+#
+#   - Container names are "test" so parameterised spec selectors
+#     (appContainerByName / initContainerByName) match.
+#
+# Note: template.metadata is NOT pre-populated here. The podMetadata spec
+# selector has a dependency declaration that ensures .spec.template.metadata
+# is created automatically before SET actions execute.
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: test
+spec:
+  template:
+    spec:
+      containers:
+      - name: test
+        image: placeholder
+      initContainers:
+      - name: test
+        image: placeholder

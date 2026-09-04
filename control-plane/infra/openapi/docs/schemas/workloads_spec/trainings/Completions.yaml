@@ -1,0 +1,8 @@
+description:
+  Used with Hyperparameter Optimization. Specifies the number of successful
+  pods the job should reach to be completed. The Job will be marked as
+  successful once the specified amount of pods has been reached (applicable to standard training only).
+type: integer
+format: int32
+example: 1
+nullable: true

@@ -1,0 +1,28 @@
+title: SupersetDefaultsAllOfCompute
+nullable: true
+properties:
+  cpuCoreLimit:
+    $ref: ./CpuCoreLimit.yaml
+  cpuCoreRequest:
+    $ref: ./CpuCoreRequest.yaml
+  cpuMemoryLimit:
+    $ref: ./CpuMemoryLimit.yaml
+  cpuMemoryRequest:
+    $ref: ./CpuMemoryRequest.yaml
+  extendedResources:
+    $ref: ./ExtendedResourcesDefaults.yaml
+  gpuDevicesRequest:
+    $ref: ./GpuDevicesRequest.yaml
+  gpuMemoryLimit:
+    $ref: ./GpuMemoryLimit.yaml
+  gpuMemoryRequest:
+    $ref: ./GpuMemoryRequest.yaml
+  gpuPortionLimit:
+    $ref: ./GpuPortionLimit.yaml
+  gpuPortionRequest:
+    $ref: ./GpuPortionRequest.yaml
+  gpuRequestType:
+    $ref: ./GpuRequestType.yaml
+  largeShmRequest:
+    $ref: ./LargeShmRequest.yaml
+type: object

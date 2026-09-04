@@ -1,0 +1,10 @@
+image: ubuntu
+command: ls
+args: -la *.go
+environmentVariables:
+  - name: USER
+    value: myself
+  - name:  "HOME"
+    value: "/my/dir"
+
+nodeType: my-type

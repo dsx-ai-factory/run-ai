@@ -1,0 +1,28 @@
+type: object
+properties:
+  range:
+    type: object
+    description: >
+      Enforces a numeric value to fall within the inclusive range [min, max],
+      optionally restricted to increments of `step` starting from `min`.
+    nullable: true
+    properties:
+      min:
+        description: Enforces the minimum numeric value of the field.
+        type: number
+        nullable: true
+      max:
+        description: Enforces the maximum numeric value of the field.
+        type: number
+        nullable: true
+      step:
+        description: >
+          Restricts the field value to specific numeric increments starting
+          from `min` (or from 0 when `min` is absent). Must be greater than 0.
+        type: number
+        nullable: true
+example:
+  range:
+    min: 11
+    max: 150
+    step: 4

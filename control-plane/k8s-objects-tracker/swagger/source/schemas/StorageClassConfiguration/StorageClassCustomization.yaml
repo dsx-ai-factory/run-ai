@@ -1,0 +1,12 @@
+description: Optional UI/policy controls that define defaults and requirements when creating PVCs with this storage class.
+properties:
+  accessMode:
+    $ref: "AccessModeCustomization.yaml"
+  volumeMode:
+    $ref: "VolumeModeCustomization.yaml"
+  claimSize:
+    $ref: "ClaimSizeCustomization.yaml"
+  attributes:
+    $ref: "AttributesCustomization.yaml"
+type: object
+nullable: true

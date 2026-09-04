@@ -1,0 +1,11 @@
+description: Information about the set of assets which comprises a workspace, training or template,
+  and an optional set of specific run parameters.
+required:
+  - assets
+properties:
+  assets:
+    $ref: "../../Asset/AssetsRef.yaml"
+  specificEnv:
+    $ref: "../SpecificRunParams.yaml"
+  distributed:
+    $ref: "./InfoDistributed.yaml"

@@ -1,0 +1,18 @@
+properties:
+  labelKey:
+    type: string
+    description: key of node label for pool
+    example: node-type
+  labelValue:
+    type: string
+    description: value of node label for pool
+    example: type-x
+  # Accepted from pre-3.0 callers and discarded. These endpoints reject unknown
+  # fields, so dropping it outright would 400 any caller that still sends it.
+  # Never stored and never returned.
+  overProvisioningRatio:
+    type: integer
+    deprecated: true
+    nullable: true
+  placementStrategy:
+    $ref: './LegacyPlacementStrategy.yaml'

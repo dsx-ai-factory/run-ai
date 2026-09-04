@@ -1,0 +1,20 @@
+description: Details of the configMap and key use to populate the environment variable
+properties:
+  name:
+    description: The name of the config-map resource. (mandatory)
+    type: string
+    minLength: 1
+    maxLength: 253
+    example: my-config-map
+    nullable: true
+    pattern: "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$"
+  key:
+    description: The key in the config-map resource. (mandatory)
+    type: string
+    minLength: 1
+    maxLength: 63
+    example: MY_POSTGRES_SCHEMA
+    nullable: true
+    pattern: .*
+nullable: true
+type: object

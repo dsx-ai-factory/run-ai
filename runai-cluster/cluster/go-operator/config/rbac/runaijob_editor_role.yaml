@@ -1,0 +1,24 @@
+# permissions for end users to edit runaijobs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runaijob-editor-role
+rules:
+- apiGroups:
+  - run.ai.run.ai
+  resources:
+  - runaijobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - run.ai.run.ai
+  resources:
+  - runaijobs/status
+  verbs:
+  - get

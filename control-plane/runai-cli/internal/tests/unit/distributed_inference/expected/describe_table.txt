@@ -1,0 +1,154 @@
+Name:                               my-dist-inference-full-123
+ID:                                 78c1c79e-81fa-484e-961c-b2168ec5c0a3
+Type:                               DistributedInference
+Phase:                              Pending
+Phase Message:                      Replicas: 2; Pending: 2
+Created At:                         2025-12-15T08:58:27Z
+Updated At:                         2025-12-15T08:59:44Z
+Project:                            team-b
+Department:                         default
+Submitted By:                       test@run.ai
+Priority:                           very-high (150)
+Category:                           Deploy
+Preemptible:                        false
+Requested Node Pool:                default
+Image:                              vllm/vllm-openai:latest
+CLI Command:                        /Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai inference distributed submit my-dist-inference-full-123 --project team-b --replicas 2 --workers 2 --image vllm/vllm-openai:latest --image-pull-policy Always --working-dir /app --command 'python -m vllm.entrypoints.openai.api_server' --arguments '--model meta-llama/Llama-2-7b --port 8080' -g 1 --gpu-memory-request 20G --environment-variable MODEL_NAME=llama-2-7b --environment-variable TENSOR_PARALLEL_SIZE=1 --environment-variable MASTER_ADDR=localhost --label role=leader --label version=v1.0 --label framework=vllm --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 1000 --capability NET_BIND_SERVICE --capability SYS_NICE --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --worker-image vllm/vllm-openai:latest --worker-image-pull-policy Always --worker-working-dir /app --worker-command 'python -m vllm.entrypoints.worker' --worker-arguments '--model meta-llama/Llama-2-7b' --worker-gpu-devices-request 1 --worker-environment WORKER_ID=${POD_INDEX} --worker-environment MASTER_ADDR=leader-0 --worker-label role=worker --worker-label version=v1.0 --worker-label framework=vllm --worker-node-type gpu-nodes --worker-run-as-uid 1000 --worker-run-as-gid 1000 --worker-capability NET_BIND_SERVICE --worker-capability SYS_NICE --worker-toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --existing-pvc claimname=my-simple-pvc,path=/models --worker-existing-pvc claimname=my-simple-pvc,path=/models --serving-port=container=8080,authorization-type=authenticatedUsers,protocol=http,authorized-users=admin:developer:tester:reviewer --restart-policy RecreateGroupOnPodRestart --startup-policy LeaderCreated
+
+
+Distributed Inference Configuration
+
+ Restart Policy:                     RecreateGroupOnPodRestart
+ Startup Policy:                     LeaderCreated
+ Replicas (Requested):               2
+ Workers per Replica:                2
+
+
+Serving Configuration
+
+ Port:                               8080
+ Authorization Type:                 authenticatedUsers
+ Authorized Users / Service Accounts: admin, developer, tester, reviewer
+ Expose Externally:                  true
+
+
+Leader Configuration
+
+ Image:                              vllm/vllm-openai:latest
+ Image Pull Policy:                  Always
+ Run as User:                        1000
+ Run as Group:                       1000
+ Capabilities:                       NET_BIND_SERVICE, SYS_NICE
+ Tolerations:                        nvidia.com/gpu=true:NoSchedule
+ Working Directory:                  /app
+ Command:                            python -m vllm.entrypoints.openai.api_server
+ Arguments:                          --model meta-llama/Llama-2-7b --port 8080
+ Environment Variables:              [MASTER_ADDR         : localhost,
+                                        MODEL_NAME          : llama-2-7b,
+                                        TENSOR_PARALLEL_SIZE: 1]
+ Labels:                             framework=vllm, role=leader, version=v1.0
+ Node Type:                          gpu-nodes
+
+    Compute Resources
+     Resource              Requested   Limit       Allocated  
+    ──────────────────────────────────────────────────────────
+     GPU Compute           1.00                    0.00       
+     CPU Cores             0.00                    0.00       
+     GPU Memory            20G                                
+     CPU Memory                                               
+
+    Storage
+     Type          Name                       Mount Path       Size      ReadOnly    Ephemeral   Data Sharing    Storage Class   
+    ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+     PVC           my-simple-pvc              /local/pvc       -         No          -           -               -               
+     PVC           claim-24mqhfjj7j           /local/vol       1G        -           No          -               standard        
+
+
+Worker Configuration
+
+ Image:                              vllm/vllm-openai:latest
+ Image Pull Policy:                  Always
+ Run as User:                        1000
+ Run as Group:                       1000
+ Capabilities:                       NET_BIND_SERVICE, SYS_NICE
+ Tolerations:                        nvidia.com/gpu=true:NoSchedule
+ Working Directory:                  /app
+ Command:                            python -m vllm.entrypoints.worker
+ Arguments:                          --model meta-llama/Llama-2-7b
+ Environment Variables:              [MASTER_ADDR         : leader-0,
+                                        MODEL_NAME          : llama-2-7b,
+                                        TENSOR_PARALLEL_SIZE: 1,
+                                        WORKER_ID           : ${POD_INDEX}]
+ Labels:                             framework=vllm, role=worker, version=v1.0
+ Node Type:                          gpu-nodes
+
+    Compute Resources
+     Resource              Requested   Limit       Allocated  
+    ──────────────────────────────────────────────────────────
+     GPU Compute           1.00                    0.00       
+     CPU Cores             0.00                    0.00       
+     GPU Memory            20G                                
+     CPU Memory                                               
+
+    Storage
+     Type          Name                       Mount Path       Size      ReadOnly    Ephemeral   Data Sharing    Storage Class   
+    ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+     PVC           my-simple-pvc              /local/pvc       -         No          -           -               -               
+     PVC           claim-24mqhfjj7j           /local/vol       1G        -           No          -               standard        
+
+
+Compute Resources
+
+ Resource              Requested   Limit       Allocated  
+──────────────────────────────────────────────────────────
+ GPU Compute           0.00                    0.00       
+ CPU Cores             0.00                    0.00       
+ GPU Memory            120G        120G                   
+ CPU Memory                                               
+
+
+Network
+
+ Name             Tool Type        Connection Type  Container Port   URL             
+─────────────────────────────────────────────────────────────────────────────────────
+ ServingPort      custom           ServingPort      8080                             
+
+  Access Control:
+  ServingPort (Port 8080):
+    Authorization Type:                 authenticatedUsers
+
+
+Pods
+
+  Running Pods:                       0/6 (2 leaders, 4 workers)
+  Requested Pods:                     Leaders: 2, Workers: 4, Total: 6
+ Name                                 Role      Node             Phase            Completed At     Node Pool       
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ my-dist-inference-full-123-c0a3-0    Leader                     Pending                                           
+ my-dist-inference-full-123-c0a3-0-1  Worker                     Pending                                           
+ my-dist-inference-full-123-c0a3-0-2  Worker                     Pending                                           
+ my-dist-inference-full-123-c0a3-1    Leader                     Pending                                           
+ my-dist-inference-full-123-c0a3-1-1  Worker                     Pending                                           
+ my-dist-inference-full-123-c0a3-1-2  Worker                     Pending                                           
+
+
+Events
+
+ Date & Timestamp           Event              Event Issuer              Component                                                                        Details                                                                                                                                                                                                                                    
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ 2025-12-15T08:58:45Z       Unschedulable      runai-scheduler           pg-my-dist-inference-full-123-c0a3-686a3a50-b528-46c6-bf3b-ea2e4fbf6bae-group-1  PodSchedulingErrors: Resources were found for 0 pods while 3 are required for gang scheduling. Additional pods cannot be scheduled due to: no nodes with enough resources were found: 1 node(s) didn't have enough resources: GPU memory.  
+ 2025-12-15T08:58:45Z       Unschedulable      runai-scheduler           my-dist-inference-full-123-c0a3-1-2                                              PodSchedulingErrors: Resources were found for 0 pods while 3 are required for gang scheduling. Additional pods cannot be scheduled due to: no nodes with enough resources were found: 1 node(s) didn't have enough resources: GPU memory.  
+ 2025-12-15T08:58:45Z       Unschedulable      runai-scheduler           my-dist-inference-full-123-c0a3-1-1                                              PodSchedulingErrors: Resources were found for 0 pods while 3 are required for gang scheduling. Additional pods cannot be scheduled due to: no nodes with enough resources were found: 1 node(s) didn't have enough resources: GPU memory.  
+ 2025-12-15T08:58:45Z       Unschedulable      runai-scheduler           my-dist-inference-full-123-c0a3-1                                                <runai-cluster-worker-0-0>: Node didn't have enough resources: GPU memory, taking all considerations into account.no nodes with enough resources were found.                                                                               
+ 2025-12-15T08:58:44Z       Unschedulable      runai-scheduler           my-dist-inference-full-123-c0a3-0                                                <runai-cluster-worker-0-0>: Node didn't have enough resources: GPU memory, taking all considerations into account.no nodes with enough resources were found.                                                                               
+ 2025-12-15T08:58:44Z       Unschedulable      runai-scheduler           my-dist-inference-full-123-c0a3-0-1                                              PodSchedulingErrors: Resources were found for 0 pods while 3 are required for gang scheduling. Additional pods cannot be scheduled due to: no nodes with enough resources were found: 1 node(s) didn't have enough resources: GPU memory.  
+ 2025-12-15T08:58:44Z       Unschedulable      runai-scheduler           my-dist-inference-full-123-c0a3-0-2                                              PodSchedulingErrors: Resources were found for 0 pods while 3 are required for gang scheduling. Additional pods cannot be scheduled due to: no nodes with enough resources were found: 1 node(s) didn't have enough resources: GPU memory.  
+ 2025-12-15T08:58:44Z       Unschedulable      runai-scheduler           pg-my-dist-inference-full-123-c0a3-686a3a50-b528-46c6-bf3b-ea2e4fbf6bae-group-0  PodSchedulingErrors: Resources were found for 0 pods while 3 are required for gang scheduling. Additional pods cannot be scheduled due to: no nodes with enough resources were found: 1 node(s) didn't have enough resources: GPU memory.  
+ 2025-12-15T08:58:39Z       NotReady           runai-scheduler           pg-my-dist-inference-full-123-c0a3-686a3a50-b528-46c6-bf3b-ea2e4fbf6bae-group-0  Job is not ready for scheduling. Waiting for 3 pods, currently 2 exist, 0 are gated                                                                                                                                                        
+ 2025-12-15T08:58:39Z       NotReady           runai-scheduler           pg-my-dist-inference-full-123-c0a3-686a3a50-b528-46c6-bf3b-ea2e4fbf6bae-group-1  Job is not ready for scheduling. Waiting for 3 pods, currently 1 exist, 0 are gated                                                                                                                                                        
+ 2025-12-15T08:58:36Z       GroupsProgressing  leaderworkerset           my-dist-inference-full-123-c0a3                                                  Created worker statefulset for leader pod my-dist-inference-full-123-c0a3-1                                                                                                                                                                
+ 2025-12-15T08:58:35Z       GroupsProgressing  leaderworkerset           my-dist-inference-full-123-c0a3                                                  Created worker statefulset for leader pod my-dist-inference-full-123-c0a3-0                                                                                                                                                                
+ 2025-12-15T08:58:34Z       GroupsProgressing  leaderworkerset           my-dist-inference-full-123-c0a3                                                  Replicas are progressing, with 0 groups ready of total 2 groups                                                                                                                                                                            
+ 2025-12-15T08:58:34Z       CreatingRevision   leaderworkerset           my-dist-inference-full-123-c0a3                                                  Creating revision with key 75c9f7f5bb for a newly created LeaderWorkerSet                                                                                                                                                                  
+ 2025-12-15T08:58:34Z       GroupsProgressing  leaderworkerset           my-dist-inference-full-123-c0a3                                                  Created leader statefulset my-dist-inference-full-123-c0a3                                                                                                                                                                                 
+ 2025-12-15T08:58:34Z       Sync               nginx-ingress-controller  dinfw-my-dist-inference-full-123-sp-0                                            Scheduled for sync                                                                                                                                                                                                                         

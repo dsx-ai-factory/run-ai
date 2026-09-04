@@ -1,0 +1,52 @@
+{{- if .Values.operands.rbac.base.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-project-controller-limit-range
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - limitranges
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-project-controller-limit-range
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-project-controller-limit-range
+subjects:
+  - kind: ServiceAccount
+    name: runai-project-controller
+    namespace: runai
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-project-controller-limit-range-per-project
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - limitranges
+    verbs:
+      - create
+  # name-in-path verbs stay scoped to the single runai-limit-range object.
+  - apiGroups:
+      - ""
+    resourceNames:
+      - runai-limit-range
+    resources:
+      - limitranges
+      - limitranges/finalizers
+    verbs:
+      - update
+      - delete
+      - patch
+{{- end }}

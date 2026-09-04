@@ -1,0 +1,20 @@
+{
+  "service_name": "frontend",
+  "artifact_type": "container",
+  "skip_container_validation": true,
+  "cache_artifacts": true,
+  "path_to_artifacts": "dist",
+  "make": {
+    "test": {
+      "runs_on": "ubuntu-latest-8-cores"
+    }
+  },
+  "notifications": {
+    "slack": {
+      "mention": "@fe_guild"
+    }
+  },
+  "jira": {
+    "team_name": "Viper Team"
+  }
+}

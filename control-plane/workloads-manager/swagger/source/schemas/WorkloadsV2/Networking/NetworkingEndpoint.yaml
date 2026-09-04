@@ -1,0 +1,14 @@
+type: object
+description: A single networking endpoint. An endpoint may create or reference one Service and may expose it externally.
+nullable: true
+properties:
+  externalAccess:
+    description: External access configuration for exposing the endpoint outside the cluster.
+    $ref: "./ExternalAccess.yaml"
+  services:
+    description: Kubernetes service to create or reference for this endpoint (maximum one).
+    type: array
+    maxItems: 1
+    items:
+      $ref: "./NetworkingService.yaml"
+    nullable: true

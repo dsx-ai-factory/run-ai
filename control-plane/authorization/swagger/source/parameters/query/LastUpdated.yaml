@@ -1,0 +1,7 @@
+name: lastUpdated
+in: query
+required: false
+description: Filter by last update time.
+schema:
+  type: string # date-time
+  example: '2021-12-14T16:04:15.099Z'

@@ -1,0 +1,10 @@
+assets:
+  environment: basic
+  compute: memory
+  datasources:
+    - kind: git
+      id: existing-password
+    - kind: s3
+      id: existing-access-key
+    - kind: secret-volume
+      id: existing-generic-secret

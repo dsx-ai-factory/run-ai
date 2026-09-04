@@ -1,0 +1,35 @@
+get:
+  summary: list details of ConfigMaps
+  operationId: list_configMaps
+  tags:
+    - ConfigMaps
+  x-internal: true
+  x-no-authorization: true
+  x-service: k8s-objects-tracker
+  x-test-coverage:
+    - k8s-objects-tracker/pkg/services/api_configmaps_service_test.go
+  parameters:
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/ScopeType.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/ScopeId.yaml"
+    - $ref: "../../parameters/query/optional/nameFilter.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml"
+    - $ref: "../../parameters/query/optional/includeAncestors.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/ConfigMaps/ConfigMapsListResponse.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,5 @@
+spec:
+  admission-controller:
+    image:
+# fill here IMAGE_NAME
+      tag: IMAGE_NAME

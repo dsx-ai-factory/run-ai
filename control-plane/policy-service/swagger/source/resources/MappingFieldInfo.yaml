@@ -1,0 +1,35 @@
+post:
+  summary: Get mapping field info. [experimental]
+  description: Retrieve the detailed breakdown for one or more field references in a workload type's mapping.
+  operationId: get_mapping_field_info
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/service_gvk_policies_test.go
+  x-authorize:
+    resource-type: policies
+    action: read
+  tags:
+    - Policy
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Mapping/GetMappingFieldInfoReq.yaml"
+  responses:
+    200:
+      description: The detailed breakdown of the requested fields.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Mapping/Breakdown.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+

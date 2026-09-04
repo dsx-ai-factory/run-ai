@@ -1,0 +1,206 @@
+apiVersion: run.ai/v1
+kind: Distributed
+metadata:
+  name: test
+spec:
+  master:
+    image: placeholder
+  worker:
+    annotations:
+    - name: description
+      value: annotated-by-all
+    args: --epochs 100
+    autoDeletionTimeAfterCompletionSeconds: 3600
+    backoffLimit: 3
+    category: training
+    cleanPodPolicy: Running
+    command: python train.py
+    compute:
+      cpuCoreLimit: 8
+      cpuCoreRequest: 4
+      cpuMemoryLimit: 16Gi
+      cpuMemoryRequest: 8Gi
+      extendedResources:
+      - quantity: "2"
+        resource: nvidia.com/gpu
+      gpuDevicesRequest: 1
+      gpuMemoryLimit: 8Gi
+      gpuMemoryRequest: 4Gi
+      gpuPortionLimit: 1
+      gpuPortionRequest: 1
+      gpuRequestType: portion
+      largeShmRequest: true
+    createHomeDir: true
+    distributedFramework: PyTorch
+    environmentVariables:
+    - description: described-by-name
+      name: WORLD_SIZE
+      value: "8"
+    exposedUrls:
+    - authorizationType: authorizedGroups
+      authorizedGroups:
+      - group-a
+      authorizedUsers:
+      - user@example.com
+      container: 6006
+      name: tensorboard
+      toolName: tensorboard
+      toolType: tensorboard
+      url: https://tensorboard.example.com
+    image: worker-image:latest
+    imagePullPolicy: IfNotPresent
+    imagePullSecrets:
+    - name: registry-secret
+      userCredential: false
+    labels:
+    - name: app
+      value: worker-set-by-name
+    maxReplicas: 8
+    minReplicas: 2
+    mpiLauncherCreationPolicy: AtStartup
+    nodeAffinityRequired:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: example.com/zone
+          operator: In
+          values:
+          - us-west
+    nodePools:
+    - pool-1
+    nodeType: gpu
+    numWorkers: 4
+    podAffinity:
+      key: kubernetes.io/hostname
+      type: Required
+    ports:
+    - container: 12345
+      external: 12345
+      name: rdma
+      serviceType: NodePort
+      toolName: rdma-tool
+      toolType: custom
+    preemptibility: preemptible
+    priorityClass: high-priority
+    probes:
+      readiness:
+        failureThreshold: 3
+        handler:
+          httpGet:
+            path: /healthz
+            port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 1
+    relatedUrls:
+    - name: docs
+      type: external
+      url: https://docs.example.com
+    restartPolicy: Never
+    security:
+      allowPrivilegeEscalation: false
+      capabilities:
+      - NET_ADMIN
+      hostIpc: false
+      hostNetwork: false
+      privileged: false
+      readOnlyRootFilesystem: false
+      runAsGid: 1000
+      runAsNonRoot: true
+      runAsUid: 1000
+      seccompProfileType: RuntimeDefault
+      supplementalGroups: 1000,2000
+      uidGidSource: custom
+    segmentSize: 1024
+    slotsPerWorker: 1
+    sshAuthMountPath: /root/.ssh
+    stdin: false
+    storage:
+      configMapVolume:
+      - configMap: my-configmap
+        defaultMode: "0644"
+        mountPath: /etc/config-2
+        name: config
+        subPath: config.yaml
+      dataVolume:
+      - id: 123e4567-e89b-12d3-a456-426614174000
+        mountPath: /mnt/data-2
+      emptyDirVolume:
+      - medium: Memory
+        name: scratch
+        path: /scratch
+        sizeLimit: 2Gi
+      git:
+      - branch: release
+        name: code-repo
+        passwordSecret: git-secret
+        path: /workspace/repo
+        repository: https://github.com/example/repo
+        revision: HEAD
+        secretKeyOfPassword: password
+        secretKeyOfUser: username
+        secretRef:
+          authenticationMethod: password
+          name: git-secret-ref
+          secretKeyOfPassword: password
+          secretKeyOfUser: username
+      hostPath:
+      - mountPath: /mnt/host
+        mountPropagation: None
+        name: host-data
+        path: /var/data
+        readOnly: true
+      nfs:
+      - mountPath: /mnt/nfs
+        name: nfs-share
+        path: /export
+        readOnly: true
+        server: nfs.example.com
+      pvc:
+      - claimInfo:
+          accessModes:
+            readOnlyMany: false
+            readWriteMany: true
+            readWriteOnce: false
+          addedAttrValues:
+          - key: extra
+            value: val
+          size: 1G
+          storageClass: standard
+          volumeMode: Filesystem
+        dataSharing: true
+        ephemeral: false
+        existingPvc: false
+        name: shared-data
+        path: /data
+        readOnly: true
+      - claimName: existing-claim
+        existingPvc: true
+        name: existing-pvc
+        path: /existing
+        readOnly: true
+      s3:
+      - accessKeySecret: s3-secret
+        awsSessionToken: token-secret
+        bucket: my-bucket
+        name: s3-bucket
+        path: /datasets
+        secretKeyOfAccessKeyId: access-key-id
+        secretKeyOfSecretKey: secret-key
+        url: https://s3.amazonaws.com
+      secretVolume:
+      - defaultMode: "0644"
+        mountPath: /etc/secrets-2
+        name: secrets
+        secret: my-secret
+    terminateAfterPreemption: false
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: nvidia.com/gpu
+      name: gpu-toleration
+      operator: Equal
+      seconds: 3600
+      value: "true"
+    tty: false
+    workingDir: /app

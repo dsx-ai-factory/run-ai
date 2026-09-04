@@ -1,0 +1,7 @@
+properties:
+  assets:
+    $ref: "./AssetsRules.yaml"
+  specificRunParams:
+    $ref: "../Workload/SpecificRunParamsRules.yaml"
+nullable: true
+type: object

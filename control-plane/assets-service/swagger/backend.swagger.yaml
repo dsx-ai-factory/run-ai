@@ -1,0 +1,2153 @@
+openapi: 3.0.3
+info:
+  version: 2.0.0
+  description: |
+    The aggregated API of Run:ai Control-Plane
+  title: Runai API
+  x-logo:
+    url: ./redoc-runai-logo.png
+    altText: 'Run:ai'
+    backgroundColor: '#FAFAFA'
+    href: 'https://run.ai'
+  license:
+    name: 'Run:ai'
+    url: www.run.ai
+servers:
+  - url: 'https://app.run.ai'
+  - url: 'https://staging.run.ai'
+  - url: 'https://test.run.ai'
+security:
+  - bearerAuth: []
+tags:
+  - name: Jobs
+    description: job related operations
+  - name: Secrets
+    description: secret related operations
+  - name: Storage Classes
+    description: storage class related operations
+  - name: PVCs
+    description: pvc related operations
+  - name: Policy
+    description: policy related operations
+  - name: Pods
+    description: pod related operations
+  - name: Deployments
+    description: deployment related operations
+  - name: Workspaces
+    description: workspaces related operations
+  - name: Sso
+    description: sso related operations
+  - name: Authentication
+    description: authentication related operations
+  - name: Authorization
+    description: authorization related operations
+  - name: Application
+    description: applications related operations
+  - name: Tokens
+    description: tokens related operations
+  - name: Tenant
+    description: tenant related operations
+  - name: NodePools
+    description: node pools related operations
+  - name: Clusters
+    description: clusters related operations
+  - name: Metrics
+    description: metrics related operations
+  - name: Departments
+    description: departments related operations
+  - name: Projects
+    description: projects related operations
+  - name: Admin
+    description: admin related operations
+paths:
+  '/internal/{resourceType}/{id}/ancestors':
+    get:
+      operationId: getAncestors
+      tags:
+        - Internal
+      summary: Get scoped resource ancestors.
+      description: Get the ancestors resource of a scoped resource.
+      parameters:
+        - $ref: '#/components/parameters/ResourceType'
+        - $ref: '#/components/parameters/ResourceId'
+      responses:
+        '200':
+          description: The resource ancestors.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - tenant_id
+                properties:
+                  tenant_id:
+                    type: string
+                    example: '1'
+                  cluster_uuid:
+                    type: string
+                    format: uuid
+                    nullable: true
+                  department_id:
+                    type: string
+                    example: '1'
+                    nullable: true
+                  project_id:
+                    type: string
+                    example: '1'
+                    nullable: true
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  '/internal/{resourceType}/{id}/name':
+    get:
+      operationId: getScopeName
+      tags:
+        - Internal
+      summary: Get scoped resource name.
+      description: Get the name of a scoped resource.
+      parameters:
+        - $ref: '#/components/parameters/ResourceType'
+        - $ref: '#/components/parameters/ResourceId'
+      responses:
+        '200':
+          description: The resource name.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - name
+                properties:
+                  name:
+                    type: string
+                    example: tenant-x
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  '/v1/k8s/clusters/{clusterId}/projects':
+    post:
+      tags:
+        - Projects
+      summary: Create a new project.
+      description: >-
+        Create a new project in the cluster. This endpoint requires EDITOR or
+        RESEARCH MANAGER role.
+      parameters:
+        - in: path
+          name: clusterId
+          schema:
+            type: string
+          required: true
+          description: The unique uuid identifying the cluster.
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        - in: query
+          name: excludePermissions
+          schema:
+            type: boolean
+          required: false
+          description: filter permissions
+          example: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectCreateRequest'
+      responses:
+        '200':
+          description: Project created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project1'
+        '400':
+          description: Bad Project request.
+        '409':
+          description: Project failed to be created.
+    get:
+      tags:
+        - Projects
+      summary: List all projects.
+      description: List all the projects managed by the tenant on a specific cluster.
+      parameters:
+        - in: path
+          name: clusterId
+          schema:
+            type: string
+          required: true
+          description: The unique uuid identifying the cluster.
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        - in: query
+          name: excludePermissions
+          schema:
+            type: boolean
+          required: false
+          description: filter permissions
+          example: true
+        - in: query
+          name: memoryUnitMb
+          schema:
+            type: boolean
+          required: false
+          description: >-
+            should memory be returned in MB. default is "false", in which case
+            it will be returned in MiB.
+          example: true
+      responses:
+        '200':
+          description: A list of projects.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project1'
+  '/v1/k8s/clusters/{clusterId}/projects/{id}':
+    put:
+      tags:
+        - Projects
+      summary: Update a project.
+      description: >-
+        Updates project details. This endpoint requires EDITOR or RESEARCH
+        MANAGER role.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: The unique project-id identifying the project.
+        - in: path
+          name: clusterId
+          schema:
+            type: string
+          required: true
+          description: The unique uuid identifying the cluster.
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        - in: query
+          name: excludePermissions
+          schema:
+            type: boolean
+          required: false
+          description: filter permissions
+          example: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Project1'
+      responses:
+        '200':
+          description: An updated project details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project1'
+        '400':
+          description: Bad project request.
+        '404':
+          description: Project not found.
+        '409':
+          description: Could not update the project.
+    delete:
+      tags:
+        - Projects
+      summary: Delete a project.
+      description: >-
+        Delete a project from the cluster. This endpoint requires EDITOR or
+        RESEARCH MANAGER  role.
+      parameters:
+        - in: path
+          name: clusterId
+          schema:
+            type: string
+          required: true
+          description: The unique uuid identifying the cluster.
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: The unique id identifying the project.
+          example: 2
+      responses:
+        '200':
+          description: Project deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project1'
+        '404':
+          description: Project not found.
+    get:
+      tags:
+        - Projects
+      summary: Get a specific project.
+      description: >-
+        Get information about a specific project. This endpoint requires view
+        permissions to the requested project.
+      parameters:
+        - in: path
+          name: clusterId
+          schema:
+            type: string
+          required: true
+          description: The unique uuid identifying the cluster.
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: The unique project-id identifying the project.
+        - in: query
+          name: excludePermissions
+          schema:
+            type: boolean
+          required: false
+          description: filter permissions
+          example: true
+      responses:
+        '200':
+          description: A project details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project1'
+        '404':
+          description: Project not found.
+  '/v1/k8s/clusters/{clusterId}/projects/status':
+    x-internal: true
+    put:
+      tags:
+        - Projects
+      summary: Update Project status
+      operationId: updateProjectStatus
+      parameters:
+        - name: clusterId
+          in: path
+          description: Unique identifier of the cluster
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectStatusRequest'
+        required: true
+      responses:
+        '201':
+          description: Project updated successfully.
+        '400':
+          description: Bad Project request.
+        '404':
+          description: Project not found.
+  '/v1/k8s/clusters/{clusterId}/departments/{departmentId}':
+    get:
+      tags:
+        - Departments
+      summary: Get a department.
+      description: Get a specific department by the ID.
+      parameters:
+        - in: path
+          name: clusterId
+          schema:
+            type: string
+          required: true
+          description: The unique uuid identifying the cluster.
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        - in: path
+          name: departmentId
+          schema:
+            type: integer
+          required: true
+          description: The unique id identifying the department.
+          example: 2
+        - in: query
+          name: excludePermissions
+          schema:
+            type: boolean
+          required: false
+          description: filter permissions
+          example: true
+      responses:
+        '200':
+          description: Departments returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Department1'
+    put:
+      tags:
+        - Departments
+      summary: Update a department.
+      description: Update a department in the cluster. This endpoint requires EDITOR role.
+      parameters:
+        - in: path
+          name: clusterId
+          schema:
+            type: string
+          required: true
+          description: The unique uuid identifying the cluster.
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        - in: path
+          name: departmentId
+          schema:
+            type: integer
+          required: true
+          description: The unique id identifying the department.
+          example: 2
+        - in: query
+          name: excludePermissions
+          schema:
+            type: boolean
+          required: false
+          description: filter permissions
+          example: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Department1'
+      responses:
+        '200':
+          description: Department updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Department1'
+    delete:
+      tags:
+        - Departments
+      summary: Delete a department.
+      description: >-
+        Delete a department from the cluster. This endpoint requires EDITOR
+        role.
+      parameters:
+        - in: path
+          name: clusterId
+          schema:
+            type: string
+          required: true
+          description: The unique uuid identifying the cluster.
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        - in: path
+          name: departmentId
+          schema:
+            type: integer
+          required: true
+          description: The unique id identifying the department.
+          example: 2
+        - in: query
+          name: excludePermissions
+          schema:
+            type: boolean
+          required: false
+          description: filter permissions
+          example: true
+      responses:
+        '200':
+          description: Department deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Department1'
+  '/v1/k8s/clusters/{clusterId}/departments':
+    get:
+      tags:
+        - Departments
+      summary: Get all departments.
+      description: Get list of all the department in the cluster.
+      parameters:
+        - in: path
+          name: clusterId
+          schema:
+            type: string
+          required: true
+          description: The unique uuid identifying the cluster.
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        - in: query
+          name: excludePermissions
+          schema:
+            type: boolean
+          required: false
+          description: filter permissions
+          example: true
+        - in: query
+          name: memoryUnitMb
+          schema:
+            type: boolean
+          required: false
+          description: >-
+            should memory be returned in MB. default is "false", in which case
+            it will be returned in MiB.
+          example: true
+      responses:
+        '200':
+          description: Departments list returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Department1'
+    post:
+      tags:
+        - Departments
+      summary: Create a new department.
+      description: >-
+        Create a new department in the cluster. This endpoint requires EDITOR
+        role.
+      parameters:
+        - in: path
+          name: clusterId
+          schema:
+            type: string
+          required: true
+          description: The unique uuid identifying the cluster.
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        - in: query
+          name: excludePermissions
+          schema:
+            type: boolean
+          required: false
+          description: filter permissions
+          example: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartmentUserDefinedProperties'
+      responses:
+        '200':
+          description: Department created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Department1'
+  '/v1/k8s/clusters/{clusterId}/departments/{departmentId}/access-control':
+    put:
+      tags:
+        - Departments
+      summary: Set the department admins.
+      description: Set the department admins. This endpoint requires EDITOR role.
+      parameters:
+        - in: path
+          name: clusterId
+          schema:
+            type: string
+          required: true
+          description: The unique uuid identifying the cluster.
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        - in: path
+          name: departmentId
+          schema:
+            type: integer
+          required: true
+          description: The unique id identifying the department.
+          example: 2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartmentAccessControl'
+      responses:
+        '201':
+          description: Department admin set successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartmentAccessControl'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error1'
+          description: Bad request.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error1'
+          description: Unauthenticated
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error1'
+          description: Forbidden
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          minimum: 100
+          maximum: 599
+        message:
+          type: string
+      example:
+        code: 418
+        message: I'm a teapot
+    ClusterId:
+      description: Unique identifier of the cluster
+      type: string
+      format: uuid
+      example: 4008188b-ab50-4aa5-a3f2-b78091ccf92d
+    Dashboards:
+      properties:
+        promProxy:
+          type: string
+          example: 'http://prometheus-proxy:8080'
+        logoutPage:
+          type: string
+          example: 'http://prometheus-proxy:8080/logout'
+        loginPage:
+          type: string
+          example: 'http://prometheus-proxy:8080/login'
+        nowDashboard:
+          type: string
+          example: 'http://prometheus-proxy:8080/d/now'
+        longTermDashboard:
+          type: string
+          example: 'http://prometheus-proxy:8080/d/long-term'
+        clustersDashboard:
+          type: string
+          example: 'http://prometheus-proxy:8080/d/clusters'
+    DepartmentId:
+      description: The id of the department
+      type: integer
+      format: int32
+      minimum: 1
+      example: 8
+    Idp:
+      description: Alias for identity provider
+      type: string
+      example: saml
+    UserId:
+      description: Unique identifier of the user
+      type: string
+      format: uuid
+      example: 4008188b-ab50-4aa5-a3f2-b78091ccf92d
+    Role:
+      type: string
+      enum:
+        - admin
+        - department_admin
+        - researcher
+        - editor
+        - viewer
+        - research_manager
+        - ml_engineer
+      example: viewer
+    AuthEntityType:
+      type: string
+      description: The type of authentication entity.
+      enum:
+        - regular-user
+        - sso-user
+        - app
+        - group
+        - internal-user
+        - super-admin
+      example: regular-user
+    AuthEntity:
+      properties:
+        entityType:
+          $ref: '#/components/schemas/AuthEntityType'
+        tenantId:
+          $ref: '#/components/schemas/TenantId'
+        userId:
+          $ref: '#/components/schemas/UserId'
+        permitAllClusters:
+          type: boolean
+          example: false
+        permittedClusters:
+          type: array
+          description: A list of clusters that the user or application can access.
+          items:
+            $ref: '#/components/schemas/ClusterId'
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+        createdAt:
+          type: string
+          format: date-time
+          description: The creation date of the application.
+          example: '2021-12-14T16:04:15.099Z'
+    User:
+      allOf:
+        - $ref: '#/components/schemas/AuthEntity'
+        - required:
+            - email
+        - properties:
+            email:
+              type: string
+              description: Email address of the user.
+              example: user@email.com
+            lastLogin:
+              type: string
+              format: date-time
+              description: The last time the user logged into the system.
+              example: '2021-12-14T16:04:15.099Z'
+    UserCreationRequest:
+      required:
+        - email
+        - password
+        - roles
+      properties:
+        email:
+          type: string
+          description: Email address of the user.
+          example: user@email.com
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+        entityType:
+          $ref: '#/components/schemas/AuthEntityType'
+        tenantId:
+          $ref: '#/components/schemas/TenantId'
+        password:
+          type: string
+          description: The user's password.
+          example: secret!123
+        needToChangePassword:
+          type: boolean
+          description: >-
+            True if the user is requested to change his password upon next
+            login.
+          example: true
+        permitAllClusters:
+          type: boolean
+          example: false
+        userId:
+          $ref: '#/components/schemas/UserId'
+        permittedClusters:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClusterId'
+    UserCreationResponse:
+      allOf:
+        - $ref: '#/components/schemas/UserCreationRequest'
+    App:
+      allOf:
+        - $ref: '#/components/schemas/AuthEntity'
+        - required:
+            - name
+        - properties:
+            clientId:
+              type: string
+              description: The client ID of the application.
+              example: 6d2894ba-f998-4039-bba1-caba57caf681
+            name:
+              type: string
+              description: The name of the application.
+              example: MyApplication
+            revoked:
+              type: boolean
+              description: Whether the application has been revoked.
+              example: false
+    Secret:
+      required:
+        - name
+      properties:
+        secret:
+          type: object
+          description: The secret.
+          properties:
+            type:
+              type: string
+              description: The type of the secret.
+              enum:
+                - password
+                - secret
+                - certificate
+              example: secret
+            value:
+              type: string
+              description: The value of the secret.
+              example: my-secret
+    ClientId:
+      description: Unique identifier of the app
+      type: string
+      format: uuid
+      example: 4008188b-ab50-4aa5-a3f2-b78091ccf92d
+    TenantId:
+      type: integer
+      description: The id of the tenant
+      format: int32
+      minimum: 1
+      example: 1
+    TenantName:
+      type: string
+      description: The name of the tenant
+      example: runai
+    Tenant:
+      type: object
+      required:
+        - id
+      properties:
+        authSettingsId:
+          type: integer
+          example: 1
+        displayName:
+          type: string
+          example: My Company
+        ssoAuthSettingsId:
+          type: integer
+          example: 1
+        authRealm:
+          type: string
+          example: runai
+        id:
+          $ref: '#/components/schemas/TenantId'
+        name:
+          type: string
+          example: runai
+        eulaSigningUser:
+          type: string
+          example: ...
+        contractType:
+          type: string
+          example: normal
+        smgEnabled:
+          type: boolean
+          example: true
+        authClientID:
+          type: string
+          example: runai-admin-ui
+        cliClientId:
+          type: string
+          example: runai-cli
+    TenantConfig:
+      type: object
+      properties:
+        selfHosted:
+          type: boolean
+          example: true
+        tenantName:
+          type: string
+          example: runai
+        authClientName:
+          type: string
+          example: runai-admin-ui
+        authUrl:
+          type: string
+          example: 'https://auth.run.ai'
+        authRealm:
+          type: string
+          example: runai
+    TenantSetting:
+      properties:
+        active:
+          type: boolean
+          example: true
+        category:
+          type: string
+          example: Department
+        description:
+          type: string
+          example: Enable the department feature
+        source:
+          type: string
+          example: Tenant
+        lable:
+          type: string
+          example: Show departments
+        stage:
+          type: string
+          example: Beta
+        type:
+          type: string
+          example: Boolean
+        key:
+          type: string
+          example: department.use
+        value:
+          type: string
+          example: true
+    TenantSettingCreationRequest:
+      properties:
+        key:
+          type: string
+          example: department.use
+        value:
+          example: true
+    TenantSettingCreationResponse:
+      properties:
+        msg:
+          type: string
+          example: done
+    GroupCreationRequest:
+      required:
+        - email
+        - password
+        - roles
+        - username
+      properties:
+        username:
+          type: string
+          description: Group's name
+          example: group1
+        email:
+          type: string
+          description: Empty email address
+          example: ''
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+        entityType:
+          type: string
+          example: sso-user
+        tenantId:
+          $ref: '#/components/schemas/TenantId'
+        permitAllClusters:
+          type: boolean
+          example: false
+        userId:
+          type: string
+          description: Group's name
+          example: group1
+        permittedClusters:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClusterId'
+        createdBy:
+          type: string
+          description: uid of the user
+          example: aaaaa-3333-4444-bbbbbb-111
+    GroupCreationResponse:
+      allOf:
+        - $ref: '#/components/schemas/GroupCreationRequest'
+    Group:
+      properties:
+        entityType:
+          type: string
+          example: group
+        tenantId:
+          $ref: '#/components/schemas/TenantId'
+        userId:
+          type: string
+          description: Group's name
+          example: group1
+        permitAllClusters:
+          type: boolean
+          example: false
+        permittedClusters:
+          type: array
+          description: A list of clusters that the user or application can access.
+          items:
+            $ref: '#/components/schemas/ClusterId'
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+        createdBy:
+          type: string
+          description: uid of the user
+          example: aaaaa-3333-4444-bbbbbb-111
+    Cluster:
+      type: object
+      required:
+        - metadata
+        - current
+      properties:
+        metadata:
+          type: object
+          required:
+            - clusterId
+            - clusterName
+          properties:
+            clusterId:
+              $ref: '#/components/schemas/ClusterId'
+            clusterName:
+              $ref: '#/components/schemas/ClusterName'
+        current:
+          type: object
+          description: >-
+            Current reported metrics data. resources holds data that is summed
+            up to the cluster level and projectResources explains the division
+            of it to projects
+          required:
+            - resources
+            - projectResources
+          properties:
+            resources:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/ResourcesData'
+                  - type: object
+                    required:
+                      - nodepoolName
+                    properties:
+                      nodepoolName:
+                        $ref: '#/components/schemas/NodepoolName'
+            projectResources:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/ResourcesData'
+                  - type: object
+                    required:
+                      - projectName
+                      - departmentName
+                      - nodepoolName
+                    properties:
+                      projectName:
+                        $ref: '#/components/schemas/ProjectName'
+                      departmentName:
+                        $ref: '#/components/schemas/DepartmentName'
+                      nodepoolName:
+                        $ref: '#/components/schemas/NodepoolName'
+        timeRange:
+          $ref: '#/components/schemas/TimeRange'
+    Department:
+      type: object
+      required:
+        - metadata
+        - current
+      properties:
+        metadata:
+          type: object
+          required:
+            - departmentId
+            - departmentName
+            - clusterId
+            - clusterName
+          properties:
+            departmentId:
+              $ref: '#/components/schemas/DepartmentId'
+            departmentName:
+              $ref: '#/components/schemas/DepartmentName'
+            clusterId:
+              $ref: '#/components/schemas/ClusterId'
+            clusterName:
+              $ref: '#/components/schemas/ClusterName'
+        current:
+          type: object
+          description: >-
+            Current reported metrics data. resources holds data that is summed
+            up to the department level and projectResources explains the
+            division of it to projects
+          required:
+            - resources
+            - projectResources
+          properties:
+            resources:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/ResourcesData'
+                  - type: object
+                    required:
+                      - nodepoolName
+                    properties:
+                      nodepoolName:
+                        $ref: '#/components/schemas/NodepoolName'
+            projectResources:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/ResourcesData'
+                  - type: object
+                    required:
+                      - projectName
+                      - nodepoolName
+                    properties:
+                      projectName:
+                        $ref: '#/components/schemas/ProjectName'
+                      nodepoolName:
+                        $ref: '#/components/schemas/NodepoolName'
+        timeRange:
+          $ref: '#/components/schemas/TimeRange'
+    Departments:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/Department'
+              - properties:
+                  timeRange:
+                    example: null
+        timeRange:
+          $ref: '#/components/schemas/TimeRange'
+    Project:
+      type: object
+      required:
+        - metadata
+        - current
+      properties:
+        metadata:
+          type: object
+          required:
+            - projectId
+            - projectName
+            - departmentId
+            - departmentName
+            - clusterId
+            - clusterName
+          properties:
+            projectId:
+              $ref: '#/components/schemas/ProjectId'
+            projectName:
+              $ref: '#/components/schemas/ProjectName'
+            departmentId:
+              $ref: '#/components/schemas/DepartmentId'
+            departmentName:
+              $ref: '#/components/schemas/DepartmentName'
+            clusterId:
+              $ref: '#/components/schemas/ClusterId'
+            clusterName:
+              $ref: '#/components/schemas/ClusterName'
+        current:
+          type: object
+          required:
+            - resources
+            - nodepoolResources
+          description: >-
+            Current reported metrics data. resources holds data that is summed
+            up to the project level and projectResources explains the division
+            of it to nodepools
+          properties:
+            resources:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/ResourcesData'
+                  - type: object
+                    required:
+                      - nodepoolName
+                    properties:
+                      nodepoolName:
+                        $ref: '#/components/schemas/NodepoolName'
+        timeRange:
+          $ref: '#/components/schemas/TimeRange'
+    Projects:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/Project'
+              - properties:
+                  timeRange:
+                    example: null
+        timeRange:
+          $ref: '#/components/schemas/TimeRange'
+    Job:
+      type: object
+      required:
+        - metadata
+        - current
+      properties:
+        metadata:
+          type: object
+          required:
+            - jobId
+            - jobName
+            - clusterId
+            - clusterName
+          properties:
+            jobId:
+              type: string
+              format: uuid
+              example: 550e8400-e29b-41d4-a716-446655440000
+            jobName:
+              type: string
+              example: workload-a
+            clusterId:
+              $ref: '#/components/schemas/ClusterId'
+            clusterName:
+              $ref: '#/components/schemas/ClusterName'
+        current:
+          type: object
+          required:
+            - totalRunTime
+            - totalWaitTime
+            - resources
+          properties:
+            totalRunTime:
+              description: Job total run time in seconds
+              type: number
+              example: 1000
+            totalWaitTime:
+              description: Job total wait time in seconds
+              type: number
+              example: 0
+            resources:
+              $ref: '#/components/schemas/JobResourcesData'
+        timeRange:
+          $ref: '#/components/schemas/JobTimeRange'
+    ClusterName:
+      type: string
+      example: cluster-a
+    DepartmentName:
+      type: string
+      example: default
+    NodepoolName:
+      type: string
+      example: nodepoola
+    ProjectId:
+      type: integer
+      example: 1
+    ProjectName:
+      type: string
+      example: project-a
+    JobResourceData:
+      type: object
+      required:
+        - allocated
+      properties:
+        allocated:
+          type: number
+          example: 2.5
+        utilization:
+          description: 'Utilization percentage, values between 0 to 1.'
+          type: number
+          example: 0.8
+    JobAdvancedData:
+      type: object
+      properties:
+        idleSeconds:
+          type: number
+          example: 50
+        grEngineActive:
+          description: >-
+            The fraction of time any portion of the graphics or compute engines
+            were active
+          type: number
+        dramActive:
+          description: >-
+            The fraction of cycles where data was sent to or received from
+            device memory
+          type: number
+        smActive:
+          description: >-
+            The fraction of time at least one warp was active on a
+            multiprocessor, averaged over all multiprocessors
+          type: number
+        smOccupancy:
+          description: >-
+            The fraction of resident warps on a multiprocessor, relative to the
+            maximum number of concurrent warps supported on a multiprocessor
+          type: number
+        pipeTensorActive:
+          description: The fraction of cycles the tensor (HMMA / IMMA) pipe was active
+          type: number
+        pipeFp64Active:
+          description: The fraction of cycles the FP64 (double precision) pipe was active
+          type: number
+        pipeFp32Active:
+          description: >-
+            The fraction of cycles the FMA (FP32 (single precision), and
+            integer) pipe was active
+          type: number
+        pipeFp16Active:
+          description: The fraction of cycles the FP16 (half precision) pipe was active
+          type: number
+        nvlinkTxBytes:
+          description: >-
+            The rate of data transmitted over NVLink, not including protocol
+            headers, in bytes per second
+          type: number
+        nvlinkRxBytes:
+          description: >-
+            The rate of data received over NVLink, not including protocol
+            headers, in bytes per second
+          type: number
+        pcieTxBytes:
+          description: >-
+            The rate of data transmitted over the PCIe bus, including both
+            protocol headers and data payloads, in bytes per second
+          type: number
+        pcieRxBytes:
+          description: >-
+            The rate of data received over the PCIe bus, including both protocol
+            headers and data payloads, in bytes per second
+          type: number
+    JobResourcesData:
+      type: object
+      required:
+        - gpu
+        - gpu-memory
+        - cpu
+        - cpu-memory
+      properties:
+        gpu:
+          description: GPU resources in fractions. 0.7 = 70% of a gpu
+          $ref: '#/components/schemas/JobResourceData'
+        gpu-memory:
+          description: GPU memory resources in megabytes. 1 = 10^6  (1000*1000)
+          $ref: '#/components/schemas/JobResourceData'
+        cpu:
+          description: CPU resources in millicpus. 1000 = 1 cpu
+          $ref: '#/components/schemas/JobResourceData'
+        cpu-memory:
+          description: CPU memory resources in megabytes. 1 = 10^6  (1000*1000)
+          $ref: '#/components/schemas/JobResourceData'
+        advanced:
+          description: >-
+            Advanced job metrics data, available only if advanced metrics
+            enables and advanced query param is set
+          type: object
+          properties:
+            idleSeconds:
+              type: number
+              example: 50
+            grEngineActive:
+              description: >-
+                The fraction of time any portion of the graphics or compute
+                engines were active
+              type: number
+            dramActive:
+              description: >-
+                The fraction of cycles where data was sent to or received from
+                device memory
+              type: number
+            smActive:
+              description: >-
+                The fraction of time at least one warp was active on a
+                multiprocessor, averaged over all multiprocessors
+              type: number
+            smOccupancy:
+              description: >-
+                The fraction of resident warps on a multiprocessor, relative to
+                the maximum number of concurrent warps supported on a
+                multiprocessor
+              type: number
+            pipeTensorActive:
+              description: The fraction of cycles the tensor (HMMA / IMMA) pipe was active
+              type: number
+            pipeFp64Active:
+              description: >-
+                The fraction of cycles the FP64 (double precision) pipe was
+                active
+              type: number
+            pipeFp32Active:
+              description: >-
+                The fraction of cycles the FMA (FP32 (single precision), and
+                integer) pipe was active
+              type: number
+            pipeFp16Active:
+              description: The fraction of cycles the FP16 (half precision) pipe was active
+              type: number
+            nvlinkTxBytes:
+              description: >-
+                The rate of data transmitted over NVLink, not including protocol
+                headers, in bytes per second
+              type: number
+            nvlinkRxBytes:
+              description: >-
+                The rate of data received over NVLink, not including protocol
+                headers, in bytes per second
+              type: number
+            pcieTxBytes:
+              description: >-
+                The rate of data transmitted over the PCIe bus, including both
+                protocol headers and data payloads, in bytes per second
+              type: number
+            pcieRxBytes:
+              description: >-
+                The rate of data received over the PCIe bus, including both
+                protocol headers and data payloads, in bytes per second
+              type: number
+    ResourceData:
+      type: object
+      description: >-
+        quota equals to the given resources and allocated equal to the real
+        count of used resources
+      required:
+        - quota
+        - allocated
+      properties:
+        quota:
+          type: number
+          example: 3
+        allocated:
+          type: number
+          example: 2.5
+        utilization:
+          type: number
+          example: 0.765
+    ResourcesData:
+      type: object
+      required:
+        - numberOfPendingWorkloads
+        - gpu
+        - cpu
+        - memory
+      properties:
+        numberOfPendingWorkloads:
+          type: integer
+          example: 1
+        gpu:
+          description: GPU resources in fractions. 0.7 = 70% of a gpu
+          $ref: '#/components/schemas/ResourceData'
+        cpu:
+          description: CPU resources in millicpus. 1000 = 1 cpu
+          $ref: '#/components/schemas/ResourceData'
+        memory:
+          description: Memory resources in megabytes. 1 = 10^6  (1000*1000)
+          $ref: '#/components/schemas/ResourceData'
+    ResourcesDataOvertime:
+      allOf:
+        - $ref: '#/components/schemas/ResourcesData'
+        - type: object
+          required:
+            - timestamp
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+              example: '2023-06-06T12:09:18.211Z'
+    TimeRange:
+      type: object
+      description: >-
+        Overtime metrics data. Returned only if both start and end query
+        parameters are set.
+      required:
+        - resources
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourcesDataOvertime'
+    JobTimeRange:
+      type: object
+      description: >-
+        Overtime metrics data. Returned only if both start and end query
+        parameters are set.
+      required:
+        - resources
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobResourcesDataOvertime'
+    JobResourcesDataOvertime:
+      allOf:
+        - $ref: '#/components/schemas/JobResourcesData'
+        - type: object
+          required:
+            - timestamp
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+              example: '2023-06-06T12:09:18.211Z'
+    OrgUnit:
+      type: object
+      required:
+        - id
+        - type
+        - name
+      properties:
+        id:
+          type: string
+          example: '7'
+        type:
+          $ref: '#/components/schemas/ScopeType'
+        name:
+          type: string
+          example: tenant-7
+        parentId:
+          type: string
+        parentType:
+          $ref: '#/components/schemas/ScopeType'
+    ScopeType:
+      type: string
+      enum:
+        - tenant
+        - department
+        - project
+        - cluster
+    Error1:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+    ProjectCreateRequest:
+      properties:
+        name:
+          type: string
+          description: Project Name
+          example: team-a
+        departmentId:
+          type: integer
+          format: int32
+          description: ID of the department owning the project
+          example: 2
+        deservedGpus:
+          type: number
+          description: >-
+            The project GPU allocation that it is deserved to get in case the
+            cluster has those resources
+          example: 3
+        maxAllowedGpus:
+          type: number
+          description: >-
+            An upper limit for the amount of GPUs the project can get (Even if
+            over quota is allowed and resources are available)
+          example: 5
+        gpuOverQuotaWeight:
+          type: number
+          description: The priority the project gets for over quota resources
+          maximum: 3
+          minimum: 0
+          example: 1
+        swapEnabled:
+          type: boolean
+          description: Flag for enabling thin provisioning for jobs of this project
+          example: false
+        defaultNodePools:
+          type: array
+          description: >-
+            Default node pools for workload submission under this project (If a
+            workload doesnt specify node pools list, this list will be used).
+          items:
+            type: string
+          example:
+            - default
+        interactiveJobTimeLimitSecs:
+          type: number
+          description: >-
+            A limit for the duration of interactive jobs from this project in
+            seconds
+          example: 3600
+        interactiveJobMaxIdleDurationSecs:
+          type: number
+          description: >-
+            Maximum time duration in seconds that interactive job can be idle
+            before it will be terminated
+          example: 3000
+        interactivePreemptibleJobMaxIdleDurationSecs:
+          type: number
+          description: >-
+            Maximum time duration in seconds that interactive preemptible job
+            can be idle before it will be terminated
+          example: 3000
+        trainingJobTimeLimitSecs:
+          type: number
+          description: >-
+            A limit for the duration of training jobs from this project in
+            seconds. Available only from cluster version 2.12
+          example: 3600
+        trainingJobMaxIdleDurationSecs:
+          type: number
+          description: >-
+            Maximum time duration in seconds that training job can be idle
+            before it will be terminated
+          example: 3000
+        nodeAffinity:
+          $ref: '#/components/schemas/JobsNodeAffinity'
+          description: Node affinity configuration for jobs of this project
+        permissions:
+          $ref: '#/components/schemas/ResourcePermissions'
+          description: Permissions for users to do CRUD operations on jobs of this project
+        resources:
+          $ref: '#/components/schemas/AssignedResources'
+          description: >-
+            Total resources assigned to this Project. If Node Pool feature is
+            on, the resources are the sum of all Node Pool Resources.
+        nodePoolsResources:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodePoolAssignedResources'
+          description: Resources assigned to this Project per Node Pool
+        namespace:
+          type: string
+          description: >-
+            The name of an existing namespace to use for the project in the
+            cluster.
+          example: ns-proj1
+    Project1:
+      allOf:
+        - $ref: '#/components/schemas/ProjectCreateRequest'
+        - properties:
+            id:
+              type: integer
+              format: int32
+              description: The project id
+              readOnly: true
+              example: 5
+            tenantId:
+              type: integer
+              format: int32
+              description: ID of the tenant owning the project
+              example: 2
+            clusterUuid:
+              type: string
+              format: uuid
+              description: ID of the cluster owning the project
+              example: 71f69d83-ba66-4822-adf5-55ce55efd210
+            departmentName:
+              type: string
+              description: Name of the department owning the project
+              example: department-a
+            interactiveNodeAffinity:
+              type: string
+              example: none
+            trainNodeAffinity:
+              type: string
+              example: none
+            createdAt:
+              type: string
+              description: The creation date of the project
+              format: date-time
+              example: '2021-12-14T16:04:15.099Z'
+            status:
+              $ref: '#/components/schemas/ProjectStatus'
+            phase:
+              type: string
+              description: project's phase
+              example: Ready
+    ResourcePermissions:
+      properties:
+        users:
+          type: array
+          items:
+            type: string
+          description: Names of users that have permissions to the project
+        groups:
+          type: array
+          items:
+            type: string
+          description: Names of groups that have permissions to the project
+        applications:
+          type: array
+          items:
+            type: string
+          description: Names of applications that have permissions to the project
+    JobsNodeAffinity:
+      properties:
+        train:
+          $ref: '#/components/schemas/NodeAffinity'
+          description: Node affinity configuration for train jobs
+        interactive:
+          $ref: '#/components/schemas/NodeAffinity'
+          description: Node affinity configuration for interactive jobs
+    NodeAffinity:
+      properties:
+        affinityType:
+          type: string
+          enum:
+            - no_limit
+            - only_selected
+          description: The type of affinity of the jobs to the nodes
+        selectedTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodeTypeForProject'
+    NodeTypeForProject:
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+    AssignedResources:
+      properties:
+        id:
+          type: number
+        gpu:
+          $ref: '#/components/schemas/Resource'
+          description: GPU number resources assigned to the project
+        cpu:
+          $ref: '#/components/schemas/Resource'
+          description: CPU in Millicores assigned assigned to the project
+        memory:
+          $ref: '#/components/schemas/Resource'
+          description: Memory in Mib assigned to the project
+    NodePoolAssignedResources:
+      properties:
+        id:
+          type: number
+        nodePool:
+          $ref: '#/components/schemas/NodePoolResources'
+          description: the node pool which the assigned resources refer to
+        gpu:
+          $ref: '#/components/schemas/Resource'
+          description: GPU number assigned to the project in the node pool
+        cpu:
+          $ref: '#/components/schemas/Resource'
+          description: CPU in Millicores assigned to the project in the node pool
+        memory:
+          $ref: '#/components/schemas/Resource'
+          description: Memory in Mib assigned to the project in the node pool
+    Resource:
+      properties:
+        deserved:
+          type: number
+          description: >-
+            The project resource allocation that it is deserved to get in case
+            the cluster has those resources
+          example: 0
+        maxAllowed:
+          type: number
+          description: Maximum amount of resources the project can get
+          example: 1000
+        overQuotaWeight:
+          type: number
+          description: The priority the project gets for over quota resources
+          example: 2
+    NodePoolResources:
+      properties:
+        id:
+          type: number
+          description: node pool id
+          example: 3
+        name:
+          type: string
+          description: node pool name
+          example: default
+    ProjectStatusRequest:
+      properties:
+        status:
+          type: string
+          description: A json representing the project's status
+          example: '{"namespace":"runai-team-a"}'
+        name:
+          type: string
+          description: Project Name
+          example: team-a
+        departmentName:
+          type: string
+          description: name of the department owning the project
+          example: default
+        quotaStatuses:
+          $ref: '#/components/schemas/NodePoolsQuotaStatuses'
+    ProjectStatus:
+      properties:
+        namespace:
+          type: string
+          description: The namespace of the project
+          example: runai-team-a
+        message:
+          type: string
+          description: Detailed phase message
+          example: NamespaceHandlerFailed
+        quotaStatuses:
+          $ref: '#/components/schemas/NodePoolsQuotaStatuses'
+    NodePoolsQuotaStatuses:
+      type: array
+      items:
+        $ref: '#/components/schemas/NodePoolQuotaStatus'
+      description: >-
+        The current quota status for each nodepool. Supported only for cluster
+        versions 2.15+.
+    NodePoolQuotaStatus:
+      properties:
+        nodePoolName:
+          type: string
+          description: the node pool name which the current quota status refers to
+        allocated:
+          $ref: '#/components/schemas/QuotaStatusResourceList'
+        allocatedNonPreemptible:
+          $ref: '#/components/schemas/QuotaStatusResourceList'
+        requested:
+          $ref: '#/components/schemas/QuotaStatusResourceList'
+    QuotaStatusResourceList:
+      properties:
+        gpu:
+          type: number
+          description: The number of GPUs (allocated/requested/...).
+          example: 0
+        cpu:
+          type: number
+          description: CPU in Millicores (allocated/requested/...).
+          example: 1000
+        memory:
+          type: number
+          description: Memory in Mib (allocated/requested/...).
+          example: 1000
+    DepartmentUserDefinedProperties:
+      properties:
+        name:
+          type: string
+          description: The name of the department.
+          example: default
+        deservedGpus:
+          type: number
+          description: Deserved GPUs for the department.
+          example: 2
+        allowOverQuota:
+          type: boolean
+          description: Is over quota allowed for the department.
+          example: false
+        maxAllowedGpus:
+          type: number
+          description: Max allowed GPUs for the department.
+          example: 2
+        resources:
+          $ref: '#/components/schemas/AssignedResources'
+          description: >-
+            Total resources assigned to the Department. If Node Pool feature is
+            on, the resources are the sum of all Node Pool Resources.
+        nodePoolsResources:
+          type: array
+          items:
+            $ref: '#/components/schemas/NodePoolAssignedResources'
+          description: Resources assigned to the Department per node pool
+    DepartmentAccessControl:
+      properties:
+        departmentId:
+          type: integer
+          format: int32
+          description: The unique id identifying the department.
+          example: 2
+        departmentAdmins:
+          type: array
+          items:
+            type: string
+          description: >-
+            Id's of users with department admin role that are assigned to
+            managed the department
+    Department1:
+      allOf:
+        - $ref: '#/components/schemas/DepartmentUserDefinedProperties'
+        - properties:
+            tenantId:
+              type: integer
+              description: The tenant id this cluster belongs to.
+              example: 42
+            clusterUuid:
+              type: string
+              description: The cluster UUID this department belongs to.
+              example: UUID
+            createdAt:
+              type: string
+              description: The creation date of the department.
+              format: date-time
+              example: '2021-12-14T16:04:15.099Z'
+            id:
+              type: integer
+              format: int32
+              description: The unique id identifying the department.
+              example: 2
+            projects:
+              type: array
+              items:
+                $ref: '#/components/schemas/Project1'
+              description: Projects under this department.
+              example:
+                - id: 16
+                  name: team-a
+                  deserved_gpus: 3
+            projectsDeservedGpus:
+              type: string
+              description: >-
+                Total deserved GPUs of the projects under this department - as
+                string.
+              example: '3.00'
+            departmentAdmins:
+              type: array
+              items:
+                type: string
+              description: >-
+                Id's of users with department admin role that are assigned to
+                managed the department
+  responses:
+    BadRequest:
+      description: Bad request.Errors
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 400
+            message: Bad Request
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 401
+            message: Unauthorized
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 403
+            message: Forbidden
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 404
+            message: Object not found
+    InternalServerError:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 500
+            message: Internal Server Error
+    ServiceUnavailable:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 503
+            message: Please try again in few minutes
+    AlreadyExists:
+      description: The specified resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 409
+            message: Already exists
+  parameters:
+    Roles:
+      in: query
+      required: false
+      name: roles
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/Role'
+      description: Filter the returned entities to only those with the required role
+    CreatedByMe:
+      in: query
+      required: false
+      name: onlyCreatedByMe
+      schema:
+        type: boolean
+      description: >-
+        Filter the returned entities to only those that created by the
+        requesting subject
+    ResourceId:
+      in: path
+      required: true
+      name: id
+      schema:
+        type: string
+    ResourceType:
+      in: path
+      required: true
+      name: resourceType
+      schema:
+        type: string
+    ClusterUuid:
+      in: path
+      name: clusterUuid
+      required: true
+      description: The unique uuid identifying the cluster.
+      schema:
+        type: string
+        format: uuid
+        example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+    DepartmentId:
+      in: path
+      name: departmentId
+      schema:
+        type: integer
+      required: true
+      description: The unique id identifying the department.
+      example: 2
+    ProjectId:
+      in: path
+      name: projectId
+      schema:
+        type: string
+      required: true
+      description: The unique project-id identifying the project.
+    JobId:
+      in: path
+      name: jobId
+      description: Unique identifier of the job (UUID)
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Start:
+      name: start
+      in: query
+      description: timestamp from when to fetch data in UTC
+      required: false
+      schema:
+        type: string
+        format: date-time
+        example: '2023-06-06 12:09:18.211'
+    End:
+      name: end
+      in: query
+      description: timestamp until when to fetch data in UTC
+      required: false
+      schema:
+        type: string
+        format: date-time
+        example: '2023-06-07 12:09:18.211'
+    NumberOfSamples:
+      name: numberOfSamples
+      in: query
+      description: the number of samples to take in the time range from start to end.
+      required: false
+      schema:
+        type: integer
+        example: 20
+        maximum: 100
+        minimum: 0
+        default: 20
+    GroupName:
+      in: path
+      name: groupName
+      required: true
+      schema:
+        description: Unique identifier of the group
+        type: string
+        format: string
+        example: group1
+    NodepoolName:
+      in: query
+      name: nodepoolName
+      schema:
+        type: string
+        example: default
+      required: false
+      description: The unique nodepool name to filter by.
+    Advanced:
+      in: query
+      name: advanced
+      schema:
+        type: boolean
+        example: true
+      required: false
+      description: Flag indicate if the advanced metrics data is requested.
+    limit:
+      name: limit
+      in: query
+      required: false
+      description: The maximum number of entries to return.
+      schema:
+        type: integer
+        format: int32
+        example: 1000
+    offset:
+      name: offset
+      in: query
+      required: false
+      description: The offset of the first item returned in the collection.
+      schema:
+        type: integer
+        format: int32
+        example: 4000
+    lastUpdated:
+      name: lastUpdated
+      in: query
+      required: false
+      description: The last timestamp of the previously received items.
+      schema:
+        type: string
+        format: date-time
+        example: '2021-12-14T16:04:15.099Z'
+    includeDeleted:
+      name: includeDeleted
+      in: query
+      required: false
+      description: True to include deleted objects in the result.
+      schema:
+        type: boolean
+        example: false
+        default: false
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer authentication
+x-tagGroups:
+  - name: Workloads
+    tags:
+      - Policy
+      - Jobs
+      - Secrets
+      - Storage Classes
+      - PVCs
+      - Pods
+      - Deployments
+      - Workspaces
+  - name: Authentication and Authorization
+    tags:
+      - Sso
+      - AccessRules
+      - Roles
+      - Users
+      - Applications
+      - Tokens
+  - name: Organizations
+    tags:
+      - Tenant
+      - Clusters
+      - NodePools
+      - Departments
+      - Projects
+  - name: Metrics
+    tags:
+      - Metrics
+  - name: Admin
+    tags:
+      - Admin CLI
+      - Audit
+  - name: Assets
+    tags:
+      - PVC
+      - Compute
+      - Credentials
+      - Registry
+      - Environment
+      - Datasources
+      - Git
+      - HostPath
+      - NFS
+      - S3
+      - Template
+      - Workspace
+      - Training

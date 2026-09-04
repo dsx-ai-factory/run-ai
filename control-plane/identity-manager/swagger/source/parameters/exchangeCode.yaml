@@ -1,0 +1,6 @@
+name: code
+in: query
+required: true 
+description: The exchange code retrieved from the idp server
+schema:
+  type: string

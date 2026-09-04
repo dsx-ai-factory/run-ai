@@ -1,0 +1,39 @@
+get:
+  summary: Get workload endpoints.
+  description: Retrieve the network endpoints exposed by a workload using a workload ID.
+  operationId: get_workload_endpoints
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/workloads_api_test.go
+  x-authorize:
+    resource-type: workloads
+    action: read
+    id: workloadId
+  tags:
+    - Workloads
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - endpoints
+            properties:
+              endpoints:
+                type: array
+                items:
+                  $ref: '../schemas/Workloads/Endpoint.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

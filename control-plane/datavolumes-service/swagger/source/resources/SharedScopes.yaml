@@ -1,0 +1,72 @@
+patch:
+  summary: Patch the datavolume's shared scopes
+  operationId: patch_datavolume_shared_scopes
+  x-service: datavolumes-service
+  x-test-coverage:
+    - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+  x-authorize:
+    resource-type: datavolumes
+    action: update
+    resource-id: datavolumeId
+  x-audit: true
+  tags:
+    - Datavolumes
+  parameters:
+    - $ref: "../parameters/path/DatavolumeId.yaml"
+  requestBody:
+    description: Requested SharedScopes of the datavolume to patch.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/SharedScopes/SharedScopesPatchRequest.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/SharedScopes/SharedScopes.yaml"
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+get:
+  summary: Get the datavolume's shared scopes
+  operationId: get_datavolume_shared_scopes
+  x-service: datavolumes-service
+  x-test-coverage:
+    - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+  x-authorize:
+    resource-type: datavolumes
+    action: update # only entities with 'update' permission can use this api; other entities will 'read' using GET /datavolume
+    resource-id: datavolumeId
+  tags:
+    - Datavolumes
+  parameters:
+    - $ref: "../parameters/path/DatavolumeId.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/SharedScopes/SharedScopes.yaml"
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

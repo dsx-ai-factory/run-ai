@@ -1,0 +1,15 @@
+type: object
+x-internal: true
+properties:
+  realm:
+    type: string
+    maxLength: 255
+  mimir_header:
+    type: string
+    maxLength: 255
+  tenant_name:
+    type: string
+    maxLength: 255
+  runai.cluster_id:
+    type: string
+    maxLength: 64

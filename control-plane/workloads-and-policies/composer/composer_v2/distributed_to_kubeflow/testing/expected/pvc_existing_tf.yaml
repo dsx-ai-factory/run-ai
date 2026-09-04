@@ -1,0 +1,131 @@
+DistributedTarget:
+  Config: {}
+  Framework: TF
+  JaxJob: null
+  MasterSpec: null
+  MpiJob: null
+  ObjectMeta: null
+  PyTorchJob: null
+  RunPolicy: null
+  TFJob:
+    apiVersion: kubeflow.org/v1
+    kind: TFJob
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: tfjob
+        createdBy: TFJob
+        project: test
+        release: pvc_existing
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: pvc_existing
+      name: pvc_existing
+      namespace: runai-test
+    spec:
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: Running
+      tfReplicaSpecs:
+        Chief:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: tfjob
+                createdBy: TFJob
+                project: test
+                release: pvc_existing
+                workloadKind: Distributed
+                workloadName: pvc_existing
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: pvc_existing
+                image: ubuntu
+                name: tensorflow
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /path/ro
+                  name: pvc-master
+                  readOnly: true
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - name: pvc-master
+                persistentVolumeClaim:
+                  claimName: claim-existing
+                  readOnly: true
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: tfjob
+                createdBy: TFJob
+                project: test
+                release: pvc_existing
+                workloadKind: Distributed
+                workloadName: pvc_existing
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: pvc_existing
+                image: ubuntu
+                name: tensorflow
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /path/ro
+                  name: pvc-worker
+                  readOnly: true
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - name: pvc-worker
+                persistentVolumeClaim:
+                  claimName: claim-existing
+                  readOnly: true
+    status: {}
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: TFJob
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-pvc_existing/, Framework: TF'
+  images:
+  - ubuntu
+  name: 'pvc_existing/, Framework: TF'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

@@ -1,0 +1,38 @@
+policyInfo:
+  master:
+    defaults:
+      image: ubuntu:master
+      nodePools:
+      - node-pool-1
+      - node-pool-5
+    rules:
+      nodePools:
+        options:
+        - value: node-pool-1
+        - value: node-pool-2
+        - value: node-pool-3
+  worker:
+    defaults:
+      image: ubuntu:worker
+      nodePools:
+      - node-pool-2
+      - node-pool-5
+    rules:
+      nodePools:
+        options:
+        - value: node-pool-1
+        - value: node-pool-2
+        - value: node-pool-3
+projectInfo:
+  name: project-1
+spec:
+  master:
+    image: ubuntu:master
+    nodePools:
+    - node-pool-1
+    - node-pool-5
+  worker:
+    image: ubuntu:worker
+    nodePools:
+    - node-pool-2
+    - node-pool-5

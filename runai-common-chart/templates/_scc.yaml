@@ -1,0 +1,44 @@
+{{- define "common.scc.tpl" -}}
+{{- $top := first . }}
+{{- $service := index . 1 }}
+{{- $securityContextConstraints := index . 2 }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  {{- include "common.metadata" (list $top $service) | nindent 2 }}
+  name: {{ include "common.fullname" $top }}-{{ $service.name }}-scc
+rules:
+  - apiGroups:
+      - security.openshift.io
+    resourceNames:
+      - {{ include "common.fullname" $top }}-{{ $service.name }}
+    resources:
+      - securitycontextconstraints
+    verbs:
+      - use
+---
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  {{- include "common.metadata" (list $top $service) | nindent 2 }}
+  name: {{ include "common.fullname" $top }}-{{ $service.name }}
+{{ toYaml $securityContextConstraints }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  {{- include "common.metadata" (list $top $service) | nindent 2 }}
+  name: {{ include "common.fullname" $top }}-{{ $service.name }}-scc
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "common.fullname" $top }}-{{ $service.name }}-scc
+subjects:
+  - kind: ServiceAccount
+    name: {{ $service.serviceAccount.name }}
+    namespace: {{ $top.Release.Namespace }}
+{{- end }}
+
+{{- define "common.scc" -}}
+{{- include "common.utils.merge" (append . "common.scc.tpl") }}
+{{- end }}

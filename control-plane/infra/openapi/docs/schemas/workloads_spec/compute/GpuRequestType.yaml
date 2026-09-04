@@ -1,0 +1,10 @@
+description: Sets the unit type for GPU resources requests. Stated in terms of portion or memory.
+  Sets the unit type for other GPU request fields.
+  If `gpuDevicesRequest > 1`, only `portion` is supported.
+  If `gpuDeviceRequest = 1`, the request type can be stated as `portion` or `memory`.
+type: string
+minLength: 1
+enum:
+  - portion
+  - memory
+nullable: true

@@ -1,0 +1,5 @@
+# SaaS-shape: NATS disabled, no AUTH_TOKEN produced.
+# This is the configuration that triggered the bug -- consumers of
+# CACHE_PASSWORD / PUBSUB_PASSWORD must still find their keys.
+nats:
+  enabled: false

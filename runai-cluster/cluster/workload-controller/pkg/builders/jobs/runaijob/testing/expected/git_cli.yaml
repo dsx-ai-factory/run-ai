@@ -1,0 +1,80 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      template: job-0-2022-04-03t05-22-11
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      project: team-a
+      release: job-0-2022-04-03t05-22-11
+      runai/job-index: "24"
+      workloadKind: TrainingWorkload
+      workloadName: job-0-2022-04-03t05-22-11
+    name: job-0
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 6
+    completions: 1
+    maxIdleDurationSeconds: 2400
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          user: user.name
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          project: team-a
+          release: job-0-2022-04-03t05-22-11
+          run.ai/top-owner-uid: ""
+          runai/job-index: "24"
+          workloadKind: TrainingWorkload
+          workloadName: job-0-2022-04-03t05-22-11
+      spec:
+        containers:
+        - command:
+          - sleep
+          - infinity
+          image: ubuntu
+          imagePullPolicy: Always
+          name: job-0
+          resources: {}
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+          - mountPath: gitmount
+            name: code-sync-0
+        initContainers:
+        - env:
+          - name: GITSYNC_REPO
+            value: https://github.com/reo2.git
+          - name: GITSYNC_REF
+            value: master
+          - name: GITSYNC_USERNAME
+            value: myuser2
+          - name: GITSYNC_PASSWORD
+            value: mypassword2
+          - name: GITSYNC_ROOT
+            value: /code-git-gitmount
+          - name: GITSYNC_ONE_TIME
+            value: "true"
+          - name: HOME
+            value: /tmp
+          image: registry.k8s.io/git-sync/git-sync:v4.7.0
+          name: git-sync-git-gitmount
+          resources: {}
+          volumeMounts:
+          - mountPath: /code-git-gitmount
+            name: code-sync-0
+        restartPolicy: Never
+        schedulerName: runai-scheduler
+        volumes:
+        - emptyDir: {}
+          name: code-sync-0
+  status: {}

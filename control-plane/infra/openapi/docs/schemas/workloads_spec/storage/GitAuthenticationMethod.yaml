@@ -1,0 +1,9 @@
+description: Specifies the authentication method to use when accessing the Git repository. This is required for private repositories
+  - `password` - Authenticate using a username and password.
+  - `ssh-key` - Authenticate using an SSH private key.
+type: string
+minLength: 1
+example: password
+enum:
+  - password
+  - ssh-key

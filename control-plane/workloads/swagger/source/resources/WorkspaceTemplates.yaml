@@ -1,0 +1,68 @@
+post:
+  summary: Create a new workspace template. [Experimental]
+  operationId: create_workspace_template
+  description: Create a new workspace template.
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/templates_service_test.go
+  x-authorize:
+    resource-type: templates
+    action: create
+  tags:
+    - Workload templates
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../../../infra/openapi/docs/schemas/workspaces/WorkspaceTemplateCreationRequest.yaml"
+  responses:
+    202:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../../../infra/openapi/docs/schemas/workspaces/WorkspaceTemplate.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+get:
+  summary: List all workspace templates. [Experimental]
+  description: List all workspace templates.
+  operationId: list_workspace_templates
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/templates_service_test.go
+  x-no-authorization: true
+  tags:
+    - Workload templates
+  parameters:
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+    - $ref: '../parameters/query/TemplatesSort.yaml'
+    - $ref: '../parameters/query/TemplatesFilter.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Search.yaml"
+    - $ref: "../parameters/query/IncludeTemplateAncestors.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToProject.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/schemas/workspaces/WorkspaceTemplatesListResponse.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

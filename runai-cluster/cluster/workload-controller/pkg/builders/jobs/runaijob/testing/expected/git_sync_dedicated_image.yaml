@@ -1,0 +1,77 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      template: test-git
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      kai.scheduler/preemptibility: non-preemptible
+      priorityClassName: build
+      project: team-a
+      release: test-git
+      workloadKind: InteractiveWorkload
+      workloadName: test-git
+    name: job-3
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 0
+    completions: 1
+    maxIdleDurationSeconds: 1200
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          user: user.name
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          kai.scheduler/preemptibility: non-preemptible
+          priorityClassName: build
+          project: team-a
+          release: test-git
+          run.ai/top-owner-uid: ""
+          workloadKind: InteractiveWorkload
+          workloadName: test-git
+      spec:
+        containers:
+        - image: http://gcr.io/runai/test
+          imagePullPolicy: Always
+          name: job-3
+          resources: {}
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+          - mountPath: /tmp/repoa
+            name: code-sync-0
+        initContainers:
+        - env:
+          - name: GITSYNC_REPO
+            value: http://github.com/repoa
+          - name: GITSYNC_USERNAME
+            value: myuser
+          - name: GITSYNC_PASSWORD
+            value: mypassword
+          - name: GITSYNC_ROOT
+            value: /code-git--tmp-repoa
+          - name: GITSYNC_ONE_TIME
+            value: "true"
+          - name: HOME
+            value: /tmp
+          image: gcr.io/dedicated-image/my-gitsync-image
+          name: git-sync-git--tmp-repoa
+          resources: {}
+          volumeMounts:
+          - mountPath: /code-git--tmp-repoa
+            name: code-sync-0
+        restartPolicy: Never
+        schedulerName: runai-scheduler
+        volumes:
+        - emptyDir: {}
+          name: code-sync-0
+  status: {}

@@ -1,0 +1,9 @@
+type: object
+required:
+  - metadata
+  - spec
+properties:
+  metadata:
+    $ref: "./NIMServiceMetadataCreateParams.yaml"
+  spec:
+    $ref: "../../../../../infra/openapi/docs/schemas/nim_services/NimServiceSpec.yaml"

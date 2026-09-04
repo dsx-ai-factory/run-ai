@@ -1,0 +1,13 @@
+allOf:
+  - $ref: './WorkloadElement.yaml'
+  - type: object
+    required:
+      - podsRequestedResources
+      - allocatedResources
+    properties:
+      podsRequestedResources:
+        $ref: "./WorkloadRequestResources.yaml"
+      allocatedResources:
+        $ref: "./WorkloadAllocatedResources.yaml"
+      topology:
+        $ref: "./WorkloadElementTopology.yaml"

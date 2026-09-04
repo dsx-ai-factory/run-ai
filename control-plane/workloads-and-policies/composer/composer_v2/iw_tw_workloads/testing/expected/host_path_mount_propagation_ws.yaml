@@ -1,0 +1,75 @@
+BatchJobTarget:
+  Config: {}
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: host_path_mount_propagation
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: host_path_mount_propagation
+      name: host_path_mount_propagation
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: host_path_mount_propagation
+            workloadKind: Workspace
+            workloadName: host_path_mount_propagation
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: host_path_mount_propagation
+            image: ubuntu
+            name: host_path_mount_propagation
+            resources: {}
+            volumeMounts:
+            - mountPath: /mount/path/vol/1
+              mountPropagation: HostToContainer
+              name: host-path
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+          volumes:
+          - hostPath:
+              path: /my/volume/1
+            name: host-path
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: host_path_mount_propagation, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: host_path_mount_propagation, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

@@ -1,0 +1,9 @@
+description: The type of Kubernetes service to create for the inference deployment. Options include 'ClusterIP' (default), 'NodePort', 'LoadBalancer', and 'ExternalName'.
+type: string
+default: ClusterIP
+enum:
+  - ClusterIP
+  - NodePort
+  - LoadBalancer
+  - ExternalName
+nullable: true

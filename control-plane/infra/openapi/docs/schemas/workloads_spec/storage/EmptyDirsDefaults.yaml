@@ -1,0 +1,7 @@
+properties:
+  attributes:
+    $ref: "./EmptyDirInstance.yaml"
+  instances:
+    $ref: "./EmptyDirItems.yaml"
+nullable: true
+type: object

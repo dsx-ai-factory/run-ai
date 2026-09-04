@@ -1,0 +1,8 @@
+name: templateId
+in: path
+required: true
+description: The  Universally Unique Identifier (UUID) of the template.
+schema:
+  type: string
+  format: uuid
+example: 550e8400-e29b-41d4-a716-446655440000

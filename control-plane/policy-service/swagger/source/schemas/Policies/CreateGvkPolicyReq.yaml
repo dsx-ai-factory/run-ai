@@ -1,0 +1,6 @@
+type: object
+description: Create a policy and apply it on a given workload type.
+allOf:
+  - $ref: "./PolicyDescriptionField.yaml"
+  - $ref: "./WorkloadTypeAndScope.yaml"
+  - $ref: "./PolicyRules.yaml"

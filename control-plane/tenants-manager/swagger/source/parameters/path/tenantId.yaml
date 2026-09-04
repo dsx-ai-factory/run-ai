@@ -1,0 +1,8 @@
+name: tenantId
+in: path
+required: true
+description: The id of the tenant to retrieve
+schema:
+  type: integer
+  format: int32
+  minimum: 0

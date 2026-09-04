@@ -1,0 +1,115 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      template: test1
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      kai.scheduler/preemptibility: non-preemptible
+      priorityClassName: build
+      project: team-a
+      release: test1
+      workloadKind: InteractiveWorkload
+      workloadName: test1
+    name: test1
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 0
+    completions: 1
+    maxIdleDurationSeconds: 1200
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          user: ""
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          kai.scheduler/preemptibility: non-preemptible
+          priorityClassName: build
+          project: team-a
+          release: test1
+          run.ai/top-owner-uid: ""
+          workloadKind: InteractiveWorkload
+          workloadName: test1
+      spec:
+        containers:
+        - command:
+          - sleep
+          - "100"
+          env:
+          - name: CLUSTER_USER
+            value: test
+          image: ubuntu
+          imagePullPolicy: Always
+          name: test1
+          ports:
+          - containerPort: 6006
+            name: port-6006
+            protocol: TCP
+          - containerPort: 8888
+            name: port-8888
+            protocol: TCP
+          - containerPort: 11111
+            name: port-11111
+            protocol: TCP
+          - containerPort: 22
+            name: port-22
+            protocol: TCP
+          resources: {}
+          securityContext:
+            allowPrivilegeEscalation: true
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+          - mountPath: /dev/shm
+            name: dshm
+        hostIPC: true
+        restartPolicy: Never
+        schedulerName: runai-scheduler
+        volumes:
+        - emptyDir:
+            medium: Memory
+          name: dshm
+  status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    priorityClassName: build
+    project: team-a
+    release: test1
+    workloadKind: InteractiveWorkload
+    workloadName: test1
+  name: iw-test1-0-clusterip
+spec:
+  ports:
+  - name: port-test1-6006-0
+    port: 6006
+    protocol: TCP
+    targetPort: 6006
+  - name: port-test1-8888-1
+    port: 8888
+    protocol: TCP
+    targetPort: 8888
+  - name: port-test1-11111-2
+    port: 11111
+    protocol: TCP
+    targetPort: 11111
+  - name: port-test1-22-3
+    port: 22
+    protocol: TCP
+    targetPort: 22
+  selector:
+    release: test1
+  type: ClusterIP
+status:
+  loadBalancer: {}

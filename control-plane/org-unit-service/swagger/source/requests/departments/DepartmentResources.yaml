@@ -1,0 +1,4 @@
+put:
+  $ref: "./UpdateDepartmentResources.yaml"
+patch:
+  $ref: "./PatchDepartmentResources.yaml"

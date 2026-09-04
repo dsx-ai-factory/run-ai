@@ -1,0 +1,17 @@
+description: |
+  Layer 3 case "workload" for serving.knative.dev/Service/v1. SETs metadata
+  on the Service and on the revision template (.spec.template.metadata).
+  Read together with cases/workload/golden.yaml.
+effectiveRules:
+  - field: labels
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "app", value: "knative-test" } }]
+  - field: annotations
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "example.com/annotation", value: "test-value" } }]
+  - field: labels
+    specSelector: podMetadata
+    enforcements: [{ set: { key: "app", value: "test" } }]
+  - field: annotations
+    specSelector: podMetadata
+    enforcements: [{ set: { key: "example.com/annotation", value: "test-value" } }]

@@ -1,0 +1,9 @@
+properties:
+  autoScaling:
+    allOf:
+      - $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/AutoScalingCommonFields.yaml"
+      - $ref: "./SpecificRunMetricFields.yaml"
+    nullable: true
+    type: object
+nullable: true
+type: object

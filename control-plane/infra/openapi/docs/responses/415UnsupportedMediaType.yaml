@@ -1,0 +1,5 @@
+description:  Unsupported media type
+content:
+  application/json:
+    schema:
+      $ref: './Error.yaml'

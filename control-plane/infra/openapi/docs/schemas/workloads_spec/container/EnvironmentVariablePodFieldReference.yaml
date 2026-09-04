@@ -1,0 +1,12 @@
+description: Details of the field-reference and key use to populate the environment variable
+properties:
+  path:
+    description: The field path resource. (mandatory)
+    type: string
+    minLength: 1
+    maxLength: 10000
+    example: metadata.name
+    nullable: true
+    pattern: .*
+nullable: true
+type: object

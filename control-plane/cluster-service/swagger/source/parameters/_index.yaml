@@ -1,0 +1,43 @@
+#path
+ClusterUuid:
+  $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+nodeName:
+  $ref: "./path/NodeName.yaml"
+NodeId:
+  $ref: "./path/NodeId.yaml"
+NodepoolId:
+  $ref: "./path/NodepoolId.yaml"
+ClusterId:
+  $ref: "./path/ClusterId.yaml"
+ClusterSettingsKey:
+  $ref: "./path/ClusterSettingsKey.yaml"
+#query
+queryVerbosity:
+  $ref: "./query/QueryVerbosity.yaml"
+NodesFilter:
+  $ref: "./query/NodesFilter.yaml"
+NodesSortBy:
+  $ref: "./query/NodesSortBy.yaml"
+NodepoolsFilterBy:
+  $ref: "./query/NodepoolsFilterBy.yaml"
+
+SortOrder:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+Search:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/Search.yaml"
+StartRequired:
+  $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/StartRequired.yaml"
+EndRequired:
+  $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/EndRequired.yaml"
+NumberOfSamples:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/NumberOfSamples.yaml"
+MetricsType:
+  $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/MetricsType.yaml"
+Offset:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml"
+Limit:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml"
+NodeMetricTypes:
+  $ref: "./query/NodeMetricTypes.yaml"
+QueryIncludeDeleted:
+  $ref: "./query/QueryIncludeDeleted.yaml"

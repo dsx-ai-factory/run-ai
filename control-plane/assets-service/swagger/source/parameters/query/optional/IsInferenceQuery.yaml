@@ -1,0 +1,7 @@
+name: isInference
+in: query
+required: false
+description: Filter results to workload of type inference.
+schema:
+  type: boolean
+allowReserved: true

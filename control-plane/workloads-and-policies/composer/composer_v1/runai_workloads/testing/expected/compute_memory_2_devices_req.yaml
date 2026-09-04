@@ -1,0 +1,52 @@
+Dinfw: null
+JobSpec:
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  environment:
+    items:
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  gpuDevices:
+    value: 2
+  gpuMemory:
+    value: 2M
+  image:
+    value: ubuntu
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  priorityClassName:
+    value: high
+  username:
+    value: test
+MasterSpec: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: compute_memory_2_devices_req, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: compute_memory_2_devices_req, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  requestedResources:
+    gpu:
+      request: 2
+    gpuMemory:
+      request: 2M
+    gpuRequestType: memory
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

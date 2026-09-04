@@ -1,0 +1,88 @@
+{
+  "general": {
+    "name": "mynim-auto",
+    "id": "5fa3c7f9-1089-4225-93e2-16d7f6c4c4a6",
+    "type": "NIMService",
+    "phase": "Running",
+    "phaseMessage": "deployment \"mynim-auto\" successfully rolled out",
+    "project": "testnim",
+    "department": "default",
+    "createdAt": "2026-03-10T16:41:36Z",
+    "updatedAt": "2026-03-10T16:43:17Z",
+    "submittedBy": "test@run.ai",
+    "priority": "very-high (150)",
+    "category": "Deploy"
+  },
+  "workloadDetails": {
+    "images": [
+      "gcr.io/run-ai-lab/nim-cpu:latest"
+    ]
+  },
+  "compute": {
+    "requestedResources": {
+      "gpuCompute": {
+        "requested": 0
+      },
+      "cpuCores": {
+        "requested": 0.1
+      },
+      "gpuMemory": {
+        "request": "",
+        "limit": ""
+      },
+      "cpuMemory": {
+        "request": "100M",
+        "limit": ""
+      }
+    },
+    "allocatedResources": {
+      "gpuCompute": 0,
+      "cpuCores": 0.1,
+      "gpuMemory": "",
+      "cpuMemory": "100M"
+    },
+    "currentNodePools": [
+      "default"
+    ]
+  },
+  "networks": [
+    {
+      "name": "NIMService",
+      "toolType": "NIMService",
+      "connectionType": "ExternalUrl",
+      "url": "https://test-cluster.runailabs.com/testnim/mynim-auto",
+      "port": 8080
+    }
+  ],
+  "podsInfo": {
+    "pods": [],
+    "runningPods": 1
+  },
+  "spec": {
+    "autoScaling": {},
+    "servingConfiguration": {}
+  },
+  "GPUAcceleration": null,
+  "nim": {
+    "image": "gcr.io/run-ai-lab/nim-cpu:latest",
+    "ngcAuthSecret": "my-ngc-secret",
+    "category": "Deploy",
+    "preemptibility": "non-preemptible",
+    "servingPort": 8000,
+    "exposeExternally": true,
+    "servingUrl": "https://test-cluster.runailabs.com/testnim/mynim-auto",
+    "serviceType": "ClusterIP",
+    "cpuCoreRequest": 0.1,
+    "cpuMemoryRequest": "100M",
+    "modelStoreType": "PVC",
+    "modelStoreAccessMode": "ReadWriteOnce",
+    "autoscalingEnabled": true,
+    "minReplicas": 1,
+    "maxReplicas": 3,
+    "metric": "cpu",
+    "metricThreshold": 80,
+    "multiNodeEnabled": false,
+    "replicasRequested": 1,
+    "replicasReady": 1
+  }
+}

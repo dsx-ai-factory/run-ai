@@ -1,0 +1,9 @@
+name: overrideTenantId
+x-internal: true
+in: query
+required: false
+schema:
+  type: integer
+  format: int32
+  example: 123
+description: The tenant Id of the current request, overrides the tenantId in the header.

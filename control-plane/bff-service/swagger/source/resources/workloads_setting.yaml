@@ -1,0 +1,104 @@
+put:
+  summary: Update workloads setting by key
+  x-service: bff-service
+  x-test-coverage: not-applicable
+  operationId: update_workloads_setting_by_key
+  x-authorize:
+    resource-type: settings
+    action: update
+  tags:
+  - Settings
+  parameters:
+  - $ref: '../parameters/workloadsSettingsKey.yaml'
+  - $ref: '../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          anyOf:
+          - $ref: '../schemas/settings/EnableNIM/UpdateEnableNIM.yaml'
+          - $ref: '../schemas/settings/DeletedWorkloadsView/UpdateDeletedWorkloadsView.yaml'
+          - $ref: '../schemas/settings/AllowGPT2Model/UpdateAllowGPT2Model.yaml'
+          - $ref: '../schemas/settings/EnableModelCatalog/UpdateEnableModelCatalog.yaml'
+        examples:
+          enableNIM:
+            $ref: '../examples/workloads_setting_examples.yaml'
+          deletedWorkloadsView:
+            $ref: '../examples/workloads_setting_examples.yaml'
+          allowGPT2Model:
+            $ref: '../examples/workloads_setting_examples.yaml'
+          enableModelCatalog:
+            $ref: '../examples/workloads_setting_examples.yaml'
+  responses:
+    '200':
+      description: Setting successfully updated
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+get:
+  summary: Get workloads setting by key
+  x-service: bff-service
+  x-test-coverage: not-applicable
+  operationId: get_workloads_setting_by_key
+  x-authorize:
+    resource-type: settings
+    action: read
+  tags:
+  - Settings
+  parameters:
+  - $ref: '../parameters/workloadsSettingsKey.yaml'
+  - $ref: "../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/settings/GetSettingResponse.yaml'
+          examples:
+            enableNIM:
+              value:
+                value:
+                  enabled: true
+                displayName: NIM models
+                description: Enable instant deployment of NIM models via the workload submission form
+            deletedWorkloadsView:
+              value:
+                value:
+                  enabled: true
+                displayName: Deleted workloads view
+                description: Enable to view deleted workloads in the Workloads view.
+            allowGPT2Model:
+              value:
+                value:
+                  enabled: true
+                displayName: Allow GPT-2 model
+                description: Enable to allow GPT-2 model.
+            enableModelCatalog:
+              value:
+                value:
+                  enabled: true
+                displayName: Hugging face models
+                description: Enable instant deployment of Hugging Face models via the Models view or the workload submission form.
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

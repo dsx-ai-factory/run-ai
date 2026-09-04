@@ -1,0 +1,88 @@
+rules:
+  args:
+    canEdit: false
+    required: true
+
+  environmentVariables:
+    instances:
+      locked:
+        - FIXED_ENV
+      canAdd: false
+
+  priorityClass:
+    canEdit: false
+
+  storage:
+    hostPath:
+      attributes:
+        path:
+          canEdit: true
+          required: true
+        mountPath:
+          canEdit: true
+          required: true
+      instances:
+        canAdd: false
+        locked:
+          - FIXED_HOST_PATH_ITEM
+    pvc:
+      attributes:
+        claimInfo:
+          accessMode:
+            readWriteMany:
+              canEdit: false
+            readWriteOnce:
+              canEdit: false
+            readOnlyMany:
+              canEdit: false
+  ports:
+    attributes:
+      container:
+        min: 8000
+        max: 9000
+    instances:
+      locked:
+        - FIXED_PORT
+      canAdd: false
+
+defaults:
+  args: FIXED VALUE
+
+  environmentVariables:
+    instances:
+      - name: FIXED_ENV
+        value: FIXED_VALUE
+      - name: CAN_CHANGE_ENV
+        value: CAN_CHANGE_VALUE
+
+  priorityClass: interactive-preemptible
+
+  storage:
+    hostPath:
+      instances:
+        - name: FIXED_HOST_PATH_ITEM
+          path: FIXED_PATH
+          mountPath: FIXED_MOUNT_PATH
+        - name: CAN_CHANGE_HOST_PATH_ITEM
+          path: CAN_CHANGE_PATH
+          mountPath: CAN_CHANGE_MOUNT_PATH
+      attributes:
+        path: default_path
+        mountPath: default_mount_path
+
+    pvc:
+      attributes:
+        claimInfo:
+          accessMode:
+            readWriteMany: true
+            readWriteOnce: false
+            readOnlyMany: true
+
+  ports:
+    attributes:
+      container: 8500
+    instances:
+      - name: FIXED_PORT
+        container: 8001
+      - name: CAN_CHANGE_PORT
+        container: 8002

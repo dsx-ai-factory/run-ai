@@ -1,0 +1,39 @@
+get:
+  summary: Get pods count.
+  description: Retrieve the number of pods from a cluster.
+  operationId: count_pods
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/pods_api_test.go
+  x-authorize:
+    resource-type: workloads
+    action: read
+  tags:
+    - Pods
+  parameters:
+    - $ref: '../parameters/query/Deleted.yaml'
+    - $ref: '../parameters/query/PodsFilter.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Search.yaml"
+    - $ref: '../parameters/query/Completed.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - count
+            properties:
+              count:
+                type: integer
+                format: int64
+                example: 1
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

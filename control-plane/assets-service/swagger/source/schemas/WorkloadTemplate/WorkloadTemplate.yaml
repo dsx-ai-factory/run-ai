@@ -1,0 +1,8 @@
+required:
+  - meta
+  - spec
+properties:
+  meta:
+    $ref: "../Asset/AssetMeta.yaml"
+  spec:
+    $ref: "../Workload/V1/SpecificRunInfoFields.yaml"

@@ -1,0 +1,14 @@
+type: object
+required:
+  - meta
+  - spec
+properties:
+  meta:
+    $ref: './HistoryRecordMeta.yaml'
+  spec:
+    type: object
+    properties:
+      event:
+        $ref: './Event.yaml'
+      phaseUpdate:
+        $ref: './PhaseUpdate.yaml'

@@ -1,0 +1,11 @@
+type: object
+required:
+  - clusterId
+  - workloads
+properties:
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  workloads:
+    type: array
+    items:
+      $ref: './WorkloadSyncFields.yaml'

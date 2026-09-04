@@ -1,0 +1,18 @@
+WorkloadV2:
+  $ref: './WorkloadsV2/WorkloadV2.yaml'
+WorkloadV2Metadata:
+  $ref: './WorkloadsV2/WorkloadV2Metadata.yaml'
+WorkloadV2MetadataCreateParams:
+  $ref: './WorkloadsV2/WorkloadV2MetadataCreateParams.yaml'
+WorkloadV2MetadataAutoFill:
+  $ref: './WorkloadsV2/WorkloadV2MetadataAutoFill.yaml'
+WorkloadV2Update:
+  $ref: './WorkloadsV2/WorkloadV2Update.yaml'
+DesiredPhase:
+  $ref: './WorkloadsV2/DesiredPhase.yaml'
+GVK:
+  $ref: './WorkloadsV2/GVK.yaml'
+RunState:
+  $ref: './WorkloadsV2/RunState.yaml'
+WorkloadRunStateRequest:
+  $ref: './WorkloadsV2/WorkloadRunStateRequest.yaml'

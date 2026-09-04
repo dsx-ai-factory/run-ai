@@ -1,0 +1,22 @@
+apiVersion: run.ai/v2alpha1
+kind: DistributedWorkload
+metadata:
+  name: job-1
+  namespace: runai-team-a
+  uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+spec:
+  jobType: PyTorchJob
+  cpuLimit:
+    value: "2"
+  image:
+    value: ubuntu
+  memory:
+    value: 100M
+  memoryLimit:
+    value: 200M
+  name:
+    value: job-1
+  workers:
+    value: 1
+  username:
+    value: user.name

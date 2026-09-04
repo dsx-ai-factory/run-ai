@@ -1,0 +1,30 @@
+args: --NotebookApp.base_url=/${RUNAI_PROJECT}/${RUNAI_JOB_NAME}
+  --NotebookApp.token=''
+backoffLimit: 6
+command: start-notebook.sh
+compute:
+  cpuCoreRequest: 0.1
+  cpuMemoryRequest: 100M
+  gpuDevicesRequest: 0
+connections:
+  - name: Jupyter
+environmentVariables: null
+exposedUrls:
+  - container: 8888
+    toolName: Jupyter
+    toolType: jupyter-notebook
+image: jupyter/scipy-notebook
+imagePullPolicy: IfNotPresent
+nodePools:
+  - default
+ports: null
+relatedUrls: null
+security:
+  capabilities: null
+  uidGidSource: fromTheImage
+storage:
+  pvc:
+    - existingPvc: true
+      claimName: oferb2-pvc-874hj
+      path: /tmp/ofer
+      readOnly: false

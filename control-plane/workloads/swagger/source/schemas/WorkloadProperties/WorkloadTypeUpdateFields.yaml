@@ -1,0 +1,8 @@
+allOf:
+  - $ref: "./WorkloadTypeCreateUpdateInnerFields.yaml"
+  - type: object
+    properties:
+      resourceInterfaces:
+        $ref: "./WorkloadTypeResourceInterfacesNullable.yaml"
+      kartas:
+        $ref: "./WorkloadTypeKartasNullable.yaml"

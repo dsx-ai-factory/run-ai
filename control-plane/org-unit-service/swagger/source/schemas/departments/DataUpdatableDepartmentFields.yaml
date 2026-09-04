@@ -1,0 +1,19 @@
+type: object
+description: Updatable fields
+required:
+  - resources
+properties:
+  description:
+    type: string
+    description: The description of the department.
+  schedulingRules:
+    $ref: "../SchedulingRules.yaml"
+  defaultNodePools:
+    description: An ordered list of node pools that defines the default scheduling preference for workloads in this department. The Scheduler will attempt to schedule workloads on node pools in this order. This setting is enforced if no node pool list is defined in the workload policy.
+    type: array
+    maxItems: 20
+    nullable: true
+    items:
+      type: string
+  nodeTypes:
+    $ref: '../nodetypes/NodeTypesPerWorkload.yaml'

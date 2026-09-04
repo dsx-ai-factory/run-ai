@@ -1,0 +1,7 @@
+properties:
+  maxReplicas:
+    description: The maximum number of replicas for autoscaling. Defaults to minReplicas, or to 1 if minReplicas is set to 0
+    type: integer
+    format: int32
+    minimum: 1
+    nullable: true

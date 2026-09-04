@@ -1,0 +1,4 @@
+description: The specifications of the distributed inference to be created.
+properties:
+  spec:
+    $ref: "DistributedInferenceSpecSpec.yaml"

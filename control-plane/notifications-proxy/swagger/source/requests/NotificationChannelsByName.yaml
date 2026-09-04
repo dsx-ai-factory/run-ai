@@ -1,0 +1,132 @@
+get:
+  x-authorize:
+    resource-type: notification-settings
+    action: read
+  x-service: notifications-proxy
+  x-test-coverage:
+    - src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts
+  tags:
+    - NotificationChannels
+  operationId: getNotificationChannel
+  summary: Get notification channel
+  description: Get notification channel
+  responses:
+    200:
+      description: Notification channel
+      content:
+        application/json:
+          schema:
+              $ref: '../schemas/NotificationChannelResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    501:
+      $ref: '../../../../infra/openapi/docs/responses/501NotImplemented.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+patch:
+  x-authorize:
+    resource-type: notification-settings
+    action: update
+  x-service: notifications-proxy
+  x-audit: true
+  x-test-coverage:
+    - src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts
+  tags:
+    - NotificationChannels
+  operationId: patchNotificationChannel
+  summary: Patch notification channel
+  description: Patch notification channel
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/NotificationChannelForPatch.yaml'
+  responses:
+    200:
+      description: Notification channel patched
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    501:
+      $ref: '../../../../infra/openapi/docs/responses/501NotImplemented.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+
+put:
+  x-authorize:
+    resource-type: notification-settings
+    action: update
+  x-service: notifications-proxy
+  x-test-coverage:
+    - src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts
+  tags:
+    - NotificationChannels
+  operationId: updateNotificationChannel
+  summary: Update notification channel
+  description: Update notification channel
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/NotificationChannel.yaml'
+  responses:
+    200:
+      description: Notification channel updated
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    501:
+      $ref: '../../../../infra/openapi/docs/responses/501NotImplemented.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+delete:
+  x-authorize:
+    resource-type: notification-settings
+    action: delete
+  x-service: notifications-proxy
+  x-test-coverage:
+    - src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts
+  tags:
+    - NotificationChannels
+  operationId: deleteNotificationChannel
+  summary: Delete notification channel
+  description: Delete notification channel
+  responses:
+    204:
+      description: Notification channel deleted
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    501:
+      $ref: '../../../../infra/openapi/docs/responses/501NotImplemented.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

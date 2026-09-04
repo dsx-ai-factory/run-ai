@@ -1,0 +1,116 @@
+Config:
+  networking:
+  - externalAccess:
+      ingress:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: infw-my-llm-url
+        spec:
+          rules:
+          - host: test.run.ai
+            http:
+              paths:
+              - backend:
+                  service:
+                    name: infw-my-llm-url
+                    port:
+                      number: 80
+                path: /team-a/my-llm
+                pathType: Prefix
+    services:
+    - spec:
+        name: infw-my-llm-url
+        ports:
+        - name: port-4180
+          port: 80
+          protocol: TCP
+          targetPort: 4180
+        selector:
+          release: my-llm
+        type: ClusterIP
+Service:
+  apiVersion: serving.knative.dev/v1
+  kind: Service
+  metadata:
+    annotations:
+      run.ai/submitted-by: tester
+    labels:
+      app: service
+      createdBy: Service
+      project: team-a
+      release: my-llm
+      run.ai/control-plane-managed: "true"
+      run.ai/converted-from-native: "true"
+      workloadKind: Inference
+      workloadName: my-llm
+    name: my-llm
+    namespace: runai-team-a
+  spec:
+    template:
+      metadata:
+        labels:
+          app: service
+          createdBy: Service
+          project: team-a
+          release: my-llm
+          workloadKind: Inference
+          workloadName: my-llm
+      spec:
+        containers:
+        - image: my-llm:latest
+          name: my-llm
+          ports:
+          - containerPort: 8080
+          - containerPort: 7860
+            name: port-7860
+            protocol: TCP
+          resources: {}
+        initContainers:
+        - args:
+          - --provider=keycloak-oidc
+          - --upstream=http://localhost:7860
+          - --redirect-url=https://test.run.ai/team-a/my-llm/oauth2/callback
+          - --oidc-issuer-url=/auth/realms/runai
+          - --scope=openid
+          - --http-address=0.0.0.0:4180
+          - --proxy-prefix=/team-a/my-llm/oauth2
+          - --skip-provider-button=true
+          - --whitelist-domain=test.run.ai
+          - --cookie-domain=test.run.ai
+          - --cookie-httponly=true
+          - --cookie-secure=true
+          - --code-challenge-method=S256
+          - --cookie-refresh=10m
+          - --cookie-samesite=lax
+          - --skip-jwt-bearer-tokens=true
+          - --extra-jwt-issuers=/auth/realms/runai=runai
+          - --custom-templates-dir=/usr/share/oauth2-proxy
+          - --pass-authorization-header=false
+          - --cookie-name=my-llm-url-auth-proxy
+          - --email-domain=*
+          env:
+          - name: OAUTH2_PROXY_COOKIE_PATH
+            value: /team-a/my-llm
+          envFrom:
+          - secretRef: {}
+          image: test.registry/oauth2-proxy:test
+          imagePullPolicy: IfNotPresent
+          name: runai-oauth2-proxy-0
+          ports:
+          - containerPort: 4180
+            name: port-4180
+            protocol: TCP
+          resources: {}
+          restartPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+          volumeMounts:
+          - mountPath: /etc/runai/auth/users
+            name: runai-auth
+        schedulerName: runai-scheduler
+        volumes:
+        - emptyDir: {}
+          name: runai-auth
+  status: {}

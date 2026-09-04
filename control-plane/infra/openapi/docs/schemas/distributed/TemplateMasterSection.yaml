@@ -1,0 +1,7 @@
+properties:
+  spec:
+    $ref: "./MasterTemplateSpec.yaml"
+  assets:
+    $ref: "../templates/TemplateAssetsIdsOptional.yaml"
+nullable: true
+type: object

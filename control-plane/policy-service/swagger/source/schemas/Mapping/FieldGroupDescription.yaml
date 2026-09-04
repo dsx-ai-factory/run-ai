@@ -1,0 +1,6 @@
+type: string
+description: Optional human-readable description of the field group
+example: "dynamoGraphDeployment services fields"
+pattern: .*
+minLength: 1
+maxLength: 1023

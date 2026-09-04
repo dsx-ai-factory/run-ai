@@ -1,0 +1,5 @@
+in: query
+name: tty
+description: TTY if true indicates that a tty will be allocated for the attach call. This is passed through the container runtime so the tty is allocated on the worker node by the container runtime. Defaults to false.
+schema:
+  type: boolean

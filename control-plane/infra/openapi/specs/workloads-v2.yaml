@@ -1,0 +1,697 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: Workloads V2 Service
+  contact:
+    name: Run.AI
+    url: https://www.run.ai/
+    email: support@run.ai
+servers:
+  - url: https://app.run.ai
+  - url: https://staging.run.ai
+  - url: https://test.run.ai
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+paths:
+  /:
+    x-internal: true
+    get:
+      summary: health check
+      x-runai-team: Lemur
+      x-no-authorization: true
+      operationId: health
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Executed successfully.
+  /api/v2/workloads:
+    x-intrnal: true
+    post:
+      summary: Create a workload
+      description: Submit a workload with metadata and Kubernetes manifest
+      operationId: create_workload_v2
+      x-runai-team: Lemur
+      x-test-coverage:
+        - control-plane/workloads-v2/pkg/services/services_test.go
+      x-authorize:
+        resource-type: workloads
+        action: create
+      tags:
+        - Workloads V2
+      requestBody:
+        description: Workload metadata and manifest
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkloadV2CreateRequest'
+      responses:
+        '201':
+          description: Workload created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkloadV2'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '409':
+          $ref: '#/components/responses/409Conflict'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v2/workloads/{WorkloadV2Id}:
+    x-intrnal: true
+    get:
+      summary: Get a specific workload
+      description: Retrieve details of a specific workload by ID
+      operationId: get_workload_v2_by_id
+      x-test-coverage:
+        - control-plane/workloads-v2/pkg/services/services_test.go
+      x-runai-team: Lemur
+      x-authorize:
+        resource-type: workloads
+        action: read
+      tags:
+        - Workloads V2
+      parameters:
+        - $ref: '#/components/parameters/WorkloadV2Id'
+      responses:
+        '200':
+          description: Successfully retrieved the workload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkloadV2'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    delete:
+      summary: Delete a workload
+      description: Delete a specific workload by ID
+      operationId: delete_workload_v2
+      x-test-coverage:
+        - control-plane/workloads-v2/pkg/services/services_test.go
+      x-runai-team: Lemur
+      x-authorize:
+        resource-type: workloads-v2
+        action: delete
+      tags:
+        - Workloads V2
+      parameters:
+        - $ref: '#/components/parameters/WorkloadV2Id'
+      responses:
+        '204':
+          $ref: '#/components/responses/204NoContent'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v2/workloads/updates:
+    x-intrnal: true
+    get:
+      summary: Get workload updates for agent polling
+      description: Retrieve pending updates for workloads that need to be processed by the cluster agent
+      operationId: get_workload_v2_updates
+      x-runai-team: Lemur
+      x-test-coverage:
+        - control-plane/workloads-v2/pkg/services/services_test.go
+      x-internal: true
+      x-authorize:
+        resource-type: workloads
+        action: sync
+      tags:
+        - Workloads V2
+      parameters:
+        - $ref: '#/components/parameters/ClusterIdRequired'
+        - $ref: '#/components/parameters/UpdatesAfter'
+        - $ref: '#/components/parameters/Limit'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClusterSyncReport'
+      responses:
+        '200':
+          description: Request completed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkloadsV2Updates'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+components:
+  responses:
+    400BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 400
+            message: Required parameter is missing
+    401Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 401
+            message: Issuer is not familiar.
+    403Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 403
+            message: You do not have sufficient permissions.
+    409Conflict:
+      description: The specified resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 409
+            message: Resource with this name already exists
+    500InternalServerError:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 500
+            message: Something went wrong.
+    503ServiceUnavailable:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 503
+            message: Please try again in few minutes.
+    404NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 404
+            message: Resource id not found.
+    204NoContent:
+      description: No Content.
+    400BadSubmissionRequest:
+      description: Bad submission request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubmissionError'
+          example:
+            code: 400
+            message: The workload request does not comply with the policy set by the administrator
+    406NotAcceptable:
+      description: Not acceptable request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    412PreconditionFailed:
+      description: The specified resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 412
+            message: Precondition failed
+    413RequestEntityTooLarge:
+      description: Request entity too large
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    415UnsupportedMediaType:
+      description: Unsupported media type
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    501NotImplemented:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 501
+            message: Not implemented
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer authentication
+  parameters:
+    WorkloadV2Id:
+      name: WorkloadV2Id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        description: The ID of the workload.
+    ClusterIdRequired:
+      name: clusterId
+      in: query
+      description: The id of the cluster
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: d73a738f-fab3-430a-8fa3-5241493d7128
+    UpdatesAfter:
+      name: updatesAfter
+      in: query
+      description: list only data with update counter greater than the provided value. for example updatesAfter=5 should fetch data with updates counter 6 and above.
+      required: true
+      schema:
+        type: integer
+        format: int64
+        example: 12345
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: The maximum number of entries to return.
+      schema:
+        type: integer
+        format: int32
+        default: 50
+        minimum: 1
+        maximum: 500
+  schemas:
+    WorkloadName:
+      description: The name of the workload.
+      type: string
+      minLength: 1
+      example: my-workload-name
+    ProjectId:
+      description: The id of the project.
+      type: string
+      example: 1
+    NodePools:
+      description: A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
+      type: array
+      items:
+        type: string
+        pattern: .*
+      example:
+        - my-node-pool-a
+        - my-node-pool-b
+      nullable: true
+    PriorityClass:
+      description: 'Specifies the priority class for the workload, which determines its scheduling behavior. Valid values are: very-low, low, medium-low, medium, medium-high, high, and very-high. Each workload type has a default priority. To view the default priority for each workload type, use the GET /workload-types endpoint. Once you change the priority from the default value defined for that workload type, the preemptibility field is not automatically updated. Make sure to set the desired preemptibility value.'
+      type: string
+      nullable: true
+      pattern: .*
+    Category:
+      description: Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform.
+      type: string
+      nullable: true
+      pattern: .*
+    WorkloadV2MetadataCreateParams:
+      type: object
+      required:
+        - name
+        - projectId
+      properties:
+        name:
+          $ref: '#/components/schemas/WorkloadName'
+        projectId:
+          $ref: '#/components/schemas/ProjectId'
+        nodepools:
+          $ref: '#/components/schemas/NodePools'
+        priority:
+          $ref: '#/components/schemas/PriorityClass'
+        category:
+          $ref: '#/components/schemas/Category'
+    Manifest:
+      type: object
+      description: The full Kubernetes manifest for the workload in JSON form. Mutually exclusive with manifestEncodedBase64.
+      additionalProperties: true
+      example:
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: my-app
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: my-app
+          template:
+            metadata:
+              labels:
+                app: my-app
+            spec:
+              containers:
+                - name: app
+                  image: nginx:latest
+    ManifestEncoded:
+      type: string
+      format: byte
+      example: YXBpVmVyc2lvbjogdjEKa2luZDogUG9kCm1ldGFkYXRhOgogIG5hbWU6IG15LXBvZApzcGVjOgogIGNvbnRhaW5lcnM6CiAgLSBuYW1lOiBuZ2lueAogICAgaW1hZ2U6IG5naW54OmxhdGVzdAo=
+      description: Kubernetes YAML manifest encoded in base 64. Mutually exclusive with manifest.
+    WorkloadV2CreateRequest:
+      type: object
+      required:
+        - metadata
+      properties:
+        metadata:
+          $ref: '#/components/schemas/WorkloadV2MetadataCreateParams'
+        manifest:
+          $ref: '#/components/schemas/Manifest'
+        manifestBase64Encoded:
+          $ref: '#/components/schemas/ManifestEncoded'
+    WorkloadId:
+      description: A unique ID of the workload.
+      type: string
+      format: uuid
+    GVK:
+      type: object
+      description: Group, Version, Kind of the Kubernetes resource
+      required:
+        - group
+        - version
+        - kind
+      properties:
+        group:
+          type: string
+          example: apps
+        version:
+          type: string
+          example: v1
+        kind:
+          type: string
+          example: Deployment
+    ProjectName:
+      type: string
+      description: The name of the project
+      example: project-a
+      minLength: 1
+      pattern: ^[a-z0-9]([a-z0-9-]*[a-z0-9])?$
+    ClusterId:
+      description: The id of the cluster.
+      type: string
+      format: uuid
+      example: 71f69d83-ba66-4822-adf5-55ce55efd210
+    TenantId:
+      description: The id of the tenant.
+      type: integer
+      format: int32
+      example: 1001
+    DepartmentId:
+      description: The id of the department.
+      type: string
+      minLength: 1
+      example: 2
+      pattern: .*
+    DepartmentName:
+      type: string
+      description: The name of the department
+      example: default
+      minLength: 1
+      pattern: ^[a-z0-9]([a-z0-9-]*[a-z0-9])?$
+    WorkloadV2MetadataAutoFill:
+      type: object
+      required:
+        - id
+        - gvk
+        - projectName
+        - clusterId
+        - tenantId
+        - departmentId
+        - departmentName
+        - createdAt
+        - createdBy
+        - updatedAt
+        - updatedBy
+      properties:
+        id:
+          $ref: '#/components/schemas/WorkloadId'
+        gvk:
+          $ref: '#/components/schemas/GVK'
+        projectName:
+          $ref: '#/components/schemas/ProjectName'
+        clusterId:
+          $ref: '#/components/schemas/ClusterId'
+        tenantId:
+          $ref: '#/components/schemas/TenantId'
+        departmentId:
+          $ref: '#/components/schemas/DepartmentId'
+        departmentName:
+          $ref: '#/components/schemas/DepartmentName'
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the workload was created
+          example: '2024-01-15T10:30:00Z'
+        createdBy:
+          type: string
+          format: .*
+          example: user@run.ai
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the workload was last updated
+          example: '2024-01-15T10:35:00Z'
+        updatedBy:
+          type: string
+          format: .*
+          example: user@run.ai
+        deletedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the workload was deleted
+          example: '2024-01-15T10:35:00Z'
+          nullable: true
+        deletedBy:
+          type: string
+          format: .*
+          example: user@run.ai
+          nullable: true
+    WorkloadV2Metadata:
+      allOf:
+        - $ref: '#/components/schemas/WorkloadV2MetadataCreateParams'
+        - $ref: '#/components/schemas/WorkloadV2MetadataAutoFill'
+    DesiredPhase:
+      description: The desired phase of the workload.
+      type: string
+      enum:
+        - Running
+        - Stopped
+        - Deleted
+    WorkloadV2:
+      type: object
+      required:
+        - metadata
+        - desiredPhase
+        - workloadManifest
+        - rawManifest
+      properties:
+        metadata:
+          $ref: '#/components/schemas/WorkloadV2Metadata'
+        desiredPhase:
+          $ref: '#/components/schemas/DesiredPhase'
+        workloadManifest:
+          $ref: '#/components/schemas/Manifest'
+        rawManifest:
+          $ref: '#/components/schemas/Manifest'
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          minimum: 100
+          maximum: 599
+        message:
+          type: string
+        details:
+          type: string
+      example:
+        code: 400
+        message: Bad request - Resource should have a name
+    UpdateCount:
+      description: the value of an update counter of a data in the system.
+      type: integer
+      format: int64
+      example: 12345
+    ClusterSyncReportUpdate:
+      description: success/failure report of a single update attempt of the cluster
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: a unique id of the entity being updated (asset, workload, policy, etc).
+        updateCount:
+          $ref: '#/components/schemas/UpdateCount'
+        updateAttemptTime:
+          description: the time in which the cluster attempted the update.
+          type: string
+          format: date-time
+          example: '2024-06-06T12:09:18.211Z'
+        message:
+          description: optional failure message for the case that the update has failed. should be sent null if the update was successful.
+          type: string
+          example: mandatory image was not provided.
+          nullable: true
+    ClusterSyncReport:
+      description: allow cluster to report about success/failures of sync updates
+      properties:
+        updates:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClusterSyncReportUpdate'
+    RequestInfo:
+      required:
+        - afterUpdate
+      description: value that the agent sent to the afterUpdate query parameter.
+      properties:
+        afterUpdate:
+          $ref: '#/components/schemas/UpdateCount'
+    ResponseInfo:
+      description: The lowest and highest update counts included in this bulk of updates. for example, it is possible that agent requester for afterUpdate=10 and received a bulk of four updates - 12, 13, 16, 18. in this case lowestUpdate=12, highestUpdate=18.
+      properties:
+        lowestUpdate:
+          $ref: '#/components/schemas/UpdateCount'
+        highestUpdate:
+          $ref: '#/components/schemas/UpdateCount'
+    SystemInfo:
+      description: the highest update count that was assigned to the data being synchronized. for example, it is possible that the agent sent afterUpdate=12 and received a bulk containing only four updates (13, 15, 18, 19) but in the system there is already update 21 which was not included in this bulk and can be received in the following bulk.
+      properties:
+        highestUpdate:
+          $ref: '#/components/schemas/UpdateCount'
+    WorkloadV2Update:
+      type: object
+      required:
+        - id
+        - name
+        - gvk
+        - updateCount
+        - desiredPhase
+      properties:
+        id:
+          $ref: '#/components/schemas/WorkloadId'
+        name:
+          $ref: '#/components/schemas/WorkloadName'
+        gvk:
+          $ref: '#/components/schemas/GVK'
+        updateCount:
+          type: integer
+          format: int64
+          description: Number of updates made to the workload
+          example: 1
+          default: 0
+        desiredPhase:
+          $ref: '#/components/schemas/DesiredPhase'
+        workloadYaml:
+          type: string
+          description: The full Kubernetes YAML manifest for the workload (only present in some updates)
+          example: |
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: my-app
+              labels:
+                runai.ai/workload-id: "550e8400-e29b-41d4-a716-446655440000"
+            spec:
+              replicas: 1
+              selector:
+                matchLabels:
+                  app: my-app
+              template:
+                metadata:
+                  labels:
+                    app: my-app
+                spec:
+                  schedulerName: runai-scheduler
+                  containers:
+                  - name: app
+                    image: nginx:latest
+          nullable: true
+    WorkloadsV2Updates:
+      type: object
+      properties:
+        requestInfo:
+          $ref: '#/components/schemas/RequestInfo'
+        responseInfo:
+          $ref: '#/components/schemas/ResponseInfo'
+        systemInfo:
+          $ref: '#/components/schemas/SystemInfo'
+        workloads:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkloadV2Update'
+    WorkloadsV2:
+      type: array
+      items:
+        $ref: '#/components/schemas/WorkloadV2'
+      x-schema-name: WorkloadsV2
+    ComplianceIssues:
+      properties:
+        complianceIssues:
+          type: array
+          items:
+            type: object
+            required:
+              - details
+              - field
+            properties:
+              field:
+                type: string
+                example: compute.gpuDevicesRequest
+              details:
+                type: string
+                example: value must be no less than 3
+      nullable: true
+      type: object
+    SubmissionError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - $ref: '#/components/schemas/ComplianceIssues'

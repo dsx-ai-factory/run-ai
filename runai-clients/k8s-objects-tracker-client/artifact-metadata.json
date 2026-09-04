@@ -1,0 +1,4 @@
+{
+  "service_name": "k8s-objects-tracker-client",
+  "artifact_type": "go"
+}

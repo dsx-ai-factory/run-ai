@@ -1,0 +1,27 @@
+description: |
+  Layer 3 case "worker" for ray.io/RayJob/v1. SETs rayWorkerGroupSpec FG fields
+  on the worker group with groupName="test" via the parameterized
+  workerGroupSpecByGroupName selector. Same shape as the RayCluster worker case
+  but anchored under .spec.rayClusterSpec instead of .spec.
+effectiveRules:
+  - field: replicas
+    specSelector: workerGroupSpecByGroupName
+    selectorParams: { groupName: "test" }
+    enforcements: [{ set: { value: 3 } }]
+  - field: minReplicas
+    specSelector: workerGroupSpecByGroupName
+    selectorParams: { groupName: "test" }
+    enforcements: [{ set: { value: 1 } }]
+  - field: maxReplicas
+    specSelector: workerGroupSpecByGroupName
+    selectorParams: { groupName: "test" }
+    enforcements: [{ set: { value: 5 } }]
+  - field: rayStartParams
+    specSelector: workerGroupSpecByGroupName
+    selectorParams: { groupName: "test" }
+    enforcements: [{ set: { key: "num-gpus", value: "1" } }]
+
+  - field: labels
+    specSelector: workerPodMetadataByGroupName
+    selectorParams: { groupName: "test" }
+    enforcements: [{ set: { key: "ray.io/group", value: "test" } }]

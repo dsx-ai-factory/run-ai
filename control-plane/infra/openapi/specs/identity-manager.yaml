@@ -1,0 +1,4504 @@
+openapi: 3.0.3
+info:
+  title: identity-manager
+  version: '1.0'
+  description: An API for managing runai realms in mappers
+  contact:
+    name: Run.AI
+    url: https://www.run.ai/
+    email: support@run.ai
+servers:
+  - url: https://app.run.ai
+  - url: https://staging.run.ai
+  - url: https://test.run.ai
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    x-internal: true
+    get:
+      summary: health check
+      x-service: identity-manager
+      operationId: health
+      x-no-authorization: true
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Executed successfully.
+  /api/v1/config:
+    x-internal: true
+    get:
+      summary: Get configuration.
+      description: Retrieve Run:ai configuration settings.
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/tenantSuite/tenantUserApi/tenantSystemApi.test.ts
+      operationId: get_tenant_configuration
+      x-no-authorization: true
+      tags:
+        - Config
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthConfiguration'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/realms:
+    x-internal: true
+    put:
+      summary: Get or create runai realm
+      x-service: identity-manager
+      x-test-coverage:
+        - control-plane/identity-manager/pkg/services/api_realm_service_test.go
+      description: |
+        Get an existing realm or create a new one for runai tenant.
+      operationId: get_or_create_realm
+      x-no-authorization: true
+      tags:
+        - Realm
+      requestBody:
+        description: The tenant on behalf realm will be created.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RealmCreationRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealmCreationResponse'
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealmCreationResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '409':
+          $ref: '#/components/responses/409Conflict'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    post:
+      summary: Create runai realm
+      x-service: identity-manager
+      x-test-coverage: not-applicable
+      description: |
+        Create a new realm for runai tenant.
+      operationId: create_realm
+      x-no-authorization: true
+      tags:
+        - Realm
+      requestBody:
+        description: The tenant on behalf realm will be created.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RealmCreationRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RealmCreationResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '409':
+          $ref: '#/components/responses/409Conflict'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/idps:
+    x-scope:
+      - system
+      - tenant
+    get:
+      summary: Get external idps list
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/ssoSuite/SAML/saml.test.ts
+      operationId: get_idps
+      x-authorize:
+        resource-type: security-settings
+        action: read
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+      tags:
+        - Idps
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Idps'
+              examples:
+                saml:
+                  value:
+                    - alias: saml
+                      type: saml
+                      redirectUri: https://domain/auth/realms/name/broker/saml/endpoint
+                      samlData:
+                        signingCertificate: signingCertificateExample
+                        singleSignOnServiceUrl: https://authhost/protocol/saml
+                        entityId: example.run.ai/runai
+                        serviceProviderMetadataUrl: https://example.runai.com/auth/realms/runai/broker/saml/endpoint/descriptor
+                      mappers:
+                        gid: GID
+                        groups: GROUPS
+                        supplementaryGroups: SUPPLEMENTARYGROUPS
+                        uid: UID
+                        email: email
+                oidc:
+                  value:
+                    - alias: oidc
+                      type: oidc
+                      redirectUri: https://domain/auth/realms/name/broker/oidc/endpoint
+                      oidcData:
+                        clientId: my-client-id
+                        clientSecret: '*******'
+                        scopes:
+                          - scope1
+                          - scope2
+                        mandatoryClaim:
+                          claim: my-claim
+                          values:
+                            - val1
+                            - val2
+                      mappers:
+                        gid: GID
+                        groups: GROUPS
+                        supplementaryGroups: SUPPLEMENTARYGROUPS
+                        uid: UID
+                        email: email
+                openshift-v4:
+                  value:
+                    - alias: openshift-v4
+                      type: openshift-v4
+                      redirectUri: https://domain/auth/realms/name/broker/openshift-v4/endpoint
+                      ocpData:
+                        clientId: my-client-id
+                        clientSecret: '*******'
+                        idpBaseUrl: https://authhost/ocp
+                        scopes:
+                          - scope1
+                          - scope2
+                      mappers:
+                        gid: metadata.gid
+                        groups: groups
+                        supplementaryGroups: supplementarygroups
+                        uid: metadata.uid
+                        email: metadata.name
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    post:
+      summary: Configure external idp
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/ssoSuite/SAML/saml.test.ts
+      operationId: create_idp
+      x-authorize:
+        resource-type: security-settings
+        action: create
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+      x-audit: true
+      tags:
+        - Idps
+      requestBody:
+        description: Idp configuration
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdpCreationRequest'
+            examples:
+              saml (by url):
+                value:
+                  type: saml
+                  samlData:
+                    metadataXmlType: url
+                    metadataXmlUrl: https://authhost/saml/metadata.xml
+                  mappers:
+                    gid: GID
+                    groups: GROUPS
+                    supplementaryGroups: SUPPLEMENTARYGROUPS
+                    uid: UID
+                    email: email
+              saml (by file):
+                value:
+                  type: saml
+                  samlData:
+                    metadataXmlType: file
+                    fileName: descriptor.xml
+                    metadataXmlFile: <file content in base64>
+                  mappers:
+                    gid: GID
+                    groups: GROUPS
+                    supplementaryGroups: SUPPLEMENTARYGROUPS
+                    uid: UID
+                    email: email
+              oidc:
+                value:
+                  type: oidc
+                  oidcData:
+                    clientId: my-client-id
+                    clientSecret: my-client-secret
+                    discoverDocumentUrl: https://authhost/openid-configuration
+                    mandatoryClaim:
+                      claim: my-claim
+                      values:
+                        - val1
+                        - val2
+                  mappers:
+                    gid: GID
+                    groups: GROUPS
+                    supplementaryGroups: SUPPLEMENTARYGROUPS
+                    uid: UID
+                    email: email
+              openshift-v4:
+                value:
+                  type: openshift-v4
+                  ocpData:
+                    clientId: my-client-id
+                    clientSecret: my-client-secret
+                    idpBaseUrl: https://authhost/ocp
+                  mappers:
+                    gid: metadata.gid
+                    groups: groups
+                    supplementaryGroups: supplementarygroups
+                    uid: metadata.uid
+                    email: metadata.name
+      responses:
+        '201':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdpPostResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '409':
+          $ref: '#/components/responses/409Conflict'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/idps/{idp}:
+    x-scope:
+      - system
+      - tenant
+    get:
+      summary: Get external idp by alias
+      x-service: identity-manager
+      x-test-coverage:
+        - e2e/src/test/suites/ssoSuite/IDP/idpApi.test.ts
+      operationId: get_idp
+      x-authorize:
+        resource-type: security-settings
+        action: read
+      tags:
+        - Idps
+      parameters:
+        - $ref: '#/components/parameters/idp'
+        - $ref: '#/components/parameters/TenantId'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              examples:
+                saml:
+                  value:
+                    alias: saml
+                    type: saml
+                    redirectUri: https://domain/auth/realms/name/broker/saml/endpoint
+                    samlData:
+                      signingCertificate: signingCertificateExample
+                      singleSignOnServiceUrl: https://authhost/protocol/saml
+                      entityId: example.run.ai/runai
+                      serviceProviderMetadataUrl: https://example.runai.com/auth/realms/runai/broker/saml/endpoint/descriptor
+                    mappers:
+                      gid: GID
+                      groups: GROUPS
+                      supplementaryGroups: SUPPLEMENTARYGROUPS
+                      uid: UID
+                      email: email
+                oidc:
+                  value:
+                    alias: oidc
+                    type: oidc
+                    redirectUri: https://domain/auth/realms/name/broker/oidc/endpoint
+                    oidcData:
+                      clientId: my-client-id
+                      clientSecret: '*******'
+                      scopes:
+                        - scope1
+                        - scope2
+                      mandatoryClaim:
+                        claim: my-claim
+                        values:
+                          - val1
+                          - val2
+                    mappers:
+                      gid: GID
+                      groups: GROUPS
+                      supplementaryGroups: SUPPLEMENTARYGROUPS
+                      uid: UID
+                      email: email
+                openshift-v4:
+                  value:
+                    alias: openshift-v4
+                    type: openshift-v4
+                    redirectUri: https://domain/auth/realms/name/broker/openshift-v4/endpoint
+                    ocpData:
+                      clientId: my-client-id
+                      clientSecret: '*******'
+                      idpBaseUrl: https://authhost/ocp
+                      scopes:
+                        - scope1
+                        - scope2
+                    mappers:
+                      gid: metadata.gid
+                      groups: groups
+                      supplementaryGroups: supplementarygroups
+                      uid: metadata.uid
+                      email: metadata.name
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    delete:
+      summary: Delete external idp by alias
+      x-service: identity-manager
+      x-test-coverage:
+        - e2e/src/test/suites/ssoSuite/IDP/idpApi.test.ts
+      operationId: delete_idp
+      x-authorize:
+        resource-type: security-settings
+        action: delete
+      x-audit: true
+      tags:
+        - Idps
+      parameters:
+        - $ref: '#/components/parameters/idp'
+        - $ref: '#/components/parameters/TenantId'
+      responses:
+        '200':
+          description: Idp successfully deleted
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    put:
+      summary: Update external idp by alias
+      x-service: identity-manager
+      x-test-coverage:
+        - e2e/src/test/suites/ssoSuite/IDP/idpApi.test.ts
+      operationId: update_idp
+      x-authorize:
+        resource-type: security-settings
+        action: update
+      tags:
+        - Idps
+      parameters:
+        - $ref: '#/components/parameters/idp'
+        - $ref: '#/components/parameters/TenantId'
+      requestBody:
+        description: Updated idp object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdpCreationRequest'
+            examples:
+              saml (by url):
+                value:
+                  type: saml
+                  samlData:
+                    metadataXmlType: url
+                    metadataXmlUrl: https://authhost/saml/metadata.xml
+                  mappers:
+                    gid: GID
+                    groups: GROUPS
+                    supplementaryGroups: SUPPLEMENTARYGROUPS
+                    uid: UID
+                    email: email
+              saml (by file):
+                value:
+                  type: saml
+                  samlData:
+                    metadataXmlType: file
+                    fileName: descriptor.xml
+                    metadataXmlFile: <file content in base64>
+                  mappers:
+                    gid: GID
+                    groups: GROUPS
+                    supplementaryGroups: SUPPLEMENTARYGROUPS
+                    uid: UID
+                    email: email
+              oidc:
+                value:
+                  type: oidc
+                  oidcData:
+                    clientId: my-client-id
+                    clientSecret: my-client-secret
+                    discoverDocumentUrl: https://authhost/openid-configuration
+                    mandatoryClaim:
+                      claim: my-claim
+                      values:
+                        - val1
+                        - val2
+                  mappers:
+                    gid: GID
+                    groups: GROUPS
+                    supplementaryGroups: SUPPLEMENTARYGROUPS
+                    uid: UID
+                    email: email
+              openshift-v4:
+                value:
+                  type: openshift-v4
+                  ocpData:
+                    clientId: my-client-id
+                    clientSecret: my-client-secret
+                    idpBaseUrl: https://authhost/ocp
+                  mappers:
+                    gid: metadata.gid
+                    groups: groups
+                    supplementaryGroups: supplementarygroups
+                    uid: metadata.uid
+                    email: metadata.name
+      responses:
+        '200':
+          description: Idp successfully updated
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/idps/{idp}/mappers:
+    x-scope:
+      - system
+      - tenant
+    get:
+      summary: Get idp mappers
+      x-service: identity-manager
+      x-test-coverage:
+        - e2e/src/test/suites/ssoSuite/IDP/idpApi.test.ts
+      operationId: get_idp_mappers
+      x-authorize:
+        resource-type: security-settings
+        action: read
+      tags:
+        - Idps
+      parameters:
+        - $ref: '#/components/parameters/idp'
+        - $ref: '#/components/parameters/TenantId'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mappers'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    put:
+      summary: Update idp mappers
+      x-service: identity-manager
+      x-test-coverage:
+        - e2e/src/test/suites/ssoSuite/IDP/idpApi.test.ts
+      operationId: update_idp_mappers
+      x-authorize:
+        resource-type: security-settings
+        action: update
+      x-audit: true
+      tags:
+        - Idps
+      parameters:
+        - $ref: '#/components/parameters/idp'
+        - $ref: '#/components/parameters/TenantId'
+      requestBody:
+        description: Map of our mappers and their source in the external idp
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Mappers'
+      responses:
+        '202':
+          description: Request accepted successfully.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/idps/{idp}/resources:
+    x-internal: true
+    get:
+      summary: get idp resources
+      x-service: identity-manager
+      x-test-coverage:
+        - e2e/src/test/suites/ssoSuite/IDP/idpApi.test.ts
+      operationId: get_idp_resources
+      x-authorize:
+        resource-type: security-settings
+        action: read
+      tags:
+        - Idps
+      parameters:
+        - $ref: '#/components/parameters/idp'
+        - $ref: '#/components/parameters/TenantId'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdpResources'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/users:
+    x-scope:
+      - system
+      - tenant
+    get:
+      summary: Get users.
+      description: Retrieve a list of platform users.
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/parallel/users/usersApi.test.ts
+      operationId: get_users
+      x-authorize:
+        resource-type: users
+        action: read
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/usersFilterBy'
+        - $ref: '#/components/parameters/usersSortBy'
+        - $ref: '#/components/parameters/SortOrder'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/search'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    post:
+      summary: Create a local user.
+      description: Use to create a local platform user.
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/parallel/users/usersApi.test.ts
+      operationId: create_user
+      x-authorize:
+        resource-type: users
+        action: create
+      x-audit: true
+      tags:
+        - Users
+      requestBody:
+        description: User object to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreationRequest'
+      responses:
+        '201':
+          description: Created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPostResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '409':
+          $ref: '#/components/responses/409Conflict'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/users-minimal:
+    x-scope:
+      - system
+      - tenant
+    get:
+      summary: Get minimal user display information.
+      description: |
+        Retrieve a list of users with minimal display information (id, username, firstName, lastName).
+        At least one of `search`, `id`, or `filterBy` is required to scope the lookup. Requires the users-minimal:read permission.
+      x-service: identity-manager
+      x-test-coverage:
+        - integration-tests/tests/api_users_test.go
+      operationId: get_users_minimal
+      x-authorize:
+        resource-type: users-minimal
+        action: read
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/usersMinimalFilterBy'
+        - $ref: '#/components/parameters/usersMinimalSearch'
+        - $ref: '#/components/parameters/usersMinimalId'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersMinimal'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/users/batch-create:
+    x-internal: true
+    x-scope:
+      - system
+      - tenant
+    post:
+      summary: Create multiple local users in batch.
+      description: Use to create multiple local platform users in a single request
+      x-service: identity-manager
+      x-test-coverage: not-applicable
+      operationId: batch_create_users
+      x-authorize:
+        resource-type: users
+        action: create
+      x-audit: true
+      tags:
+        - Users
+      requestBody:
+        description: Bulk user creation request containing array of max 10 users
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkUserCreationRequest'
+      responses:
+        '200':
+          description: Batch creation completed (may include both successes and failures).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkUserCreationResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/users/count:
+    x-scope:
+      - system
+      - tenant
+    get:
+      summary: Count users
+      operationId: count_users
+      description: count users
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/parallel/users/userPaginationApi.test.ts
+      x-authorize:
+        resource-type: users
+        action: read
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/usersFilterBy'
+        - $ref: '#/components/parameters/search'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - count
+                properties:
+                  count:
+                    type: integer
+                    format: int64
+                    example: 1
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/users/{userId}/logout:
+    x-scope:
+      - system
+      - tenant
+    post:
+      summary: Logout a user.
+      description: Use to force a user to logout.
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/advancedSuite/generalSettings/securityUi.test.ts
+      operationId: logout_user
+      x-authorize:
+        resource-type: users
+        action: update
+        resource-id: userId
+      x-audit: true
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '200':
+          description: Executed successfully.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/users/{userId}/password:
+    x-scope:
+      - system
+      - tenant
+    post:
+      summary: Reset a user's password.
+      description: Use to reset a user's password.
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/parallel/users/usersPassword.test.ts
+      operationId: reset_user_password
+      x-authorize:
+        resource-type: users
+        action: update
+        resource-id: userId
+      x-audit: true
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '200':
+          description: Regenerated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tempPassword:
+                    type: string
+                example:
+                  tempPassword: asdasidjn9d
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/users/{userId}:
+    x-scope:
+      - system
+      - tenant
+    get:
+      summary: Get a user by id.
+      description: Retrieve a user's details by id.
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/parallel/users/userTableViewApi.test.ts
+      operationId: get_user_by_id
+      x-authorize:
+        resource-type: users
+        action: read
+        resource-id: userId
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    patch:
+      summary: Update a user by id.
+      description: Use to update a local user's details by id. SSO users cannot be updated.
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/parallel/users/userTableViewApi.test.ts
+      operationId: patch_user_by_id
+      x-authorize:
+        resource-type: users
+        action: update
+        resource-id: userId
+      x-audit: true
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      requestBody:
+        description: User patch object with fields to update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPatchRequest'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    delete:
+      summary: Delete a user by id.
+      description: Use to delete a user by id.
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/parallel/users/userTableViewApi.test.ts
+      operationId: delete_user_by_id
+      x-authorize:
+        resource-type: users
+        action: delete
+        resource-id: userId
+      x-audit: true
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '204':
+          description: Executed successfully.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/me/password:
+    x-scope:
+      - system
+      - tenant
+    post:
+      summary: change user password
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/parallel/users/resetPasswordLocalUser.test.ts
+      operationId: change_user_password
+      x-no-authorization: true
+      x-audit: true
+      tags:
+        - Users
+      requestBody:
+        description: Password to change
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserChangePasswordRequest'
+      responses:
+        '200':
+          description: Password changed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  currentPassword:
+                    type: string
+                  newPassword:
+                    type: string
+                example:
+                  tempPassword: Abcd!234
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/users:
+    post:
+      summary: create internal user
+      x-service: identity-manager
+      x-test-coverage:
+        - /runai/control-plane/identity-manager/pkg/services/api_users_service_test.go
+      operationId: create_intenral_user
+      x-no-authorization: true
+      tags:
+        - Users
+      requestBody:
+        description: Internal user object to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalUserCreationRequest'
+      responses:
+        '201':
+          description: Created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPostResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '409':
+          $ref: '#/components/responses/409Conflict'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/users/{userId}:
+    x-internal: true
+    get:
+      summary: Get a user by id (internal).
+      description: Retrieve a user's details by id for internal service use.
+      x-service: identity-manager
+      x-test-coverage:
+        - /runai/control-plane/identity-manager/pkg/services/api_users_service_test.go
+      operationId: get_internal_user_by_id
+      x-no-authorization: true
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+  /internal/realms/{realm}/users/{email}:
+    delete:
+      summary: Delete a user by email (internal).
+      description: Delete a user by email for internal service use.
+      x-service: identity-manager
+      x-test-coverage: not-applicable
+      operationId: delete_internal_user_by_email
+      x-no-authorization: true
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/realm'
+        - $ref: '#/components/parameters/email'
+      responses:
+        '200':
+          description: Deleted successfully.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+  /internal/users/{email}/accessGroups:
+    get:
+      summary: Get a users access groups.
+      description: Retrieve a user's groups that have access roles.
+      x-service: identity-manager
+      x-test-coverage: not-applicable
+      operationId: get_user_access_groups
+      x-no-authorization: true
+      tags:
+        - Users
+      parameters:
+        - $ref: '#/components/parameters/email'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Groups'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/service-accounts:
+    x-scope:
+      - system
+      - tenant
+    get:
+      summary: Get a list of service accounts.
+      description: Retrieve a list of service accounts.
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/parallel/applicationsV2/applicationsApi.test.ts
+        - src/test/suites/sphinxSuite/apps.test.ts
+      operationId: get_service_accounts
+      x-authorize:
+        resource-type: service-account
+        action: read
+      tags:
+        - Service Accounts
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceAccounts'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    post:
+      summary: Create a service account.
+      description: Used to create a service account.
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/parallel/applicationsV2/applicationsApi.test.ts
+      operationId: create_service_account
+      x-authorize:
+        resource-type: service-account
+        action: create
+      x-audit: true
+      tags:
+        - Service Accounts
+      requestBody:
+        description: Service account object to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceAccountCreationRequest'
+      responses:
+        '201':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceAccountPostResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '409':
+          $ref: '#/components/responses/409Conflict'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/service-accounts:
+    x-internal: true
+    post:
+      summary: Create a service account internally
+      description: Used to create a service account internally.
+      x-service: identity-manager
+      x-test-coverage: not-applicable
+      operationId: create_service_account_internally
+      x-no-authorization: true
+      tags:
+        - Service Accounts
+      requestBody:
+        description: Service account object to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalServiceAccountCreationRequest'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceAccountPostResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '409':
+          $ref: '#/components/responses/409Conflict'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/service-accounts/installer:
+    x-internal: true
+    get:
+      summary: Get the installer service account.
+      description: Retrieve the installer service account used for cluster installation.
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/parallel/applicationsV2/applicationsApi.test.ts
+      operationId: get_installer_service_account
+      x-authorize:
+        resource-type: service-account
+        action: read
+      tags:
+        - Service Accounts
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceAccountPostResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/installer-bootstrap:
+    x-internal: true
+    post:
+      summary: Mint a short-lived bootstrap JWT for the installer service account.
+      description: |
+        Returns a 2-hour Keycloak access token for the runai-internal.installer
+        service account. Called by cluster-service when generating the cluster
+        install command. The token is passed to the Helm hook as
+        --set cluster.bootstrapToken=<token> and used directly as a Bearer token
+        to call GET /clusters/{uuid}/control-plane-config — the installer client
+        secret never leaves the server.
+
+        When clusterId is provided, the token is minted from a dedicated
+        per-cluster installer client scoped to that cluster instead of the
+        shared one - the client is resolved (and, if needed, self-healed by
+        creating it) internally, so callers only need to say which cluster the
+        token is for.
+      x-service: identity-manager
+      x-test-coverage: not-applicable
+      operationId: mint_installer_bootstrap_token
+      x-no-authorization: true
+      tags:
+        - Service Accounts
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+        - $ref: '#/components/parameters/FilterByCluster'
+      responses:
+        '200':
+          description: Bootstrap token minted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstallerBootstrapResponse'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/service-accounts/{serviceAccountId}:
+    x-scope:
+      - system
+      - tenant
+    get:
+      summary: Get service account by id.
+      description: Retrieve the details of a service account by id.
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/parallel/applicationsV2/applicationsApi.test.ts
+      operationId: get_service_account_by_id
+      x-authorize:
+        resource-type: service-account
+        action: read
+        resource-id: serviceAccountId
+      tags:
+        - Service Accounts
+      parameters:
+        - $ref: '#/components/parameters/serviceAccountId'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceAccount'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    patch:
+      summary: Update service account details by id.
+      description: Use to update the details of a service account by id.
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/parallel/applicationsV2/applicationsApi.test.ts
+      operationId: update_service_account_by_id
+      x-authorize:
+        resource-type: service-account
+        action: update
+        resource-id: serviceAccountId
+      x-audit: true
+      tags:
+        - Service Accounts
+      parameters:
+        - $ref: '#/components/parameters/serviceAccountId'
+      requestBody:
+        description: Service account object that needs to be updated.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceAccountPatchRequest'
+      responses:
+        '200':
+          description: Executed successfully.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    delete:
+      summary: Delete a service account by id.
+      description: Use to delete a service account by id.
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/parallel/applicationsV2/applicationsApi.test.ts
+      operationId: delete_service_account_by_id
+      x-authorize:
+        resource-type: service-account
+        action: delete
+        resource-id: serviceAccountId
+      x-audit: true
+      tags:
+        - Service Accounts
+      parameters:
+        - $ref: '#/components/parameters/serviceAccountId'
+      responses:
+        '204':
+          description: Executed successfully.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/service-accounts/{serviceAccountId}/secret:
+    x-scope:
+      - system
+      - tenant
+    post:
+      summary: Regenerate a service account secret.
+      description: Use to regenerate the service account secret by id.
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/parallel/applicationsV2/applicationJobApi.test.ts
+      operationId: regenerate_service_account_secret
+      x-authorize:
+        resource-type: service-account
+        action: update
+        resource-id: serviceAccountId
+      x-audit: true
+      tags:
+        - Service Accounts
+      parameters:
+        - $ref: '#/components/parameters/serviceAccountId'
+      responses:
+        '200':
+          description: Regenerated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegenerateServiceAccountSecretResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/access-keys:
+    x-scope:
+      - system
+      - tenant
+    get:
+      summary: Get a list of access keys.
+      description: Retrieve a list of the user's access keys.
+      x-service: identity-manager
+      operationId: get_access_keys
+      x-test-coverage:
+        - integration-tests/tests/api_access_keys_test.go
+        - pkg/services/api_access_keys_service_test.go
+        - e2e/src/test/suites/parallel/personalApplications/crudUserApplication.test.ts
+        - e2e/src/test/suites/parallel/personalApplications/userApplicationUi.test.ts
+        - e2e/src/test/suites/parallel/personalApplications/userAppStatusCodes.test.ts
+      x-no-authorization: true
+      tags:
+        - Access Keys
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeys'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    post:
+      summary: Create an access key.
+      description: Used to create an access key.
+      x-service: identity-manager
+      operationId: create_access_key
+      x-audit: true
+      x-no-authorization: true
+      x-test-coverage:
+        - integration-tests/tests/api_access_keys_test.go
+        - pkg/services/api_access_keys_service_test.go
+        - e2e/src/test/suites/parallel/personalApplications/crudUserApplication.test.ts
+        - e2e/src/test/suites/parallel/personalApplications/userApplicationUi.test.ts
+        - e2e/src/test/suites/parallel/personalApplications/userAppStatusCodes.test.ts
+        - e2e/src/test/suites/parallel/personalApplications/userAppLimitation.test.ts
+      tags:
+        - Access Keys
+      requestBody:
+        description: Access key object to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessKeyCreationRequest'
+      responses:
+        '201':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeyPostResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '409':
+          $ref: '#/components/responses/409Conflict'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/access-keys/{accessKeyId}:
+    x-scope:
+      - system
+      - tenant
+    get:
+      summary: Get access key by id.
+      description: Retrieve the details of an access key by id.
+      x-service: identity-manager
+      operationId: get_access_key_by_id
+      x-no-authorization: true
+      x-test-coverage:
+        - integration-tests/tests/api_access_keys_test.go
+        - pkg/services/api_access_keys_service_test.go
+        - e2e/src/test/suites/parallel/personalApplications/crudUserApplication.test.ts
+        - e2e/src/test/suites/parallel/personalApplications/userApplicationUi.test.ts
+        - e2e/src/test/suites/parallel/personalApplications/userAppStatusCodes.test.ts
+      tags:
+        - Access Keys
+      parameters:
+        - $ref: '#/components/parameters/accessKeyId'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKey'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    delete:
+      summary: Delete an access key by id.
+      description: Use to delete an access key by id.
+      x-service: identity-manager
+      operationId: delete_access_key_by_id
+      x-audit: true
+      x-no-authorization: true
+      x-test-coverage:
+        - integration-tests/tests/api_access_keys_test.go
+        - pkg/services/api_access_keys_service_test.go
+        - e2e/src/test/suites/parallel/personalApplications/crudUserApplication.test.ts
+        - e2e/src/test/suites/parallel/personalApplications/userApplicationUi.test.ts
+        - e2e/src/test/suites/parallel/personalApplications/userAppStatusCodes.test.ts
+        - e2e/src/test/suites/parallel/personalApplications/deletionUser.test.ts
+      tags:
+        - Access Keys
+      parameters:
+        - $ref: '#/components/parameters/accessKeyId'
+      responses:
+        '204':
+          description: Executed successfully.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/access-keys/{accessKeyId}/secret:
+    x-scope:
+      - system
+      - tenant
+    post:
+      summary: Regenerate an access key secret.
+      description: Use to regenerate the access key secret by id.
+      x-service: identity-manager
+      operationId: regenerate_access_key_secret
+      x-audit: true
+      x-no-authorization: true
+      x-test-coverage:
+        - integration-tests/tests/api_access_keys_test.go
+        - pkg/services/api_access_keys_service_test.go
+        - e2e/src/test/suites/parallel/personalApplications/crudUserApplication.test.ts
+        - e2e/src/test/suites/parallel/personalApplications/userApplicationUi.test.ts
+        - e2e/src/test/suites/parallel/personalApplications/userAppStatusCodes.test.ts
+      tags:
+        - Access Keys
+      parameters:
+        - $ref: '#/components/parameters/accessKeyId'
+      responses:
+        '200':
+          description: Regenerated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clientSecret:
+                    type: string
+                    description: Secret credential paired with the client ID. Used to obtain authentication tokens.
+                example:
+                  clientSecret: this-is-my-secret
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/administration/access-keys:
+    x-scope:
+      - system
+      - tenant
+    get:
+      summary: Get a list of all access keys.
+      description: Retrieve a list of all access keys.
+      x-service: identity-manager
+      operationId: get_access_keys_administration
+      x-test-coverage:
+        - integration-tests/tests/api_access_keys_test.go
+        - pkg/services/api_access_keys_service_test.go
+        - e2e/src/test/suites/parallel/personalApplications/userAppAdmin.test.ts
+      x-authorize:
+        resource-type: access-keys
+        action: read
+      tags:
+        - Access Keys
+      parameters:
+        - description: Filter results by clientId
+          in: query
+          name: clientId
+          required: false
+          schema:
+            type: string
+          example: 3434c-12323ab-4ce2ea6-b44fc-db344d
+        - description: Filter results by creatdBy
+          in: query
+          name: createdBy
+          required: false
+          schema:
+            type: string
+          example: test@run.ai
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKeysAdministration'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/administration/access-keys/{accessKeyId}:
+    x-scope:
+      - system
+      - tenant
+    delete:
+      summary: Delete an access key by id for administrations.
+      description: Use to delete an access key by id for administrations.
+      x-service: identity-manager
+      operationId: delete_access_key_by_id_administration
+      x-audit: true
+      x-authorize:
+        resource-type: access-keys
+        action: delete
+      x-test-coverage:
+        - integration-tests/tests/api_access_keys_test.go
+        - pkg/services/api_access_keys_service_test.go
+        - e2e/src/test/suites/parallel/personalApplications/userAppAdmin.test.ts
+      tags:
+        - Access Keys
+      parameters:
+        - $ref: '#/components/parameters/accessKeyId'
+      responses:
+        '204':
+          description: Executed successfully.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/clients:
+    get:
+      summary: get all clients
+      x-service: identity-manager
+      x-test-coverage:
+        - runai/control-plane/identity-manager/pkg/services/api_clients_service_test.go
+      operationId: get_all_clients
+      x-no-authorization: true
+      tags:
+        - Clients
+      parameters:
+        - description: Filter results by client attribute.
+          in: query
+          name: filter
+          required: false
+          schema:
+            type: string
+          example: runai.cluster_id:123
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Clients'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    post:
+      summary: create internal client
+      x-service: identity-manager
+      x-test-coverage:
+        - runai/control-plane/identity-manager/pkg/services/api_clients_service_test.go
+      operationId: create_internal_client
+      x-no-authorization: true
+      tags:
+        - Clients
+      requestBody:
+        description: Client object to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientCreationRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/ClientCreationResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '409':
+          $ref: '#/components/responses/409Conflict'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/clients/{id}:
+    delete:
+      summary: delete client
+      x-service: identity-manager
+      x-test-coverage:
+        - /runai/control-plane/identity-manager/pkg/services/api_clients_service_test.go
+      operationId: delete_client
+      x-no-authorization: true
+      tags:
+        - Clients
+      parameters:
+        - description: ID of the client
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Executed successfully.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/clients/{id}/secret:
+    get:
+      summary: get client secret
+      x-service: identity-manager
+      x-test-coverage:
+        - /runai/control-plane/identity-manager/pkg/services/api_clients_service_test.go
+      operationId: get_client_secret
+      x-no-authorization: true
+      tags:
+        - Clients
+      parameters:
+        - $ref: '#/components/parameters/clientId'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  secret:
+                    type: string
+                example:
+                  secret: 5g453dasidjn9d2873rh8rfunfe
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/clients/{id}/redirectUris:
+    put:
+      summary: update client redirect uris by id
+      x-service: identity-manager
+      x-test-coverage:
+        - /runai/control-plane/identity-manager/pkg/services/api_clients_service_test.go
+      operationId: update_redirect_uris
+      x-no-authorization: true
+      tags:
+        - Clients
+      parameters:
+        - $ref: '#/components/parameters/clientId'
+      requestBody:
+        description: Updated Client redirect uris
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientRedirectUrisUpdateRequest'
+      responses:
+        '200':
+          description: Redirect uris for clients updated successfully
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/token:
+    x-scope:
+      - system
+      - tenant
+    post:
+      tags:
+        - Tokens
+      summary: Create an access token v1
+      deprecated: true
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/sphinxSuite/tenant.test.ts
+      description: |
+        Create tokens using the `grant_type` parameter.
+        This endpoint is deprecated. Use `/api/v2/token` instead.
+      operationId: grant_token
+      x-no-authorization: true
+      x-audit: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+            examples:
+              client_credentials:
+                value:
+                  grantType: client_credentials
+                  clientID: clientID
+                  clientSecret: clientSecret
+                description: Obtain the clientID and the clientSecret using service accounts or access keys endpoints
+              refresh_token:
+                value:
+                  grantType: refresh_token
+                  refreshToken: refreshToken
+                  clientID: clientID
+              exchange_token:
+                value:
+                  grantType: exchange_token
+                  code: code
+                  clientID: clientID
+                  redirectUri: redirectUri
+              external_token_exchange:
+                value:
+                  grantType: external_token_exchange
+                  externalToken: access token from external idp
+              app_token (deprecated):
+                x-internal: true
+                value:
+                  grantType: app_token
+                  appID: appID
+                  appSecret: appSecret
+                description: Deprecated - Obtain the appID and the appSecret using applications or access keys endpoints
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v2/token:
+    x-scope:
+      - system
+      - tenant
+    post:
+      tags:
+        - Tokens
+      summary: Create an access token v2
+      x-service: identity-manager
+      x-test-coverage:
+        - pkg/services/api_tokens_v2_test.go
+        - integration-tests/tests/api_token_test.go
+      description: |
+        Use this endpoint to obtain an access token. Compliant with standard OAuth2 protocol and supports the common OAuth2 grant types.
+      operationId: grant_token_v2
+      x-no-authorization: true
+      x-audit: true
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - grant_type
+              properties:
+                grant_type:
+                  type: string
+                  description: |
+                    The OAuth2 grant type. Determines the authentication flow and which parameters are required:
+
+                    `client_credentials` - Authenticate as a service account or user access key using clientId and clientSecret.
+
+                    `password` - Authenticate as a local user using username and password.
+
+                    `external_token_exchange` - Authenticate as a service account or user using a token issued by the configured identity provider (IdP) for a Run:ai token. Requires externalToken.
+                  enum:
+                    - client_credentials
+                    - password
+                    - external_token_exchange
+                client_id:
+                  type: string
+                  description: The client identifier for a service account or user access key. Required when using the client_credentials grant type. Must be used together with clientSecret.
+                client_secret:
+                  type: string
+                  description: The client secret corresponding to the clientId. Required when using the client_credentials grant type. Must be used together with clientId.
+                  format: password
+                username:
+                  type: string
+                  description: The username of a local user account. Required when using the password grant type. Must be used together with password.
+                password:
+                  type: string
+                  description: The password for the specified username. Required when using the password grant type. Must be used together with username.
+                  format: password
+                external_token:
+                  type: string
+                  description: A valid token issued by the identity provider (IdP) that is configured in NVIDIA Run:ai. Required when using the external_token_exchange grant type.
+                refresh_token:
+                  type: string
+                  x-internal: true
+                  description: The refresh token used to obtain a new access token. Required only when using the refresh_token grant type.
+                code:
+                  type: string
+                  x-internal: true
+                  description: Authorization code issued by the authorization server. Used in the authorization_code grant to exchange the code for an access token.
+                redirect_uri:
+                  type: string
+                  x-internal: true
+                  description: The redirect URI used during the authorization request. Required for the authorization_code grant to validate the redirect destination.
+                code_verifier:
+                  type: string
+                  pattern: ^[A-Za-z0-9._~-]+$
+                  x-internal: true
+                  description: PKCE code verifier. Required when the authorization code was requested with a code_challenge.
+            examples:
+              client_credentials:
+                value:
+                  grant_type: client_credentials
+                  client_id: my-client-id
+                  client_secret: my-client-secret
+                description: Obtain the clientID and the clientSecret using service accounts or access keys endpoints
+              password:
+                value:
+                  grant_type: password
+                  username: user@example.com
+                  password: password123
+                  client_id: my-client-id
+              external_token_exchange:
+                value:
+                  grant_type: external_token_exchange
+                  external_token: access_token_from_external_idp
+                  client_id: my-client-id
+                description: Exchange an external identity provider token for a Run:ai access token
+      responses:
+        '200':
+          description: Successfully issued token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuth2TokenResponse'
+              example:
+                access_token: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+                token_type: Bearer
+                expires_in: 3600
+                refresh_token: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+                id_token: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuth2Error'
+        '401':
+          description: Client authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuth2Error'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /.well-known/openid-configuration:
+    x-internal: true
+    get:
+      tags:
+        - OpenID Connect
+      summary: OpenID Connect Discovery
+      x-service: identity-manager
+      x-test-coverage:
+        - pkg/services/api_openid_configuration_service_test.go
+        - integration-tests/tests/api_token_test.go
+      description: |
+        Returns the OpenID Connect discovery document containing metadata about the OAuth2/OIDC provider.
+        This endpoint follows RFC 8414 (OAuth 2.0 Authorization Server Metadata) and OpenID Connect Discovery 1.0.
+      operationId: get_openid_configuration
+      x-no-authorization: true
+      responses:
+        '200':
+          description: OpenID Connect Discovery Document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenIDConfiguration'
+              examples:
+                discovery:
+                  value:
+                    issuer: https://app.run.ai
+                    authorization_endpoint: https://app.run.ai/api/v1/login
+                    token_endpoint: https://app.run.ai/api/v2/token
+                    jwks_uri: https://app.run.ai/auth/realms/runai/protocol/openid-connect/certs
+                    response_types_supported:
+                      - code
+                      - token
+                      - id_token
+                    subject_types_supported:
+                      - public
+                    id_token_signing_alg_values_supported:
+                      - RS256
+                    grant_types_supported:
+                      - authorization_code
+                      - client_credentials
+                      - refresh_token
+                      - password
+                    token_endpoint_auth_methods_supported:
+                      - client_secret_post
+                      - client_secret_basic
+                    scopes_supported:
+                      - openid
+                      - profile
+                      - email
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /.well-known/oauth-authorization-server:
+    x-internal: true
+    get:
+      tags:
+        - OpenID Connect
+      summary: OAuth 2.0 Authorization Server Metadata
+      x-service: identity-manager
+      x-test-coverage:
+        - pkg/services/api_openid_configuration_service_test.go
+        - integration-tests/tests/api_token_test.go
+      description: |
+        Returns the OAuth 2.0 Authorization Server metadata document.
+        This endpoint follows RFC 8414 (OAuth 2.0 Authorization Server Metadata).
+      operationId: get_oauth_authorization_server_metadata
+      x-no-authorization: true
+      responses:
+        '200':
+          description: OAuth 2.0 Authorization Server Metadata Document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuthAuthorizationServer'
+              examples:
+                metadata:
+                  value:
+                    issuer: https://app.run.ai
+                    authorization_endpoint: https://app.run.ai/api/v1/login
+                    token_endpoint: https://app.run.ai/api/v2/token
+                    jwks_uri: https://app.run.ai/auth/realms/runai/protocol/openid-connect/certs
+                    response_types_supported:
+                      - code
+                      - token
+                      - id_token
+                    grant_types_supported:
+                      - authorization_code
+                      - client_credentials
+                      - refresh_token
+                      - password
+                    token_endpoint_auth_methods_supported:
+                      - client_secret_post
+                      - client_secret_basic
+                    scopes_supported:
+                      - openid
+                      - profile
+                      - email
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/login:
+    x-internal: true
+    get:
+      summary: Get login url
+      x-service: identity-manager
+      x-test-coverage:
+        - e2e/src/test/suites/parallel/login/login.test.ts
+      tags:
+        - Logins
+      x-no-authorization: true
+      description: |
+        Get redirected to the login screen for your client
+      operationId: getLoginScreenURL
+      parameters:
+        - in: header
+          name: User-Agent
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: authentication_flow
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: redirect_url
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: code_challenge
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: code_challenge_method
+          schema:
+            $ref: '#/components/schemas/CodeChallengeMethod'
+          required: false
+      responses:
+        '307':
+          $ref: '#/components/responses/307TemporaryRedirect'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/logout:
+    x-internal: true
+    post:
+      summary: Logout
+      x-service: identity-manager
+      x-test-coverage:
+        - e2e/src/test/suites/parallel/login/login.test.ts
+      tags:
+        - Logout
+      x-no-authorization: true
+      operationId: logout
+      responses:
+        '200':
+          description: Successfully logged out
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/security/settings:
+    x-scope:
+      - system
+      - tenant
+    get:
+      summary: Get security settings
+      x-service: identity-manager
+      x-test-coverage: not-applicable
+      operationId: get_security_settings
+      x-authorize:
+        resource-type: security-settings
+        action: read
+      parameters:
+        - $ref: '#/components/parameters/TenantId'
+      tags:
+        - Settings
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettingsGetResponse'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/security/settings/{key}:
+    x-scope:
+      - system
+      - tenant
+    put:
+      summary: Update security setting by key
+      x-service: identity-manager
+      x-test-coverage:
+        - /runai/control-plane/identity-manager/pkg/services/api_realm_service_test.go
+      operationId: update_security_setting_by_key
+      x-authorize:
+        resource-type: security-settings
+        action: update
+      tags:
+        - Settings
+      parameters:
+        - $ref: '#/components/parameters/settingsKey'
+        - $ref: '#/components/parameters/TenantId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - $ref: '#/components/schemas/UpdateAutoRedirectSsoSettingValue'
+                - $ref: '#/components/schemas/UpdateBrowserSessionTimeoutSettingValue'
+                - $ref: '#/components/schemas/UpdateLogoutRedirectUriSettingValue'
+            examples:
+              autoRedirectSSO:
+                value:
+                  enabled: false
+                  idpAlias: oidc
+              browserSessionTimeout:
+                value:
+                  idleTimeout: 60
+              logoutRedirectUri:
+                value:
+                  uri: https://example.com/logout-success
+      responses:
+        '200':
+          description: Setting successfully updated
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    get:
+      summary: Get security setting by key
+      x-service: identity-manager
+      x-test-coverage: not-applicable
+      operationId: get_security_setting_by_key
+      x-authorize:
+        resource-type: security-settings
+        action: read
+      tags:
+        - Settings
+      parameters:
+        - $ref: '#/components/parameters/settingsKey'
+        - $ref: '#/components/parameters/TenantId'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+              examples:
+                autoRedirectSSO:
+                  value:
+                    value:
+                      enabled: false
+                      idpAlias: oidc
+                    displayName: Auto Redirect SSO
+                    description: Automatically redirect users to the SSO login page after logging in to the application
+                browserSessionTimeout:
+                  value:
+                    value:
+                      idleTimeout: 60
+                    displayName: Browser Session Timeout
+                    description: The idle timeout duration in minutes for browser sessions
+                logoutRedirectUri:
+                  value:
+                    value:
+                      uri: https://example.com/logout-success
+                    displayName: Logout Redirect URI
+                    description: The URI where users will be redirected after logging out of the application
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/realms/{realm}/reconcile:
+    post:
+      summary: Reconcile runai realm
+      x-service: identity-manager
+      x-test-coverage: not-applicable
+      description: |
+        Create a new realm for runai tenant.
+      operationId: reconcile_realm
+      x-no-authorization: true
+      tags:
+        - Realm
+      parameters:
+        - $ref: '#/components/parameters/realm'
+      requestBody:
+        description: how to run reconcile
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RealmReconcileRequest'
+      responses:
+        '202':
+          description: Reconciling
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '409':
+          $ref: '#/components/responses/409Conflict'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /v1/k8s/auth/oauth/apptoken:
+    x-internal: true
+    post:
+      deprecated: true
+      tags:
+        - Tokens
+      x-no-authorization: true
+      summary: get application token
+      x-service: identity-manager
+      x-test-coverage:
+        - src/test/suites/parallel/applicationsV2/applicationsAuth.test.ts
+      description: |
+        Retrieve access token for an application.
+        The application token is retrieved from the authorization server.
+        This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to app_token instead, with AppID and appSecret set accordingly to get an application token
+      operationId: app_token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppTokenRequest'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppTokenResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/realms/{realm}:
+    delete:
+      summary: delete realm
+      x-service: identity-manager
+      x-test-coverage:
+        - /runai/control-plane/identity-manager/pkg/services/api_realm_service_test.go
+      operationId: delete_realm
+      x-no-authorization: true
+      tags:
+        - Realm
+      parameters:
+        - $ref: '#/components/parameters/realm'
+        - $ref: '#/components/parameters/isHardDelete'
+      responses:
+        '200':
+          description: realm successfully deleted
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+components:
+  parameters:
+    TenantId:
+      name: tenantId
+      in: query
+      required: false
+      x-scope:
+        - system
+      description: If exists will return the relevant resource for the tenant ID
+      example: '1008'
+      schema:
+        type: string
+        default: ''
+    idp:
+      name: idp
+      in: path
+      required: true
+      description: The alias of the idp
+      schema:
+        type: string
+    usersFilterBy:
+      name: filterBy
+      in: query
+      required: false
+      description: Filter results by a parameter. Use the format field-name operator value. Operators are <= Less than or equal, >= Greater than or equal, =@ contains. Dates are in ISO 8601 timestamp format and available for operators <=, >= and ==.
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: ^((username|createdBy|lastLogin|creationTime|lastUpdated|isLocal)(==|<=|>=|=@)|(firstName|lastName|fullName)(=@)).+$
+        example:
+          - username=@test,lastLogin>=2024-09-24T00:00:00.00Z,isLocal==false
+      explode: false
+    usersSortBy:
+      name: sortBy
+      in: query
+      required: false
+      description: Sort results by a parameters.
+      schema:
+        $ref: '#/components/schemas/UsersFilterSortFields'
+    SortOrder:
+      name: sortOrder
+      in: query
+      required: false
+      description: Sort results in descending or ascending order.
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: asc
+    Offset:
+      name: offset
+      in: query
+      required: false
+      description: The offset of the first item returned in the collection.
+      schema:
+        type: integer
+        format: int32
+        example: 100
+    limit:
+      name: limit
+      in: query
+      required: false
+      description: The maximum number of entries to return.
+      schema:
+        type: integer
+        format: int32
+        default: 500
+        minimum: 1
+        maximum: 500
+    search:
+      name: search
+      in: query
+      required: false
+      description: Filter results by a free text search.
+      schema:
+        type: string
+        example: test@run
+    usersMinimalFilterBy:
+      name: filterBy
+      in: query
+      required: false
+      description: |
+        Filter results by username. Use the format field-name operator value. Supported operators are == (exact match) and =@ (contains).
+        Multiple entries (up to 25) are allowed only with the == operator.
+      schema:
+        type: array
+        maxItems: 25
+        items:
+          type: string
+          pattern: ^username(==|=@).+$
+        example:
+          - username==test@run.ai
+      explode: false
+    usersMinimalSearch:
+      name: search
+      in: query
+      required: false
+      description: Filter results by a free text search across username, firstName and lastName (OR logic). Minimum 2 characters.
+      schema:
+        type: string
+        minLength: 2
+        maxLength: 100
+        example: john
+    usersMinimalId:
+      name: id
+      in: query
+      required: false
+      description: Bulk lookup by user IDs (comma-separated). Returns the matching users in addition to any results from `search` or `filterBy`. Up to 25 IDs per request.
+      schema:
+        type: array
+        maxItems: 25
+        items:
+          type: string
+        example:
+          - 8e3f0a4b-4d3c-4f6e-9d2a-1c5e0a8b7f6d
+      explode: false
+    userId:
+      name: userId
+      in: path
+      required: true
+      description: The id of the user
+      schema:
+        type: string
+    realm:
+      name: realm
+      in: path
+      required: true
+      description: The name of the realm
+      schema:
+        type: string
+    email:
+      name: email
+      in: path
+      required: true
+      schema:
+        type: string
+    FilterByCluster:
+      name: clusterId
+      in: query
+      description: Filter using the Universally Unique Identifier (UUID) of the cluster.
+      required: false
+      schema:
+        type: string
+        format: uuid
+        example: d73a738f-fab3-430a-8fa3-5241493d7128
+    serviceAccountId:
+      name: serviceAccountId
+      in: path
+      required: true
+      description: Service account id
+      schema:
+        type: string
+        example: 6d2894ba-f998-4039-bba1-caba57caf681
+    accessKeyId:
+      name: accessKeyId
+      in: path
+      required: true
+      description: The access key ID
+      schema:
+        type: string
+    clientId:
+      name: id
+      in: path
+      required: true
+      description: The client "id" to retrieve
+      schema:
+        type: string
+    settingsKey:
+      name: key
+      in: path
+      required: true
+      description: The settings key
+      schema:
+        $ref: '#/components/schemas/settingsKeyEnum'
+    isHardDelete:
+      name: isHardDelete
+      in: query
+      description: Boolean indicator for soft/hard delete
+      schema:
+        type: boolean
+    exchangeCode:
+      name: code
+      in: query
+      required: true
+      description: The exchange code retrieved from the idp server
+      schema:
+        type: string
+    redirectUri:
+      name: redirect_uri
+      in: query
+      required: true
+      description: The redirect uri to redirect to after the authorization server completes the authorization flow
+      schema:
+        type: string
+    refreshToken:
+      name: refresh_token
+      in: query
+      required: true
+      description: The refresh token retrieved from the idp server
+      schema:
+        type: string
+    appType:
+      name: appType
+      in: query
+      required: true
+      description: The type of application
+      schema:
+        type: string
+        enum:
+          - Agent
+          - MimirWriter
+    code:
+      $ref: '#/components/parameters/exchangeCode'
+    redirect_url:
+      $ref: '#/components/parameters/redirectUri'
+    refresh_token:
+      $ref: '#/components/parameters/refreshToken'
+    app_type:
+      $ref: '#/components/parameters/appType'
+    is_hard_delete:
+      $ref: '#/components/parameters/isHardDelete'
+  schemas:
+    AuthConfiguration:
+      type: object
+      required:
+        - tenantName
+        - authClientID
+        - authHost
+        - isMultiTenant
+        - redirectUrl
+      properties:
+        tenantName:
+          type: string
+        authClientID:
+          type: string
+        authHost:
+          type: string
+        isMultiTenant:
+          type: boolean
+        redirectUrl:
+          type: string
+      example:
+        tenantName: mytest
+        authClientID: runai-admin-ui
+        authHost: https://app.run.ai
+        isMultiTenant: false
+        redirectUrl: https://mytest.run.ai
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          minimum: 100
+          maximum: 599
+        message:
+          type: string
+        details:
+          type: string
+      example:
+        code: 400
+        message: Bad request - Resource should have a name
+    RealmCreationRequest:
+      type: object
+      x-internal: true
+      required:
+        - realm_name
+        - tenant_id
+      properties:
+        realm_name:
+          type: string
+          pattern: ^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$
+          minLength: 2
+          maxLength: 255
+        tenant_id:
+          type: string
+          pattern: ^[0-9]{1,}$
+          minLength: 1
+          maxLength: 64
+        external_redirect_uri:
+          items:
+            type: string
+            minLength: 1
+            maxLength: 2048
+          type: array
+          minItems: 0
+          maxItems: 100
+      example:
+        realm_name: runai
+        tenant_id: 1
+    Client:
+      type: object
+      x-internal: true
+      required:
+        - id
+        - clientId
+        - secret
+      properties:
+        id:
+          type: string
+        clientId:
+          type: string
+        secret:
+          type: string
+        redirectUris:
+          type: array
+          items:
+            type: string
+        attributes:
+          type: object
+      example:
+        id: 3434c-12323ab-4ce2ea6-b44fc-db344d
+        clientId: name123
+        secret: e32r3re23h65y5766k8i7k988l
+        redirectUris:
+          - https://url1
+          - https://url2
+        attributes:
+          key1: value
+          key2: value
+    RealmCreationResponse:
+      type: object
+      x-internal: true
+      required:
+        - realm_name
+        - domain
+        - clients
+      properties:
+        realm_name:
+          type: string
+        domain:
+          type: string
+        clients:
+          type: array
+          items:
+            $ref: '#/components/schemas/Client'
+    SamlData:
+      type: object
+      nullable: true
+      properties:
+        signingCertificate:
+          type: string
+        singleSignOnServiceUrl:
+          type: string
+        entityId:
+          type: string
+        serviceProviderMetadataUrl:
+          type: string
+          description: Service Provider (SP) metadata url
+    MandatoryClaim:
+      type: object
+      nullable: true
+      required:
+        - claim
+        - values
+      properties:
+        claim:
+          type: string
+          pattern: .*[a-zA-Z].*
+          minLength: 1
+          maxLength: 255
+        values:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: string
+            minLength: 1
+            maxLength: 255
+            pattern: ^(?!.*\s).*?[a-zA-Z].*$
+    OidcData:
+      type: object
+      nullable: true
+      required:
+        - clientId
+        - clientSecret
+        - discoverDocumentUrl
+      properties:
+        clientId:
+          type: string
+        clientSecret:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+            pattern: ^([a-zA-Z0-9-._:]+)(\s[a-zA-Z0-9-._:]+)*$
+        mandatoryClaim:
+          $ref: '#/components/schemas/MandatoryClaim'
+    OcpData:
+      type: object
+      nullable: true
+      properties:
+        idpBaseUrl:
+          type: string
+        clientId:
+          type: string
+        clientSecret:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+    Mappers:
+      type: object
+      required:
+        - alias
+      properties:
+        gid:
+          type: string
+          maxLength: 255
+        uid:
+          type: string
+          maxLength: 255
+        groups:
+          type: string
+          maxLength: 255
+        supplementaryGroups:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          maxLength: 254
+        firstName:
+          type: string
+          maxLength: 255
+        lastName:
+          type: string
+          maxLength: 255
+    Idp:
+      type: object
+      required:
+        - alias
+        - type
+        - redirectUri
+      properties:
+        alias:
+          type: string
+          pattern: ^[a-z0-9_-]+$
+        type:
+          type: string
+          enum:
+            - saml
+            - oidc
+            - openshift-v4
+        redirectUri:
+          type: string
+        samlData:
+          $ref: '#/components/schemas/SamlData'
+        oidcData:
+          $ref: '#/components/schemas/OidcData'
+        ocpData:
+          $ref: '#/components/schemas/OcpData'
+        mappers:
+          $ref: '#/components/schemas/Mappers'
+    Idps:
+      type: array
+      minItems: 0
+      maxItems: 100
+      items:
+        $ref: '#/components/schemas/Idp'
+    IdpCreationRequestTypeEnum:
+      type: string
+      enum:
+        - oidc
+        - saml
+        - openshift-v4
+    SamlCreationDataMetadataXmlTypeEnum:
+      type: string
+      enum:
+        - url
+        - file
+    SamlCreationData:
+      type: object
+      nullable: true
+      properties:
+        metadataXmlUrl:
+          type: string
+          pattern: /^(https?://)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(:[0-9]{1,5})?(/[^\s]*)?$|^$/
+          maxLength: 2048
+        metadataXmlFile:
+          type: string
+          maxLength: 100000
+        fileName:
+          type: string
+          maxLength: 255
+        metadataXmlType:
+          allOf:
+            - $ref: '#/components/schemas/SamlCreationDataMetadataXmlTypeEnum'
+        entityId:
+          type: string
+          maxLength: 2048
+    OidcCreationData:
+      type: object
+      nullable: true
+      required:
+        - clientId
+        - clientSecret
+        - discoverDocumentUrl
+      properties:
+        clientId:
+          type: string
+          minLength: 1
+          maxLength: 255
+        clientSecret:
+          type: string
+          minLength: 1
+          maxLength: 500
+        discoverDocumentUrl:
+          type: string
+          pattern: /^(https?://)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(:[0-9]{1,5})?(/[^\s]*)?$|^$/
+          maxLength: 2048
+        scopes:
+          type: array
+          minItems: 0
+          maxItems: 50
+          items:
+            type: string
+            pattern: ^([a-zA-Z0-9-._:]+)(\s[a-zA-Z0-9-._:]+)*$
+            minLength: 1
+            maxLength: 100
+        mandatoryClaim:
+          $ref: '#/components/schemas/MandatoryClaim'
+    OcpCreationData:
+      type: object
+      nullable: true
+      required:
+        - idpBaseUrl
+        - clientSecret
+      properties:
+        clientId:
+          type: string
+          minLength: 1
+          maxLength: 255
+        idpBaseUrl:
+          type: string
+          pattern: /^(https?://)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(:[0-9]{1,5})?(/[^\s]*)?$|^$/
+          maxLength: 2048
+        clientSecret:
+          type: string
+          minLength: 1
+          maxLength: 500
+        scopes:
+          type: array
+          minItems: 0
+          maxItems: 50
+          items:
+            type: string
+            pattern: ^([a-zA-Z0-9-._:]+)(\s[a-zA-Z0-9-._:]+)*$
+            minLength: 1
+            maxLength: 100
+    IdpCreationRequest:
+      type: object
+      required:
+        - type
+        - data
+      properties:
+        name:
+          type: string
+          maxLength: 255
+        type:
+          allOf:
+            - $ref: '#/components/schemas/IdpCreationRequestTypeEnum'
+        samlData:
+          $ref: '#/components/schemas/SamlCreationData'
+        oidcData:
+          $ref: '#/components/schemas/OidcCreationData'
+        ocpData:
+          $ref: '#/components/schemas/OcpCreationData'
+        mappers:
+          $ref: '#/components/schemas/Mappers'
+    IdpPostResponse:
+      type: object
+      required:
+        - alias
+      properties:
+        alias:
+          type: string
+      example:
+        alias: oidc
+    IdpResources:
+      type: object
+      properties:
+        resourceName:
+          type: string
+        resource:
+          type: string
+        type:
+          type: string
+          enum:
+            - url
+            - file
+    UsersFilterSortFields:
+      type: string
+      enum:
+        - username
+        - createdBy
+        - lastLogin
+        - creationTime
+        - lastUpdated
+        - type
+        - firstName
+        - lastName
+        - fullName
+    User:
+      type: object
+      required:
+        - id
+        - username
+        - createdBy
+        - createdAt
+        - updatedAt
+        - lastLogin
+        - isLocal
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+        lastLogin:
+          type: string
+          format: date-time
+          nullable: true
+        isLocal:
+          type: boolean
+          nullable: true
+        groups:
+          type: array
+          items:
+            type: string
+          nullable: true
+        firstName:
+          type: string
+          maxLength: 255
+        lastName:
+          type: string
+          maxLength: 255
+      example:
+        id: 3434c-12323ab-4ce2ea6-b44fc-db344d
+        username: test@run.ai
+        createdBy: devops@run.ai
+        createdAt: '2020-01-01T00:00:00Z'
+        updatedAt: '2022-01-01T00:00:00Z'
+        lastLogin: '2023-02-01T00:00:00Z'
+        isLocal: true
+        groups:
+          - groupA
+          - groupB
+    Users:
+      type: array
+      items:
+        $ref: '#/components/schemas/User'
+    UserCreationRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          pattern: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+          description: The email of the user. Must be a valid email address.
+          minLength: 5
+          maxLength: 254
+        resetPassword:
+          type: boolean
+          nullable: true
+        notify:
+          type: boolean
+          description: When true, send an email to the user. The email includes a link to reset the password.
+          nullable: true
+        firstName:
+          type: string
+          maxLength: 255
+        lastName:
+          type: string
+          maxLength: 255
+      example:
+        email: test@run.ai
+        resetPassword: false
+        notify: true
+    UserPostResponse:
+      type: object
+      required:
+        - id
+        - username
+        - tempPassword
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        tempPassword:
+          type: string
+      example:
+        id: 0eeaf222-e503-4f35-9d9c-c419816272e3
+        username: test@run.ai
+        tempPassword: asdasidjn9d
+    UserMinimal:
+      type: object
+      required:
+        - id
+        - username
+      properties:
+        id:
+          type: string
+          description: The user's unique identifier.
+        username:
+          type: string
+          description: The user's login name. Typically an email address.
+        firstName:
+          type: string
+          nullable: true
+          maxLength: 255
+          description: The user's first name.
+        lastName:
+          type: string
+          nullable: true
+          maxLength: 255
+          description: The user's last name.
+      example:
+        id: 3434c-12323ab-4ce2ea6-b44fc-db344d
+        username: test@run.ai
+        firstName: John
+        lastName: Doe
+    UsersMinimal:
+      type: array
+      items:
+        $ref: '#/components/schemas/UserMinimal'
+    UserCreationRequestBulk:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          pattern: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+          description: The email of the user. Must be a valid email address.
+          minLength: 5
+          maxLength: 254
+        resetPassword:
+          type: boolean
+          nullable: true
+      example:
+        email: test@run.ai
+        resetPassword: false
+    BulkUserCreationRequest:
+      type: object
+      required:
+        - users
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserCreationRequestBulk'
+          minItems: 1
+          maxItems: 10
+          description: Array of users to create. Maximum 10 users per batch.
+        notify:
+          type: boolean
+          description: When true, send an email to the user. The email includes a link to reset the password.
+          nullable: true
+      example:
+        users:
+          - email: user1@run.ai
+            resetPassword: false
+          - email: user2@run.ai
+            resetPassword: true
+          - email: user3@run.ai
+        notify: true
+    BulkUserCreationResponse:
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            required:
+              - success
+            properties:
+              success:
+                type: boolean
+                description: Whether the user creation was successful
+              user:
+                $ref: '#/components/schemas/UserPostResponse'
+                description: Created user details (only present if success is true)
+                nullable: true
+              error:
+                type: object
+                description: Error details if creation failed (only present if success is false)
+                nullable: true
+                properties:
+                  code:
+                    type: integer
+                    description: HTTP error code
+                  message:
+                    type: string
+                    description: Error message
+        totalRequested:
+          type: integer
+          description: Total number of users requested for creation
+        totalSuccessful:
+          type: integer
+          description: Number of users successfully created
+        totalFailed:
+          type: integer
+          description: Number of users that failed to be created
+      example:
+        results:
+          - success: true
+            user:
+              id: 0eeaf222-e503-4f35-9d9c-c419816272e3
+              username: user1@run.ai
+              tempPassword: asdasidjn9d
+          - success: false
+            user:
+              id: ''
+              username: user2@run.ai
+              tempPassword: ''
+            error:
+              code: 409
+              message: User already exists
+        totalRequested: 2
+        totalSuccessful: 1
+        totalFailed: 1
+    UserPatchRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          maxLength: 255
+          nullable: true
+        lastName:
+          type: string
+          maxLength: 255
+          nullable: true
+      example:
+        firstName: John
+        lastName: Doe
+    UserChangePasswordRequest:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+          minLength: 8
+          maxLength: 255
+        newPassword:
+          type: string
+          minLength: 8
+          maxLength: 255
+      example:
+        currentPassword: Abcd!234
+        newPassword: Zxcv!567
+    InternalUserCreationRequest:
+      type: object
+      required:
+        - email
+        - realm
+        - resetPassword
+      properties:
+        email:
+          type: string
+          minLength: 5
+          maxLength: 254
+        realm:
+          type: string
+          minLength: 1
+          maxLength: 255
+        password:
+          type: string
+          nullable: true
+          minLength: 8
+          maxLength: 255
+        resetPassword:
+          type: boolean
+        notify:
+          type: boolean
+          description: When true, send an email to the user. The email includes a link to reset the password.
+          nullable: true
+      example:
+        email: test@run.ai
+        realm: runai
+        password: ae23idjn9d!2a4
+        resetPassword: true
+        notify: true
+    Groups:
+      type: array
+      items:
+        example: group-A
+        type: string
+    ServiceAccount:
+      type: object
+      required:
+        - name
+        - createdBy
+        - createdAt
+        - updatedAt
+        - enabled
+        - lastLogin
+        - id
+        - clientId
+      properties:
+        name:
+          type: string
+          description: The name of the service account.
+        createdBy:
+          type: string
+          description: The email address of the user who created the service account.
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: The timestamp for when the service account was created.
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: The timestamp for when the service account was last updated.
+        enabled:
+          type: boolean
+          description: Indicates whether the service account is enabled.
+        tenantId:
+          type: string
+          description: The unique identifier of the tenant.
+        lastLogin:
+          type: string
+          format: date-time
+          nullable: true
+          description: The timestamp of the last time the service account was used to authenticate.
+        id:
+          type: string
+          description: The unique identifier of the service account.
+        clientId:
+          type: string
+          description: The client identifier associated with the service account. Used when requesting authentication tokens.
+      example:
+        name: service-account-123
+        createdBy: test@run.ai
+        createdAt: '2020-01-01T00:00:00Z'
+        updatedAt: '2020-01-01T00:00:00Z'
+        enabled: true
+        tenantId: 1234567890
+        lastLogin: '2020-01-01T00:00:00Z'
+        id: 3434c-12323ab-4ce2ea6-b44fc-db344d
+        clientId: service-account-123
+    ServiceAccounts:
+      type: array
+      minItems: 0
+      maxItems: 1000
+      items:
+        $ref: '#/components/schemas/ServiceAccount'
+    ServiceAccountCreationRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          pattern: ^[a-z][-_a-z0-9]*[a-z0-9]$
+          description: The name of the service account. The name must be unique within the organization and can only contain lowercase alphanumeric characters and hyphens. It must start and end with a letter.
+          minLength: 2
+          maxLength: 255
+      example:
+        name: service-account-123
+    ServiceAccountPostResponse:
+      type: object
+      required:
+        - id
+        - name
+        - clientSecret
+      properties:
+        id:
+          type: string
+          description: The unique identifier of the service account.
+        name:
+          type: string
+          description: The name of the service account.
+        clientSecret:
+          type: string
+          description: Secret credential paired with the client ID. Used to obtain authentication tokens. Displayed only once upon creation.
+        clientId:
+          type: string
+          description: The client identifier associated with the service account. Used when requesting authentication tokens.
+      example:
+        id: 0eeaf222-e503-4f35-9d9c-c419816272e3
+        name: service-account-123
+        clientSecret: asdasidjn9d
+        clientId: service-account-123
+    InternalServiceAccountCreationRequest:
+      type: object
+      required:
+        - name
+        - realm
+      properties:
+        name:
+          type: string
+          pattern: ^[a-z][-_a-z0-9]*[a-z0-9]$
+          description: The name of the service account. The name must be unique within the organization and can only contain lowercase alphanumeric characters and hyphens. It must start and end with a letter.
+          minLength: 2
+          maxLength: 255
+        realm:
+          type: string
+          description: The realm in which to create the service account
+          minLength: 1
+          maxLength: 255
+      example:
+        name: service-account-123
+        realm: realm
+    InstallerBootstrapResponse:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: Short-lived Keycloak JWT (2h TTL) for the installer service account. Pass as Authorization Bearer to GET /clusters/{uuid}/control-plane-config.
+      example:
+        token: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+    ServiceAccountPatchRequest:
+      type: object
+      required:
+        - enabled
+      properties:
+        enabled:
+          type: boolean
+          description: Indicates whether the service account is enabled.
+      example:
+        enabled: true
+    RegenerateServiceAccountSecretResponse:
+      type: object
+      properties:
+        clientSecret:
+          type: string
+          description: Secret credential paired with the client ID. Used to obtain authentication tokens. Displayed only once upon regeneration.
+      example:
+        clientSecret: 189ej2ijd92fj092k049fk0
+    AccessKey:
+      type: object
+      required:
+        - name
+        - id
+        - clientId
+        - createdAt
+        - lastLogin
+      properties:
+        name:
+          type: string
+          description: The name of the access key.
+        clientId:
+          type: string
+          description: The client identifier associated with the access key. Used when requesting authentication tokens.
+        id:
+          type: string
+          description: The unique identifier of the access key.
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: The timestamp for when the access key was created.
+        lastLogin:
+          type: string
+          format: date-time
+          nullable: true
+          description: The timestamp of the last time the access key was used to authenticate.
+      example:
+        name: my-access-key
+        id: 3434c-12323ab-4ce2ea6-b44fc-db344d
+        clientId: 3434c-12323ab-4ce2ea6
+        createdAt: '2019-01-01T00:00:00Z'
+        lastLogin: '2020-01-01T00:00:00Z'
+    AccessKeys:
+      type: object
+      required:
+        - accessKeys
+      properties:
+        accessKeys:
+          type: array
+          minItems: 0
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/AccessKey'
+      example:
+        accessKeys:
+          - name: my-access-key
+            id: 3434c-12323ab-4ce2ea6-b44fc-db344d
+            clientId: 3434c-12323ab-4ce2ea6
+            createdAt: '2019-01-01T00:00:00Z'
+            lastLogin: '2020-01-01T00:00:00Z'
+          - name: another-access-key
+            id: 5656d-45645cd-6de3fb7-c55gd-ef455e
+            clientId: 5656d-45645cd-6de3fb7
+            createdAt: '2019-01-01T00:00:00Z'
+            lastLogin: '2020-01-01T00:00:00Z'
+    AccessKeyCreationRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          pattern: ^[a-z][-_a-z0-9]*[a-z0-9]$
+          description: The name of the access key. The name must be unique within the user's access keys list and can only contain lowercase alphanumeric characters and hyphens. It must start and end with a letter.
+          minLength: 2
+          maxLength: 255
+      example:
+        name: access-key-name
+    AccessKeyPostResponse:
+      type: object
+      required:
+        - id
+        - name
+        - clientSecret
+        - clientId
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: The unique identifier of the access key.
+        clientId:
+          type: string
+          description: The client identifier associated with the access key. Used when requesting authentication tokens.
+        name:
+          type: string
+          description: The name of the access key.
+        clientSecret:
+          type: string
+          description: Secret credential paired with the client ID. Used to obtain authentication tokens. Displayed only once upon creation.
+        createdAt:
+          format: date-time
+          nullable: true
+          type: string
+          description: The timestamp for when the access key was created.
+      example:
+        id: 0eeaf222-e503-4f35-9d9c-c419816272e3
+        clientId: 5e7b3b7b4b7b4b7b
+        name: access-key-123
+        clientSecret: this-is-the-access-key-secret
+        createdAt: '2020-01-01T00:00:00Z'
+    AccessKeyAdministration:
+      type: object
+      required:
+        - name
+        - id
+        - clientId
+        - createdBy
+        - createdAt
+        - lastLogin
+      properties:
+        name:
+          type: string
+        id:
+          type: string
+        clientId:
+          type: string
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+        lastLogin:
+          type: string
+          format: date-time
+          nullable: true
+      example:
+        name: my-access-key
+        id: 3434c-12323ab-4ce2ea6-b44fc-db344d
+        clientId: 1434c-123233ab-4ce2ea6-b44fc-db344d
+        createdBy: test@run.ai
+        createdAt: '2020-01-01T00:00:00Z'
+        lastLogin: '2020-01-01T00:00:00Z'
+    AccessKeysAdministration:
+      type: object
+      required:
+        - accessKeys
+      properties:
+        accessKeys:
+          type: array
+          minItems: 0
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/AccessKeyAdministration'
+      example:
+        accessKeys:
+          - name: my-access-key
+            id: 3434c-12323ab-4ce2ea6-b44fc-db344d
+            clientId: 1434c-123233ab-4ce2ea6-b44fc-db344d
+            createdBy: test@run.ai
+            createdAt: '2020-01-01T00:00:00Z'
+            lastLogin: '2020-01-01T00:00:00Z'
+          - name: another-access-key
+            id: 5656d-45645cd-6de3fb7-c55gd-ef455e
+            clientId: 2545e-234344bc-5df4gc8-d66he-fg566f
+            createdBy: user@run.ai
+            createdAt: '2020-01-01T00:00:00Z'
+            lastLogin: '2020-01-01T00:00:00Z'
+    Clients:
+      type: array
+      x-internal: true
+      minItems: 0
+      maxItems: 100
+      items:
+        $ref: '#/components/schemas/Client'
+    ClientType:
+      type: string
+      enum:
+        - Agent
+        - WorkloadsAuth
+        - Application
+        - Installer
+    ClientAttributeCreationRequest:
+      type: object
+      x-internal: true
+      properties:
+        realm:
+          type: string
+          maxLength: 255
+        mimir_header:
+          type: string
+          maxLength: 255
+        tenant_name:
+          type: string
+          maxLength: 255
+        runai.cluster_id:
+          type: string
+          maxLength: 64
+    ClientCreationRequest:
+      type: object
+      x-internal: true
+      required:
+        - type
+        - clientId
+      properties:
+        type:
+          $ref: '#/components/schemas/ClientType'
+        clientId:
+          type: string
+        tenantId:
+          type: string
+        attributes:
+          $ref: '#/components/schemas/ClientAttributeCreationRequest'
+      example:
+        clientId: Agent123
+        type: Agent
+        tenantId: '1234567'
+        attributes:
+          runai.cluster_id: '123'
+    ClientRedirectUrisUpdateRequest:
+      type: object
+      x-internal: true
+      required:
+        - redirectUris
+      properties:
+        redirectUris:
+          type: array
+          minItems: 0
+          maxItems: 100
+          items:
+            type: string
+            minLength: 1
+            maxLength: 2048
+      example:
+        redirectUris:
+          - https://url1
+          - https://url2
+    TokenRequestGrantTypeEnum:
+      x-enum-internal:
+        - app_token
+      enum:
+        - client_credentials
+        - refresh_token
+        - exchange_token
+        - password
+        - external_token_exchange
+        - app_token
+    TokenRequest:
+      type: object
+      properties:
+        grantType:
+          $ref: '#/components/schemas/TokenRequestGrantTypeEnum'
+        appID:
+          deprecated: true
+          x-internal: true
+          type: string
+          maxLength: 255
+        appSecret:
+          deprecated: true
+          x-internal: true
+          type: string
+          maxLength: 500
+        code:
+          type: string
+          maxLength: 2048
+        redirectUri:
+          type: string
+          maxLength: 2048
+        refreshToken:
+          type: string
+          maxLength: 4096
+        username:
+          type: string
+          maxLength: 255
+        password:
+          type: string
+          maxLength: 255
+        clientID:
+          type: string
+          maxLength: 255
+        clientSecret:
+          type: string
+          maxLength: 500
+        externalToken:
+          type: string
+          maxLength: 4096
+        codeVerifier:
+          type: string
+          maxLength: 128
+    TokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        idToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+          description: Token lifetime in seconds
+    OAuth2TokenResponse:
+      type: object
+      required:
+        - access_token
+        - token_type
+      properties:
+        access_token:
+          type: string
+          description: The access token issued by the authorization server
+        token_type:
+          type: string
+          description: The type of the token issued (typically "Bearer")
+          example: Bearer
+        expires_in:
+          type: integer
+          description: The lifetime in seconds of the access token
+          example: 3600
+        refresh_token:
+          type: string
+          description: The refresh token, which can be used to obtain new access tokens
+        id_token:
+          type: string
+          description: ID Token value associated with the authenticated session (OpenID Connect)
+        scope:
+          type: string
+          description: The scope of the access token
+    OAuth2Error:
+      type: object
+      description: OAuth 2.0 error response (RFC 6749 Section 5.2)
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: A single ASCII error code
+          enum:
+            - invalid_request
+            - invalid_client
+            - invalid_grant
+            - unauthorized_client
+            - unsupported_grant_type
+            - invalid_scope
+            - server_error
+            - temporarily_unavailable
+          example: invalid_client
+        error_description:
+          type: string
+          description: Human-readable ASCII text providing additional information
+          example: Client authentication failed
+        error_uri:
+          type: string
+          description: URI identifying a human-readable web page with information about the error
+    OpenIDConfiguration:
+      type: object
+      description: OpenID Connect Discovery Document (RFC 8414)
+      required:
+        - issuer
+        - authorization_endpoint
+        - token_endpoint
+        - jwks_uri
+        - response_types_supported
+        - subject_types_supported
+        - id_token_signing_alg_values_supported
+      properties:
+        issuer:
+          type: string
+          description: The authorization server's issuer identifier URL
+          example: https://app.run.ai
+        authorization_endpoint:
+          type: string
+          description: URL of the OAuth2 authorization endpoint
+          example: https://app.run.ai/api/v1/login
+        token_endpoint:
+          type: string
+          description: URL of the OAuth2 token endpoint
+          example: https://app.run.ai/api/v2/token
+        userinfo_endpoint:
+          type: string
+          description: URL of the UserInfo endpoint
+        jwks_uri:
+          type: string
+          description: URL of the JSON Web Key Set document
+        registration_endpoint:
+          type: string
+          description: URL of the Dynamic Client Registration endpoint
+        scopes_supported:
+          type: array
+          items:
+            type: string
+          description: List of OAuth2 scope values supported
+          example:
+            - openid
+            - profile
+            - email
+        response_types_supported:
+          type: array
+          items:
+            type: string
+          description: List of OAuth2 response_type values supported
+          example:
+            - code
+            - token
+            - id_token
+        response_modes_supported:
+          type: array
+          items:
+            type: string
+          description: List of OAuth2 response_mode values supported
+        grant_types_supported:
+          type: array
+          items:
+            type: string
+          description: List of OAuth2 grant type values supported
+          example:
+            - authorization_code
+            - client_credentials
+            - refresh_token
+            - password
+        subject_types_supported:
+          type: array
+          items:
+            type: string
+          description: List of Subject Identifier types supported
+          example:
+            - public
+        id_token_signing_alg_values_supported:
+          type: array
+          items:
+            type: string
+          description: List of JWS signing algorithms supported for ID Token
+          example:
+            - RS256
+        token_endpoint_auth_methods_supported:
+          type: array
+          items:
+            type: string
+          description: List of client authentication methods supported by token endpoint
+          example:
+            - client_secret_post
+            - client_secret_basic
+        claims_supported:
+          type: array
+          items:
+            type: string
+          description: List of claim names supported
+        code_challenge_methods_supported:
+          type: array
+          items:
+            type: string
+          description: List of PKCE code challenge methods supported
+          example:
+            - S256
+            - plain
+        end_session_endpoint:
+          type: string
+          description: URL of the logout endpoint
+    OAuthAuthorizationServer:
+      type: object
+      description: OAuth 2.0 Authorization Server Metadata (RFC 8414)
+      required:
+        - issuer
+        - jwks_uri
+      properties:
+        issuer:
+          type: string
+          description: The authorization server's issuer identifier URL
+          example: https://app.run.ai
+        authorization_endpoint:
+          type: string
+          description: URL of the OAuth2 authorization endpoint
+          example: https://app.run.ai/api/v1/login
+        token_endpoint:
+          type: string
+          description: URL of the OAuth2 token endpoint
+          example: https://app.run.ai/api/v2/token
+        userinfo_endpoint:
+          type: string
+          description: URL of the UserInfo endpoint
+        jwks_uri:
+          type: string
+          description: URL of the JSON Web Key Set document
+        registration_endpoint:
+          type: string
+          description: URL of the Dynamic Client Registration endpoint
+        scopes_supported:
+          type: array
+          items:
+            type: string
+          description: List of OAuth2 scope values supported
+          example:
+            - openid
+            - profile
+            - email
+        response_types_supported:
+          type: array
+          items:
+            type: string
+          description: List of OAuth2 response_type values supported
+          example:
+            - code
+            - token
+            - id_token
+        response_modes_supported:
+          type: array
+          items:
+            type: string
+          description: List of OAuth2 response_mode values supported
+        grant_types_supported:
+          type: array
+          items:
+            type: string
+          description: List of OAuth2 grant type values supported
+          example:
+            - authorization_code
+            - client_credentials
+            - refresh_token
+            - password
+        token_endpoint_auth_methods_supported:
+          type: array
+          items:
+            type: string
+          description: List of client authentication methods supported by token endpoint
+          example:
+            - client_secret_post
+            - client_secret_basic
+        claims_supported:
+          type: array
+          items:
+            type: string
+          description: List of claim names supported
+        code_challenge_methods_supported:
+          type: array
+          items:
+            type: string
+          description: List of PKCE code challenge methods supported
+          example:
+            - S256
+            - plain
+        end_session_endpoint:
+          type: string
+          description: URL of the logout endpoint
+    CodeChallengeMethod:
+      type: string
+      description: PKCE code challenge method (RFC 7636). Defaults to "plain" if omitted.
+      enum:
+        - plain
+        - S256
+    GetAutoRedirectSsoSetting:
+      type: object
+      properties:
+        value:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+              nullable: true
+            idpAlias:
+              type: string
+              pattern: ^[a-z0-9_-]*$
+              nullable: true
+              maxLength: 255
+        displayName:
+          type: string
+          description: Human-readable name for this setting
+          readOnly: true
+        description:
+          type: string
+          description: Description of what this setting controls
+          readOnly: true
+      example:
+        value:
+          enabled: false
+          idpAlias: oidc
+        displayName: Auto Redirect SSO
+        description: Automatically redirect users to the SSO login page after logging in to the application
+    GetBrowserSessionTimeoutSetting:
+      type: object
+      properties:
+        value:
+          type: object
+          properties:
+            idleTimeout:
+              type: number
+              description: Duration in minutes that a user can remain inactive before their browser session automatically expires and requires re-authentication
+              default: 0
+              minimum: 0
+              maximum: 10080
+              nullable: true
+        displayName:
+          type: string
+          description: Human-readable name for this setting
+          readOnly: true
+        description:
+          type: string
+          description: Description of what this setting controls
+          readOnly: true
+      example:
+        value:
+          idleTimeout: 0
+        displayName: Browser Session Timeout
+        description: The idle timeout duration in minutes for browser sessions
+    GetLogoutRedirectUriSetting:
+      type: object
+      properties:
+        value:
+          type: object
+          properties:
+            uri:
+              type: string
+              description: The URI where users will be redirected after logging out of the application
+              nullable: true
+              pattern: /^(https?://)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(:[0-9]{1,5})?(/[^\s]*)?$|^$/
+              example: https://example.com/logout
+              maxLength: 2048
+        displayName:
+          type: string
+          description: Human-readable name for this setting
+          readOnly: true
+        description:
+          type: string
+          description: Description of what this setting controls
+          readOnly: true
+      example:
+        value:
+          uri: https://example.com/logout-success
+        displayName: Logout Redirect URI
+        description: The URI where users will be redirected after logging out of the application
+    SettingsGetResponse:
+      type: object
+      properties:
+        autoRedirectSSO:
+          $ref: '#/components/schemas/GetAutoRedirectSsoSetting'
+        browserSessionTimeout:
+          $ref: '#/components/schemas/GetBrowserSessionTimeoutSetting'
+        logoutRedirectUri:
+          $ref: '#/components/schemas/GetLogoutRedirectUriSetting'
+    settingsKeyEnum:
+      type: string
+      enum:
+        - autoRedirectSSO
+        - browserSessionTimeout
+        - logoutRedirectUri
+    Settings:
+      type: object
+      additionalProperties: true
+      minProperties: 0
+      maxProperties: 50
+    UpdateAutoRedirectSsoSettingValue:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          nullable: true
+        idpAlias:
+          type: string
+          pattern: ^[a-z0-9_-]*$
+          nullable: true
+          maxLength: 255
+      example:
+        enabled: false
+        idpAlias: oidc
+    UpdateBrowserSessionTimeoutSettingValue:
+      type: object
+      properties:
+        idleTimeout:
+          type: number
+          description: Duration in minutes that a user can remain inactive before their browser session automatically expires and requires re-authentication
+          default: 0
+          minimum: 0
+          maximum: 10080
+          nullable: true
+      example:
+        idleTimeout: 0
+    UpdateLogoutRedirectUriSettingValue:
+      type: object
+      properties:
+        uri:
+          type: string
+          description: The URI where users will be redirected after logging out of the application
+          nullable: true
+          pattern: /^(https?://)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(:[0-9]{1,5})?(/[^\s]*)?$|^$/
+          example: https://example.com/logout
+          maxLength: 2048
+      example:
+        uri: https://example.com/logout-success
+    reconcilerType:
+      type: string
+      nullable: true
+      enum:
+        - realms
+        - clients
+        - apps
+        - internalApps
+        - userApps
+        - workloadAuth
+    RealmReconcileRequest:
+      type: object
+      x-internal: true
+      properties:
+        force:
+          type: boolean
+        reconcilerType:
+          $ref: '#/components/schemas/reconcilerType'
+      example:
+        force: true
+        reconcilerType: clients
+    AppTokenRequest:
+      type: object
+      required:
+        - id
+        - name
+        - secret
+      properties:
+        id:
+          type: string
+          maxLength: 64
+        name:
+          type: string
+          maxLength: 255
+        secret:
+          type: string
+          maxLength: 500
+    AppTokenResponse:
+      type: object
+      required:
+        - access_token
+        - id_token
+      properties:
+        access_token:
+          type: string
+        id_token:
+          type: string
+    ConfigSamlResponse:
+      type: object
+      required:
+        - entity_id
+        - redirect_uri
+      properties:
+        entity_id:
+          type: string
+        redirect_uri:
+          type: string
+      example:
+        entity_id: f84d2fcf-8a61-4136-9b75-d06f496ca1f2
+        redirect_uri: app.run.ai/auth/realms/runai/broker/saml/endpoint
+    IdpResourcdes:
+      $ref: '#/components/schemas/IdpResources'
+    UserGroups:
+      $ref: '#/components/schemas/Groups'
+    ComplianceIssues:
+      properties:
+        complianceIssues:
+          type: array
+          items:
+            type: object
+            required:
+              - details
+              - field
+            properties:
+              field:
+                type: string
+                example: compute.gpuDevicesRequest
+              details:
+                type: string
+                example: value must be no less than 3
+      nullable: true
+      type: object
+    SubmissionError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - $ref: '#/components/schemas/ComplianceIssues'
+  responses:
+    500InternalServerError:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 500
+            message: Something went wrong.
+    503ServiceUnavailable:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 503
+            message: Please try again in few minutes.
+    400BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 400
+            message: Required parameter is missing
+    401Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 401
+            message: Issuer is not familiar.
+    403Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 403
+            message: You do not have sufficient permissions.
+    409Conflict:
+      description: The specified resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 409
+            message: Resource with this name already exists
+    404NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 404
+            message: Resource id not found.
+    ClientCreationResponse:
+      description: Executed successfully.
+      x-internal: true
+      content:
+        application/json:
+          schema:
+            properties:
+              id:
+                type: string
+            example:
+              id: 3434c-12323ab-4ce2ea6-b44fc-db344d
+    307TemporaryRedirect:
+      description: The resource was not modified
+      headers:
+        Location:
+          schema:
+            type: string
+            format: uri
+    204NoContent:
+      description: No Content.
+    400BadSubmissionRequest:
+      description: Bad submission request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubmissionError'
+          example:
+            code: 400
+            message: The workload request does not comply with the policy set by the administrator
+    406NotAcceptable:
+      description: Not acceptable request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    412PreconditionFailed:
+      description: The specified resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 412
+            message: Precondition failed
+    413RequestEntityTooLarge:
+      description: Request entity too large
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    415UnsupportedMediaType:
+      description: Unsupported media type
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    501NotImplemented:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 501
+            message: Not implemented
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      description: Bearer authentication
+      scheme: bearer
+      type: http

@@ -1,0 +1,15 @@
+type: object
+required:
+  - enabled
+properties:
+  scopeType:
+    type: string
+    default: tenant
+    x-internal: true
+    x-csp: true
+    enum:
+      - system
+      - tenant
+  enabled:
+    type: boolean
+    default: true

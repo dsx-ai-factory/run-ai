@@ -1,0 +1,11 @@
+x-internal: true
+allOf:
+  - $ref: "./WorkloadTypeStatusFields.yaml"
+  - type: object
+    required:
+      - id
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: The unique identifier of the workload type.

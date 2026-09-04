@@ -1,0 +1,10 @@
+{{- if .Values.notificationsService.enabled }}
+{{- include "common.configMap" (list . .Values.notificationsService "control-plane.notificationsService.configmap") }}
+{{- end }}
+
+{{- define "control-plane.notificationsService.configmap" -}}
+{{- $top := first . }}
+data:
+  config.yaml: |-
+{{ include "control-plane.notificationsService.processedConfig" $top | indent 4 }}
+{{- end }}

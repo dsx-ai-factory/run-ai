@@ -1,0 +1,22 @@
+type: object
+properties:
+  value:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        nullable: true
+        description: Whether NIM models deployment is enabled
+  displayName:
+    type: string
+    description: Human-readable name for this setting
+    readOnly: true
+  description:
+    type: string
+    description: Short explanation of what this setting controls, shown alongside the setting
+    readOnly: true
+example:
+  value:
+    enabled: true
+  displayName: NIM models
+  description: Enable instant deployment of NIM models via the workload submission form

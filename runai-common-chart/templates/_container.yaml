@@ -1,0 +1,92 @@
+{{- define "common.container.tpl" -}}
+{{- $top := first . }}
+{{- $container := index . 1 }}
+{{- $image := $container.image | default (dict) }}
+{{- $securityContext := mergeOverwrite (deepCopy ($container.securityContext | default dict)) (dict "allowPrivilegeEscalation" false "runAsNonRoot" true) }}
+{{- $securityContext = mergeOverwrite $securityContext (dict "capabilities" (dict "drop" (list "ALL"))) }}
+{{- $_ := set $securityContext "seccompProfile" (dict "type" "RuntimeDefault") }}
+name: {{ $container.name }}
+securityContext:
+  {{- include "common.securityContext.render" (list $top $securityContext) | nindent 2 }}
+{{- with $container.command }}
+command:
+{{- toYaml . | nindent 2 }}
+{{- end }}
+image: "{{ $image.registry | default $top.Values.global.image.registry }}/{{ $image.repository }}:{{ $image.tag | default $top.Chart.AppVersion }}"
+imagePullPolicy: {{ $container.image.pullPolicy | default $top.Values.global.image.pullPolicy }}
+  {{- if $container.livenessProbe }}
+livenessProbe:
+  {{- toYaml $container.livenessProbe | nindent 2 }}
+  {{- end }}
+  {{- if $container.readinessProbe }}
+readinessProbe:
+  {{- toYaml $container.readinessProbe | nindent 2 }}
+  {{- end }}
+  {{- if $container.startupProbe }}
+startupProbe:
+  {{- toYaml $container.startupProbe | nindent 2 }}
+  {{- end }}
+  {{- if $container.service }}
+ports:
+- name: http
+  containerPort: {{ $container.service.port }}
+  protocol: {{ $container.service.protocol }}
+  {{- end }}
+resources:
+  {{- toYaml $container.resources | nindent 2 }}
+{{- with $container.envFrom }}
+envFrom:
+  {{- range . }}
+    {{- if .secretRef }}
+    - secretRef:
+        {{- if and (($top.Values.global.config).argoRollouts) (ne $container.argoRollouts false) }}
+        name: {{ .secretRef.name }}-{{ $top.Chart.Version }}
+        {{- else }}
+        name: {{ .secretRef.name }}
+        {{- end }}
+      {{- else if .configMapRef }}
+    - configMapRef:
+        {{- if and (($top.Values.global.config).argoRollouts) (ne $container.argoRollouts false) }}
+        name: {{ .configMapRef.name }}-{{ $top.Chart.Version }}
+        {{- else }}
+        name: {{ .configMapRef.name }}
+        {{- end }}
+      {{- end }}
+  {{- end }}
+{{- end }}
+{{- with $container.args }}
+args:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- with $container.extraArgs }}
+  {{- tpl . $top | nindent 2 }}
+{{- end }}
+env:
+  {{- if ($top.Values.global.customCA).enabled | default false }}
+    {{- $top.Values.global.customCA.env | toYaml | nindent 2 }}
+  {{- end }}
+  {{- $fipsMode := ($top.Values.global).fipsMode | default "off" -}}
+  {{- if kindIs "bool" $fipsMode -}}
+    {{- $fipsMode = ternary "on" "off" $fipsMode -}}
+  {{- end -}}
+  {{- if not (has $fipsMode (list "off" "on" "only")) -}}
+    {{- fail (printf "global.fipsMode must be one of: off, on, only (got %q)" $fipsMode) -}}
+  {{- end }}
+  - name: GODEBUG
+    value: fips140={{ $fipsMode }}
+  {{- with $container.env }}
+    {{- tpl (toYaml .) $top | nindent 2 }}
+  {{- end }}
+volumeMounts:
+  {{- if ($top.Values.global.customCA).enabled | default false }}
+    {{- $top.Values.global.customCA.volumeMounts | toYaml | nindent 2 }}
+  {{- end }}
+  {{- with $container.volumeMounts }}
+    {{- tpl (toYaml .) $top | nindent 2 }}
+  {{- end }}
+
+{{- end }}
+
+{{- define "common.container" -}}
+{{- include "common.utils.merge" (append . "common.container.tpl") }}
+{{- end }}

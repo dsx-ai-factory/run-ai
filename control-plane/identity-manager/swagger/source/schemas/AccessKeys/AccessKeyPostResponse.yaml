@@ -1,0 +1,31 @@
+type: object
+required:
+- id
+- name
+- clientSecret
+- clientId
+- createdAt
+properties:
+  id:
+    type: string
+    description: The unique identifier of the access key.
+  clientId:
+    type: string
+    description: The client identifier associated with the access key. Used when requesting authentication tokens.
+  name:
+    type: string
+    description: The name of the access key.
+  clientSecret:
+    type: string
+    description: Secret credential paired with the client ID. Used to obtain authentication tokens. Displayed only once upon creation.
+  createdAt:
+    format: date-time
+    nullable: true
+    type: string
+    description: The timestamp for when the access key was created.
+example:
+  id: 0eeaf222-e503-4f35-9d9c-c419816272e3
+  clientId: 5e7b3b7b4b7b4b7b
+  name: access-key-123
+  clientSecret: this-is-the-access-key-secret
+  createdAt: 2020-01-01T00:00:00Z

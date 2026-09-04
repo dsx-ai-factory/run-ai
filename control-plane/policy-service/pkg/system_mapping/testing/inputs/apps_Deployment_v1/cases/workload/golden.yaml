@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test
+spec:
+  minReadySeconds: 0
+  paused: false
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchExpressions:
+    - key: test
+      operator: In
+      values:
+      - v1
+      - v2
+    matchLabels:
+      app: test
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        example.com/annotation: test-value
+      labels:
+        app: test
+    spec:
+      containers:
+      - image: placeholder
+        name: test
+      initContainers:
+      - image: placeholder
+        name: test

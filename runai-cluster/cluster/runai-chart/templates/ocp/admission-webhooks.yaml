@@ -1,0 +1,201 @@
+{{- if eq (include "isOpenShift" .) "true" }}
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: runai-pod-controller-mutation
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+  labels:
+    app: runai
+webhooks:
+  - name: runai-admission-controller.runai.svc.cluster.local
+    admissionReviewVersions: [ "v1" ]
+    sideEffects: None
+    namespaceSelector:
+      matchExpressions:
+        - key: runai/queue
+          operator: Exists
+    failurePolicy: Fail
+    clientConfig:
+      service:
+        name: runai-admission-controller
+        namespace: runai
+        path: "/mutate-pod-controller"
+    rules:
+      - operations: ["CREATE", "UPDATE"]
+        apiGroups: ["*"]
+        apiVersions: ["*"]
+        resources: ["statefulsets", "jobs", "deployments"]
+        scope: "Namespaced"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: runai-pod
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+  labels:
+    app: runai
+webhooks:
+  - name: runai-admission-controller.runai.svc.cluster.local
+    admissionReviewVersions: [ "v1" ]
+    sideEffects: None
+    namespaceSelector:
+      matchExpressions:
+        - key: runai/queue
+          operator: Exists
+    failurePolicy: Fail
+    clientConfig:
+      service:
+        name: runai-admission-controller
+        namespace: runai
+        path: "/mutate-pod"
+    rules:
+      - operations: ["CREATE"]
+        apiGroups: ["*"]
+        apiVersions: ["*"]
+        resources: ["pods"]
+        scope: "Namespaced"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: runai-project-validation
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+  labels:
+    app: runai
+webhooks:
+  - name: runai-project-controller.runai.svc
+    admissionReviewVersions: [ "v1" ]
+    sideEffects: None
+    failurePolicy: Fail
+    clientConfig:
+      service:
+        name: runai-agent
+        namespace: runai
+        path: "/validate-project"
+        port: 9443
+    rules:
+      - operations: ["CREATE", "UPDATE", "DELETE"]
+        apiGroups: ["run.ai"]
+        apiVersions: ["*"]
+        resources: ["projects"]
+      - operations: ["CREATE", "UPDATE", "DELETE"]
+        apiGroups: ["scheduling.run.ai"]
+        apiVersions: ["*"]
+        resources: ["departments"]
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: runai-pod-group-mutation
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+  labels:
+    app: runai
+webhooks:
+  - name: pod-group-assigner.runai.svc
+    admissionReviewVersions: [ "v1" ]
+    sideEffects: None
+    namespaceSelector:
+      matchExpressions:
+        - key: runai/queue
+          operator: Exists
+    failurePolicy: Fail
+    clientConfig:
+      service:
+        name: pod-group-assigner
+        namespace: runai
+        path: "/mutate-pod-group"
+    rules:
+      - operations: ["CREATE"]
+        apiGroups: ["scheduling.run.ai"]
+        apiVersions: ["*"]
+        resources: ["podgroups"]
+        scope: "Namespaced"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: runai-secret-pvc-validation
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+  labels:
+    app: runai
+webhooks:
+- name: runai-agent.runai.svc
+  admissionReviewVersions: [ "v1" ]
+  sideEffects: None
+  failurePolicy: Ignore
+  objectSelector:
+    matchExpressions:
+    - key: run.ai/asset
+      operator: Exists
+  clientConfig:
+    service:
+      name: runai-agent
+      namespace: runai
+      path: "/validate-secrets-pvc"
+      port: 9443
+  rules:
+  - operations: ["CREATE", "UPDATE", "DELETE"]
+    apiGroups: ["*"]
+    apiVersions: ["*"]
+    resources: ["secrets", "persistentvolumeclaims"]
+    scope: "Namespaced"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: application-validation
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+  labels:
+    app: runai
+webhooks:
+  - name: application-validation.runai.svc
+    admissionReviewVersions: [ "v1" ]
+    sideEffects: None
+    failurePolicy: Fail
+    clientConfig:
+      service:
+        name: application-controller
+        namespace: runai
+        path: "/validate-application"
+    rules:
+      - operations: ["CREATE", "UPDATE", "DELETE"]
+        apiGroups: ["run.ai"]
+        apiVersions: ["*"]
+        resources: ["applications"]
+        scope: "Namespaced"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: runai-restartrequest-validation
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+  labels:
+    app: runai
+webhooks:
+  - name: anyworkload-controller.runai.svc
+    admissionReviewVersions: [ "v1" ]
+    sideEffects: None
+    namespaceSelector:
+      matchExpressions:
+        - key: runai/queue
+          operator: Exists
+    failurePolicy: Fail
+    clientConfig:
+      service:
+        name: anyworkload-controller
+        namespace: runai
+        path: "/validate-restartrequest"
+    rules:
+      - operations: ["CREATE", "UPDATE"]
+        apiGroups: ["run.ai"]
+        apiVersions: ["v1alpha1"]
+        resources: ["restartrequests"]
+        scope: "Namespaced"
+{{- end }}

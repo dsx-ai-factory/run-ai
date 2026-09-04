@@ -1,0 +1,8 @@
+allOf:
+  - $ref: "../Workloads/Endpoint.yaml"
+  - type: object
+    properties:
+      workloadId:
+        description: The id of the workload associated with this endpoint.
+        type: string
+        format: uuid

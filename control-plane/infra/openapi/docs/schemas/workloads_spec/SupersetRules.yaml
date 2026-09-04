@@ -1,0 +1,118 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+allOf:
+- $ref: ./inferences/InferenceFieldsRules.yaml
+- $ref: ./distributed_inferences/DistributedInferenceLeaderRulesFields.yaml
+- $ref: ./distributed_inferences/DistributedInferenceWorkerRulesFields.yaml
+- $ref: ./distributed_inferences/DistributedInferenceCommonRules.yaml
+- nullable: true
+  properties:
+    annotations:
+      $ref: ../policy_rules/InstancesRules.yaml
+    args:
+      $ref: ../policy_rules/StringRules.yaml
+    autoDeletionTimeAfterCompletionSeconds:
+      $ref: ../policy_rules/IntegerRules.yaml
+    backoffLimit:
+      $ref: ../policy_rules/IntegerRules.yaml
+    category:
+      $ref: ../policy_rules/StringRules.yaml
+    cleanPodPolicy:
+      $ref: ./distributed/CleanPodPolicyRules.yaml
+    command:
+      $ref: ../policy_rules/StringRules.yaml
+    completions:
+      $ref: ../policy_rules/IntegerRules.yaml
+    compute:
+      $ref: ./compute/SupersetRulesAllOfCompute.yaml
+    createHomeDir:
+      $ref: ../policy_rules/BooleanRules.yaml
+    distributedFramework:
+      $ref: ./distributed/DistributedFrameworkRules.yaml
+    environmentVariables:
+      $ref: ../policy_rules/InstancesRules.yaml
+    exposedUrls:
+      $ref: ./connectivity/ExposedUrlsRules.yaml
+    image:
+      $ref: ../policy_rules/StringRules.yaml
+    imagePullPolicy:
+      $ref: ./container/ImagePullPolicyRules.yaml
+    imagePullSecrets:
+      $ref: ./advanced/ImagePullSecretsRules.yaml
+    labels:
+      $ref: ../policy_rules/InstancesRules.yaml
+    maxReplicas:
+      $ref: ../policy_rules/IntegerRules.yaml
+    minReplicas:
+      $ref: ../policy_rules/IntegerRules.yaml
+    mpiLauncherCreationPolicy:
+      $ref: ./distributed/MpiLauncherCreationPolicyRules.yaml
+    nodeAffinityRequired:
+      $ref: ../policy_rules/ArbitraryRules.yaml
+    nodePools:
+      $ref: ../policy_rules/ArrayRules.yaml
+    nodeType:
+      $ref: ../policy_rules/StringRules.yaml
+    numWorkers:
+      $ref: ../policy_rules/IntegerRules.yaml
+    parallelism:
+      $ref: ../policy_rules/IntegerRules.yaml
+    podAffinity:
+      $ref: ./resources/PodAffinityRules.yaml
+    ports:
+      $ref: ./connectivity/PortsRules.yaml
+    preemptibility:
+      $ref: ./advanced/PreemptibilityRules.yaml
+    priorityClass:
+      $ref: ../policy_rules/StringRules.yaml
+    probes:
+      $ref: ./container/ProbesRules.yaml
+    relatedUrls:
+      $ref: ./connectivity/RelatedUrlsRules.yaml
+    restartPolicy:
+      $ref: ../policy_rules/StringRules.yaml
+    security:
+      $ref: ./security/SupersetRulesAllOfSecurity.yaml
+    servingPort:
+      $ref: ./supersetHack/SupersetServingPortRules.yaml
+    slotsPerWorker:
+      $ref: ../policy_rules/IntegerRules.yaml
+    sshAuthMountPath:
+      $ref: ../policy_rules/StringRules.yaml
+    stdin:
+      $ref: ../policy_rules/BooleanRules.yaml
+    storage:
+      nullable: true
+      properties:
+        configMapVolume:
+          $ref: ./storage/ConfigMapsRules.yaml
+        dataVolume:
+          $ref: ./storage/DataVolumesRules.yaml
+        emptyDirVolume:
+          $ref: ./storage/EmptyDirsRules.yaml
+        git:
+          $ref: ./storage/GitsRules.yaml
+        hostPath:
+          $ref: ./storage/HostPathsRules.yaml
+        nfs:
+          $ref: ./storage/NfssRules.yaml
+        pvc:
+          $ref: ./storage/PvcsRules.yaml
+        s3:
+          $ref: ./storage/S3sRules.yaml
+        secretVolume:
+          $ref: ./storage/SecretsRules.yaml
+      type: object
+    terminateAfterPreemption:
+      $ref: ../policy_rules/BooleanRules.yaml
+    terminationGracePeriodSeconds:
+      $ref: ../policy_rules/IntegerRules.yaml
+    tolerations:
+      $ref: ./advanced/TolerationsRules.yaml
+    tty:
+      $ref: ../policy_rules/BooleanRules.yaml
+    workingDir:
+      $ref: ../policy_rules/StringRules.yaml
+  type: object

@@ -1,0 +1,30 @@
+type: object
+description: >-
+  The workload type whose mapping is modified and the names of the spec
+  selectors to delete from it.
+required:
+  - workloadType
+  - specSelectors
+properties:
+  workloadType:
+    description: >-
+      The Kubernetes group, version, and kind of the workload type whose mapping
+      the spec selectors are deleted from.
+    allOf:
+      - $ref: "../../../../../workloads-manager/swagger/source/schemas/WorkloadsV2/GVK.yaml"
+  specSelectors:
+    description: The names of the spec selectors to delete (1-50 names).
+    type: array
+    items:
+      $ref: "./SpecSelectorName.yaml"
+    minItems: 1
+    maxItems: 50
+
+example:
+  workloadType:
+    group: apps
+    kind: Deployment
+    version: v1
+  specSelectors:
+     - containerByName
+ 

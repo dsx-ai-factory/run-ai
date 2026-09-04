@@ -1,0 +1,11 @@
+type: object
+required:
+  - baseUrl
+  - whatsNew
+properties:
+  baseUrl:
+    type: string
+    description: Base URL used to resolve documentation links.
+    example: https://run-ai-docs.nvidia.com/self-hosted
+  whatsNew:
+    $ref: './BootConfigWhatsNew.yaml'

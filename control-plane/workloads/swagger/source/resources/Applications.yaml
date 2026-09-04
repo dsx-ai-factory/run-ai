@@ -1,0 +1,76 @@
+get:
+  summary: List AI applications. [Experimental]
+  description: List AI applications.
+  operationId: list_applications
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/ai_applications_service_test.go
+  x-authorize:
+    resource-type: applications
+    action: read
+  tags:
+    - AI Applications
+  parameters:
+    - $ref: '../parameters/query/ApplicationQueryVerbosity.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+    - $ref: '../parameters/query/ApplicationsSort.yaml'
+    - $ref: '../parameters/query/ApplicationsFilter.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Search.yaml"
+  responses:
+    200:
+      description: ok.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - applications
+            properties:
+              next:
+                type: integer
+                example: 1
+              applications:
+                $ref: '../schemas/Applications/AIApplications.yaml'
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+
+post:
+  summary: Create AI application.
+  description: Create AI application.
+  operationId: create_application
+  x-service: workloads
+  x-test-coverage:
+    - not-applicable
+  x-authorize:
+    resource-type: applications
+    action: create
+  tags:
+    - AI Applications
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Applications/AIApplicationCreationRequest.yaml'
+  responses:
+    200:
+      description: ok.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Applications/AIApplication.yaml'
+    204:
+      $ref: '../../../../infra/openapi/docs/responses/204NoContent.yaml'
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"

@@ -1,0 +1,42 @@
+apiVersion: optimization.nvidia.com/v1alpha1
+kind: ResourceInterface
+metadata:
+  creationTimestamp: "2026-05-10T06:38:29Z"
+  finalizers:
+  - rid.kai.bolt/finalize
+  generation: 1
+  labels:
+    run.ai/resource-interface-group: kubeflow.org
+    run.ai/resource-interface-kind: MPIJob
+    run.ai/resource-interface-updated-at: 2026-05-10T06-35-07Z
+    run.ai/resource-interface-version: v2beta1
+    run.ai/workload-type-id: 3c7c69e9-4c8f-4892-a3d4-c6f0c0afe9b8
+  name: ri-v2beta1-kubeflow-org-mpijob
+  resourceVersion: "8386"
+  uid: 6b3a5031-6e02-4d95-966a-e7bc638e26ac
+spec:
+  optimizationInstructions: {}
+  structureDefinition:
+    rootComponent:
+      kind:
+        group: kubeflow.org
+        kind: MPIJob
+        version: v2beta1
+      name: ""
+status:
+  conditions:
+  - lastTransitionTime: "2026-05-10T06:38:37Z"
+    message: ""
+    reason: CRDExists
+    status: "True"
+    type: CRDExists
+  - lastTransitionTime: "2026-05-10T06:38:37Z"
+    message: ""
+    reason: RBACReady
+    status: "True"
+    type: RBACReady
+  - lastTransitionTime: "2026-05-10T06:38:37Z"
+    message: ""
+    reason: SyncEnabled
+    status: "True"
+    type: SyncEnabled

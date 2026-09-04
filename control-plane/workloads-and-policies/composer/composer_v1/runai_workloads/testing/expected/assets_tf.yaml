@@ -1,0 +1,154 @@
+Dinfw: null
+JobSpec:
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  environment:
+    items:
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  exposedUrls:
+    items:
+      url-worker:
+        value:
+          containerPort: 8081
+      url-worker-1:
+        value:
+          containerPort: 8081
+  gitSync:
+    items:
+      git-worker:
+        value:
+          directory: /container/my-repository
+          password: Password
+          repository: http://runai.public.github.com
+          rev: "12345678"
+          secretName: my-password-secret
+          username: User
+      git-worker-1:
+        value:
+          directory: /mount/git-defaults
+          repository: https://runai.public.github.com
+  image:
+    value: ubuntu
+  jobType: TFJob
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  ports:
+    items:
+      port-worker:
+        value:
+          autoGenerate: true
+          container: 8081
+          serviceType: NodePort
+  priorityClassName:
+    value: low
+  username:
+    value: test
+  volumes:
+    items:
+      host-path-worker:
+        value:
+          sourcePath: /my/volume/1
+          targetPath: /mount/path/vol/1
+      host-path-worker-1:
+        value:
+          sourcePath: /my/volume/2
+          targetPath: /mount/path/vol/2
+  workers:
+    value: 2
+MasterSpec:
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  environment:
+    items:
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  image:
+    value: ubuntu
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  priorityClassName:
+    value: low
+  username:
+    value: test
+  volumes:
+    items:
+      host-path-master:
+        value:
+          sourcePath: /my/volume/master
+          targetPath: /mount/path/vol/master
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  datasources:
+  - id: hp1-id
+    name: hp1-name
+    type: hostPath
+  - id: hp2-id
+    name: hp2-name
+    type: hostPath
+  - id: hp-master-id
+    name: hp-master-name
+    type: hostPath
+  departmentId: department-456-123
+  distributedFramework: TFJob
+  environments:
+  - connections:
+    - connectionType: ExternalUrl
+      containerPort: 8081
+      correlationName: url-worker
+      exposedUrlPath: /project/test
+      exposedUrlSubDomain: project-test
+      name: url-worker
+      toolType: tensor
+    - connectionType: ExternalUrl
+      containerPort: 8081
+      correlationName: url-worker-1
+      exposedUrlPath: /project/test/url-worker-1
+      exposedUrlSubDomain: project-test-url-worker-1
+      name: my-tool
+      toolType: custom
+    - connectionType: NodePort
+      containerPort: 8081
+      correlationName: port-worker
+      name: port-worker
+      portResourceName: port-test-8081-0
+      serviceResourceName: dw-test-0-nodeport
+      toolType: tensor
+    id: assets-worker-id
+    name: assets-worker-name
+    replicaType: Worker
+  - connections: []
+    id: assets-master-id
+    name: assets-master-name
+    replicaType: Master
+  externalConnections:
+  - connectionType: ""
+    name: ""
+    toolType: google
+    url: http://google.com/search
+  - connectionType: ""
+    name: stats
+    toolType: wandb
+    url: http://wandb.com/stats
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: assets, Rules: , Type: Distributed'
+  images:
+  - ubuntu
+  - ubuntu
+  name: 'Value: assets, Rules: , Type: Distributed'
+  projectId: project-654-321
+  requestedPods:
+    number: 3
+  submittedBy: test
+  type: Distributed
+  version: v2alpha1

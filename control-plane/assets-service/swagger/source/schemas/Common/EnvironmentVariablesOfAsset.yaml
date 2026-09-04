@@ -1,0 +1,5 @@
+description: Set of environment variables to populate into the container running the workspace.
+type: array
+items:
+  $ref: "./EnvironmentVariableOfAsset.yaml"
+nullable: true

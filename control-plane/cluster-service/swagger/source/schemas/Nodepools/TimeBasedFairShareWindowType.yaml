@@ -1,0 +1,11 @@
+type: string
+enum:
+  - sliding
+  - tumbling
+example: tumbling
+nullable: true
+default: sliding
+description: |
+  The method for evaluating the usage window.
+   - sliding: A moving window that always evaluates the most recent time period. For example, a 7-day sliding window always considers the last 7 days.
+   - tumbling: Fixed, non-overlapping intervals that reset at the end of each cycle. Requires tumblingWindowStartTime to define the cycle anchor.

@@ -1,0 +1,35 @@
+get:
+  x-internal: true
+  x-no-authorization: true
+  x-service: notifications-proxy
+  x-test-coverage: not-applicable
+  tags:
+    - Slack
+  operationId: AuthorizeSlackApp
+  summary: Authorize a Slack app
+  description: Authorize a Slack app
+  parameters:
+    - name: code
+      in: query
+      required: true
+      description: Handles the OAuth redirect from Slack.
+        Exchanges the authorization code for an access token, new tenant associated sink for notifications created.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 500
+    - name: state
+      in: query
+      required: true
+      description: A CSRF token or UI redirect hint sent by the frontend.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 500
+  responses:
+    "200":
+      description: Authenticated Slack app and sink created
+    '400':
+      description: Invalid request.
+    '500':
+      description: Internal server error during token exchange.

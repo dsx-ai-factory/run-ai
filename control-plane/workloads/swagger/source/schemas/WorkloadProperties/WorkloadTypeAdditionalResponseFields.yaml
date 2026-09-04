@@ -1,0 +1,12 @@
+type: object
+properties:
+  categoryId:
+    type: string
+    format: uuid
+    description: The unique identifier of the workload category.
+  priorityId:
+    type: string
+    format: uuid
+    description: The unique identifier of the workload priority.
+  preemptibility:
+    $ref: "./WorkloadTypePreemptibility.yaml"

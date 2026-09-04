@@ -1,0 +1,12 @@
+{
+  "target": {
+    "path": {
+      "deployment": "status-updater"
+    },
+    "namespace": "runai"
+  },
+  "feature": {
+    "env": true,
+    "fs": "read"
+  }
+}

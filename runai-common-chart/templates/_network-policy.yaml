@@ -1,0 +1,30 @@
+{{- define "common.networkPolicy.tpl" -}}
+{{- $top := first . }}
+{{- $networkPolicy := index . 1 }}
+{{- $obj := index . 2 }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  {{- include "common.metadata" (list $top $obj) | nindent 2 }}
+  name: {{ include "common.fullname" $top }}-{{ $obj.name }}
+spec:
+    podSelector:
+      matchLabels:
+        {{- include "common.selectorLabelName" $obj | nindent 8 }}
+    {{- with $networkPolicy.policyTypes }}
+    policyTypes:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with $networkPolicy.ingress }}
+    ingress:
+    {{- tpl (toYaml .) $top | nindent 6 }}
+    {{- end }}
+    {{- with $networkPolicy.egress }}
+    egress:
+    {{- tpl (toYaml .) $top | nindent 6 }}
+    {{- end }}
+{{- end }}
+
+{{- define "common.networkPolicy" -}}
+{{- include "common.utils.merge" (append . "common.networkPolicy.tpl") }}
+{{- end }}

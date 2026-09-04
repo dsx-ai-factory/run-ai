@@ -1,0 +1,17 @@
+description: Field names that can be removed from a NIM service spec
+type: string
+enum:
+  - autoscaling
+  - replicas
+  - compute
+  - environmentVariables
+  - security
+  - modelStore
+  - multiNode
+  - probes
+  - annotations
+  - labels
+  - tolerations
+  - nodePools
+  - imagePullSecrets
+

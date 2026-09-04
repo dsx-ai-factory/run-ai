@@ -1,0 +1,348 @@
+{{- if .Values.operands.rbac.base.create }}
+# Allow the reading of the current state of pods & workloads to sync backend
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-sync
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+      - pods
+      - namespaces
+      - configmaps
+      - events
+      - persistentvolumeclaims
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - topology.node.k8s.io
+    resources:
+      - noderesourcetopologies
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apiextensions.k8s.io
+    resources:
+      - customresourcedefinitions
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - kubeflow.org
+    resources:
+      - mpijobs
+      - pytorchjobs
+      - tfjobs
+      - xgboostjobs
+      - jaxjobs
+      - notebooks
+      - scheduledworkflows
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - scheduling.run.ai
+    resources:
+      - queues
+      - departments
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - kai.resources
+    resources:
+      - projects
+      - departments
+      - nodepools
+    verbs:
+      - get
+      - list
+      - watch
+      - patch
+      - update
+  - apiGroups:
+      - scheduling.run.ai
+    resources:
+      - podgroups
+    verbs:
+      - get
+      - list
+      - watch
+      - patch
+  - apiGroups:
+      - run.ai
+    resources:
+      - runaijobs
+      - interactiveworkloads
+      - trainingworkloads
+      - inferenceworkloads
+      - distributedworkloads
+      - distributedinferenceworkloads
+      - distributedinferenceworkloads/status
+      - distributedinferenceworkloads/scale
+      - interactivepolicies
+      - trainingpolicies
+      - inferencepolicies
+      - distributedpolicies
+      - nodepools
+      - projects
+      - externalworkloads
+      - datavolumes
+      - datavolumes/status
+      - accessrules
+      - accessrules/status
+      - applications
+      - applications/status
+      - workloadrunners
+      - workloadrunners/status
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+      - replicasets
+      - statefulsets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - serving.knative.dev
+    resources:
+      - revisions
+      - configurations
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - leaderworkerset.x-k8s.io
+    resources:
+      - leaderworkersets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - storage.k8s.io
+    resources:
+      - storageclasses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - machinelearning.seldon.io
+    resources:
+      - seldondeployments
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - kubevirt.io
+    resources:
+      - virtualmachineinstances
+      - virtualmachines
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - amlarc.azureml.com
+    resources:
+      - amljobs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - batch
+    resources:
+      - jobs
+      - cronjobs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - "workspace.devfile.io"
+    resources:
+      - devworkspaces
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ray.io
+    resources:
+      - rayclusters
+      - rayjobs
+      - rayservices
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - workflows
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - tekton.dev
+    resources:
+      - pipelineruns
+      - taskruns
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - egx.nvidia.io
+    resources:
+      - spotrequests
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apps.nvidia.com
+    resources:
+      - nimservices
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - list
+      - watch
+  - apiGroups:
+      - scheduling.k8s.io
+    resources:
+      - priorityclasses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - externalworkloads/status
+      - interactiveworkloads/status
+      - inferenceworkloads/status
+      - trainingworkloads/status
+      - distributedworkloads/status
+      - distributedinferenceworkloads/status
+      - workloadrunners/status
+    verbs:
+      - update
+      - patch
+  - apiGroups:
+      - run.ai
+    resources:
+      - projects/status
+    verbs:
+      - patch
+  - apiGroups:
+      - scheduling.run.ai
+    resources:
+      - departments/status
+    verbs:
+      - patch
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - create
+      - get
+      - update
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+  - apiGroups:
+      - kai.scheduler
+    resources:
+      - topologies
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - grove.io
+    resources:
+      - clustertopologybindings
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - kartas
+    verbs:
+      - list
+      - get
+      - watch
+---
+# This ClusterRole has no associated ClusterRoleBinding (only RoleBinding at the project level)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-sync-project
+rules:
+  - apiGroups:
+      - ""
+      - run.ai
+    resources:
+      - externalworkloads
+      - trainingworkloads
+      - interactiveworkloads
+      - inferenceworkloads
+      - distributedworkloads
+      - distributedinferenceworkloads
+      - distributedinferenceworkloads/status
+      - distributedinferenceworkloads/scale
+      - workloadrunners
+      - workloadrunners/status
+    verbs:
+      - patch
+      - update
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cluster-sync
+subjects:
+  - kind: ServiceAccount
+    name: cluster-sync
+    namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-sync
+{{- end }}

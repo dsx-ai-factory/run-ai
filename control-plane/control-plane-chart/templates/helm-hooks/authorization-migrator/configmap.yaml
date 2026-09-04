@@ -1,0 +1,22 @@
+{{- if .Values.authorization.enabled }}
+{{- include "common.configMap" (list . .Values.authorizationMigrator "control-plane.authorizationMigrator.configmap") }}
+{{- end }}
+
+{{- define "control-plane.authorizationMigrator.configmap" -}}
+{{- $top := first . }}
+data:
+  SERVICE_NAME: {{ $top.Values.authorizationMigrator.name | quote }}
+  LOG_LEVEL: {{ $top.Values.authorizationMigrator.config.logLevel | quote }}
+  DB_MIGRATION_VERSION: {{ $top.Values.authorizationMigrator.config.migrationVersion | quote }}
+  DB_NAME: {{ $top.Values.authorizationMigrator.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_HOST: {{ $top.Values.authorizationMigrator.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SSL_MODE: {{ $top.Values.authorizationMigrator.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_PORT: {{ $top.Values.authorizationMigrator.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  DB_SCHEMA: {{ $top.Values.authorizationMigrator.config.dbSchemaTarget | quote }}
+  DB_SCHEMA_TARGET: {{ $top.Values.authorizationMigrator.config.dbSchemaTarget | quote }}
+  DB_SCHEMA_SOURCE_BACKEND: {{ $top.Values.authorizationMigrator.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  DB_SCHEMA_SOURCE_TENANTS: {{ $top.Values.authorizationMigrator.config.dbSchemaSourceTenants | quote }}
+  DB_MIGRATION_AUTO: "false"
+  DB_USE_SERVICE_SESSION: "false"
+  KEYCLOAK_HOST: {{ $top.Values.global.keycloakx.host | quote }}
+{{- end }}

@@ -1,0 +1,7 @@
+name: force
+in: query
+required: false
+description: Sets the project to be forced deleted (could leave orphan objects in the system)
+x-internal: true
+schema:
+  type: boolean

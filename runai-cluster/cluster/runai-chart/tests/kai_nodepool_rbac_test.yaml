@@ -1,0 +1,72 @@
+suite: Test native KAI shard permissions
+
+templates:
+  - templates/clusterroles/nodepool-controller.yaml
+
+tests:
+  - it: should let the nodepool controller reconcile KAI SchedulingShards
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - kai.scheduler
+            resources:
+              - schedulingshards
+            verbs:
+              - create
+              - delete
+              - get
+              - list
+              - patch
+              - update
+              - watch
+        documentIndex: 0
+
+  # The controller reconciles the kai.resources NodePool CRD, so it needs the same
+  # access there that it had on the legacy run.ai one.
+  - it: should let the nodepool controller reconcile KAI NodePools
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - kai.resources
+            resources:
+              - nodepools
+              - managednodesconfigs
+            verbs:
+              - create
+              - delete
+              - get
+              - list
+              - patch
+              - update
+              - watch
+        documentIndex: 0
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - kai.resources
+            resources:
+              - nodepools/status
+              - managednodesconfigs/status
+            verbs:
+              - get
+              - update
+              - patch
+              - watch
+        documentIndex: 0
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - kai.resources
+            resources:
+              - nodepools/finalizers
+              - managednodesconfigs/finalizers
+            verbs:
+              - update
+              - patch
+        documentIndex: 0

@@ -1,0 +1,4 @@
+type: string
+description: A direct HTTPS URL to a packaged Helm chart archive (.tgz). When provided, the chart is downloaded directly from this location instead of being resolved through a Helm repository reference.
+maxLength: 250
+example: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz

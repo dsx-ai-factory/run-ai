@@ -1,0 +1,32 @@
+type: object
+required:
+  - name
+properties:
+  name:
+    type: string
+    example: "v100"
+  phase:
+    $ref: "./NodepoolPhase.yaml"
+  phaseMessage:
+    type: string
+    description: Message for status of Node Pool
+    example: all nodes are down
+  status:
+    allOf:
+      - $ref: "./NodepoolSyncUpdateFields.yaml"
+      - type: object
+        properties:
+          conditions:
+            type: array
+            items:
+              $ref: ./NodepoolConditionDetails.yaml
+          gpuNetworkAccelerationDetected:
+            description: Signals to all relevant parties about GPUNetworkAcceleration
+              being detected in some nodepool's nodes
+            type: boolean
+          nodes:
+            type: array
+            items:
+              type: string
+              example: node1
+

@@ -1,0 +1,61 @@
+Config: {}
+Service:
+  apiVersion: serving.knative.dev/v1
+  kind: Service
+  metadata:
+    annotations:
+      run.ai/submitted-by: tester
+    labels:
+      app: service
+      createdBy: Service
+      project: team-a
+      release: my-llm
+      run.ai/control-plane-managed: "true"
+      run.ai/converted-from-native: "true"
+      workloadKind: Inference
+      workloadName: my-llm
+    name: my-llm
+    namespace: runai-team-a
+  spec:
+    template:
+      metadata:
+        labels:
+          app: service
+          createdBy: Service
+          project: team-a
+          release: my-llm
+          workloadKind: Inference
+          workloadName: my-llm
+      spec:
+        containers:
+        - image: my-llm:latest
+          name: my-llm
+          ports:
+          - containerPort: 8080
+          resources: {}
+          volumeMounts:
+          - mountPath: /code
+            name: code-sync-0
+        initContainers:
+        - env:
+          - name: GITSYNC_REPO
+            value: https://github.com/example/repo.git
+          - name: GITSYNC_REF
+            value: main
+          - name: GITSYNC_ROOT
+            value: /code-git-code
+          - name: GITSYNC_ONE_TIME
+            value: "true"
+          - name: HOME
+            value: /tmp
+          image: registry.k8s.io/git-sync/git-sync:v4.7.0
+          name: git-sync-git-code
+          resources: {}
+          volumeMounts:
+          - mountPath: /code-git-code
+            name: code-sync-0
+        schedulerName: runai-scheduler
+        volumes:
+        - emptyDir: {}
+          name: code-sync-0
+  status: {}

@@ -1,0 +1,36 @@
+suite: Test RunAI KAI scale adjust namespace
+
+templates:
+  - templates/kai-scale-adjust-resources.yaml
+
+tests:
+  - it: should render both scale-adjust resources referenced by the RunAI-owned KAI Config
+    asserts:
+      - hasDocuments:
+          count: 2
+
+  - it: should render the scale-adjust namespace
+    documentIndex: 0
+    asserts:
+      - isKind:
+          of: Namespace
+      - equal:
+          path: metadata.name
+          value: runai-scale-adjust
+
+  - it: should render the default-deny ingress policy
+    documentIndex: 1
+    asserts:
+      - isKind:
+          of: NetworkPolicy
+      - equal:
+          path: metadata.name
+          value: runai-scale-adjust
+      - equal:
+          path: metadata.namespace
+          value: runai-scale-adjust
+      - equal:
+          path: spec
+          value:
+            podSelector: {}
+            ingress: []

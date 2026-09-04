@@ -1,0 +1,36 @@
+type: object
+required:
+  - id
+  - name
+  - phase
+  - clusterId
+  - createdAt
+  - allocated
+  - deserved
+properties:
+  id:
+    type: string
+    example: 33
+  name:
+    type: string
+    example: proj1
+  namespace:
+    type: string
+    nullable: true
+    example: runai-proj1
+  enforceRunaiScheduler:
+    type: boolean
+    description: a flag to enforce that all pods in this namespace will be scheduled with runai-scheduler. Supported for cluster v2.21+
+  phase:
+    type: string
+    nullable: true
+    example: Ready
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  createdAt:
+    type: string
+    format: date-time
+  allocated:
+    $ref: '../QuotaStatusResource.yaml'
+  deserved:
+    $ref: '../QuotaStatusResource.yaml'

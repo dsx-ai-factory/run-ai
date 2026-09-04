@@ -1,0 +1,10 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+storage:
+  nfs:
+    - name: shared
+      path: /shared
+      server: nfs.example.com
+      mountPath: /mnt/shared

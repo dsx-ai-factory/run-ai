@@ -1,0 +1,8 @@
+name: dataVolumes
+in: query
+required: false
+x-internal: true
+description: Whether the query should include data volumes
+schema:
+  type: boolean
+  default: false

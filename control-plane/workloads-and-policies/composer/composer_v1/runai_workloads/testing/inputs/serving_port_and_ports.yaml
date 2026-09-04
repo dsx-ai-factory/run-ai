@@ -1,0 +1,11 @@
+image: ubuntu
+ports:
+  - container: 8081
+    toolType: tool-1
+    serviceType: ClusterIP
+  - container: 8082
+    toolType: tool-2
+    serviceType: LoadBalancer
+servingPort:
+  container: 8083
+  protocol: grpc

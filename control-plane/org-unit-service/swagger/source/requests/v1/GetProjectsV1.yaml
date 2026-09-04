@@ -1,0 +1,35 @@
+summary: List all projects and their details.
+description: >-
+  Retrieves a list of all projects and details from a specific cluster. \n
+  Use in reporting and analysis tools.
+operationId: get_projects_v1
+x-internal: true
+x-service: org-unit-service
+x-test-coverage:
+  - control-plane/org-unit-service/pkg/test/project_v1_api_test.go
+x-authorize:
+  resource-type: project
+  action: read
+tags:
+  - Projects v1
+parameters:
+  - $ref: "../../parameters/v1/ClusterIdV1.yaml"
+  - $ref: "../../parameters/v1/ExcludePermissionsV1.yaml"
+  - $ref: "../../parameters/v1/MemoryUnitsV1.yaml"
+responses:
+  200:
+    description: Successfully retrieved a list of all the projects.
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: "../../schemas/v1/ProjectV1.yaml"
+  400:
+    $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+  401:
+    $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+  403:
+    $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+  503:
+    $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

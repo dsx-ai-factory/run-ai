@@ -1,0 +1,6 @@
+name: deletedAfter
+in: query
+required: true
+schema:
+  type: string
+  format: date-time

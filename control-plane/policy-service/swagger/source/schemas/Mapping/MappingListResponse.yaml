@@ -1,0 +1,9 @@
+type: object
+required:
+  - items
+properties:
+  items:
+    type: array
+    items:
+      $ref: "./Mapping.yaml"
+    maxItems: 1000

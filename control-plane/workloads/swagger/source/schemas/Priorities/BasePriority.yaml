@@ -1,0 +1,33 @@
+type: object
+required:
+  - id
+  - name
+  - value
+properties:
+  id:
+    type: string
+    example: d73a738f-fab3-430a-8fa3-5241493d7128
+    description: The unique identifier of the workload priority
+  source:
+    description: The source of the priority class. Indicates where the priority definition originated. Currently, the value is either Run:ai or empty.
+    type: string
+    example: "Run:ai"
+  name:
+    type: string
+    example: "medium"
+    description: The name of the workload priority (e.g., low, medium, high)
+  value:
+    type: integer
+    minimum: 0
+    example: 50
+    description: The scheduling value assigned to this priority
+  createdAt:
+    type: string
+    format: date-time
+    description: The timestamp for when the priority was created
+    example: 2022-01-01T03:49:52.531Z
+  updatedAt:
+    type: string
+    format: date-time
+    description: The timestamp for when the priority was updated
+    example: 2022-06-08T11:28:24.131Z

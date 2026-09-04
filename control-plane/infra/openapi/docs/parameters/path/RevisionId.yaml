@@ -1,0 +1,7 @@
+name: revisionId
+in: path
+required: true
+description: The  Universally Unique Identifier (UUID) of the revision.
+schema:
+  type: string
+  format: uuid

@@ -1,0 +1,78 @@
+openapi: "3.0.0"
+info:
+  version: 2.0.0
+  title: datavolumes-service
+  description: An API for managing datavolumes
+  contact:
+    email: support@run.ai
+servers:
+  - url: https://app.run.ai
+  - url: https://staging.run.ai
+  - url: https://test.run.ai
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+components:
+  responses:
+    $ref: "../../../infra/openapi/docs/responses/_index.yaml"
+  securitySchemes:
+    $ref: "./securitySchemes/_index.yaml"
+  parameters:
+    $ref: "./parameters/_index.yaml"
+  schemas:
+    $ref: "./schemas/_index.yaml"
+
+paths:
+  /:
+    x-internal: true
+    get:
+      summary: health check
+      x-service: datavolumes-service
+      x-no-authorization: true
+      operationId: health
+      tags:
+        - Health
+      responses:
+        200:
+          description: Executed successfully.
+
+  /api/v1/datavolumes:
+    $ref: './resources/Datavolumes.yaml'
+
+
+  /api/v1/datavolumes/{datavolumeId}:
+    $ref: './resources/Datavolume.yaml'
+
+  /api/v1/datavolumes/name-availability:
+    $ref: './resources/DatavolumesNameAvailability.yaml'
+
+  /api/v1/datavolumes/used-pvcs:
+    $ref: './resources/DatavolumesUsedPVCs.yaml'
+
+  /api/v1/datavolumes/count:
+    $ref: './resources/DatavolumesCount.yaml'
+
+  /api/v1/datavolumes/{datavolumeId}/sharedScopes:
+    $ref: './resources/SharedScopes.yaml'
+
+  /api/v1/datavolumes/{datavolumeId}/status:
+    x-internal: true
+    $ref: './resources/DatavolumeStatus.yaml'
+  /api/v1/datavolumes/sync:
+    x-internal: true
+    $ref: './resources/DatavolumesSync.yaml'
+
+  /internal/datavolumes/{datavolumeId}/ancestors:
+    x-internal: true
+    $ref: './resources/DatavolumeAncestors.yaml'
+
+  /internal/datavolumes:
+    x-internal: true
+    $ref: './resources/InternalDatavolumes.yaml'
+
+  /api/v1/datavolumes/settings:
+    x-scope: [ system, tenant ]
+    $ref: "./resources/Settings/DatavolumesSettings.yaml"
+  /api/v1/datavolumes/settings/{key}:
+    x-scope: [ system, tenant ]
+    $ref: "./resources/Settings/DatavolumesSettingsByKey.yaml"

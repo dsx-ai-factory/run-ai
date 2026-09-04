@@ -1,0 +1,34 @@
+type: object
+additionalProperties: false
+description: |
+  PersistentVolumeClaim spec. Subset of `v1.PersistentVolumeClaimSpec`.
+required:
+  - accessModes
+  - resources
+properties:
+  accessModes:
+    type: array
+    description: Access modes the volume should support. At least one is required.
+    minItems: 1
+    maxItems: 4
+    uniqueItems: true
+    items:
+      $ref: "./WorkloadV2UpdateConfigurationPvcAccessMode.yaml"
+    example:
+      - ReadWriteOnce
+  resources:
+    $ref: "./WorkloadV2UpdateConfigurationPvcResources.yaml"
+  storageClassName:
+    type: string
+    description: |
+      Name of the StorageClass to use. When omitted, the cluster's default
+      StorageClass is used (if one is configured).
+    pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
+    minLength: 1
+    maxLength: 253
+    nullable: true
+    example: standard
+  volumeMode:
+    allOf:
+      - $ref: "./WorkloadV2UpdateConfigurationPvcVolumeMode.yaml"
+    nullable: true

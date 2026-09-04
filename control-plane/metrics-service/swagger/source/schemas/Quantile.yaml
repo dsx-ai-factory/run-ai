@@ -1,0 +1,6 @@
+type: number
+nullable: true
+description: the quantile value to calculate
+example: 0.5
+minimum: 0
+maximum: 1

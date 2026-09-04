@@ -1,0 +1,12 @@
+allOf:
+  - $ref: './RolePermissionSet.yaml'
+  - type: object
+    required:
+      - name
+      - permissions
+    properties:
+      description:
+        type: string
+        description: A description of the permission set.
+      permissions:
+        $ref: './RolePermissions.yaml'

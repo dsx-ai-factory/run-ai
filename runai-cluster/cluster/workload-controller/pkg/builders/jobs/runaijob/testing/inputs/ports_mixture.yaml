@@ -1,0 +1,39 @@
+apiVersion: run.ai/v2alpha1
+kind: InteractiveWorkload
+metadata:
+  creationTimestamp: null
+  name: job-5
+  namespace: runai-team-a
+spec:
+  completions:
+    value: 1
+  image:
+    value: zembutsu/docker-sample-nginx
+  name:
+    value: job-5
+  ports:
+    items:
+      port-a:
+        value:
+          autoGenerate: false
+          container: 8080
+          external: 30080
+      port-b:
+        value:
+          serviceType: NodePort
+          autoGenerate: true
+          container: 31081
+      port-c:
+        value:
+          serviceType: LoadBalancer
+          container: 8000
+          external: 9000
+      port-d:
+        value:
+          serviceType: ClusterIP
+          container: 8001
+          external: 9001
+  serviceType:
+    value: NodePort
+  username:
+    value: user.name

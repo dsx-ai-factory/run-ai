@@ -1,0 +1,34 @@
+get:
+  summary: Get internal deleted org-units
+  operationId: get_internal_deleted_org_units
+  x-internal: true
+  x-no-authorization: true
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/org_unit_test.go
+  x-service: org-unit-service
+  tags:
+    - Org unit
+  parameters:
+    - $ref: "../../parameters/DeletedAfter.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - orgUnits
+            properties:
+              orgUnits:
+                type: array
+                items:
+                  $ref: '../../schemas/DeletedOrgUnit.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

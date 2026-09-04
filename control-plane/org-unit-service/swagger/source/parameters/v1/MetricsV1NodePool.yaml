@@ -1,0 +1,7 @@
+in: query
+name: nodepoolName
+schema:
+ type: string
+ example: default
+required: false
+description: Filter by unique nodepool name.

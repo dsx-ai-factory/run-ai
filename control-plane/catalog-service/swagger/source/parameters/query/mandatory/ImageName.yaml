@@ -1,0 +1,7 @@
+name: ImageName
+in: query
+required: true
+description: The name of the image to get the tags for
+example: runai/viper-catalog-service:latest
+schema:
+  type: string

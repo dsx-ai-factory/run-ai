@@ -1,0 +1,5 @@
+type: object
+properties:
+  msg:
+    type: string
+    example: done

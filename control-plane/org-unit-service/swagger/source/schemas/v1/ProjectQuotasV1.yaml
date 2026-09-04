@@ -1,0 +1,31 @@
+type: array
+items:
+  properties:
+    id:
+      type: integer
+      format: int32
+      description: Project id.
+      readOnly: true
+      example: 5
+    tenantId:
+      type: integer
+      format: int32
+      description: ID of the tenant where the project is located.
+      example: 2
+    clusterUuid:
+      type: string
+      format: uuid
+      description: ID of the cluster where the project is located.
+      example: 71f69d83-ba66-4822-adf5-55ce55efd210
+    name:
+      type: string
+      description: Project name.
+      example: team-a
+    deservedGpus:
+      type: number
+      description: The project's deserved GPU allocation in case the cluster has those resources.
+      example: 3
+    allocatedGpus:
+      type: number
+      description: The project's allocated GPU.
+      example: 3

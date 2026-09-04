@@ -1,0 +1,9 @@
+x-internal: true
+description: Claim information updatable fields.
+properties:
+  size:
+    $ref: "./PvcClaimSize.yaml"
+  addedAttrValues:
+    $ref: "./PvcAddedAttrValues.yaml"
+nullable: true
+type: object

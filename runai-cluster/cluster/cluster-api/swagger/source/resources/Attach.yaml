@@ -1,0 +1,37 @@
+get:
+      summary: Attach to a container in a pod
+      description: Attach to a container in a pod.
+      operationId: attach
+      tags:
+        - Cluster API
+      x-runai-team: Fox
+      x-no-authorization: true
+      parameters:
+        - $ref: "../parameters/ProjectName.yaml"
+        - $ref: "../parameters/WorkloadName.yaml"
+        - $ref: "../parameters/WorkloadType.yaml"
+        - $ref: "../parameters/Container.yaml"
+        - $ref: "../parameters/Stderr.yaml"
+        - $ref: "../parameters/Stdin.yaml"
+        - $ref: "../parameters/Stdout.yaml"
+        - $ref: "../parameters/Pod.yaml"
+        - $ref: "../parameters/Tty.yaml"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+        400:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/400BadRequest.yaml'
+        401:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/401Unauthorized.yaml'
+        403:
+            $ref: '../../../../../control-plane/infra/openapi/docs/responses/403Forbidden.yaml'
+        404:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/404NotFound.yaml'
+        500:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/500InternalServerError.yaml'
+        503:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/503ServiceUnavailable.yaml'

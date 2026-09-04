@@ -1,0 +1,296 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: projects.kai.resources
+spec:
+  group: kai.resources
+  names:
+    kind: Project
+    listKind: ProjectList
+    plural: projects
+    singular: project
+  scope: Cluster
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Project is the Schema for the projects API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ProjectSpec defines the desired state of Project
+            properties:
+              defaultNodePools:
+                description: Ordered list of node pools that defines the default scheduling
+                  preference for workloads in this project
+                items:
+                  type: string
+                type: array
+              deletionType:
+                description: Requested deletion type for the project
+                type: string
+              enforceKaiScheduler:
+                description: Whether to run KAI scheduler on the project's workloads
+                type: boolean
+              namespace:
+                description: Requested namespace associated with the project. If not
+                  specified it will be generated from the project name
+                type: string
+              parent:
+                description: The department parent of the project
+                type: string
+              queues:
+                description: Project's queues
+                items:
+                  properties:
+                    name:
+                      description: Queue name
+                      type: string
+                    nodepool:
+                      description: Nodepool associated with the queue
+                      type: string
+                    priority:
+                      description: Queue priority
+                      format: int32
+                      type: integer
+                    resources:
+                      description: Queue resources definition
+                      properties:
+                        cpu:
+                          description: CPU resources in millicpus (e.g. 1000 = 1 CPU)
+                          properties:
+                            deserved:
+                              type: number
+                            limit:
+                              type: number
+                            overQuotaWeight:
+                              type: number
+                          type: object
+                        gpu:
+                          description: GPU resources in fractions (e.g. 0.7 = 70%
+                            of a GPU)
+                          properties:
+                            deserved:
+                              type: number
+                            limit:
+                              type: number
+                            overQuotaWeight:
+                              type: number
+                          type: object
+                        memory:
+                          description: Memory resources in megabytes (1 MB = 10^6
+                            bytes)
+                          properties:
+                            deserved:
+                              type: number
+                            limit:
+                              type: number
+                            overQuotaWeight:
+                              type: number
+                          type: object
+                      type: object
+                  required:
+                  - name
+                  - nodepool
+                  type: object
+                type: array
+            required:
+            - queues
+            type: object
+          status:
+            description: ProjectStatus defines the observed state of Project
+            properties:
+              conditions:
+                description: Current conditions of the project
+                items:
+                  properties:
+                    lastProbeTime:
+                      description: Last time we probed the condition.
+                      format: date-time
+                      nullable: true
+                      type: string
+                    lastTransitionTime:
+                      description: Last time the condition transitioned from one status
+                        to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: Human-readable message indicating details about
+                        last transition.
+                      type: string
+                    reason:
+                      description: Unique, one-word, CamelCase reason for the condition's
+                        last transition.
+                      type: string
+                    status:
+                      description: |-
+                        Status is the status of the condition.
+                        Can be True, False, Unknown.
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - status
+                  - type
+                  type: object
+                type: array
+              message:
+                description: A human-readable message indicating details about why
+                  the project is in this condition.
+                type: string
+              namespace:
+                description: Actual namespace of the project
+                type: string
+              nodePoolsQuotaStatuses:
+                description: Current situation of requested/allocated for each nodepool
+                items:
+                  properties:
+                    nodePoolName:
+                      description: The NodePoolName of the current quota status
+                      type: string
+                    queueStatus:
+                      description: The detailed queue status
+                      properties:
+                        allocated:
+                          additionalProperties:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                            x-kubernetes-int-or-string: true
+                          description: |-
+                            Current allocated GPU (in fractions), CPU (in millicpus) and Memory in megabytes
+                            for all running jobs in queue and child queues
+                          type: object
+                        allocatedNonPreemptible:
+                          additionalProperties:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                            x-kubernetes-int-or-string: true
+                          description: |-
+                            Current allocated GPU (in fractions), CPU (in millicpus) and Memory in megabytes
+                            for all non-preemptible running jobs in queue and child queues
+                          type: object
+                        childQueues:
+                          description: List of queues in cluster which specify this
+                            queue as parent
+                          items:
+                            type: string
+                          type: array
+                        conditions:
+                          description: Current conditions of the queue
+                          items:
+                            properties:
+                              lastProbeTime:
+                                description: Last time we probed the condition.
+                                format: date-time
+                                type: string
+                              lastTransitionTime:
+                                description: Last time the condition transitioned
+                                  from one status to another.
+                                format: date-time
+                                type: string
+                              message:
+                                description: Human-readable message indicating details
+                                  about last transition.
+                                type: string
+                              reason:
+                                description: Unique, one-word, CamelCase reason for
+                                  the condition's last transition.
+                                type: string
+                              status:
+                                description: |-
+                                  Status is the status of the condition.
+                                  Can be True, False, Unknown.
+                                type: string
+                              type:
+                                description: Type is the type of the condition.
+                                type: string
+                            required:
+                            - status
+                            - type
+                            type: object
+                          type: array
+                        requested:
+                          additionalProperties:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                            x-kubernetes-int-or-string: true
+                          description: |-
+                            Current requested GPU (in fractions), CPU (in millicpus) and Memory in megabytes
+                            by all running and pending jobs in queue and child queues
+                          type: object
+                      type: object
+                  required:
+                  - queueStatus
+                  type: object
+                type: array
+              phase:
+                description: ProjectPhase is the recently observed phase of the project.
+                type: string
+              quotaStatus:
+                description: Sum of quota statuses of all node pools
+                properties:
+                  allocated:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: |-
+                      Current allocated GPU (in fractions), CPU (in millicpus) and Memory in megabytes
+                      for all running jobs in queue and child queues
+                    type: object
+                  allocatedNonPreemptible:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: |-
+                      Current allocated GPU (in fractions), CPU (in millicpus) and Memory in megabytes
+                      for all non-preemptible running jobs in queue and child queues
+                    type: object
+                  requested:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: |-
+                      Current requested GPU (in fractions), CPU (in millicpus) and Memory in megabytes
+                      by all running and pending jobs in queue and child queues
+                    type: object
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

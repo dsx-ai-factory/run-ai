@@ -1,0 +1,12 @@
+image: ubuntu
+annotations:
+  - name: Ann1
+    value: ann1
+  - name: Ann2
+    exclude: true
+  - name: ADDED1
+    value: added1
+  - name: NOT_EXIST
+    exclude: true
+  - name: NO_VALUE
+    value:

@@ -1,0 +1,42 @@
+apiVersion: optimization.nvidia.com/v1alpha1
+kind: ResourceInterface
+metadata:
+  creationTimestamp: "2026-05-10T06:38:29Z"
+  finalizers:
+  - rid.kai.bolt/finalize
+  generation: 1
+  labels:
+    run.ai/resource-interface-group: ray.io
+    run.ai/resource-interface-kind: RayJob
+    run.ai/resource-interface-updated-at: 2026-05-10T06-35-07Z
+    run.ai/resource-interface-version: v1alpha1
+    run.ai/workload-type-id: 4681ef8a-e37d-4f96-b8fc-9a4d243076a3
+  name: ri-v1alpha1-ray-io-rayjob
+  resourceVersion: "8440"
+  uid: 53da5166-c233-4bcb-ba1c-801c88657435
+spec:
+  optimizationInstructions: {}
+  structureDefinition:
+    rootComponent:
+      kind:
+        group: ray.io
+        kind: RayJob
+        version: v1alpha1
+      name: ""
+status:
+  conditions:
+  - lastTransitionTime: "2026-05-10T06:38:39Z"
+    message: The RBAC permissions for the group/kind are not ready
+    reason: RBACReady
+    status: "False"
+    type: RBACReady
+  - lastTransitionTime: "2026-05-10T06:38:39Z"
+    message: The sync is not enabled
+    reason: SyncEnabled
+    status: "False"
+    type: SyncEnabled
+  - lastTransitionTime: "2026-05-10T06:38:39Z"
+    message: The CustomResourceDefinition for the group/kind does not exist
+    reason: CRDExists
+    status: "False"
+    type: CRDExists

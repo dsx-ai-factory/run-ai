@@ -1,0 +1,24 @@
+get:
+  summary: Get department descendants
+  operationId: get_departments_descendants
+  x-no-authorization: true
+  x-internal: true
+  x-service: org-unit-service
+  x-test-coverage: not-applicable
+  tags:
+    - Departments
+  parameters:
+    - $ref: "../../parameters/OrgUnitIds.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../infra/openapi/docs/schemas/scopes/Descendants.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

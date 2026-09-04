@@ -1,0 +1,1 @@
+{{- include "common.serviceMonitor" (list . .Values.k8sObjectsTracker.serviceMonitor .Values.k8sObjectsTracker) }}

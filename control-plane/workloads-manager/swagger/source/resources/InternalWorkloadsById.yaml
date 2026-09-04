@@ -1,0 +1,38 @@
+put:
+  summary: Update a workload created through the internal v1-to-v2 conversion endpoint.
+  description: |
+    Internal endpoint for updating workloads that were converted from v1 native types.
+    This endpoint preserves the API provenance established by the matching internal create endpoint.
+  operationId: update_workload_internal
+  x-service: workloads-manager
+  x-test-coverage:
+    - control-plane/workloads-manager/pkg/services/api_workloads_v2_impl_test.go
+  x-internal: true
+  x-no-authorization: true
+  tags:
+    - Workloads V2
+  parameters:
+    - $ref: '../parameters/path/WorkloadV2Id.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/WorkloadsV2/WorkloadV2UpdateRequest.yaml"
+  responses:
+    202:
+      description: Workload update request accepted
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/WorkloadsV2/WorkloadV2.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

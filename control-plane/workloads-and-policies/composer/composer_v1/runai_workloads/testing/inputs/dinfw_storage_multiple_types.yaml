@@ -1,0 +1,43 @@
+servingPort:
+  port: 8081
+workers: 1
+leader:
+  image: python:3.8
+  storage:
+    pvc:
+      - existingPvc: false
+        path: "/data/pvc"
+        readOnly: false
+        claimInfo:
+          size: 1Gi
+          storageClass: fast-ssd
+    configMapVolume:
+      - configMap: my-config
+        mountPath: "/config/app/1"
+        name: app-config
+    secretVolume:
+      - secret: my-secret
+        mountPath: "/secrets/creds/1"
+        name: credentials
+    emptyDirVolume:
+      - path: /mount/empty/1
+worker:
+  image: python:3.8
+  storage:
+    pvc:
+      - existingPvc: false
+        path: "/data/pvc"
+        readOnly: false
+        claimInfo:
+          size: 1Gi
+          storageClass: fast-ssd
+    configMapVolume:
+      - configMap: my-config
+        mountPath: "/config/app/2"
+        name: app-config
+    secretVolume:
+      - secret: my-secret
+        mountPath: "/secrets/creds/2"
+        name: credentials
+    emptyDirVolume:
+      - path: /mount/empty/2

@@ -1,0 +1,4 @@
+type: object
+properties:
+  enableDataVolumes:
+    $ref: "./GetEnableDataVolumes.yaml"

@@ -1,0 +1,12 @@
+{
+    "target": {
+        "path": {
+            "deployment": "init-ca"
+        },
+        "namespace": "runai"
+    },
+    "feature": {
+        "env": true,
+        "fs": "read"
+    }
+}

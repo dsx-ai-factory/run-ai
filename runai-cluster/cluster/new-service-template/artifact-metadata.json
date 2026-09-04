@@ -1,0 +1,15 @@
+{
+  "service_name": "new-service-template",
+  "artifact_type": "container",
+  "skip_airgap": true,
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "notifications": {
+    "slack": {
+      "mention": "@griffin"
+    }
+  },
+  "jira": {
+    "team_name": "Griffin Team"
+  }
+}

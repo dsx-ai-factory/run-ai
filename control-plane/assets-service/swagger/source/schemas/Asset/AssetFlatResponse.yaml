@@ -1,0 +1,11 @@
+type: object
+description: flat representation of an asset, for a given project and workload type
+properties:
+  assetsMeta:
+    type: array
+    items:
+      $ref: "./AssetMeta.yaml"
+  worker:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/SupersetSpec.yaml"
+  master:
+    $ref: "../../../../../infra/openapi/docs/schemas/distributed/MasterSpec.yaml"

@@ -1,0 +1,330 @@
+// Z-indices are set below Quasar's default dialog z-index (6000)
+// This ensures dialogs opened during the tour naturally appear above the overlay
+// along with their tooltips, menus, etc. - no special overrides needed
+$guided-tour-z-index-overlay: 5000;
+$guided-tour-z-index-popover: 5001;
+$guided-tour-z-index-tooltip: 5002;
+$guided-tour-animation-duration: 0.3s;
+$guided-tour-animation-easing: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+// Mixins for reusable styles
+@mixin guided-tour-transition($properties: all) {
+  transition: $properties $guided-tour-animation-duration $guided-tour-animation-easing;
+}
+
+@mixin guided-tour-fixed-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+@mixin guided-tour-arrow-base {
+  content: "";
+  position: absolute;
+  border: solid transparent;
+  height: 0;
+  width: 0;
+  pointer-events: none;
+  display: none;
+}
+
+@keyframes guided-tour-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes guided-tour-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.guided-tour-active {
+  overflow: hidden;
+
+  * {
+    pointer-events: none !important;
+  }
+
+  .guided-tour-active-element,
+  .guided-tour-active-element *,
+  .guided-tour-accessible-element,
+  .guided-tour-accessible-element *,
+  .guided-tour-popover,
+  .guided-tour-modal *,
+  [aria-controls="guided-tour-popover-content"],
+  .guided-tour-popover *,
+  .admin-message-modal,
+  .admin-message-modal * {
+    pointer-events: auto !important;
+  }
+
+  // Override for disabled interaction elements
+  .guided-tour-active-element.guided-tour-no-interaction,
+  .guided-tour-active-element.guided-tour-no-interaction * {
+    pointer-events: none !important;
+    cursor: default !important;
+  }
+
+  .q-tooltip {
+    z-index: $guided-tour-z-index-tooltip !important;
+  }
+
+  // Scroll locking styles
+  body {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  // Allow scrolling within specific elements
+  .guided-tour-scrollable-element {
+    overflow: auto !important;
+    pointer-events: auto !important;
+
+    * {
+      pointer-events: auto !important;
+    }
+  }
+}
+
+.guided-tour-overlay {
+  @include guided-tour-fixed-fullscreen;
+  z-index: $guided-tour-z-index-overlay;
+  pointer-events: none;
+  @include guided-tour-transition(opacity);
+
+  rect,
+  path {
+    @include guided-tour-transition;
+  }
+
+  &.guided-tour-overlay--cutout path {
+    pointer-events: auto;
+    cursor: auto;
+  }
+}
+
+// =============================================================================
+// HIGHLIGHTED ELEMENT
+// =============================================================================
+
+.guided-tour-active-element {
+  position: relative;
+  z-index: $guided-tour-z-index-overlay + 1;
+  @include guided-tour-transition;
+  pointer-events: auto !important;
+
+  &.guided-tour-no-interaction {
+    pointer-events: none !important;
+    cursor: default;
+  }
+}
+
+// Accessible elements during guided tour steps
+.guided-tour-accessible-element {
+  position: relative;
+  z-index: $guided-tour-z-index-popover + 1 !important;
+  pointer-events: auto !important;
+
+  // Ensure all child elements are also accessible
+  * {
+    pointer-events: auto !important;
+  }
+}
+
+// Dummy element for modal-like behavior
+#guided-tour-dummy-element {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 0 !important;
+  height: 0 !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  z-index: -1 !important;
+}
+
+.guided-tour-popover {
+  min-width: 250px;
+  max-width: 400px;
+  width: fit-content;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  border-radius: 8px;
+  z-index: $guided-tour-z-index-popover;
+  position: relative;
+  background: white;
+  overflow: visible;
+
+  &.guided-tour-popover-large {
+    min-width: 350px;
+    max-width: 500px;
+  }
+
+  &.guided-tour-popover-medium {
+    min-width: 350px;
+    max-width: 450px;
+  }
+  .guided-tour-content {
+    padding: 16px;
+  }
+
+  .guided-tour-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .guided-tour-title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .guided-tour-close-btn {
+    margin: -4px -4px -4px 0;
+  }
+
+  .guided-tour-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .guided-tour-progress-section {
+    flex: 1;
+  }
+
+  .guided-tour-progress {
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0.9;
+  }
+
+  .guided-tour-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .guided-tour-prev-btn,
+  .guided-tour-next-btn {
+    min-width: 80px;
+  }
+
+  // Arrow styles
+  &::after,
+  &::before {
+    @include guided-tour-arrow-base;
+    z-index: $guided-tour-z-index-tooltip;
+  }
+
+  &[class*="q-menu--arrow-"] {
+    &::after,
+    &::before {
+      display: block;
+    }
+
+    &::after {
+      border-width: 10px;
+    }
+
+    &::before {
+      border-width: 12px;
+    }
+  }
+
+  // Arrow directions
+  &.q-menu--arrow-left {
+    &::after,
+    &::before {
+      right: 100%;
+      top: 50%;
+    }
+    &::after {
+      border-right-color: white;
+      margin-top: -10px;
+    }
+    &::before {
+      border-right-color: rgba(0, 0, 0, 0.25);
+      margin-top: -12px;
+    }
+  }
+
+  &.q-menu--arrow-right {
+    &::after,
+    &::before {
+      left: 100%;
+      top: 50%;
+    }
+    &::after {
+      border-left-color: white;
+      margin-top: -10px;
+    }
+    &::before {
+      border-left-color: rgba(0, 0, 0, 0.25);
+      margin-top: -12px;
+    }
+  }
+
+  &.q-menu--arrow-up {
+    &::after,
+    &::before {
+      bottom: 100%;
+      left: 50%;
+    }
+    &::after {
+      border-bottom-color: white;
+      margin-left: -10px;
+    }
+    &::before {
+      border-bottom-color: rgba(0, 0, 0, 0.25);
+      margin-left: -12px;
+    }
+  }
+
+  &.q-menu--arrow-down {
+    &::after,
+    &::before {
+      top: 100%;
+      left: 50%;
+    }
+    &::after {
+      border-top-color: white;
+      margin-left: -10px;
+    }
+    &::before {
+      border-top-color: rgba(0, 0, 0, 0.25);
+      margin-left: -12px;
+    }
+  }
+}
+
+.guided-tour-focus-trap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: $guided-tour-z-index-popover + 1;
+}
+
+.q-tooltip.guided-tour-tooltip {
+  z-index: $guided-tour-z-index-tooltip !important;
+}

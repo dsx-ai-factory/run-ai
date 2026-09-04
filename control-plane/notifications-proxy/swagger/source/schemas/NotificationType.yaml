@@ -1,0 +1,16 @@
+type: object
+required:
+  - category
+  - type
+  - description
+properties:
+  category:
+    type: string
+  type:
+    type: string
+  description:
+    type: string
+example:
+  category: Workload status change
+  type: Creating
+  description: Workload and associated resources are being created in the cluster

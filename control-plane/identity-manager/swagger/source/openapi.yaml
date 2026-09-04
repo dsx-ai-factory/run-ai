@@ -1,0 +1,199 @@
+openapi: 3.0.3
+info:
+  title: identity-manager
+  version: '1.0'
+  description: An API for managing runai realms in mappers
+  contact:
+    name: Run.AI
+    url: 'https://www.run.ai/'
+    email: support@run.ai
+servers:
+- url: 'https://app.run.ai'
+- url: 'https://staging.run.ai'
+- url: 'https://test.run.ai'
+- url: 'http://localhost:8080'
+paths:
+  /health:
+    x-internal: true
+    get:
+      summary: health check
+      x-service: identity-manager
+      operationId: health
+      x-no-authorization: true
+      tags:
+      - Health
+      responses:
+        '200':
+          description: Executed successfully.
+  /api/v1/config:
+    x-internal: true
+    $ref: './resources/auth_configuration.yaml'
+  /internal/realms:
+    x-internal: true
+    $ref: './resources/realms.yaml'
+  /api/v1/idps:
+    x-scope: [ system, tenant ]
+    $ref: './resources/idps/idps.yaml'
+  /api/v1/idps/{idp}:
+    x-scope: [ system, tenant ]
+    $ref: './resources/idps/idp.yaml'
+  /api/v1/idps/{idp}/mappers:
+    x-scope: [ system, tenant ]
+    $ref: './resources/idps/idpMappers.yaml'
+  /api/v1/idps/{idp}/resources:
+    x-internal: true
+    $ref: './resources/idps/idpResources.yaml'
+  /api/v1/users:
+    x-scope: [ system, tenant ]
+    $ref: './resources/users/users.yaml'
+  /api/v1/users-minimal:
+    x-scope: [ system, tenant ]
+    $ref: './resources/users/usersMinimal.yaml'
+  /api/v1/users/batch-create:
+    x-internal: true
+    x-scope: [ system, tenant ]
+    $ref: './resources/users/batch-create.yaml'
+  /api/v1/users/count:
+    x-scope: [ system, tenant ]
+    $ref: './resources/users/usersCount.yaml'
+  /api/v1/users/{userId}/logout:
+    x-scope: [ system, tenant ]
+    $ref: './resources/users/userLogout.yaml'
+  /api/v1/users/{userId}/password:
+    x-scope: [ system, tenant ]
+    $ref: './resources/users/userResetPassword.yaml'
+  /api/v1/users/{userId}:
+    x-scope: [ system, tenant ]
+    $ref: './resources/users/userById.yaml'
+  /api/v1/me/password:
+    x-scope: [ system, tenant ]
+    $ref: './resources/users/userChangePassword.yaml'
+  /internal/users:
+    $ref: './resources/users/internalUsers.yaml'
+  /internal/users/{userId}:
+    x-internal: true
+    $ref: './resources/users/internalUserById.yaml'
+  /internal/realms/{realm}/users/{email}:
+    $ref: './resources/users/internalUserByEmail.yaml'
+  /internal/users/{email}/accessGroups:
+    $ref: './resources/users/internalUserGroups.yaml'
+  /api/v1/service-accounts:
+    x-scope: [ system, tenant ]
+    $ref: './resources/service_accounts/serviceAccounts.yaml'
+  /internal/service-accounts:
+    x-internal: true
+    post:
+      summary: Create a service account internally
+      description: Used to create a service account internally.
+      x-service: identity-manager
+      x-test-coverage: not-applicable
+      operationId: create_service_account_internally
+      x-no-authorization: true
+      tags:
+      - Service Accounts
+      requestBody:
+        description: Service account object to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/ServiceAccounts/InternalServiceAccountCreationRequest.yaml'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/ServiceAccounts/ServiceAccountPostResponse.yaml'
+        '400':
+          $ref: '../../../infra/openapi/docs/responses/400BadRequest.yaml'
+        '409':
+          $ref: '../../../infra/openapi/docs/responses/409Conflict.yaml'
+        '500':
+          $ref: '../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+        '503':
+          $ref: '../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+  /api/v1/service-accounts/installer:
+    x-internal: true
+    $ref: './resources/service_accounts/installer.yaml'
+  /internal/installer-bootstrap:
+    x-internal: true
+    $ref: './resources/service_accounts/installerBootstrap.yaml'
+  /api/v1/service-accounts/{serviceAccountId}:
+    x-scope: [ system, tenant ]
+    $ref: './resources/service_accounts/serviceAccountById.yaml'
+  /api/v1/service-accounts/{serviceAccountId}/secret:
+    x-scope: [ system, tenant ]
+    $ref: './resources/service_accounts/serviceAccountsSecret.yaml'
+  /api/v1/access-keys:
+    x-scope: [ system, tenant ]
+    $ref: './resources/access_keys/accessKeys.yaml'
+  /api/v1/access-keys/{accessKeyId}:
+    x-scope: [ system, tenant ]
+    $ref: './resources/access_keys/accessKeyById.yaml'
+  /api/v1/access-keys/{accessKeyId}/secret:
+    x-scope: [ system, tenant ]
+    $ref: './resources/access_keys/accessKeySecret.yaml'
+  /api/v1/administration/access-keys:
+    x-scope: [ system, tenant ]
+    $ref: './resources/access_keys/administration/accessKeysAdministration.yaml'
+  /api/v1/administration/access-keys/{accessKeyId}:
+    x-scope: [ system, tenant ]
+    $ref: './resources/access_keys/administration/accessKeyByIdAdministration.yaml'
+  /internal/clients:
+    $ref: './resources/clients/internalClients.yaml'
+  /internal/clients/{id}:
+    $ref: './resources/internal_client.yaml'
+  /internal/clients/{id}/secret:
+    $ref: './resources/clients/clientById.yaml'
+  /internal/clients/{id}/redirectUris:
+    $ref: './resources/clients/clientRedirectUris.yaml'
+  /api/v1/token:
+    x-scope: [ system, tenant ]
+    $ref: './resources/token/token.yaml'
+  /api/v2/token:
+    x-scope: [ system, tenant ]
+    $ref: './resources/token/token_v2.yaml'
+  /.well-known/openid-configuration:
+    x-internal: true
+    $ref: './resources/openid_configuration.yaml'
+  /.well-known/oauth-authorization-server:
+    x-internal: true
+    $ref: './resources/oauth_authorization_server.yaml'
+  /api/v1/login:
+    x-internal: true
+    $ref: './resources/login/login.yaml'
+  /api/v1/logout:
+    x-internal: true
+    $ref: './resources/logout/logout.yaml'
+  /api/v1/security/settings:
+    x-scope: [ system, tenant ]
+    $ref: './resources/realm_settings.yaml'
+  /api/v1/security/settings/{key}:
+    x-scope: [ system, tenant ]
+    $ref: './resources/realm/settings.yaml'
+  /internal/realms/{realm}/reconcile:
+    $ref: './resources/internal_realms_reconcile.yaml'
+  # Deprecated - start
+  /v1/k8s/auth/oauth/apptoken:
+    x-internal: true
+    $ref: './resources/token/appToken.yaml'
+  /internal/realms/{realm}:
+    $ref: './resources/internal_realms.yaml'
+security:
+- bearerAuth: []
+
+# Deprecated - end
+components:
+  parameters:
+    $ref: "./parameters/_index.yaml"
+  schemas:
+    $ref: "./schemas/_index.yaml"
+  responses:
+    $ref: "../../../infra/openapi/docs/responses/_index.yaml"
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      description: Bearer authentication
+      scheme: bearer
+      type: http

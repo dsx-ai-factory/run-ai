@@ -1,0 +1,13 @@
+description: Pod affinity scheduling rules (e.g. co-locate this workload in the same node, zone, etc. as some other workloads).
+type: object
+properties:
+  type:
+    $ref: "./PodAffinityType.yaml"
+  key:
+    description: The label key to use. (mandatory)
+    type: string
+    nullable: true
+    pattern: .*
+    ##WAIT_FOR_35331## minLength: 1
+    maxLength: 63
+nullable: true

@@ -1,0 +1,44 @@
+type: object
+required:
+- name
+- email
+properties:
+  name:
+    type: string
+    pattern: "^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$" # strings that contain alphanumeric characters, numbers and hyphens (not at the start or end of the string).
+    description: The name of the tenant.
+    example: name
+    minLength: 2
+    maxLength: 255
+  alias:
+    type: string
+    nullable: true
+    pattern: "^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$"
+    description: An optional alias for the tenant. Must be unique across all tenant names and aliases.
+    example: tenant-alias
+    minLength: 2
+    maxLength: 255
+  email:
+    type: string
+    pattern: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+    description: The email of the tenant's admin user.
+    example: admin@example.com
+    minLength: 5
+    maxLength: 254
+  password:
+    type: string
+    nullable: true
+    description: The password for the tenant's admin user. Must contain at least 1 special character, 1 uppercase letter, 1 lowercase letter, 1 digit, and be at least 8 characters long.
+    minLength: 8
+    maxLength: 255
+  contractType:
+    type: string
+    enum: [ "normal", "" ]
+  role:
+    $ref: './Roles.yaml'
+  metricStore:
+    writeOnly: true
+    nullable: true
+    type: object
+    allOf:
+    - $ref: './MetricStore.yaml#/MetricStore'

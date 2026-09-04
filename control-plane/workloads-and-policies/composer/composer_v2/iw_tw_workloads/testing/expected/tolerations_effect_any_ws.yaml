@@ -1,0 +1,71 @@
+BatchJobTarget:
+  Config: {}
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: tolerations_effect_any
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: tolerations_effect_any
+      name: tolerations_effect_any
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: tolerations_effect_any
+            workloadKind: Workspace
+            workloadName: tolerations_effect_any
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: tolerations_effect_any
+            image: ubuntu
+            name: tolerations_effect_any
+            resources: {}
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+          tolerations:
+          - key: key1
+            operator: Equal
+            value: value1
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: tolerations_effect_any, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: tolerations_effect_any, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

@@ -1,0 +1,12 @@
+type: object
+required:
+  - scopeId
+  - scopeType
+  - issue
+properties:
+  scopeId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ScopeId.yaml"
+  scopeType:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ScopeType.yaml"
+  issue:
+    $ref: "./AssetClusterStatusIssueEnum.yaml"

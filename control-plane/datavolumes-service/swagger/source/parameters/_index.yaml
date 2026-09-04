@@ -1,0 +1,21 @@
+#path
+DatavolumeId:
+  $ref: "../parameters/path/DatavolumeId.yaml"
+#query
+Limit:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml"
+Offset:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml"
+SortOrder:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+DatavolumesRequestType:
+  $ref: "./query/mandatory/DatavolumesRequestType.yaml"
+DatavolumesUsableInProjectId:
+  $ref: "./query/optional/DatavolumesUsableInProjectId.yaml"
+DatavolumesFilter:
+  $ref: "./query/optional/DatavolumesFilter.yaml"
+DatavolumesSortBy:
+  $ref: "./query/optional/DatavolumesSortBy.yaml"
+
+DatavolumesSettingsKey:
+  $ref: './path/DatavolumesSettingsKey.yaml'

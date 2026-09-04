@@ -1,0 +1,11 @@
+type: object
+properties:
+  accessToken:
+    type: string
+  idToken:
+    type: string
+  refreshToken:
+    type: string
+  expiresIn:
+    type: integer
+    description: Token lifetime in seconds

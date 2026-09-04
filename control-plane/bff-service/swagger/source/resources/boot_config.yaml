@@ -1,0 +1,19 @@
+get:
+  tags:
+  - BootConfig
+  x-no-authorization: true
+  x-test-coverage:
+  - integration-tests/tests/main_test.go
+  x-service: bff-service
+  summary: Get frontend boot configuration
+  description: Returns deployment-resolved, browser-safe configuration required before the frontend mounts.
+  operationId: get_boot_config
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/boot-config/BootConfig.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'

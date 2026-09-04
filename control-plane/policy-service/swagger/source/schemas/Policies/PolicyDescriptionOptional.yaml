@@ -1,0 +1,7 @@
+type: string
+nullable: true
+description: A description of the policy.
+example: "a short description of the policy"
+pattern: .*
+minLength: 1
+maxLength: 1023

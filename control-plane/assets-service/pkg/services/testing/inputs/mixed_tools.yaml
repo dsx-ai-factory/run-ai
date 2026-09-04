@@ -1,0 +1,13 @@
+assets:
+  environment: mixed-tools
+  compute: cpu-only
+specificRunParams:
+  connections:
+    - name: exposed-url-custom
+      externalUrl: https://custom-url.com
+      authorizedUsers:
+        - user-a
+        - user-b
+    - name: exposed-port-custom
+      nodePort: 1234
+

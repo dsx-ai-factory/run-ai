@@ -1,0 +1,9 @@
+properties:
+  bucket:
+    $ref: "../../policy_rules/StringRules.yaml"
+  path:
+    $ref: "../../policy_rules/StringRules.yaml"
+  url:
+    $ref: "../../policy_rules/StringRules.yaml"
+nullable: true
+type: object

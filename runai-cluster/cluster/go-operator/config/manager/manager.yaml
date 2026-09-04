@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    control-plane: runai-operator
+  name: system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: operator
+  namespace: runai
+  labels:
+    control-plane: runai-operator
+spec:
+  selector:
+    matchLabels:
+      control-plane: runai-operator
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+      labels:
+        control-plane: runai-operator
+    spec:
+      # Disabling ServiceAccount token automounting to pass sonar security check (this manifest is in use)
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+      containers:
+      - command:
+        - /manager
+        image: controller:latest
+        imagePullPolicy: Always
+        name: manager
+        securityContext:
+          allowPrivilegeEscalation: false
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8083
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8083
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        # TODO(user): Configure the resources accordingly based on the project requirements.
+        # More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 64Mi
+      serviceAccountName: runai-operator
+      terminationGracePeriodSeconds: 10

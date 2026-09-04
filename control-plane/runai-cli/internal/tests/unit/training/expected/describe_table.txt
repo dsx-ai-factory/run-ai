@@ -1,0 +1,89 @@
+Name:                               my-training-demo-123
+ID:                                 0586e34b-6c17-419b-9cc6-c091cb4d72f5
+Type:                               Training
+Phase:                              Pending
+Created At:                         2025-12-15T08:58:28Z
+Updated At:                         2025-12-15T08:59:24Z
+Project:                            team-b
+Department:                         default
+Submitted By:                       test@run.ai
+Priority:                           low (40)
+Category:                           Train
+Preemptible:                        true
+Requested Node Pool:                default
+Image:                              gcr.io/knative-samples/helloworld-go
+Image Pull Policy:                  IfNotPresent
+Working Directory:                  /app
+Node Type:                          gpu-nodes
+Run as User:                        1000
+Run as Group:                       1000
+Capabilities:                       SYS_PTRACE, NET_ADMIN
+Tolerations:                        nvidia.com/gpu=true:NoSchedule
+Labels:                             [experiment:demo,
+                                     framework:custom]
+Annotations:                        [owner:data-science-team,
+                                     runai-submit-command:/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai training submit my-training-demo-123 --project team-b --image gcr.io/knative-samples/helloworld-go --image-pull-policy IfNotPresent --working-dir /app -g 1 --runs 5 --parallelism 2 --backoff-limit 3 --restart-policy OnFailure --environment-variable BATCH_SIZE=32 --environment-variable EPOCHS=100 --environment-variable LEARNING_RATE=0.001 --label experiment=demo --label framework=custom --annotation owner=data-science-team --existing-pvc claimname=my-simple-pvc,path=/data --external-url container=8080,authgroups=ml-team:data-scientists:platform-ops --auto-deletion-time-after-completion 1h --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 1000 --supplemental-groups 2000,3000 --capability SYS_PTRACE --capability NET_ADMIN --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --command -- sh -c 'echo "Training simulation"; sleep 30']
+Command:                            sh -c 'echo "Training simulation"; sleep 30'
+Environment Variables:              [BATCH_SIZE    : 32,
+                                    EPOCHS        : 100,
+                                    LEARNING_RATE : 0.001,
+                                    RUNAI_JOB_NAME: ${RUNAI_JOB_NAME},
+                                    RUNAI_PROJECT : ${RUNAI_PROJECT}]
+CLI Command:                        /Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai training submit my-training-demo-123 --project team-b --image gcr.io/knative-samples/helloworld-go --image-pull-policy IfNotPresent --working-dir /app -g 1 --runs 5 --parallelism 2 --backoff-limit 3 --restart-policy OnFailure --environment-variable BATCH_SIZE=32 --environment-variable EPOCHS=100 --environment-variable LEARNING_RATE=0.001 --label experiment=demo --label framework=custom --annotation owner=data-science-team --existing-pvc claimname=my-simple-pvc,path=/data --external-url container=8080,authgroups=ml-team:data-scientists:platform-ops --auto-deletion-time-after-completion 1h --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 1000 --supplemental-groups 2000,3000 --capability SYS_PTRACE --capability NET_ADMIN --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --command -- sh -c 'echo "Training simulation"; sleep 30'
+
+
+Compute Resources
+
+ Resource              Requested   Limit       Allocated  
+──────────────────────────────────────────────────────────
+ GPU Compute           1.00                    0.00       
+ CPU Cores             0.00                    0.00       
+ GPU Memory                                               
+ CPU Memory                                               
+
+
+Storage
+
+ Type          Name                       Mount Path       Size      ReadOnly    Ephemeral   Data Sharing    Storage Class   
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ PVC           my-simple-pvc              /local/pvc       -         No          -           -               -               
+ PVC           claim-24mqhfjj7j           /local/vol       1G        -           No          -               standard        
+ Git           https://github.com/run-ai  /git             -         -           -           -               -               
+ HostPath      /host/path                 /hostpath        -         -           -           -               -               
+ S3            bucket-name                /s3              -         -           -           -               -               
+
+
+Network
+
+ Name             Tool Type        Connection Type  Container Port   URL                                                            
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ url              custom           ExternalUrl      8080             https://nael-env-001.runailabs.com/team-b/my-training-demo-123 
+
+  Access Control:
+  url (Port 8080):
+    Authorized Groups:                  ml-team, data-scientists, platform-ops
+
+
+Pods
+
+  Running Pods:                       0/2
+ Name                      Node             Phase            Completed At     Node Pool       
+──────────────────────────────────────────────────────────────────────────────────────────────
+ my-training-demo-123-0-0                   Pending                                           
+ my-training-demo-123-1-0                   Pending                                           
+
+
+Events
+
+ Date & Timestamp           Event              Event Issuer              Component                                                       Details                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ 2025-12-15T08:58:39Z       Unschedulable      runai-scheduler           my-training-demo-123-0-0                                        <runai-cluster-control-plane>: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.<runai-cluster-system-0-0>: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.<runai-cluster-system-0-1>: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.<runai-cluster-worker-0-0>: node(s) didn't match Pod's node affinity/selector.no nodes with enough resources were found.      
+ 2025-12-15T08:58:39Z       Unschedulable      runai-scheduler           pg-my-training-demo-123-0-2019b712-da03-4170-b236-b27cd5356a13  PodSchedulingErrors: Resources were not found for pod runai-team-b/my-training-demo-123-0-0 due to: no nodes with enough resources were found: 1 node(s) didn't match Pod's node affinity/selector. 3 node(s) didn't have enough resources: GPUs.                                                                                                                                                                                                        
+ 2025-12-15T08:58:39Z       Unschedulable      runai-scheduler           my-training-demo-123-1-0                                        <runai-cluster-control-plane>: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.<runai-cluster-system-0-0>: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.<runai-cluster-system-0-1>: Node didn't have enough resources: GPUs, requested: 1, used: 0, capacity: 0.<runai-cluster-worker-0-0>: node(s) didn't match Pod's node affinity/selector.no nodes with enough resources were found.      
+ 2025-12-15T08:58:39Z       Unschedulable      runai-scheduler           pg-my-training-demo-123-1-2019b712-da03-4170-b236-b27cd5356a13  PodSchedulingErrors: Resources were not found for pod runai-team-b/my-training-demo-123-1-0 due to: no nodes with enough resources were found: 1 node(s) didn't match Pod's node affinity/selector. 3 node(s) didn't have enough resources: GPUs.                                                                                                                                                                                                        
+ 2025-12-15T08:58:37Z       PodGrouperWarning  pod-grouper               my-training-demo-123-1-0                                        Operation cannot be fulfilled on podgroups.scheduling.run.ai "pg-my-training-demo-123-1-2019b712-da03-4170-b236-b27cd5356a13": the object has been modified; please apply your changes to the latest version and try again                                                                                                                                                                                                                               
+ 2025-12-15T08:58:36Z       Pending            status-updater            pg-my-training-demo-123-1-2019b712-da03-4170-b236-b27cd5356a13  Job status is Pending                                                                                                                                                                                                                                                                                                                                                                                                                                    
+ 2025-12-15T08:58:36Z       Pending            status-updater            pg-my-training-demo-123-0-2019b712-da03-4170-b236-b27cd5356a13  Job status is Pending                                                                                                                                                                                                                                                                                                                                                                                                                                    
+ 2025-12-15T08:58:35Z       SuccessfulCreate   runaijobcontroller        my-training-demo-123                                            Created pod: my-training-demo-123-1-0                                                                                                                                                                                                                                                                                                                                                                                                                    
+ 2025-12-15T08:58:34Z       Sync               nginx-ingress-controller  tw-my-training-demo-123-0                                       Scheduled for sync                                                                                                                                                                                                                                                                                                                                                                                                                                       
+ 2025-12-15T08:58:34Z       SuccessfulCreate   runaijobcontroller        my-training-demo-123                                            Created pod: my-training-demo-123-0-0                                                                                                                                                                                                                                                                                                                                                                                                                    

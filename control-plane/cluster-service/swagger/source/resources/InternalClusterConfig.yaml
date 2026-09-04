@@ -1,0 +1,33 @@
+get:
+  summary: Get the internal configuration of a cluster. This API is intended to be used by RunAI components on the cluster.
+  operationId: get_internal_cluster_config
+  x-service: cluster-service
+  x-test-coverage:
+    - cluster-service/pkg/services/api_cluster_config_service_test.go
+  x-authorize:
+    resource-type: cluster-config
+    action: sync
+    resource-id: clusterUuid
+  tags:
+    - ClusterConfig
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Clusters/ClusterConfig/GetInternalClusterConfigResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

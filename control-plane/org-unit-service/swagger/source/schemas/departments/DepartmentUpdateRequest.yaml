@@ -1,0 +1,8 @@
+allOf:
+  - $ref: "./DataUpdatableDepartmentFields.yaml"
+  - properties:
+      resources:
+        type: array
+        items:
+          $ref: "../ResourcesNullable.yaml"
+        description: Resources assigned to this Organization per Node Pool

@@ -1,0 +1,10 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+compute:
+  cpuCoreRequest: 1
+  cpuCoreLimit: 2
+  cpuMemoryRequest: 1G
+  cpuMemoryLimit: 4G
+  gpuDevicesRequest: 1

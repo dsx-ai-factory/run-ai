@@ -1,0 +1,9 @@
+name: tenantId
+in: query
+required: false
+x-scope: [system]
+description: If exists will return the relevant resource for the tenant ID
+example: "1008"
+schema:
+  type: string
+  default: ""

@@ -1,0 +1,22 @@
+deprecated: true
+description: 'Deprecated: use a workload policy node selector to target node types instead. Node type configurations for different workload types (training, workspace). Specifies which node types are allowed for each workload type. Enforced when no node type is configured in the workload policy.'
+properties:
+  training:
+    type: array
+    maxItems: 20
+    description: ids of the node types for training workloads
+    items:
+      type: string
+  workspace:
+    type: array
+    maxItems: 20
+    description: ids of the node types for workspace workloads
+    items:
+      type: string
+  names:
+    nullable: true
+    type: object
+    maxProperties: 20
+    additionalProperties:
+      type: string
+    description: mapping of ids to names

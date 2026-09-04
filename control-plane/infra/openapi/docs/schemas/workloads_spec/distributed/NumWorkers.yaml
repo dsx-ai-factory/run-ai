@@ -1,0 +1,4 @@
+description: the number of workers that will be allocated for running the workload.
+type: integer
+minimum: 1
+nullable: true

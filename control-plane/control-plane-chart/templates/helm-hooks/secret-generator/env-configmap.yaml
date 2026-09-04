@@ -1,0 +1,10 @@
+{{- include "common.configMap" (list . .Values.secretGenerator "control-plane.secretGenerator.configmap") }}
+
+{{- define "control-plane.secretGenerator.configmap" -}}
+{{- $top := first . }}
+data:
+  LOG_LEVEL: {{ $top.Values.secretGenerator.config.logLevel | quote }}
+  CONFIG_FILE_PATH: {{ $top.Values.secretGenerator.config.configFilePath | quote }}
+  FULLNAME_OVERRIDE: {{ $top.Values.fullnameOverride | quote }}
+  DRY_RUN: {{ $top.Values.secretGenerator.config.dryRun | quote }}
+{{- end }}

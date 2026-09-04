@@ -1,0 +1,47 @@
+# Tests that spec selector dependencies are recursively collected for the entire
+# parent chain. If X depends on Y and Y depends on Z, all three paths must be
+# created in the correct order (Z first, then Y, then X).
+policy:
+  id: test-dependency-chain
+  effectiveRules:
+    # Set a value on a deeply nested path where none of the intermediate
+    # levels exist. The dependency chain is:
+    #   leafMeta depends on midLevel (path: metadata)
+    #   midLevel depends on topLevel (path: nested)
+    #   topLevel depends on root (path: spec.deep)
+    - field: value
+      specSelector: leafMeta
+      enforcements:
+        - set:
+            value: injected-at-leaf
+
+  breakdown:
+    fields:
+      value:
+        - specSelectors: [leafMeta]
+          specRef: value
+          formatter: { builtin: KeyValue }
+    specSelectors:
+      # Chain: leafMeta -> midLevel -> topLevel -> (root)
+      leafMeta:
+        query: ".spec.deep.nested.metadata"
+        dependency:
+          specSelector: midLevel
+          path: metadata
+      midLevel:
+        query: ".spec.deep.nested"
+        dependency:
+          specSelector: topLevel
+          path: nested
+      topLevel:
+        query: ".spec.deep"
+        dependency:
+          path: spec.deep
+
+workload:
+  apiVersion: test/v1
+  kind: DeepWorkload
+  metadata:
+    name: deep-test
+  # Note: .spec does NOT exist at all - the entire chain must be created:
+  # .spec -> .spec.deep -> .spec.deep.nested -> .spec.deep.nested.metadata

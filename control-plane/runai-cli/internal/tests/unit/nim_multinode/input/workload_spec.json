@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "name": "mynim-multi",
+    "projectId": "4500011",
+    "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+    "workloadV2Id": "6f75680c-255c-422f-b4f4-7c31e4bd9cd9",
+    "createdAt": "2026-03-10T16:49:32Z",
+    "updatedAt": "2026-03-10T21:40:58Z",
+    "submittedBy": "test@run.ai",
+    "category": "Deploy",
+    "priorityClass": "very-high",
+    "preemptibility": "non-preemptible"
+  },
+  "desiredPhase": "Running",
+  "spec": {
+    "image": "gcr.io/run-ai-lab/nim-cpu:latest",
+    "replicas": 1,
+    "ngcAuthSecret": "my-ngc-secret",
+    "servingPort": {
+      "port": 8000,
+      "exposeExternally": true,
+      "serviceType": "ClusterIP"
+    },
+    "modelStore": {
+      "pvc": {
+        "existingPvc": false,
+        "claimInfo": {
+          "size": "10M",
+          "accessModes": {
+            "readWriteOnce": true
+          }
+        }
+      }
+    },
+    "multiNode": {
+      "workers": 1
+    },
+    "compute": {
+      "cpuCoreRequest": 0.1,
+      "cpuMemoryRequest": "100M"
+    }
+  }
+}

@@ -1,0 +1,68 @@
+policy:
+  effectiveRules:
+  - enforcements:
+    - set:
+        key: a
+        value: "1"
+    field: labels
+    sourceOfRule: null
+    specSelector: allContainers
+  - enforcements:
+    - set:
+        key: b
+        value: "2"
+    field: labels
+    sourceOfRule: null
+    specSelector: allContainers
+  - enforcements:
+    - set:
+        key: c
+        value: "3"
+    field: labels
+    sourceOfRule: null
+    specSelector: allContainers
+  - enforcements:
+    - set:
+        key: existing
+        value: newValue
+    field: labels
+    sourceOfRule: null
+    specSelector: allContainers
+  - enforcements:
+    - set:
+        value: X
+    field: labels-value
+    itemSelector: allLabels
+    selectorParams:
+      containerName: container-2
+    sourceOfRule: null
+    specSelector: appContainerByName
+  - enforcements:
+    - set:
+        key: b
+        value: "Y"
+    field: labels
+    selectorParams:
+      containerName: container-2
+    sourceOfRule: null
+    specSelector: appContainerByName
+  workloadType:
+    group: test
+    kind: Synthetic
+    version: v1
+workload:
+  apiVersion: test/v1
+  containers:
+  - labels:
+      a: "1"
+      b: "2"
+      c: "3"
+      existing: newValue
+    name: container-1
+  - labels:
+      a: X
+      b: "Y"
+      c: X
+      existing: X
+    name: container-2
+  kind: Synthetic

@@ -1,0 +1,97 @@
+name: Bug report
+description: Report a reproducible bug in Run:ai.
+title: "[bug] "
+labels: ["kind/bug", "triage/needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report. Please fill in as much detail as you can — reproducible reports are fixed much faster.
+
+        **Before filing:**
+        - Confirm the bug reproduces on a [currently supported version](../blob/HEAD/SUPPORT.md).
+        - Search [existing issues](../../issues?q=is%3Aissue) — your bug may already be tracked.
+        - **Security vulnerabilities:** stop here and follow [`SECURITY.md`](../blob/HEAD/SECURITY.md) instead.
+
+  - type: input
+    id: runai-version
+    attributes:
+      label: Run:ai version
+      description: The Run:ai release the bug reproduces on (for example `v2.26.1`).
+      placeholder: "v2.26.1"
+    validations:
+      required: true
+
+  - type: input
+    id: k8s-version
+    attributes:
+      label: Kubernetes version
+      description: Output of `kubectl version --short` (or the relevant client/server versions).
+      placeholder: "v1.30.4"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Cluster type (on-prem / cloud provider / DGX Cloud), node count, GPU model, OS — anything that might matter.
+      placeholder: |
+        - Cluster: GKE 1.30, 3 nodes
+        - GPUs: 8x A100-80GB per node
+        - OS: Ubuntu 22.04
+    validations:
+      required: false
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps the maintainers can follow to reproduce the bug. Include any YAML manifests, CLI commands, or API calls.
+      placeholder: |
+        1. Apply this manifest: `...`
+        2. Run `runai submit ...`
+        3. Observe the pod is stuck in `Pending` state
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Relevant pod / controller logs. Use ``` fenced code blocks. Redact any secrets before pasting.
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Anything else that might help — screenshots, related issues, what you have already tried.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      options:
+        - label: I agree to follow this project's [Code of Conduct](../blob/HEAD/CODE_OF_CONDUCT.md).
+          required: true

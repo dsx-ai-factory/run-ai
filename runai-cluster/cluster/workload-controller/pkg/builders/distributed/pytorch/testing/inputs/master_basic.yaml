@@ -1,0 +1,59 @@
+apiVersion: run.ai/v2alpha1
+kind: DistributedWorkload
+metadata:
+  name: job-0-20220125-034942
+  namespace: runai-team-a
+  uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+spec:
+  jobType: PyTorchJob
+  environment:
+    items:
+      ENV_0:
+        value: env0
+      ENV_1:
+        value: env1
+      ENV_2:
+        value: "USERCREDENTIAL:my-user-credential,my-user-key"
+  image:
+    value: ubuntu
+  imagePullPolicy:
+    value: Always
+  runPolicy:
+    values:
+      backoffLimit:
+        value: 5
+  name:
+    value: job-0
+  gpuMemory:
+    value: 120M
+  nodePools:
+    value: default nodepoola
+  username:
+    value: user.name
+  tolerations:
+    items:
+      tol-a:
+        value:
+          tolerationKey: aaa
+  workers:
+    value: 3
+masterSpec:
+  environment:
+    items:
+      ENV_M_0:
+        value: envm0
+      ENV_M_1:
+        value: envm1
+      ENV_M_2:
+        value: "USERCREDENTIAL:my-user-credential,my-other-user-key"
+  image:
+    value: ubuntu:master
+  imagePullPolicy:
+    value: Never
+  gpuMemory:
+    value: 20M
+  tolerations:
+    items:
+      tol-b:
+        value:
+          tolerationKey: bbb

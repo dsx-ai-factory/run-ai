@@ -1,0 +1,8 @@
+type: object
+required:
+  - logos
+properties:
+  logos:
+    type: array
+    items:
+      $ref: 'TenantLogo.yaml'

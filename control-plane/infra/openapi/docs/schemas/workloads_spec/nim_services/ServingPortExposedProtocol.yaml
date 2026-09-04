@@ -1,0 +1,6 @@
+description: The protocol to use for the exposed URL. If grpcPort is set, this defaults to grpc. Otherwise, it defaults to http.
+type: string
+enum:
+  - http
+  - grpc
+nullable: true

@@ -1,0 +1,14 @@
+type: object
+required:
+  - name
+  - id
+properties:
+  type:
+    type: string
+    example: "pvc"
+  name:
+    type: string
+    example: "my-pvc-datasource-1"
+  id:
+    type: string
+    format: uuid

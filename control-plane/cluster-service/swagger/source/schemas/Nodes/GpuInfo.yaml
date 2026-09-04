@@ -1,0 +1,23 @@
+type: object
+nullable: true
+required:
+  - gpuType
+  - gpuCount
+properties:
+  gpuType:
+    type: string
+    example: Tesla-V100
+  gpuCount:
+    type: integer
+  gpuMemoryBytes:
+    type: integer
+    format: int64
+    minimum: 0
+    x-internal: true
+    description: >-
+      Memory of a single GPU device on this node, in bytes, taken from the node's GPU
+      vendor labels. Note this is per device, unlike the TOTAL_GPU_MEMORY_BYTES node
+      telemetry type which reports the node's total across all of its devices.
+      Omitted when the node's GPU labels do not report memory.
+    example: 85899345920
+x-schema-name: GpuInfo

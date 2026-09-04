@@ -1,0 +1,12 @@
+type: object
+description: >
+  Indicates the lowest network topology level at which all relevant running pods are colocated,
+  representing where the workload/element was placed in the topology hierarchy.
+nullable: true
+properties:
+  level:
+    description: The network topology level at which placement was achieved (for example, rack, block, or zone).
+    type: string
+  value:
+    description: The specific topology value at that level (for example, rack-1 or block-a).
+    type: string

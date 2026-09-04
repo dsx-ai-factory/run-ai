@@ -1,0 +1,11 @@
+servingPort:
+    port: 8080
+    protocol: http
+    exposeExternally: true
+workers: 1
+replicas: 1
+preemptibility: preemptible
+leader:
+    image: leader-image:latest
+worker:
+    image: worker-image:latest

@@ -1,0 +1,54 @@
+type: object
+x-internal: true
+required:
+  - name
+  - totalCpuCores
+  - allocatedCpuCores
+  - totalCpuMemoryBytes
+  - allocatedCpuMemoryBytes
+  - totalGpus
+  - allocatedGpus
+properties:
+  name:
+    type: string
+    description: The NUMA node zone name reported by NodeResourceTopology.
+    example: node-0
+  totalCpuCores:
+    type: number
+    format: double
+    minimum: 0
+    multipleOf: 0.001
+    description: Total CPU in cores available for allocation, taken from the allocatable value reported by NodeResourceTopology.
+    example: 63.5
+  allocatedCpuCores:
+    type: number
+    format: double
+    minimum: 0
+    multipleOf: 0.001
+    description: Allocated CPU in cores, calculated as allocatable minus available.
+    example: 8.5
+  totalCpuMemoryBytes:
+    type: integer
+    format: int64
+    minimum: 0
+    description: Total CPU memory in bytes available for allocation, taken from the allocatable value reported by NodeResourceTopology.
+    example: 270582939648
+  allocatedCpuMemoryBytes:
+    type: integer
+    format: int64
+    minimum: 0
+    description: Allocated memory in bytes, calculated as allocatable minus available.
+    example: 34359738368
+  totalGpus:
+    type: integer
+    format: int32
+    minimum: 0
+    description: Total GPUs available for allocation, taken from the allocatable value reported by NodeResourceTopology.
+    example: 4
+  allocatedGpus:
+    type: integer
+    format: int32
+    minimum: 0
+    description: Allocated GPUs, calculated as allocatable minus available.
+    example: 2
+x-schema-name: NumaNodeDetails

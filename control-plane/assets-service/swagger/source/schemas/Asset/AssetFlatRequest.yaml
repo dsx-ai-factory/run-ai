@@ -1,0 +1,22 @@
+type: object
+required:
+  - assetId
+  - clusterId
+  - projectId
+  - workloadType
+properties:
+  assetId:
+    type: string
+    format: uuid
+  assetIds:
+    type: array
+    items:
+      $ref: "../../../../../infra/openapi/docs/schemas/assets/AssetId.yaml"
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  projectId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ProjectId.yaml"
+  workloadType:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads/WorkloadType.yaml"
+  masterSameAsWorker:
+    type: boolean

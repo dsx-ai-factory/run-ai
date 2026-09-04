@@ -1,0 +1,32 @@
+suite: Test Engine-to-KAI migration gate (pre-crd-upgrade)
+
+templates:
+  - templates/hooks/pre-crd-upgrade-job.yaml
+
+tests:
+  - it: should enable the engine->KAI migration during the final cutover
+    set:
+      helmHooksHandler.enabled: true
+    documentSelector:
+      path: kind
+      value: Job
+    asserts:
+      - isKind:
+          of: Job
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--engine-to-kai-migration-enabled=true"
+
+  - it: should allow the internal migration gate to be disabled explicitly
+    set:
+      helmHooksHandler.enabled: true
+      engineToKaiMigration.enabled: false
+    documentSelector:
+      path: kind
+      value: Job
+    asserts:
+      - isKind:
+          of: Job
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--engine-to-kai-migration-enabled=false"

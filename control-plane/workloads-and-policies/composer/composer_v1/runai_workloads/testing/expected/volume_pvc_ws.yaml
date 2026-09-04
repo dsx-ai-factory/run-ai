@@ -1,0 +1,93 @@
+Dinfw: null
+JobSpec:
+  arguments:
+    value: --NotebookApp.base_url=/${RUNAI_PROJECT}/${RUNAI_JOB_NAME} --NotebookApp.token=''
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  backoffLimit:
+    value: 6
+  command:
+    value: start-notebook.sh
+  cpu:
+    value: "0.1"
+  environment:
+    items:
+      JUPYTER_PORT:
+        value: "8888"
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  exposedUrls:
+    items:
+      url:
+        value:
+          containerPort: 8888
+  gpuDevices:
+    value: 0
+  image:
+    value: jupyter/scipy-notebook
+  imagePullPolicy:
+    value: IfNotPresent
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  memory:
+    value: 100M
+  nodePools:
+    value: default
+  priorityClassName:
+    value: high
+  pvcs:
+    items:
+      pvc:
+        value:
+          claimName: oferb2-pvc-874hj
+          ephemeral: false
+          path: /tmp/ofer
+          readOnly: false
+          readWriteOnce: true
+          size: 1M
+          storageClass: standard
+          volumeMode: Filesystem
+  username:
+    value: test
+MasterSpec: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections:
+    - connectionType: ExternalUrl
+      containerPort: 8888
+      correlationName: url
+      exposedUrlPath: /project/test
+      exposedUrlSubDomain: project-test
+      name: Jupyter
+      toolType: jupyter-notebook
+    id: volume-pvc-env-id
+    name: volume-pvc-env-name
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: volume_pvc, Rules: , Type: Workspace'
+  images:
+  - jupyter/scipy-notebook
+  name: 'Value: volume_pvc, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedNodePools:
+  - default
+  requestedPods:
+    number: 1
+  requestedResources:
+    cpu:
+      request: 0.1
+    cpuMemory:
+      request: 100M
+    gpu:
+      request: 0
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

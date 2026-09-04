@@ -1,0 +1,25 @@
+ngcAuthSecret: "ngc-secret"
+servingPort:
+  port: 8000
+image: "nvidia/nim-llama3-8b-instruct:1.0.0"
+modelStore:
+  nimCache:
+    name: "nim-cache"
+tolerations:
+  - name: "gpu-toleration"
+    key: "nvidia.com/gpu"
+    operator: "Equal"
+    value: "v100"
+    effect: "NoSchedule"
+  - name: "node-toleration"
+    key: "node-type"
+    operator: "Exists"
+    effect: "NoExecute"
+    seconds: 300
+  - key: "dedicated"
+    operator: "Equal"
+    value: "ml-workload"
+    effect: "PreferNoSchedule"
+  - key: "experimental"
+    operator: "Exists"
+    effect: "Any"

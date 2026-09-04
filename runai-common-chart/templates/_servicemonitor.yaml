@@ -1,0 +1,68 @@
+{{- define "common.serviceMonitor.metadata" -}}
+{{- $serviceMonitor := index . 1 }}
+{{- with $serviceMonitor.namespace }}
+namespace: {{ . }}
+{{- end }}
+{{- end }}
+
+{{- define "common.serviceMonitor.tpl" -}}
+{{- $top := first . }}
+{{- $serviceMonitor := index . 1 }}
+{{- $obj := index . 2 }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  {{- include "common.metadata" (append (list $top $obj) "common.serviceMonitor.metadata") | nindent 2 }}
+  name: {{ include "common.fullname" $top }}-{{ $obj.name }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "common.selectorLabelName" $obj | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ $top.Release.Namespace | quote }}
+  endpoints:
+    - port: "{{ $serviceMonitor.port }}"
+      relabelings:
+        - action: replace
+          targetLabel: service_name
+          replacement: {{ $obj.name }}
+      {{- if $serviceMonitor.metricRelabelings }}
+      metricRelabelings:
+      {{- range $serviceMonitor.metricRelabelings }}
+        - action: {{ .action }}
+          sourceLabels: [{{ .sourceLabels | join "," }}]
+          targetLabel: {{ .targetLabel }}
+          regex: {{ .regex }}
+          replacement: {{ .replacement }}
+    {{- end }}
+    {{- end }}
+    {{- with $serviceMonitor.path }}
+      path: {{ . }}
+    {{- end }}
+    {{- with $serviceMonitor.interval }}
+      interval: {{ . }}
+    {{- end }}
+    {{- with $serviceMonitor.scrapeTimeout }}
+      scrapeTimeout: {{ . }}
+    {{- end }}
+    {{- $basicAuth := $serviceMonitor.basicAuth | default (dict) }}
+    {{- $name := $basicAuth.secretName | default (include "common.fullname" $top) }}
+    {{- if $basicAuth.enabled }}
+      basicAuth:
+        username:
+          name: {{ $name }}
+          key: {{ $basicAuth.usernameKey | default "username" }}
+        password:
+          name: {{ $name }}
+          key: {{ $basicAuth.passwordKey | default "password" }}
+    {{- end }}
+{{- end }}
+
+{{- define "common.serviceMonitor" -}}
+{{- $top := first . }}
+{{- $serviceMonitor := index . 1 }}
+{{- if $serviceMonitor.enabled | default $top.Values.global.config.serviceMonitorEnabled }}
+  {{- include "common.utils.merge" (append . "common.serviceMonitor.tpl") }}
+{{- end }}
+{{- end }}

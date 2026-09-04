@@ -1,0 +1,26 @@
+description: |
+  Layer 3 case "worker" for ray.io/RayService/v1. Same shape as the RayJob
+  worker case but anchored under .spec.rayClusterConfig instead of
+  .spec.rayClusterSpec.
+effectiveRules:
+  - field: replicas
+    specSelector: workerGroupSpecByGroupName
+    selectorParams: { groupName: "test" }
+    enforcements: [{ set: { value: 3 } }]
+  - field: minReplicas
+    specSelector: workerGroupSpecByGroupName
+    selectorParams: { groupName: "test" }
+    enforcements: [{ set: { value: 1 } }]
+  - field: maxReplicas
+    specSelector: workerGroupSpecByGroupName
+    selectorParams: { groupName: "test" }
+    enforcements: [{ set: { value: 5 } }]
+  - field: rayStartParams
+    specSelector: workerGroupSpecByGroupName
+    selectorParams: { groupName: "test" }
+    enforcements: [{ set: { key: "num-gpus", value: "1" } }]
+
+  - field: labels
+    specSelector: workerPodMetadataByGroupName
+    selectorParams: { groupName: "test" }
+    enforcements: [{ set: { key: "ray.io/group", value: "test" } }]

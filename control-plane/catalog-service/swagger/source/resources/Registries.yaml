@@ -1,0 +1,64 @@
+get:
+  summary: List registry integrations
+  description: List registry integrations.
+  operationId: list_registry_integrations
+  x-service: catalog-service
+  x-internal: true
+  x-authorize:
+    resource-type: registries
+    action: read
+  tags:
+    - Registries
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/registries/RegistryIntegrationListResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+
+post:
+  summary: Create registry integration
+  description: Create registry integration.
+  operationId: create_registry_integration
+  x-service: catalog-service
+  x-internal: true
+  x-authorize:
+    resource-type: registries
+    action: create
+  tags:
+    - Registries
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/registries/RegistryIntegrationCreationRequest.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/registries/RegistryIntegration.yaml'
+    400: 
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    409:
+      $ref: '../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

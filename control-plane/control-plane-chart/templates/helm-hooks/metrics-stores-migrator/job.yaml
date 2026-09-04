@@ -1,0 +1,15 @@
+{{- if .Values.metricStoresMigrator.enabled }}
+{{- include "common.job" (list . .Values.metricStoresMigrator .Values.metricStoresMigrator.serviceAccount "control-plane.metricStoresMigrator.job") }}
+{{- end }}
+
+{{- define "control-plane.metricStoresMigrator.job" -}}
+spec:
+  template:
+    spec:
+      containers:
+      - {{- include "common.container" . | nindent 12 }}
+      restartPolicy: OnFailure
+      initContainers:
+        {{- include "awaitingMetricsServiceReadiness" . | nindent 12 }}
+        {{- include "awaitingTenantsManagerReadiness" . | nindent 12 }}
+{{- end }}

@@ -1,0 +1,87 @@
+type: object
+description: OpenID Connect Discovery Document (RFC 8414)
+required:
+  - issuer
+  - authorization_endpoint
+  - token_endpoint
+  - jwks_uri
+  - response_types_supported
+  - subject_types_supported
+  - id_token_signing_alg_values_supported
+properties:
+  issuer:
+    type: string
+    description: The authorization server's issuer identifier URL
+    example: "https://app.run.ai"
+  authorization_endpoint:
+    type: string
+    description: URL of the OAuth2 authorization endpoint
+    example: "https://app.run.ai/api/v1/login"
+  token_endpoint:
+    type: string
+    description: URL of the OAuth2 token endpoint
+    example: "https://app.run.ai/api/v2/token"
+  userinfo_endpoint:
+    type: string
+    description: URL of the UserInfo endpoint
+  jwks_uri:
+    type: string
+    description: URL of the JSON Web Key Set document
+  registration_endpoint:
+    type: string
+    description: URL of the Dynamic Client Registration endpoint
+  scopes_supported:
+    type: array
+    items:
+      type: string
+    description: List of OAuth2 scope values supported
+    example: ["openid", "profile", "email"]
+  response_types_supported:
+    type: array
+    items:
+      type: string
+    description: List of OAuth2 response_type values supported
+    example: ["code", "token", "id_token"]
+  response_modes_supported:
+    type: array
+    items:
+      type: string
+    description: List of OAuth2 response_mode values supported
+  grant_types_supported:
+    type: array
+    items:
+      type: string
+    description: List of OAuth2 grant type values supported
+    example: ["authorization_code", "client_credentials", "refresh_token", "password"]
+  subject_types_supported:
+    type: array
+    items:
+      type: string
+    description: List of Subject Identifier types supported
+    example: ["public"]
+  id_token_signing_alg_values_supported:
+    type: array
+    items:
+      type: string
+    description: List of JWS signing algorithms supported for ID Token
+    example: ["RS256"]
+  token_endpoint_auth_methods_supported:
+    type: array
+    items:
+      type: string
+    description: List of client authentication methods supported by token endpoint
+    example: ["client_secret_post", "client_secret_basic"]
+  claims_supported:
+    type: array
+    items:
+      type: string
+    description: List of claim names supported
+  code_challenge_methods_supported:
+    type: array
+    items:
+      type: string
+    description: List of PKCE code challenge methods supported
+    example: ["S256", "plain"]
+  end_session_endpoint:
+    type: string
+    description: URL of the logout endpoint

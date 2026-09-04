@@ -1,0 +1,6 @@
+description: allow cluster to report about success/failures of sync updates
+properties:
+  updates:
+    type: array
+    items:
+      $ref: "ClusterSyncReportUpdate.yaml"

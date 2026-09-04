@@ -1,0 +1,31 @@
+type: object
+description: >-
+  The formatter details for a field in the breakdown: either the name of the
+  built-in formatter used, or the resolved getExpr/setExpr, arrayKey, and
+  argument type/enum information.
+properties:
+  builtin:
+    description: The name of the built-in formatter, if used.
+    type: string
+    allOf:
+      - $ref: "./FormatterName.yaml"
+    nullable: true
+  setExpr:
+    type: string
+    allOf:
+      - $ref: "./FormatterSetExpression.yaml"
+    nullable: true
+  getExpr:
+    type: string
+    allOf:
+      - $ref: "./FormatterGetExpression.yaml"
+    nullable: true
+  arrayKey:
+    type: object
+    allOf:
+      - $ref: "./FormatterArrayKey.yaml"
+    nullable: true
+  argsInfo:
+    $ref: "./MappingArgsInfo.yaml"
+  argsEnum:
+    $ref: "./MappingArgsEnum.yaml"

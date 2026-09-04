@@ -1,0 +1,5 @@
+allOf:
+  - $ref: "./TtyField.yaml"
+  - $ref: "./StdinField.yaml"
+nullable: true
+type: object

@@ -1,0 +1,14 @@
+  LOG_LEVEL: debug
+  USE_MOCKS: true
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  DB_NAME: runai
+  DB_SCHEMA: audit_service
+  PORT: 6379
+  BATCH_INTERVAL_SEC: 1
+  BATCH_MAX_SIZE: 10
+  PUBSUB_SUBSCRIBE_RETRIES: 0
+  PUBSUB_TYPE: redis
+  SERVICE_NAME: audit-service
+  PUBSUB_URL: redis:6379
+  SECRETS_MOUNT_PATH: /etc/secrets

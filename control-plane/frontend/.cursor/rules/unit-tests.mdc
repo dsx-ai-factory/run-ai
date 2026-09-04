@@ -1,0 +1,28 @@
+---
+description: Unit testing conventions for Run:ai frontend (Vitest)
+globs: ["**/*.test.ts", "**/*.spec.ts"]
+alwaysApply: false
+---
+
+# Unit Tests
+
+## Key Patterns
+
+- Use `.test.ts` extension, co-located with source files
+- Import from `vitest`: `describe`, `it`, `expect`, `vi`, `beforeEach`
+- Mock modules with `vi.mock()`, functions with `vi.fn()`
+- Limit to 3-5 focused tests per file for maintainability
+
+## Canonical Examples
+
+- **Store testing**: See `src/stores/cluster.store.test.ts`
+- **Service testing**: See `src/services/guided-tour.service/guided-tour.service.test.ts`
+- **Composable testing**: See `src/composables/org-unit/use-quota-validation.composable.test.ts`
+- **Global test setup**: See `unit-test/setup.ts`
+
+## Best Practices
+
+- Prioritize testing business logic and utility functions
+- Always mock dependencies before imports with `vi.mock()`
+- Test valid inputs, invalid inputs, and edge cases
+- Group related tests in `describe` blocks

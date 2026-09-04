@@ -1,0 +1,31 @@
+get:
+  summary: Count the amount of network topologies in a tenant.
+  x-service: cluster-service
+  description: Retrieve the count of network topologies in a tenant group by selected attributes
+  operationId: get_network_topologies_count
+  x-test-coverage:
+    - cluster-service/pkg/services/api_network_topologies_service_test.go
+  x-authorize:
+    resource-type: network-topologies
+    action: read
+  tags:
+    - Network Topologies
+  parameters:
+    - $ref: '../parameters/query/NetworkTopologiesFilterBy.yaml'
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/schemas/common/CountResponse.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml' 

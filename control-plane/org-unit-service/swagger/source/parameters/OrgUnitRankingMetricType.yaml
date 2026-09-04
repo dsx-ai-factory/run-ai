@@ -1,0 +1,7 @@
+name: metricType
+in: query
+description: The type of metric to rank by (top/bottom gpu allocation/utilization)
+required: true
+example: topGpuAllocation
+schema:
+  $ref: "../schemas/RankingMetricType.yaml"

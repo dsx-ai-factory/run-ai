@@ -1,0 +1,7 @@
+properties:
+  initialReplicas:
+    description: The number of replicas to run when initializing the workload for the first time. Defaults to minReplicas, or to 1 if minReplicas is set to 0
+    type: integer
+    format: int32
+    minimum: 0
+    nullable: true

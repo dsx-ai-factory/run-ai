@@ -1,0 +1,97 @@
+parameters:
+  - $ref: "../../../../infra/openapi/docs/parameters/path/AssetId.yaml"
+get:
+  summary: Get a ConfigMap asset.
+  description: Retrieve the details of ConfigMap datasource asset by id.
+  operationId: get_config_map_asset_by_id
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_datasources_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - control-plane/assets-service/pkg/services/api_configmap_service_test.go
+    - e2e/src/test/suites/defaultSuite/dataSource/existingConfigMapUI.test.ts
+    - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
+  x-authorize:
+    resource-type: cm-volume-assets
+    action: read
+  tags:
+    - ConfigMap
+  parameters:
+    - $ref: "../parameters/query/optional/IncludeUsageInfo.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToProject.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToWorkloadType.yaml"
+    - $ref: "../parameters/query/optional/IncludeStatus.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToReplicaType.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/ConfigMap/ConfigMapAsset.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+put:
+  summary: Update a ConfigMap asset.
+  description: Use to update the details of a ConfigMap datasource asset by id.
+  operationId: update_config_map_asset_by_id
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_datasources_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - control-plane/assets-service/pkg/services/api_configmap_service_test.go
+  x-no-authorization: true
+  x-audit: true
+  tags:
+    - ConfigMap
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/ConfigMap/ConfigMapUpdateRequest.yaml"
+  responses:
+    202:
+      description: Request accepted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/ConfigMap/ConfigMapAsset.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    default:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+delete:
+  summary: Delete a ConfigMap asset.
+  description: Use to delete a ConfigMap datasource asset by id.
+  operationId: delete_config_map_asset_by_id
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_datasources_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - control-plane/assets-service/pkg/services/api_configmap_service_test.go
+    - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
+  x-no-authorization: true
+  x-audit: true
+  tags:
+    - ConfigMap
+  responses:
+    202:
+      $ref: "../../../../infra/openapi/docs/responses/202Accepted.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

@@ -1,0 +1,35 @@
+type: object
+required:
+- name
+- id
+- clientId
+- createdAt
+- lastLogin
+
+properties:
+  name:
+    type: string
+    description: The name of the access key.
+  clientId:
+    type: string
+    description: The client identifier associated with the access key. Used when requesting authentication tokens.
+  id:
+    type: string
+    description: The unique identifier of the access key.
+  createdAt:
+    type: string
+    format: date-time
+    nullable: true
+    description: The timestamp for when the access key was created.
+  lastLogin:
+    type: string
+    format: date-time
+    nullable: true
+    description: The timestamp of the last time the access key was used to authenticate.
+
+example:
+  name: my-access-key
+  id: 3434c-12323ab-4ce2ea6-b44fc-db344d
+  clientId: 3434c-12323ab-4ce2ea6
+  createdAt: 2019-01-01T00:00:00Z
+  lastLogin: 2020-01-01T00:00:00Z

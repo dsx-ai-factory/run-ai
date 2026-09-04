@@ -1,0 +1,10 @@
+plugins:
+  - ../plugins/internal-filters.js
+decorators:
+  remove-x-internal: on
+  internal-filters/filter-internal-enum-values: on
+  filter-in:
+    property: x-scope
+    value: [tenant,system]
+    matchStrategy: all
+  remove-unused-components: on

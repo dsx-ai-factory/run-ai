@@ -1,0 +1,20 @@
+type: object
+required:
+- type
+- data
+
+properties:
+  name:
+    type: string
+    maxLength: 255
+  type:
+    allOf:
+    - $ref: '../../parameters/IdpCreationRequestTypeEnum.yaml'
+  samlData:
+    $ref: './SamlCreationData.yaml'
+  oidcData:
+    $ref: './OidcCreationData.yaml'
+  ocpData:
+    $ref: './OcpCreationData.yaml'
+  mappers:
+    $ref: './Mappers.yaml'

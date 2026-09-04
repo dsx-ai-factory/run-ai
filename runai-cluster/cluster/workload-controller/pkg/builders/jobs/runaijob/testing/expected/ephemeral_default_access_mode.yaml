@@ -1,0 +1,73 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      template: job-3
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      kai.scheduler/preemptibility: non-preemptible
+      priorityClassName: build
+      project: team-a
+      release: job-3
+      workloadKind: InteractiveWorkload
+      workloadName: job-3
+    name: job-3
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 0
+    completions: 1
+    maxIdleDurationSeconds: 1200
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          user: ""
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          kai.scheduler/preemptibility: non-preemptible
+          priorityClassName: build
+          project: team-a
+          release: job-3
+          run.ai/top-owner-uid: ""
+          workloadKind: InteractiveWorkload
+          workloadName: job-3
+      spec:
+        containers:
+        - image: ubuntu
+          imagePullPolicy: IfNotPresent
+          name: job-3
+          resources: {}
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+          - mountPath: /tmp/existing
+            name: pvc-volume-0
+            readOnly: true
+          - mountPath: this/should/not/be/ignored
+            name: scratch-volume
+        restartPolicy: Never
+        schedulerName: runai-scheduler
+        volumes:
+        - ephemeral:
+            volumeClaimTemplate:
+              metadata: {}
+              spec:
+                accessModes:
+                - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 10M
+                storageClassName: scratch-storage-class
+          name: scratch-volume
+        - name: pvc-volume-0
+          persistentVolumeClaim:
+            claimName: existing
+            readOnly: true
+  status: {}

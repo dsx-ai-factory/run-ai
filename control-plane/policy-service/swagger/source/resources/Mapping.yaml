@@ -1,0 +1,134 @@
+get:
+  summary: List mappings. [experimental]
+  description: Retrieve a list of mappings, optionally filtered by workload type.
+  operationId: list_mappings
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/service_mapping_spec_selectors_test.go
+  x-authorize:
+    resource-type: policies
+    action: read
+  tags:
+    - Spec mapping
+  parameters:
+    - $ref: "../parameters/query/optional/MappingFilter.yaml"
+  responses:
+    200:
+      description: List mappings.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Mapping/MappingListResponse.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+
+post:
+  summary: Create a mapping. [experimental]
+  description: Creates a mapping object for a specific workload type based on the provided specification.
+  operationId: create_mapping
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/service_mapping_spec_selectors_test.go
+  x-authorize:
+    resource-type: policies
+    action: create
+  x-audit: true
+  tags:
+    - Spec mapping
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Mapping/MappingCreUpdRequest.yaml"
+  responses:
+    200:
+      description: Mapping created.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Mapping/Mapping.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    409:
+      $ref: "../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+
+delete :
+  summary: Delete a mapping. [experimental]
+  description: Delete an existing mapping by its workload type.
+  operationId: delete_mapping
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/service_mapping_spec_selectors_test.go
+  x-authorize:
+    resource-type: policies
+    action: delete
+  x-audit: true
+  tags:
+    - Spec mapping
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Mapping/MappingDeletionRequest.yaml"
+  responses:
+    204:
+      $ref: "../../../../infra/openapi/docs/responses/204NoContent.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    409:
+      $ref: "../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+
+patch:
+  summary: Update a mapping. [experimental]
+  description: Update an existing mapping for a specific workload type.
+  operationId: update_mapping
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/service_mapping_spec_selectors_test.go
+  x-authorize:
+    resource-type: policies
+    action: update
+  x-audit: true
+  tags:
+    - Spec mapping
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Mapping/MappingCreUpdRequest.yaml"
+  responses:
+    200:
+      description: Mapping updated.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Mapping/Mapping.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    409:
+      $ref: "../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+

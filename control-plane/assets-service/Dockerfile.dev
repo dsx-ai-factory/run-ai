@@ -1,0 +1,10 @@
+FROM golang:1.18
+WORKDIR /
+
+COPY bin/assets-service.amd64 ./assets-service
+COPY NOTICE .
+
+USER 65532:65532
+
+ENTRYPOINT ["/assets-service"]
+

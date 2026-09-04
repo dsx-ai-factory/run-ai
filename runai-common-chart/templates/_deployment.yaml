@@ -1,0 +1,85 @@
+{{- define "common.deployment.tpl" -}}
+{{- $top := first . }}
+{{- $deployment := index . 1 }}
+{{- $autoscaling := index . 2 }}
+{{- $serviceAccount := index . 3 }}
+{{- $obj := index . 1 }}
+{{- $valuedName := "" -}}
+{{- $targetServiceName := $obj.name -}}
+{{- $hasSecret := false -}}
+{{- $hasConfigMap := false -}}
+{{- $additionalAnnotations := dict -}}
+{{- range $key, $value := $top.Values -}}
+  {{- if and (kindIs "map" $value) (hasKey $value "name") (eq $value.name $targetServiceName) -}}
+    {{- $valuedName = $key -}}
+    {{- range $section := list "envFrom" "volumes" "env" }}
+      {{- if hasKey $value $section }}
+        {{- range $item := index $value $section }}
+          {{- if or (and (hasKey $item "secretRef") (eq $section "envFrom")) 
+                    (and (hasKey $item "secret") (eq $section "volumes"))
+                    (and (hasKey $item "valueFrom") (kindIs "map" $item.valueFrom) (hasKey $item.valueFrom "secretKeyRef") (eq $section "env")) }}
+            {{- $hasSecret = true -}}
+          {{- end }}
+          {{- if or (and (hasKey $item "configMapRef") (eq $section "envFrom")) 
+                    (and (hasKey $item "configMap") (eq $section "volumes"))
+                    (or (and (hasKey $item "name") (hasKey $item "value") (eq $section "env"))
+                        (and (hasKey $item "valueFrom") (kindIs "map" $item.valueFrom) (hasKey $item.valueFrom "configMapKeyRef") (eq $section "env"))) }}
+            {{- $hasConfigMap = true -}}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- if $hasConfigMap }}
+{{- $_ := set $additionalAnnotations "checksum/config" (include "common.configMap" (list $top $deployment (printf "%s.%s.configmap" $top.Chart.Name $valuedName)) | sha256sum) }}
+{{- end }}
+{{- if $hasSecret }}
+{{- $_ := set $additionalAnnotations "checksum/secret" (include "common.secret" (list $top $deployment (printf "%s.%s.secret" $top.Chart.Name $valuedName)) | sha256sum) }}
+{{- end }}
+{{- if and (($top.Values.global.config).argoRollouts) (ne $deployment.argoRollouts false) }}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+{{- else -}}
+apiVersion: apps/v1
+kind: Deployment
+{{- end }}
+metadata:
+  {{- include "common.metadata" (list $top $obj) | nindent 2 }}
+  name: {{ include "common.fullname" $top }}-{{ $obj.name }}
+  {{- with $obj.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if and (not $autoscaling.enabled) (not $top.Values.global.config.hpaEnabled) }}
+  replicas: {{ $deployment.replicaCount | default ($top.Values.global.replicaCount | default 1) }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "common.selectorLabels" $top | nindent 6 }}
+      {{- include "common.selectorLabelName" $obj | nindent 6 }}
+  {{- if and (($top.Values.global.config).argoRollouts) (ne $deployment.argoRollouts false) }}
+  strategy:
+    {{- if $deployment.strategy }}
+    {{- $deployment.strategy | toYaml | nindent 4 }}
+    {{ else }}
+    blueGreen:
+      autoPromotionEnabled: {{ $top.Values.global.config.argoRollouts.autoPromotionEnabled | default false }}
+      activeService: {{ include "common.fullname" $top }}-{{ $obj.name }}
+      previewService: {{ include "common.fullname" $top }}-{{ $obj.name }}-preview
+      activeMetadata:
+        labels:
+          role: active
+      previewMetadata:
+        labels:
+          role: preview
+    {{- end }}
+  {{- end }}
+  template:
+    {{- include "common.pod.template" (list $top $deployment $serviceAccount $obj $additionalAnnotations) | nindent 4 }}
+{{- end }}
+
+{{- define "common.deployment" -}}
+{{- include "common.utils.merge" (append . "common.deployment.tpl") }}
+{{- end }}

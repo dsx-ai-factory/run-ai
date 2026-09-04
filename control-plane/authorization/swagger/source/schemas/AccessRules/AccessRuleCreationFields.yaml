@@ -1,0 +1,8 @@
+allOf:
+  - $ref: "./AccessRuleCreationFieldsInternal.yaml"
+  - type: object
+    required:
+      - subjectType
+    properties:
+      subjectType:
+        $ref: './SubjectType.yaml'

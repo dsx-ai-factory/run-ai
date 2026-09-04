@@ -1,0 +1,23 @@
+{{- if and (index .Values "runai-operator" "enabled") (index .Values "runai-operator" "metrics" "serviceMonitor" "enabled") }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: runai-operator
+  labels:
+    app: runai-operator
+spec:
+  selector:
+    matchLabels:
+      app: runai-operator
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics
+      metricRelabelings:
+      - action: replace
+        replacement: stats
+        targetLabel: type
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+{{- end }}

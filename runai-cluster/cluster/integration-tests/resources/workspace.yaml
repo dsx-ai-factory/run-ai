@@ -1,0 +1,12 @@
+apiVersion: run.ai/v2alpha1
+kind: InteractiveWorkload
+metadata:
+  name: {{WORKLOAD_NAME}}
+  namespace: {{WORKLOAD_NAMESPACE}}
+spec:
+  name:
+    value: {{POD_NAME_PREFIX}}
+  image:
+    value: ubuntu
+  command:
+      value: sleep infinity

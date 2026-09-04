@@ -1,0 +1,15 @@
+properties:
+  initialDelaySeconds:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  periodSeconds:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  timeoutSeconds:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  successThreshold:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  failureThreshold:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  handler:
+    $ref: "./ProbeHandlerRules.yaml"
+nullable: true
+type: object

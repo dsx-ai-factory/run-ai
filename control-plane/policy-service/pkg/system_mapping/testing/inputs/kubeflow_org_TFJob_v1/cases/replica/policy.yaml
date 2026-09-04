@@ -1,0 +1,40 @@
+description: |
+  Layer 3 case "replica" for kubeflow.org/TFJob/v1. SETs replica-level
+  fields (replicas, restartPolicy) and pod metadata for each replica type.
+effectiveRules:
+  # ----- Chief replica spec -----
+  - field: replicas
+    specSelector: chiefReplicaSpec
+    enforcements: [{ set: { value: 2 } }]
+  - field: restartPolicy
+    specSelector: chiefReplicaSpec
+    enforcements: [{ set: { value: OnFailure } }]
+
+  # ----- Chief pod metadata -----
+  - field: labels
+    specSelector: chiefPodMetadata
+    enforcements: [{ set: { key: "replica.type", value: "chief" } }]
+  - field: annotations
+    specSelector: chiefPodMetadata
+    enforcements: [{ set: { key: "replica.example.com/role", value: "chief" } }]
+
+  # ----- Worker replica spec -----
+  - field: replicas
+    specSelector: workerReplicaSpec
+    enforcements: [{ set: { value: 4 } }]
+  - field: restartPolicy
+    specSelector: workerReplicaSpec
+    enforcements: [{ set: { value: OnFailure } }]
+
+  # ----- Worker pod metadata -----
+  - field: labels
+    specSelector: workerPodMetadata
+    enforcements: [{ set: { key: "replica.type", value: "worker" } }]
+  - field: annotations
+    specSelector: workerPodMetadata
+    enforcements: [{ set: { key: "replica.example.com/role", value: "worker" } }]
+
+  # ----- container image (verify policy modifies skeleton) -----
+  - field: image
+    specSelector: allContainers
+    enforcements: [{ set: { value: "tensorflow/tensorflow:2.12.0" } }]

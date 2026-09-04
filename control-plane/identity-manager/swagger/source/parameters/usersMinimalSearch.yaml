@@ -1,0 +1,9 @@
+name: search
+in: query
+required: false
+description: Filter results by a free text search across username, firstName and lastName (OR logic). Minimum 2 characters.
+schema:
+  type: string
+  minLength: 2
+  maxLength: 100
+  example: john

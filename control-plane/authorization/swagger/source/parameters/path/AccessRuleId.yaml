@@ -1,0 +1,9 @@
+name: accessRuleId
+in: path
+required: true
+description: The id of the access rule to retrieve
+example: 32
+schema:
+  type: integer
+  format: int32
+  minimum: 0

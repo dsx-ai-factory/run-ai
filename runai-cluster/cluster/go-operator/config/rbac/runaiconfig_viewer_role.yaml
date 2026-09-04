@@ -1,0 +1,20 @@
+# permissions for end users to view runaiconfigs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runaiconfig-viewer-role
+rules:
+- apiGroups:
+  - run.ai
+  resources:
+  - runaiconfigs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - run.ai
+  resources:
+  - runaiconfigs/status
+  verbs:
+  - get

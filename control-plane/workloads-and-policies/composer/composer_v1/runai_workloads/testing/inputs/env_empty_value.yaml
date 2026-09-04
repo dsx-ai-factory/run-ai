@@ -1,0 +1,8 @@
+image: ubuntu
+environmentVariables:
+  - name: HOME
+    value: "/home/my-folder"
+  - name: EXCLUDED
+    exclude: true
+  - name: NO-VALUE
+    value:

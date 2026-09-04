@@ -1,0 +1,5 @@
+image: ubuntu
+exposedUrls:
+  - container: 8080
+    url: "https://my-app.example.com/app"
+    authorizationType: authenticatedUsers

@@ -1,0 +1,38 @@
+name: "Jira on V branch create (trigger)"
+
+on:
+  create:
+
+permissions: {}
+
+jobs:
+  dispatch:
+    name: Dispatch to saas-configuration
+    # Real release branch (vX.Y or release-X.Y), not a -saas branch.
+    if: ${{ github.event.ref_type == 'branch' && (startsWith(github.ref, 'refs/heads/v') || startsWith(github.ref, 'refs/heads/release-')) && contains(github.ref, '.') && !contains(github.ref, '-saas') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate release branch
+        id: check
+        run: |
+          BRANCH_NAME="${GITHUB_REF_NAME}"
+          echo "$BRANCH_NAME"
+          if [[ "$BRANCH_NAME" =~ ^(v|release-)[0-9]+\.[0-9]+$ ]]; then
+            echo "branch=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
+          else
+            echo "Branch name $BRANCH_NAME does not match ^(v|release-)[0-9]+\.[0-9]+$. Skipping."
+            echo "branch=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Cross-repo dispatch to saas-configuration worker
+        if: steps.check.outputs.branch != ''
+        uses: benc-uk/workflow-dispatch@31e2b3319479a63f0ab15bf800eff9e913504e26 # v1
+        with:
+          workflow: jira-on-v-branch-create.yml
+          repo: run-ai/saas-configuration
+          ref: master
+          token: ${{ secrets.GIT_HUB_OSS }}
+          inputs: |
+            {
+              "branch_name": "${{ steps.check.outputs.branch }}"
+            }

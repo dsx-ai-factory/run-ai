@@ -1,0 +1,3 @@
+{{- if .Values.notificationsService.enabled }}
+{{- include "common.hpa" (list . .Values.notificationsService.autoscaling .Values.notificationsService) -}}
+{{- end }}

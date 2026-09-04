@@ -1,0 +1,15 @@
+properties:
+  id:
+    type: number
+  gpu:
+    allOf:
+      - $ref: "./ResourceV1.yaml"
+    description: GPU number assigned
+  cpu:
+    allOf:
+      - $ref: "./ResourceV1.yaml"
+    description: CPU Millicores assigned. Supported only if 'CPU Resources Quota' feature flag is enabled.
+  memory:
+    allOf:
+      - $ref: "./ResourceV1.yaml"
+    description: CPU Memory Mib assigned. Supported only if 'CPU Resources Quota' feature flag is enabled.

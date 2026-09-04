@@ -1,0 +1,3 @@
+{{- if .Values.workloadsManager.enabled }}
+{{- include "common.hpa" (list . .Values.workloadsManager.autoscaling .Values.workloadsManager) -}}
+{{- end }}

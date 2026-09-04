@@ -1,0 +1,11 @@
+properties:
+  schedulingRules:
+    $ref: "../SchedulingRules.yaml"
+  defaultNodePools:
+    description: default order of node pools for workloads. will be enforced if no list is defined in workload policy
+    type: array
+    nullable: true
+    items:
+      type: string
+  nodeTypes:
+    $ref: '../nodetypes/NodeTypesPerWorkload.yaml'

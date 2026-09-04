@@ -1,0 +1,21 @@
+type: object
+description: Cluster configuration status
+properties:
+  actualConfig:
+    $ref: "ClusterUserConfigData.yaml"
+  state:
+    type: string
+    description: |
+      The state of the configuration. The possible values are:
+      Updating - The control plane got a request to update the cluster configuration and did not receive a status update yet from the cluster.
+      Applying - The configuration has been stored on the cluster, but is not yet applied.
+      Applied - The configuration has been successfully applied in the cluster.
+      Failed - The cluster has failed to apply the configuration.
+    enum:
+    - updating
+    - applying
+    - applied
+    - failed
+  stateMessage:
+    type: string
+    description: A message describing the state of the configuration.

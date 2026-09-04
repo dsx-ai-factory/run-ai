@@ -1,0 +1,3 @@
+description: the type of workload
+type: string
+enum: [Workspace, Training, Distributed, Inference, DistributedInference]

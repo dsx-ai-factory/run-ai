@@ -1,0 +1,31 @@
+get:
+  summary: Count templates. [Experimental]
+  description: Get the total number of templates.
+  operationId: count_templates
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/templates_service_test.go
+  x-authorize:
+    resource-type: templates
+    action: read
+  tags:
+    - Workload templates
+  parameters:
+    - $ref: '../parameters/query/TemplatesFilter.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Search.yaml"
+    - $ref: "../parameters/query/IncludeTemplateAncestors.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../../../infra/openapi/docs/schemas/common/CountResponse.yaml"
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

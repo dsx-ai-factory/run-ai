@@ -1,0 +1,259 @@
+type: object
+required:
+  - type
+  - name
+  - id
+  - source
+  - priority
+  - priorityClassName
+  - clusterId
+  - projectName
+  - projectId
+  - departmentName
+  - departmentId
+  - namespace
+  - createdAt
+  - phase
+  - conditions
+  - k8sPhase
+  - tenantId
+  - runningPods
+  - phaseUpdatedAt
+  - k8sPhaseUpdatedAt
+  - updatedAt
+  - deletedAt
+  - category
+properties:
+  tenantId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml'
+  runningPods:
+    type: integer
+    format: int32
+    example: 1
+  phaseUpdatedAt:
+    type: string
+    format: date-time
+    example: 2022-06-08T11:28:24.131Z
+  k8sPhaseUpdatedAt:
+    type: string
+    format: date-time
+    example: 2022-06-08T11:28:24.131Z
+  updatedAt:
+    type: string
+    format: date-time
+    example: 2022-06-08T11:28:24.131Z
+  source:
+    $ref: "./Source.yaml"
+  deletedAt:
+    type: string
+    format: date-time
+    example: 2022-08-12T19:28:24.131Z
+    nullable: true
+  type:
+    type: string
+    example: "runai-job"
+  name:
+    type: string
+    example: "very-important-job"
+  externalWorkloadName:
+    type: string
+    example: "ew-deployment-very-important-job"
+    x-internal: true
+  id:
+    type: string
+    format: uuid
+  priority:
+    type: integer
+    format: int32
+    example: 50
+    nullable: true
+  priorityClassName:
+    type: string
+    example: "high-priority"
+  submittedBy:
+    type: string
+    example: "researcher@run.ai"
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  projectName:
+    type: string
+    example: "proj-1"
+  projectId:
+    type: string
+    example: "1"
+  departmentName:
+    type: string
+    example: "department-1"
+  departmentId:
+    type: string
+    example: "1"
+  namespace:
+    type: string
+    example: "runai-proj-1"
+  createdAt:
+    type: string
+    format: date-time
+    example: 2022-01-01T03:49:52.531Z
+  workloadRequestedResources:
+    $ref: "./WorkloadRequestResources.yaml"
+  podsRequestedResources:
+    $ref: "./WorkloadRequestResources.yaml"
+  allocatedResources:
+    $ref: "./WorkloadAllocatedResources.yaml"
+  actionsSupport:
+    $ref: "../Common/ActionsSupport.yaml"
+  phase:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads/Phase.yaml'
+  conditions:
+    $ref: "../Common/Conditions.yaml"
+  phaseMessage:
+    type: string
+    example: 'Not enough resources in the requested nodepool'
+  k8sPhase:
+    type: string
+    example: 'Pending'
+  requestedPods:
+    $ref: "./RequestedPods.yaml"
+  requestedNodePools:
+    type: array
+    items:
+      type: string
+      example: "default"
+  currentNodePools:
+    type: array
+    items:
+      type: string
+      example: "default"
+  completedAt:
+    type: string
+    format: date-time
+    example: 2022-01-01T03:49:52.531Z
+    nullable: true
+  images:
+    type: array
+    items:
+      type: string
+      example: "alpine:latest"
+  childrenIds:
+    type: array
+    writeOnly: true
+    items:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+  urls:
+    description: "**DEPRECATED:** This field is deprecated. Use [Get workload endpoints](/latest/#operation/get_workload_endpoints) to retrieve workload network endpoints instead.Requires cluster version 2.25 or above."
+    type: array
+    items:
+      type: string
+  datasources:
+    type: array
+    items:
+      $ref: "./Datasource.yaml"
+  environments:
+    type: array
+    items:
+      $ref: "./Environment.yaml"
+  externalConnections:
+    description: "**DEPRECATED:** This field is deprecated. Use [Get workload endpoints](/latest/#operation/get_workload_endpoints) to retrieve workload network endpoints instead.Requires cluster version 2.25 or above."
+    type: array
+    items:
+      $ref: "./Connection.yaml"
+  distributedFramework:
+    type: string
+    example: "Pytorch"
+  additionalFields:
+    type: object
+    additionalProperties: true
+  preemptible:
+    type: boolean
+    nullable: true
+  fullySaasWorkload:
+    x-internal: true
+    type: boolean
+  environmentVariables:
+    type: object
+    additionalProperties:
+      type: string
+  command:
+    type: string
+    example: "sleep"
+  arguments:
+    type: string
+    example: "1000"
+  phaseReason:
+    type: string
+    nullable: true
+    allOf:
+      - $ref: "./PhaseReasons/PhaseReason.yaml"
+  idleAllocatedGpus:
+    type: number
+    description: sum of idle allocated gpus in the workload
+    nullable: true
+    example: 1
+  idleSince:
+    x-internal: true
+    type: string
+    format: date-time
+    nullable: true
+    example: 2022-01-01T03:49:52.531Z
+    description: The timestamp when the workload became idle. Null if the workload is not currently idle.
+  totalPendingTimeSeconds:
+    type: integer
+    description: The total cumulative time, in seconds, that the workload has spent in the Pending phase since submission.
+    nullable: true
+    example: 60
+  totalRunningTimeSeconds:
+    type: integer
+    description: The total cumulative time, in seconds, that the workload has spent in the Running phase since submission.
+    nullable: true
+    example: 60
+  category:
+    type: string
+    example: Train
+    description: Category Description
+  guaranteedRuntimeEndsAt:
+    type: string
+    format: date-time
+    example: 2025-08-01T03:49:52.531Z
+    nullable: true
+    description: A timestamp indicating when the workload will reach its minimum guaranteed runtime, as defined by minGuaranteedRuntime. 
+      Until this time, the workload is considered non-preemptible and cannot be interrupted by higher-priority workloads.
+  aiApplicationId:
+    type: string
+  aiApplicationName:
+    type: string
+  sourceApi:
+    $ref: "./SourceApi.yaml"
+  topology:
+    type: object
+    description: The workload’s network topology. Populated whenever the workload requested topology constraints, or runs on nodepools associated with a network topology.
+    nullable: true
+    properties:
+      name:
+        type: string
+        description: The name of the network topology associated with the workload — either as requested via constraints, or inferred from the workload's nodepools when no constraints were requested.
+      preferredPlacement:
+        type: string
+        description: The topology level to use as a preferred placement constraint for the workload.
+      requiredPlacement:
+        type: string
+        description: The topology level to use as required placement constraint for the workload. If the requirement cannot be satisfied at this topology level, placement will fail
+      actualPlacement:
+        $ref: "./WorkloadTopologyActualPlacement.yaml"
+  endpoints:
+    description: List of network endpoints through which the workload is exposed.
+    type: array
+    items:
+      $ref: "./Endpoint.yaml"
+  nodeAffinities:
+    x-internal: true
+    $ref: "../Pods/NodeAffinity/WorkloadNodeAffinities.yaml"
+  kubernetesRef:
+    $ref: "./WorkloadKubernetesRef.yaml"

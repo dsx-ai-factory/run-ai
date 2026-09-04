@@ -1,0 +1,19 @@
+type: object
+required:
+  - uid
+  - kind
+  - name
+  - namespace
+properties:
+  uid:
+    type: string
+    format: uuid
+  kind:
+    type: string
+    example: "Pod"
+  name:
+    type: string
+    example: "test-0-1"
+  namespace:
+    type: string
+    example: "runai-test"

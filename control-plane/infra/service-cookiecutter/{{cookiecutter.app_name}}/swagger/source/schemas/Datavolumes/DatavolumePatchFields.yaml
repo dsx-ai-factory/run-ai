@@ -1,0 +1,6 @@
+type: object
+properties:
+  description:
+    type: string
+    maxLength: 127
+    example: "Results of experiment X"

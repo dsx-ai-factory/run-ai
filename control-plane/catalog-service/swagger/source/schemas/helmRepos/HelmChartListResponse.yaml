@@ -1,0 +1,9 @@
+type: object
+required:
+  - charts
+properties:
+  charts:
+    type: array
+    description: The list of charts in the helm repo.
+    items:
+      $ref: './HelmChart.yaml'

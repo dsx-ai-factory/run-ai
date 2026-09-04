@@ -1,0 +1,13 @@
+type: object
+properties:
+  value:
+    $ref: './GetEnableSettingsValue.yaml'
+  displayName:
+    type: string
+    readOnly: true
+  description:
+    type: string
+    readOnly: true
+  stage:
+    type: string
+    readOnly: true

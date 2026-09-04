@@ -1,0 +1,11 @@
+properties:
+  validation:
+    properties:
+      errorMessage:
+        pattern: '.*'
+        type: string
+        description: In case validation failed, holds the error message explaining the issue
+    nullable: true
+    type: object
+nullable: true
+type: object

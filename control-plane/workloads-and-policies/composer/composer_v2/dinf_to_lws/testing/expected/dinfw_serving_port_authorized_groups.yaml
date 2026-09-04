@@ -1,0 +1,156 @@
+Config:
+  mnnvl: None
+  networking:
+  - externalAccess:
+      ingress:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: dinfw-test-lws-sp-0
+        spec:
+          rules:
+          - host: test.run.ai
+            http:
+              paths:
+              - backend:
+                  service:
+                    name: dinfw-test-lws-sp-0
+                    port:
+                      number: 80
+                path: /team-a/test-lws
+                pathType: Prefix
+    services:
+    - spec:
+        name: dinfw-test-lws-sp-0
+        ports:
+        - name: serving-port
+          port: 80
+          protocol: TCP
+          targetPort: 4180
+        selector:
+          leaderworkerset.sigs.k8s.io/name: test-lws-1234
+          leaderworkerset.sigs.k8s.io/worker-index: "0"
+        type: ClusterIP
+LeaderWorkerSet:
+  apiVersion: leaderworkerset.x-k8s.io/v1
+  kind: LeaderWorkerSet
+  metadata:
+    annotations:
+      run.ai/submitted-by: tester
+    labels:
+      app: leaderworkerset
+      createdBy: LeaderWorkerSet
+      project: team-a
+      release: test-lws
+      run.ai/control-plane-managed: "true"
+      run.ai/converted-from-native: "true"
+      workloadKind: DistributedInference
+      workloadName: test-lws
+    name: test-lws-1234
+    namespace: runai-team-a
+  spec:
+    leaderWorkerTemplate:
+      leaderTemplate:
+        metadata:
+          labels:
+            app: leaderworkerset
+            createdBy: LeaderWorkerSet
+            project: team-a
+            release: test-lws
+            workloadKind: DistributedInference
+            workloadName: test-lws
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: team-a
+            - name: RUNAI_JOB_NAME
+              value: test-lws
+            image: python:3.8
+            name: leader
+            ports:
+            - containerPort: 8081
+              name: port-8081
+              protocol: TCP
+            readinessProbe:
+              tcpSocket:
+                port: 8081
+            resources: {}
+          - args:
+            - --provider=keycloak-oidc
+            - --upstream=http://localhost:8081
+            - --redirect-url=https://test.run.ai/team-a/test-lws/oauth2/callback
+            - --oidc-issuer-url=https://test.run.ai/auth/realms/runai
+            - --scope=openid
+            - --http-address=0.0.0.0:4180
+            - --proxy-prefix=/team-a/test-lws/oauth2
+            - --skip-provider-button=true
+            - --whitelist-domain=test.run.ai
+            - --cookie-domain=test.run.ai
+            - --cookie-httponly=true
+            - --cookie-secure=true
+            - --code-challenge-method=S256
+            - --cookie-refresh=10m
+            - --cookie-samesite=lax
+            - --skip-jwt-bearer-tokens=true
+            - --extra-jwt-issuers=https://test.run.ai/auth/realms/runai=runai
+            - --custom-templates-dir=/usr/share/oauth2-proxy
+            - --pass-authorization-header=false
+            - --cookie-name=dinfw-test-lws-sp-0
+            - --session-store-type=redis
+            - --redis-connection-url=redis://redis.runai-backend.svc.cluster.local
+            - --force-json-errors=true
+            - --allowed-group=group-a
+            - --allowed-group=group-b
+            - --email-domain=*
+            env:
+            - name: OAUTH2_PROXY_COOKIE_PATH
+              value: /team-a/test-lws
+            envFrom:
+            - secretRef:
+                name: runai-auth-secret
+            image: test.registry/oauth2-proxy:latest
+            imagePullPolicy: IfNotPresent
+            name: runai-oauth2-proxy-0
+            ports:
+            - containerPort: 4180
+            resources: {}
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+            volumeMounts:
+            - mountPath: /etc/runai/auth/users
+              name: runai-auth
+          priorityClassName: very-high
+          schedulerName: runai-scheduler
+          volumes:
+          - emptyDir: {}
+            name: runai-auth
+      restartPolicy: RecreateGroupOnPodRestart
+      size: 1
+      workerTemplate:
+        metadata:
+          labels:
+            app: leaderworkerset
+            createdBy: LeaderWorkerSet
+            project: team-a
+            release: test-lws
+            workloadKind: DistributedInference
+            workloadName: test-lws
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: team-a
+            - name: RUNAI_JOB_NAME
+              value: test-lws
+            image: python:3.8
+            name: worker
+            resources: {}
+          priorityClassName: very-high
+          schedulerName: runai-scheduler
+    replicas: 1
+    rolloutStrategy:
+      type: RollingUpdate
+    startupPolicy: LeaderCreated
+  status: {}

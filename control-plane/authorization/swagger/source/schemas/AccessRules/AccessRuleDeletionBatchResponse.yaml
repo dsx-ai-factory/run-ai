@@ -1,0 +1,13 @@
+type: object
+required:
+  - id
+properties:
+  id:
+    $ref: './AccessRuleDeletionBatchId.yaml'
+  succeeded:
+    $ref: './AccessRuleDeletionBatchIdsList.yaml'
+  failed:
+    type: array
+    description: Details of the access rule IDs that failed to delete.
+    items:
+      $ref: './AccessRuleDeletionBatchResponseFailureItem.yaml'

@@ -1,0 +1,16 @@
+type: object
+required: 
+  - chartRef
+properties:
+  chartRef:
+    $ref: "./AIApplicationSpecChartRef.yaml"
+  values:
+    type: object
+    description: Inline Helm values used to override the Helm chart’s default configuration. These values are merged with the Helm chart’s `values.yaml`. This field is mutually exclusive with `valuesBase64`.
+    additionalProperties: true
+  valuesBase64:
+    type: string
+    description: Base64-encoded Helm values used to override the Helm chart’s default configuration. This field is mutually exclusive with `values`.
+    format: byte
+  auth:
+    $ref: "./AIApplicationAuth.yaml"

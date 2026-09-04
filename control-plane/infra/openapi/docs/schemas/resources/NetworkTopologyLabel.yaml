@@ -1,0 +1,11 @@
+type: object
+required:
+  - labelKey
+  - labelValue
+properties:
+  labelKey:
+    type: string
+    description: The Kubernetes node label key that identifies a topology level (for example, topology.kubernetes.io/zone or cloud.provider.com/topology-rack).
+  labelValue:
+    $ref: '../common/LabelValue.yaml'
+    description: The value of the Kubernetes node label for the specified labelKey on this node (for example, zone-a or rack-1). This value identifies the node’s placement within the corresponding topology level.

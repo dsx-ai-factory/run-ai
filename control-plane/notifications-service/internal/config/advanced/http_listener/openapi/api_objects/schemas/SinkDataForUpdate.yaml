@@ -1,0 +1,13 @@
+type: object
+properties:
+  type:
+    type: string
+    enum:
+      - email
+      - slack
+      - postgres
+  config:
+    type: object
+    additionalProperties: true
+required:
+  - type

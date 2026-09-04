@@ -1,0 +1,42 @@
+description: |
+  Layer 3 case "workload" for ray.io/RayService/v1. SETs workload-level
+  rayServiceSpec FG fields (serveConfigV2, deploymentUnhealthySecondThreshold,
+  serviceUnhealthySecondThreshold, excludeHeadPodFromServeSvc) plus the
+  upgradeStrategy.type enum (custom rayServiceSpec formatter). Also SETs a few
+  fields on the embedded rayClusterSpec to prove that selector resolves under
+  .spec.rayClusterConfig.
+effectiveRules:
+  # ----- workloadMetadata -----
+  - field: labels
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "app", value: "ray-service-test" } }]
+  - field: annotations
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "example.com/annotation", value: "test-value" } }]
+
+  # ----- rayServiceSpec FG scalar fields -----
+  - field: serveConfigV2
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "applications:\n  - name: app\n    import_path: app:main\n" } }]
+  - field: deploymentUnhealthySecondThreshold
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 300 } }]
+  - field: serviceUnhealthySecondThreshold
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 300 } }]
+  - field: excludeHeadPodFromServeSvc
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: false } }]
+
+  # ----- upgradeStrategy.type enum (custom rayServiceSpec formatter) -----
+  - field: upgradeStrategy-Type
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: NewCluster } }]
+
+  # ----- embedded rayClusterSpec fields (anchored at .spec.rayClusterConfig) -----
+  - field: rayVersion
+    specSelector: rayClusterSpec
+    enforcements: [{ set: { value: "2.11.0" } }]
+  - field: enableInTreeAutoscaling
+    specSelector: rayClusterSpec
+    enforcements: [{ set: { value: true } }]

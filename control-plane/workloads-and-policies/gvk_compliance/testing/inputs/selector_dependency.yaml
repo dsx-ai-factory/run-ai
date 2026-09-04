@@ -1,0 +1,74 @@
+# Tests that spec selector dependencies create missing intermediate paths
+# before SET enforcements run. Without dependencies, SET to a missing path would
+# silently skip because the JQ selector yields no results.
+policy:
+  id: test-dependency
+  effectiveRules:
+    # Set annotation on a nested path that doesn't exist.
+    # The dependency on "templateMetadata" should create .spec.template.metadata
+    # before the SET enforcement runs.
+    - field: annotations
+      specSelector: templateMetadata
+      enforcements:
+        - set:
+            key: injected-by-policy
+            value: "true"
+
+    # Set annotation on workload root metadata (no dependency needed, path exists)
+    - field: annotations
+      specSelector: workloadMetadata
+      enforcements:
+        - set:
+            key: root-annotation
+            value: present
+
+    # Set on a deeply nested path with chained dependencies:
+    # servicePodMetadata depends on serviceByName, which requires the service to exist.
+    # The dependency should create .spec.services[name=svc-a].extraPodMetadata
+    - field: annotations
+      specSelector: servicePodMetadata
+      selectorParams:
+        serviceName: svc-a
+      enforcements:
+        - set:
+            key: service-annotation
+            value: from-policy
+
+  breakdown:
+    fields:
+      annotations:
+        - specSelectors: [workloadMetadata, templateMetadata, servicePodMetadata]
+          formatter:
+            setExpr: |
+              { "annotations": { ($ARGS.named.key): $ARGS.named.value } }
+    specSelectors:
+      workloadMetadata:
+        query: ".metadata"
+      templateMetadata:
+        query: ".spec.template.metadata"
+        dependency:
+          path: spec.template.metadata
+      serviceByName:
+        query: '.spec.services[] | select(.name == $ARGS.named.serviceName)'
+        argsInfo:
+          serviceName: string
+      servicePodMetadata:
+        query: '.spec.services[] | select(.name == $ARGS.named.serviceName) | .extraPodMetadata'
+        argsInfo:
+          serviceName: string
+        dependency:
+          specSelector: serviceByName
+          path: extraPodMetadata
+
+workload:
+  apiVersion: test/v1
+  kind: TestWorkload
+  metadata:
+    name: test-workload
+  spec:
+    replicas: 1
+    services:
+      - name: svc-a
+        port: 8080
+      # svc-a exists but has no extraPodMetadata - dependency should create it
+    # Note: .spec.template does NOT exist - dependency should create the full path

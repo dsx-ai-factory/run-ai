@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: etcd-metrics-proxy
+  namespace: runai
+spec:
+  selector:
+    matchLabels:
+      app: etcd-metrics-proxy
+  template:
+    metadata:
+      labels:
+        app: etcd-metrics-proxy
+    spec:
+      hostNetwork: true
+      nodeSelector:
+        node-role.kubernetes.io/control-plane: ""
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: socat
+          image: alpine/socat:latest
+          args:
+            - TCP-LISTEN:2382,bind=0.0.0.0,reuseaddr,fork
+            - TCP:127.0.0.1:2381
+          ports:
+            - name: metrics
+              containerPort: 2382
+              hostPort: 2382
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: etcd-metrics-proxy
+  namespace: runai
+  labels:
+    app: etcd-metrics-proxy
+spec:
+  clusterIP: None
+  selector:
+    app: etcd-metrics-proxy
+  ports:
+    - name: metrics
+      port: 2382
+      targetPort: 2382
+      protocol: TCP
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: etcd-metrics-proxy
+  namespace: runai
+spec:
+  selector:
+    matchLabels:
+      app: etcd-metrics-proxy
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s

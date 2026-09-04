@@ -1,0 +1,68 @@
+get:
+  summary: List workload categories.
+  description: Retrieves a list of workload categories. These categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform.
+  operationId: list_categories
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/workloads_types_api_test.go
+  x-no-authorization: true # code implements validation - read on workloads or workload-properties
+  tags:
+    - Workload properties
+  responses:
+    200:
+      description: List of categories retrieved successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - categories
+            properties:
+              categories:
+                $ref: '../schemas/WorkloadProperties/WorkloadCategories.yaml'
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+
+#post:
+#  summary: Create a new category
+#  operationId: create_category
+#  x-service: workloads
+#  x-test-coverage: not-applicable
+#  x-authorize:
+#    resource-type: workload-properties
+#    action: create
+#  tags:
+#    - Workload properties
+#  requestBody:
+#    content:
+#      application/json:
+#        schema:
+#          type: object
+#          properties:
+#            name:
+#              type: string
+#              description: Name of the category
+#            description:
+#              type: string
+#              description: Optional description of the category
+#  responses:
+#    201:
+#      description: Category created successfully
+#      content:
+#        application/json:
+#          schema:
+#            $ref: '../schemas/WorkloadProperties/WorkloadCategory.yaml'
+#    400:
+#      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+#    401:
+#      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+#    403:
+#      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+#    503:
+#      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

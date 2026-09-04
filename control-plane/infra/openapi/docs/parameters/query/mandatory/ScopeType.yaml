@@ -1,0 +1,11 @@
+name: scopeType
+in: query
+required: true
+description: The resource scope type to filter by.
+schema:
+  type: string
+  enum:
+    - tenant
+    - cluster
+    - department
+    - project

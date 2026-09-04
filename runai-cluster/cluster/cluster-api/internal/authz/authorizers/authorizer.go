@@ -1,0 +1,35 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package authorizers
+
+import (
+	"context"
+
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/api"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/auth"
+)
+
+type Authorizer interface {
+	Authorize(ctx context.Context, request *Request) (allowed bool, reason Reason, err error)
+}
+
+type Reason int
+
+const (
+	ReasonAuthorized Reason = iota
+	ReasonUnauthorized
+	ReasonError
+)
+
+type Request struct {
+	AuthInfo    *auth.Info
+	Project     string
+	Namespace   string
+	Workload    string
+	Kind        api.WorkloadType
+	Action      api.WorkloadAction
+	WorkloadUID string
+}

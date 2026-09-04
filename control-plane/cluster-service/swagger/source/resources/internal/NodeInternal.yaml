@@ -1,0 +1,26 @@
+get:
+  x-internal: true
+  x-no-authorization: true
+  summary: Get node internal data by cluster UUID and name
+  description: Returns minimal node data including topology labels for internal service use
+  x-service: cluster-service
+  x-test-coverage: cluster-service/pkg/services/api_nodes_internal_service_test.go
+  tags:
+    - Nodes
+  operationId: get_node_internal
+  parameters:
+    - $ref: "../../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+    - $ref: "../../parameters/path/NodeName.yaml"
+  responses:
+    "200":
+      description: Successfully retrieved node data
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/Nodes/NodeInternal.yaml"
+    "400":
+      $ref: "../../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    "404":
+      $ref: "../../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    "500":
+      $ref: "../../../../../infra/openapi/docs/responses/500InternalServerError.yaml"

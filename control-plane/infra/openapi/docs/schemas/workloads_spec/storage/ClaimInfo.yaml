@@ -1,0 +1,20 @@
+description: Claim information for the newly created PVC. The information should not be provided when attempting to use existing PVC.
+properties:
+  size:
+    $ref: "./PvcClaimSize.yaml"
+  storageClass:
+    description: Storage class name to associate with the PVC. This parameter may be omitted if there is a single storage class in the system, or you are using the default storage class. For more information, see [Storage class](https://kubernetes.io/docs/concepts/storage/storage-classes).
+    type: string
+    minLength: 1
+    maxLength: 63
+    example: my-storage-class
+    nullable: true
+    pattern: "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$"
+  accessModes:
+    $ref: "./PvcAccessModes.yaml"
+  volumeMode:
+    $ref: "./PvcVolumeMode.yaml"
+  addedAttrValues:
+    $ref: "./PvcAddedAttrValues.yaml"
+nullable: true
+type: object

@@ -1,0 +1,5 @@
+{
+    "service_name": "cert-utils",
+    "artifact_type": "none",
+    "cache_artifacts": false
+  }

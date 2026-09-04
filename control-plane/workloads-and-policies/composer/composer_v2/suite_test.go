@@ -1,0 +1,17 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package composer_v2
+
+import (
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	"testing"
+)
+
+func TestWorkloadsComposer(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "fields composer tests suite")
+}

@@ -1,0 +1,31 @@
+post:
+  summary: Create inference workload.
+  description: Creates an inference workload from a given set of assets. The set must include one environment asset and can include one compute asset and multiple datasource assets.
+  operationId: create_inference
+  x-service: assets-service
+  x-test-coverage:
+    - e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+  x-no-authorization: true
+  x-internal: true
+  tags:
+    - Inferences
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/Workload/V1/WorkloadCreationRequest.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/Inference/Inference.yaml"
+    400:
+      $ref: "../../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

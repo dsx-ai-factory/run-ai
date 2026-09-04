@@ -1,0 +1,49 @@
+{
+  "id": "6f75680c-255c-422f-b4f4-7c31e4bd9cd9",
+  "name": "mynim-multi",
+  "type": "NIMService",
+  "phase": "Running",
+  "phaseMessage": "leaderworkerset \"mynim-multi-lws\" is ready",
+  "projectId": "4500011",
+  "projectName": "testnim",
+  "departmentName": "default",
+  "createdAt": "2026-03-10T16:49:32Z",
+  "updatedAt": "2026-03-10T21:40:58Z",
+  "submittedBy": "test@run.ai",
+  "priorityClassName": "very-high",
+  "priority": 150,
+  "images": ["gcr.io/run-ai-lab/nim-cpu:latest"],
+  "runningPods": 2,
+  "requestedPods": {
+    "number": 2
+  },
+  "workloadRequestedResources": {
+    "cpu": { "request": 0.2 },
+    "cpuMemory": { "request": "200M" },
+    "gpu": { "request": 0.0 }
+  },
+  "allocatedResources": {
+    "cpu": 0.2,
+    "cpuMemory": "200M",
+    "gpu": 0.0
+  },
+  "category": "Deploy",
+  "urls": ["https://test-cluster.runailabs.com/testnim/mynim-multi"],
+  "environments": [
+    {
+      "name": "NIMService",
+      "connections": [
+        {
+          "name": "NIMService",
+          "toolType": "NIMService",
+          "connectionType": "ExternalUrl",
+          "containerPort": 8080,
+          "url": "https://test-cluster.runailabs.com/testnim/mynim-multi"
+        }
+      ]
+    }
+  ],
+  "requestedNodePools": [],
+  "currentNodePools": ["default"],
+  "additionalFields": {}
+}

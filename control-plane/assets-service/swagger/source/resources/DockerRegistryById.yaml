@@ -1,0 +1,108 @@
+parameters:
+  - $ref: "../../../../infra/openapi/docs/parameters/path/AssetId.yaml"
+get:
+  tags:
+    - Credentials
+  summary: Get a docker registry credential.
+  description: Use to retrieve the details of a docker registry credential by id.
+  operationId: get_docker_registry_by_id
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_credentials_service_test.go
+    - control-plane/assets-service/pkg/services/api_credentials_service_docker_registry_test.go
+    - e2e/src/test/suites/advancedSuite/credential/credentialUI.test.ts
+    - e2e/src/test/suites/advancedSuite/credential/existingSecrestsUI.test.ts
+    - e2e/src/test/suites/advancedSuite/credential/existingSecrestsApi.test.ts
+  x-authorize:
+    resource-type: credentials
+    action: read
+  parameters:
+    - $ref: "../parameters/query/optional/IncludeUsageInfo.yaml"
+    - $ref: "../parameters/query/optional/IncludeStatus.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/DockerRegistry/DockerRegistry.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+put:
+  tags:
+    - Credentials
+  summary: Update a docker registry credential.
+  description: Use to updates the details of a docker registry credentials by id.
+  operationId: update_docker_registry
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_credentials_service_test.go
+    - control-plane/assets-service/pkg/services/api_credentials_service_docker_registry_test.go
+    - e2e/src/test/suites/advancedSuite/credential/credentialUI.test.ts
+  x-authorize:
+    resource-type: credentials
+    action: update
+  x-audit: true
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/DockerRegistry/DockerRegistryUpdateRequest.yaml"
+  responses:
+    202:
+      description: Request accepted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/DockerRegistry/DockerRegistry.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+delete:
+  tags:
+    - Credentials
+  summary: Delete a docker registry credential.
+  description: Use to deletes a docker registry credential by id.
+  operationId: delete_docker_registry
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_credentials_service_test.go
+    - control-plane/assets-service/pkg/services/api_credentials_service_docker_registry_test.go
+    - e2e/src/test/suites/advancedSuite/credential/credentialUI.test.ts
+    - e2e/src/test/suites/advancedSuite/credential/existingSecrestsUI.test.ts
+    - e2e/src/test/suites/advancedSuite/credential/existingSecrestsApi.test.ts
+  x-authorize:
+    resource-type: credentials
+    action: delete
+  x-audit: true
+  responses:
+    202:
+      $ref: "../../../../infra/openapi/docs/responses/202Accepted.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    412:
+      $ref: "../../../../infra/openapi/docs/responses/412PreconditionFailed.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

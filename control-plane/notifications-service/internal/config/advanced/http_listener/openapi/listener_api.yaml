@@ -1,0 +1,543 @@
+openapi: 3.0.3
+
+info:
+  version: 1.0.0
+  title: Notifications Service Config API
+  description: API for notifications-service config endpoint
+
+paths:
+  /api/v1/listeners:
+    post:
+      tags:
+        - listener
+      operationId: createListener
+      description: Creates a listener config
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./api_objects/schemas/ListenerData.yaml"
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkRequest.yaml"
+        '400':
+          $ref: "./api_objects/responses/BadRequest.yaml"
+        '409':
+          $ref: "./api_objects/responses/Conflict.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+  /api/v1/listeners/{listenerId}:
+    put:
+      parameters:
+        - name: listenerId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of relevant listener to update
+      tags:
+        - listener
+      operationId: updateListener
+      description: Updates a listener config
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./api_objects/schemas/ListenerDataForUpdate.yaml"
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkRequest.yaml"
+        '400':
+          $ref: "./api_objects/responses/BadRequest.yaml"
+        '404':
+          $ref: "./api_objects/responses/NotFound.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+    get:
+      parameters:
+        - name: listenerId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of relevant listener to retrieve
+      tags:
+        - listener
+      operationId: getListener
+      description: Get a listener
+      responses:
+        '200':
+          $ref: "./api_objects/responses/ListenerResponse.yaml"
+        '404':
+          $ref: "./api_objects/responses/NotFound.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+    delete:
+      parameters:
+        - name: listenerId
+          in: path
+          schema:
+            type: string
+          required: true
+          description: ID of relevant listener to delete
+      tags:
+        - listener
+      operationId: deleteListener
+      description: Deletes a listener
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkRequest.yaml"
+        '404':
+          $ref: "./api_objects/responses/NotFound.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+  /api/v1/tenants/{tenantId}/routes:
+    parameters:
+      - in: path
+        name: tenantId
+        schema:
+          type: string
+        required: true
+        description: ID of relevant tenant
+    get:
+      tags:
+        - tenant_route
+      operationId: getRoutes
+      description: Get list of tenant routes
+      responses:
+        '200':
+          $ref: "./api_objects/responses/Routes.yaml"
+    post:
+      tags:
+        - tenant_route
+      operationId: createRoute
+      description: Creates a tenant route
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./api_objects/schemas/RouteData.yaml"
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkRequest.yaml"
+        '400':
+          $ref: "./api_objects/responses/BadRequest.yaml"
+        '409':
+          $ref: "./api_objects/responses/Conflict.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+  /api/v1/tenants/{tenantId}/routes/{routeId}:
+    parameters:
+      - in: path
+        name: tenantId
+        schema:
+          type: string
+        required: true
+        description: ID of relevant tenant
+      - in: path
+        name: routeId
+        schema:
+          type: string
+        required: true
+        description: ID of relevant tenant route
+    get:
+      tags:
+        - tenant_route
+      operationId: getRoute
+      description: Get a single tenant route config
+      responses:
+        '200':
+          $ref: "./api_objects/responses/Route.yaml"
+        '404':
+          $ref: "./api_objects/responses/NotFound.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+    put:
+      tags:
+        - tenant_route
+      operationId: updateRoute
+      description: Updates a tenant route
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./api_objects/schemas/RouteDataForUpdate.yaml"
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkRequest.yaml"
+        '400':
+          $ref: "./api_objects/responses/BadRequest.yaml"
+        '404':
+          $ref: "./api_objects/responses/NotFound.yaml"
+    delete:
+      tags:
+        - tenant_route
+      operationId: deleteRoute
+      description: Deletes a tenant route
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkRequest.yaml"
+        '404':
+          $ref: "./api_objects/responses/NotFound.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+  /api/v1/tenants/{tenantId}/users/routes:
+    parameters:
+      - in: path
+        name: tenantId
+        schema:
+          type: string
+        required: true
+        description: ID of relevant tenant
+    delete:
+      operationId: deleteAllUserRoutes
+      description: Deletes all user routes of a tenant
+      tags:
+        - user_route
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkRequest.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+  /api/v1/tenants/{tenantId}/users/routes/notify/{notifyId}:
+    parameters:
+    - in: path
+      name: tenantId
+      schema:
+        type: string
+      required: true
+      description: ID of the relevant tenant
+    - in: path
+      name: notifyId
+      schema:
+        type: string
+      required: true
+      description: ID of the relevant notify/sink
+    delete:
+      operationId: deleteNotifyIdFromAllUserRoutes
+      description: Deletes a notifyId from all user routes of a tenant
+      tags:
+        - user_route
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkRequest.yaml"
+        '400':
+          $ref: "./api_objects/responses/BadRequest.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+  /api/v1/tenants/{tenantId}/users/{userId}/routes:
+    parameters:
+      - in: path
+        name: tenantId
+        schema:
+          type: string
+        required: true
+        description: ID of the relevant tenant
+      - in: path
+        name: userId
+        schema:
+          type: string
+        required: true
+        description: ID of the relevant user
+    get:
+      tags:
+        - user_route
+      operationId: getUserRoutes
+      description: Get current user routes of a user
+      responses:
+        '200':
+          $ref: "./api_objects/responses/Routes.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+    post:
+      tags:
+        - user_route
+      operationId: createUserRoute
+      description: Creates a user route for a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./api_objects/schemas/UserRouteData.yaml"
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkRequest.yaml"
+        '400':
+          $ref: "./api_objects/responses/BadRequest.yaml"
+        '409':
+          $ref: "./api_objects/responses/Conflict.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+  /api/v1/tenants/{tenantId}/users/{userId}/routes/{routeId}:
+    parameters:
+      - in: path
+        name: tenantId
+        schema:
+          type: string
+        required: true
+        description: ID of the relevant tenant
+      - in: path
+        name: userId
+        schema:
+          type: string
+        required: true
+        description: ID of the relevant user
+      - in: path
+        name: routeId
+        schema:
+          type: string
+        required: true
+        description: ID of the relevant route
+    put:
+      tags:
+        - user_route
+      operationId: updateUserRoute
+      description: Updates a user route for a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./api_objects/schemas/UserRouteDataForUpdate.yaml"
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkRequest.yaml"
+        '400':
+          $ref: "./api_objects/responses/BadRequest.yaml"
+        '404':
+          $ref: "./api_objects/responses/NotFound.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+    delete:
+      operationId: deleteUserRoute
+      description: Deletes a user route
+      tags:
+        - user_route
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkRequest.yaml"
+        '404':
+          $ref: "./api_objects/responses/NotFound.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+  /api/v1/sinks:
+    post:
+      tags:
+        - sinks
+      operationId: createSink
+      description: Creates a sink
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./api_objects/schemas/SinkData.yaml"
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkRequest.yaml"
+        '400':
+          $ref: "./api_objects/responses/BadRequest.yaml"
+        '409':
+          $ref: "./api_objects/responses/Conflict.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+    get:
+      operationId: getSinks
+      description: Get all sinks
+      tags:
+        - sinks
+      responses:
+        '200':
+          $ref: "./api_objects/responses/Sinks.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+  /api/v1/sinks/{sinkId}:
+    parameters:
+      - in: path
+        name: sinkId
+        required: true
+        schema:
+          type: string
+        description: ID of the sink
+        explode: false
+        style: simple
+    get:
+      tags:
+        - sinks
+      operationId: getSink
+      description: Get a sink configuration
+      responses:
+        '200':
+          $ref: "./api_objects/responses/Sink.yaml"
+        '404':
+          $ref: "./api_objects/responses/NotFound.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+    put:
+      tags:
+        - sinks
+      operationId: updateSink
+      description: Updates a sink
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./api_objects/schemas/SinkDataForUpdate.yaml"
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkRequest.yaml"
+        '404':
+          $ref: "./api_objects/responses/NotFound.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+    delete:
+      tags:
+        - sinks
+      operationId: deleteSink
+      description: Deletes a sink
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkRequest.yaml"
+        '404':
+          $ref: "./api_objects/responses/NotFound.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+  /api/v1/sinks/validate:
+    post:
+      tags:
+        - sinks
+      operationId: ValidateSink
+      description: Verify that the provided sink settings are correct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./api_objects/schemas/SinkData.yaml"
+      responses:
+        '200':
+          $ref: "./api_objects/responses/ValidateSinkResponse.yaml"
+        '400':
+          $ref: "./api_objects/responses/BadRequest.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+  /api/v1/config/health:
+    get:
+      tags:
+        - health
+      operationId: health
+      description: Get health state
+      
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkRequest.yaml"
+  /api/v1/tenants:
+    get:
+      tags:
+        - tenant_route
+      operationId: GetAllTenantsWithRoutes
+      description: Get a list of tenants with routes in the system
+      responses:
+        '200':
+          description: Distinct list of tenant ids with routes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+  /api/v1/notification-kinds:
+    get:
+      tags:
+        - register_notification
+      operationId: getNotificationKinds
+      description: get notification kinds
+      parameters:
+        - in: query
+          name: origin
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: category
+          schema:
+            type: string
+        - in: query
+          name: type
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: "./api_objects/responses/NotificationKinds.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+    post:
+      tags:
+        - register_notification
+      operationId: createNotificationKind
+      description: create a new notification kind
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./api_objects/schemas/NotificationKind.yaml"
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkRequest.yaml"
+        '409':
+          $ref: "./api_objects/responses/Conflict.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+    put:
+      tags:
+        - register_notification
+      operationId: updateNotificationKind
+      description: update a notification kind
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./api_objects/schemas/NotificationKind.yaml"
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkRequest.yaml"
+        '409':
+          $ref: "./api_objects/responses/Conflict.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+    delete:
+      tags:
+        - register_notification
+      parameters:
+        - in: query
+          name: category
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: type
+          required: true
+          schema:
+            type: string
+      operationId: deleteNotificationKind
+      description: delete a notification kind
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkRequest.yaml"
+        '404':
+          $ref: "./api_objects/responses/NotFound.yaml"
+        '500':
+          $ref: "./api_objects/responses/InternalServerError.yaml"
+tags:
+  - name: global
+    description: Global configuration API

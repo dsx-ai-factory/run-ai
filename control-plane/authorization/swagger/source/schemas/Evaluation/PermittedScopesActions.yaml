@@ -1,0 +1,15 @@
+type: object
+required:
+  - create
+  - read
+  - update
+  - delete
+properties:
+  create:
+    $ref: "./PermittedScopes.yaml"
+  read:
+    $ref: "./PermittedScopes.yaml"
+  update:
+    $ref: "./PermittedScopes.yaml"
+  delete:
+    $ref: "./PermittedScopes.yaml"

@@ -1,0 +1,32 @@
+post:
+  summary: Evaluate user permission to the requested resource. The returned permitted scopes are the scopes that the action on the resource is permitted, with OR between the multiple scopes.
+  x-no-authorization: true
+  x-internal: true
+  x-service: authorization
+  x-test-coverage:
+    - control-plane/authorization/pkg/services/permissions_api_test.go
+  operationId: evaluate_permission
+  tags:
+    - Permissions
+  requestBody:
+    description: The request parameters.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Evaluation/BackendEvaluationRequest.yaml'
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Evaluation/PermittedScopes.yaml'
+    204:
+      $ref: '../../../../infra/openapi/docs/responses/204NoContent.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

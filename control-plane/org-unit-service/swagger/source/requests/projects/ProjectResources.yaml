@@ -1,0 +1,4 @@
+put:
+  $ref: "./UpdateProjectResources.yaml"
+patch:
+  $ref: "./PatchProjectResources.yaml"

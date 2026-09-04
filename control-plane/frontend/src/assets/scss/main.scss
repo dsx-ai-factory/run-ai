@@ -1,0 +1,29 @@
+// abstracts
+@import "abstracts/mixin";
+@import "abstracts/icon-sizes";
+
+// vendors
+// @import 'vendor/quasar-variables'; // is imported from vite.config
+
+// base
+@import "base/base";
+@import "base/animation";
+@import "base/helpers";
+@import "base/typography";
+
+// components
+@import "components/btn";
+@import "components/table";
+@import "components/alert";
+@import "components/chip";
+@import "components/card";
+@import "components/input";
+@import "components/select";
+@import "components/tooltip";
+@import "components/form";
+@import "components/stepper";
+@import "components/guided-tour";
+@import "components/notification";
+
+// vendors
+@import "vendor/branding.scss";

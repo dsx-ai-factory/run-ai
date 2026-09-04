@@ -1,0 +1,14 @@
+{
+    "capturedAt": "2025-12-15T09:08:18Z",
+    "workloadType": "DistributedInference",
+    "workloadId": "78c1c79e-81fa-484e-961c-b2168ec5c0a3",
+    "workloadName": "my-dist-inference-full-123",
+    "apiUrl": "https://nael-env-001.runailabs.com",
+    "files": {
+        "workloadList": "workload_list.json",
+        "workloadDetailed": "workload_detailed.json",
+        "workloadSpec": "workload_spec.json",
+        "workloadPods": "workload_pods.json",
+        "workloadEvents": "workload_events.json"
+    }
+}

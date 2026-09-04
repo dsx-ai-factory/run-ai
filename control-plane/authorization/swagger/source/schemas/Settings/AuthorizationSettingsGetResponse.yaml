@@ -1,0 +1,6 @@
+type: object
+properties:
+  enableScopedAuthorization:
+    $ref: "./EnableScopedAuthorizationSetting.yaml"
+  tenantIsCspManaged:
+    $ref: "./TenantIsCspManagedSetting.yaml"

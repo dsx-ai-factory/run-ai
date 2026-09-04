@@ -1,0 +1,7 @@
+name: RegistryIntegrationId
+in: path
+required: true
+schema:
+  type: string
+  format: uuid
+  description: The ID of the registry integration.

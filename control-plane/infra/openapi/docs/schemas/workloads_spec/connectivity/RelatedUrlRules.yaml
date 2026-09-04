@@ -1,0 +1,10 @@
+description: Rules for the attributes of relatedUrls
+properties:
+  url:
+    $ref: "../../policy_rules/StringRules.yaml"
+  type:
+    $ref: "../../policy_rules/StringRules.yaml"
+  name:
+    $ref: "../../policy_rules/StringRules.yaml"
+nullable: true
+type: object

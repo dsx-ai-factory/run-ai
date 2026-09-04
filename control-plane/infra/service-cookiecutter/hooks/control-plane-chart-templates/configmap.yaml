@@ -1,0 +1,21 @@
+{{- if .Values.[[ cookiecutter_app_name_camel_case_lower ]].enabled }}
+{{- include "common.configMap" (list . .Values.[[ cookiecutter_app_name_camel_case_lower ]] "control-plane.[[ cookiecutter_app_name_camel_case_lower ]].configmap") }}
+{{- end }}
+
+{{- define "control-plane.[[ cookiecutter_app_name_camel_case_lower ]].configmap" -}}
+{{- $top := first . }}
+data:
+  SERVICE_PORT: {{ $top.Values.[[ cookiecutter_app_name_camel_case_lower ]].service.port | quote }}
+DB-CC-PREFIX  MIGRATION_FILES: {{ $top.Values.[[ cookiecutter_app_name_camel_case_lower ]].config.migrationFiles | quote }}
+DB-CC-PREFIX  DB_NAME: {{ $top.Values.[[ cookiecutter_app_name_camel_case_lower ]].config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+DB-CC-PREFIX  DB_HOST: {{ $top.Values.[[ cookiecutter_app_name_camel_case_lower ]].config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+DB-CC-PREFIX  DB_SSL_MODE: {{ $top.Values.[[ cookiecutter_app_name_camel_case_lower ]].config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+DB-CC-PREFIX  DB_PORT: {{ $top.Values.[[ cookiecutter_app_name_camel_case_lower ]].config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+DB-CC-PREFIX  DB_SCHEMA: {{ $top.Values.[[ cookiecutter_app_name_camel_case_lower ]].config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+CACHE-CC-PREFIX  {{- if $top.Values.[[ cookiecutter_app_name_camel_case_lower ]].config.cacheEnabled }}
+CACHE-CC-PREFIX  CACHE_ENABLED: "true"
+CACHE-CC-PREFIX  CACHE_URL: {{ $top.Values.[[ cookiecutter_app_name_camel_case_lower ]].config.cacheUrl | default $top.Values.global.cache.url | quote }}
+CACHE-CC-PREFIX  CACHE_READ_URL: {{ $top.Values.[[ cookiecutter_app_name_camel_case_lower ]].config.cacheReadUrl | default $top.Values.global.cache.readUrl | quote }}
+CACHE-CC-PREFIX  CACHE_TYPE: {{ $top.Values.[[ cookiecutter_app_name_camel_case_lower ]].config.cacheType | default $top.Values.global.cache.type | quote }}
+CACHE-CC-PREFIX  {{- end }}
+{{- end }}

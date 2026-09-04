@@ -1,0 +1,17 @@
+{
+  "service_name": "runai-cli",
+  "artifact_type": "go",
+  "notifications": {
+    "slack": {
+      "mention": "@viper"
+    }
+  },
+  "make": {
+    "test": {
+      "runs_on": "ubuntu-latest-4-cores"
+    }
+  },
+  "jira": {
+    "team_name": "Viper Team"
+  }
+}

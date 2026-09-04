@@ -1,0 +1,7 @@
+description: an optional array of key-values pairs that are written as annotations
+  on the created PVC. the allowed attributes are determined according to the 
+  storage class configuration (see k8s-objects-tracker for further info).
+type: array
+items:
+  $ref: "./PvcAddedAttrValue.yaml"
+maxItems: 1000

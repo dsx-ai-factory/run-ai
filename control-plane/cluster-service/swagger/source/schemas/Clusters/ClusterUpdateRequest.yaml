@@ -1,0 +1,8 @@
+type: object
+required:
+  - name
+properties:
+  name:
+    type: string
+    minLength: 0  # Optional field - can be empty if provided
+    maxLength: 253  # Kubernetes DNS subdomain limit (RFC 1035/1123)

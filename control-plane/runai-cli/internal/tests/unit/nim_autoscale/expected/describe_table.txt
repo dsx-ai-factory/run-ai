@@ -1,0 +1,62 @@
+Name:                               mynim-auto
+ID:                                 5fa3c7f9-1089-4225-93e2-16d7f6c4c4a6
+Type:                               NIMService
+Phase:                              Running
+Phase Message:                      deployment "mynim-auto" successfully rolled out
+Created At:                         2026-03-10T16:41:36Z
+Updated At:                         2026-03-10T16:43:17Z
+Project:                            testnim
+Department:                         default
+Submitted By:                       test@run.ai
+Priority:                           very-high (150)
+Category:                           Deploy
+Current Node Pool:                  default
+Image:                              gcr.io/run-ai-lab/nim-cpu:latest
+Environment Variables:              []
+
+
+NIM Service Configuration
+
+ NGC Auth Secret:                    my-ngc-secret
+ Replicas (Requested):               1
+ Replicas (Ready):                   1
+ Multi-Node:                         Disabled
+
+
+Model Store
+
+ Type:                               PVC
+ Access Mode:                        ReadWriteOnce
+
+
+Serving Configuration
+
+ Serving Port:                       8000
+ Expose Externally:                  true
+ Serving URL:                        https://test-cluster.runailabs.com/testnim/mynim-auto
+ Service Type:                       ClusterIP
+
+
+Autoscaling
+
+ Min Replicas:                       1
+ Max Replicas:                       3
+ Metric:                             cpu
+ Threshold:                          80
+
+
+Compute Resources
+
+ Resource              Requested   Limit       Allocated  
+──────────────────────────────────────────────────────────
+ GPU Compute           0.00                    0.00       
+ CPU Cores             0.10                    0.10       
+ GPU Memory                                               
+ CPU Memory            100M                    100M       
+
+
+Network
+
+ Name             Tool Type        Connection Type  Container Port   URL                                                   
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ NIMService       NIMService       ExternalUrl      8080             https://test-cluster.runailabs.com/testnim/mynim-auto 

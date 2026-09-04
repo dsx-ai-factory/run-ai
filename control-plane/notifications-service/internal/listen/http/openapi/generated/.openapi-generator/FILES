@@ -1,0 +1,14 @@
+.openapi-generator-ignore
+README.md
+api.go
+api/openapi.yaml
+api_notify.go
+api_notify_service.go
+error.go
+helpers.go
+impl.go
+logger.go
+model_api_error.go
+model_notification.go
+model_notify_batch_200_response.go
+routers.go

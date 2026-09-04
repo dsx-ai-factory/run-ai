@@ -1,0 +1,42 @@
+apiVersion: optimization.nvidia.com/v1alpha1
+kind: ResourceInterface
+metadata:
+  creationTimestamp: "2026-05-10T06:38:29Z"
+  finalizers:
+  - rid.kai.bolt/finalize
+  generation: 1
+  labels:
+    run.ai/resource-interface-group: serving.knative.dev
+    run.ai/resource-interface-kind: Service
+    run.ai/resource-interface-updated-at: 2026-05-10T06-35-07Z
+    run.ai/resource-interface-version: v1
+    run.ai/workload-type-id: f0a79bbf-c794-4e7b-aea0-119ff161b00c
+  name: ri-v1-serving-knative-dev-service
+  resourceVersion: "8770"
+  uid: c9381bc8-8841-4ec0-9e28-4a76e72d13c4
+spec:
+  optimizationInstructions: {}
+  structureDefinition:
+    rootComponent:
+      kind:
+        group: serving.knative.dev
+        kind: Service
+        version: v1
+      name: ""
+status:
+  conditions:
+  - lastTransitionTime: "2026-05-10T06:38:50Z"
+    message: ""
+    reason: RBACReady
+    status: "True"
+    type: RBACReady
+  - lastTransitionTime: "2026-05-10T06:38:50Z"
+    message: ""
+    reason: SyncEnabled
+    status: "True"
+    type: SyncEnabled
+  - lastTransitionTime: "2026-05-10T06:38:50Z"
+    message: ""
+    reason: CRDExists
+    status: "True"
+    type: CRDExists

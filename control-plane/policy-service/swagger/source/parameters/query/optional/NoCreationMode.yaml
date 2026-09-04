@@ -1,0 +1,9 @@
+name: noCreationMode
+in: query
+required: false
+x-internal: true
+description: Indicates that the policy should be returned only if the tenant has at least one
+  given policy, otherwise it should not be created and instead return error 404. This is done
+  for the frontend which needs the policy info also for tenants that are not using policy
+schema:
+  type: boolean

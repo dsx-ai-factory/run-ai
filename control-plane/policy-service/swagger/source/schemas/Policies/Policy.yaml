@@ -1,0 +1,21 @@
+type: object
+description: >-
+  A policy resource. A policy is uniquely identified by the triple of workload
+  type (Kubernetes Group/Version/Kind), scope, and project id, and constrains
+  the allowed values of fields in the workload spec through its rules. The
+  server assigns a unique id and tracks ownership and configuration status.
+allOf:
+  - $ref: "./PolicyDescriptionField.yaml"
+  - $ref: "./WorkloadTypeAndScope.yaml"
+  - $ref: "./PolicyRules.yaml"
+  - $ref: "./EffectiveRules.yaml"
+  - $ref: "./PolicyIdAndOwnership.yaml"
+properties:
+  status:
+    description: >-
+      Configuration issues detected by the server for this policy. Returned in
+      responses only; not accepted in requests.
+    allOf:
+      - $ref: "./PolicyStatus.yaml"
+    type: object
+    nullable: true

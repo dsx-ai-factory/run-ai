@@ -1,0 +1,9 @@
+properties:
+  path:
+    $ref: "../../policy_rules/StringRules.yaml"
+  medium:
+    $ref: "../../policy_rules/StringRules.yaml"
+  sizeLimit:
+    $ref: "../../policy_rules/StringRules.yaml"
+nullable: true
+type: object

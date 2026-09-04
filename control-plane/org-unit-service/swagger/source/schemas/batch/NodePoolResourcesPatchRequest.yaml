@@ -1,0 +1,15 @@
+type: object
+required:
+  - orgUnitId
+  - nodePoolId
+properties:
+  orgUnitId:
+    description: The project/department ID.
+    type: string
+  nodePoolId:
+    type: string
+  rank:
+    nullable: true
+    type: string
+  resources:
+    $ref: "../../schemas/ResourcesPerNodePoolNullable.yaml"

@@ -1,0 +1,15 @@
+type: object
+description: quota equals to the given resources and allocated equal to the real count of used resources
+required:
+  - quota
+  - allocated
+properties:
+  quota:
+    type: number
+    example: 3
+  allocated:
+    type: number
+    example: 2.5
+  utilization:
+    type: number
+    example: 0.765

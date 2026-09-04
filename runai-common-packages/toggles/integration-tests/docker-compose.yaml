@@ -1,0 +1,55 @@
+name: toggles-integration-tests
+
+services:
+  postgres:
+    attach: false
+    image: postgres:15-alpine
+    profiles:
+      - unleash-setup
+    environment:
+      POSTGRES_DB: unleash
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: unleash
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+      start_period: 2s
+
+  unleash:
+    attach: false
+    image: unleashorg/unleash-server:6
+    profiles:
+      - unleash-setup
+    environment:
+      DATABASE_URL: "postgres://postgres:unleash@postgres/unleash"
+      DATABASE_SSL: "false"
+      LOG_LEVEL: "warn"
+      INIT_ADMIN_API_TOKENS: "*:*.toggles-admin-token"
+      INIT_CLIENT_API_TOKENS: "*:development.toggles-client-token"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4242/health"]
+      interval: 5s
+      timeout: 10s
+      retries: 20
+      start_period: 15s
+
+  toggles-test:
+    profiles:
+      - unleash-test
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    image: toggles-test
+    environment:
+      UNLEASH_URL: "http://unleash:4242/api"
+      UNLEASH_ADMIN_URL: "http://unleash:4242"
+      UNLEASH_ADMIN_TOKEN: "*:*.toggles-admin-token"
+      UNLEASH_API_KEY: "*:development.toggles-client-token"
+    depends_on:
+      unleash:
+        condition: service_healthy

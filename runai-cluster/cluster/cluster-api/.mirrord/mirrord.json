@@ -1,0 +1,15 @@
+{
+    "target": {
+        "path": {
+            "deployment": "cluster-api"
+        },
+        "namespace": "runai"
+    },
+    "feature": {
+        "env": true,
+        "fs": "read",
+        "network": {
+            "incoming": "steal"
+        }
+    }
+}

@@ -1,0 +1,43 @@
+type: object
+required:
+  - type
+  - timestamp
+  - values
+properties:
+  type:
+    type: string
+    description: "specifies what data returned"
+    example: "ALLOCATION_RATIO"
+  timestamp:
+    type: string
+    format: date-time
+    example: '2023-06-06 12:09:18.211'
+  values:
+    type: array
+    items:
+      type: object
+      required:
+        - value
+      properties:
+        value:
+          type: string
+          example: '85'
+        groups:
+          type: array
+          description: "columns the data is grouped by"
+          maxItems: 2
+          items:
+            type: object
+            required:
+              - key
+              - value
+            properties:
+              key:
+                type: string
+                example: "department"
+              value:
+                type: string
+                example: "1"
+              name:
+                type: string
+                example: "department-A"

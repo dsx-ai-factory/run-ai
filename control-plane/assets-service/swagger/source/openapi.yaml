@@ -1,0 +1,224 @@
+openapi: "3.0.0"
+info:
+  version: 2.0.0
+  title: Assets
+  description: An API for managing assets
+  contact:
+    email: support@run.ai
+servers:
+  - url: https://app.run.ai
+  - url: https://staging.run.ai
+  - url: https://test.run.ai
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Synchronization
+    description: Internal interface for synchronizing assets between the clusters and the control plane.
+
+paths:
+  /:
+    x-internal: true
+    get:
+      summary: health check
+      x-service: assets-service
+      x-no-authorization: true
+      operationId: health
+      tags:
+        - Health
+      responses:
+        200:
+          description: Executed successfully.
+
+  /api/v1/asset/model:
+    $ref: "./resources/Model.yaml"
+
+  /api/v1/asset/model/{ModelId}:
+    $ref: './resources/ModelById.yaml'
+
+  /api/v1/asset:
+    $ref: './resources/Asset.yaml'
+
+  /api/v1/asset/compute:
+    $ref: "./resources/Compute.yaml"
+  /api/v1/asset/compute/{AssetId}:
+    $ref: './resources/ComputeById.yaml'
+
+  /api/v1/asset/credentials:
+    $ref: "./resources/Credentials.yaml"
+  /api/v1/asset/credentials/updates:
+    $ref: "./resources/CredentialsUpdates.yaml"
+
+  /api/v1/asset/credentials/access-key:
+    $ref: "./resources/AccessKey.yaml"
+  /api/v1/asset/credentials/access-key/{AssetId}:
+    $ref: "./resources/AccessKeyById.yaml"
+
+  /api/v1/asset/credentials/password:
+    $ref: './resources/Password.yaml'
+  /api/v1/asset/credentials/password/{AssetId}:
+    $ref: './resources/PasswordById.yaml'
+
+  /api/v1/asset/credentials/docker-registry:
+    $ref: './resources/DockerRegistry.yaml'
+  /api/v1/asset/credentials/docker-registry/{AssetId}:
+    $ref: './resources/DockerRegistryById.yaml'
+
+  /api/v1/asset/credentials/generic-secret:
+    $ref: './resources/GenericSecret.yaml'
+  /api/v1/asset/credentials/generic-secret/{AssetId}:
+    $ref: './resources/GenericSecretById.yaml'
+
+  /api/v1/asset/credentials/ngc-api-key:
+    $ref: './resources/NgcApiKey.yaml'
+  /api/v1/asset/credentials/ngc-api-key/{AssetId}:
+    $ref: './resources/NgcApiKeyById.yaml'
+
+  /api/v1/asset/registries:
+    $ref: './resources/Registry.yaml'
+  /api/v1/asset/registries/{AssetId}:
+    $ref: './resources/RegistryById.yaml'
+  /api/v1/asset/registries/{AssetId}/repositories:
+    $ref: './resources/Repositories.yaml'
+  /api/v1/asset/registries/{AssetId}/repositories/tags:
+    $ref: './resources/RepositoryTags.yaml'
+
+  /api/v1/asset/environment:
+    $ref: './resources/Environment.yaml'
+  /api/v1/asset/environment/{AssetId}:
+    $ref: './resources/EnvironmentById.yaml'
+
+  /api/v1/asset/datasource:
+    $ref: './resources/Datasource.yaml'
+  /api/v1/asset/datasource/updates:
+    $ref: "./resources/DatasourceUpdates.yaml"
+
+  /api/v1/asset/datasource/git:
+    $ref: './resources/Git.yaml'
+  /api/v1/asset/datasource/git/{AssetId}:
+    $ref: './resources/GitById.yaml'
+
+  /api/v1/asset/datasource/host-path:
+    $ref: './resources/HostPath.yaml'
+  /api/v1/asset/datasource/host-path/{AssetId}:
+    $ref: './resources/HostPathById.yaml'
+
+  /api/v1/asset/datasource/nfs:
+    $ref: './resources/NFS.yaml'
+  /api/v1/asset/datasource/nfs/{AssetId}:
+    $ref: './resources/NFSById.yaml'
+
+  /api/v1/asset/datasource/pvc:
+    $ref: './resources/PVC.yaml'
+  /api/v1/asset/datasource/pvc/{AssetId}:
+    $ref: './resources/PVCById.yaml'
+  /api/v1/asset/datasource/pvc/{AssetId}/history:
+    $ref: './resources/PVCHistory.yaml'
+
+  /api/v1/asset/datasource/s3:
+    $ref: './resources/S3.yaml'
+  /api/v1/asset/datasource/s3/{AssetId}:
+    $ref: './resources/S3ById.yaml'
+
+  /api/v1/asset/workload-template:
+    $ref: './resources/WorkloadTemplate.yaml'
+  /api/v1/asset/workload-template/{AssetId}:
+    $ref: './resources/WorkloadTemplateById.yaml'
+
+  /v1/k8s/clusters/{clusterUuid}/workspaces:
+    $ref: './resources/V1/WorkspaceList.yaml'
+  /v1/k8s/clusters/{clusterUuid}/trainings:
+    $ref: './resources/V1/TrainingList.yaml'
+
+  /v1/k8s/clusters/{clusterUuid}/workspaces/status:
+    $ref: './resources/V1/WorkspaceStatus.yaml'
+  /v1/k8s/clusters/{clusterUuid}/workspaces/{workloadId}:
+    $ref: './resources/V1/WorkspaceById.yaml'
+  /v1/k8s/clusters/{clusterUuid}/trainings/status:
+    $ref: './resources/V1/TrainingStatus.yaml'
+  /v1/k8s/clusters/{clusterUuid}/trainings/{workloadId}:
+    $ref: './resources/V1/TrainingById.yaml'
+  /v1/k8s/clusters/{clusterUuid}/distributed/status:
+    $ref: './resources/V1/DistributedStatus.yaml'
+  /v1/k8s/clusters/{clusterUuid}/distributed/{workloadId}:
+    $ref: './resources/V1/DistributedById.yaml'
+
+  /api/v1/workspace:
+    $ref: './resources/V1/Workspace.yaml'
+  /api/v2/workspace/merged:
+    $ref: './resources/WorkspaceMerged.yaml'
+  /api/v2/workspace:
+    $ref: './resources/WorkspaceV2.yaml'
+  /api/v2/workspace/{workloadId}:
+    $ref: './resources/WorkspaceByIdV2.yaml'
+
+  /api/v1/training:
+    $ref: './resources/V1/Training.yaml'
+  /api/v2/training/merged:
+    $ref: './resources/TrainingMerged.yaml'
+  /api/v2/training:
+    $ref: './resources/TrainingV2.yaml'
+  /api/v2/training/{workloadId}:
+    $ref: './resources/TrainingByIdV2.yaml'
+
+  /api/v1/inference:
+    $ref: './resources/V1/Inference.yaml'
+  /api/v1/inference/{workloadId}:
+    $ref: './resources/V1/InferenceById.yaml'
+  /api/v2/inference:
+    $ref: './resources/InferenceV2.yaml'
+  /api/v2/inference/merged:
+    $ref: './resources/InferenceMerged.yaml'
+  /api/v2/inference/{workloadId}:
+    $ref: './resources/InferenceByIdV2.yaml'
+
+  /api/v1/model-inference:
+    $ref: "./resources/V1/ModelInference.yaml"
+  /api/v2/model-inference:
+    $ref: "./resources/ModelInferenceV2.yaml"
+
+  /api/v1/asset/name-availability:
+    $ref: './resources/AssetNameAvailability.yaml'
+  /api/v1/asset/count:
+    $ref: './resources/AssetCount.yaml'
+
+  /api/v1/asset/sync/validate:
+    $ref: './resources/SyncValidate.yaml'
+
+  /api/v1/asset/datasource/config-map:
+    $ref: './resources/ConfigMap.yaml'
+  /api/v1/asset/datasource/config-map/{AssetId}:
+    $ref: './resources/ConfigMapById.yaml'
+
+  /api/v1/asset/datasource/secrets:
+    $ref: './resources/Secrets.yaml'
+  /api/v1/asset/datasource/secrets/{AssetId}:
+    $ref: './resources/SecretById.yaml'
+
+  /api/v2/huggingface-model/info-request:
+    $ref: "./resources/HuggingFaceModelInfo.yaml"
+
+  /api/v1/asset/flat:
+    x-internal: true
+    $ref: "./resources/AssetFlatInfo.yaml"
+
+  /api/v1/asset/sync/events:
+    $ref: "./resources/Events.yaml"
+
+  /api/v1/asset/sync/asset-resources-ids:
+    $ref: "./resources/SyncAssetResourcesIds.yaml"
+
+  /internal/api/v1/asset/ngc-api-key/{AssetId}:
+    x-internal: true
+    $ref: "./resources/NgcApiKeyByIdInternal.yaml"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer authentication
+  schemas:
+    servingPortProtocol:
+      $ref: "../../../infra/openapi/docs/schemas/workloads_spec/inferences/ServingPortProtocol.yaml"

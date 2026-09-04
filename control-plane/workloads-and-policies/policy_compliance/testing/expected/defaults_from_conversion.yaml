@@ -1,0 +1,4 @@
+compute:
+  cpuMemoryLimit: 17500000
+  cpuMemoryRequest: 0.4
+  gpuMemoryLimit: 500M

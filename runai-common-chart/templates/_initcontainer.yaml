@@ -1,0 +1,83 @@
+{{- define "common.initContainer.tpl" -}}
+{{- $top := first . }}
+{{- $container := index . 1 }}
+{{- $initcontainer := $container.initContainers }}
+{{- range $initcontainer }}
+{{- $securityContext := mergeOverwrite (deepCopy (.securityContext | default dict)) (dict "allowPrivilegeEscalation" false "runAsNonRoot" true) }}
+{{- $securityContext = mergeOverwrite $securityContext (dict "capabilities" (dict "drop" (list "ALL"))) }}
+{{- $_ := set $securityContext "seccompProfile" (dict "type" "RuntimeDefault") }}
+- name: {{ .image.name }}
+  {{- with .restartPolicy }}
+  restartPolicy: {{ . }}
+  {{- end }}
+  securityContext:
+  {{- include "common.securityContext.render" (list $top $securityContext) | nindent 4 }}
+  {{- with .command }}
+  command:
+  {{- range . }}
+   - {{- tpl . $top | nindent 4  }}
+  {{- end }}
+  {{- end }}
+  image: "{{ .image.registry | default $top.Values.global.image.registry }}/{{ .image.repository }}:{{ .image.tag | default $top.Chart.AppVersion }}"
+  imagePullPolicy: {{ .image.pullPolicy | default $top.Values.global.image.pullPolicy }}
+  resources:
+  {{- toYaml .resources | nindent 4 }}
+  {{- with .ports }}
+  ports:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .livenessProbe }}
+  livenessProbe:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .readinessProbe }}
+  readinessProbe:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .envFrom }}
+  envFrom:
+  {{- range . }}
+    {{- if .secretRef }}
+    - secretRef:
+        {{- if and (($top.Values.global.config).argoRollouts) (ne $container.argoRollouts false) }}
+        name: {{ .secretRef.name }}-{{ $top.Chart.Version }}
+        {{- else }}
+        name: {{ .secretRef.name }}
+        {{- end }}
+      {{- else if .configMapRef }}
+    - configMapRef:
+        {{- if and (($top.Values.global.config).argoRollouts) (ne $container.argoRollouts false) }}
+        name: {{ .configMapRef.name }}-{{ $top.Chart.Version }}
+        {{- else }}
+        name: {{ .configMapRef.name }}
+        {{- end }}
+      {{- end }}
+  {{- end }}
+  {{- end }}
+  {{- with .args }}
+  args: 
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .extraArgs }}
+  {{- tpl . $top | nindent 4 }}
+  {{- end }}
+  env: 
+    {{- if ($top.Values.global.customCA).enabled | default false }}
+      {{- $top.Values.global.customCA.env | toYaml | nindent 4 }}
+    {{- end }}
+    {{- with .env }}
+    {{- tpl (toYaml .) $top | nindent 4 }}
+    {{- end }}
+  volumeMounts: 
+    {{- if ($top.Values.global.customCA).enabled | default false }}
+      {{- $top.Values.global.customCA.volumeMounts | toYaml | nindent 4 }}
+    {{- end }}
+    {{- with .volumeMounts }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end }}
+{{- end }}
+
+{{- define "common.initContainer" -}}
+{{- include "common.utils.merge" (append . "common.initContainer.tpl") }}
+{{- end }}

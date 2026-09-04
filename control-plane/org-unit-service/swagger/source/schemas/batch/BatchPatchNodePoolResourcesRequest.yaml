@@ -1,0 +1,29 @@
+type: object
+description: Batch of node pool resources patch requests.
+required:
+  - patchRequests
+properties:
+  patchRequests:
+    type: array
+    minItems: 1
+    maxItems: 100
+    description: Array of node pool resources patch requests.
+    items:
+      $ref: "./NodePoolResourcesPatchRequest.yaml"
+example:
+  patchRequests:
+    - orgUnitId: "3845"
+      nodePoolId: "22"
+      rank: Low
+      resources:
+        gpu:
+          deserved: 2
+          limit: 2
+          overQuotaWeight: 2
+    - orgUnitId: "27552"
+      nodePoolId: "33"
+      resources:
+        cpu:
+          deserved: 20
+          limit: 20
+          overQuotaWeight: 20

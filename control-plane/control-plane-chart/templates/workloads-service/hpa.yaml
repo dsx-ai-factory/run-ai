@@ -1,0 +1,1 @@
+{{- include "common.hpa" (list . .Values.workloads.autoscaling .Values.workloads) -}}

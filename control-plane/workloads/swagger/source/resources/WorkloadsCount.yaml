@@ -1,0 +1,39 @@
+get:
+  summary: Count workloads.
+  description: Retrieve the number of workloads. 
+  operationId: count_workloads
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/workloads_api_test.go
+  x-authorize:
+    resource-type: workloads
+    action: read
+  tags:
+    - Workloads
+  parameters:
+    - $ref: '../parameters/query/Deleted.yaml'
+    - $ref: '../parameters/query/WorkloadsFilter.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Search.yaml"
+    - $ref: '../parameters/query/Precise.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - count
+            properties:
+              count:
+                type: integer
+                format: int64
+                example: 1
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

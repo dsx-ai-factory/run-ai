@@ -1,0 +1,60 @@
+#path
+workloadId:
+  $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+podId:
+  $ref: "../../../../infra/openapi/docs/parameters/path/PodId.yaml"
+workloadTypeId:
+  $ref: "./path/WorkloadTypeId.yaml"
+ApplicationId:
+  $ref: "./path/ApplicationId.yaml"
+#query
+Completed:
+  $ref: "./query/Completed.yaml"
+Deleted:
+  $ref: "./query/Deleted.yaml"
+PodMetricTypes:
+  $ref: "./query/PodMetricTypes.yaml"
+PodsFilter:
+  $ref: "./query/PodsFilter.yaml"
+PodsSort:
+  $ref: "./query/PodsSort.yaml"
+TelemetryGroupBy:
+  $ref: "./query/TelemetryGroupBy.yaml"
+TelemetryType:
+  $ref: "./query/TelemetryType.yaml"
+WorkloadMetricTypes:
+  $ref: "./query/WorkloadMetricTypes.yaml"
+WorkloadsFilter:
+  $ref: "./query/WorkloadsFilter.yaml"
+WorkloadsSort:
+  $ref: "./query/WorkloadsSort.yaml"
+Precise:
+  $ref: "./query/Precise.yaml"
+ExternalTypesOnly:
+  $ref: "./query/ExternalTypesOnly.yaml"
+ProjectName:
+  $ref: "./query/backwards/ProjectName.yaml"
+Limit:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml"
+Offset:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml"
+SortOrder:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+FilterByCluster:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml"
+FilterByNodepoolName:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByNodepoolName.yaml"
+FilterByDepartment:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByDepartment.yaml"
+StartRequired:
+  $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/StartRequired.yaml"
+EndRequired:
+  $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/EndRequired.yaml"
+NumberOfSamples:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/NumberOfSamples.yaml"
+ApplicationQueryVerbosity:
+  $ref: "./query/ApplicationQueryVerbosity.yaml"
+ApplicationsFilter:
+  $ref: "./query/ApplicationsFilter.yaml"
+ApplicationsSort:
+  $ref: "./query/ApplicationsSort.yaml"

@@ -1,0 +1,6 @@
+name: telemetryType
+in: query
+required: true
+description: "specifies what data to request"
+schema:
+  $ref: './NodeTelemetryType.yaml'

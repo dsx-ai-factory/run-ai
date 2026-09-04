@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 560" width="680" height="560">
+  <defs>
+    <style>text { font-family: 'Segoe UI', Arial, sans-serif; }</style>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748B"/>
+    </marker>
+    <marker id="arr-up" markerWidth="10" markerHeight="7" refX="1" refY="3.5" orient="auto">
+      <polygon points="10 0, 0 3.5, 10 7" fill="#94A3B8"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="680" height="560" fill="#FFFFFF" rx="6"/>
+
+  <!-- ── USERS ── -->
+  <text x="340" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="#1E293B">Users and clients</text>
+  <text x="220" y="50" text-anchor="middle" font-size="11" fill="#64748B">UI / API</text>
+  <text x="460" y="50" text-anchor="middle" font-size="11" fill="#64748B">workload access</text>
+
+  <!-- DNS labels -->
+  <text x="220" y="74" text-anchor="middle" font-size="10" fill="#475569">runai.mycorp.local</text>
+  <text x="460" y="68" text-anchor="middle" font-size="10" fill="#475569">*.runai.mycorp.local</text>
+  <text x="460" y="82" text-anchor="middle" font-size="10" fill="#475569">*.runai-inference.mycorp.local</text>
+
+  <!-- Arrow from users into cluster -->
+  <line x1="220" y1="86" x2="220" y2="112" stroke="#64748B" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="460" y1="86" x2="460" y2="112" stroke="#64748B" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── KUBERNETES CLUSTER outer box ── -->
+  <rect x="40" y="112" width="600" height="416" rx="10" fill="#F8FAFC" stroke="#94A3B8" stroke-width="2" stroke-dasharray="8 4"/>
+  <rect x="52" y="104" width="200" height="20" rx="4" fill="#94A3B8"/>
+  <text x="152" y="118" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF">Customer Kubernetes Cluster</text>
+
+  <!-- ── LOAD BALANCER ── -->
+  <rect x="72" y="132" width="536" height="56" rx="8" fill="#FFF7ED" stroke="#F97316" stroke-width="1.5"/>
+  <rect x="72" y="132" width="5" height="56" rx="4" fill="#F97316"/>
+  <text x="342" y="158" text-anchor="middle" font-size="13" font-weight="700" fill="#7C2D12">Load Balancer</text>
+  <text x="342" y="176" text-anchor="middle" font-size="11" fill="#64748B">MetalLB or cloud-provided · shared entry point for all inbound traffic</text>
+
+  <!-- Arrow LB → Ingress -->
+  <line x1="340" y1="188" x2="340" y2="212" stroke="#64748B" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── INGRESS CONTROLLER ── -->
+  <rect x="72" y="212" width="536" height="56" rx="8" fill="#FAF5FF" stroke="#A855F7" stroke-width="1.5"/>
+  <rect x="72" y="212" width="5" height="56" rx="4" fill="#A855F7"/>
+  <text x="342" y="238" text-anchor="middle" font-size="13" font-weight="700" fill="#3B0764">Ingress Controller</text>
+  <text x="342" y="256" text-anchor="middle" font-size="11" fill="#64748B">Routes by hostname · runai.mycorp.local → Control Plane · *.runai.* → Cluster</text>
+
+  <!-- Ingress splits into two paths -->
+  <line x1="210" y1="268" x2="210" y2="292" stroke="#64748B" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="470" y1="268" x2="470" y2="292" stroke="#64748B" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── CONTROL PLANE (left) ── -->
+  <rect x="72" y="292" width="256" height="76" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5"/>
+  <rect x="72" y="292" width="5" height="76" rx="4" fill="#3B82F6"/>
+  <text x="201" y="322" text-anchor="middle" font-size="13" font-weight="700" fill="#1E3A5F">NVIDIA Run:ai</text>
+  <text x="201" y="340" text-anchor="middle" font-size="13" font-weight="700" fill="#1E3A5F">Control Plane</text>
+  <text x="201" y="358" text-anchor="middle" font-size="10" fill="#64748B">Resource management · UI · API</text>
+
+  <!-- ── RUN:AI CLUSTER (right) ── -->
+  <rect x="352" y="292" width="256" height="204" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5"/>
+  <rect x="352" y="292" width="5" height="204" rx="4" fill="#22C55E"/>
+  <text x="481" y="318" text-anchor="middle" font-size="13" font-weight="700" fill="#14532D">NVIDIA Run:ai Cluster</text>
+
+  <!-- Workloads sub-box -->
+  <rect x="372" y="332" width="216" height="64" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5"/>
+  <text x="480" y="358" text-anchor="middle" font-size="12" font-weight="600" fill="#374151">Workloads</text>
+  <text x="480" y="376" text-anchor="middle" font-size="10" fill="#64748B">workspaces · training · inference</text>
+
+  <!-- Run:ai services sub-box -->
+  <rect x="372" y="412" width="216" height="64" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5"/>
+  <text x="480" y="438" text-anchor="middle" font-size="12" font-weight="600" fill="#374151">Run:ai services</text>
+  <text x="480" y="456" text-anchor="middle" font-size="10" fill="#64748B">scheduling · workload management</text>
+
+  <!-- Management arrow: Run:ai services → Control Plane (outbound) -->
+  <!-- Down from services box, left across bottom, up to control plane -->
+  <line x1="372" y1="444" x2="340" y2="444" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <line x1="340" y1="444" x2="340" y2="490" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <line x1="340" y1="490" x2="200" y2="490" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <line x1="200" y1="490" x2="200" y2="368" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arr-up)"/>
+  <!-- Label -->
+  <rect x="224" y="482" width="192" height="16" fill="#FFFFFF"/>
+  <text x="320" y="494" text-anchor="middle" font-size="10" fill="#94A3B8">management (outbound)</text>
+</svg>

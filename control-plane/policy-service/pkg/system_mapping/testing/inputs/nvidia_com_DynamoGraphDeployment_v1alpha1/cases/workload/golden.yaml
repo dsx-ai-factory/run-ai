@@ -1,0 +1,39 @@
+apiVersion: nvidia.com/v1alpha1
+kind: DynamoGraphDeployment
+metadata:
+  annotations:
+    example.com/annotation: test-value
+  labels:
+    app: dynamo-test
+  name: test-dynamo
+  namespace: default
+spec:
+  backendFramework: sglang
+  restart:
+    id: restart-2
+    strategy:
+      type: Parallel
+  services:
+    service-a:
+      componentType: worker
+      extraPodSpec:
+        containers:
+        - image: dynamo/service:v1
+          name: main
+        initContainers:
+        - image: dynamo/service:v1
+          name: init
+      replicas: 1
+    service-b:
+      componentType: router
+      extraPodSpec:
+        containers:
+        - image: dynamo/service:v1
+          name: main
+        initContainers:
+        - image: dynamo/service:v1
+          name: init
+      replicas: 2
+    service-c:
+      componentType: inference
+      replicas: 1

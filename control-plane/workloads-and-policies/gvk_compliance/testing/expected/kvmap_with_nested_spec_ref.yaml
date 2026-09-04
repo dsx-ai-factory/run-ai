@@ -1,0 +1,31 @@
+policy:
+  effectiveRules:
+  - enforcements:
+    - set:
+        value: deep
+    - options:
+      - deep
+    field: deepScalar
+    sourceOfRule: null
+    specSelector: innerSpec
+  - enforcements:
+    - set:
+        key: keyX
+        value: xxx
+    - set:
+        key: keyY
+        value: yyy
+    field: deepMap
+    sourceOfRule: null
+    specSelector: innerSpec
+  workloadType:
+    group: apps
+    kind: Deployment
+    version: v1
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: test
+  spec:
+    replicas: 1

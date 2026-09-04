@@ -1,0 +1,6 @@
+description: A key's relationship to the value. Equal uses key and value. Exists is equivalent to wildcard for value, so that a workload can tolerate all taints of a particular category. (mandatory)
+type: string
+enum:
+  - Equal
+  - Exists
+nullable: true

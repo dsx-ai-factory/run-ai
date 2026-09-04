@@ -1,0 +1,15 @@
+apiVersion: run.ai/v2alpha1
+kind: TrainingWorkload
+metadata:
+  name: test-training
+  namespace: runai-team-a
+spec:
+  preemptibility:
+    value: non-preemptible
+  image:
+    value: training-image:latest
+  name:
+    value: test-training
+  command:
+    value: python train.py
+

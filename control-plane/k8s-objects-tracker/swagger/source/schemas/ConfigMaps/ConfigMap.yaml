@@ -1,0 +1,8 @@
+type: object
+required:
+  - name
+properties:
+  name:
+    $ref: "./ConfigMapName.yaml"
+  issues:
+    $ref: "../Common/Issues.yaml"

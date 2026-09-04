@@ -1,0 +1,8 @@
+type: object
+properties:
+  enabled:
+    type: boolean
+    nullable: true
+    description: Whether to allow GPT-2 model.
+example:
+  enabled: true

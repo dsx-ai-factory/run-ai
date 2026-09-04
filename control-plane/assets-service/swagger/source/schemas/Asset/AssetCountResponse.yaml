@@ -1,0 +1,6 @@
+required:
+  - result
+properties:
+  result:
+    type: integer
+    format: int64

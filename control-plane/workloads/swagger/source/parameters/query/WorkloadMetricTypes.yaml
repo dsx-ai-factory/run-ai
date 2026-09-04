@@ -1,0 +1,11 @@
+name: metricType
+in: query
+required: true
+description: Specify which data to request.
+explode: false
+schema:
+  type: array
+  minItems: 1
+  maxItems: 10
+  items:
+    $ref: '../../schemas/Workloads/WorkloadMetricType.yaml'

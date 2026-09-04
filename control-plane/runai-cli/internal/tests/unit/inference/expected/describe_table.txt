@@ -1,0 +1,81 @@
+Name:                               my-inference-full-123
+ID:                                 a22ecd44-f863-444d-b69d-0cc0d26bbc54
+Type:                               Inference
+Phase:                              Failed
+Phase Message:                      Failed to create workload: [Service:my-inference-full-123] admission webhook "validation.webhook.serving.knative.dev" denied the request: validation failed: must not set the field(s): spec.template.spec.containers[0].securityContext.capabilities.add. Check the inference prerequisites in the Run:ai documentation
+Created At:                         2025-12-15T08:58:24Z
+Updated At:                         2025-12-15T09:07:57Z
+Project:                            team-b
+Department:                         default
+Submitted By:                       test@run.ai
+Priority:                           very-high (150)
+Category:                           Deploy
+Preemptible:                        false
+Requested Node Pool:                default
+Image:                              vllm/vllm-openai:latest
+Image Pull Policy:                  Always
+Working Directory:                  /app
+Node Type:                          gpu-nodes
+Run as User:                        1000
+Run as Group:                       1000
+Capabilities:                       SYS_ADMIN, NET_ADMIN
+Tolerations:                        nvidia.com/gpu=true:NoSchedule, high-priority=true:NoSchedule
+Labels:                             [app:inference-full,
+                                     version:v2.0,
+                                     framework:vllm]
+Annotations:                        [description:Comprehensive inference with all fields,
+                                     runai-submit-command:/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai inference submit my-inference-full-123 --project team-b --image vllm/vllm-openai:latest --image-pull-policy Always --working-dir /app -g 1 --gpu-memory-request 20G --serving-port=container=8080,authorization-type=authenticatedUsers,authorized-users=user1:user2:demo-user,protocol=http --environment-variable MODEL_NAME=llama-2-7b --environment-variable VLLM_HOST=0.0.0.0 --label app=inference-full --label version=v2.0 --label framework=vllm --annotation 'description=Comprehensive inference with all fields' --existing-pvc claimname=my-simple-pvc,path=/models --node-type gpu-nodes --min-replicas 0 --max-replicas 5 --initial-replicas 1 --activation-replicas 2 --metric concurrency --metric-threshold 50 --metric-threshold-percentage 70 --concurrency-hard-limit 100 --initialization-timeout-seconds 300 --request-timeout-seconds 60 --scale-down-delay-seconds 30 --scale-to-zero-retention-seconds 300 --run-as-uid 1000 --run-as-gid 1000 --supplemental-groups 2000,3000 --capability SYS_ADMIN --capability NET_ADMIN --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --toleration operator=Equal,key=high-priority,value=true,effect=NoSchedule --command -- python -m vllm.entrypoints.openai.api_server --model meta-llama/Llama-2-7b --port 8080 --tensor-parallel-size 1]
+Command:                            python -m vllm.entrypoints.openai.api_server --model meta-llama/Llama-2-7b --port 8080 --tensor-parallel-size 1
+Environment Variables:              [MODEL_NAME    : llama-2-7b,
+                                    RUNAI_JOB_NAME: ${RUNAI_JOB_NAME},
+                                    RUNAI_PROJECT : ${RUNAI_PROJECT},
+                                    VLLM_HOST     : 0.0.0.0]
+CLI Command:                        /Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai inference submit my-inference-full-123 --project team-b --image vllm/vllm-openai:latest --image-pull-policy Always --working-dir /app -g 1 --gpu-memory-request 20G --serving-port=container=8080,authorization-type=authenticatedUsers,authorized-users=user1:user2:demo-user,protocol=http --environment-variable MODEL_NAME=llama-2-7b --environment-variable VLLM_HOST=0.0.0.0 --label app=inference-full --label version=v2.0 --label framework=vllm --annotation 'description=Comprehensive inference with all fields' --existing-pvc claimname=my-simple-pvc,path=/models --node-type gpu-nodes --min-replicas 0 --max-replicas 5 --initial-replicas 1 --activation-replicas 2 --metric concurrency --metric-threshold 50 --metric-threshold-percentage 70 --concurrency-hard-limit 100 --initialization-timeout-seconds 300 --request-timeout-seconds 60 --scale-down-delay-seconds 30 --scale-to-zero-retention-seconds 300 --run-as-uid 1000 --run-as-gid 1000 --supplemental-groups 2000,3000 --capability SYS_ADMIN --capability NET_ADMIN --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --toleration operator=Equal,key=high-priority,value=true,effect=NoSchedule --command -- python -m vllm.entrypoints.openai.api_server --model meta-llama/Llama-2-7b --port 8080 --tensor-parallel-size 1
+
+
+Serving
+
+ Minimum Replicas:                   0
+ Maximum Replicas:                   5
+ Initial Replicas:                   1
+ Initialization Timeout Seconds:     300
+ Request Timeout Seconds:            60
+ Activation Replicas:                2
+ Metric:                             concurrency
+ Metric Threshold Percentage:        70.00
+ Metric Threshold:                   50
+ Scale Down Delay Seconds:           30
+ Scale To Zero Retention Seconds:    300
+ Hard Limit:                         100
+
+
+Compute Resources
+
+ Resource              Requested   Limit       Allocated  
+──────────────────────────────────────────────────────────
+ GPU Compute           0.00                    0.00       
+ CPU Cores             0.00                    0.00       
+ GPU Memory            20G         20G                    
+ CPU Memory                                               
+
+
+Storage
+
+ Type          Name                       Mount Path       Size      ReadOnly    Ephemeral   Data Sharing    Storage Class   
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ PVC           my-simple-pvc              /local/pvc       -         No          -           -               -               
+ PVC           claim-24mqhfjj7j           /local/vol       1G        -           No          -               standard        
+ Git           https://github.com/run-ai  /git             -         -           -           -               -               
+ HostPath      /host/path                 /hostpath        -         -           -           -               -               
+
+
+Network
+
+ Name             Tool Type        Connection Type  Container Port   URL             
+─────────────────────────────────────────────────────────────────────────────────────
+ ServingPort      custom           ServingPort      8080                             
+
+  Access Control:
+  ServingPort (Port 8080):
+    Authorization Type:                 authenticatedUsers
+    Authorized Users / Service Accounts: user1, user2, demo-user

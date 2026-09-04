@@ -1,0 +1,110 @@
+policy:
+  id: test-policy
+  effectiveRules:
+    # --- scalar set (always overwrites) ---
+    - field: scalar
+      specSelector: self
+      enforcements:
+        - set:
+            value: overridden          # existing value "old" gets replaced
+
+    # --- scalar default: only fills in missing values ---
+    - field: presentDefault
+      specSelector: self
+      enforcements:
+        - default:
+            value: from-default        # already set to "keep-me", must NOT change
+    - field: missingDefault
+      specSelector: self
+      enforcements:
+        - default:
+            value: from-default        # absent in workload, gets added
+
+    # --- nested set (KeyValue specRef is a dotted path) ---
+    - field: nested
+      specSelector: self
+      enforcements:
+        - set:
+            value: true                # creates nested.security.allowRoot=true
+
+    # --- whole-object set on an itemized field (custom formatter + arrayKey) ---
+    # Appends FOO / SHARED env vars to both containers; arrayKey "name"
+    # ensures re-runs on the same container merge by env-var name.
+    - field: environmentVariables-FromConfigMap
+      specSelector: allContainers
+      enforcements:
+        - set:
+            name: FOO
+            configMapName: cm-a
+            key: foo-key
+            optional: false
+    - field: environmentVariables-FromConfigMap
+      specSelector: allContainers
+      enforcements:
+        - set:
+            name: SHARED
+            configMapName: cm-shared
+            key: shared-key
+            optional: false
+
+  # Synthetic, minimal breakdown: a root "self" selector and a containers
+  # selector to exercise itemized sets. Custom formatter on the
+  # FromConfigMap field mirrors the real mapping, including the arrayKey
+  # that keys env entries by ".name" during merge.
+  breakdown:
+    fields:
+      scalar:
+        - specSelectors: [self]
+          specRef: scalar
+          formatter: { builtin: KeyValue }
+      presentDefault:
+        - specSelectors: [self]
+          specRef: presentDefault
+          formatter: { builtin: KeyValue }
+      missingDefault:
+        - specSelectors: [self]
+          specRef: missingDefault
+          formatter: { builtin: KeyValue }
+      nested:
+        - specSelectors: [self]
+          specRef: nested.security.allowRoot
+          formatter: { builtin: KeyValue }
+      environmentVariables-FromConfigMap:
+        - specSelectors: [allContainers]
+          formatter:
+            setExpr: |
+              {
+                "env": [
+                  {
+                    "name": $ARGS.named.name,
+                    "valueFrom": {
+                      "configMapKeyRef": {
+                        "name": $ARGS.named.configMapName,
+                        "key": $ARGS.named.key,
+                        "optional": $ARGS.named.optional
+                      }
+                    }
+                  }
+                ]
+              }
+            arrayKey:
+              argName: name
+    specSelectors:
+      self:
+        query: "."
+      allContainers:
+        query: "(.containers // [])[]"
+
+workload:
+  apiVersion: test/v1
+  kind: Synthetic
+  scalar: old
+  presentDefault: keep-me
+  # missingDefault: absent on purpose.
+  # "nested" absent entirely -> set should create the full path.
+  containers:
+    - name: worker-1
+    - name: worker-2
+      env:
+        - name: EXISTING
+          value: keep-me

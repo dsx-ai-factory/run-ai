@@ -1,0 +1,32 @@
+apiVersion: run.ai/v2alpha1
+kind: InteractiveWorkload
+metadata:
+  creationTimestamp: null
+  name: job-4-20220125-103828
+  namespace: runai-team-a
+spec:
+  completions:
+    value: 1
+  image:
+    value: zembutsu/docker-sample-nginx
+  imagePullPolicy:
+    value: Always
+  name:
+    value: job-4
+  ports:
+    items:
+      port-80:
+        value:
+          autoGenerate: false
+          container: 80
+          external: 8080
+  runAsGid:
+    value: 20
+  runAsUid:
+    value: 501
+  serviceType:
+    value: ClusterIP
+  supplementalGroups:
+    value: 20;12;61;79;80;81;98;33;100;204;250;395;101;399;400;701
+  username:
+    value: user.name

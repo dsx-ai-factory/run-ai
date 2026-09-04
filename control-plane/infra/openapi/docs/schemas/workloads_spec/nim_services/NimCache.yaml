@@ -1,0 +1,16 @@
+description: The specification of a NIM cache volume.
+type: object
+properties:
+  name:
+    description: The NIMCache resource name (mandatory).
+    type: string
+    minLength: 1
+    example: nim-cache-a
+    nullable: true
+  profile:
+    description: The NIM profile to use (optional).
+    type: string
+    minLength: 1
+    example: tensorrt_llm-b200-fp8-tp2-pp1-latency-2901:10de-2
+    nullable: true
+nullable: true

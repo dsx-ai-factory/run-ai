@@ -1,0 +1,10 @@
+type: object
+properties:
+  default:
+    type: object
+    description: Sets the value of the field when the user does not supply one.
+    additionalProperties: true
+example:
+  default:
+    containerPort: 1234
+    protocol: TCP

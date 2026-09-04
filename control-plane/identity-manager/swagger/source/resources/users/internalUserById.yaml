@@ -1,0 +1,25 @@
+get:
+  summary: Get a user by id (internal).
+  description: Retrieve a user's details by id for internal service use.
+  x-service: identity-manager
+  x-test-coverage:
+    - /runai/control-plane/identity-manager/pkg/services/api_users_service_test.go
+  operationId: get_internal_user_by_id
+  x-no-authorization: true
+  tags:
+  - Users
+  parameters:
+  - $ref: "../../parameters/userId.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Users/User.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'

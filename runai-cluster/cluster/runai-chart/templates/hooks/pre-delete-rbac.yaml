@@ -1,0 +1,55 @@
+{{- if and (not .Values.global.serviceAccountName) .Values.helmHooksHandler.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: runai-pre-delete
+  namespace: runai
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "-3"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    run.ai/hook: pre-delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-pre-delete
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "-2"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    run.ai/hook: pre-delete
+rules:
+  - apiGroups:
+      - run.ai
+    resources:
+      - runaiconfigs
+      - clusters
+      - remoteconfigs
+      - remoteconfigsyncs
+    verbs:
+      - delete
+      - get
+      - list
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-pre-delete
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-weight": "-1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    run.ai/hook: pre-delete
+subjects:
+  - kind: ServiceAccount
+    name: runai-pre-delete
+    namespace: runai
+roleRef:
+  kind: ClusterRole
+  name: runai-pre-delete
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

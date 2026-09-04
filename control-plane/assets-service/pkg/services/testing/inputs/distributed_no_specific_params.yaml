@@ -1,0 +1,13 @@
+assets:
+  environment: image-only
+  compute: cpu-only
+
+specificRunParams:
+
+distributed:
+  numWorkers: 3
+  framework: PyTorch
+  master:
+    assets:
+      environment: master-image-only
+      compute: master-cpu-only

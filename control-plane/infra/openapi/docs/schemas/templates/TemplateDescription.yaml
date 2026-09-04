@@ -1,0 +1,6 @@
+description: A description of the template.
+type: string
+minLength: 1
+maxLength: 250
+example: description of my template.
+nullable: true

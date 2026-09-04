@@ -1,0 +1,13 @@
+properties:
+  httpGet:
+    properties:
+      path:
+        $ref: "../../policy_rules/StringRules.yaml"
+      port:
+        $ref: "../../policy_rules/IntegerRules.yaml"
+      host:
+        $ref: "../../policy_rules/StringRules.yaml"
+      scheme:
+        $ref: "../../policy_rules/StringRules.yaml"
+nullable: true
+type: object

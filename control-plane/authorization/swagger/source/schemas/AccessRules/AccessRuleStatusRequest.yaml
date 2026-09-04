@@ -1,0 +1,11 @@
+type: object
+required:
+  - phase
+  - message
+properties:
+  phase:
+    $ref: './AccessRuleClusterPhase.yaml'
+  message:
+    type: string
+    description: Message for status of Access Rule in the cluster
+    example: Failed to enforce department 'department-a'

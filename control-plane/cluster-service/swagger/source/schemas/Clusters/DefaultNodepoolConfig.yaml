@@ -1,0 +1,5 @@
+type: object
+x-internal: true
+properties:
+  schedulingCapabilities:
+    $ref: "../Nodepools/SchedulingCapabilitiesNullable.yaml"

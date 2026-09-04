@@ -1,0 +1,8 @@
+persistent:
+  customization:
+    claimSize:
+      step: 500M
+    volumeMode:
+      supportedValues:
+        block: false
+

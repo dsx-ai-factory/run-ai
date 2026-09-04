@@ -1,0 +1,38 @@
+put:
+  summary: Update an access rule.
+  description: Use to update the status of the access rule in the cluster by id.
+  operationId: update_access_rule_status
+  x-service: authorization
+  x-internal: true
+  x-test-coverage:
+    - control-plane/authorization/pkg/services/access_rules_batch_api_test.go
+  x-authorize:
+    resource-type: access_rules
+    action: sync
+  tags:
+    - Access rules
+  parameters:
+    - $ref: "../parameters/path/AccessRuleId.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+  requestBody:
+    description: The status of the access rule in the cluster.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/AccessRules/AccessRuleStatusRequest.yaml'
+  responses:
+    204:
+      $ref: '../../../../infra/openapi/docs/responses/204NoContent.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

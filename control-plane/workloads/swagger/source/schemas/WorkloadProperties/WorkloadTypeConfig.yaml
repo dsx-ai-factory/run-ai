@@ -1,0 +1,50 @@
+allOf:
+  - $ref: "./WorkloadTypeAdditionalResponseFields.yaml"
+  - $ref: "./WorkloadTypeAdditionalCreateFields.yaml"
+  - type: object
+    required:
+      - name
+      - group
+      - categoryId
+      - priorityId
+      - preemptibility
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: The unique identifier of the workload type.
+      categoryName:
+        type: string
+        example: "Build"
+        description: The name of the workload category.
+      priorityName:
+        type: string
+        example: "medium"
+        description: The name of the workload priority.
+      updatedAt:
+        type: string
+        format: date-time
+        description: The timestamp for the last time the workload type was updated.
+      updatedBy:
+        type: string
+        description: Identifier of the user who last updated the workload type.
+      createdAt:
+        type: string
+        format: date-time
+        description: The timestamp for when the workload type was created.
+      createdBy:
+        type: string
+        description: Identifier of the user who created the workload type.
+      resourceInterfaces:
+        $ref: "./WorkloadTypeResourceInterfacesWithVersion.yaml"
+      kartas:
+        $ref: "./WorkloadTypeKartasWithVersion.yaml"
+      source:
+        x-internal: true
+        type: string
+        description: The source of the workload type - 'native', 'custom' or 'external'.
+      clusterStatuses:
+        nullable: true
+        type: array
+        items:
+          $ref: "./WorkloadTypeStatus.yaml"

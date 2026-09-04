@@ -1,0 +1,13 @@
+properties:
+  path:
+    description: Local path within the workload to which the PVC bucket will be mapped. (mandatory)
+    type: string
+    minLength: 1
+    maxLength: 4096
+    example: /container/my-claim
+    nullable: true
+    pattern: .*
+  claimInfo:
+    $ref: "ClaimInfoUpdatable.yaml"
+nullable: true
+type: object

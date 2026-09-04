@@ -1,0 +1,7 @@
+description: Container's working directory. If not specified, the container runtime default will be used. This may be configured in the container image.
+type: string
+minLength: 1
+maxLength: 4096
+nullable: true
+example: /home/myfolder
+pattern: .*

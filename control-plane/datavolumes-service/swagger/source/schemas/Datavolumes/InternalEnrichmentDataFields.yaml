@@ -1,0 +1,7 @@
+type: object
+properties:
+  departmentId:
+    type: string
+    example: "4500001"
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"

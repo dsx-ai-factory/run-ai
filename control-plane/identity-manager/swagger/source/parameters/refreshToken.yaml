@@ -1,0 +1,6 @@
+name: refresh_token
+in: query
+required: true 
+description: The refresh token retrieved from the idp server
+schema:
+  type: string

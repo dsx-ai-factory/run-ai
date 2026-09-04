@@ -1,0 +1,28 @@
+{{- if .Values.clusterMigrator.enabled }}
+{{- include "common.configMap" (list . .Values.clusterMigrator "control-plane.clusterMigrator.configmap") }}
+{{- end }}
+
+{{- define "control-plane.clusterMigrator.configmap" -}}
+{{- $top := first . }}
+data:
+  LOG_LEVEL: {{ $top.Values.clusterMigrator.config.logLevel | quote }}
+  SERVICE_NAME: {{ $top.Values.clusterMigrator.name | quote }}
+  DB_MIGRATION_VERSION: {{ $top.Values.clusterMigrator.config.migrationVersion | quote }}
+  DB_MIGRATION_TYPE: {{ $top.Values.clusterMigrator.config.migrationType | quote }}
+  DB_MIGRATION_AUTO: "false"
+  DB_USE_SERVICE_SESSION: "false"
+  DB_NAME: {{ $top.Values.clusterMigrator.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_HOST: {{ $top.Values.clusterMigrator.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SSL_MODE: {{ $top.Values.clusterMigrator.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_PORT: {{ $top.Values.clusterMigrator.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  DB_SCHEMA_SOURCE_BACKEND: {{ $top.Values.clusterMigrator.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  DB_SCHEMA_TARGET: {{ $top.Values.clusterService.config.dbScheme | default "cluster_service" | quote }}
+  DB_SCHEMA: {{ $top.Values.clusterService.config.dbScheme | default "cluster_service" | quote }}
+  SHOULD_MARK_COMPLETED: {{ $top.Values.clusterMigrator.config.markCompleted | default false | quote }}
+  {{- if $top.Values.clusterMigrator.config.tenantsToMigrate }}
+  TENANTS_TO_MIGRATE: {{ $top.Values.clusterMigrator.config.tenantsToMigrate | quote }}
+  {{- end }}
+  {{- if $top.Values.clusterMigrator.config.tenantsToNotMigrate }}
+  TENANTS_TO_NOT_MIGRATE: {{ $top.Values.clusterMigrator.config.tenantsToNotMigrate | quote }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,23 @@
+image: alpine
+command: sleep 1000
+imagePullPolicy: IfNotPresent
+nodePools:
+  - default
+environmentVariables: []
+annotations: []
+labels: []
+tolerations: []
+priorityClass: low
+preemptibility: preemptible
+autoDeletionTimeAfterCompletionSeconds: 2592000
+backoffLimit: 6
+numWorkers: 1
+cleanPodPolicy: None
+terminationGracePeriodSeconds: 30
+compute: {}
+security:
+  uidGidSource: fromTheImage
+  capabilities: []
+exposedUrls: []
+ports: []
+relatedUrls: []

@@ -1,0 +1,28 @@
+post:
+  summary: Node pool updated
+  operationId: node_pool_updated
+  x-service: org-unit-service
+  x-no-authorization: true
+  x-internal: true
+  tags:
+    - Notifications
+  parameters:
+    - $ref: "../../parameters/DefaultNodePool.yaml"
+  requestBody:
+    description: Node pool
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/NodePool.yaml"
+  responses:
+    201:
+      description: Created
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

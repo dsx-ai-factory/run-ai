@@ -1,0 +1,13 @@
+description:  information about a workspace created based on assets.
+required:
+  - meta
+  - assets
+properties:
+  meta:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads/WorkloadMeta.yaml"
+  assets:
+    $ref: "../Asset/AssetsRef.yaml"
+  specificRunParams:
+    $ref: "./WorkspaceSpecificRunParams.yaml"
+  policyInfo:
+    $ref: "../Policy/PolicyInfo.yaml"

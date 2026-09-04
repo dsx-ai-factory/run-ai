@@ -1,0 +1,7 @@
+properties:
+  worker:
+    description: Defines the pod specification for the workers.
+    allOf:
+      - $ref: "./DistributedInferenceLeaderWorkerTemplateSpec.yaml"
+    nullable: true
+    type: object

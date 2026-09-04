@@ -1,0 +1,35 @@
+servingPort:
+  port: 8080
+  exposeExternally: false
+workers: 1
+nodePools:
+  - gpu-pool-a
+preemptibility: preemptible
+priorityClass: high
+leader:
+  image: leader:latest
+  environmentVariables:
+    - name: ROLE
+      value: leader
+  compute:
+    cpuCoreRequest: 1
+    cpuMemoryRequest: 1Gi
+  security:
+    hostNetwork: true
+    runAsNonRoot: true
+  nodeType: gpu
+  labels:
+    - name: role-label
+      value: leader
+  annotations:
+    - name: example.com/role
+      value: leader
+worker:
+  image: worker:latest
+  environmentVariables:
+    - name: ROLE
+      value: worker
+  compute:
+    cpuCoreRequest: 2
+    cpuMemoryRequest: 2Gi
+  nodeType: cpu

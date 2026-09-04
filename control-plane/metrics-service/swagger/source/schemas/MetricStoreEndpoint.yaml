@@ -1,0 +1,28 @@
+type: object
+required:
+  - url
+properties:
+  url:
+    type: string
+    maxLength: 2000
+    minLength: 1
+    format: uri
+    example: http://mimir-nginx.mimir-test.svc:80/api/v1/query
+  auth:
+    nullable: true
+    type: object
+    properties:
+      type:
+        $ref: './MetricStoreEndpointAuthType.yaml'
+      basic:
+        $ref: './MetricStoreEndpointAuthBasic.yaml'
+  headers:
+    type: object
+    maxProperties: 20
+    minProperties: 0
+    additionalProperties:
+      type: string
+      maxLength: 250
+      minLength: 1
+    example:
+      X-Scope-OrgID: abcd

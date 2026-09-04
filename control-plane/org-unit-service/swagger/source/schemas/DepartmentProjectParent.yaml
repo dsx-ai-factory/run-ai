@@ -1,0 +1,16 @@
+type: object
+nullable: true
+description: Department or project parent
+required:
+  - id
+  - name
+properties:
+  id:
+    type: string
+    format: uuid
+    example: 9f55253e-11ed-47c7-acef-fc4054768dbc
+  name:
+    type: string
+    example: organization1
+  parent:
+    $ref: "./DepartmentProjectParent.yaml"

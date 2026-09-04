@@ -1,0 +1,23 @@
+apiVersion: run.ai/v2alpha1
+kind: DistributedWorkload
+metadata:
+  creationTimestamp: null
+  name: job-0-20220125-034942
+  namespace: runai-team-a
+  uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+spec:
+  jobType: MPIJob
+  image:
+    value: ubuntu
+  mpiJob:
+    values:
+      slotsPerWorker:
+        value: 5
+  name:
+    value: job-0
+  gpuMemory:
+    value: 120M
+  username:
+    value: user.name
+  workers:
+    value: 3

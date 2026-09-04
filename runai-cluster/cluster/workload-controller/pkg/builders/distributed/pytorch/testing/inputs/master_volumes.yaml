@@ -1,0 +1,37 @@
+apiVersion: run.ai/v2alpha1
+kind: DistributedWorkload
+metadata:
+  name: job-1
+  namespace: runai-team-a
+  uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+spec:
+  jobType: PyTorchJob
+  name:
+    value: job-1
+  pvcs:
+    items:
+      pvc--1:
+        value:
+          path: /tmp/ofer1
+          readOnly: false
+          size: 10M
+          storageClass: storage
+      pvc--2:
+        value:
+          path: /tmp/ofer2
+          readOnly: false
+          size: 20M
+          storageClass: storage
+  workers:
+    value: 1
+  username:
+    value: user.name
+masterSpec:
+  pvcs:
+    items:
+      pvc--3:
+        value:
+          path: /tmp/ofer3
+          readOnly: false
+          size: 30M
+          storageClass: storage

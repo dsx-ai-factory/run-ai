@@ -1,0 +1,130 @@
+apiVersion: kubeflow.org/v1
+kind: XGBoostJob
+metadata:
+  annotations:
+    image: ubuntu
+    template: job-0-20220125-034942
+    user: user.name
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: xgboostjob
+    createdBy: XGBoostJob
+    project: team-a
+    release: job-0
+    run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+    workloadKind: DistributedWorkload
+    workloadName: job-0-20220125-034942
+  name: job-0
+  namespace: runai-team-a
+spec:
+  runPolicy:
+    backoffLimit: 5
+    cleanPodPolicy: None
+  xgbReplicaSpecs:
+    Master:
+      replicas: 1
+      template:
+        metadata:
+          annotations:
+            gpu-fraction-num-devices: "1"
+            gpu-memory: "20"
+            totalGPUs: "0"
+            totalGPUsMemory: "380"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-0-20220125-034942
+        spec:
+          containers:
+          - env:
+            - name: ENV_M_0
+              value: envm0
+            - name: ENV_M_1
+              value: envm1
+            - name: ENV_M_2
+              valueFrom:
+                secretKeyRef:
+                  key: my-other-user-key
+                  name: dw-job-0-my-user-credential
+            image: ubuntu:master
+            imagePullPolicy: Never
+            name: xgboost
+            resources: {}
+            securityContext:
+              seccompProfile:
+                type: RuntimeDefault
+          schedulerName: runai-scheduler
+          tolerations:
+          - key: bbb
+            operator: Exists
+    Worker:
+      replicas: 3
+      template:
+        metadata:
+          annotations:
+            gpu-fraction-num-devices: "1"
+            gpu-memory: "120"
+            runai-nodepools: default nodepoola
+            totalGPUs: "0"
+            totalGPUsMemory: "380"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-0-20220125-034942
+        spec:
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: runai/node-pool
+                    operator: DoesNotExist
+                - matchExpressions:
+                  - key: test-key
+                    operator: In
+                    values:
+                    - test-value
+          containers:
+          - env:
+            - name: ENV_0
+              value: env0
+            - name: ENV_1
+              value: env1
+            - name: ENV_2
+              valueFrom:
+                secretKeyRef:
+                  key: my-user-key
+                  name: dw-job-0-my-user-credential
+            image: ubuntu
+            imagePullPolicy: Always
+            name: xgboost
+            resources: {}
+            securityContext:
+              seccompProfile:
+                type: RuntimeDefault
+          schedulerName: runai-scheduler
+          tolerations:
+          - key: aaa
+            operator: Exists
+status: {}
+---
+data:
+  my-user-key: cHJpdmF0ZS12YWx1ZS0x
+kind: Secret
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: xgboostjob
+    createdBy: XGBoostJob
+    project: team-a
+    release: job-0
+    workloadKind: DistributedWorkload
+    workloadName: job-0
+  name: dw-job-0-my-user-credential
+  namespace: runai-team-a

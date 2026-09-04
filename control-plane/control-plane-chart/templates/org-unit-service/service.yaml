@@ -1,0 +1,3 @@
+{{- if .Values.orgUnitService.enabled }}
+{{- include "common.service" (list . .Values.orgUnitService.service .Values.orgUnitService) }}
+{{- end }}

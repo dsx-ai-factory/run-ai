@@ -1,0 +1,140 @@
+@startuml 02-migration-sequence
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing true
+skinparam RoundCorner 8
+skinparam ParticipantPadding 20
+skinparam BoxPadding 15
+
+skinparam sequence {
+    ArrowColor #555555
+    ArrowFontName SansSerif
+    ArrowFontSize 11
+
+    ActorBorderColor #2C3E50
+    ActorBackgroundColor white
+    ActorFontColor #2C3E50
+    ActorFontSize 14
+
+    LifeLineBorderColor #BDC3C7
+    LifeLineBackgroundColor #ECF0F1
+
+    ParticipantBorderColor transparent
+    ParticipantBackgroundColor #34495E
+    ParticipantFontName SansSerif
+    ParticipantFontSize 13
+    ParticipantFontColor white
+
+    BoxBorderColor transparent
+    BoxFontName SansSerif
+    BoxFontSize 11
+    BoxFontColor #95A5A6
+}
+
+skinparam note {
+    BackgroundColor #FFF9C4
+    BorderColor #FBC02D
+    FontName SansSerif
+    FontSize 11
+    FontColor #424242
+}
+
+title <font size=20 color=#2C3E50><b>RI to Karta Migration</b></font>\n<font size=12 color=#7F8C8D>helm upgrade v2.25 -> v2.26</font>
+
+box "Helm" #F0F4FF
+    participant "Helm" as helm #2980B9
+    participant "CRD\nUpgrader" as crd #2980B9
+    participant "Migration Job\n(init + controller\n+ sidecar)" as mig #D35400
+end box
+
+box "Cluster" #F0FFF0
+    participant "K8s API" as k8s #27AE60
+    participant "Agent" as agent #16A085
+    participant "New controllers\n(EWI, Anyworkload,\nPodGrouper, Cluster-Sync)" as controllers #E65100
+end box
+
+== <b>Starting state</b> (v2.25) ==
+
+note over k8s
+  31 RI CRs (Ready), agent running,
+  all controllers on v2.25
+end note
+
+== <b>Phase 1</b> - Pre-upgrade hook ==
+
+helm -> crd : install CRDs
+activate crd #BBDEFB
+crd -> k8s : apply run.ai_kartas.yaml\n(keep old CRD alongside)
+deactivate crd
+
+|||
+
+helm -> mig : run Migration Job
+activate mig #FFE0B2
+
+note right of mig
+  Pod with:
+  - Init container (copy RI -> Karta)
+  - Karta controller (reconcile)
+  - Sidecar watcher
+end note
+
+group #E3F2FD Init container
+  loop per RI
+    mig -> k8s : CREATE Karta (same spec,\nnew kind/apiVersion/labels)
+  end
+end
+
+group #FFF3E0 Controller container
+  loop per Karta
+    mig -> k8s : validate + add finalizer
+    mig -> k8s : PATCH status -> Ready=True
+  end
+end
+
+group #E8F5E9 Sidecar container
+  loop poll
+    mig -> k8s : count(Karta Ready) == count(RI Ready) ?
+  end
+  mig -> mig : match -> signal exit
+end
+
+deactivate mig
+
+note over agent #E8F5E9
+  Agent keeps running.
+  Any new RI it creates is picked
+  up by the re-run in Phase 3.
+end note
+
+== <b>Phase 2</b> - Main chart deploy ==
+
+helm -> k8s : deploy main chart
+k8s -> controllers : start new controllers
+activate controllers #FFE0B2
+controllers -> k8s : watch Kartas (all Ready -> no-op)
+deactivate controllers
+
+note over controllers
+  No init containers, no migration flag.
+  Kartas already Ready -> no race.
+end note
+
+== <b>Phase 3</b> - Post-upgrade hook ==
+
+helm -> mig : re-run Migration Job
+activate mig #FFE0B2
+mig -> k8s : reconcile any RI created\nduring the upgrade window
+mig -> mig : sidecar sees match -> exit
+deactivate mig
+
+helm -> k8s : remove RI finalizers, delete RI CRs
+
+== <b>Final state</b> (v2.26) ==
+
+note over k8s #E8F8E8
+  31 Karta CRs (Ready), RIs deleted,
+  old CRD kept for rollback safety.
+end note
+
+@enduml

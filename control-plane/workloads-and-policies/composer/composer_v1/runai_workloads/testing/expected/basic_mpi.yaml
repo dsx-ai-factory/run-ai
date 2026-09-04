@@ -1,0 +1,134 @@
+Dinfw: null
+JobSpec:
+  arguments:
+    value: -x my-script.py
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 864000
+  command:
+    value: python-3.8
+  environment:
+    items:
+      HOME:
+        value: /home/my-folder
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  gpu:
+    value: "0.5"
+  gpuDevices:
+    value: 1
+  image:
+    value: ubuntu
+  jobType: MPIJob
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  nfs:
+    items:
+      nfs-worker:
+        value:
+          nfsServer: my.nfs.com
+          readOnly: true
+          sourcePath: /container/nfs
+          targetPath: /local/nfs
+  nodePools:
+    value: my-node-pool-a my-node-pool-b
+  priorityClassName:
+    value: low
+  runAsNonRoot:
+    value: true
+  username:
+    value: test
+  volumes:
+    items:
+      host-path-worker:
+        value:
+          readOnly: true
+          sourcePath: /container/directory
+          targetPath: /local/directory
+  workers:
+    value: 2
+  workingDir:
+    value: /home/my-folder
+MasterSpec:
+  arguments:
+    value: -x master-script.py
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  command:
+    value: run-master
+  environment:
+    items:
+      HOME:
+        value: /home/master-folder
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  gpuDevices:
+    value: 1
+  gpuMemory:
+    value: 100M
+  image:
+    value: redhat
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  nfs:
+    items:
+      nfs-master:
+        value:
+          nfsServer: master.nfs.com
+          readOnly: true
+          sourcePath: /container/nfs/master
+          targetPath: /local/nfs/master
+  nodePools:
+    value: master-node-pool-a master-node-pool-b
+  priorityClassName:
+    value: low
+  username:
+    value: test
+  volumes:
+    items:
+      host-path-master:
+        value:
+          readOnly: true
+          sourcePath: /container/directory/master
+          targetPath: /local/directory/master
+  workingDir:
+    value: /home/master-folder
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: MPIJob
+  environments:
+  - connections: []
+    id: ""
+    name: Worker
+    replicaType: Worker
+  - connections: []
+    id: ""
+    name: Master
+    replicaType: Master
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: basic, Rules: , Type: Distributed'
+  images:
+  - ubuntu
+  - redhat
+  name: 'Value: basic, Rules: , Type: Distributed'
+  projectId: project-654-321
+  requestedNodePools:
+  - my-node-pool-a
+  - my-node-pool-b
+  - master-node-pool-a
+  - master-node-pool-b
+  requestedPods:
+    number: 3
+  submittedBy: test
+  type: Distributed
+  version: v2alpha1

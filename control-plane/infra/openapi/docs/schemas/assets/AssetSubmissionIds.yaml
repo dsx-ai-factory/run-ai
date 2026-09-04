@@ -1,0 +1,14 @@
+x-internal: true
+description: The unique identifier of assets to use for submitting this workload.
+  The combined values provided in the spec, template and assets will be used to create the workload.
+properties:
+  environment:
+    $ref: "./AssetIdOptional.yaml"
+  compute:
+    $ref: "./AssetIdOptional.yaml"
+  datasources:
+    type: array
+    items:
+      $ref: "./AssetId.yaml"
+type: object
+nullable: true

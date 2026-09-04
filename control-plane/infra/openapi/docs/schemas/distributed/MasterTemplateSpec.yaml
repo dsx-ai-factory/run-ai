@@ -1,0 +1,143 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+nullable: true
+properties:
+  annotations:
+    $ref: ../workloads_spec/advanced/Annotations.yaml
+  args:
+    $ref: ../workloads_spec/container/Args.yaml
+  autoDeletionTimeAfterCompletionSeconds:
+    $ref: ../workloads_spec/advanced/AutoDeletionTimeAfterPreemptionMaster.yaml
+  backoffLimit:
+    $ref: ../workloads_spec/advanced/BackoffLimitMaster.yaml
+  category:
+    $ref: ../workloads_spec/resources/Category.yaml
+  command:
+    $ref: ../workloads_spec/container/Command.yaml
+  compute:
+    nullable: true
+    properties:
+      cpuCoreLimit:
+        $ref: ../workloads_spec/compute/CpuCoreLimit.yaml
+      cpuCoreRequest:
+        $ref: ../workloads_spec/compute/CpuCoreRequest.yaml
+      cpuMemoryLimit:
+        $ref: ../workloads_spec/compute/CpuMemoryLimit.yaml
+      cpuMemoryRequest:
+        $ref: ../workloads_spec/compute/CpuMemoryRequest.yaml
+      extendedResources:
+        $ref: ../workloads_spec/compute/ExtendedResources.yaml
+      gpuDevicesRequest:
+        $ref: ../workloads_spec/compute/GpuDevicesRequest.yaml
+      gpuMemoryLimit:
+        $ref: ../workloads_spec/compute/GpuMemoryLimit.yaml
+      gpuMemoryRequest:
+        $ref: ../workloads_spec/compute/GpuMemoryRequest.yaml
+      gpuPortionLimit:
+        $ref: ../workloads_spec/compute/GpuPortionLimit.yaml
+      gpuPortionRequest:
+        $ref: ../workloads_spec/compute/GpuPortionRequest.yaml
+      gpuRequestType:
+        $ref: ../workloads_spec/compute/GpuRequestType.yaml
+      largeShmRequest:
+        $ref: ../workloads_spec/compute/LargeShmRequest.yaml
+    type: object
+  createHomeDir:
+    $ref: ../workloads_spec/container/CreateHomeDir.yaml
+  environmentVariables:
+    $ref: ../workloads_spec/container/EnvironmentVariables.yaml
+  exposedUrls:
+    $ref: ../workloads_spec/connectivity/ExposedUrls.yaml
+  image:
+    $ref: ../workloads_spec/container/Image.yaml
+  imagePullPolicy:
+    $ref: ../workloads_spec/container/ImagePullPolicy.yaml
+  labels:
+    $ref: ../workloads_spec/advanced/Labels.yaml
+  nodeAffinityRequired:
+    $ref: ../workloads_spec/resources/NodeAffinityRequired.yaml
+  nodePools:
+    $ref: ../workloads_spec/resources/NodePools.yaml
+  nodeType:
+    $ref: ../workloads_spec/resources/NodeType.yaml
+  podAffinity:
+    $ref: ../workloads_spec/resources/PodAffinity.yaml
+  ports:
+    $ref: ../workloads_spec/connectivity/Ports.yaml
+  preemptibility:
+    $ref: ../workloads_spec/advanced/Preemptibility.yaml
+  priorityClass:
+    $ref: ../workloads_spec/resources/PriorityClassMaster.yaml
+  probes:
+    $ref: ../workloads_spec/container/Probes.yaml
+  relatedUrls:
+    $ref: ../workloads_spec/connectivity/RelatedUrls.yaml
+  restartPolicy:
+    $ref: ../workloads_spec/advanced/RestartPolicy.yaml
+  security:
+    nullable: true
+    properties:
+      allowPrivilegeEscalation:
+        $ref: ../workloads_spec/security/AllowPrivilegeEscalation.yaml
+      capabilities:
+        $ref: ../workloads_spec/security/Capabilities.yaml
+      hostIpc:
+        $ref: ../workloads_spec/security/HostIpc.yaml
+      hostNetwork:
+        $ref: ../workloads_spec/security/HostNetwork.yaml
+      privileged:
+        allOf:
+        - $ref: ../workloads_spec/security/Privileged.yaml
+        x-internal: true
+      readOnlyRootFilesystem:
+        $ref: ../workloads_spec/security/ReadOnlyRootFileSystem.yaml
+      runAsGid:
+        $ref: ../workloads_spec/security/RunAsGid.yaml
+      runAsNonRoot:
+        $ref: ../workloads_spec/security/RunAsNonRoot.yaml
+      runAsUid:
+        $ref: ../workloads_spec/security/RunAsUid.yaml
+      seccompProfileType:
+        $ref: ../workloads_spec/security/SeccompProfileType.yaml
+      supplementalGroups:
+        $ref: ../workloads_spec/security/SupplementalGroups.yaml
+      uidGidSource:
+        $ref: ../workloads_spec/security/UidGidSource.yaml
+    type: object
+  stdin:
+    $ref: ../workloads_spec/container/Stdin.yaml
+  storage:
+    nullable: true
+    properties:
+      configMapVolume:
+        $ref: ../workloads_spec/storage/ConfigMapItems.yaml
+      dataVolume:
+        $ref: ../workloads_spec/storage/DataVolumeItems.yaml
+      emptyDirVolume:
+        $ref: ../workloads_spec/storage/EmptyDirItems.yaml
+      git:
+        $ref: ../workloads_spec/storage/GitItems.yaml
+      hostPath:
+        $ref: ../workloads_spec/storage/HostPathItems.yaml
+      nfs:
+        $ref: ../workloads_spec/storage/NfsItems.yaml
+      pvc:
+        $ref: ../workloads_spec/storage/PvcItems.yaml
+      s3:
+        $ref: ../workloads_spec/storage/S3Items.yaml
+      secretVolume:
+        $ref: ../workloads_spec/storage/SecretItems.yaml
+    type: object
+  terminateAfterPreemption:
+    $ref: ../workloads_spec/advanced/TerminateAfterPreemption.yaml
+  terminationGracePeriodSeconds:
+    $ref: ../workloads_spec/advanced/TerminationGracePeriodMaster.yaml
+  tolerations:
+    $ref: ../workloads_spec/advanced/Tolerations.yaml
+  tty:
+    $ref: ../workloads_spec/container/Tty.yaml
+  workingDir:
+    $ref: ../workloads_spec/container/WorkingDir.yaml
+type: object

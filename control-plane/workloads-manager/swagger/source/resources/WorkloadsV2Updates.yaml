@@ -1,0 +1,39 @@
+post:
+  summary: Get workload updates for agent polling + report issues with previous updates
+  description: Retrieve pending updates for workloads that need to be processed by the cluster agent, and report sync issues
+  operationId: get_workload_v2_updates
+  x-service: workloads-manager
+  x-test-coverage:
+    - control-plane/workloads-manager/pkg/services/services_test.go
+  x-internal: true
+  x-authorize:
+    resource-type: workloads
+    action: sync
+  tags:
+    - Workloads V2
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/UpdatesAfter.yaml"
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../../../infra/openapi/docs/schemas/sync/ClusterSyncReport.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/WorkloadsV2/WorkloadsV2Updates.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

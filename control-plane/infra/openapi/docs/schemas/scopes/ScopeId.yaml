@@ -1,0 +1,2 @@
+type: string
+description: The id of the cluster, department or project, depending on the scope type.

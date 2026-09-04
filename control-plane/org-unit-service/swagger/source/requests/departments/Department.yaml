@@ -1,0 +1,4 @@
+post:
+  $ref: "./CreateDepartment.yaml"
+get:
+  $ref: "./GetDepartments.yaml"
