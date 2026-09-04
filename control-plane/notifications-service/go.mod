@@ -88,6 +88,9 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/docker/go-units v0.5.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/evanphx/json-patch v5.9.0+incompatible // indirect
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
@@ -112,9 +115,6 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.67.5 // indirect
 	github.com/prometheus/procfs v0.19.2 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0
 	github.com/spf13/pflag v1.0.10 // indirect
@@ -140,8 +140,8 @@ require (
 )
 
 require (
-	github.com/emersion/go-sasl v0.0.0-20241020182733-b788ff22d5a6
 	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v0.0.0
+	github.com/emersion/go-sasl v0.0.0-20241020182733-b788ff22d5a6
 )
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client => ./pkg/client

@@ -4,15 +4,15 @@ go 1.26.3
 
 require (
 	github.com/aws/smithy-go v1.28.1
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.3
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.24
 	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/lithammer/shortuuid/v4 v4.3.0
 	github.com/maypok86/otter/v2 v2.3.0
 	github.com/nats-io/nats-server/v2 v2.14.6
 	github.com/nats-io/nats.go v1.53.1
 	github.com/redis/go-redis/v9 v9.22.0
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.3
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.24
 	github.com/stretchr/testify v1.12.1
 )
 

@@ -3,11 +3,11 @@ module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/karta-migrate
 go 1.26.3
 
 require (
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-20250428095855-d1862558c98a
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/rs/zerolog v1.35.1
 	github.com/run-ai/karta v0.1.0
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-20250428095855-d1862558c98a
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
 	golang.org/x/sync v0.20.0
 	k8s.io/api v0.35.4
 	k8s.io/apiextensions-apiserver v0.35.4
@@ -21,6 +21,8 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/evanphx/json-patch v5.9.11+incompatible // indirect
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
@@ -70,8 +72,6 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.67.5 // indirect
 	github.com/prometheus/procfs v0.20.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 // indirect
 	github.com/sagikazarmark/locafero v0.7.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.12.0 // indirect

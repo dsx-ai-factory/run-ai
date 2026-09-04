@@ -3,11 +3,11 @@ module github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics
 go 1.26.3
 
 require (
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/prometheus/client_golang v1.24.1
 	github.com/prometheus/client_model v0.6.3
 	github.com/prometheus/common v0.70.1
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
 	gorm.io/gorm v1.31.2

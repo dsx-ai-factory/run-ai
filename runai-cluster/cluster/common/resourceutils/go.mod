@@ -3,9 +3,9 @@ module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/resourceuti
 go 1.26.3
 
 require (
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
 	github.com/kai-scheduler/KAI-scheduler v0.16.9
 	github.com/rs/zerolog v1.31.0
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.27.1
 	golang.org/x/exp v0.0.0-20260218203240-3dfff04db8fa

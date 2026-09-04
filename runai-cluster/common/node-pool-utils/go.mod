@@ -3,11 +3,11 @@ module github.com/dsx-ai-factory/run-ai/runai-cluster/common/node-pool-utils
 go 1.26.3
 
 require (
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-00010101000000-000000000000
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-00010101000000-000000000000
 	github.com/onsi/ginkgo/v2 v2.28.1
 	github.com/onsi/gomega v1.39.1
 	github.com/rs/zerolog v1.31.0
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-00010101000000-000000000000
 	k8s.io/api v0.35.4
 	k8s.io/apimachinery v0.35.4
 	sigs.k8s.io/controller-runtime v0.23.3

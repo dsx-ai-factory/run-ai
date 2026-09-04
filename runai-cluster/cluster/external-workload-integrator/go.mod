@@ -6,19 +6,6 @@ require (
 	github.com/NVIDIA/k8s-nim-operator v1.0.0
 	github.com/ai-dynamo/dynamo/deploy/operator v0.0.0-20260609064536-bae00515e813
 	github.com/devfile/api/v2 v2.2.2
-	github.com/go-logr/zerologr v1.2.3
-	github.com/google/uuid v1.6.0
-	github.com/hashicorp/go-multierror v1.1.1
-	github.com/kai-scheduler/KAI-scheduler v0.16.9
-	github.com/kubeflow/mpi-operator v0.6.0
-	github.com/kubeflow/training-operator v1.9.3
-	github.com/onsi/ginkgo/v2 v2.28.3
-	github.com/onsi/gomega v1.40.0
-	github.com/openshift/api v0.0.0-20260513233232-73d7ca93df6d
-	github.com/prometheus/client_golang v1.23.2
-	github.com/ray-project/kuberay/ray-operator v1.5.1
-	github.com/rs/zerolog v1.32.0
-	github.com/run-ai/karta v0.1.0
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-20240519090715-44f7f790e5ee
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra v0.0.0-00010101000000-000000000000
@@ -35,6 +22,19 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/supported-workloads v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/top-owner v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
+	github.com/go-logr/zerologr v1.2.3
+	github.com/google/uuid v1.6.0
+	github.com/hashicorp/go-multierror v1.1.1
+	github.com/kai-scheduler/KAI-scheduler v0.16.9
+	github.com/kubeflow/mpi-operator v0.6.0
+	github.com/kubeflow/training-operator v1.9.3
+	github.com/onsi/ginkgo/v2 v2.28.3
+	github.com/onsi/gomega v1.40.0
+	github.com/openshift/api v0.0.0-20260513233232-73d7ca93df6d
+	github.com/prometheus/client_golang v1.23.2
+	github.com/ray-project/kuberay/ray-operator v1.5.1
+	github.com/rs/zerolog v1.32.0
+	github.com/run-ai/karta v0.1.0
 	github.com/tektoncd/pipeline v0.55.0
 	go.uber.org/zap v1.27.1
 	golang.org/x/exp v0.0.0-20260312153236-7ab1446f8b90
@@ -54,6 +54,11 @@ require (
 
 require (
 	github.com/cloudevents/sdk-go/v2 v2.16.2 // indirect
+	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.12 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
@@ -63,11 +68,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.3.1 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
-	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
@@ -94,6 +94,7 @@ require (
 	github.com/cyphar/filepath-securejoin v0.6.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/distribution/reference v0.6.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils v0.0.0-00010101000000-000000000000
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/evanphx/json-patch v5.9.11+incompatible // indirect
@@ -156,7 +157,6 @@ require (
 	github.com/prometheus/common v0.67.5 // indirect
 	github.com/prometheus/procfs v0.20.1 // indirect
 	github.com/prometheus/statsd_exporter v0.27.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils v0.0.0-00010101000000-000000000000
 	github.com/samber/lo v1.52.0 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/spf13/cobra v1.10.2 // indirect
