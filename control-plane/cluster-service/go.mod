@@ -4,12 +4,6 @@ go 1.26.3
 
 require (
 	github.com/Masterminds/semver/v3 v3.4.0
-	github.com/go-chi/chi/v5 v5.2.2
-	github.com/google/uuid v1.6.0
-	github.com/iancoleman/strcase v0.3.0
-	github.com/lib/pq v1.11.2
-	github.com/onsi/ginkgo/v2 v2.27.2
-	github.com/onsi/gomega v1.41.0
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7
 	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.17
 	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.17
@@ -23,6 +17,12 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.6
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25
+	github.com/go-chi/chi/v5 v5.2.2
+	github.com/google/uuid v1.6.0
+	github.com/iancoleman/strcase v0.3.0
+	github.com/lib/pq v1.11.2
+	github.com/onsi/ginkgo/v2 v2.27.2
+	github.com/onsi/gomega v1.41.0
 	github.com/xhit/go-str2duration/v2 v2.1.0
 	golang.org/x/exp v0.0.0-20250819193227-8b4c13bb791b
 	gorm.io/gorm v1.31.2
@@ -31,7 +31,6 @@ require (
 )
 
 require (
-	github.com/maypok86/otter/v2 v2.2.1
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/client v1.0.2
@@ -46,17 +45,18 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.11
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/setting v1.2.0
+	github.com/maypok86/otter/v2 v2.2.1
 	gorm.io/datatypes v1.2.7
 )
 
 require (
 	github.com/aws/smithy-go v1.27.8 // indirect
-	github.com/lithammer/shortuuid/v4 v4.2.0 // indirect
-	github.com/moby/moby/api v1.55.0 // indirect
-	github.com/moby/moby/client v0.5.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.2 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1 // indirect
+	github.com/lithammer/shortuuid/v4 v4.2.0 // indirect
+	github.com/moby/moby/api v1.55.0 // indirect
+	github.com/moby/moby/client v0.5.0 // indirect
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.43.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/mod v0.36.0 // indirect
@@ -81,6 +81,7 @@ require (
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/containerd/platforms v0.2.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
 	github.com/ebitengine/purego v0.10.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
@@ -120,7 +121,6 @@ require (
 	github.com/prometheus/common v0.64.0 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
 	github.com/redis/go-redis/v9 v9.14.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/segmentio/kafka-go v0.4.48 // indirect
@@ -164,6 +164,7 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.7.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
@@ -187,7 +188,6 @@ require (
 	github.com/pelletier/go-toml/v2 v2.3.1 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.35.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
