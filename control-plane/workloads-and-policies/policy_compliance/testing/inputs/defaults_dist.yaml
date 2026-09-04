@@ -1,0 +1,48 @@
+worker:
+  storage:
+    hostPath:
+      instances:
+        - name: hp1
+          path: /path/worker/hp1
+          mountPath: /mount/path/worker/hp1
+        - name: hp2
+          path: /path/worker/hp2
+          mountPath: /mount/path/worker/hp2
+        - path: /path/worker/noname
+          mountPath: /mount/path/worker/noname
+    s3:
+      attributes:
+        bucket: /default/worker/bucket
+      instances:
+        - name: s3a
+          path: /path/worker/s3a
+          url: https://s3a.worker.amazonaws.com
+        - name: s3b
+          path: /path/worker/s3b
+          url: https://s3b.worker.amazonaws.com
+        - path: /path/worker/noname
+          url: https://noname.worker.amazonaws.com
+master:
+  storage:
+    hostPath:
+      instances:
+        - name: hp1
+          path: /path/master/hp1
+          mountPath: /mount/path/master/hp1
+        - name: hp2
+          path: /path/master/hp2
+          mountPath: /mount/path/master/hp2
+        - path: /path/master/noname
+          mountPath: /mount/path/master/noname
+    s3:
+      attributes:
+        bucket: /default/master/bucket
+      instances:
+        - name: s3a
+          path: /path/master/s3a
+          url: https://s3a.master.amazonaws.com
+        - name: s3b
+          path: /path/master/s3b
+          url: https://s3b.master.amazonaws.com
+        - path: /path/master/noname
+          url: https://noname.master.amazonaws.com

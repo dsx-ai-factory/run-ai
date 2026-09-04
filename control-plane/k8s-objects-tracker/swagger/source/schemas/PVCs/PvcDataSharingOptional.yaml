@@ -1,0 +1,4 @@
+description: A Flag to mark if the PVC data is shared.
+type: boolean
+example: true
+nullable: true

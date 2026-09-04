@@ -1,0 +1,120 @@
+BatchJobTarget:
+  Config: {}
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: git
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: git
+      name: git
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: git
+            workloadKind: Workspace
+            workloadName: git
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: git
+            image: ubuntu
+            name: git
+            resources: {}
+            volumeMounts:
+            - mountPath: /container/my-repository
+              name: code-sync-0
+            - mountPath: /mount/git-defaults
+              name: code-sync-1
+          initContainers:
+          - env:
+            - name: GITSYNC_REPO
+              value: http://runai.public.github.com
+            - name: GITSYNC_REF
+              value: "12345678"
+            - name: GITSYNC_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: User
+                  name: my-password-secret
+            - name: GITSYNC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: Password
+                  name: my-password-secret
+            - name: GITSYNC_ROOT
+              value: /code-git
+            - name: GITSYNC_ONE_TIME
+              value: "true"
+            - name: HOME
+              value: /tmp
+            image: registry.k8s.io/git-sync/git-sync:v4.7.0
+            name: git-sync-git
+            resources: {}
+            volumeMounts:
+            - mountPath: /code-git
+              name: code-sync-0
+          - env:
+            - name: GITSYNC_REPO
+              value: https://runai.public.github.com
+            - name: GITSYNC_ROOT
+              value: /code-git-1
+            - name: GITSYNC_ONE_TIME
+              value: "true"
+            - name: HOME
+              value: /tmp
+            image: registry.k8s.io/git-sync/git-sync:v4.7.0
+            name: git-sync-git-1
+            resources: {}
+            volumeMounts:
+            - mountPath: /code-git-1
+              name: code-sync-1
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+          volumes:
+          - emptyDir: {}
+            name: code-sync-0
+          - emptyDir: {}
+            name: code-sync-1
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: git, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: git, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

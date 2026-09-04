@@ -1,0 +1,7 @@
+properties:
+  canAdd:
+    description: Whether it is possible to add non-imposed assets in the workload
+    type: boolean
+    nullable: true
+nullable: true
+type: object

@@ -1,0 +1,8 @@
+description: Indicates which kind of seccomp profile will be applied to the container.
+  The options are
+  a. `RuntimeDefault` - the container runtime default profile should be used.
+  b. `Unconfined` - no profile should be applied.
+  c. `Localhost` is not yet supported by Run:ai.
+type: string
+enum: [ RuntimeDefault, Unconfined, Localhost ]
+nullable: true

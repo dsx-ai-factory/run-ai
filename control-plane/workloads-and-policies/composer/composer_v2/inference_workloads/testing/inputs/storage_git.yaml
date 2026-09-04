@@ -1,0 +1,10 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+storage:
+  git:
+    - name: code
+      path: /code
+      repository: https://github.com/example/repo.git
+      branch: main

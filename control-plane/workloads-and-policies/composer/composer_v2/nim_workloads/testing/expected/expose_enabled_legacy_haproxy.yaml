@@ -1,0 +1,41 @@
+authSecret: ngc-secret
+expose:
+  ingress:
+    annotations:
+      haproxy.org/path-rewrite: /test-project/test-workload(/|$)(.*) /\2
+    enabled: true
+    spec:
+      ingressClassName: haproxy
+      rules:
+      - host: example.com
+        http:
+          paths:
+          - backend:
+              service:
+                name: test-workload
+                port:
+                  name: api
+            path: /test-project/test-workload
+            pathType: Prefix
+  router: {}
+  service:
+    port: 8000
+    type: LoadBalancer
+image:
+  repository: nvidia/nim-llama3-8b-instruct
+  tag: 1.0.0
+livenessProbe: {}
+metrics:
+  enabled: true
+  serviceMonitor: {}
+readinessProbe: {}
+replicas: 1
+scale:
+  hpa:
+    maxReplicas: 0
+schedulerName: runai-scheduler
+startupProbe: {}
+storage:
+  nimCache:
+    name: nim-cache
+  pvc: {}

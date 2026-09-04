@@ -1,0 +1,9 @@
+properties:
+  assets:
+    type: object
+    nullable: true
+    properties:
+      leader:
+        $ref: "../assets/AssetSubmissionIds.yaml"
+      worker:
+        $ref: "../assets/AssetSubmissionIds.yaml"

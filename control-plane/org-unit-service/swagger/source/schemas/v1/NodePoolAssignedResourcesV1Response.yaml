@@ -1,0 +1,35 @@
+required:
+  - nodePool
+  - id
+  - gpu
+  - cpu
+  - memory
+properties:
+  id:
+    description: The id of the assigned resources. Required in PUT when updating the assigned resources.
+    type: number
+  nodePool:
+    required:
+      - id
+    properties:
+      id:
+        type: number
+        description: Node pool id.
+        example: 3
+      name:
+        type: string
+        description: Node pool name.
+        example: default
+    description: The node pool which the assigned resources refer to.
+  gpu:
+    allOf:
+      - $ref: "./ResourceV1Response.yaml"
+    description: Number of GPUs assigned in the node pool.
+  cpu:
+    allOf:
+      - $ref: "./ResourceV1Response.yaml"
+    description: Number of CPU Millicores assigned in the node pool. Supported only if the 'CPU Resources Quota' feature flag is enabled.
+  memory:
+    allOf:
+      - $ref: "./ResourceV1Response.yaml"
+    description: Amount of CPU Memory Mib assigned in the node pool. Supported only if the 'CPU Resources Quota' feature flag is enabled.

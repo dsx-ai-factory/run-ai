@@ -1,0 +1,34 @@
+log_level: debug
+use_mocks: true
+service_name: metrics-service
+reports:
+  processor_run_interval_sec: 2
+  s3_config:
+    bucket: metrics-service
+datasources:
+  datasource_url: http://prometheus:9090
+metrics:
+  example_metric:
+    cross_version_query: sum(example_metric_new{FILTERS}) by(clusterId) or sum(example_metric_old{FILTERS}) by(clusterId)
+    queries:
+      2.12.0: sum(example_metric_new{FILTERS}) by(clusterId)
+      2.11.0: sum(example_metric_old{FILTERS}) by(clusterId)
+  example_metric_aggregation:
+    cross_version_query: sum(sum_over_time(example_metric_new{FILTERS}[RANGE])) by(clusterId)
+    queries:
+      2.12.0: sum(sum_over_time(example_metric_new{FILTERS}[RANGE])) by(clusterId)
+  example_metric_quantile:
+    cross_version_query: histogram_quantile(QUANTILE, sum(rate(example_metric_histogram_bucket{FILTERS}[RANGE])) by (le, clusterId))
+    queries:
+      2.12.0: histogram_quantile(QUANTILE, sum(rate(example_metric_histogram_bucket{FILTERS}[RANGE])) by (le, clusterId))
+cleaner:
+  is_cleanup_enabled: true
+  cleaner_interval_hours: 12
+  delete_report_ttl_days: 90
+cron_jobs:
+  reports:
+    interval_seconds: 2
+    max_retry_count: 1
+    retry_failed_reports_min_age_minutes: 0
+    retry_failed_reports_max_age_minutes: 30
+    fail_stuck_processing_reports_min_age_minutes: 30

@@ -1,0 +1,18 @@
+image: ubuntu
+
+storage:
+  s3:
+    - bucket: private-bucket
+      path: /container/my-bucket
+      url: "https://s3.amazonaws.com"
+      accessKeySecret: my-access-key-secret
+    - bucket: public-bucket
+      path: /container/everyones
+      url: "https://uswest.s3.amazonaws"
+    - bucket: private-bucket-with-token
+      path: /container/my-very-secret-bucket
+      url: "https://s3.amazonaws.com"
+      accessKeySecret: my-access-key-secret
+      awsSessionToken: my-session-token
+    - name: s3-x
+      exclude: true

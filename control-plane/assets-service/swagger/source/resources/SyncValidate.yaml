@@ -1,0 +1,30 @@
+post:
+  summary: Validate assets sync.
+  description: Validating deletion of project-scoped assets before actually deleting the resources from the cluster.
+  operationId: sync_validate
+  x-service: assets-service
+  x-test-coverage: null
+  x-authorize:
+    resource-type: credentials
+    action: sync
+  x-internal: true
+  tags:
+    - Synchronization
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Sync/ValidateSyncRequest.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Sync/ValidateSyncResponse.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

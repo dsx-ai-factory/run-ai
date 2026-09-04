@@ -1,0 +1,6 @@
+name: precise
+in: query
+x-internal: true
+description: Use this if you want to count the precise amount of workloads, uncached. Defaults to false.
+schema:
+  type: boolean

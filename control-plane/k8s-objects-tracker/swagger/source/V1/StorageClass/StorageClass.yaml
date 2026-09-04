@@ -1,0 +1,80 @@
+parameters:
+  - $ref: './StorageClassSchema.yaml#/components/parameters/uuid'
+get:
+  summary: Get all storageClasses from a cluster.
+  description: this API is used by cluster versions < 2.20
+  deprecated: true
+  operationId: V1GetStorageClasses
+  tags:
+    - Storage Classes
+  x-service: k8s-objects-tracker
+  x-test-coverage:
+    - src/test/suites/playwright/parallel/dataSource/storageClassApi.test.ts
+  x-audit: false
+  x-authorize:
+    resource-type: pvc-assets
+    action: read
+  parameters:
+    - name: includeNone
+      in: query
+      description: Include runai-none storage class to be able to create PVCs without a storage class
+      required: false
+      schema:
+        type: boolean
+  responses:
+    200:
+      $ref: './StorageClassSchema.yaml#/components/schemas/V1StorageClassNames'
+    401:
+      $ref: './StorageClassSchema.yaml#/components/responses/V1Unauthorized'
+    404:
+      $ref: './StorageClassSchema.yaml#/components/responses/V1NotFound'
+    default:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: "./StorageClassSchema.yaml#/components/schemas/V1Error"
+
+post:
+  summary: Create a storageClass.
+  description: this API is used by cluster versions < 2.20
+  deprecated: true
+  operationId: V1CreateStorageClass
+  parameters:
+    - $ref: './StorageClassSchema.yaml#/components/parameters/uuid'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: './StorageClassSchema.yaml#/components/schemas/V1StorageClass'
+  tags:
+    - Storage Classes
+  x-internal: true
+  x-service: k8s-objects-tracker
+  x-test-coverage:
+    - src/test/suites/playwright/parallel/dataSource/storageClassApi.test.ts
+  x-audit: false
+  x-authorize:
+    resource-type: pvc-assets
+    action: sync
+  responses:
+    200:
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: "./StorageClassSchema.yaml#/components/schemas/V1StorageClass"
+    401:
+      $ref: './StorageClassSchema.yaml#/components/responses/V1Forbidden'
+    403:
+      $ref: './StorageClassSchema.yaml#/components/responses/V1Forbidden'
+    503:
+      $ref: './StorageClassSchema.yaml#/components/responses/V1ServiceUnavailable'
+    default:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: "./StorageClassSchema.yaml#/components/schemas/V1Error"
+

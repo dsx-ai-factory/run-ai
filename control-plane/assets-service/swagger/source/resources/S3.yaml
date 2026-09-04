@@ -1,0 +1,74 @@
+get:
+  summary: List S3 assets.
+  description: Retrieve a list of S3 compatible datasource assets.
+  operationId: list_s3_assets
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_datasources_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - control-plane/assets-service/pkg/services/api_s3_service_test.go
+    - e2e/src/test/suites/parallel/dataSource/dataSourceUI.test.ts
+  x-no-authorization: true
+  tags:
+    - S3
+  parameters:
+    - $ref: "../parameters/query/optional/AssetNameFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetScopeFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetProjectFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetDepartmentFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetClusterFilter.yaml"
+    - $ref: "../parameters/query/optional/IncludeUsageInfo.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToProject.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToWorkloadType.yaml"
+    - $ref: "../parameters/query/optional/IncludeStatus.yaml"
+    - $ref: "../parameters/query/optional/AssetIdsFilter.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToReplicaType.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/S3/S3ListResponse.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+post:
+  summary: Create an S3 asset.
+  description: Use to create an S3 compatible datasource asset.
+  operationId: create_s3_asset
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_datasources_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - control-plane/assets-service/pkg/services/api_s3_service_test.go
+    - e2e/src/test/suites/parallel/dataSource/dataSourceUI.test.ts
+  x-no-authorization: true
+  x-audit: true
+  tags:
+    - S3
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/S3/S3CreationRequest.yaml"
+  responses:
+    202:
+      description: Request accepted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/S3/S3Asset.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    409:
+      $ref: "../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

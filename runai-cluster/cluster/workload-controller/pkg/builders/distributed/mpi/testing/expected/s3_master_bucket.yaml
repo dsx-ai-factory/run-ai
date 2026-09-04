@@ -1,0 +1,164 @@
+apiVersion: kubeflow.org/v2beta1, Kind=MPIJob
+kind: MPIJob
+metadata:
+  annotations:
+    image: ""
+    template: job-1
+    user: user.name
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: mpijob
+    createdBy: MPIJob
+    project: team-a
+    release: job-1
+    run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+    workloadKind: DistributedWorkload
+    workloadName: job-1
+  name: job-1
+  namespace: runai-team-a
+spec:
+  mpiReplicaSpecs:
+    Launcher:
+      replicas: 1
+      template:
+        metadata:
+          annotations:
+            totalGPUs: "0"
+            totalGPUsMemory: "0"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-1
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_MPI_NUM_WORKERS
+              value: "1"
+            imagePullPolicy: IfNotPresent
+            name: mpi
+            resources: {}
+            securityContext:
+              seccompProfile:
+                type: RuntimeDefault
+            volumeMounts:
+            - mountPath: /home/mydata2
+              mountPropagation: HostToContainer
+              name: s3-0
+          - command:
+            - goofys
+            - -f
+            - --dir-mode
+            - "0777"
+            - --file-mode
+            - "0777"
+            - -o
+            - allow_other
+            - --debug_s3
+            - yosef-bucket-1
+            - /home/mydata2
+            env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  key: henry-key
+                  name: k8s-secret-b
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: henry-secret
+                  name: k8s-secret-b
+            - name: RUNAI_MPI_NUM_WORKERS
+              value: "1"
+            image: runai.jfrog.io/op-containers-prod/goofys
+            imagePullPolicy: IfNotPresent
+            name: s3-fs-0
+            resources: {}
+            securityContext:
+              privileged: true
+            volumeMounts:
+            - mountPath: /home/mydata2
+              mountPropagation: Bidirectional
+              name: s3-0
+          schedulerName: runai-scheduler
+          volumes:
+          - emptyDir: {}
+            name: s3-0
+    Worker:
+      replicas: 1
+      template:
+        metadata:
+          annotations:
+            totalGPUs: "0"
+            totalGPUsMemory: "0"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-1
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_MPI_NUM_WORKERS
+              value: "1"
+            imagePullPolicy: IfNotPresent
+            name: mpi
+            resources: {}
+            securityContext:
+              seccompProfile:
+                type: RuntimeDefault
+            volumeMounts:
+            - mountPath: /home/mydata1
+              mountPropagation: HostToContainer
+              name: s3-0
+          - command:
+            - goofys
+            - -f
+            - --dir-mode
+            - "0777"
+            - --file-mode
+            - "0777"
+            - -o
+            - allow_other
+            - --debug_s3
+            - --uid
+            - "501"
+            - --gid
+            - "20"
+            - yona-bucket-1
+            - /home/mydata1
+            env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  key: liza-key
+                  name: k8s-secret-a
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: liza-secret
+                  name: k8s-secret-a
+            - name: RUNAI_MPI_NUM_WORKERS
+              value: "1"
+            image: runai.jfrog.io/op-containers-prod/goofys
+            imagePullPolicy: IfNotPresent
+            name: s3-fs-0
+            resources: {}
+            securityContext:
+              privileged: true
+            volumeMounts:
+            - mountPath: /home/mydata1
+              mountPropagation: Bidirectional
+              name: s3-0
+          schedulerName: runai-scheduler
+          volumes:
+          - emptyDir: {}
+            name: s3-0
+  runPolicy:
+    backoffLimit: 6
+    cleanPodPolicy: Running
+status: {}

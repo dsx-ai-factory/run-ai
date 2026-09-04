@@ -1,0 +1,35 @@
+type: object
+properties:
+  initialDelaySeconds:
+    description: Number of seconds after the container has started before liveness or readiness probes are initiated.
+    type: integer
+    format: int32
+    minimum: 0
+    nullable: true
+  periodSeconds:
+    description: How often (in seconds) to perform the probe.
+    type: integer
+    format: int32
+    minimum: 1
+    nullable: true
+  timeoutSeconds:
+    description: Number of seconds after which the probe times out.
+    type: integer
+    format: int32
+    minimum: 1
+    nullable: true
+  successThreshold:
+    description: Minimum consecutive successes for the probe to be considered successful after having failed.
+    type: integer
+    format: int32
+    minimum: 1
+    nullable: true
+  failureThreshold:
+    description: When a probe fails, the number of times to try before giving up.
+    type: integer
+    format: int32
+    minimum: 1
+    nullable: true
+  handler:
+    $ref: "./ProbeHandler.yaml"
+nullable: true

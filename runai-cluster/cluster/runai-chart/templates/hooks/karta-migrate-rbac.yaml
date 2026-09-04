@@ -1,0 +1,64 @@
+{{- /*
+RBAC for the karta migration job.
+
+Granted on both helm.sh/hook=pre-upgrade and post-upgrade (weight=0,
+before the Job at weight=1) so the SA exists when the Job starts.
+*/}}
+{{- if .Values.kartaMigrate.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: karta-migrate
+  namespace: runai
+  annotations:
+    "helm.sh/hook": pre-upgrade,post-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    {{- include "jobLabels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: karta-migrate
+  annotations:
+    "helm.sh/hook": pre-upgrade,post-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+rules:
+  # legacy RI CRs (read for migration, patch+delete for cleanup)
+  - apiGroups: [optimization.nvidia.com]
+    resources: [resourceinterfaces]
+    verbs: [get, list, update, patch, delete]
+  # new Karta CRs (create, list, status patch, finalizers)
+  - apiGroups: [run.ai]
+    resources: [kartas, kartas/status, kartas/finalizers]
+    verbs: [get, list, watch, create, update, patch]
+  # CRD existence check + delete (post-hook only)
+  - apiGroups: [apiextensions.k8s.io]
+    resources: [customresourcedefinitions]
+    verbs: [get, delete]
+  # additional-workload-gvks ClusterRoles (mirrors the EWI reconcile path the
+  # migration runs in pkg/migrate). escalate is required so the SA can grant
+  # rules on the underlying workload kinds it does not itself hold.
+  - apiGroups: [rbac.authorization.k8s.io]
+    resources: [clusterroles]
+    verbs: [get, list, create, update, patch, escalate, bind]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: karta-migrate
+  annotations:
+    "helm.sh/hook": pre-upgrade,post-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+subjects:
+  - kind: ServiceAccount
+    name: karta-migrate
+    namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: karta-migrate
+{{- end }}

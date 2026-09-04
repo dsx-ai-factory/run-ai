@@ -1,0 +1,32 @@
+{{- define "common.service.preview.tpl" -}}
+{{- $top := first . }}
+{{- $service := index . 1 }}
+{{- $obj := index . 2 }}
+{{- if ($top.Values.global.config).argoRollouts }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  {{- include "common.metadata" (list $top $obj) | nindent 2 }}
+  name: {{ include "common.fullname" $top }}-{{ $obj.name }}-preview
+  {{- with $obj.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ $service.type }}
+  ports:
+  - port: {{ $service.port }}
+    targetPort: http
+    protocol: {{ $service.protocol }}
+    name: http
+  {{- with $service.extraPorts }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
+  selector:
+    {{- include "common.selectorLabels" $top | nindent 4 }}
+    {{- include "common.selectorLabelName" $obj | nindent 4 }}
+{{- end }}
+{{- end }}
+
+

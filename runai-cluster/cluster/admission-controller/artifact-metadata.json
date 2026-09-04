@@ -1,0 +1,14 @@
+{
+  "service_name": "admission-controller",
+  "artifact_type": "container",
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "notifications": {
+    "slack": {
+      "mention": "@scheduler"
+    }
+  },
+  "jira": {
+    "team_name": "Vaquita Team"
+  }
+}

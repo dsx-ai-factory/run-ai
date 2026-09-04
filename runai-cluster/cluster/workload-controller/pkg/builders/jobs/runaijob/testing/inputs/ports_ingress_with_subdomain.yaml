@@ -1,0 +1,49 @@
+apiVersion: run.ai/v2alpha1
+kind: InteractiveWorkload
+metadata:
+  creationTimestamp: null
+  name: job-5
+  namespace: runai-team-a
+spec:
+  completions:
+    value: 1
+  image:
+    value: zembutsu/docker-sample-nginx
+  imagePullPolicy:
+    value: Always
+  ingressUrl:
+    value: https://app.run.ai
+  name:
+    value: job-5
+  ports:
+    items:
+      port-70:
+        value:
+          autoGenerate: false
+          container: 70
+          external: 7000
+  exposedUrls:
+    items:
+      a:
+        value:
+          containerPort: 443
+          url: https://test.run.ai:8443/my/url
+          customUrl: true
+      b:
+        value:
+          containerPort: 443
+      c:
+        value:
+          containerPort: 80
+          url: http://this.is.port:8080/to/port/80
+          customUrl: true
+  runAsGid:
+    value: 20
+  runAsUid:
+    value: 501
+  serviceType:
+    value: ClusterIP
+  supplementalGroups:
+    value: 20;12;61;79;80;81;98;33;100;204;250;395;101;399;400;701
+  username:
+    value: user.name

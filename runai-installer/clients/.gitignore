@@ -1,0 +1,7 @@
+# Downloaded OpenAPI specs (regenerated from source)
+specs/
+
+# Temporary files
+*.tmp
+*.swp
+

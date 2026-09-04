@@ -1,0 +1,31 @@
+template: testify
+template-data:
+  unroll-variadic: true
+dir: "{{.InterfaceDir}}/mocks"
+pkgname: "mocks"
+structname: "{{.InterfaceName}}"
+filename: "{{.InterfaceName}}.go"
+packages:
+  github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb:
+    interfaces:
+      DBInitializer:
+  github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/orm:
+    interfaces:
+      DB:
+  github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/internal/logger:
+    interfaces:
+      Logger:
+  github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/internal/postgres:
+    interfaces:
+      migrationStrategy:
+        config:
+          structname: "MigrationStrategy"
+      migrationRunner:
+        config:
+          structname: "MigrationRunner"
+  github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/internal/dbinit:
+    interfaces:
+      Factory:
+      Connector:
+      Migrator:
+      SessionCreator:

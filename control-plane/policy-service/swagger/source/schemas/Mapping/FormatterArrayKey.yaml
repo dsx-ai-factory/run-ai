@@ -1,0 +1,20 @@
+type: object
+description: >-
+  The unique key per item for an itemized field, provided as an argName with an
+  optional specRef.
+required:
+  - argName
+properties:
+  argName:
+    description: >-
+      The name of the argument that supplies the unique key value per item.
+    allOf:
+      - $ref: "./MappingArgName.yaml"
+  specRef:
+    description: >-
+      An optional direct dotted path into the workload spec that locates the key
+      value for each item.
+    type: string
+    allOf:
+      - $ref: "./SpecReference.yaml"
+    nullable: true

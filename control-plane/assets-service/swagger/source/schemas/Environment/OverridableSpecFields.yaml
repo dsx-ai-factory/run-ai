@@ -1,0 +1,19 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+nullable: true
+properties:
+  args:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/Args.yaml
+  command:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/Command.yaml
+  environmentVariables:
+    $ref: ../Common/EnvironmentVariablesOfAsset.yaml
+  runAsGid:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/RunAsGid.yaml
+  runAsUid:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/RunAsUid.yaml
+  supplementalGroups:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/SupplementalGroups.yaml
+type: object

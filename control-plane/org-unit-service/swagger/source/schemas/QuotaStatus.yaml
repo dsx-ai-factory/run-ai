@@ -1,0 +1,9 @@
+type: object
+description: Sum of all quota statuses of all the node pools
+properties:
+  allocated:
+    $ref: './QuotaStatusResource.yaml'
+  allocatedNonPreemptible:
+    $ref: './QuotaStatusResource.yaml'
+  requested:
+    $ref: './QuotaStatusResource.yaml'

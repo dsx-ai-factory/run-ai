@@ -1,0 +1,93 @@
+services:
+  nats-tests:
+    container_name: nats-tests
+    profiles:
+      - nats-tests
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    image: nats-tests
+    environment:
+      PUBSUB_URL: nats://n1:4222
+      PUBSUB_TYPE: nats
+      REDIS_PUBSUB_URL: redis:6379
+      PUBSUB_REPLICAS: 1
+      SECRETS_MOUNT_PATH: ./config/secrets/
+    depends_on:
+      n1:
+        condition: service_healthy
+
+  kafka-tests:
+    container_name: kafka-tests
+    profiles:
+      - kafka-tests
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    image: kafka-tests
+    environment:
+      PUBSUB_URL: k1:9092
+      PUBSUB_TYPE: kafka
+      REDIS_PUBSUB_URL: redis:6379
+      PUBSUB_REPLICAS: 1
+      SECRETS_MOUNT_PATH: ./config/secrets/
+    depends_on:
+      k1:
+        condition: service_healthy
+
+  redis:
+    container_name: redis
+    profiles:
+      - redis-setup
+    image: redis:6.2-alpine
+    ports:
+      - '6379:6379'
+    command: redis-server
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+
+  n1:
+    container_name: n1
+    profiles:
+      - nats-setup
+    image: nats:2.11.4-alpine
+    command: --user user --pass abc123  --name N1 --js -m 8222  -p 4222
+    ports:
+    - 4222:4222
+    - 8222:8222
+    healthcheck:
+      test: wget -qO- http://localhost:8222/varz || exit 1
+      interval: 2s
+      timeout: 10s
+      retries: 10
+      start_period: 2s
+      
+  k1:
+    container_name: k1
+    profiles:
+      - kafka-setup
+    image: apache/kafka:4.0.0
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_KRAFT_MODE: "true"
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@k1:29093
+      KAFKA_LISTENERS: SASL_PLAINTEXT://0.0.0.0:9092,PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:29093
+      KAFKA_ADVERTISED_LISTENERS: SASL_PLAINTEXT://${HOST:-k1}:9092,PLAINTEXT://localhost:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: SASL_PLAINTEXT:SASL_PLAINTEXT,PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+      KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    volumes:
+      - ./config/kafka_server_jaas.conf:/etc/kafka/kafka_server_jaas.conf
+    stop_grace_period: 1m
+    healthcheck:
+      test: ["CMD", "bash", "-c", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:29092 --list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

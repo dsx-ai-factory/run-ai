@@ -1,0 +1,5 @@
+in: query
+name: tailLines
+description: Lines of recent log file to display. Defaults to -1, showing all log lines.
+schema:
+  type: integer

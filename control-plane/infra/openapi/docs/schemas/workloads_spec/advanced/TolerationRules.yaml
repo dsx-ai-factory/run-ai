@@ -1,0 +1,16 @@
+description: Toleration details.
+properties:
+  operator:
+    $ref: "./TolerationOperatorRules.yaml"
+  key:
+    $ref: "../../policy_rules/StringRules.yaml"
+  value:
+    $ref: "../../policy_rules/StringRules.yaml"
+  effect:
+    $ref: "./TolerationEffectRules.yaml"
+  seconds:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  exclude:
+    $ref: "../../policy_rules/BooleanRules.yaml"
+nullable: true
+type: object

@@ -1,0 +1,7 @@
+name: scopeId
+in: query
+required: false
+description: The scope resource id that we want to filter by.
+schema:
+  type: string
+  example: "2"

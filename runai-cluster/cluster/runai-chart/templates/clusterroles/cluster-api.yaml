@@ -1,0 +1,110 @@
+{{- if .Values.operands.rbac.clusterAPI.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-cluster-api-project
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - pods/exec
+      - pods/attach
+      - pods/log
+      - pods/portforward
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-cluster-api
+rules:
+  - apiGroups:
+      - run.ai
+      - ""
+      - kubeflow.org
+    resources:
+      - projects
+      - runaijobs
+      - runaijobs/status
+      - trainingworkloads
+      - trainingworkloads/status
+      - inferenceworkloads
+      - inferenceworkloads/status
+      - distributedinferenceworkloads
+      - distributedinferenceworkloads/status
+      - interactiveworkloads
+      - interactiveworkloads/status
+      - distributedworkloads
+      - distributedworkloads/status
+      - namespaces
+      - pods
+      - pods/status
+      - mpijobs
+      - pytorchjobs
+      - tfjobs
+      - xgboostjobs
+      - jaxjobs
+      - inferenceworkloads
+      - inferenceworkloads/status
+      - externalworkloads
+      - externalworkloads/status
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - batch
+    resources:
+      - jobs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - serving.knative.dev
+    resources:
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - authorization.k8s.io
+    resources:
+      - subjectaccessreviews
+    verbs:
+      - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-cluster-api
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-cluster-api
+subjects:
+  - kind: ServiceAccount
+    name: cluster-api
+    namespace: runai
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-cluster-api-additional-workload-gvks-read
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-additional-workload-gvks-read
+subjects:
+  - kind: ServiceAccount
+    name: cluster-api
+    namespace: runai
+{{- end }}

@@ -1,0 +1,9 @@
+FROM golang:1.26.3
+ARG TARGETARCH
+ENV TARGETARCH=$TARGETARCH
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+
+ADD bin/metrics-exporter-$TARGETARCH /usr/local/bin/metrics_exporter
+RUN chgrp -R 0 /usr/local/bin/metrics_exporter && chmod -R g=u /usr/local/bin/metrics_exporter
+
+ENTRYPOINT ["/go/bin/dlv", "exec", "--headless", "-l", ":10000", "--api-version=2", "/usr/local/bin/metrics_exporter", "--"]

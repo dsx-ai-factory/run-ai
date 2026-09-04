@@ -1,0 +1,3 @@
+allOf:
+  - $ref: "./PvcFieldsUpdatable.yaml"
+  - $ref: "./PvcFieldsNonUpdatable.yaml"

@@ -1,0 +1,29 @@
+type: object
+required:
+- email
+
+properties:
+  email:
+    type: string
+    pattern: ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+    description: The email of the user. Must be a valid email address.
+    minLength: 5
+    maxLength: 254
+  resetPassword:
+    type: boolean
+    nullable: true
+  notify:
+    type: boolean
+    description: When true, send an email to the user. The email includes a link to reset the password.
+    nullable: true
+  firstName:
+    type: string
+    maxLength: 255
+  lastName:
+    type: string
+    maxLength: 255
+
+example:
+  email: "test@run.ai"
+  resetPassword: false
+  notify: true

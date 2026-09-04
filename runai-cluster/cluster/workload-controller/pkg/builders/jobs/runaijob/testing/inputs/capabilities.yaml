@@ -1,0 +1,22 @@
+apiVersion: run.ai/v2alpha1
+kind: InteractiveWorkload
+metadata:
+  name: capa-bili
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  image:
+    value: ubuntu
+  name:
+    value: capa-bili
+  username:
+    value: user.name
+  capabilities:
+    items:
+      "cap-1":
+        value:
+          capability: AUDIT_CONTROL
+      "cap-2":
+        value:
+          capability: IPC_LOCK
+status: {}

@@ -1,0 +1,39 @@
+policy:
+  id: test-policy
+  effectiveRules:
+    # blocked:false accepts present values. Pins the toggle semantics so
+    # authors can keep a stable rule shape across environments by
+    # flipping the flag.
+    - field: image
+      specSelector: allContainers
+      enforcements:
+        - blocked: false
+
+  breakdown:
+    fields:
+      image:
+        - specSelectors: [allContainers]
+          specRef: image
+          formatter:
+            builtin: KeyValue
+    specSelectors:
+      allContainers:
+        query: |
+          (
+            .spec.template.spec.containers[]?,
+            .spec.template.spec.initContainers[]?
+          )
+          | select(.)
+
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: blocked-false
+  spec:
+    template:
+      spec:
+        containers:
+          - name: with-image
+            image: ubuntu
+          - name: no-image

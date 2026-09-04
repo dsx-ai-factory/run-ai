@@ -1,0 +1,136 @@
+defaults:
+  environmentVariables:
+    instances:
+      - name: env-1
+        value: env-value-1
+      - name: env-2
+        value: env-value-2
+      - name: env-3
+        value: env-value-3
+  annotations:
+    instances:
+      - name: ann-1
+        value: ann-value-1
+      - name: ann-2
+        value: ann-value-2
+      - name: ann-3
+        value: ann-value-3
+  labels:
+    instances:
+      - name: label-1
+        value: label-value-1
+      - name: label-2
+        value: label-value-2
+      - name: label-3
+        value: label-value-3
+  ports:
+    instances:
+      - name: port-1
+        container: 9081
+      - name: port-2
+        container: 9082
+      - name: port-3
+        container: 9083
+  exposedUrls:
+    instances:
+      - name: exposed-1
+        url: http://exposed.com/url/1
+      - name: exposed-2
+        url: http://exposed.com/url/2
+      - name: exposed-3
+        url: http://exposed.com/url/3
+  relatedUrls:
+    instances:
+      - type: google
+        name: related-1
+        url: http://related.com/url/1
+      - type: wandb
+        name: related-2
+        url: http://related.com/url/2
+      - type: wandb
+        name: related-3
+        url: http://related.com/url/3
+  compute:
+    extendedResources:
+      instances:
+        - resource: aaa/1
+          quantity: 10M
+        - resource: aaa/2
+          quantity: 20M
+        - resource: aaa/3
+          quantity: 30M
+  storage:
+    s3:
+     instances:
+        - name: s3-1
+          path: /s3/path-1
+        - name: s3-2
+          path: /s3/path-2
+        - name: s3-3
+          path: /s3/path-3
+    hostPath:
+      instances:
+        - name: hp-1
+          path: /hp/path-1
+          mountPath: /hp/mount-path-1
+        - name: hp-2
+          path: /hp/path-2
+          mountPath: /hp/mount-path-2
+        - name: hp-3
+          path: /hp/path-3
+          mountPath: /hp/mount-path-3
+    git:
+      instances:
+        - name: git-1
+          path: /git/path-1
+        - name: git-2
+          path: /git/path-2
+        - name: git-3
+          path: /git/path-3
+    dataVolume:
+      instances:
+        - id: 1234-0001
+          mountPath: /dv/path-1
+        - id: 1234-0002
+          mountPath: /dv/path-2
+        - id: 1234-0003
+          mountPath: /dv/path-3
+    pvc:
+      instances:
+        - name: pvc-1
+          claimName: claim-pvc-1
+          existingPvc: true
+          path: /pvc/path-1
+        - name: pvc-2
+          claimName: claim-pvc-2
+          existingPvc: true
+          path: /pvc/path-2
+        - name: pvc-3
+          claimName: claim-pvc-3
+          existingPvc: true
+          path: /pvc/path-3
+    nfs:
+      instances:
+        - name: nfs-1
+          path: nfs-path-1
+          server: nfs-server-1
+          mountPath: /nfs/path-1
+        - name: nfs-2
+          path: nfs-path-2
+          server: nfs-server-2
+          mountPath: /nfs/path-2
+        - name: nfs-3
+          path: nfs-path-3
+          server: nfs-server-3
+          mountPath: /nfs/path-3
+    configMapVolume:
+      instances:
+        - configMap: cm-1
+          mountPath: /cm/path-1
+          name: cm-1
+        - configMap: cm-2
+          mountPath: /cm/path-2
+          name: cm-2
+        - configMap: cm-3
+          mountPath: /cm/path-3
+          name: cm-3

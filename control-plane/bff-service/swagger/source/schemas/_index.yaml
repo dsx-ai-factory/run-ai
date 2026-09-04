@@ -1,0 +1,47 @@
+# Version
+VersionResponse:
+  $ref: './VersionResponse.yaml'
+
+# Frontend boot configuration
+BootConfig:
+  $ref: './boot-config/BootConfig.yaml'
+BootConfigVersion:
+  $ref: './boot-config/BootConfigVersion.yaml'
+BootConfigDocs:
+  $ref: './boot-config/BootConfigDocs.yaml'
+BootConfigWhatsNew:
+  $ref: './boot-config/BootConfigWhatsNew.yaml'
+BootConfigSupport:
+  $ref: './boot-config/BootConfigSupport.yaml'
+BootConfigCapabilities:
+  $ref: './boot-config/BootConfigCapabilities.yaml'
+BootConfigUnleashConfig:
+  $ref: './boot-config/BootConfigUnleashConfig.yaml'
+
+# Notifications Settings
+AdminMessage:
+  $ref: './settings/AdminMessage/GetAdminMessage.yaml'
+UpdateAdminMessage:
+  $ref: './settings/AdminMessage/UpdateAdminMessage.yaml'
+
+# Workloads Settings
+EnableNIM:
+  $ref: './settings/EnableNIM/GetEnableNIM.yaml'
+UpdateEnableNIM:
+  $ref: './settings/EnableNIM/UpdateEnableNIM.yaml'
+
+# Appearance Settings
+BannerConfig:
+  $ref: './settings/BannerConfig/GetBannerConfig.yaml'
+UpdateBannerConfig:
+  $ref: './settings/BannerConfig/UpdateBannerConfig.yaml'
+AppearanceSettingsGetAllResponse:
+  $ref: './settings/AppearanceSettingsGetAllResponse.yaml'
+
+# Branding Settings
+Logo:
+  $ref: './settings/Logo/GetLogo.yaml'
+UpdateLogo:
+  $ref: './settings/Logo/UpdateLogo.yaml'
+BrandingSettingsGetAllResponse:
+  $ref: './settings/BrandingSettingsGetAllResponse.yaml'

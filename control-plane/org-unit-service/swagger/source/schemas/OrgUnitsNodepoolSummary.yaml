@@ -1,0 +1,15 @@
+type: array
+description: Projects/departments in this node pool that match the requested summary type
+items:
+  type: object
+  properties:
+    id:
+      type: string
+      example: 50
+    name:
+      type: string
+    type:
+      type: string
+      enum:
+        - department
+        - project

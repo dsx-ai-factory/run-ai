@@ -1,0 +1,39 @@
+type: object
+description: The specification used to create a field group.
+required:
+  - name
+properties:
+  name:
+    $ref: "./FieldGroupName.yaml"
+  description:
+    $ref: "./MappingDescriptionOptional.yaml"
+  fields:
+    $ref: "./FieldGroupFields.yaml"
+  itemSelectors:
+    $ref: "./ItemSelectors.yaml"
+
+example:
+  name: podSpec
+  description: fields of a pod spec
+  fields:
+    ports:
+      formatter: podSpec
+      description: ports of a pod
+    ports-Name:
+      formatter: KeyValue
+      specRef: name
+      type: string
+      itemSelectors:
+        - allPorts
+        - portsByContainerPort
+  itemSelectors:
+    allPorts:
+      description: All the ports.
+      query: (.ports // [])[]
+    portsByContainerPort:
+      description: Ports by container port.
+      query:
+        (.ports // [])[]
+        | select(.containerPort == $ARGS.named.containerPort)
+      argsInfo:
+        containerPort: integer

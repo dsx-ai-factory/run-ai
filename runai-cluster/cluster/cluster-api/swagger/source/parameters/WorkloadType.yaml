@@ -1,0 +1,10 @@
+name: workloadType
+in: path
+required: true
+description: The workload type
+schema:
+  type: string
+  enum:
+    - workspace
+    - training
+    - distributed

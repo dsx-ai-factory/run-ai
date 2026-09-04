@@ -1,0 +1,10 @@
+type: object
+properties:
+  clusterId:
+    type: string
+    example: d73a738f-fab3-430a-8fa3-5241493d7128
+    description: The unique identifier of the cluster
+  phase:
+    type: string
+    description: Current phase of the priority in the specified cluster
+    example: "Ready"

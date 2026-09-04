@@ -1,0 +1,13 @@
+{
+  "app_name": "example-service",
+  "go_version": "1.21",
+  "use_postgresql": true,
+  "use_redis": false,
+  "use_nats": false,
+  "remove_gitkeep": false,
+  "add_service_to_ci": true,
+  "add_to_helm_chart": true,
+  "__app_name_camel_case_upper": "{{ cookiecutter.app_name | replace('_', '-') | title | replace('-', '') }}",
+  "__app_name_camel_case_lower": "{{ cookiecutter.app_name[0] }}{{ cookiecutter.__app_name_camel_case_upper[1:] }}",
+  "__app_name_underscore_lower": "{{ cookiecutter.app_name|replace('-', '_')|lower }}"
+}

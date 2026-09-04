@@ -1,0 +1,25 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+allOf:
+- nullable: true
+  properties:
+    category:
+      $ref: ../resources/Category.yaml
+    nodePools:
+      $ref: ../resources/NodePools.yaml
+    preemptibility:
+      $ref: ../advanced/Preemptibility.yaml
+    priorityClass:
+      $ref: ../resources/PriorityClass.yaml
+    restartPolicy:
+      $ref: ./DistributedInferenceRestartPolicy.yaml
+    servingPort:
+      $ref: ./DistributedInferenceServingPort.yaml
+  type: object
+- $ref: ./DistributedInferenceStartupPolicyField.yaml
+- $ref: ./DistributedInferenceWorkersField.yaml
+- $ref: ./DistributedInferenceReplicasField.yaml
+nullable: true
+type: object

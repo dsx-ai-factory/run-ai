@@ -1,0 +1,14 @@
+{
+  "service_name": "org-units-migrator",
+  "artifact_type": "container",
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "notifications": {
+    "slack": {
+      "mention": "@suricata"
+    }
+  },
+  "jira": {
+    "team_name": "Suricata Team"
+  }
+}

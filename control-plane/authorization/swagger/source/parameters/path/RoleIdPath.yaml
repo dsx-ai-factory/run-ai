@@ -1,0 +1,9 @@
+name: roleIdPath
+in: path
+required: true
+description: The ID of the role
+example: 32
+schema:
+  type: integer
+  format: int32
+  minimum: 0

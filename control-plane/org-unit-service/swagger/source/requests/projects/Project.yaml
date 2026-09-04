@@ -1,0 +1,4 @@
+post:
+  $ref: "./CreateProject.yaml"
+get:
+  $ref: "./GetProjects.yaml"

@@ -1,0 +1,38 @@
+get:
+  summary: Get a single workload structure element by element id.
+  description: >
+    Retrieve a specific structure element for a workload, including aggregated
+    requested and allocated resources from pods linked to this element.
+    Completed pods are excluded from aggregation. Requires cluster version >= 2.25.
+  operationId: get_workload_element
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/workload_elements_test.go
+  x-authorize:
+    resource-type: workloads
+    action: read
+    resource-id: workloadId
+  tags:
+    - Workloads
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+    - $ref: "../parameters/path/ElementId.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Workloads/WorkloadElementResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

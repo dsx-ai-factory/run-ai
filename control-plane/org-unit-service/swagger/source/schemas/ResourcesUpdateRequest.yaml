@@ -1,0 +1,4 @@
+type: array
+items:
+  $ref: "./ResourcesNullable.yaml"
+description: Resources assigned to this Project per Node Pool

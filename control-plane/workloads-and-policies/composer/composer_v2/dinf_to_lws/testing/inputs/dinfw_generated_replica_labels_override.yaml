@@ -1,0 +1,12 @@
+servingPort:
+  port: 8080
+  exposeExternally: false
+leader:
+  image: leader:latest
+  labels:
+    - name: app
+      value: user-app
+    - name: release
+      value: user-release
+    - name: workloadName
+      value: user-workload

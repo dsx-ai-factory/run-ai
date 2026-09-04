@@ -1,0 +1,28 @@
+get:
+  summary: Get all group names of a tenant
+  x-no-authorization: true
+  x-service: authorization
+  x-internal: true
+  x-test-coverage: not-applicable
+  operationId: get_groups
+  tags:
+    - Internal
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - names
+            properties:
+              names:
+                type: array
+                items:
+                  type: string
+                  example: group-1
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

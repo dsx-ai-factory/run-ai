@@ -1,0 +1,44 @@
+get:
+  summary: Get the workload events.
+  description: Retrieve all the workload events using a workload id.
+  operationId: get_workload_events
+  x-service: workloads
+  x-test-coverage:
+    - e2e/src/test/suites/advancedSuite/workloads/workloadsApi.test.ts
+    - e2e/src/test/suites/parallel/workloads/jobsStatus.test.ts
+  x-authorize:
+    resource-type: workloads
+    action: read
+    id: workloadId
+  tags:
+    - Events
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: '../parameters/query/EventsSort.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - events
+            properties:
+              next:
+                type: integer
+                example: 1
+              events:
+                $ref: '../schemas/Events/Events.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

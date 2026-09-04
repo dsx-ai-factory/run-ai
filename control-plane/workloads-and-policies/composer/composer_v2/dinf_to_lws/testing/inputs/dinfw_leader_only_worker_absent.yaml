@@ -1,0 +1,7 @@
+servingPort:
+  port: 8080
+  exposeExternally: false
+workers: 1
+leader:
+  image: shared:latest
+  args: "--model model-a"

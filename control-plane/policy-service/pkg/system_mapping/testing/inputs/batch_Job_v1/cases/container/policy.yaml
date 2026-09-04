@@ -1,0 +1,236 @@
+description: |
+  Layer 3 case "container" for batch/Job/v1. SETs every field reachable
+  through the podSpecContainer field group plus the container-scope variations
+  of the podSpecAndContainer field group (.resources and the container's
+  .securityContext sub-tree).
+
+  Selector strategy:
+    * allContainers          — fields whose value is the same on app and init
+                               containers (image, imagePullPolicy, working dir,
+                               volumeMounts, the basic securityContext leaves
+                               that both containers share, etc.).
+    * allAppContainers       — fields the app container has but the init
+                               container does not (the larger env / envFrom /
+                               ports content, the extended securityContext,
+                               app-only command/args/...).
+    * allInitContainers      — same shapes for the init container, with the
+                               smaller content the init container ships.
+
+  Custom formatters used here:
+    * environmentVariables-{AsValue,FromConfigMap,FromField,FromResource,FromSecret}
+      (runai-podSpec) — one rule per env entry, merged into .env by .name.
+    * environmentVariableBulks-{FromConfigMap,FromSecret} (runai-podSpec) —
+      one rule per envFrom entry, merged by .configMapRef.name / .secretRef.name.
+    * ports (runai-podSpec) — one rule per port entry, merged by .containerPort.
+    * volumeMounts (runai-podSpec) — one rule per mount, merged by .name.
+    * resourceLimits / resourceRequests (runai-podSpec) — one rule per
+      key/value pair on .resources.limits / .requests.
+    * resourceClaims (runai-podSpec) — one rule per .resources.claims entry.
+
+  Read together with cases/container/golden.yaml.
+effectiveRules:
+  # ----- shared scalars across both containers (allContainers) -----
+  - field: image
+    specSelector: allContainers
+    enforcements: [{ set: { value: test } }]
+  - field: imagePullPolicy
+    specSelector: allContainers
+    enforcements: [{ set: { value: IfNotPresent } }]
+  - field: stdin
+    specSelector: allContainers
+    enforcements: [{ set: { value: false } }]
+  - field: stdinOnce
+    specSelector: allContainers
+    enforcements: [{ set: { value: false } }]
+  - field: terminationMessage-Path
+    specSelector: allContainers
+    enforcements: [{ set: { value: /dev/termination-log } }]
+  - field: terminationMessage-Policy
+    specSelector: allContainers
+    enforcements: [{ set: { value: File } }]
+  - field: tty
+    specSelector: allContainers
+    enforcements: [{ set: { value: false } }]
+  - field: workingDir
+    specSelector: allContainers
+    enforcements: [{ set: { value: /tmp } }]
+
+  # ----- shared volumeMounts (one rule per mount, applied to both kinds) -----
+  - field: volumeMounts
+    specSelector: allContainers
+    enforcements:
+      - set:
+          name: cm-vol
+          mountPath: /etc/cm
+          mountPropagation: None
+          readOnly: true
+          recursiveReadOnly: Disabled
+          subPath: foo
+          subPathExpr: foo
+
+  # ----- shared resources (podSpecAndContainer at container scope) -----
+  - field: resourceLimits
+    specSelector: allContainers
+    enforcements: [{ set: { key: cpu, value: "1" } }]
+  - field: resourceLimits
+    specSelector: allContainers
+    enforcements: [{ set: { key: memory, value: "1Gi" } }]
+  - field: resourceRequests
+    specSelector: allContainers
+    enforcements: [{ set: { key: cpu, value: "1" } }]
+  - field: resourceRequests
+    specSelector: allContainers
+    enforcements: [{ set: { key: memory, value: "1Gi" } }]
+  - field: resourceClaims
+    specSelector: allContainers
+    enforcements: [{ set: { name: claim, request: shared-request } }]
+
+  # ----- shared securityContext leaves (KeyValue, both containers) -----
+  - field: allowPrivilegeEscalation
+    specSelector: allContainers
+    enforcements: [{ set: { value: false } }]
+  - field: runAsGroup
+    specSelector: allContainers
+    enforcements: [{ set: { value: 1 } }]
+  - field: runAsNonRoot
+    specSelector: allContainers
+    enforcements: [{ set: { value: true } }]
+  - field: runAsUser
+    specSelector: allContainers
+    enforcements: [{ set: { value: 1 } }]
+
+  # ----- app-container-only scalars -----
+  - field: args
+    specSelector: allAppContainers
+    enforcements: [{ set: { value: ["arg-1"] } }]
+  - field: command
+    specSelector: allAppContainers
+    enforcements: [{ set: { value: ["cmd-1"] } }]
+
+  # ----- app-container env (custom formatter, one rule per source kind) -----
+  - field: environmentVariables-AsValue
+    specSelector: allAppContainers
+    enforcements: [{ set: { name: AS_VALUE, value: somevalue } }]
+  - field: environmentVariables-FromConfigMap
+    specSelector: allAppContainers
+    enforcements:
+      - set:
+          name: FROM_CM
+          configMapName: cm
+          key: key
+          optional: false
+  - field: environmentVariables-FromField
+    specSelector: allAppContainers
+    enforcements:
+      - set:
+          name: FROM_FIELD
+          apiVersion: v1
+          fieldPath: metadata.name
+  - field: environmentVariables-FromResource
+    specSelector: allAppContainers
+    enforcements:
+      - set:
+          name: FROM_RESOURCE
+          containerName: test
+          divisor: "1"
+          resource: limits.cpu
+  - field: environmentVariables-FromSecret
+    specSelector: allAppContainers
+    enforcements:
+      - set:
+          name: FROM_SECRET
+          secretName: secret
+          key: key
+          optional: false
+
+  # ----- app-container envFrom (custom formatter) -----
+  - field: environmentVariableBulks-FromConfigMap
+    specSelector: allAppContainers
+    enforcements:
+      - set:
+          configMapName: cm
+          optional: false
+          prefix: cm_
+  - field: environmentVariableBulks-FromSecret
+    specSelector: allAppContainers
+    enforcements:
+      - set:
+          secretName: secret
+          optional: false
+          prefix: secret_
+
+  # ----- app-container ports (custom formatter; full port with hostIP/hostPort) -----
+  - field: ports
+    specSelector: allAppContainers
+    enforcements:
+      - set:
+          name: http
+          containerPort: 80
+          protocol: TCP
+          hostPort: 81
+          hostIp: "127.0.0.1"
+
+  # ----- app-container extended securityContext (KeyValue) -----
+  - field: capabilities-Add
+    specSelector: allAppContainers
+    enforcements: [{ set: { value: ["NET_BIND_SERVICE"] } }]
+  - field: capabilities-Drop
+    specSelector: allAppContainers
+    enforcements: [{ set: { value: ["ALL"] } }]
+  - field: privileged
+    specSelector: allAppContainers
+    enforcements: [{ set: { value: false } }]
+  - field: procMount
+    specSelector: allAppContainers
+    enforcements: [{ set: { value: Default } }]
+  - field: readOnlyRootFilesystem
+    specSelector: allAppContainers
+    enforcements: [{ set: { value: false } }]
+  - field: appArmorProfile-Type
+    specSelector: allAppContainers
+    enforcements: [{ set: { value: Localhost } }]
+  - field: appArmorProfile-LocalhostProfile
+    specSelector: allAppContainers
+    enforcements: [{ set: { value: foo } }]
+  - field: seccompProfile-Type
+    specSelector: allAppContainers
+    enforcements: [{ set: { value: Localhost } }]
+  - field: seccompProfile-Localhost
+    specSelector: allAppContainers
+    enforcements: [{ set: { value: foo } }]
+
+  # ----- init-container-only scalars (different values from app) -----
+  - field: args
+    specSelector: allInitContainers
+    enforcements: [{ set: { value: ["init-arg"] } }]
+  - field: command
+    specSelector: allInitContainers
+    enforcements: [{ set: { value: ["init-cmd"] } }]
+
+  # ----- init-container env: only AS_VALUE -----
+  - field: environmentVariables-AsValue
+    specSelector: allInitContainers
+    enforcements: [{ set: { name: AS_VALUE, value: somevalue } }]
+
+  # ----- init-container envFrom: only configMap (cm_) -----
+  - field: environmentVariableBulks-FromConfigMap
+    specSelector: allInitContainers
+    enforcements:
+      - set:
+          configMapName: cm
+          optional: false
+          prefix: cm_
+
+  # ----- init-container ports: minimal port (no hostIP / hostPort) -----
+  - field: ports
+    specSelector: allInitContainers
+    enforcements:
+      - set:
+          name: http
+          containerPort: 80
+          protocol: TCP
+
+  # ----- podMetadata: demonstrates dependency mechanism creates template.metadata -----
+  - field: labels
+    specSelector: podMetadata
+    enforcements: [{ set: { key: "test-case", value: "container" } }]

@@ -1,0 +1,8 @@
+default: 1
+description: The number of replicas to deploy.
+type: integer
+format: int32
+minimum: 0
+maximum: 1000
+example: 2
+nullable: true

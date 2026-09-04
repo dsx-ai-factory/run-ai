@@ -1,0 +1,7 @@
+name: externalTypesOnly
+in: query
+required: false
+description: Return only external and user_external sourced workload types.
+schema:
+  type: boolean
+  default: false

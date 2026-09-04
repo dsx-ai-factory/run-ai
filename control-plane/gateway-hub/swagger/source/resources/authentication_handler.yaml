@@ -1,0 +1,54 @@
+get:
+  summary: Validate JWT and return identity headers
+  description: >
+    ForwardAuth endpoint called by Traefik for every protected request.
+    Validates the Bearer JWT against Keycloak, then returns the nine
+    X-Runai-* identity headers that Traefik copies onto the upstream request.
+  x-service: gateway-hub
+  x-test-coverage: not-applicable
+  operationId: authentication_handler
+  x-no-authorization: true
+  tags:
+  - Auth
+  responses:
+    200:
+      description: JWT is valid. X-Runai-* identity headers are set on the response.
+      headers:
+        X-Runai-Tenant-Id:
+          schema:
+            type: string
+        X-Runai-Subject-Id:
+          schema:
+            type: string
+        X-Runai-Subject-Type:
+          schema:
+            type: string
+            enum: [User, ServiceAccount]
+        X-Runai-Groups:
+          schema:
+            type: string
+        X-Runai-Supplemental-Groups:
+          schema:
+            type: string
+        X-Runai-GID:
+          schema:
+            type: string
+        X-Runai-UID:
+          schema:
+            type: string
+        X-Runai-Is-Management-Tenant:
+          schema:
+            type: string
+            enum: ["true", "false"]
+        X-Runai-Client-Id:
+          schema:
+            type: string
+        X-Runai-Session-Id:
+          schema:
+            type: string
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

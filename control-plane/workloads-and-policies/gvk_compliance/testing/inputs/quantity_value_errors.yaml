@@ -1,0 +1,80 @@
+policy:
+  id: test-policy
+  # parseQuantity has two failure branches: the value is not a string, and
+  # the value is a string that does not parse as a k8s resource quantity.
+  # Both branches surface as 400 *api.Error from the quantity-aware enforcement
+  # (quantityRange). This test feeds each bound (min/max/step) a field with
+  # each broken shape so every combination emits one validation error.
+  effectiveRules:
+    # --- quantityRange.max ---
+    - field: qtyNotStringForMax
+      specSelector: self
+      enforcements:
+        - quantityRange: { max: "1Gi" }
+    - field: qtyBadStringForMax
+      specSelector: self
+      enforcements:
+        - quantityRange: { max: "1Gi" }
+
+    # --- quantityRange.min ---
+    - field: qtyNotStringForMin
+      specSelector: self
+      enforcements:
+        - quantityRange: { min: "1Gi" }
+    - field: qtyBadStringForMin
+      specSelector: self
+      enforcements:
+        - quantityRange: { min: "1Gi" }
+
+    # --- quantityRange.step ---
+    - field: qtyNotStringForStep
+      specSelector: self
+      enforcements:
+        - quantityRange: { step: "100m" }
+    - field: qtyBadStringForStep
+      specSelector: self
+      enforcements:
+        - quantityRange: { step: "100m" }
+
+  breakdown:
+    fields:
+      qtyNotStringForMax:
+        - specSelectors: [self]
+          specRef: qtyNotStringForMax
+          formatter: { builtin: KeyValue }
+      qtyBadStringForMax:
+        - specSelectors: [self]
+          specRef: qtyBadStringForMax
+          formatter: { builtin: KeyValue }
+      qtyNotStringForMin:
+        - specSelectors: [self]
+          specRef: qtyNotStringForMin
+          formatter: { builtin: KeyValue }
+      qtyBadStringForMin:
+        - specSelectors: [self]
+          specRef: qtyBadStringForMin
+          formatter: { builtin: KeyValue }
+      qtyNotStringForStep:
+        - specSelectors: [self]
+          specRef: qtyNotStringForStep
+          formatter: { builtin: KeyValue }
+      qtyBadStringForStep:
+        - specSelectors: [self]
+          specRef: qtyBadStringForStep
+          formatter: { builtin: KeyValue }
+    specSelectors:
+      self:
+        query: "."
+
+workload:
+  apiVersion: test/v1
+  kind: Synthetic
+  # Numbers trip the "not a string" branch of parseQuantity.
+  qtyNotStringForMax: 42
+  qtyNotStringForMin: 42
+  qtyNotStringForStep: 42
+  # Strings that don't match the quantity regex trip the "not a valid
+  # quantity" branch.
+  qtyBadStringForMax: notAQuantity
+  qtyBadStringForMin: notAQuantity
+  qtyBadStringForStep: notAQuantity

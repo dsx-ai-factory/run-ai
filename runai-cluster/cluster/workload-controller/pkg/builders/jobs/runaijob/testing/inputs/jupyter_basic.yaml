@@ -1,0 +1,35 @@
+apiVersion: run.ai/v2alpha1
+kind: InteractiveWorkload
+metadata:
+  name: job-0
+  namespace: runai-team-a
+spec:
+  completions:
+    value: 1
+  gpu:
+    value: "0"
+  image:
+    value: jupyter/scipy-notebook
+  jupyter:
+    value: true
+  imagePullPolicy:
+    value: Always
+  name:
+    value: job-0
+  ports:
+    items:
+      port-8888:
+        value:
+          autoGenerate: false
+          container: 8888
+          external: 8888
+  runAsGid:
+    value: 20
+  runAsUid:
+    value: 501
+  serviceType:
+    value: ClusterIP
+  supplementalGroups:
+    value: 20;12;61;79;80;81;98;33;100;204;250;395;101;399;400;701
+  username:
+    value: user.name

@@ -1,0 +1,4 @@
+servingPort:
+  port: 8081
+leader:
+  image: python:3.8

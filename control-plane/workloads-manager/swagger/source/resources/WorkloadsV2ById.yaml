@@ -1,0 +1,99 @@
+get:
+  summary: Get a specific workload.
+  description: Retrieve details of a specific workload by ID
+  operationId: get_workload_v2_by_id
+  x-test-coverage:
+    - control-plane/workloads-manager/pkg/services/services_test.go
+  x-service: workloads-manager
+  x-authorize:
+    resource-type: workloads
+    action: read
+  tags:
+    - Workloads V2
+  parameters:
+    - $ref: '../parameters/path/WorkloadV2Id.yaml'
+  responses:
+    200:
+      description: Successfully retrieved the workload
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/WorkloadsV2/WorkloadV2GetResponse.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+delete:
+  summary: Delete a workload.
+  description: Delete a specific workload by ID
+  operationId: delete_workload_v2
+  x-test-coverage:
+    - control-plane/workloads-manager/pkg/services/services_test.go
+  x-service: workloads-manager
+  x-authorize:
+    resource-type: workloads
+    action: delete
+  tags:
+    - Workloads V2
+  parameters:
+    - $ref: '../parameters/path/WorkloadV2Id.yaml'
+  responses:
+    202:
+      description: Deletion request accepted.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/WorkloadsV2/WorkloadV2.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+put:
+  summary: Update workload spec.
+  operationId: update_workload_v2
+  description: Update the specification of an existing workload.
+  x-service: workloads-manager
+  x-test-coverage:
+    - control-plane/workloads-manager/pkg/services/services_test.go
+  x-authorize:
+    resource-type: workloads
+    action: update
+  tags:
+    - Workloads V2
+  parameters:
+    - $ref: '../parameters/path/WorkloadV2Id.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/WorkloadsV2/WorkloadV2UpdateRequest.yaml"
+  responses:
+    202:
+      description: Workload update request accepted
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/WorkloadsV2/WorkloadV2.yaml'
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

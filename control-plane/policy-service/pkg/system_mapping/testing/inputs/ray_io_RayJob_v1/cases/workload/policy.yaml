@@ -1,0 +1,81 @@
+description: |
+  Layer 3 case "workload" for ray.io/RayJob/v1. SETs workload-level rayJobSpec
+  FG fields (entrypoint, runtimeEnvYAML, shutdownAfterJobFinishes,
+  ttlSecondsAfterFinished, activeDeadlineSeconds, backoffLimit,
+  entrypointNumCpus/Gpus/Resources, deletionPolicy, managedBy, suspend,
+  metadata, clusterSelector, submitterConfig.backoffLimit) plus the
+  submissionMode enum (custom rayJobSpec formatter). Also SETs a few fields on
+  the embedded rayClusterSpec to prove that selector resolves under
+  .spec.rayClusterSpec.
+effectiveRules:
+  # ----- workloadMetadata (RayJob labels/annotations) -----
+  - field: labels
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "app", value: "ray-job-test" } }]
+  - field: annotations
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "example.com/annotation", value: "test-value" } }]
+
+  # ----- rayJobSpec FG scalar fields -----
+  - field: entrypoint
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "python -c 'print(1)'" } }]
+  - field: runtimeEnvYAML
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "pip:\n  - requests==2.32.0\n" } }]
+  - field: shutdownAfterJobFinishes
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: true } }]
+  - field: ttlSecondsAfterFinished
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 3600 } }]
+  - field: activeDeadlineSeconds
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 86400 } }]
+  - field: backoffLimit
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 3 } }]
+  - field: entrypointNumCpus
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 1.5 } }]
+  - field: entrypointNumGpus
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 1.0 } }]
+  - field: entrypointResources
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "{\"custom\": 1}" } }]
+  - field: deletionPolicy
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "DeleteCluster" } }]
+  - field: managedBy
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "ray.io/rayjob-controller" } }]
+  - field: suspend
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: false } }]
+
+  # ----- submitterConfig.backoffLimit -----
+  - field: submitterConfig-BackoffLimit
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 2 } }]
+
+  # ----- metadata and clusterSelector (keyValueMap) -----
+  - field: metadata
+    specSelector: workloadSpec
+    enforcements: [{ set: { key: "owner", value: "team-a" } }]
+  - field: clusterSelector
+    specSelector: workloadSpec
+    enforcements: [{ set: { key: "ray.io/cluster", value: "shared-cluster" } }]
+
+  # ----- submissionMode enum (custom rayJobSpec formatter) -----
+  - field: submissionMode
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: K8sJobMode } }]
+
+  # ----- embedded rayClusterSpec fields (anchored at .spec.rayClusterSpec) -----
+  - field: rayVersion
+    specSelector: rayClusterSpec
+    enforcements: [{ set: { value: "2.11.0" } }]
+  - field: enableInTreeAutoscaling
+    specSelector: rayClusterSpec
+    enforcements: [{ set: { value: true } }]

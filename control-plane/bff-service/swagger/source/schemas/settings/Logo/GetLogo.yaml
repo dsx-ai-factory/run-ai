@@ -1,0 +1,21 @@
+type: object
+properties:
+  value:
+    type: object
+    properties:
+      logo:
+        type: string
+        description: Logo image returned as a base64-encoded string. PNG and SVG formats are supported
+  displayName:
+    type: string
+    description: Human-readable name for this setting
+    readOnly: true
+  description:
+    type: string
+    description: Short explanation of what this setting controls, shown alongside the setting
+    readOnly: true
+example:
+  value:
+    logo: "<base64-encoded-image>"
+  displayName: Logo
+  description: Retrieve the base64 logo file.

@@ -1,0 +1,28 @@
+description: |
+  Layer 3 case "workload" for nvidia.com/DynamoGraphDeployment/v1alpha1. SETs
+  workload-level fields (backendFramework, restart) and workloadMetadata
+  (labels, annotations on the DynamoGraphDeployment itself).
+effectiveRules:
+  # ----- workloadMetadata (DynamoGraphDeployment labels/annotations) -----
+  - field: labels
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "app", value: "dynamo-test" } }]
+  - field: annotations
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "example.com/annotation", value: "test-value" } }]
+
+  # ----- workloadSpec fields -----
+  - field: backendFramework
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: sglang } }]
+  - field: restart-id
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "restart-2" } }]
+  - field: restart-strategy-type
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: Parallel } }]
+
+  # ----- container image (verify policy modifies skeleton) -----
+  - field: image
+    specSelector: allContainers
+    enforcements: [{ set: { value: "dynamo/service:v1" } }]

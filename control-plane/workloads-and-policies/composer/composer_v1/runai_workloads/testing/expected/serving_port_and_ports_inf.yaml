@@ -1,0 +1,83 @@
+Dinfw: null
+JobSpec:
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  environment:
+    items:
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  image:
+    value: ubuntu
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  maxScale:
+    value: 1
+  minScale:
+    value: 1
+  ports:
+    items:
+      port:
+        value:
+          autoGenerate: true
+          container: 8081
+          serviceType: ClusterIP
+      port-1:
+        value:
+          autoGenerate: true
+          container: 8082
+          serviceType: LoadBalancer
+      serving-port:
+        value:
+          container: 8083
+          protocol: grpc
+          serviceType: ServingPort
+  priorityClassName:
+    value: very-high
+  username:
+    value: test
+MasterSpec: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections:
+    - connectionType: NodePort
+      containerPort: 8081
+      correlationName: port
+      name: port
+      portResourceName: port-test-8081-0
+      serviceResourceName: infw-test-0-clusterip
+      toolType: tool-1
+    - connectionType: LoadBalancer
+      containerPort: 8082
+      correlationName: port-1
+      name: port-1
+      portResourceName: port-test-8082-1
+      serviceResourceName: infw-test-1-loadbalancer
+      toolType: tool-2
+    - authorizationType: public
+      connectionType: ServingPort
+      containerPort: 8083
+      correlationName: serving-port
+      name: ServingPort
+      toolType: custom
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: serving_port_and_ports, Rules: , Type: Inference'
+  images:
+  - ubuntu
+  name: 'Value: serving_port_and_ports, Rules: , Type: Inference'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Inference
+  version: v2alpha1

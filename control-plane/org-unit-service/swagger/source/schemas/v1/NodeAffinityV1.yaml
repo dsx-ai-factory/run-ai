@@ -1,0 +1,16 @@
+properties:
+  affinityType:
+    type: string
+    enum:
+      - no_limit
+      - only_selected
+    description: The type of affinity of the jobs on the nodes.
+  selectedTypes:
+    type: array
+    items:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string

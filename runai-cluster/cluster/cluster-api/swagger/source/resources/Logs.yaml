@@ -1,0 +1,48 @@
+get:
+      summary: Read logs of the specified Pod
+      description: Read logs of the specified Pod in the given workload.
+      operationId: logs
+      tags:
+        - Cluster API
+      x-runai-team: Fox
+      x-no-authorization: true
+      parameters:
+        - $ref: "../parameters/ProjectName.yaml"
+        - $ref: "../parameters/WorkloadName.yaml"
+        - $ref: "../parameters/WorkloadType.yaml"
+        - $ref: "../parameters/Container.yaml"
+        - $ref: "../parameters/Follow.yaml"
+        - $ref: "../parameters/InsecureSkipTLSVerifyBackend.yaml"
+        - $ref: "../parameters/LimitBytes.yaml"
+        - $ref: "../parameters/Previous.yaml"
+        - $ref: "../parameters/SinceSeconds.yaml"
+        - $ref: "../parameters/Timestamps.yaml"
+        - $ref: "../parameters/TailLines.yaml"
+        - $ref: "../parameters/Pod.yaml"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+            text/plain:
+              schema:
+                type: string
+            application/yaml:
+              schema:
+                type: string
+        400:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/400BadRequest.yaml'
+        401:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/401Unauthorized.yaml'
+        403:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/403Forbidden.yaml'
+        404:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/404NotFound.yaml'
+        412:
+          $ref: '../responses/412PodNotReady.yaml'
+        500:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/500InternalServerError.yaml'
+        503:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/503ServiceUnavailable.yaml'

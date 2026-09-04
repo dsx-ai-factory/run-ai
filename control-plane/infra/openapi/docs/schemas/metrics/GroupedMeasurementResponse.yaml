@@ -1,0 +1,38 @@
+type: object
+required:
+  - type
+  - values
+properties:
+  type:
+    type: string
+    description: "specifies what data returned"
+    example: "ALLOCATED_GPU"
+  labels:
+    type: object
+    nullable: true
+    description: "labels of the metric measurement"
+    example: "{'gpu': '3'}"
+    additionalProperties:
+      type: string
+  values:
+    type: array
+    nullable: true
+    items:
+      type: object
+      required:
+        - value
+        - timestamp
+      properties:
+        value:
+          type: string
+          example: '85'
+        timestamp:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2023-06-06 12:09:18.211'
+  groups:
+    type: array
+    description: Group information for this measurement
+    items:
+      $ref: './GroupedMeasurementGroup.yaml'

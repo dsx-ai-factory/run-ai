@@ -1,0 +1,18 @@
+{{- if .Values.tenantsManager.enabled }}
+{{- include "common.deployment" (list . .Values.tenantsManager .Values.tenantsManager.autoscaling .Values.tenantsManager.serviceAccount "control-plane.tenantsManager.deployment" ) }}
+{{- end }}
+
+{{- define "control-plane.tenantsManager.deployment" -}}
+{{- $top := first . }}
+spec:
+  template:
+    spec:
+      initContainers:
+        {{- include "awaitingPostgresReadinessContainer" . | nindent 8 }}
+        {{- include "awaitingIdentityManagerReadiness" . | nindent 8 }}
+        {{- if $top.Values.authorization.enabled }}
+        {{- include "awaitingAuthorizationServiceReadiness" . | nindent 8 }}
+        {{- end }}
+      containers:
+      - {{- include "common.container" . | nindent 8 }}
+{{- end }}

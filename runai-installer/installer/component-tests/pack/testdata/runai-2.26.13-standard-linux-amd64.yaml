@@ -1,0 +1,288 @@
+apiVersion: artifacts.run.ai/v1alpha1
+kind: ArtifactLock
+metadata:
+  name: runai
+  version: 2.26.13
+spec:
+  profile: standard
+  platform:
+    os: linux
+    architecture: amd64
+  imageLocks:
+  - name: runai
+    version: 2.26.13
+    digest: sha256:3b6ff656fd44c245b97e2de7b78bfb9264de61a9d34464215da481e4d64c86b3
+    images:
+    - name: accessrule-controller
+      image: nvcr.io/nvidia/runai/accessrule-controller@sha256:9741abc964a10bc41271a1bf2cffd56b4d05664cd78782c71b55469950b572d3
+      source: nvcr.io/nvidia/runai/accessrule-controller:2.26.13
+      indexDigest: sha256:1e141841fb6cb989ace44a08710797d59219f79889307a831798707cf58f7387
+    - name: admission-controller
+      image: nvcr.io/nvidia/runai/admission-controller@sha256:8f50ea374acc3e8da24b1c2ab0d2340cb98b7045ca9b25eff95d634e4874991d
+      source: nvcr.io/nvidia/runai/admission-controller:2.26.13
+      indexDigest: sha256:f17be895df5b436547897b59e8a6d4fbdd7e6375d8a218eabd5c9482fc60f3dd
+    - name: advice-restart-controller
+      image: nvcr.io/nvidia/runai/advice-restart-controller@sha256:4672623d83fc9487b5c42939f09109dabefab0273ff2d2531c7fda9f848e97f1
+      source: nvcr.io/nvidia/runai/advice-restart-controller:2.26.13
+      indexDigest: sha256:41c274a1d0e70fb6f9951b40f90602d1ec0d7008b017b23a9b632fcfcee92c5f
+    - name: agent
+      image: nvcr.io/nvidia/runai/agent@sha256:dff3dfc7ae3dcb341e961c0cc1a6a265bebdef76f70e25f04997a2c4167ecbb9
+      source: nvcr.io/nvidia/runai/agent:2.26.13
+      indexDigest: sha256:8add25e5e9dbfcfe6457270171b0fbcf89ef85c74129288b1fe5dd507a946499
+    - name: anyworkload-controller
+      image: nvcr.io/nvidia/runai/anyworkload-controller@sha256:d524bf9b33f05de57812c553869910c861134dbcd11f84ede07adf66b72a5903
+      source: nvcr.io/nvidia/runai/anyworkload-controller:2.26.13
+      indexDigest: sha256:8b022928ea4f60215a5a4750ba1d13415d274924320bfd8693fd409c2844fc51
+    - name: application-controller
+      image: nvcr.io/nvidia/runai/application-controller@sha256:28c39e85bfec2e742d63a143662b2363e71fc9ad11b05681391eef7468fb2523
+      source: nvcr.io/nvidia/runai/application-controller:2.26.13
+      indexDigest: sha256:737fb841e0a2401dcc136e7d1f5124f76aa6d53f63c96fe80b25748a18487f02
+    - name: assets-service
+      image: nvcr.io/nvidia/runai/assets-service@sha256:5a6c99e4b28f37411a46cdca762b46f4d0ae6f61a56e092479d973d337b675fa
+      source: nvcr.io/nvidia/runai/assets-service:2.26.13
+      indexDigest: sha256:e96bd58b296552d45f281c44fae6ea9c1484bfdd03f7bbd12bb96b7cdbb8f8a1
+    - name: audit-service
+      image: nvcr.io/nvidia/runai/audit-service@sha256:8d2c0c577d8f52c642154aa3d23e76b3842648a513529173b325373779c3c6bb
+      source: nvcr.io/nvidia/runai/audit-service:2.26.13
+      indexDigest: sha256:5aed3db6b5654e2cbf8cba9cccab70816f7baa0de76430cf18da0e4943e872d6
+    - name: authorization
+      image: nvcr.io/nvidia/runai/authorization@sha256:f4fa75e22ab6c672ddcf4e2f8d56a3352baa7c63e3c1249c0bfdc90e595fedf5
+      source: nvcr.io/nvidia/runai/authorization:2.26.13
+      indexDigest: sha256:c87fa54340aac398afa049dca0a758778ad6bd7115d3f5722ada2bf4a55d4ffb
+    - name: authorization-migrator
+      image: nvcr.io/nvidia/runai/authorization-migrator@sha256:53b5acdbb0b6da60a729c22f7507576debac07b151872684c5c8fabf58e8b72e
+      source: nvcr.io/nvidia/runai/authorization-migrator:2.26.13
+      indexDigest: sha256:2c7d50dc5384a61a7d2045bbb1f9361a489a4f661b2690a891d7cd1da35926b3
+    - name: bff-service
+      image: nvcr.io/nvidia/runai/bff-service@sha256:73a4af28b94bfe43ac465d2f23f6151205cdfa7e012796badcf2e7ab1be093a6
+      source: nvcr.io/nvidia/runai/bff-service:2.26.13
+      indexDigest: sha256:85ec1ff2517eaed2ba93798ed5d6883c36bfcdeed2eaf0481c5d8a278c40eab7
+    - name: catalog-service
+      image: nvcr.io/nvidia/runai/catalog-service@sha256:745c36b36bd5c759dbbe141d560e784977d4266eb421e6323e16a4975d7266e0
+      source: nvcr.io/nvidia/runai/catalog-service:2.26.13
+      indexDigest: sha256:79d0582435fee3e14ed55ca4449abe1f730341401618ca4990320659ed719b06
+    - name: cli-exposer
+      image: nvcr.io/nvidia/runai/cli-exposer@sha256:1eb3c5947e4b02127afa3dad92b2c42d7f7455e2813a8188a3b5adf8464d7d44
+      source: nvcr.io/nvidia/runai/cli-exposer:2.26.13
+      indexDigest: sha256:f3220d26dee1eb6717fff94c893234f9cc274b591a85caa34e3e36a2c1271336
+    - name: cluster-api
+      image: nvcr.io/nvidia/runai/cluster-api@sha256:2abc99b0f677a003e7f43eeff5e571f88ec058f9f91766ca7948ae53f0fda45d
+      source: nvcr.io/nvidia/runai/cluster-api:2.26.13
+      indexDigest: sha256:ee52a2397671547f787dc2b83bf630bf8e8de0bdea03ae42e12c32d7ba035b37
+    - name: cluster-migrator
+      image: nvcr.io/nvidia/runai/cluster-migrator@sha256:3680c5f86191078c78bb50cfde51188ab5e5ade4e96ec4f3d06b7d64a540e9c6
+      source: nvcr.io/nvidia/runai/cluster-migrator:2.26.13
+      indexDigest: sha256:8f59f28a961f25a571e72090c5f5c7206f763e88e518c2e3b254d2e3d4b65fd3
+    - name: cluster-service
+      image: nvcr.io/nvidia/runai/cluster-service@sha256:1454d69df7201bc8923c60d673a2e062d47e72301c876be0fa31afce95c555fc
+      source: nvcr.io/nvidia/runai/cluster-service:2.26.13
+      indexDigest: sha256:61559b77b9159045b0744c606079b6a2b5c3305d4d83ace0b4da62960d65d138
+    - name: cluster-sync
+      image: nvcr.io/nvidia/runai/cluster-sync@sha256:e86f9967821407272eff71f40206a846253ef504da342b4beeb31bf1b69a5082
+      source: nvcr.io/nvidia/runai/cluster-sync:2.26.13
+      indexDigest: sha256:01bcdd215a2993e1a4c1fffd047b02fde54184ccc7c36dcb309ae7b52fbe893d
+    - name: datavolumes-service
+      image: nvcr.io/nvidia/runai/datavolumes-service@sha256:41e5328952266bcc9a3b9f8f3c67a03fd386bd47a12dceb041c840d1d970e1c7
+      source: nvcr.io/nvidia/runai/datavolumes-service:2.26.13
+      indexDigest: sha256:7c5d0c78571138aa10abb505614fbbe431e33e2cae7e0944e5374acb1a8e8987
+    - name: external-workload-integrator
+      image: nvcr.io/nvidia/runai/external-workload-integrator@sha256:41bc325681ec128fb79ad9c517f914b91095932d33814129f434bb9fd4d18218
+      source: nvcr.io/nvidia/runai/external-workload-integrator:2.26.13
+      indexDigest: sha256:7da6b977717d6438b32359e37b17d9723f5275b0bf5fda32aa538b0c91c1e132
+    - name: frontend
+      image: nvcr.io/nvidia/runai/frontend@sha256:ab747217c1239b813c5a379d7f74843917922621658f5cb05df795260801cb47
+      source: nvcr.io/nvidia/runai/frontend:2.26.13
+      indexDigest: sha256:5b9af5ffd37e721f03c531a9337a0c3d1fb08fce477a67e8fb990e0a4ebe5ddf
+    - name: go-operator
+      image: nvcr.io/nvidia/runai/go-operator@sha256:73dcc5696e37301c468aee08298c59201f35dc125a751db0ee1efd39d0e74656
+      source: nvcr.io/nvidia/runai/go-operator:2.26.13
+      indexDigest: sha256:2203fd1d6f9ef872b4428f43ee6ddf7adab491b81a4c6dabeb93e93d771e9b0d
+    - name: goofys
+      image: nvcr.io/nvidia/runai/goofys@sha256:258610ad624fba8ecccc9f3405ceeaa21f47b1914a99c23e42ba1bc277c10521
+      source: nvcr.io/nvidia/runai/goofys:2.26.13
+      indexDigest: sha256:f8bbc91c486bce11ea70b6c1761bb37ea6eba366a73d3ffce9947fe396380fd3
+    - name: helm-hooks-handler
+      image: nvcr.io/nvidia/runai/helm-hooks-handler@sha256:54dbf52395eb4b99d59c76fdd2799411dc106a4bdcf59dd72f3cea24a007d889
+      source: nvcr.io/nvidia/runai/helm-hooks-handler:2.26.13
+      indexDigest: sha256:4f7490ba5bd6909aecc11fdf8f5a89a0f17cca466fc371c9e7ee9ac6df2b8623
+    - name: identity-manager
+      image: nvcr.io/nvidia/runai/identity-manager@sha256:499f78e3591c60dcae55c39b00ec300b65fb61986b8bff3cd9c57000736563a4
+      source: nvcr.io/nvidia/runai/identity-manager:2.26.13
+      indexDigest: sha256:8d35c98510d803e0102e7f3a1c13e66f0e246b1d66c170cf4b9ad9bfbe166718
+    - name: inference-workload-controller
+      image: nvcr.io/nvidia/runai/inference-workload-controller@sha256:d9caaefaad74b7669fbafe23c4a271cb9212de242d78d07d5a059873d2522e79
+      source: nvcr.io/nvidia/runai/inference-workload-controller:2.26.13
+      indexDigest: sha256:be55c520dc51540f6272b160d9d659f8860516ccf4facdd314f96e4444acd1e2
+    - name: init-ca-base
+      image: nvcr.io/nvidia/runai/init-ca-base@sha256:6f1b760ed90409097ddd65fb59bd1be1522e495e406026210f9809e74cb9c244
+      source: nvcr.io/nvidia/runai/init-ca-base:2.26.13
+      indexDigest: sha256:24a9c95283eb7a5e67edf56188bba7e1f4fb9d351487b0b2736970dc4e2b7ea2
+    - name: k8s-objects-tracker
+      image: nvcr.io/nvidia/runai/k8s-objects-tracker@sha256:d247c4b5c816d5299e4aac5854381d1d519ce1fd27120763fa1d39f35efc5dc5
+      source: nvcr.io/nvidia/runai/k8s-objects-tracker:2.26.13
+      indexDigest: sha256:aeb1357368b830b4f704ac1fd459078e18eb0cb48798904af0dfe3227b17d5f1
+    - name: karta-migrate
+      image: nvcr.io/nvidia/runai/karta-migrate@sha256:258419028554b133e37f13434900aac9e0f0573e088ef50c1ff571acb3741eba
+      source: nvcr.io/nvidia/runai/karta-migrate:2.26.13
+      indexDigest: sha256:ea68463fc4d039ea825c1b88cd847cd9384b9083e9cc0257deb0f62ee6a373c8
+    - name: metric-stores-migrator
+      image: nvcr.io/nvidia/runai/metric-stores-migrator@sha256:c99e61769071143fdc7196b567454d13954c28125e9e7a09d1628327207c068b
+      source: nvcr.io/nvidia/runai/metric-stores-migrator:2.26.13
+      indexDigest: sha256:ab81ab8850b7101960899be5bbaef365f6b3f25f1d19025765ac8861a20603ff
+    - name: metrics-exporter
+      image: nvcr.io/nvidia/runai/metrics-exporter@sha256:04394293bcee84db0f1635d69a69d8f92b86899116bbdd0e4833f4fd28c064f9
+      source: nvcr.io/nvidia/runai/metrics-exporter:2.26.13
+      indexDigest: sha256:7981d843ec1d84e21ce8bc8444dbdd14f7172ed0fbac24da6948ebdbbf8eca1b
+    - name: metrics-service
+      image: nvcr.io/nvidia/runai/metrics-service@sha256:4668ff9666fa46c9c5cf42b3094802d166885f949545b5c056a67411884b4116
+      source: nvcr.io/nvidia/runai/metrics-service:2.26.13
+      indexDigest: sha256:0e32178c41ce3c6a0c79d86f1b7baf83a06785b32be1bf824c1635c13d42a123
+    - name: nodepool-controller
+      image: nvcr.io/nvidia/runai/nodepool-controller@sha256:7816d67daa85f65cd5150ce9ea29ed04b7be2febdab218753892bbdf721f56d7
+      source: nvcr.io/nvidia/runai/nodepool-controller:2.26.13
+      indexDigest: sha256:8cba6b1f5ab701f8627a6364ccd168276ecb4ec64594d7d2846b3492f0daee94
+    - name: notifications-proxy
+      image: nvcr.io/nvidia/runai/notifications-proxy@sha256:6fc87608c9fd9c10fbd5dc194e0443b6fbad32a6703a72f3454ad8b7290e9cec
+      source: nvcr.io/nvidia/runai/notifications-proxy:2.26.13
+      indexDigest: sha256:69304e9f2cd8dc6d83cdbb1824c3e68b1f067576097e69b80018b4f219b4c532
+    - name: notifications-service
+      image: nvcr.io/nvidia/runai/notifications-service@sha256:d7f45af04e52854e5edd44b525b5c3d177764b5e40fd431b1d46d52e58c80cce
+      source: nvcr.io/nvidia/runai/notifications-service:2.26.13
+      indexDigest: sha256:a88e6a5a86d3d185b12a0dd9c67a77ae6a2ca1a6a7e2af3fa725d63c7317715a
+    - name: oauth2-proxy
+      image: nvcr.io/nvidia/runai/oauth2-proxy@sha256:33bd4cada9d0e9d7dc01f79ea36e7ca44402bfef5cd1dc705979ebe4f0a01487
+      source: nvcr.io/nvidia/runai/oauth2-proxy:2.26.13
+      indexDigest: sha256:fe27065bbe5dc1521b0b369a1847eb91d3a3530dbb6e5fc4fcf0e62035baef6a
+    - name: org-unit-service
+      image: nvcr.io/nvidia/runai/org-unit-service@sha256:74a91ab2a341502c7fa2c2a793dddf9178d27cda1dd4334ef821c8ec3c6c049a
+      source: nvcr.io/nvidia/runai/org-unit-service:2.26.13
+      indexDigest: sha256:79ad4d3d75072f04f17843a5dfa9af106862af688aeea765b03339404da4c3d0
+    - name: org-units-migrator
+      image: nvcr.io/nvidia/runai/org-units-migrator@sha256:245ff51366285faeac771fe5a56a24ef2bf36ecf3893797732100bf2fffe921c
+      source: nvcr.io/nvidia/runai/org-units-migrator:2.26.13
+      indexDigest: sha256:85ca92f4e06b8d9723404ff109d1df82e19f8b5319b3fb8a3e0aeef9f19df6e5
+    - name: pod-group-assigner
+      image: nvcr.io/nvidia/runai/pod-group-assigner@sha256:cc2f703178a9275241eaa7b01bc572b5a973b7a5503bfca0e4c254aabae5a0a5
+      source: nvcr.io/nvidia/runai/pod-group-assigner:2.26.13
+      indexDigest: sha256:1951e5b47e1d1131210cdc512d5a105b4324d59445fd1de81926f993f192629d
+    - name: policy-service
+      image: nvcr.io/nvidia/runai/policy-service@sha256:88916f7822c4d6424e6d2b3afae9f31d5b949c7b0eac76dff6516f885942c7f7
+      source: nvcr.io/nvidia/runai/policy-service:2.26.13
+      indexDigest: sha256:34bc475ac96263fda1b246109a79d3fd066933283b37609edbbce58aced34df0
+    - name: project-controller
+      image: nvcr.io/nvidia/runai/project-controller@sha256:5cd95027719320ad69039e0e8964708bd85ad797e4b7a7b92ff4752d9599dc73
+      source: nvcr.io/nvidia/runai/project-controller:2.26.13
+      indexDigest: sha256:913c09744e4cdc724679d545581ab0dfb049bf9fd1e95b5670c5eaca62377551
+    - name: runai-crd-upgrader
+      image: nvcr.io/nvidia/runai/runai-crd-upgrader@sha256:bb797f66066f79231738ee1393c30ed7ebbfe5930c2793d2d50bbb6894a541fa
+      source: nvcr.io/nvidia/runai/runai-crd-upgrader:2.26.13
+      indexDigest: sha256:a8cdda8269505715c88b719c234c98915be5e7ad0eadc9badc4a13dd17cd122c
+    - name: runaijob-controller
+      image: nvcr.io/nvidia/runai/runaijob-controller@sha256:5004b3a7940771369d1ae087e22817d7e9b32c26242e5bd6151291e0b706d849
+      source: nvcr.io/nvidia/runai/runaijob-controller:2.26.13
+      indexDigest: sha256:2c477592109c9399a8dbb198c328f76eab50248e066b4f017131d850c06ea732
+    - name: secret-generator
+      image: nvcr.io/nvidia/runai/secret-generator@sha256:e95a8d75c164c62052f1579c4548f37f982aeaac8210b99f29fade433c874bf7
+      source: nvcr.io/nvidia/runai/secret-generator:2.26.13
+      indexDigest: sha256:6cebf8fac9fd44a4af3ea9a09d85851665903c1e05cd072b2039284015bc1b1b
+    - name: shared-objects-controller
+      image: nvcr.io/nvidia/runai/shared-objects-controller@sha256:3640d8e8c2f81f6b03d6c1fca4d11dd1b626e3e87d411f1eb2848642bdb51e44
+      source: nvcr.io/nvidia/runai/shared-objects-controller:2.26.13
+      indexDigest: sha256:d4818bffe04c21d943f2b0f35861ff15cd2146e877dc4a36f8b57600e0723016
+    - name: status-updater
+      image: nvcr.io/nvidia/runai/status-updater@sha256:2d6d76a2e89560ada22a404fc3fd378cb9b711b32e776c3a4dc4a9273c17058d
+      source: nvcr.io/nvidia/runai/status-updater:2.26.13
+      indexDigest: sha256:95781ac78da8e77206c202c6e45b596e35986b09d7a916d6d861a9b17059b19e
+    - name: temp-backend-settings
+      image: nvcr.io/nvidia/runai/temp-backend-settings@sha256:05ad42f5a40898dba19d96027f3191fdd6e9115fd783911b2217911e2a461273
+      source: nvcr.io/nvidia/runai/temp-backend-settings:2.26.13
+      indexDigest: sha256:0d2a0a87f9b5520869c29626fe36f3d41a7fd3f0f935e0cfac7908117ebaabb6
+    - name: tenants-manager
+      image: nvcr.io/nvidia/runai/tenants-manager@sha256:84d7c5fa8588e87bd406dca817443661ca960dc51f7a34e4938a523aad8ef408
+      source: nvcr.io/nvidia/runai/tenants-manager:2.26.13
+      indexDigest: sha256:7e6a9302b7010dd141bc3426f9e9353c1dd1c05de0d3a38e77c49a2ba68e14d0
+    - name: workload-controller
+      image: nvcr.io/nvidia/runai/workload-controller@sha256:8b2b874f704e8a33bdc9cb6df4cdd9eb1ec7b420a69795668eab922a20e1c0f9
+      source: nvcr.io/nvidia/runai/workload-controller:2.26.13
+      indexDigest: sha256:a35847a005c9592ca75aff853fdfc701b08da7335e869e1757668bf10251ef2c
+    - name: workload-exporter
+      image: nvcr.io/nvidia/runai/workload-exporter@sha256:b26d25dcb6698434f4fe88eeb6a8de1ba74ab9806d54a80cf2a870f531eae672
+      source: nvcr.io/nvidia/runai/workload-exporter:2.26.13
+      indexDigest: sha256:203a625700366ab79fef14b8045d6bf2220ea330769b9d3799b449aa4c2327e0
+    - name: workloads
+      image: nvcr.io/nvidia/runai/workloads@sha256:ac1ec1d18b192d853f7296a437b6f8064eb0590258af01fa2a13d18d90d8fde9
+      source: nvcr.io/nvidia/runai/workloads:2.26.13
+      indexDigest: sha256:239539f28379aae0c2ce7add1f915a6ae9b8c2206f786097691871bb48527dfe
+    - name: workloads-manager
+      image: nvcr.io/nvidia/runai/workloads-manager@sha256:4e84d865251ddb8f3ab279de640eeba71c31fd0b32dd943fa7fc3554defe7b53
+      source: nvcr.io/nvidia/runai/workloads-manager:2.26.13
+      indexDigest: sha256:2763670c29e4b0b0b1c0c00f8c5adfcc6a0cb281038ae60eda29e198a041273b
+  charts:
+  - name: control-plane
+    version: 2.26.13
+    source: https://helm.ngc.nvidia.com/nvidia/runai/charts/control-plane-2.26.13.tgz
+    bundlePath: charts/control-plane-2.26.13.tgz
+    digest: sha256:7a714ff76c5f9215629a38787c88f8ed4153e9203f4d9f2e0a80411b41deba71
+    dependencies:
+    - name: common
+      version: 2.40.0
+      repository: https://charts.bitnami.com/bitnami
+      embeddedPath: charts/common
+      digest: sha256:0cdbce4c2719cd45ad4131ccbeab0a603dcb183be00d02434e515ea062b9c6d1
+    - name: keycloakx
+      version: 2.6.0
+      repository: https://codecentric.github.io/helm-charts
+      embeddedPath: charts/keycloakx
+      digest: sha256:628a82df034b0292fa9df7896198a86c5b17ad547ef030a4a28abb06632d1877
+    - name: nats
+      version: 9.0.28
+      repository: https://charts.bitnami.com/bitnami
+      embeddedPath: charts/nats
+      digest: sha256:aa100e593608fb78b9b05096738d96a8efd8c1c6bec2966c197f194b124da824
+    - name: notifications-service
+      version: 1.5.8
+      repository: https://nvcr.io/artifactory/notifications
+      embeddedPath: charts/notifications-service
+      digest: sha256:8aec2efa16854b3259282058e6726c0fdff043508b15d0b69d2299d9d146f69e
+    - name: postgresql
+      version: 15.5.38
+      repository: https://charts.bitnami.com/bitnami
+      embeddedPath: charts/postgresql
+      digest: sha256:17df96bbd26c912603dffb239c0e8ce23e5f921c6a9f8b60ae08308c8bfb4f47
+    - name: runai-common-chart
+      version: 1.0.62
+      repository: file://../../runai-common-chart
+      embeddedPath: charts/runai-common-chart
+      digest: sha256:5a2a94c079022b9192ecf4aad6f31e069feb0c94ec9228d980c41e67dcab883b
+    - name: thanos
+      version: 16.0.7
+      repository: https://charts.bitnami.com/bitnami
+      embeddedPath: charts/thanos
+      digest: sha256:d750bc2045a7be55c54655aec5f6d11638a6c74a4bd2a05c0752230e0854c875
+    - name: unleash-edge
+      version: 2.7.4
+      repository: https://docs.getunleash.io/helm-charts
+      embeddedPath: charts/unleash-edge
+      digest: sha256:4571db9a86c18bcf4d28a81d0c51e210e554e2e1cd031e5c81f57d7cdc8d9812
+  - name: runai-cluster
+    version: 2.26.13
+    source: https://helm.ngc.nvidia.com/nvidia/runai/charts/runai-cluster-2.26.13.tgz
+    bundlePath: charts/runai-cluster-2.26.13.tgz
+    digest: sha256:5ab7ecc90e42ea2259fc017ac9cdaa03b1e9d0e317a01f90e49ebccc58ed408c
+    dependencies:
+    - name: crds
+      version: 0.0.0
+      repository: file://charts/crds
+      embeddedPath: charts/crds
+      digest: sha256:13fc8ca2a5f46bbe7b89ad0bcd7ac9698934249cc712fc8f7ccc0184758fc47f
+    - name: karta
+      version: 0.1.0
+      repository: oci://ghcr.io/run-ai/karta
+      embeddedPath: charts/karta
+      digest: sha256:64ccbf32f491720a0430a18fdb4769d12d504e20a4967b8db9d6999ddb81f6a8
+    - name: runai-engine
+      version: v3.41.6
+      repository: https://nvcr.io/artifactory/op-charts-prod/
+      embeddedPath: charts/runai-engine
+      digest: sha256:0748ae36e86eb36cc02c1b536a32ee23134ed8cecf039cff331cda523e1c5ed9
+  clis: []

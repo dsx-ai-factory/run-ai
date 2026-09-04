@@ -1,0 +1,40 @@
+get:
+      summary: Connect GET requests to exec of Pod
+      description: Connect GET requests to exec of Pod.
+      operationId: exec
+      tags:
+        - Cluster API
+      x-runai-team: Fox
+      x-no-authorization: true
+      parameters:
+        - $ref: "../parameters/ProjectName.yaml"
+        - $ref: "../parameters/WorkloadName.yaml"
+        - $ref: "../parameters/WorkloadType.yaml"
+        - $ref: "../parameters/Stderr.yaml"
+        - $ref: "../parameters/Stdin.yaml"
+        - $ref: "../parameters/Stdout.yaml"
+        - $ref: "../parameters/Tty.yaml"
+        - $ref: "../parameters/Command.yaml"
+        - $ref: "../parameters/Container.yaml"
+        - $ref: "../parameters/Pod.yaml"
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+        400:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/400BadRequest.yaml'
+        401:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/401Unauthorized.yaml'
+        403:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/403Forbidden.yaml'
+        404:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/404NotFound.yaml'
+        412:
+          $ref: '../responses/412PodNotReady.yaml'
+        500:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/500InternalServerError.yaml'
+        503:
+          $ref: '../../../../../control-plane/infra/openapi/docs/responses/503ServiceUnavailable.yaml'

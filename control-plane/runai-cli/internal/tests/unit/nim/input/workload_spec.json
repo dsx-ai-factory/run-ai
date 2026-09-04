@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "name": "my-nim-service",
+    "projectId": "4500011",
+    "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+    "workloadV2Id": "a22ecd44-f863-444d-b69d-0cc0d26bbc55",
+    "createdAt": "2025-12-15T08:58:24.919632Z",
+    "updatedAt": "2025-12-15T09:07:57.791339Z",
+    "submittedBy": "test@run.ai",
+    "category": "Deploy",
+    "priorityClass": "very-high",
+    "preemptibility": "non-preemptible"
+  },
+  "desiredPhase": "Running",
+  "spec": {
+    "image": "gcr.io/run-ai-lab/nim-cpu:latest",
+    "replicas": 1,
+    "ngcAuthSecret": "my-ngc",
+    "servingPort": {
+      "port": 8000,
+      "exposeExternally": true,
+      "serviceType": "ClusterIP"
+    },
+    "modelStore": {
+      "pvc": {
+        "existingPvc": false,
+        "claimInfo": {
+          "size": "10M",
+          "accessModes": {
+            "readOnlyMany": true
+          }
+        }
+      }
+    },
+    "compute": {
+      "cpuCoreRequest": 0.1,
+      "cpuMemoryRequest": "10M"
+    },
+    "labels": [
+      {"name": "app", "value": "nim-service"},
+      {"name": "env", "value": "production"}
+    ],
+    "annotations": [
+      {"name": "runai-submit-command", "value": "runai inference nim submit my-nim-service -p test-nim"}
+    ],
+    "environmentVariables": [
+      {"name": "MODEL_NAME", "value": "llama-2-7b"},
+      {"name": "NIM_MODE", "value": "inference"}
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+get:
+  summary: Get the cluster url.
+  description: Retrieve the url of the cluster by id.
+  x-service: cluster-service
+  x-test-coverage:
+    - cluster-service/pkg/services/api_clusters_service_test.go
+  operationId: get_cluster_url
+  x-no-authorization: true
+  tags:
+    - Clusters
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - url
+            properties:
+              url:
+                type: string
+                example: "https://cluster-x.example.com"
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

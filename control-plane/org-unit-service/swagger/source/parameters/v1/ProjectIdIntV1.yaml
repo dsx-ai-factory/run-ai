@@ -1,0 +1,7 @@
+in: path
+name: id
+schema:
+ type: integer
+required: true
+description: The unique id of the project.
+example: 2

@@ -1,0 +1,47 @@
+description: |
+  Layer 3 case "worker" for ray.io/RayCluster/v1. SETs rayWorkerGroupSpec FG
+  fields on the worker group with groupName="test" via the parameterized
+  workerGroupSpecByGroupName selector (selectorParams.groupName="test").
+  Also SETs labels/annotations on the worker pod template (workerPodMetadataByGroupName).
+effectiveRules:
+  # ----- rayWorkerGroupSpec FG via parameterized selector -----
+  - field: replicas
+    specSelector: workerGroupSpecByGroupName
+    selectorParams: { groupName: "test" }
+    enforcements: [{ set: { value: 3 } }]
+  - field: minReplicas
+    specSelector: workerGroupSpecByGroupName
+    selectorParams: { groupName: "test" }
+    enforcements: [{ set: { value: 1 } }]
+  - field: maxReplicas
+    specSelector: workerGroupSpecByGroupName
+    selectorParams: { groupName: "test" }
+    enforcements: [{ set: { value: 5 } }]
+  - field: numOfHosts
+    specSelector: workerGroupSpecByGroupName
+    selectorParams: { groupName: "test" }
+    enforcements: [{ set: { value: 2 } }]
+  - field: idleTimeoutSeconds
+    specSelector: workerGroupSpecByGroupName
+    selectorParams: { groupName: "test" }
+    enforcements: [{ set: { value: 120 } }]
+
+  # ----- rayStartParams (keyValueMap) — multiple keys -----
+  - field: rayStartParams
+    specSelector: workerGroupSpecByGroupName
+    selectorParams: { groupName: "test" }
+    enforcements: [{ set: { key: "num-gpus", value: "1" } }]
+  - field: rayStartParams
+    specSelector: workerGroupSpecByGroupName
+    selectorParams: { groupName: "test" }
+    enforcements: [{ set: { key: "num-cpus", value: "4" } }]
+
+  # ----- worker pod metadata (labels/annotations on the worker pod template) -----
+  - field: labels
+    specSelector: workerPodMetadataByGroupName
+    selectorParams: { groupName: "test" }
+    enforcements: [{ set: { key: "ray.io/group", value: "test" } }]
+  - field: annotations
+    specSelector: workerPodMetadataByGroupName
+    selectorParams: { groupName: "test" }
+    enforcements: [{ set: { key: "example.com/worker-ann", value: "worker-value" } }]

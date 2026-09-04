@@ -1,0 +1,29 @@
+get:
+  summary: Template name availability
+  description:
+    Check if a given template name creates naming conflicts under the given scope.
+    Returns conflict (409) in case the name is not available, or 204 (no content) if it is ok.
+  operationId: template_name_availability
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/templates_service_test.go
+  x-authorize:
+    resource-type: templates
+    action: read
+  tags:
+    - Workload templates
+  parameters:
+    - $ref: "../parameters/query/TemplateName.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ScopeType.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ScopeId.yaml"
+  responses:
+    204:
+      description: The name is available to use
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    409:
+      $ref: "../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

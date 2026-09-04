@@ -1,0 +1,58 @@
+description: |
+  Layer 3 case "container" for apps.nvidia.com/NIMCache/v1alpha1. NIMCache
+  has no containers[] — the "allContainers" spec selector is anchored at
+  .spec (same place as workloadSpec) and binds the nimCacheContainer FG,
+  which only covers the env vars + resources that drive the caching Job.
+
+  Custom formatters used here (runai-podSpec, reused):
+    * environmentVariables-{AsValue,FromConfigMap,FromField,FromResource,FromSecret}
+      — one rule per env entry, merged by .name.
+
+  Resources use plain KeyValue scalars because NIMCache's .spec.resources is
+  the flat Resources {cpu, memory} struct (not corev1.ResourceRequirements).
+
+  Read together with cases/container/golden.yaml.
+effectiveRules:
+  # ----- env (reused runai-podSpec) -----
+  - field: environmentVariables-AsValue
+    specSelector: allContainers
+    enforcements: [{ set: { name: AS_VALUE, value: somevalue } }]
+  - field: environmentVariables-FromConfigMap
+    specSelector: allContainers
+    enforcements:
+      - set:
+          name: FROM_CM
+          configMapName: cm
+          key: key
+          optional: false
+  - field: environmentVariables-FromField
+    specSelector: allContainers
+    enforcements:
+      - set:
+          name: FROM_FIELD
+          apiVersion: v1
+          fieldPath: metadata.name
+  - field: environmentVariables-FromResource
+    specSelector: allContainers
+    enforcements:
+      - set:
+          name: FROM_RESOURCE
+          containerName: test
+          divisor: "1"
+          resource: limits.cpu
+  - field: environmentVariables-FromSecret
+    specSelector: allContainers
+    enforcements:
+      - set:
+          name: FROM_SECRET
+          secretName: secret
+          key: key
+          optional: false
+
+  # ----- resources (flat quantities, not ResourceRequirements) -----
+  - field: cpu-Resource
+    specSelector: allContainers
+    enforcements: [{ set: { value: "4" } }]
+  - field: memory-Resource
+    specSelector: allContainers
+    enforcements: [{ set: { value: "16Gi" } }]

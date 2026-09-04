@@ -1,0 +1,15 @@
+description: |
+  Parameters which apply to distributed training.
+allOf:
+  - properties:
+      numWorkers:
+        type: integer
+      noMaster:
+        type: boolean
+        nullable: true
+      distFramework:
+        $ref: "../../../../../../infra/openapi/docs/schemas/workloads_spec/distributed/DistributedFramework.yaml"
+      master:
+        $ref: "./InfoDistMaster.yaml"
+nullable: true
+type: object

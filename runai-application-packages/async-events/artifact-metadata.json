@@ -1,0 +1,4 @@
+{
+    "service_name": "async-events",
+    "artifact_type": "go"
+  }

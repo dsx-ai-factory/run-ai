@@ -1,0 +1,69 @@
+openapi: "3.0.3"
+info:
+  version: 1.0.0
+  title: Cluster API
+  description: An API for proxying k8s commands on workloads.
+  contact:
+    email: support@run.ai
+servers:
+  - url: https://app.run.ai
+  - url: https://staging.run.ai
+  - url: https://test.run.ai
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    $ref: "./securitySchemes/_index.yaml"
+
+paths:
+  /health:
+    x-internal: true
+    get:
+      summary: health check
+      x-no-authorization: true
+      x-runai-team: Fox
+      operationId: health
+      tags:
+        - Health
+      responses:
+        200:
+          description: Executed successfully.
+
+  /cluster-api/status:
+    x-internal: true
+    get:
+      summary: status check
+      x-no-authorization: true
+      x-runai-team: Fox
+      operationId: status
+      tags:
+        - Status
+      responses:
+        200:
+          description: Executed successfully.
+
+  # WIP
+
+  # /cluster-api/api/v1/{projectName}/workloads/{workloadType}/{workloadFramework}/{workloadName}/exec:
+  #   $ref: "./resources/Exec.yaml"
+
+  # /cluster-api/api/v1/{projectName}/workloads/{workloadType}/{workloadFramework}/{workloadName}/logs:
+  #   $ref: "./resources/Logs.yaml"
+
+  # /cluster-api/api/v1/{projectName}/workloads/{workloadType}/{workloadFramework}/{workloadName}/port-forward:
+  #   $ref: "./resources/Portforward.yaml"
+
+  # /cluster-api/api/v1/{projectName}/workloads/{workloadType}/{workloadFramework}/{workloadName}/attach:
+  #   $ref: "./resources/Attach.yaml"
+    
+  /cluster-api/api/v1/{projectName}/workloads/{workloadType}/{workloadFramework}/{workloadName}/status:
+    $ref: "./resources/Status.yaml"
+
+  /cluster-api/api/v2/workloads/{workloadId}/object:
+    $ref: "./resources/WorkloadObject.yaml"
+
+  /cluster-api/api/v2/workloads/{workloadId}/pods/{podId}/object:
+    $ref: "./resources/PodObject.yaml"
+
+  /cluster-api/api/v2/workloads/{workloadId}/elements/{elementId}/object:
+    $ref: "./resources/ElementObject.yaml"

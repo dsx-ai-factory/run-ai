@@ -1,0 +1,9 @@
+name: force
+in: query
+required: false
+description: |
+  if true will force cluster instant deletion otherwise will start cluster graceful deletion process.
+example: true
+schema:
+  type: boolean
+  default: false

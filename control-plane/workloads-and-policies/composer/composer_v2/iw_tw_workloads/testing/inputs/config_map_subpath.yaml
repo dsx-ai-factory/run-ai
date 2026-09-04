@@ -1,0 +1,7 @@
+image: ubuntu
+
+storage:
+  configMapVolume:
+    - configMap: cm1
+      mountPath: /mount/cm/1
+      subPath: /tmp

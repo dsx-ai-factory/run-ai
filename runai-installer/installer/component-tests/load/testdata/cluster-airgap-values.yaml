@@ -1,0 +1,23 @@
+global:
+    image:
+        registry: registry.local:5000/runai/runai-cluster
+kai-scheduler:
+    global:
+        registry: registry.local:5000/runai/kai-scheduler
+karta:
+    image:
+        repository: registry.local:5000/runai/karta/operator
+        tag: 0.2.3
+thirdPartyImages:
+    git-sync:
+        registry: registry.local:5000/runai/runai-cluster
+        repository: git-sync
+        tag: v4.7.0
+    valkey:
+        registry: registry.local:5000/runai/runai-cluster
+        repository: valkey
+        tag: 9.0.4
+    wait-ubi-minimal:
+        registry: registry.local:5000/runai/runai-cluster
+        repository: wait-ubi-minimal
+        tag: "9.8"

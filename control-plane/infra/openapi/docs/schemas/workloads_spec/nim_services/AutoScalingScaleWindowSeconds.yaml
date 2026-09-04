@@ -1,0 +1,6 @@
+description: The time window for autoscaling decisions, in seconds. Defaults to 300 seconds.
+type: integer
+format: int32
+minimum: 60
+maximum: 3600
+nullable: true

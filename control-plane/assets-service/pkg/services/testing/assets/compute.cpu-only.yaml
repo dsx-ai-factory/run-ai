@@ -1,0 +1,7 @@
+spec:
+  gpuDevicesRequest: 0
+
+  cpuCoreRequest: 0.5
+  cpuCoreLimit: 2
+  cpuMemoryRequest: 20M
+  cpuMemoryLimit: 30M

@@ -1,0 +1,6 @@
+description: Defines the configuration for the inference serving endpoint. This determines how applications or services can send inference requests to the workload.
+allOf:
+  - $ref: "./DistributedInferenceServingPort/DistributedInferenceServingPortContainerAndProtocol.yaml"
+  - $ref: "./DistributedInferenceServingPort/DistributedInferenceServingPortAccess.yaml"
+nullable: true
+type: object

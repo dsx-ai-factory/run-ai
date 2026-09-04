@@ -1,0 +1,3 @@
+{{- if .Values.notificationsService.enabled }}
+{{- include "common.service" (list . .Values.notificationsService.service .Values.notificationsService) }}
+{{- end }}

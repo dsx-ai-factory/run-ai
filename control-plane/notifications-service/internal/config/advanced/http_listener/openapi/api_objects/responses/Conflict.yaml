@@ -1,0 +1,8 @@
+content:
+  application/json:
+    schema:
+      $ref: "../schemas/APIError.yaml"
+    example:
+      code: 409
+      message: The specified resource already exists
+description: The specified resource already exists

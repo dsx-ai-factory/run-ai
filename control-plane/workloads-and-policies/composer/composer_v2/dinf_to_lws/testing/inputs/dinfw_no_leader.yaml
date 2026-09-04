@@ -1,0 +1,6 @@
+servingPort:
+  port: 8081
+  protocol: http
+workers: 1
+worker:
+  image: python:3.8

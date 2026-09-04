@@ -1,0 +1,4 @@
+description: Allow the container running the workload to operate in privileged mode, granting it elevated access to the host system. When enabled, the container receives all Linux capabilities, unrestricted access to host devices, and is exempt from security constraints. This effectively removes many of the isolation boundaries between the container and the host.
+type: boolean
+example: false
+nullable: true

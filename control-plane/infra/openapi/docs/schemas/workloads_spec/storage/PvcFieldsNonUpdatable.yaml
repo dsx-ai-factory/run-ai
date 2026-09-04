@@ -1,0 +1,40 @@
+properties:
+  existingPvc:
+    description: Verify existing PVC. PVC is assumed to exist when set to `true`. If set to `false`,
+      the PVC will be created, if it does not exist. Cannot be set to `true` when `dataSharing`
+      is `true`.
+    type: boolean
+    default: false
+    nullable: true
+  claimName:
+    description: Name for the PVC. Allow referencing it across workloads. If not provided,
+      a name based on the workload name and scope will be auto-generated.
+    type: string
+    minLength: 1
+    maxLength: 63
+    example: my-claim
+    nullable: true
+    pattern: .*
+  readOnly:
+    description: Permit only read access to PVC.
+    type: boolean
+    default: false
+    nullable: true
+  ephemeral:
+    description: Use `true` to set PVC to ephemeral. If set to `true`, the PVC will be deleted when the workload is stopped. Not supported for inference workloads.
+    type: boolean
+    default: false
+    example: false
+    nullable: true
+  claimInfo:
+    #    description: Claim information for the newly created PVC. The information should not be provided when attempting to use existing PVC.
+    $ref: "./ClaimInfo.yaml"
+  dataSharing:
+    description: Use `true` to share the PVC data to all projects under the selected scope.
+      Cannot be set to `true` when `existingPvc` is `true`.
+    type: boolean
+    default: false
+    example: false
+    nullable: true
+nullable: true
+type: object

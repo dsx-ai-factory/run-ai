@@ -1,0 +1,8 @@
+name: query
+in: query
+description: >
+  Full-text Lucene query (e.g., `name:llama*`, `*:*`, or `orgName:"nvidia"`).
+required: false
+schema:
+  type: string
+  example: "*:*"

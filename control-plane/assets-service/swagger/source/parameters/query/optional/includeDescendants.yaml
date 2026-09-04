@@ -1,0 +1,6 @@
+name: includeDescendants
+in: query
+required: false
+description: "Indicates whether to include assets from all descendant scopes under the specified scope. When set to true, and a specific scope identifier (for example, clusterId) is provided, the query also returns assets from all nested scopes within it (for example, departments and projects).  Mutually exclusive with scope."
+schema:
+  type: boolean

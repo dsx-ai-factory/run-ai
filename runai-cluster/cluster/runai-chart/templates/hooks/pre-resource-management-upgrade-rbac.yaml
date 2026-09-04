@@ -1,0 +1,103 @@
+{{- if and (not .Values.global.serviceAccountName) .Values.helmHooksHandler.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: runai-pre-resource-management-upgrade
+  namespace: runai
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "-3"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    run.ai/hook: pre-resource-management-upgrade
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-pre-resource-management-upgrade
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "-3"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    run.ai/hook: pre-resource-management-upgrade
+rules:
+  # legacy department CRD existence check (the migration self-gates on it)
+  - apiGroups: [apiextensions.k8s.io]
+    resources: [customresourcedefinitions]
+    verbs: [get]
+  # legacy departments + projects + nodepools + managed-nodes-config - the migration
+  # sources. patch strips their legacy finalizers so the post-upgrade delete completes.
+  - apiGroups: [scheduling.run.ai]
+    resources: [departments]
+    verbs: [get, list]
+  - apiGroups: [run.ai]
+    resources: [projects]
+    verbs: [get, list]
+  - apiGroups: [ run.ai ]
+    resources: [nodepools ]
+    verbs: [get, list, patch]
+  - apiGroups: [run.ai]
+    resources: [managednodesconfigs]
+    verbs: [get, patch]
+  # queues re-owned during migration (and rolled back to their old owner on failure).
+  # `delete` here and below: OwnerReferencesPermissionEnforcement (default on OCP)
+  # requires it to rewrite .metadata.ownerReferences.
+  - apiGroups: [scheduling.run.ai]
+    resources: [queues]
+    verbs: [get, list, update, patch, delete]
+  # scheduling shards re-owned during the nodepool migration (and rolled back to
+  # their old owner on failure)
+  - apiGroups: [kai.scheduler]
+    resources: [schedulingshards]
+    verbs: [get, list, update, patch, delete]
+  # new kai departments + projects + nodepools + managed-nodes-config (create; rollback deletes them and
+  # strips finalizers). the finalizers subresource is required to stamp
+  # owned-object ownerReferences with blockOwnerDeletion pointing at the new CR.
+  - apiGroups: [kai.resources]
+    resources: [departments, departments/finalizers, projects, projects/finalizers, nodepools, nodepools/finalizers, managednodesconfigs, managednodesconfigs/finalizers]
+    verbs: [get, list, create, update, patch, delete]
+  # project-owned objects re-parented during the project migration (and rolled back
+  # on failure): limitranges, rolebindings, and the cluster-wide replicated
+  # secrets/pvcs/configmaps (re-pointed via labels). namespaces are read to resolve
+  # each project's namespace.
+  - apiGroups: [""]
+    resources: [limitranges, secrets, persistentvolumeclaims, configmaps]
+    verbs: [get, list, update, patch, delete]
+  - apiGroups: [rbac.authorization.k8s.io]
+    resources: [rolebindings]
+    verbs: [get, list, update, patch, delete]
+  - apiGroups: [""]
+    resources: [namespaces]
+    verbs: [get, list]
+  # RunaiConfig - disable the project-controller, agent and nodepool-controller
+  # before the migration and re-enable them afterwards (same mechanism
+  # pre-crd-upgrade uses for the nodepool-controller)
+  - apiGroups: [run.ai]
+    resources: [runaiconfigs]
+    verbs: [get, update, patch]
+  # project-controller / agent / nodepool-controller pods - waited on until
+  # go-operator scales them down
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [list]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-pre-resource-management-upgrade
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "-2"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    run.ai/hook: pre-resource-management-upgrade
+subjects:
+  - kind: ServiceAccount
+    name: runai-pre-resource-management-upgrade
+    namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-pre-resource-management-upgrade
+{{- end }}

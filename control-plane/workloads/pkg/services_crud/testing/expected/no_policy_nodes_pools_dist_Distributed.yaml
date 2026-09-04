@@ -1,0 +1,34 @@
+policyInfo:
+  master:
+    defaults:
+      nodePools:
+      - node-pool-1
+      - node-pool-2
+    rules:
+      nodePools:
+        options:
+        - value: node-pool-1
+        - value: node-pool-2
+        - value: node-pool-3
+  worker:
+    defaults:
+      nodePools:
+      - node-pool-1
+      - node-pool-2
+    rules:
+      nodePools:
+        options:
+        - value: node-pool-1
+        - value: node-pool-2
+        - value: node-pool-3
+projectInfo:
+  name: project-1
+spec:
+  master:
+    nodePools:
+    - node-pool-1
+    - node-pool-2
+  worker:
+    nodePools:
+    - node-pool-1
+    - node-pool-2

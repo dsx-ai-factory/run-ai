@@ -1,0 +1,53 @@
+get:
+  summary: Get inference content.
+  description: Retrieves the data of an inference, i.e. its set of assets and specific env.
+  operationId: get_inference_by_id
+  x-no-authorization: true
+  x-internal: true
+  x-service: assets-service
+  x-test-coverage:
+    - e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+  tags:
+    - Inferences
+  parameters:
+    - $ref: "../../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/Inference/Inference.yaml"
+    401:
+      $ref: "../../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+delete:
+  summary: Delete an inference workload.
+  description: Delete inference workload leftover from backend, by id.
+  operationId: delete_inference_by_id
+  x-no-authorization: true
+  x-service: assets-service
+  x-internal: true
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_inference_service_test.go
+  tags:
+    - Inferences
+  parameters:
+    - $ref: "../../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+  responses:
+    202:
+      $ref: "../../../../../infra/openapi/docs/responses/202Accepted.yaml"
+    401:
+      $ref: "../../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+

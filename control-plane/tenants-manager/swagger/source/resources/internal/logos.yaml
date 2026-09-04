@@ -1,0 +1,42 @@
+get:
+  summary: Get all tenant logos (paginated)
+  x-service: tenants-manager
+  x-test-coverage:
+    - api/internal/service/api_internal_service_test.go
+  operationId: get_all_logos
+  x-no-authorization: true
+  tags:
+    - Internal
+  parameters:
+    - name: offset
+      in: query
+      required: false
+      description: Number of logos to skip (default 0)
+      schema:
+        type: integer
+        format: int32
+        default: 0
+        minimum: 0
+    - name: limit
+      in: query
+      required: false
+      description: Maximum number of logos to return (default 50, max 100)
+      schema:
+        type: integer
+        format: int32
+        default: 50
+        minimum: 1
+        maximum: 100
+  responses:
+    200:
+      description: List of tenant logos for the requested page.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Tenants/TenantLogosResponse.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

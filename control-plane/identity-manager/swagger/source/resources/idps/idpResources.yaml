@@ -1,0 +1,31 @@
+get:
+  summary: get idp resources
+  x-service: identity-manager
+  x-test-coverage:
+  - e2e/src/test/suites/ssoSuite/IDP/idpApi.test.ts
+  operationId: get_idp_resources
+  x-authorize:
+    resource-type: security-settings
+    action: read
+  tags:
+  - Idps
+  parameters:
+  - $ref: '../../parameters/idp.yaml'
+  - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Idp/IdpResources.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

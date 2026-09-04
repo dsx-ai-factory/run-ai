@@ -1,0 +1,7 @@
+Documentation:
+https://runai.atlassian.net/wiki/spaces/EN/pages/3152609292/Integration+Tests
+
+
+To add more directories with integration tests to CI, etc.. -
+add them in "supported-dirs.txt" file as string with space separator
+(for example: "dir1 dir2 dir3").

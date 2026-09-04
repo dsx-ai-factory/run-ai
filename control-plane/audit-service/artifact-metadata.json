@@ -1,0 +1,14 @@
+{
+  "service_name": "audit-service",
+  "artifact_type": "container",
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "notifications": {
+    "slack": {
+      "mention": "@phoenix"
+    }
+  },
+  "jira": {
+    "team_name": "Phoenix"
+  }
+}

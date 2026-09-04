@@ -1,0 +1,5 @@
+type: array
+items:
+  $ref: './SubscriptionEvent.yaml'
+minItems: 0
+maxItems: 100

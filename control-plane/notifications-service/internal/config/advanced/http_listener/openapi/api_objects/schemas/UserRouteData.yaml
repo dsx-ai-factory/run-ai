@@ -1,0 +1,15 @@
+type: object
+properties:
+  tenant_id:
+    type: string
+  user_id:
+    type: string
+  route_id:
+    type: string
+  route_config:
+    type: object
+required:
+  - tenant_id
+  - route_id
+  - route_config
+  - user_id

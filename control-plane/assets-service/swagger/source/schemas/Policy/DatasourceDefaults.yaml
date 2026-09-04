@@ -1,0 +1,19 @@
+properties:
+  hostPath:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/HostPath.yaml"
+  nfs:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/Nfs.yaml"
+  pvc:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/Pvc.yaml"
+  git:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/GitCommon.yaml"
+  s3:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/S3Common.yaml"
+  dataVolume:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/DataVolume.yaml"
+  configMapVolume:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/ConfigMap.yaml"
+  secretVolume:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/Secret.yaml"
+nullable: true
+type: object

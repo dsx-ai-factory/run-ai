@@ -1,0 +1,278 @@
+# Comprehensive run.ai/Distributed/v1 manifest used by Layer 1/2 to validate
+# that all field group fields can be resolved against a real spec.
+#
+# This is a fictive GVK representing Run.ai native distributed policy spec.
+# The workload spec nests both replica specs under .spec: worker and master.
+apiVersion: run.ai/v1
+kind: Distributed
+metadata:
+  name: test
+spec:
+  worker:
+    # Distributed-specific fields (nativeDistributedSpec)
+    cleanPodPolicy: Running
+    distributedFramework: PyTorch
+    mpiLauncherCreationPolicy: AtStartup
+    numWorkers: 4
+    segmentSize: 1024
+    slotsPerWorker: 1
+    sshAuthMountPath: /root/.ssh
+    minReplicas: 2
+    maxReplicas: 8
+
+    # Container fields (nativeSpec)
+    image: worker-image
+    command: "python train.py"
+    args: "--epochs 100"
+    workingDir: /app
+    createHomeDir: true
+    stdin: false
+    tty: false
+    imagePullPolicy: IfNotPresent
+    probes:
+      readiness:
+        initialDelaySeconds: 5
+        periodSeconds: 10
+        timeoutSeconds: 1
+        successThreshold: 1
+        failureThreshold: 3
+        handler:
+          httpGet:
+            path: /healthz
+            port: 8080
+
+    # Scheduling
+    category: training
+    nodeType: gpu
+    nodePools:
+      - pool-1
+    priorityClass: high-priority
+    preemptibility: preemptible
+    nodeAffinityRequired:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: example.com/zone
+              operator: In
+              values:
+                - us-west
+    podAffinity:
+      type: Required
+      key: kubernetes.io/hostname
+
+    # Lifecycle
+    backoffLimit: 3
+    autoDeletionTimeAfterCompletionSeconds: 3600
+    terminateAfterPreemption: false
+    terminationGracePeriodSeconds: 30
+    restartPolicy: Never
+
+    # Compute
+    compute:
+      cpuCoreRequest: 4.0
+      cpuCoreLimit: 8.0
+      cpuMemoryRequest: "8Gi"
+      cpuMemoryLimit: "16Gi"
+      gpuDevicesRequest: 1
+      gpuPortionRequest: 1.0
+      gpuPortionLimit: 1.0
+      gpuMemoryRequest: "4Gi"
+      gpuMemoryLimit: "8Gi"
+      gpuRequestType: portion
+      largeShmRequest: true
+      extendedResources:
+        - resource: nvidia.com/gpu
+          quantity: "1"
+
+    # Security
+    security:
+      allowPrivilegeEscalation: false
+      capabilities:
+        - NET_ADMIN
+      hostIpc: false
+      hostNetwork: false
+      privileged: false
+      readOnlyRootFilesystem: false
+      runAsGid: 1000
+      runAsNonRoot: true
+      runAsUid: 1000
+      supplementalGroups: "1000,2000"
+      seccompProfileType: RuntimeDefault
+      uidGidSource: custom
+
+    # Arrays
+    labels:
+      - name: app
+        value: distributed-training
+    annotations:
+      - name: description
+        value: distributed-workload
+    environmentVariables:
+      - name: WORLD_SIZE
+        value: "4"
+        description: number of workers
+        configMap:
+          name: my-configmap
+          key: config-key
+        secret:
+          name: my-secret
+          key: secret-key
+        podFieldRef:
+          path: metadata.name
+        userCredential:
+          name: cred-name
+          key: cred-key
+    imagePullSecrets:
+      - name: registry-secret
+        userCredential: true
+    tolerations:
+      - name: gpu-toleration
+        key: nvidia.com/gpu
+        value: "true"
+        operator: Equal
+        effect: NoSchedule
+        seconds: 3600
+    ports:
+      - name: rdma
+        container: 12345
+        external: 12345
+        serviceType: ClusterIP
+        toolName: rdma-tool
+        toolType: custom
+    exposedUrls:
+      - name: tensorboard
+        container: 6006
+        url: https://tensorboard.example.com
+        authorizationType: authorizedUsers
+        authorizedUsers:
+          - user@example.com
+        authorizedGroups:
+          - group-a
+        toolName: tensorboard
+        toolType: tensorboard
+    relatedUrls:
+      - name: docs
+        url: https://docs.example.com
+        type: documentation
+
+    # Storage
+    storage:
+      pvc:
+        - name: shared-data
+          path: /data
+          claimName: shared-claim
+          existingPvc: false
+          readOnly: false
+          ephemeral: false
+          dataSharing: true
+          claimInfo:
+            size: 1G
+            storageClass: standard
+            volumeMode: Filesystem
+            accessModes:
+              readWriteOnce: false
+              readOnlyMany: false
+              readWriteMany: true
+            addedAttrValues:
+              - key: extra
+                value: val
+        - name: existing-pvc
+          path: /existing
+          claimName: existing-claim
+          existingPvc: true
+          readOnly: true
+      hostPath:
+        - name: host-data
+          mountPath: /mnt/host
+          path: /var/data
+          readOnly: false
+          mountPropagation: None
+      nfs:
+        - name: nfs-share
+          path: /export
+          server: nfs.example.com
+          mountPath: /mnt/nfs
+          readOnly: false
+      git:
+        - name: code-repo
+          repository: https://github.com/example/repo
+          branch: main
+          revision: HEAD
+          path: /workspace/repo
+          passwordSecret: git-secret
+          secretKeyOfPassword: password
+          secretKeyOfUser: username
+          secretRef:
+            name: git-secret-ref
+            authenticationMethod: password
+            secretKeyOfUser: username
+            secretKeyOfPassword: password
+      s3:
+        - name: s3-bucket
+          bucket: my-bucket
+          path: /data
+          url: https://s3.amazonaws.com
+          accessKeySecret: s3-secret
+          awsSessionToken: token-secret
+          secretKeyOfAccessKeyId: access-key-id
+          secretKeyOfSecretKey: secret-key
+      configMapVolume:
+        - name: config
+          configMap: my-configmap
+          mountPath: /etc/config
+          subPath: config.yaml
+          defaultMode: "0644"
+      secretVolume:
+        - name: secrets
+          secret: my-secret
+          mountPath: /etc/secrets
+          defaultMode: "0644"
+      dataVolume:
+        - id: 123e4567-e89b-12d3-a456-426614174000
+          mountPath: /mnt/data
+      emptyDirVolume:
+        - name: scratch
+          path: /scratch
+          medium: Memory
+          sizeLimit: 1Gi
+
+  master:
+    # Master-specific fields (nativeSpec only)
+    image: master-image
+    command: "python master.py"
+    workingDir: /app
+    imagePullPolicy: IfNotPresent
+
+    # Compute (may differ from workers)
+    compute:
+      cpuCoreRequest: 2.0
+      cpuMemoryRequest: "4Gi"
+      gpuDevicesRequest: 0
+
+    # Security
+    security:
+      runAsNonRoot: true
+      runAsUid: 1000
+
+    # Arrays
+    labels:
+      - name: role
+        value: master
+    environmentVariables:
+      - name: ROLE
+        value: master
+
+    # Storage
+    storage:
+      pvc:
+        - name: shared-data
+          path: /data
+          claimName: shared-claim
+          existingPvc: false
+          readOnly: false
+          ephemeral: false
+          claimInfo:
+            size: 1G
+            storageClass: standard
+            volumeMode: Filesystem
+            accessModes:
+              readWriteMany: true

@@ -1,0 +1,7 @@
+name: nodeTypeId
+in: path
+required: true
+schema:
+  type: string
+  description: The NodeType ID.
+  example: 1

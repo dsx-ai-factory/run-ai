@@ -1,0 +1,27 @@
+type: object
+required:
+  - name
+  - projectId
+  - originPvcName
+properties:
+  name:
+    type: string
+    maxLength: 63
+    pattern: "^[a-z][-a-z0-9]{0,62}$"
+    example: "datavolume-a"
+  description:
+    type: string
+    maxLength: 127
+    example: "Results of experiment X"
+  projectId:
+    type: string
+    example: "5"
+  originPvcName:
+    description: The name of the PVC that the datavolume is based on
+    type: string
+    example: "pvc-a"
+  shouldDeleteOriginalVolume:
+    description: If true, the original storage volume will be deleted together with the datavolume
+    type: boolean
+    default: false
+    example: false

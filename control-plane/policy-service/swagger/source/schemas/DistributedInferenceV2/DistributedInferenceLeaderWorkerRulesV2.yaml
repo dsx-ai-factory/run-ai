@@ -1,0 +1,78 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+properties:
+  annotations:
+    $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
+  args:
+    $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+  command:
+    $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+  compute:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/SupersetRulesAllOfCompute.yaml
+  createHomeDir:
+    $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/BooleanRules.yaml
+  environmentVariables:
+    $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
+  image:
+    $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+  imagePullPolicy:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/ImagePullPolicyRules.yaml
+  imagePullSecrets:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/ImagePullSecretsRules.yaml
+  labels:
+    $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
+  nodeAffinityRequired:
+    $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/ArbitraryRules.yaml
+  nodeType:
+    $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+  podAffinity:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/PodAffinityRules.yaml
+  probes:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/ProbesRules.yaml
+  security:
+    nullable: true
+    properties:
+      capabilities:
+        $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/ArrayRules.yaml
+      hostIpc:
+        $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/BooleanRules.yaml
+      hostNetwork:
+        $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/BooleanRules.yaml
+      privileged:
+        allOf:
+        - $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/BooleanRules.yaml
+        x-internal: true
+      readOnlyRootFilesystem:
+        $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/BooleanRules.yaml
+      runAsGid:
+        $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRulesOptional.yaml
+      runAsNonRoot:
+        $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/BooleanRules.yaml
+      runAsUid:
+        $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRulesOptional.yaml
+      seccompProfileType:
+        $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/SeccompProfileTypeRules.yaml
+      supplementalGroups:
+        $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+      uidGidSource:
+        $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/UidGidSourceRules.yaml
+    type: object
+  storage:
+    nullable: true
+    properties:
+      configMapVolume:
+        $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/ConfigMapsRules.yaml
+      emptyDirVolume:
+        $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/EmptyDirsRules.yaml
+      pvc:
+        $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/PvcsRules.yaml
+      secretVolume:
+        $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/SecretsRules.yaml
+    type: object
+  tolerations:
+    $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/TolerationsRules.yaml
+  workingDir:
+    $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+type: object

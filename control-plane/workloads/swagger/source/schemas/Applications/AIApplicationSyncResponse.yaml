@@ -1,0 +1,12 @@
+type: object
+properties:
+  requestInfo:
+    $ref: "../../../../../infra/openapi/docs/schemas/sync/RequestInfo.yaml"
+  responseInfo:
+    $ref: "../../../../../infra/openapi/docs/schemas/sync/ResponseInfo.yaml"
+  systemInfo:
+    $ref: "../../../../../infra/openapi/docs/schemas/sync/SystemInfo.yaml"
+  applications:
+    type: array
+    items:
+      $ref: "./AIApplicationSyncInfo.yaml"

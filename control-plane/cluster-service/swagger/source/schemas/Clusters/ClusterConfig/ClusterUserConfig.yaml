@@ -1,0 +1,11 @@
+type: object
+description: Cluster configuration
+allOf:
+  - $ref: "../../Common/Metadata.yaml"
+  - type: object
+    properties:
+      clusterId:
+        type: string
+        format: uuid
+      config:
+        $ref: "ClusterUserConfigData.yaml"

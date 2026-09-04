@@ -1,0 +1,13 @@
+description: A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to
+  use the first node pool before moving to the next one if the first is not available.
+type: array
+items:
+  type: string
+  ##WAIT_FOR_35331## minLength: 1
+  maxLength: 63
+  pattern: .*
+maxItems: 1000
+example:
+  - my-node-pool-a
+  - my-node-pool-b
+nullable: true

@@ -1,0 +1,6 @@
+apiVersion: run.ai/v1alpha1
+kind: ExternalWorkload
+metadata:
+  name: externalworkload-sample
+spec:
+  # TODO(user): Add fields here

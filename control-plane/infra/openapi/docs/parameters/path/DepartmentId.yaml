@@ -1,0 +1,8 @@
+name: departmentId
+in: path
+required: true
+description: The id of the department.
+schema:
+  type: string
+  example: "1"
+  pattern: .*

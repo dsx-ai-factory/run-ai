@@ -1,0 +1,41 @@
+{{- if and .Values.notificationsService.enabled .Values.notificationsService.rbac.clusterRole.enabled }}
+{{- $svc := .Values.notificationsService }}
+{{- $fullname := include "control-plane.notificationsService.fullname" . }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  {{- include "common.metadata" (list . $svc) | nindent 2 }}
+  name: {{ $fullname }}
+rules:
+- apiGroups:
+  - ""
+  - "scheduling.run.ai"
+  resources:
+    {{- toYaml $svc.rbac.clusterRole.relevantResources | nindent 4 }}
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - "events.k8s.io"
+  resources:
+  - events
+  verbs:
+  - watch
+  - list
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  {{- include "common.metadata" (list . $svc) | nindent 2 }}
+  name: {{ $fullname }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ $fullname }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "common.serviceAccountName" (list . $svc.serviceAccount) }}
+  namespace: {{ .Release.Namespace }}
+{{- end }}

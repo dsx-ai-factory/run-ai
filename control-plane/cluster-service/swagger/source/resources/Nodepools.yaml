@@ -1,0 +1,74 @@
+post:
+  summary: Create nodepool
+  operationId: create_nodepool
+  x-service: cluster-service
+  description: Create nodepool
+  x-test-coverage:
+    - e2e/src/test/suites/playwright/serial/regression/node-pools/advancedNodePoolsApiV2.test.ts
+  x-authorize:
+    resource-type: nodepools
+    action: create
+  x-audit: true
+  tags:
+    - NodePools
+  requestBody:
+    description: Nodepool to create.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Nodepools/NodepoolCreateFields.yaml"
+  responses:
+    201:
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Nodepools/Nodepool.yaml"
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+get:
+  summary: Get nodepools
+  operationId: get_nodepools
+  x-service: cluster-service
+  description: Get nodepools
+  x-test-coverage:
+    - e2e/src/test/suites/playwright/serial/regression/node-pools/advancedNodePoolsApi.test.ts
+  x-authorize:
+    resource-type: nodepools
+    action: read
+  tags:
+    - NodePools
+  parameters:
+    - $ref: "../parameters/query/NodepoolsFilterBy.yaml"
+    - $ref: "../parameters/query/NodepoolsSortBy.yaml"
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+  responses:
+    200:
+      description: ok
+      content:
+        application/json:
+          schema:
+            x-schemaName: GetNodepools200Response
+            type: object
+            properties:
+              nodepools:
+                type: array
+                items:
+                  $ref: "../schemas/Nodepools/Nodepool.yaml"
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,11 @@
+properties:
+  repository:
+    $ref: "../../policy_rules/StringRules.yaml"
+  branch:
+    $ref: "../../policy_rules/StringRules.yaml"
+  revision:
+    $ref: "../../policy_rules/StringRules.yaml"
+  path:
+    $ref: "../../policy_rules/StringRules.yaml"
+nullable: true
+type: object

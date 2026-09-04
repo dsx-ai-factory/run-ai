@@ -1,0 +1,4 @@
+description: Indicates if the job should be terminated by the system after it has been preempted.
+type: boolean
+example: false
+nullable: true

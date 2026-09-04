@@ -1,0 +1,12 @@
+{{- if eq (include "isOpenShift" .) "true" }}
+apiVersion: v1
+data:
+  config: |-
+    enforcePreventPrivilegeEscalation: true
+kind: ConfigMap
+metadata:
+  labels:
+    runai/cluster-config: "true"
+  name: cluster-config
+  namespace: runai
+{{- end }}

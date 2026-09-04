@@ -1,0 +1,18 @@
+type: array
+description: subjects for the access rules. must have at least one value
+minItems: 1
+maxItems: 100
+items:
+  type: object
+  required:
+    - subjectId
+    - subjectType
+  properties:
+    subjectId:
+      type: string
+      description: The unique identifier of the subject e.g., user, group, or app).
+      example: "user@run.ai"
+    subjectType:
+      allOf:
+        - $ref: './SubjectType.yaml'
+        - description: "The subject assigned to the access rule. Valid values: user, group, app."

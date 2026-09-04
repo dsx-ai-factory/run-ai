@@ -1,0 +1,38 @@
+get:
+  summary: Get workload structure elements by workload id.
+  description: >
+    Retrieve the hierarchy structure elements for a workload. Returns a flat list
+    ordered by level. Requires cluster version >= 2.25.
+  operationId: get_workload_elements
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/workload_elements_test.go
+  x-authorize:
+    resource-type: workloads
+    action: read
+    resource-id: workloadId
+  tags:
+    - Workloads
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Workloads/WorkloadElementsResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

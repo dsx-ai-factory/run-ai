@@ -1,0 +1,9 @@
+servingPort:
+  port: 8081
+  protocol: http
+nodePools:
+  - gpu-pool-a
+  - gpu-pool-b
+  - cpu-pool
+leader:
+  image: python:3.8

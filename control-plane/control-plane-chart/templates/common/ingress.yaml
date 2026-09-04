@@ -1,0 +1,22 @@
+{{- if and (.Values.global.ingress.enabled) (eq .Values.global.config.kubernetesDistribution "kubernetes") }}
+{{ $defaultName := "ingress" }}
+{{ $objectsName := ternary (tuple $defaultName (printf "%s-%s" $defaultName "preview")) (tuple $defaultName) (hasKey .Values.global.config "argoRollouts") }}
+{{- $annotations := include "control-plane.ingress.annotations" (dict "ingressClass" $.Values.global.ingress.ingressClass "customAnnotations" $.Values.global.ingress.extraAnnotations "ingressClassAnnotations" $.Values.global.ingress.ingressClassAnnotations) | fromYaml -}}
+{{- range $name := $objectsName }}
+{{ $serviceName := ternary (printf "%s-traefik-preview" (include "common.fullname" $)) (printf "%s-traefik" (include "common.fullname" $)) (contains "preview" . ) }}
+{{- include "control-plane.ingress" (list $ (dict "name" $name "serviceName" $serviceName "ingressClass" $.Values.global.ingress.ingressClass "domain" $.Values.global.domain "tlsSecretName" $.Values.global.ingress.tlsSecretName "extraDomains" $.Values.global.ingress.extraDomains "extraAnnotations" $annotations "isPreview" (contains "preview" $name ) "multiTenancy" $.Values.global.multiTenancy.enabled)) }}
+{{- end }}
+
+{{- if $.Values.global.additionalIngresses }}
+{{- range $key, $additionalIngress := $.Values.global.additionalIngresses }}
+{{ $objectsNames := ternary (tuple (printf "ingress-%s" $additionalIngress.name) (printf "ingress-preview-%s" $additionalIngress.name)) (tuple (printf "ingress-%s" $additionalIngress.name)) (hasKey $.Values.global.config "argoRollouts")  }}
+{{- $additionalIngressClass := coalesce $additionalIngress.ingressClass $.Values.global.ingress.ingressClass -}}
+{{- $additionalCustomAnnotations := coalesce $additionalIngress.extraAnnotations $.Values.global.ingress.extraAnnotations -}}
+{{- $additionalAnnotations := include "control-plane.ingress.annotations" (dict "ingressClass" $additionalIngressClass "customAnnotations" $additionalCustomAnnotations "ingressClassAnnotations" $.Values.global.ingress.ingressClassAnnotations) | fromYaml -}}
+{{- range $name := $objectsNames }}
+{{- $serviceName := ternary (printf "%s-traefik-preview" (include "common.fullname" $)) (printf "%s-traefik" (include "common.fullname" $)) (contains "preview" $name) }}
+{{- include "control-plane.ingress" (list $ (dict "name" $name "serviceName" $serviceName "ingressClass" $additionalIngressClass "domain" (coalesce $additionalIngress.domain $.Values.global.domain) "tlsSecretName" (coalesce $additionalIngress.tlsSecretName $.Values.global.ingress.tlsSecretName) "extraDomains" (coalesce $additionalIngress.extraDomains $.Values.global.ingress.extraDomains) "extraAnnotations" $additionalAnnotations "isPreview" (contains "preview" $name) "multiTenancy" $.Values.global.multiTenancy.enabled)) }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

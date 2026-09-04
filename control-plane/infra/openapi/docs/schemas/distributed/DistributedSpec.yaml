@@ -1,0 +1,10 @@
+description: The specifications of the training to be created.
+properties:
+  spec:
+    $ref: "./DistributedSpecSpec.yaml"
+  masterSpecSameAsWorker:
+    $ref: "./MasterSpecSameAsWorker.yaml"
+  masterSpec:
+    $ref: "./MasterSpec.yaml"
+  masterAssets:
+    $ref: "../assets/AssetSubmissionIds.yaml"

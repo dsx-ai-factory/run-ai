@@ -1,0 +1,26 @@
+properties:
+  path:
+    description: Local path within the workload to which the EmptyDir volume will be mapped. (mandatory)
+    type: string
+    minLength: 1
+    maxLength: 4096
+    example: /mnt/emptydir
+    nullable: true
+    pattern: .*
+  medium:
+    description: The type of storage medium for the volume. Use "Memory" for memory-backed storage, or leave empty for disk-backed storage.
+    type: string
+    minLength: 1
+    maxLength: 63
+    nullable: true
+    pattern: .*
+  sizeLimit:
+    description: The total amount of local storage or memory required for the emptyDir volume. Specify using Kubernetes quantity format (e.g., 1G, 500Mi).
+    type: string
+    ##WAIT_FOR_35331## minLength: 1
+    maxLength: 63
+    pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+    example: 1G
+    nullable: true
+nullable: true
+type: object

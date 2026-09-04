@@ -1,0 +1,31 @@
+createdAt: "0001-01-01T00:00:00Z"
+createdBy: ""
+description: translation of my-policy
+id: ""
+projectId: "4500001"
+rules:
+- enforcements:
+  - options:
+    - ubuntu
+    - ubuntu/latest
+  - required: true
+  - set:
+      value: ubuntu
+  field: image
+  specSelector: masterSpec
+- enforcements:
+  - options:
+    - redhat
+    - redhat/latest
+  - required: false
+  - default:
+      value: redhat
+  field: image
+  specSelector: workerSpec
+scope: project
+updatedAt: "0001-01-01T00:00:00Z"
+updatedBy: ""
+workloadType:
+  group: run.ai
+  kind: Distributed
+  version: v1

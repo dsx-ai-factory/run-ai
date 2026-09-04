@@ -1,0 +1,22 @@
+type: object
+description: Specifies the Group, Version, and Kind (GVK) of the Kubernetes resource that defines the workload.
+required:
+  - version
+  - kind
+properties:
+  group:
+    description: The API group of the Kubernetes resource. Empty string for core resources like Pod.
+    type: string
+    nullable: true
+    maxLength: 253
+    example: "apps"
+  version:
+    description: The API version of the resource within the specified group.
+    type: string
+    maxLength: 250
+    example: "v1"
+  kind:
+    description: The type of Kubernetes resource being referenced.
+    type: string
+    maxLength: 250
+    example: "Deployment"

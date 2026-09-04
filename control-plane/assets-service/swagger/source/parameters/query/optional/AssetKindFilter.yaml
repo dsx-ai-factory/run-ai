@@ -1,0 +1,6 @@
+name: kind
+in: query
+description: Request results for specific asset kind.
+schema:
+  type: string
+  minLength: 1

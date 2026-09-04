@@ -1,0 +1,76 @@
+get:
+  summary: Get a workloads setting by key.
+  description: Retrieve the current value of a specific workloads setting by its key.
+  operationId: get_workloads_service_setting_by_key
+  x-service: workloads
+  x-test-coverage: not-applicable
+  x-authorize:
+    resource-type: settings
+    action: read
+  tags:
+    - Settings
+  parameters:
+    - name: key
+      in: path
+      required: true
+      schema:
+        $ref: '../schemas/Settings/WorkloadsSettingsKeyEnum.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml'
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Settings/GetWorkloadsSetting.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+put:
+  summary: Update a workloads setting by key.
+  description: Update the value of a specific workloads setting by its key.
+  operationId: update_workloads_service_setting_by_key
+  x-service: workloads
+  x-test-coverage: not-applicable
+  x-authorize:
+    resource-type: settings
+    action: update
+  tags:
+    - Settings
+  parameters:
+    - name: key
+      in: path
+      required: true
+      schema:
+        $ref: '../schemas/Settings/WorkloadsSettingsKeyEnum.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Settings/UpdateWorkloadsSettingByKeyRequest.yaml'
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Settings/UpdateWorkloadsSettingByKeyRequest.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

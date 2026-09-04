@@ -1,0 +1,9 @@
+image: ubuntu
+servingPort:
+  container: 8081
+  protocol: http
+autoscaling:
+  minReplicas: 0
+  maxReplicas: 1
+  metric: latency
+  metricThreshold: 80

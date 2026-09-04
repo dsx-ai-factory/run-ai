@@ -1,0 +1,150 @@
+description: |
+  Layer 3 case "workload" for apps.nvidia.com/NIMCache/v1alpha1. SETs every
+  field reachable through the nimCacheSpec field group (everything in .spec
+  other than env / resources; those live in the container FG and are
+  exercised by the "container" case).
+
+  This policy uses object-level fields (ngcSource, dataStoreSource, hfSource,
+  pvcStorage, hostPathStorage) rather than granular xxx-yyy fields. In a real
+  policy you would pick ONE source type; here we set all three to exercise each
+  field-group entry's write path.
+
+  Custom formatters used here:
+    * ngcSource, dataStoreSource, hfSource, pvcStorage, hostPathStorage all use
+      runai-nimCacheSpec (object-level writes with optional enum enforcement).
+    * nodeSelectors uses runai-podSpec (reused; adds one entry to
+      .spec.nodeSelector by key+value).
+    * tolerations uses runai-podSpec (reused; one rule per toleration entry,
+      merged into .spec.tolerations by .key).
+
+  All other fields are KeyValue scalars. Read together with
+  cases/workload/golden.yaml.
+effectiveRules:
+  # ----- workloadMetadata (CR-level metadata) -----
+  - field: labels
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "app", value: "test" } }]
+  - field: annotations
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "example.com/annotation", value: "test-value" } }]
+
+  # ----- spec scalars -----
+  - field: runtimeClassName
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: gvisor } }]
+  - field: userID
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 1000 } }]
+  - field: groupID
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 2000 } }]
+
+  # ----- certConfig -----
+  - field: certConfig-Name
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: my-certs } }]
+  - field: certConfig-MountPath
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: /etc/ssl/certs } }]
+
+  # ----- proxy -----
+  - field: proxy-HttpProxy
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "http://proxy.example.com:3128" } }]
+  - field: proxy-HttpsProxy
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "http://proxy.example.com:3128" } }]
+  - field: proxy-NoProxy
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "localhost,.cluster.local" } }]
+  - field: proxy-CertConfigMap
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: proxy-certs } }]
+
+  # ----- source.ngc (object-level SET) -----
+  - field: ngcSource
+    specSelector: workloadSpec
+    enforcements:
+      - set:
+          authSecret: ngc-api-key
+          modelPuller: "nvcr.io/nim/model-puller:v1"
+          pullSecret: ngc-pull-secret
+          model:
+            profiles: ["profile-a", "profile-b"]
+            precision: fp16
+            engine: tensorrt_llm
+            tensorParallelism: "2"
+            qosProfile: throughput
+            lora: false
+            buildable: true
+
+  # ----- source.dataStore (object-level SET) -----
+  # Note: endpoint must match pattern ^https?://.*/v1/hf/?$
+  - field: dataStoreSource
+    specSelector: workloadSpec
+    enforcements:
+      - set:
+          endpoint: "https://datastore.example.com/v1/hf"
+          namespace: my-namespace
+          authSecret: datastore-api-key
+          modelPuller: "nvcr.io/nim/datastore-puller:v1"
+          pullSecret: datastore-pull-secret
+          modelName: my-model
+          datasetName: my-dataset
+          revision: "1.0.0"
+
+  # ----- source.hf (object-level SET) -----
+  # Note: endpoint must match pattern ^https?://.*$
+  - field: hfSource
+    specSelector: workloadSpec
+    enforcements:
+      - set:
+          endpoint: "https://huggingface.co"
+          namespace: hf-namespace
+          authSecret: hf-api-key
+          modelPuller: "nvcr.io/nim/hf-puller:v1"
+          pullSecret: hf-pull-secret
+          modelName: hf-model
+          datasetName: hf-dataset
+          revision: main
+
+  # ----- storage.pvc (object-level SET, includes readOnly) -----
+  - field: pvcStorage
+    specSelector: workloadSpec
+    enforcements:
+      - set:
+          name: nim-cache-pvc
+          create: true
+          storageClass: standard
+          size: "10Gi"
+          subPath: cache
+          volumeAccessMode: ReadWriteOnce
+          readOnly: false
+
+  # ----- storage.hostPath (object-level SET, includes readOnly) -----
+  # Note: readOnly is synonymous between pvcStorage and hostPathStorage; both
+  # map to storage.readOnly. The last rule wins, so hostPathStorage's readOnly
+  # value will be the final one in the golden.
+  - field: hostPathStorage
+    specSelector: workloadSpec
+    enforcements:
+      - set:
+          path: /data/nim-cache
+          readOnly: false
+
+  # ----- nodeSelector (custom, reused podSpec formatter) -----
+  - field: nodeSelectors
+    specSelector: workloadSpec
+    enforcements:
+      - set: { key: test, value: somevalue }
+
+  # ----- tolerations (custom, reused podSpec formatter) -----
+  - field: tolerations
+    specSelector: workloadSpec
+    enforcements:
+      - set:
+          key: test
+          operator: Equal
+          value: somevalue
+          effect: NoSchedule
+          seconds: 60

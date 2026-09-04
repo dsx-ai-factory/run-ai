@@ -1,0 +1,3 @@
+description: A unique ID of the workload.
+type: string
+format:  uuid

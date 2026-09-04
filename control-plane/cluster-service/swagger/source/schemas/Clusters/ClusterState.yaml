@@ -1,0 +1,9 @@
+type: string
+description: The cluster's state.
+enum:
+  - WaitingToConnect
+  - Connected
+  - Disconnected
+  - MissingPrerequisites
+  - ServiceIssues
+  - Unknown

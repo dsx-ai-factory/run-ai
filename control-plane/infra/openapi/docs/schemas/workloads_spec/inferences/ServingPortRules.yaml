@@ -1,0 +1,15 @@
+properties:
+  container:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  protocol:
+    $ref: "./ServingPortProtocolRules.yaml"
+  authorizationType:
+    $ref: "./ServingPortAuthorizationTypeRules.yaml"
+  authorizedUsers:
+    $ref: "../../policy_rules/ArrayRules.yaml"
+  authorizedGroups:
+    $ref: "../../policy_rules/ArrayRules.yaml"
+  clusterLocalAccessOnly:
+    $ref: "../../policy_rules/BooleanRules.yaml"
+nullable: true
+type: object

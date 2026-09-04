@@ -1,0 +1,15 @@
+name: groupBy
+in: query
+description: project fields to group the data by
+explode: false
+required: false
+schema:
+  type: array
+  maxItems: 2
+  items:
+    type: string
+    enum:
+      - ClusterId
+      - NodepoolId
+      - ParentId
+      - ProjectId

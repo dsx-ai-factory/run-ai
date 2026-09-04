@@ -1,0 +1,14 @@
+{
+  "service_name": "tenants-manager",
+  "artifact_type": "container",
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "notifications": {
+    "slack": {
+      "mention": "@sphinx"
+    }
+  },
+  "jira": {
+    "team_name": "Sphinx"
+  }
+}

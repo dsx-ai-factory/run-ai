@@ -1,0 +1,184 @@
+BatchJobTarget:
+  Config: {}
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: s3
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: s3
+      name: s3
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: s3
+            workloadKind: Workspace
+            workloadName: s3
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: s3
+            image: ubuntu
+            name: s3
+            resources: {}
+            volumeMounts:
+            - mountPath: /container/my-bucket
+              mountPropagation: HostToContainer
+              name: s3-0
+            - mountPath: /container/everyones
+              mountPropagation: HostToContainer
+              name: s3-1
+            - mountPath: /container/my-very-secret-bucket
+              mountPropagation: HostToContainer
+              name: s3-2
+          initContainers:
+          - command:
+            - goofys
+            - -f
+            - --dir-mode
+            - "0777"
+            - --file-mode
+            - "0777"
+            - -o
+            - allow_other
+            - --debug_s3
+            - --endpoint
+            - https://s3.amazonaws.com
+            - private-bucket
+            - /container/my-bucket
+            env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  key: AccessKeyId
+                  name: my-access-key-secret
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: SecretKey
+                  name: my-access-key-secret
+            image: nvcr.io/nvidia/runai/goofys:2.26.30
+            imagePullPolicy: IfNotPresent
+            name: s3-fs-0
+            resources: {}
+            restartPolicy: Always
+            securityContext:
+              privileged: true
+            volumeMounts:
+            - mountPath: /container/my-bucket
+              mountPropagation: Bidirectional
+              name: s3-0
+          - command:
+            - goofys
+            - -f
+            - --dir-mode
+            - "0777"
+            - --file-mode
+            - "0777"
+            - -o
+            - allow_other
+            - --debug_s3
+            - --endpoint
+            - https://uswest.s3.amazonaws
+            - public-bucket
+            - /container/everyones
+            image: nvcr.io/nvidia/runai/goofys:2.26.30
+            imagePullPolicy: IfNotPresent
+            name: s3-fs-1
+            resources: {}
+            restartPolicy: Always
+            securityContext:
+              privileged: true
+            volumeMounts:
+            - mountPath: /container/everyones
+              mountPropagation: Bidirectional
+              name: s3-1
+          - command:
+            - goofys
+            - -f
+            - --dir-mode
+            - "0777"
+            - --file-mode
+            - "0777"
+            - -o
+            - allow_other
+            - --debug_s3
+            - --endpoint
+            - https://s3.amazonaws.com
+            - private-bucket-with-token
+            - /container/my-very-secret-bucket
+            env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  key: AccessKeyId
+                  name: my-access-key-secret
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: SecretKey
+                  name: my-access-key-secret
+            - name: AWS_SESSION_TOKEN
+              value: my-session-token
+            image: nvcr.io/nvidia/runai/goofys:2.26.30
+            imagePullPolicy: IfNotPresent
+            name: s3-fs-2
+            resources: {}
+            restartPolicy: Always
+            securityContext:
+              privileged: true
+            volumeMounts:
+            - mountPath: /container/my-very-secret-bucket
+              mountPropagation: Bidirectional
+              name: s3-2
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+          volumes:
+          - emptyDir: {}
+            name: s3-0
+          - emptyDir: {}
+            name: s3-1
+          - emptyDir: {}
+            name: s3-2
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: s3, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: s3, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

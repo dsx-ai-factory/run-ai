@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  notification-integration-test:
+    profiles:
+      - tests
+    build:
+      context: ../
+      dockerfile: ./integration_tests/Dockerfile
+    depends_on:
+      notifications-service:
+        condition: service_healthy
+    links:
+      - notifications-service
+      - smtp
+      - slack-mock
+
+  notifications-service:
+    profiles:
+      - service
+    build:
+      context: ../
+      dockerfile: Dockerfile
+      target: integration
+    ports:
+      - "2525:2525"
+      - "5000:5000"
+      - "8085:8085"
+    volumes:
+      - ${CONFIG_FILE:-./config/config.advanced.yaml}:/config.yaml
+    environment:
+      - CONF_PATH=/config.yaml
+      - ENV_CONFIG_PROVIDER=${PROVIDER_TYPE:-advanced}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      slack-mock:
+        condition: service_started
+    healthcheck:
+      test: curl --fail "http://localhost:8085/api/v1/config/health" || exit 1
+      interval: 2s
+      timeout: 10s
+      retries: 10
+      start_period: 2s
+    links:
+      - postgres
+      - smtp
+      - slack-mock
+
+  postgres:
+    profiles:
+      - postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: runai
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"
+    volumes:
+      - ./config/initdb:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  smtp:
+    # Use http://localhost:8025/ to view emails
+    image: mailhog/mailhog:v1.0.1
+    platform: linux/amd64
+    profiles:
+      - smtp
+    entrypoint: ["/bin/sh", "-c", "MailHog &>/dev/null"]
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    expose:
+      - "1025"
+      - "8025"
+
+  slack-mock:
+    profiles:
+      - slack
+    build: ./slack
+    ports:
+      - "3000:3000"
+    expose:
+      - "3000"

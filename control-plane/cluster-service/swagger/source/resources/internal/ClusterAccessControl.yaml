@@ -1,0 +1,20 @@
+put:
+  x-internal: true
+  x-service: cluster-service
+  x-no-authorization: true
+  x-test-coverage: not-applicable
+  summary: Set the cluster access control.
+  tags:
+    - Internal
+  operationId: setClusterAccessControl
+  parameters:
+    - $ref: "../../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+  responses:
+    "200":
+      description: Executed successfully.
+    "400":
+      $ref: "../../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    "404":
+      $ref: "../../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    "500":
+      $ref: "../../../../../infra/openapi/docs/responses/500InternalServerError.yaml"

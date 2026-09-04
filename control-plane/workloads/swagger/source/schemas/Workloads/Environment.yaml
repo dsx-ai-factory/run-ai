@@ -1,0 +1,17 @@
+type: object
+required:
+  - name
+  - id
+properties:
+  connections:
+    type: array
+    items:
+      $ref: "./Connection.yaml"
+  name:
+    type: string
+    example: "pytorch"
+  id:
+    type: string
+    format: uuid
+  replicaType:
+    $ref: "./ReplicaType.yaml"

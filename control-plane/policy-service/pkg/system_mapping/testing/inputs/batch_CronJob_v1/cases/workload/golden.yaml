@@ -1,0 +1,64 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: test
+spec:
+  concurrencyPolicy: Allow
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 60
+      backoffLimit: 1
+      backoffLimitPerIndex: 1
+      completionMode: Indexed
+      completions: 1
+      managedBy: example.com/manager
+      manualSelector: false
+      maxFailedIndexes: 1
+      parallelism: 1
+      podFailurePolicy:
+        rules:
+        - action: FailJob
+          onExitCodes:
+            containerName: test
+            operator: In
+            values:
+            - 1
+          onPodConditions:
+          - status: "True"
+            type: Test
+      podReplacementPolicy: Failed
+      selector:
+        matchExpressions:
+        - key: test
+          operator: In
+          values:
+          - v1
+          - v2
+        matchLabels:
+          app: test
+      successPolicy:
+        rules:
+        - succeededCount: 1
+          succeededIndexes: 0-1
+      suspend: false
+      template:
+        metadata:
+          annotations:
+            example.com/annotation: test-value
+          labels:
+            app: test
+        spec:
+          containers:
+          - image: placeholder
+            name: test
+          initContainers:
+          - image: placeholder
+            name: test
+          restartPolicy: Never
+      ttlSecondsAfterFinished: 60
+  schedule: 0 */2 * * *
+  startingDeadlineSeconds: 60
+  successfulJobsHistoryLimit: 3
+  suspend: false
+  timeZone: Etc/UTC

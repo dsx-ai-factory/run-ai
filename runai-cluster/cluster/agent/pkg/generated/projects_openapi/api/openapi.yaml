@@ -1,0 +1,1215 @@
+openapi: 3.0.0
+info:
+  description: |
+    The aggregated API of Run:AI backend projects and departments
+  license:
+    name: Run:AI
+  title: Project and Department service API
+  version: 1.5.1
+servers:
+- url: https://app.run.ai
+- url: https://staging.run.ai
+- url: https://test.run.ai
+security:
+- bearerAuth: []
+paths:
+  /v1/k8s/clusters/{clusterId}/projects:
+    get:
+      description: List all the projects managed by the tenant on a specific cluster.
+      parameters:
+      - description: The unique uuid identifying the cluster.
+        example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        explode: false
+        in: path
+        name: clusterId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: filter permissions
+        example: true
+        explode: true
+        in: query
+        name: excludePermissions
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: "should memory be returned in MB. default is \"false\", in which\
+          \ case it will be returned in MiB."
+        example: true
+        explode: true
+        in: query
+        name: memoryUnitMb
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Project'
+                type: array
+          description: A list of projects.
+      summary: List all projects.
+      tags:
+      - Projects
+    post:
+      description: Create a new project in the cluster. This endpoint requires EDITOR
+        or RESEARCH MANAGER role.
+      parameters:
+      - description: The unique uuid identifying the cluster.
+        example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        explode: false
+        in: path
+        name: clusterId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: filter permissions
+        example: true
+        explode: true
+        in: query
+        name: excludePermissions
+        required: false
+        schema:
+          type: boolean
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectCreateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: Project created successfully.
+        "400":
+          description: Bad Project request.
+        "409":
+          description: Project failed to be created.
+      summary: Create a new project.
+      tags:
+      - Projects
+  /v1/k8s/clusters/{clusterId}/projects/{id}:
+    delete:
+      description: Delete a project from the cluster. This endpoint requires EDITOR
+        or RESEARCH MANAGER  role.
+      parameters:
+      - description: The unique uuid identifying the cluster.
+        example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        explode: false
+        in: path
+        name: clusterId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: The unique id identifying the project.
+        example: 2
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: Project deleted successfully.
+        "404":
+          description: Project not found.
+      summary: Delete a project.
+      tags:
+      - Projects
+    get:
+      description: Get information about a specific project. This endpoint requires
+        view permissions to the requested project.
+      parameters:
+      - description: The unique uuid identifying the cluster.
+        example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        explode: false
+        in: path
+        name: clusterId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: The unique project-id identifying the project.
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: filter permissions
+        example: true
+        explode: true
+        in: query
+        name: excludePermissions
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: A project details.
+        "404":
+          description: Project not found.
+      summary: Get a specific project.
+      tags:
+      - Projects
+    put:
+      description: Updates project details. This endpoint requires EDITOR or RESEARCH
+        MANAGER role.
+      parameters:
+      - description: The unique project-id identifying the project.
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: The unique uuid identifying the cluster.
+        example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        explode: false
+        in: path
+        name: clusterId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: filter permissions
+        example: true
+        explode: true
+        in: query
+        name: excludePermissions
+        required: false
+        schema:
+          type: boolean
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Project'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: An updated project details.
+        "404":
+          description: Project not found.
+        "400":
+          description: Bad project request.
+        "409":
+          description: Could not update the project.
+      summary: Update a project.
+      tags:
+      - Projects
+  /v1/k8s/clusters/{clusterId}/projects/status:
+    put:
+      operationId: updateProjectStatus
+      parameters:
+      - description: Unique identifier of the cluster
+        explode: false
+        in: path
+        name: clusterId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectStatusRequest'
+        required: true
+      responses:
+        "201":
+          description: Project updated successfully.
+        "400":
+          description: Bad Project request.
+        "404":
+          description: Project not found.
+      summary: Update Project status
+      tags:
+      - Projects
+    x-internal: true
+  /v1/k8s/clusters/{clusterId}/departments/{department-id}:
+    delete:
+      description: Delete a department from the cluster. This endpoint requires EDITOR
+        role.
+      parameters:
+      - description: The unique uuid identifying the cluster.
+        example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        explode: false
+        in: path
+        name: clusterId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: The unique id identifying the department.
+        example: 2
+        explode: false
+        in: path
+        name: department-id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      - description: filter permissions
+        example: true
+        explode: true
+        in: query
+        name: excludePermissions
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Department'
+          description: Department deleted successfully.
+      summary: Delete a department.
+      tags:
+      - Departments
+    get:
+      description: Get a specific department by the ID.
+      parameters:
+      - description: The unique uuid identifying the cluster.
+        example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        explode: false
+        in: path
+        name: clusterId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: The unique id identifying the department.
+        example: 2
+        explode: false
+        in: path
+        name: department-id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      - description: filter permissions
+        example: true
+        explode: true
+        in: query
+        name: excludePermissions
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Department'
+          description: Departments returned successfully.
+      summary: Get a department.
+      tags:
+      - Departments
+    put:
+      description: Update a department in the cluster. This endpoint requires EDITOR
+        role.
+      parameters:
+      - description: The unique uuid identifying the cluster.
+        example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        explode: false
+        in: path
+        name: clusterId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: The unique id identifying the department.
+        example: 2
+        explode: false
+        in: path
+        name: department-id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      - description: filter permissions
+        example: true
+        explode: true
+        in: query
+        name: excludePermissions
+        required: false
+        schema:
+          type: boolean
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Department'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Department'
+          description: Department updated successfully.
+      summary: Update a department.
+      tags:
+      - Departments
+  /v1/k8s/clusters/{clusterId}/departments:
+    get:
+      description: Get list of all the department in the cluster.
+      parameters:
+      - description: The unique uuid identifying the cluster.
+        example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        explode: false
+        in: path
+        name: clusterId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: filter permissions
+        example: true
+        explode: true
+        in: query
+        name: excludePermissions
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: "should memory be returned in MB. default is \"false\", in which\
+          \ case it will be returned in MiB."
+        example: true
+        explode: true
+        in: query
+        name: memoryUnitMb
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Department'
+                type: array
+          description: Departments list returned successfully.
+      summary: Get all departments.
+      tags:
+      - Departments
+    post:
+      description: Create a new department in the cluster. This endpoint requires
+        EDITOR role.
+      parameters:
+      - description: The unique uuid identifying the cluster.
+        example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        explode: false
+        in: path
+        name: clusterId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: filter permissions
+        example: true
+        explode: true
+        in: query
+        name: excludePermissions
+        required: false
+        schema:
+          type: boolean
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartmentUserDefinedProperties'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Department'
+          description: Department created successfully.
+      summary: Create a new department.
+      tags:
+      - Departments
+  /v1/k8s/clusters/{clusterId}/departments/{department-id}/access-control:
+    put:
+      description: Set the department admins. This endpoint requires EDITOR role.
+      parameters:
+      - description: The unique uuid identifying the cluster.
+        example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+        explode: false
+        in: path
+        name: clusterId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: The unique id identifying the department.
+        example: 2
+        explode: false
+        in: path
+        name: department-id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartmentAccessControl'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartmentAccessControl'
+          description: Department admin set successfully.
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthenticated
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+      summary: Set the department admins.
+      tags:
+      - Departments
+components:
+  parameters:
+    limit:
+      description: The maximum number of entries to return.
+      explode: true
+      in: query
+      name: limit
+      required: false
+      schema:
+        example: 1000
+        format: int32
+        type: integer
+      style: form
+    offset:
+      description: The offset of the first item returned in the collection.
+      explode: true
+      in: query
+      name: offset
+      required: false
+      schema:
+        example: 4000
+        format: int32
+        type: integer
+      style: form
+    lastUpdated:
+      description: The last timestamp of the previously received items.
+      explode: true
+      in: query
+      name: lastUpdated
+      required: false
+      schema:
+        example: 2021-12-14T16:04:15.099Z
+        format: date-time
+        type: string
+      style: form
+    includeDeleted:
+      description: True to include deleted objects in the result.
+      explode: true
+      in: query
+      name: includeDeleted
+      required: false
+      schema:
+        default: false
+        example: false
+        type: boolean
+      style: form
+  schemas:
+    Error:
+      properties:
+        code:
+          format: int32
+          type: integer
+        message:
+          type: string
+      required:
+      - code
+      - message
+    ProjectCreateRequest:
+      example:
+        interactivePreemptibleJobMaxIdleDurationSecs: 3000
+        maxAllowedGpus: 5
+        trainingJobMaxIdleDurationSecs: 3000
+        deservedGpus: 3
+        departmentId: 2
+        resources:
+          memory:
+            maxAllowed: 1000
+            overQuotaWeight: 2
+            deserved: 0
+          cpu:
+            maxAllowed: 1000
+            overQuotaWeight: 2
+            deserved: 0
+          id: 6.027456183070403
+          gpu:
+            maxAllowed: 1000
+            overQuotaWeight: 2
+            deserved: 0
+        nodeAffinity:
+          interactive:
+            affinityType: no_limit
+            selectedTypes:
+            - name: name
+              id: 0.8008281904610115
+            - name: name
+              id: 0.8008281904610115
+          train:
+            affinityType: no_limit
+            selectedTypes:
+            - name: name
+              id: 0.8008281904610115
+            - name: name
+              id: 0.8008281904610115
+        interactiveJobMaxIdleDurationSecs: 3000
+        interactiveJobTimeLimitSecs: 3600
+        gpuOverQuotaWeight: 1
+        nodePoolsResources:
+        - nodePool:
+            name: default
+            id: 3
+          memory:
+            maxAllowed: 1000
+            overQuotaWeight: 2
+            deserved: 0
+          cpu:
+            maxAllowed: 1000
+            overQuotaWeight: 2
+            deserved: 0
+          id: 1.4658129805029452
+          gpu:
+            maxAllowed: 1000
+            overQuotaWeight: 2
+            deserved: 0
+        - nodePool:
+            name: default
+            id: 3
+          memory:
+            maxAllowed: 1000
+            overQuotaWeight: 2
+            deserved: 0
+          cpu:
+            maxAllowed: 1000
+            overQuotaWeight: 2
+            deserved: 0
+          id: 1.4658129805029452
+          gpu:
+            maxAllowed: 1000
+            overQuotaWeight: 2
+            deserved: 0
+        permissions:
+          groups:
+          - groups
+          - groups
+          users:
+          - users
+          - users
+          applications:
+          - applications
+          - applications
+        swapEnabled: false
+        defaultNodePools:
+        - default
+        trainingJobTimeLimitSecs: 3600
+        name: team-a
+        namespace: ns-proj1
+      properties:
+        name:
+          description: Project Name
+          example: team-a
+          type: string
+        departmentId:
+          description: ID of the department owning the project
+          example: 2
+          format: int32
+          type: integer
+        deservedGpus:
+          description: The project GPU allocation that it is deserved to get in case
+            the cluster has those resources
+          example: 3
+          type: number
+        maxAllowedGpus:
+          description: An upper limit for the amount of GPUs the project can get (Even
+            if over quota is allowed and resources are available)
+          example: 5
+          type: number
+        gpuOverQuotaWeight:
+          description: The priority the project gets for over quota resources
+          example: 1
+          maximum: 3
+          minimum: 0
+          type: number
+        swapEnabled:
+          description: Flag for enabling thin provisioning for jobs of this project
+          example: false
+          type: boolean
+        defaultNodePools:
+          description: "Default node pools for workload submission under this project\
+            \ (If a workload doesnt specify node pools list, this list will be used)."
+          example:
+          - default
+          items:
+            type: string
+          type: array
+        interactiveJobTimeLimitSecs:
+          description: A limit for the duration of interactive jobs from this project
+            in seconds
+          example: 3600
+          type: number
+        interactiveJobMaxIdleDurationSecs:
+          description: Maximum time duration in seconds that interactive job can be
+            idle before it will be terminated
+          example: 3000
+          type: number
+        interactivePreemptibleJobMaxIdleDurationSecs:
+          description: Maximum time duration in seconds that interactive preemptible
+            job can be idle before it will be terminated
+          example: 3000
+          type: number
+        trainingJobTimeLimitSecs:
+          description: A limit for the duration of training jobs from this project
+            in seconds. Available only from cluster version 2.12
+          example: 3600
+          type: number
+        trainingJobMaxIdleDurationSecs:
+          description: Maximum time duration in seconds that training job can be idle
+            before it will be terminated
+          example: 3000
+          type: number
+        nodeAffinity:
+          $ref: '#/components/schemas/JobsNodeAffinity'
+        permissions:
+          $ref: '#/components/schemas/ResourcePermissions'
+        resources:
+          $ref: '#/components/schemas/AssignedResources'
+        nodePoolsResources:
+          description: Resources assigned to this Project per Node Pool
+          items:
+            $ref: '#/components/schemas/NodePoolAssignedResources'
+          type: array
+        namespace:
+          description: The name of an existing namespace to use for the project in
+            the cluster.
+          example: ns-proj1
+          type: string
+    Project:
+      allOf:
+      - $ref: '#/components/schemas/ProjectCreateRequest'
+      - $ref: '#/components/schemas/Project_allOf'
+    ResourcePermissions:
+      example:
+        groups:
+        - groups
+        - groups
+        users:
+        - users
+        - users
+        applications:
+        - applications
+        - applications
+      properties:
+        users:
+          description: Names of users that have permissions to the project
+          items:
+            type: string
+          type: array
+        groups:
+          description: Names of groups that have permissions to the project
+          items:
+            type: string
+          type: array
+        applications:
+          description: Names of applications that have permissions to the project
+          items:
+            type: string
+          type: array
+    JobsNodeAffinity:
+      example:
+        interactive:
+          affinityType: no_limit
+          selectedTypes:
+          - name: name
+            id: 0.8008281904610115
+          - name: name
+            id: 0.8008281904610115
+        train:
+          affinityType: no_limit
+          selectedTypes:
+          - name: name
+            id: 0.8008281904610115
+          - name: name
+            id: 0.8008281904610115
+      properties:
+        train:
+          $ref: '#/components/schemas/NodeAffinity'
+        interactive:
+          $ref: '#/components/schemas/NodeAffinity'
+    NodeAffinity:
+      example:
+        affinityType: no_limit
+        selectedTypes:
+        - name: name
+          id: 0.8008281904610115
+        - name: name
+          id: 0.8008281904610115
+      properties:
+        affinityType:
+          description: The type of affinity of the jobs to the nodes
+          enum:
+          - no_limit
+          - only_selected
+          type: string
+        selectedTypes:
+          items:
+            $ref: '#/components/schemas/NodeTypeForProject'
+          type: array
+    NodeTypeForProject:
+      example:
+        name: name
+        id: 0.8008281904610115
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+    AssignedResources:
+      example:
+        memory:
+          maxAllowed: 1000
+          overQuotaWeight: 2
+          deserved: 0
+        cpu:
+          maxAllowed: 1000
+          overQuotaWeight: 2
+          deserved: 0
+        id: 6.027456183070403
+        gpu:
+          maxAllowed: 1000
+          overQuotaWeight: 2
+          deserved: 0
+      properties:
+        id:
+          type: number
+        gpu:
+          $ref: '#/components/schemas/Resource'
+        cpu:
+          $ref: '#/components/schemas/Resource'
+        memory:
+          $ref: '#/components/schemas/Resource'
+    NodePoolAssignedResources:
+      example:
+        nodePool:
+          name: default
+          id: 3
+        memory:
+          maxAllowed: 1000
+          overQuotaWeight: 2
+          deserved: 0
+        cpu:
+          maxAllowed: 1000
+          overQuotaWeight: 2
+          deserved: 0
+        id: 1.4658129805029452
+        gpu:
+          maxAllowed: 1000
+          overQuotaWeight: 2
+          deserved: 0
+      properties:
+        id:
+          type: number
+        nodePool:
+          $ref: '#/components/schemas/NodePoolResources'
+        gpu:
+          $ref: '#/components/schemas/Resource'
+        cpu:
+          $ref: '#/components/schemas/Resource'
+        memory:
+          $ref: '#/components/schemas/Resource'
+    Resource:
+      example:
+        maxAllowed: 1000
+        overQuotaWeight: 2
+        deserved: 0
+      properties:
+        deserved:
+          description: The project resource allocation that it is deserved to get
+            in case the cluster has those resources
+          example: 0
+          type: number
+        maxAllowed:
+          description: Maximum amount of resources the project can get
+          example: 1000
+          type: number
+        overQuotaWeight:
+          description: The priority the project gets for over quota resources
+          example: 2
+          type: number
+    NodePoolResources:
+      example:
+        name: default
+        id: 3
+      properties:
+        id:
+          description: node pool id
+          example: 3
+          type: number
+        name:
+          description: node pool name
+          example: default
+          type: string
+    ProjectStatusRequest:
+      example:
+        departmentName: default
+        quotaStatuses:
+        - requested:
+            memory: 1000
+            cpu: 1000
+            gpu: 0
+          nodePoolName: nodePoolName
+          allocatedNonPreemptible:
+            memory: 1000
+            cpu: 1000
+            gpu: 0
+          allocated:
+            memory: 1000
+            cpu: 1000
+            gpu: 0
+        - requested:
+            memory: 1000
+            cpu: 1000
+            gpu: 0
+          nodePoolName: nodePoolName
+          allocatedNonPreemptible:
+            memory: 1000
+            cpu: 1000
+            gpu: 0
+          allocated:
+            memory: 1000
+            cpu: 1000
+            gpu: 0
+        name: team-a
+        status: "{\"namespace\":\"runai-team-a\"}"
+      properties:
+        status:
+          description: A json representing the project's status
+          example: "{\"namespace\":\"runai-team-a\"}"
+          type: string
+        name:
+          description: Project Name
+          example: team-a
+          type: string
+        departmentName:
+          description: name of the department owning the project
+          example: default
+          type: string
+        quotaStatuses:
+          description: The current quota status for each nodepool. Supported only
+            for cluster versions 2.15+.
+          items:
+            $ref: '#/components/schemas/NodePoolQuotaStatus'
+          type: array
+    ProjectStatus:
+      properties:
+        namespace:
+          description: The namespace of the project
+          example: runai-team-a
+          type: string
+        message:
+          description: Detailed phase message
+          example: NamespaceHandlerFailed
+          type: string
+        quotaStatuses:
+          description: The current quota status for each nodepool. Supported only
+            for cluster versions 2.15+.
+          items:
+            $ref: '#/components/schemas/NodePoolQuotaStatus'
+          type: array
+    NodePoolsQuotaStatuses:
+      description: The current quota status for each nodepool. Supported only for
+        cluster versions 2.15+.
+      items:
+        $ref: '#/components/schemas/NodePoolQuotaStatus'
+      type: array
+    NodePoolQuotaStatus:
+      example:
+        requested:
+          memory: 1000
+          cpu: 1000
+          gpu: 0
+        nodePoolName: nodePoolName
+        allocatedNonPreemptible:
+          memory: 1000
+          cpu: 1000
+          gpu: 0
+        allocated:
+          memory: 1000
+          cpu: 1000
+          gpu: 0
+      properties:
+        nodePoolName:
+          description: the node pool name which the current quota status refers to
+          type: string
+        allocated:
+          $ref: '#/components/schemas/QuotaStatusResourceList'
+        allocatedNonPreemptible:
+          $ref: '#/components/schemas/QuotaStatusResourceList'
+        requested:
+          $ref: '#/components/schemas/QuotaStatusResourceList'
+    QuotaStatusResourceList:
+      example:
+        memory: 1000
+        cpu: 1000
+        gpu: 0
+      properties:
+        gpu:
+          description: The number of GPUs (allocated/requested/...).
+          example: 0
+          type: number
+        cpu:
+          description: CPU in Millicores (allocated/requested/...).
+          example: 1000
+          type: number
+        memory:
+          description: Memory in Mib (allocated/requested/...).
+          example: 1000
+          type: number
+    DepartmentUserDefinedProperties:
+      example:
+        maxAllowedGpus: 2
+        deservedGpus: 2
+        name: default
+        allowOverQuota: false
+        resources:
+          memory:
+            maxAllowed: 1000
+            overQuotaWeight: 2
+            deserved: 0
+          cpu:
+            maxAllowed: 1000
+            overQuotaWeight: 2
+            deserved: 0
+          id: 6.027456183070403
+          gpu:
+            maxAllowed: 1000
+            overQuotaWeight: 2
+            deserved: 0
+        nodePoolsResources:
+        - nodePool:
+            name: default
+            id: 3
+          memory:
+            maxAllowed: 1000
+            overQuotaWeight: 2
+            deserved: 0
+          cpu:
+            maxAllowed: 1000
+            overQuotaWeight: 2
+            deserved: 0
+          id: 1.4658129805029452
+          gpu:
+            maxAllowed: 1000
+            overQuotaWeight: 2
+            deserved: 0
+        - nodePool:
+            name: default
+            id: 3
+          memory:
+            maxAllowed: 1000
+            overQuotaWeight: 2
+            deserved: 0
+          cpu:
+            maxAllowed: 1000
+            overQuotaWeight: 2
+            deserved: 0
+          id: 1.4658129805029452
+          gpu:
+            maxAllowed: 1000
+            overQuotaWeight: 2
+            deserved: 0
+      properties:
+        name:
+          description: The name of the department.
+          example: default
+          type: string
+        deservedGpus:
+          description: Deserved GPUs for the department.
+          example: 2
+          type: number
+        allowOverQuota:
+          description: Is over quota allowed for the department.
+          example: false
+          type: boolean
+        maxAllowedGpus:
+          description: Max allowed GPUs for the department.
+          example: 2
+          type: number
+        resources:
+          $ref: '#/components/schemas/AssignedResources'
+        nodePoolsResources:
+          description: Resources assigned to the Department per node pool
+          items:
+            $ref: '#/components/schemas/NodePoolAssignedResources'
+          type: array
+    DepartmentAccessControl:
+      example:
+        departmentId: 2
+        departmentAdmins:
+        - departmentAdmins
+        - departmentAdmins
+      properties:
+        departmentId:
+          description: The unique id identifying the department.
+          example: 2
+          format: int32
+          type: integer
+        departmentAdmins:
+          description: Id's of users with department admin role that are assigned
+            to managed the department
+          items:
+            type: string
+          type: array
+    Department:
+      allOf:
+      - $ref: '#/components/schemas/DepartmentUserDefinedProperties'
+      - $ref: '#/components/schemas/Department_allOf'
+    Project_allOf:
+      properties:
+        id:
+          description: The project id
+          example: 5
+          format: int32
+          readOnly: true
+          type: integer
+        tenantId:
+          description: ID of the tenant owning the project
+          example: 2
+          format: int32
+          type: integer
+        clusterUuid:
+          description: ID of the cluster owning the project
+          example: 71f69d83-ba66-4822-adf5-55ce55efd210
+          format: uuid
+          type: string
+        departmentName:
+          description: Name of the department owning the project
+          example: department-a
+          type: string
+        interactiveNodeAffinity:
+          example: none
+          type: string
+        trainNodeAffinity:
+          example: none
+          type: string
+        createdAt:
+          description: The creation date of the project
+          example: 2021-12-14T16:04:15.099Z
+          format: date-time
+          type: string
+        status:
+          $ref: '#/components/schemas/ProjectStatus'
+        phase:
+          description: project's phase
+          example: Ready
+          type: string
+    Department_allOf:
+      properties:
+        tenantId:
+          description: The tenant id this cluster belongs to.
+          example: 42
+          type: integer
+        clusterUuid:
+          description: The cluster UUID this department belongs to.
+          example: UUID
+          type: string
+        createdAt:
+          description: The creation date of the department.
+          example: 2021-12-14T16:04:15.099Z
+          format: date-time
+          type: string
+        id:
+          description: The unique id identifying the department.
+          example: 2
+          format: int32
+          type: integer
+        projects:
+          description: Projects under this department.
+          example:
+          - id: 16
+            name: team-a
+            deserved_gpus: 3
+          items:
+            $ref: '#/components/schemas/Project'
+          type: array
+        projectsDeservedGpus:
+          description: Total deserved GPUs of the projects under this department -
+            as string.
+          example: "3.00"
+          type: string
+        departmentAdmins:
+          description: Id's of users with department admin role that are assigned
+            to managed the department
+          items:
+            type: string
+          type: array
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http

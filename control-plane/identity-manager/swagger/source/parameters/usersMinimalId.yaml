@@ -1,0 +1,11 @@
+name: id
+in: query
+required: false
+description: Bulk lookup by user IDs (comma-separated). Returns the matching users in addition to any results from `search` or `filterBy`. Up to 25 IDs per request.
+schema:
+  type: array
+  maxItems: 25
+  items:
+    type: string
+  example: ["8e3f0a4b-4d3c-4f6e-9d2a-1c5e0a8b7f6d"]
+explode: false

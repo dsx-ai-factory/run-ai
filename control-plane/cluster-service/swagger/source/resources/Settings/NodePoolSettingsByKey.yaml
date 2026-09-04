@@ -1,0 +1,76 @@
+put:
+  summary: Update node pool setting by key
+  x-service: cluster-service
+  x-test-coverage:
+    - control-plane/cluster-service/pkg/services/api_settings_service_test.go
+  operationId: update_node_pool_setting_by_key
+  x-authorize:
+    resource-type: settings
+    action: update
+  tags:
+    - Settings
+  parameters:
+    - $ref: "../../parameters/path/NodePoolSettingsKey.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/Settings/UpdateNodePoolSettingByKeyRequest.yaml"
+        examples:
+          projectManualOverQuota:
+            value:
+              enabled: false
+  responses:
+    "200":
+      description: Setting successfully updated
+    "400":
+      $ref: "../../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    "401":
+      $ref: "../../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    "403":
+      $ref: "../../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    "404":
+      $ref: "../../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    "500":
+      $ref: "../../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    "503":
+      $ref: "../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+get:
+  summary: Get node pool setting by key
+  x-service: cluster-service
+  x-test-coverage:
+    - control-plane/cluster-service/pkg/services/api_settings_service_test.go
+  operationId: get_node_pool_setting_by_key
+  x-authorize:
+    resource-type: settings
+    action: read
+  tags:
+    - Settings
+  parameters:
+    - $ref: "../../parameters/path/NodePoolSettingsKey.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  responses:
+    "200":
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/Settings/NodePoolSetting.yaml"
+          examples:
+            projectManualOverQuota:
+              value:
+                enabled: false
+    "400":
+      $ref: "../../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    "401":
+      $ref: "../../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    "403":
+      $ref: "../../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    "404":
+      $ref: "../../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    "500":
+      $ref: "../../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    "503":
+      $ref: "../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

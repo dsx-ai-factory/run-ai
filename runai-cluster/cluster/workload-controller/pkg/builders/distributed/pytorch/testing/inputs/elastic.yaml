@@ -1,0 +1,20 @@
+apiVersion: run.ai/v2alpha1
+kind: DistributedWorkload
+metadata:
+  name: job-0
+  namespace: runai-team-a
+  uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+spec:
+  name:
+    value: job-0
+  jobType: PyTorchJob
+  pyTorchJob:
+    values:
+      minReplicas:
+        value: 3
+      maxReplicas:
+        value: 10
+  username:
+    value: user.name
+  workers:
+    value: 5

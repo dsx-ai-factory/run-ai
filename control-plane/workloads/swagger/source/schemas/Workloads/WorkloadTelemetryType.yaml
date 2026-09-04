@@ -1,0 +1,3 @@
+type: string
+description: Select a telemetry type.
+enum: [WORKLOADS_COUNT, GPU_ALLOCATION, PENDING_TIME_DISTRIBUTION, IDLE_ALLOCATED_GPUS]

@@ -1,0 +1,101 @@
+put:
+  summary: Update security setting by key
+  x-service: identity-manager
+  x-test-coverage:
+  - /runai/control-plane/identity-manager/pkg/services/api_realm_service_test.go
+  operationId: update_security_setting_by_key
+  x-authorize:
+    resource-type: security-settings
+    action: update
+  tags:
+  - Settings
+  parameters:
+  - $ref: '../../parameters/settingsKey.yaml'
+  - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          anyOf:
+          - $ref: '../../schemas/Settings/AutoRedirectSsoSetting/UpdateAutoRedirectSsoSettingValue.yaml'
+          - $ref: '../../schemas/Settings/BrowserSessionTimeoutSetting/UpdateBrowserSessionTimeoutSettingValue.yaml'
+          - $ref: '../../schemas/Settings/LogoutRedirectUriSetting/UpdateLogoutRedirectUriSettingValue.yaml'
+        examples:
+          autoRedirectSSO:
+            value:
+              enabled: false
+              idpAlias: "oidc"
+          browserSessionTimeout:
+            value:
+              idleTimeout: 60
+          logoutRedirectUri:
+            value:
+              uri: "https://example.com/logout-success"
+  responses:
+    '200':
+      description: Setting successfully updated
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+get:
+  summary: Get security setting by key
+  x-service: identity-manager
+  x-test-coverage: not-applicable
+  operationId: get_security_setting_by_key
+  x-authorize:
+    resource-type: security-settings
+    action: read
+  tags:
+  - Settings
+  parameters:
+  - $ref: '../../parameters/settingsKey.yaml'
+  - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Settings/Settings.yaml'
+          examples:
+            autoRedirectSSO:
+              value:
+                value:
+                  enabled: false
+                  idpAlias: "oidc"
+                displayName: "Auto Redirect SSO"
+                description: "Automatically redirect users to the SSO login page after logging in to the application"
+            browserSessionTimeout:
+              value:
+                value:
+                  idleTimeout: 60
+                displayName: "Browser Session Timeout"
+                description: "The idle timeout duration in minutes for browser sessions"
+            logoutRedirectUri:
+              value:
+                value:
+                  uri: "https://example.com/logout-success"
+                displayName: "Logout Redirect URI"
+                description: "The URI where users will be redirected after logging out of the application"
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,28 @@
+defaults:
+  annotations:
+    instances:
+      - name: a1
+        value: v1
+      - name: a2
+        value: v2
+  storage:
+    s3:
+      instances:
+        - name: s1
+          path: /path/s1
+          url: https://s1.com
+        - name: s2
+          path: /path/s1
+          url: https://s2.com
+rules:
+  annotations:
+    instances:
+      locked:
+        - a1
+        - a2
+  storage:
+    s3:
+      instances:
+        locked:
+          - s1
+          - s2

@@ -1,0 +1,33 @@
+put:
+  summary: update client redirect uris by id
+  x-service: identity-manager
+  x-test-coverage:
+    -  /runai/control-plane/identity-manager/pkg/services/api_clients_service_test.go
+  operationId: update_redirect_uris
+  x-no-authorization: true
+  tags:
+    - Clients
+  parameters:
+    - $ref: '../../parameters/clientId.yaml'
+  requestBody:
+    description: Updated Client redirect uris
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/Clients/ClientRedirectUrisUpdateRequest.yaml'
+  responses:
+    '200':
+      description: Redirect uris for clients updated successfully
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

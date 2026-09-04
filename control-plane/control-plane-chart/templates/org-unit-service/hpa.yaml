@@ -1,0 +1,3 @@
+{{- if .Values.orgUnitService.enabled }}
+{{- include "common.hpa" (list . .Values.orgUnitService.autoscaling .Values.orgUnitService) -}}
+{{- end }}

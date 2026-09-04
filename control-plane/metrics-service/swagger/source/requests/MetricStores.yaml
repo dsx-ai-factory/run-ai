@@ -1,0 +1,93 @@
+post:
+  x-internal: true
+  x-service: metrics-service
+  x-test-coverage:
+    - metrics-service/integration-tests/tests/metric_store_test.go
+  x-no-authorization: true
+  operationId: createMetricStore
+  tags:
+    - MetricStores
+  summary: Create/Save metric store for tenant
+  description: 'Create metric store for tenant or save an existing one'
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/MetricStore.yaml'
+    description: metrics store
+    required: true
+  responses:
+    "201":
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/MetricStore.yaml'
+      description: Created.
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    409:
+      $ref: '../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+get:
+  x-internal: true
+  x-service: metrics-service
+  x-test-coverage:
+    - metrics-service/integration-tests/tests/metric_store_test.go
+  x-no-authorization: true
+  operationId: getMetricStores
+  tags:
+    - MetricStores
+  summary: Get tenant metric stores
+  description: 'Get tenant metric stores'
+  parameters:
+    - $ref: "../parameters/query/override_tenant_id.yaml"
+  responses:
+    "200":
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../schemas/MetricStore.yaml"
+      description: "Tenant Metric Stores"
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+delete:
+  x-internal: true
+  x-service: metrics-service
+  x-test-coverage:
+    - metrics-service/integration-tests/tests/metric_store_test.go
+  x-no-authorization: true
+  operationId: deleteMetricStores
+  tags:
+    - MetricStores
+  summary: Delete tenant metric stores
+  description: Delete tenant metric stores
+  parameters:
+    - $ref: "../parameters/query/override_tenant_id.yaml"
+  responses:
+    204:
+      $ref: '../../../../infra/openapi/docs/responses/204NoContent.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

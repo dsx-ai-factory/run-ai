@@ -1,0 +1,6 @@
+name: alias
+in: query
+required: false
+description: Filter tenants by alias
+schema:
+  type: string

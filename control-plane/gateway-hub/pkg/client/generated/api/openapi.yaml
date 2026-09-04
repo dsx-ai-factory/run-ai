@@ -1,0 +1,358 @@
+openapi: 3.0.3
+info:
+  contact:
+    email: support@run.ai
+    name: Run.AI
+    url: https://www.run.ai/
+  description: API for the gateway-hub sidecar
+  title: gateway-hub
+  version: "1.0"
+servers:
+- url: http://localhost:8181
+security:
+- bearerAuth: []
+paths:
+  /healthz:
+    get:
+      operationId: healthz
+      responses:
+        "200":
+          description: Executed successfully.
+      summary: health check
+      tags:
+      - Health
+      x-service: gateway-hub
+      x-no-authorization: true
+      x-test-coverage: not-applicable
+    x-internal: true
+  /internal/plugins/authentication-handler:
+    get:
+      description: |
+        ForwardAuth endpoint called by Traefik for every protected request. Validates the Bearer JWT against Keycloak, then returns the nine X-Runai-* identity headers that Traefik copies onto the upstream request.
+      operationId: authentication_handler
+      responses:
+        "200":
+          description: JWT is valid. X-Runai-* identity headers are set on the response.
+          headers:
+            X-Runai-Tenant-Id:
+              explode: false
+              schema:
+                type: string
+              style: simple
+            X-Runai-Subject-Id:
+              explode: false
+              schema:
+                type: string
+              style: simple
+            X-Runai-Subject-Type:
+              explode: false
+              schema:
+                enum:
+                - User
+                - ServiceAccount
+                type: string
+              style: simple
+            X-Runai-Groups:
+              explode: false
+              schema:
+                type: string
+              style: simple
+            X-Runai-Supplemental-Groups:
+              explode: false
+              schema:
+                type: string
+              style: simple
+            X-Runai-GID:
+              explode: false
+              schema:
+                type: string
+              style: simple
+            X-Runai-UID:
+              explode: false
+              schema:
+                type: string
+              style: simple
+            X-Runai-Is-Management-Tenant:
+              explode: false
+              schema:
+                enum:
+                - "true"
+                - "false"
+                type: string
+              style: simple
+            X-Runai-Client-Id:
+              explode: false
+              schema:
+                type: string
+              style: simple
+            X-Runai-Session-Id:
+              explode: false
+              schema:
+                type: string
+              style: simple
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Validate JWT and return identity headers
+      tags:
+      - Auth
+      x-service: gateway-hub
+      x-test-coverage: not-applicable
+      x-no-authorization: true
+    x-internal: true
+  /internal/plugins/extract-tenant-id:
+    get:
+      description: |
+        ForwardAuth endpoint called by Traefik for hostname-scoped routes. Resolves the tenant name from the forwarded hostname via tenants-manager and returns the X-Runai-Tenant-Id header that Traefik copies onto the upstream request. Always returns 200 — when the tenant cannot be resolved the request passes through without the header.
+      operationId: extract_tenant_id
+      parameters:
+      - description: "Hostname of the original client request, set by Traefik."
+        explode: false
+        in: header
+        name: X-Forwarded-Host
+        required: false
+        schema:
+          maxLength: 253
+          pattern: "^[a-zA-Z0-9.-]+(:[0-9]+)?$"
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Request processed. X-Runai-Tenant-Id is set when the tenant
+            was resolved.
+          headers:
+            X-Runai-Tenant-Id:
+              explode: false
+              schema:
+                type: string
+              style: simple
+      summary: Resolve tenant ID from the request hostname
+      tags:
+      - Tenant
+      x-service: gateway-hub
+      x-test-coverage: not-applicable
+      x-no-authorization: true
+    x-internal: true
+  /internal/plugins/workload-redirect-validation:
+    get:
+      description: |
+        ForwardAuth endpoint for the workload-redirect-validation Traefik middleware. Validates the redirect_uri query parameter against the cluster's registered external URL. Returns 200 when the URI is valid so Traefik forwards the request to Keycloak; returns 400 + HTML error page when invalid — Traefik forwardAuth passes non-2xx responses directly to the client.
+      operationId: validate_redirect
+      parameters:
+      - description: OAuth redirect URI to validate.
+        explode: true
+        in: query
+        name: redirect_uri
+        required: true
+        schema:
+          type: string
+        style: form
+      - description: OAuth client_id in the format runai-internal.<uuid>.workloads_auth.
+        explode: true
+        in: query
+        name: client_id
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          description: redirect_uri is valid for this cluster.
+        "400":
+          content:
+            text/html:
+              schema:
+                type: string
+          description: redirect_uri is invalid or could not be validated.
+      summary: Validate the OAuth redirect_uri for workload auth flows
+      tags:
+      - Redirect Validation
+      x-service: gateway-hub
+      x-test-coverage: not-applicable
+      x-no-authorization: true
+    x-internal: true
+components:
+  parameters: {}
+  responses:
+    "401Unauthorized":
+      content:
+        application/json:
+          example:
+            code: 401
+            message: Issuer is not familiar.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unauthorized
+    "500InternalServerError":
+      content:
+        application/json:
+          example:
+            code: 500
+            message: Something went wrong.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+    "503ServiceUnavailable":
+      content:
+        application/json:
+          example:
+            code: 503
+            message: Please try again in few minutes.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+    "204NoContent":
+      description: No Content.
+    "400BadRequest":
+      content:
+        application/json:
+          example:
+            code: 400
+            message: Required parameter is missing
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Bad request.
+    "400BadSubmissionRequest":
+      content:
+        application/json:
+          example:
+            code: 400
+            message: The workload request does not comply with the policy set by the
+              administrator
+          schema:
+            $ref: '#/components/schemas/SubmissionError'
+      description: Bad submission request.
+    "403Forbidden":
+      content:
+        application/json:
+          example:
+            code: 403
+            message: You do not have sufficient permissions.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Forbidden
+    "404NotFound":
+      content:
+        application/json:
+          example:
+            code: 404
+            message: Resource id not found.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource was not found
+    "406NotAcceptable":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Not acceptable request
+    "409Conflict":
+      content:
+        application/json:
+          example:
+            code: 409
+            message: Resource with this name already exists
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource already exists
+    "412PreconditionFailed":
+      content:
+        application/json:
+          example:
+            code: 412
+            message: Precondition failed
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource was not found.
+    "413RequestEntityTooLarge":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Request entity too large
+    "415UnsupportedMediaType":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unsupported media type
+    "501NotImplemented":
+      content:
+        application/json:
+          example:
+            code: 501
+            message: Not implemented
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+  schemas:
+    Error:
+      example:
+        code: 400
+        message: Bad request - Resource should have a name
+      properties:
+        code:
+          maximum: 599
+          minimum: 100
+          type: integer
+        message:
+          type: string
+        details:
+          type: string
+      required:
+      - code
+      - message
+    ComplianceIssues:
+      nullable: true
+      properties:
+        complianceIssues:
+          items:
+            $ref: '#/components/schemas/ComplianceIssues_complianceIssues_inner'
+          type: array
+      type: object
+    SubmissionError:
+      allOf:
+      - $ref: '#/components/schemas/Error'
+      - $ref: '#/components/schemas/ComplianceIssues'
+    ComplianceIssues_complianceIssues_inner:
+      properties:
+        field:
+          example: compute.gpuDevicesRequest
+          type: string
+        details:
+          example: value must be no less than 3
+          type: string
+      required:
+      - details
+      - field
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      description: Bearer authentication
+      scheme: bearer
+      type: http

@@ -1,0 +1,85 @@
+BatchJobTarget:
+  Config: {}
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: host_path_and_nfs
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: host_path_and_nfs
+      name: host_path_and_nfs
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: host_path_and_nfs
+            workloadKind: Workspace
+            workloadName: host_path_and_nfs
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: host_path_and_nfs
+            image: ubuntu
+            name: host_path_and_nfs
+            resources: {}
+            volumeMounts:
+            - mountPath: /mount/path/vol/1
+              name: host-path
+            - mountPath: /mount/path/vol/2
+              name: host-path-1
+            - mountPath: /mount/path/nfs
+              name: nfs
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+          volumes:
+          - hostPath:
+              path: /my/volume/1
+            name: host-path
+          - hostPath:
+              path: /my/volume/2
+            name: host-path-1
+          - name: nfs
+            nfs:
+              path: /my/nfs
+              server: my-server
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: host_path_and_nfs, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: host_path_and_nfs, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

@@ -1,0 +1,7 @@
+type: array
+nullable: true
+deprecated: true
+description: Deprecated. Use kartas instead. Lists the versions of the custom resource definition (CRD) supported for this workload type, such as v1, v1beta1, or v1alpha1. This enables the platform to correctly parse, interpret, and manage manifests for this workload type according to the specific structure and schema associated with each listed version. On update, you may only add or remove supported versions, modifying existing version entries is not allowed.
+maxItems: 4
+items:
+  $ref: "./WorkloadTypeResourceInterface.yaml"

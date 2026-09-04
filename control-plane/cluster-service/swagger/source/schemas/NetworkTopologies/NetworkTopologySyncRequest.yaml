@@ -1,0 +1,9 @@
+type: object
+properties:
+  fullSync:
+    type: boolean
+    description: Upsert all items and delete all missing items
+  networkTopologies:
+    type: array
+    items:
+      $ref: './NetworkTopologySyncFields.yaml'

@@ -1,0 +1,8 @@
+name: includeInternal
+in: query
+required: false
+x-internal: true
+description: Whether the query should include data volumes that were created internally
+schema:
+  type: boolean
+  default: false

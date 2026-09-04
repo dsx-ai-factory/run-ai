@@ -1,0 +1,11 @@
+{
+    "extends": "./tsconfig.app.json",
+    "include": ["src/plugins/runai-router/runai-router.type.ts", "env.d.ts", "src/**/*", "src/**/*.vue", "src/**/*.json", "unit-test/**/*"],
+    "exclude": [],
+    "compilerOptions": {
+        "strict": true,
+        "composite": true,
+        "lib": [],
+        "types": ["node", "jsdom", "vitest/globals"]
+    }
+}

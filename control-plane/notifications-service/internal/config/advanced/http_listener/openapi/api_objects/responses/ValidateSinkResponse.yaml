@@ -1,0 +1,10 @@
+content:
+  application/json:
+    description: The response from the validation endpoint
+    schema:
+      type: object
+      properties:
+        error_code:
+          type: integer
+        error_message:
+          type: string

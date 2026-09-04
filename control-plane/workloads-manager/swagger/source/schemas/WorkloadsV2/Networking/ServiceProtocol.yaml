@@ -1,0 +1,8 @@
+description: Service port protocol.
+type: string
+default: TCP
+enum:
+  - TCP
+  - UDP
+  - SCTP
+nullable: true

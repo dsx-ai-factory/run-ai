@@ -1,0 +1,32 @@
+get:
+  summary: list of objects in the cluster and their found issues
+  operationId: list_cluster_objects_status
+  tags:
+    - ClusterObjectsStatus
+  x-internal: true
+  x-no-authorization: true
+  x-service: k8s-objects-tracker
+  x-test-coverage:
+    - k8s-objects-tracker/pkg/services/api_cluster_objects_status_service_test.go
+  parameters:
+    - $ref: "../../parameters/query/optional/resourceTypeFilter.yaml"
+    - $ref: "../../parameters/query/optional/secretTypeFilter.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/ScopeId.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/ScopeType.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/ClusterObjectsStatus/ClusterObjectsStatus.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

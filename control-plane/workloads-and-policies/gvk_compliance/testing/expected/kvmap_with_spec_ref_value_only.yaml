@@ -1,0 +1,45 @@
+policy:
+  effectiveRules:
+  - enforcements:
+    - set:
+        value: "true"
+    field: labels
+    sourceOfRule: null
+    specSelector: podMetadata
+  - enforcements:
+    - set:
+        value: fan-empty
+    field: labels
+    sourceOfRule: null
+    specSelector: workloadMetadata
+  - enforcements:
+    - set:
+        value: fan-missing
+    field: annotations
+    sourceOfRule: null
+    specSelector: workloadMetadata
+  workloadType:
+    group: apps
+    kind: Deployment
+    version: v1
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations: {}
+    labels: {}
+    name: sleep-ubuntu
+    namespace: runai-ofer
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: sleep-ubuntu
+    template:
+      metadata:
+        labels:
+          app: "true"
+      spec:
+        containers:
+        - image: ubuntu
+          name: sleep

@@ -1,0 +1,18 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  name: fractional
+  namespace: runai-team-a
+spec:
+  usage: Submit
+  image:
+    value: image
+  name:
+    value: inference-0
+  gpuDevices:
+    value: 3
+  gpuMemory:
+    value: 2M
+  username:
+    value: guy.shaibi
+status: {}

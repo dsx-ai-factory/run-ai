@@ -1,0 +1,83 @@
+@mixin m-text-primary-clr {
+  color: var(--primary-color) !important;
+}
+
+@mixin m-bg-primary-clr {
+  background-color: var(--primary-color) !important;
+}
+
+@mixin m-bg-primary-opacity-10-clr {
+  background-color: rgba(var(--primary-color-rgb), 0.1);
+}
+
+@mixin m-text-secondary-clr {
+  color: var(--secondary-color) !important;
+}
+
+@mixin m-bg-secondary-clr {
+  background-color: var(--secondary-color) !important;
+}
+
+@mixin m-fill-secondary-clr {
+  fill: var(--secondary-color) !important;
+}
+
+@mixin m-stroke-secondary-clr {
+  stroke: var(--secondary-color) !important;
+}
+
+@mixin m-bg-secondary-opacity-clr {
+  background-color: rgba(var(--secondary-color-rgb), var(--secondary-color-opacity));
+}
+
+@mixin m-bg-menu-clr {
+  background-color: var(--menu-color) !important;
+}
+
+@mixin m-link-clr {
+  color: $blue-primary !important;
+}
+
+.text-primary-clr {
+  @include m-text-primary-clr;
+}
+
+.bg-primary-clr {
+  @include m-bg-primary-clr;
+}
+
+.bg-primary-opacity-10-clr {
+  @include m-bg-primary-opacity-10-clr;
+}
+
+.text-secondary-clr {
+  @include m-text-secondary-clr;
+}
+
+.bg-secondary-clr {
+  @include m-bg-secondary-clr;
+}
+
+.fill-secondary-clr {
+  @include m-fill-secondary-clr;
+}
+
+.stroke-secondary-clr {
+  @include m-stroke-secondary-clr;
+}
+
+.bg-secondary-opacity-clr {
+  @include m-bg-secondary-opacity-clr;
+}
+
+.bg-menu-clr {
+  @include m-bg-menu-clr;
+}
+
+.link-clr {
+  @include m-link-clr;
+}
+
+.link-grey {
+  color: $black-54 !important;
+}

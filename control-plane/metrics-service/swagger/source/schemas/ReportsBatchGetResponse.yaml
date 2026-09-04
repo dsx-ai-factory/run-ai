@@ -1,0 +1,16 @@
+type: object
+required:
+  - id
+properties:
+  id:
+    $ref: '../../../../infra/openapi/docs/schemas/batch/BatchId.yaml'
+  succeeded:
+    type: array
+    description: Reports that were found for the tenant.
+    items:
+      $ref: './Report.yaml'
+  failed:
+    type: array
+    description: Report ids that could not be returned, with per-id error details.
+    items:
+      $ref: '../../../../infra/openapi/docs/schemas/batch/BatchResponseFailureItem.yaml'

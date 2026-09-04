@@ -1,0 +1,5 @@
+description: Image pull policy. Defaults to `Always` if `:latest` tag is specified, otherwise it is `IfNotPresent`.
+type: string
+minLength: 1
+enum: [Always, Never, IfNotPresent]
+nullable: true

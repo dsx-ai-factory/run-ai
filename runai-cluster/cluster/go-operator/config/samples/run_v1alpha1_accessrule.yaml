@@ -1,0 +1,6 @@
+apiVersion: run.ai/v1alpha1
+kind: AccessRule
+metadata:
+  name: accessrule-sample
+spec:
+  # TODO(user): Add fields here

@@ -1,0 +1,80 @@
+Dinfw: null
+JobSpec:
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  environment:
+    items:
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  image:
+    value: ubuntu
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  ports:
+    items:
+      port:
+        value:
+          container: 8080
+          external: 32010
+          serviceType: ClusterIP
+      port-1:
+        value:
+          autoGenerate: true
+          container: 8081
+          serviceType: LoadBalancer
+      port-2:
+        value:
+          autoGenerate: true
+          container: 8082
+          serviceType: NodePort
+  priorityClassName:
+    value: high
+  username:
+    value: test
+MasterSpec: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections:
+    - connectionType: NodePort
+      containerPort: 8080
+      correlationName: port
+      name: my-jupyter
+      portResourceName: port-test-8080-0
+      serviceResourceName: iw-test-0-clusterip
+      toolType: jupyter
+    - connectionType: LoadBalancer
+      containerPort: 8081
+      correlationName: port-1
+      name: port-1
+      portResourceName: port-test-8081-1
+      serviceResourceName: iw-test-1-loadbalancer
+      toolType: tensor
+    - connectionType: NodePort
+      containerPort: 8082
+      correlationName: port-2
+      name: my-tool
+      portResourceName: port-test-8082-2
+      serviceResourceName: iw-test-2-nodeport
+      toolType: ""
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: ports, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: ports, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

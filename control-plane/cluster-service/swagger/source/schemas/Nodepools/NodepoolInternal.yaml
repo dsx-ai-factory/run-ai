@@ -1,0 +1,12 @@
+type: object
+required:
+  - name
+  - id
+  - clusterId
+properties:
+  name:
+    type: string
+  id:
+    type: string
+  clusterId:
+    type: string

@@ -1,0 +1,39 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package main
+
+import (
+	"context"
+
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
+
+	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam"
+	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/business"
+	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/config"
+	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/reconciler"
+	manager_reconciler "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/reconciler/manager_reconciler"
+	tenants_manager_client "github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client"
+)
+
+func runReconcile(
+	ctx context.Context,
+	iamServices *iam.IamServiceContainer,
+	masterReconciler reconciler.MasterReconcilerI,
+	realmDal business.RealmDal,
+	iamArgs *config.Iam,
+) {
+	tmClient := tenants_manager_client.NewTenantsManagerClient(iamArgs.TenantsManagerUrl)
+	reconcileManager := manager_reconciler.NewReconcileManager(ctx, iamServices, masterReconciler, tmClient, realmDal)
+
+	if reconcileManager.ShouldUpdateTenants(ctx) {
+		reconcileManager.AddAllTenantsToLocalSchema(ctx)
+	}
+	err := reconcileManager.RunReconcile(ctx)
+	if err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("error accrued while running realm reconciler. err:  %v", err)
+	}
+}

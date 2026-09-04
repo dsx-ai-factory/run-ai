@@ -1,0 +1,21 @@
+# Keycloak admin credentials
+KC_BOOTSTRAP_ADMIN_USERNAME: "admin"
+KC_BOOTSTRAP_ADMIN_PASSWORD: "admin"
+
+# Keycloak hostname
+KC_HTTP_ENABLED: "true"
+KC_HOSTNAME_STRICT: "false"
+KC_HTTP_RELATIVE_PATH: "/auth"
+
+# Java options
+JAVA_OPTS_APPEND: "-Djgroups.dns.query=keycloak-headless"
+
+# Keycloak log console output
+KC_METRICS_ENABLED: "true"
+KC_HEALTH_ENABLED: "true"
+
+# Keycloak SPI client JPA searchable attributes
+KC_SPI_CLIENT_JPA_SEARCHABLE_ATTRIBUTES: "runai.cluster_id,runai.is_external,runai.client_type,runai.created.by"
+KC_SPI_CONNECTIONS_HTTP_CLIENT_DEFAULT_DISABLE_TRUST_MANAGER: "true"
+
+KC_LOG_LEVEL: "ERROR"

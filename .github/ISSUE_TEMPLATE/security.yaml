@@ -1,0 +1,29 @@
+name: Security vulnerability — STOP, use private reporting
+description: Do NOT report security vulnerabilities here. This template only exists to redirect you to the private process.
+title: "[STOP — use private reporting] "
+labels: ["security"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # ⛔ Do not file security vulnerabilities as public issues
+
+        Public issues are visible to everyone. Reporting a vulnerability here exposes it to attackers before there is a fix.
+
+        ## Please report privately instead
+
+        See [`SECURITY.md`](../blob/HEAD/SECURITY.md) for the full process. Two private channels are available:
+
+        1. **GitHub Security Advisory** (preferred for repo-specific issues) — open from the **Security** tab of this repository, then **Report a vulnerability**.
+        2. **NVIDIA PSIRT** (for cross-product issues or if you prefer email) — `psirt@nvidia.com` or <https://www.nvidia.com/object/submit-security-vulnerability.html>.
+
+        Close this draft and use one of the channels above. Thank you for helping keep users safe.
+
+  - type: checkboxes
+    id: acknowledgement
+    attributes:
+      label: Required acknowledgement
+      description: You must acknowledge the private reporting requirement before this form can be submitted. Then please close the draft without submitting.
+      options:
+        - label: I understand I should NOT file this as a public issue and will use the private channels above.
+          required: true

@@ -1,0 +1,11 @@
+name: pageSize
+in: query
+description: >
+  Number of results per page.
+required: false
+schema:
+  type: integer
+  minimum: 1
+  maximum: 1000
+  default: 200
+  example: 50

@@ -1,0 +1,16 @@
+policy:
+  effectiveRules:
+  - enforcements:
+    - range:
+        max: 5
+    field: foo
+    sourceOfRule: null
+    specSelector: self
+  workloadType:
+    group: test
+    kind: Synthetic
+    version: v1
+workload:
+  apiVersion: test/v1
+  foo: 10
+  kind: Synthetic

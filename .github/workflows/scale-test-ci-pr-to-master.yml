@@ -1,0 +1,88 @@
+name: "Scale Tests CI: pull-request"
+
+on:
+  pull_request:
+    branches:
+      - "master"
+      - "main"
+      - "v*.*"
+      - "release-*.*"
+    paths:
+      - 'scale-tests/unified_tests/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  checks: write
+  contents: read
+  pull-requests: write
+  id-token: write
+  security-events: write
+  actions: read
+  repository-projects: read
+
+env:
+  ENVIRONMENT: "lab"
+  SERVICE_LIST: "scale-tests/unified_tests"
+
+jobs:
+  env:
+    name: Set environment
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    outputs:
+      ENVIRONMENT: ${{ env.ENVIRONMENT }}
+      SERVICE_LIST: ${{ env.SERVICE_LIST }}
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+  get-service-list:
+    name: Get service list
+    needs: env
+    uses: run-ai/runai-actions/.github/workflows/get-service-list-v2.yml@main
+    with:
+      service_list: ${{ needs.env.outputs.SERVICE_LIST }}
+
+  docker-login:
+    name: Docker login
+    uses: run-ai/runai-actions/.github/workflows/docker-login-v2.yaml@main
+    needs: env
+    secrets: inherit # nosemgrep: yaml.github-actions.security.secrets-inherit.secrets-inherit
+    with:
+      env: ${{ needs.env.outputs.ENVIRONMENT }}
+
+  make:
+    name: Make
+    needs: [get-service-list, env, docker-login]
+    strategy:
+      fail-fast: false
+      matrix:
+        service_list: ${{ fromJson(needs.get-service-list.outputs.service_list).service_list }}
+    uses: run-ai/runai-actions/.github/workflows/make-v2.yml@main
+    secrets: inherit # nosemgrep: yaml.github-actions.security.secrets-inherit.secrets-inherit
+    with:
+      service_name: ${{ matrix.service_list }}
+      version: "irrelevant"
+      registry: "irrelevant"
+      env: "irrelevant"
+
+  validate-successful-run:
+    name: Validate Successful Run
+    if: always() && github.event.pull_request.head.repo.full_name == github.repository
+    needs:
+      [
+        make,
+      ]
+    uses: run-ai/runai-actions/.github/workflows/validate-successful-run.yml@main
+    with:
+      needs: ${{ toJson(needs) }}

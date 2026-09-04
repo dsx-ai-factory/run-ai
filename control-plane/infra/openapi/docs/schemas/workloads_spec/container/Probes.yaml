@@ -1,0 +1,6 @@
+description: Probes are used to determine if the container is healthy and ready to accept traffic.
+type: object
+properties:
+  readiness:
+    $ref: "./Probe.yaml"
+nullable: true

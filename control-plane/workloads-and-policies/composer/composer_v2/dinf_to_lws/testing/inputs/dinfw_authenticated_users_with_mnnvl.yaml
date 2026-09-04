@@ -1,0 +1,14 @@
+servingPort:
+  port: 8080
+  authorizationType: authorizedUsers
+  authorizedUsers:
+    - user-a
+  exposeExternally: false
+workers: 1
+leader:
+  image: leader:latest
+  labels:
+    - name: run.ai/MNNVL
+      value: Required
+worker:
+  image: worker:latest

@@ -1,0 +1,9 @@
+name: projectId
+in: query
+required: false
+description: Filter results by project id. If scope filter is project,
+  only assets from the specific project will be included in the response.
+  Otherwise, the response will include project, department, cluster, tenant and system assets.
+schema:
+  type: integer
+  format: int32

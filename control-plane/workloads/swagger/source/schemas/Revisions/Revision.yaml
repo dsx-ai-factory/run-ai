@@ -1,0 +1,106 @@
+type: object
+required:
+  - type
+  - name
+  - id
+  - workloadId
+  - tenantId
+  - clusterId
+  - departmentId
+  - projectId
+  - createdAt
+  - phase
+properties:
+  type:
+    type: string
+    example: "runai-revision"
+  name:
+    type: string
+    example: "very-important-job"
+  id:
+    type: string
+    format: uuid
+  workloadId:
+    type: string
+    format: uuid
+  tenantId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml'
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  projectId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ProjectId.yaml"
+  departmentId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/DepartmentId.yaml"
+  createdAt:
+    type: string
+    format: date-time
+    example: 2022-01-01T03:49:52.531Z
+  deletedAt:
+    type: string
+    format: date-time
+    example: 2022-08-12T19:28:24.131Z
+    nullable: true
+  revisionRequestedResources:
+    $ref: "../Workloads/WorkloadRequestResources.yaml"
+  podsRequestedResources:
+    $ref: "../Workloads/WorkloadRequestResources.yaml"
+  requestedPods:
+    $ref: "../Workloads/RequestedPods.yaml"
+  requestedNodePools:
+    type: array
+    items:
+      type: string
+      example: "default"
+  allocatedResources:
+    $ref: "../Workloads/WorkloadAllocatedResources.yaml"
+  currentNodePools:
+    type: array
+    items:
+      type: string
+      example: "default"
+  runningPods:
+    type: integer
+    format: int32
+    example: 1
+  images:
+    type: array
+    items:
+      type: string
+      example: "alpine:latest"
+  environmentVariables:
+    type: object
+    additionalProperties:
+      type: string
+  command:
+    type: string
+    example: "sleep"
+  arguments:
+    type: string
+    example: "1000"
+  childrenIds:
+    type: array
+    writeOnly: true
+    items:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+  conditions:
+    $ref: "../Common/Conditions.yaml"
+  phase:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads/Phase.yaml'
+  phaseMessage:
+    type: string
+    example : 'Not enough resources in the requested nodepool'
+  phaseUpdatedAt:
+    type: string
+    format: date-time
+    example: 2022-06-08T11:28:24.131Z
+  additionalFields:
+    type: object
+    additionalProperties: true

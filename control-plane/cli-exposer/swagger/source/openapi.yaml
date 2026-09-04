@@ -1,0 +1,105 @@
+openapi: "3.0.0"
+info:
+  version: 2.0.0
+  title: cli-exposer
+  description: An API for managing RunAI Researcher Command Line Interface
+  contact:
+    name: 'Run.AI'
+    url: 'https://www.run.ai/'
+    email: 'support@run.ai'
+servers:
+  - url: https://app.run.ai
+  - url: https://staging.run.ai
+  - url: https://test.run.ai
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+components:
+  responses:
+    $ref: "../../../infra/openapi/docs/responses/_index.yaml"
+  securitySchemes:
+    $ref: "./securitySchemes/_index.yaml"
+# parameters:
+#   $ref: "./parameters/_index.yaml"
+#  schemas:
+#    $ref: "./schemas/_index.yaml"
+
+paths:
+  /:
+    x-internal: true
+    get:
+      summary: health check
+      x-no-authorization: true
+      x-service: cli-exposer
+      x-internal: true
+      operationId: health
+      tags:
+        - Health
+      responses:
+        200:
+          description: Executed successfully.
+
+  /api/v1/cli-exposer/installer/unix:
+    $ref: './resources/InstallerUnix.yaml'
+
+  /api/v1/cli-exposer/installer/unix/commands:
+    $ref: './resources/InstallerUnixCommands.yaml'
+
+  /api/v1/cli-exposer/installer/mac:
+    $ref: './resources/InstallerMac.yaml'
+
+  /api/v1/cli-exposer/installer/mac/commands:
+    $ref: './resources/InstallerMacCommands.yaml'
+
+  /api/v1/cli-exposer/installer/linux:
+    $ref: './resources/InstallerLinux.yaml'
+
+  /api/v1/cli-exposer/installer/linux/commands:
+    $ref: './resources/InstallerLinuxCommands.yaml'
+
+  #  will be added in the future
+  # /api/v1/cli-exposer/installer/windows:
+  #  $ref: './resources/InstallerWindows.yaml'
+
+  /api/v1/cli-exposer/installer/windows/commands:
+    $ref: './resources/InstallerWindowsCommands.yaml'
+
+  /api/v1/cli-exposer/version:
+    $ref: './resources/Version.yaml'
+
+  /api/v1/cli-exposer/dist/{operatingSystem}/{architecture}/runai:
+    $ref: './resources/Distributions.yaml'
+
+  /api/v1/cli-exposer/docs/{documentName}:
+    $ref: './resources/Documents.yaml'
+
+### deprecated endpoints ###
+  /api/v1/cli/installer/unix:
+    $ref: './resources/deprecated/InstallerUnix.yaml'
+
+  /api/v1/cli/installer/unix/commands:
+    $ref: './resources/deprecated/InstallerUnixCommands.yaml'
+
+  /api/v1/cli/installer/mac:
+    $ref: './resources/deprecated/InstallerMac.yaml'
+
+  /api/v1/cli/installer/mac/commands:
+    $ref: './resources/deprecated/InstallerMacCommands.yaml'
+
+  /api/v1/cli/installer/linux:
+    $ref: './resources/deprecated/InstallerLinux.yaml'
+
+  /api/v1/cli/installer/linux/commands:
+    $ref: './resources/deprecated/InstallerLinuxCommands.yaml'
+
+  /api/v1/cli/installer/windows/commands:
+    $ref: './resources/deprecated/InstallerWindowsCommands.yaml'
+
+  /api/v1/cli/version:
+    $ref: './resources/deprecated/Version.yaml'
+
+  /api/v1/cli/dist/{operatingSystem}/{architecture}/runai:
+    $ref: './resources/deprecated/Distributions.yaml'
+
+  /api/v1/cli/docs/{documentName}:
+    $ref: './resources/deprecated/Documents.yaml'

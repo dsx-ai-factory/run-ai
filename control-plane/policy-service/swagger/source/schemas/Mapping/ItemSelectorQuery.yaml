@@ -1,0 +1,9 @@
+type: string
+description: The JQ query used to filter items of an itemized field. Consult https://jqlang.org/manual/ for further info.
+example: |
+  (.ports // [])[]
+  | select(.containerPort == $ARGS.named.containerPort)
+minLength: 1
+maxLength: 4095
+pattern: .*
+

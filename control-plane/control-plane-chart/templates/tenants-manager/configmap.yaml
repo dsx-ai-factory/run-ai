@@ -1,0 +1,58 @@
+{{- if .Values.tenantsManager.enabled }}
+{{- include "common.configMap" (list . .Values.tenantsManager "control-plane.tenantsManager.configmap") }}
+{{- end }}
+
+{{- define "control-plane.tenantsManager.configmap" -}}
+{{- $top := first . }}
+{{- $thanosPushUrl := printf "https://%s/api/v1/receive" $top.Values.global.domain }}
+data:
+  LOG_LEVEL: {{ $top.Values.tenantsManager.config.logLevel | quote }}
+  SERVICE_PORT: {{ $top.Values.tenantsManager.service.port | quote }}
+  SERVICE_NAME: {{ $top.Values.tenantsManager.name | quote }}
+  TRACING_ENABLED: {{ if hasKey $top.Values.tenantsManager.config "tracingEnabled" }}{{ $top.Values.tenantsManager.config.tracingEnabled | quote }}{{ else }}{{ $top.Values.global.config.tracingEnabled | quote }}{{ end }}
+  AUDIT_ENABLED: {{ if hasKey $top.Values.tenantsManager.config "auditEnabled" }}{{ $top.Values.tenantsManager.config.auditEnabled | quote }}{{ else }}{{ $top.Values.global.config.auditEnabled | quote }}{{ end }}
+  AUDIT_ENABLE_PRINT_TO_STDOUT: {{ if hasKey $top.Values.tenantsManager.config "auditEnablePrintToStdout" }}{{ $top.Values.tenantsManager.config.auditEnablePrintToStdout | quote }}{{ else }}{{ $top.Values.global.config.auditEnablePrintToStdout | quote }}{{ end }}
+  AUDIT_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.auditService.name ($top.Values.auditService.service.port | toString) | quote }}
+  DB_NAME: {{ $top.Values.tenantsManager.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_VERBOSE_LOGGING: {{ $top.Values.tenantsManager.config.dbVerboseLogging | default $top.Values.global.postgresql.dbVerboseLogging | quote }}
+  DB_HOST: {{ $top.Values.tenantsManager.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SSL_MODE: {{ $top.Values.tenantsManager.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_PORT: {{ $top.Values.tenantsManager.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  RELEASE_NAME: {{ $top.Release.Name | quote }}
+  {{- if or ($top.Values.global.postgresql.auth.readHost) ($top.Values.tenantsManager.config.dbReadHost) }}
+  DB_READ_HOST: {{ $top.Values.tenantsManager.config.dbReadHost | default $top.Values.global.postgresql.auth.readHost | quote }}
+  {{- end }}
+  {{- if or ($top.Values.global.postgresql.auth.dbReadPort) ($top.Values.tenantsManager.config.dbReadPort) }}
+  DB_READ_PORT: {{ $top.Values.tenantsManager.config.dbReadPort | default $top.Values.global.postgresql.auth.readPort | quote }}
+  {{- end }}
+  DB_SCHEMA: {{ $top.Values.tenantsManager.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  DB_MIGRATION_FILES: {{ $top.Values.tenantsManager.config.migrationFiles | quote }}
+  AUTH_SERVICE_URL: {{ printf "https://%s" ($top.Values.global.domain) }}
+  IDENTITY_MNG_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.identityManager.name ($top.Values.identityManager.service.port | toString ) }}
+  {{- if $top.Values.global.multiTenancy.enabled }}
+  TENANT_DOMAIN_TEMPLATE: {{ ($top.Values.identityManager.config.hostTemplate) |  default (printf "https://{{.}}.%s" ($top.Values.global.domain)) }}
+  TENANT_MNG_NAME: {{ $top.Values.global.management.name }}
+  {{- else }}
+  TENANT_DOMAIN_TEMPLATE: {{ printf "https://%s" ($top.Values.global.domain) }}
+  ADMIN_USERNAME: {{ $top.Values.tenantsManager.config.adminUsername | lower | quote }}
+  TENANT_NAME: {{ $top.Values.tenantsManager.config.tenantName | quote }}
+  {{- end }}
+  {{- $cacheEnabled := $top.Values.tenantsManager.config.cacheEnabled | default false }}
+  CACHE_ENABLED: {{ $cacheEnabled | quote }}
+  {{- if eq (toString $cacheEnabled) "true" }}
+  CACHE_URL: {{ $top.Values.tenantsManager.config.cacheUrl | default $top.Values.global.cache.url | quote }}
+  CACHE_READ_URL: {{ $top.Values.tenantsManager.config.cacheReadUrl | default $top.Values.global.cache.readUrl | quote }}
+  CACHE_TYPE: {{ $top.Values.tenantsManager.config.cacheType | default $top.Values.global.cache.type | quote }}
+  {{- end }}
+
+  PUBSUB_URL: {{ $top.Values.global.pubsub.url | quote }}
+  PUBSUB_TYPE: {{ $top.Values.global.pubsub.type | quote }}
+  PUBSUB_ENABLE_ADDITIONAL_SUBSCRIBER: {{ $top.Values.global.pubsub.additionalSubscriber.enabled | quote }}
+  {{- if $top.Values.global.pubsub.additionalSubscriber.enabled }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_TYPE: {{ $top.Values.global.pubsub.additionalSubscriber.type | quote }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_URL: {{ $top.Values.global.pubsub.additionalSubscriber.url | quote }}
+  {{- end }}
+  PUBSUB_SUBSCRIBER_RETRIES: {{ $top.Values.tenantsManager.config.pubsub.subscriberRetries | quote }}
+  PUBSUB_ALLOW_RETRIES_ON_REJECT: {{ $top.Values.tenantsManager.config.pubsub.allowRetriesOnReject | quote }}
+  SECRETS_MOUNT_PATH: {{ $top.Values.tenantsManager.config.secretsMountPath | quote }}
+{{- end }}

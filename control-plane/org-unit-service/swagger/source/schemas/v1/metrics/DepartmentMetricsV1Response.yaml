@@ -1,0 +1,60 @@
+type: object
+required:
+  - metadata
+  - current
+properties:
+  metadata:
+    type: object
+    required:
+      - departmentId
+      - departmentName
+      - clusterId
+      - clusterName
+    properties:
+      departmentId:
+        $ref: './DepartmentIdV1.yaml'
+      departmentName:
+        type: string
+        example: default
+      clusterId:
+        $ref: './ClusterIdV1.yaml'
+      clusterName:
+        type: string
+        example: cluster-a
+  current:
+    type: object
+    description: Current reported metrics data. resources holds data that is summed up to the department level and projectResources explains the division of it to projects
+    required:
+      - resources
+      - projectResources
+    properties:
+      resources:
+        type: array
+        items:
+          allOf:
+            - $ref: './MetricsResourcesDataV1.yaml'
+            - type: object
+              required:
+                - nodepoolName
+              properties:
+                nodepoolName:
+                  type: string
+                  example: nodepoola
+      projectResources:
+        type: array
+        items:
+          allOf:
+            - $ref: './MetricsResourcesDataV1.yaml'
+            - type: object
+              required:
+                - projectName
+                - nodepoolName
+              properties:
+                projectName:
+                  type: string
+                  example: project-a
+                nodepoolName:
+                  type: string
+                  example: nodepoola
+  timeRange:
+    $ref: './TimeRangeV1.yaml'

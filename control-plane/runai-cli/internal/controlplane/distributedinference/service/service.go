@@ -1,0 +1,33 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package service
+
+import (
+	"context"
+
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/spec"
+)
+
+type BackendDistributedInferenceService struct {
+	distributedInferenceClient workload.WithUpdateAction
+}
+
+func NewBackendDistributedInferenceService(distributedInferenceClient workload.WithUpdateAction) *BackendDistributedInferenceService {
+	return &BackendDistributedInferenceService{distributedInferenceClient: distributedInferenceClient}
+}
+
+func (bds *BackendDistributedInferenceService) DeleteByUuid(ctx context.Context, uuid string) error {
+	return bds.distributedInferenceClient.Delete(ctx, uuid)
+}
+
+func (bds *BackendDistributedInferenceService) Update(ctx context.Context, uuid, clusterId string, spec *spec.GeneralSpec) (string, error) {
+	return bds.distributedInferenceClient.Update(ctx, uuid, clusterId, spec)
+}
+
+func (bds *BackendDistributedInferenceService) Submit(ctx context.Context, name, projectId, clusterId string, spec *spec.GeneralSpec) (string, error) {
+	return bds.distributedInferenceClient.Submit(ctx, name, projectId, clusterId, spec)
+}

@@ -1,0 +1,36 @@
+---
+description: File organization and import conventions for Run:ai frontend
+globs: ["**/*.ts", "**/*.vue"]
+alwaysApply: false
+---
+
+# File Organization
+
+## File Naming (all kebab-case)
+
+| Type | Pattern | Example |
+|------|---------|---------|
+| Component | `<name>.vue` | `runai-btn.vue` |
+| Store | `<name>.store.ts` | `app.store.ts` |
+| Service | `<name>.service.ts` | `user.service.ts` |
+| Composable | `use-<name>.composable.ts` | `use-refresh.composable.ts` |
+| Model | `<name>.model.ts` | `config.model.ts` |
+| Utility | `<name>.util.ts` | `date.util.ts` |
+| Test | `<name>.test.ts` | `cluster.store.test.ts` |
+
+## Import Order
+
+Group imports with comments: vue → stores → components → models → services → utils → constants → routes
+
+See `src/App.vue` for canonical import organization.
+
+## Key Patterns
+
+- Always use `@/` alias for src imports
+- Tests are co-located with source files
+- Components use `index.ts` for exports: See `src/components/common/runai-btn/index.ts`
+- Utils export as object: See `src/utils/date.util/date.util.ts`
+
+## Do NOT Edit
+
+- `src/swagger-models/` - Auto-generated from API specs

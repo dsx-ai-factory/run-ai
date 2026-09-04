@@ -1,0 +1,14 @@
+x-internal: true
+allOf:
+  - type: object
+    nullable: true
+    properties:
+      attributeDefaults:
+        $ref: "./AttributeDefaults.yaml"
+  - type: object
+    nullable: true
+    properties:
+      rules:
+        $ref: "./Rules.yaml"
+nullable: true
+type: object

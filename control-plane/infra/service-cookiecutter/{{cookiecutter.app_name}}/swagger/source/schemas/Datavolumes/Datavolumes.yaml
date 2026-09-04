@@ -1,0 +1,4 @@
+type: array
+items:
+  $ref: './Datavolume.yaml'
+x-schema-name: Datavolumes

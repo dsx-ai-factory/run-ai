@@ -1,0 +1,56 @@
+suite: Test runai-operator third-party images
+
+templates:
+  - templates/deployment.yaml
+
+tests:
+  - it: should pass chart images to the operator
+    documentSelector:
+      path: kind
+      value: Deployment
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: IMG_THIRD_PARTY_GIT_SYNC_REGISTRY
+            value: registry.k8s.io
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: IMG_THIRD_PARTY_GIT_SYNC_REPOSITORY
+            value: git-sync/git-sync
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: IMG_THIRD_PARTY_GIT_SYNC_TAG
+            value: v4.7.0
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: IMG_THIRD_PARTY_VALKEY_REGISTRY
+            value: docker.io
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: IMG_THIRD_PARTY_VALKEY_REPOSITORY
+            value: valkey/valkey
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: IMG_THIRD_PARTY_VALKEY_TAG
+            value: 9.0.4
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: IMG_THIRD_PARTY_WAIT_UBI_MINIMAL_REGISTRY
+            value: registry.access.redhat.com
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: IMG_THIRD_PARTY_WAIT_UBI_MINIMAL_REPOSITORY
+            value: ubi9/ubi-minimal
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: IMG_THIRD_PARTY_WAIT_UBI_MINIMAL_TAG
+            value: "9.8"

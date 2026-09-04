@@ -1,0 +1,5 @@
+description: The metric to use for autoscaling. Mandatory if minReplicas < maxReplicas, except for the special case where minReplicas is set to 0 and maxReplicas is set to 1, as in this case autoscaling decisions are made according to network activity rather than metrics. Use one of the built-in metrics of 'throughput', 'concurrency' or 'latency', or any other available custom metric. Only the 'throughput' and 'concurrency' metrics support scale-to-zero
+type: string
+pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
+example: "http_requests_total"
+nullable: true

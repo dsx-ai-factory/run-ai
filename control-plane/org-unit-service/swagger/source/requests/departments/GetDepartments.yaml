@@ -1,0 +1,43 @@
+summary: Get departments
+operationId: get_departments
+x-service: org-unit-service
+description: list departments
+x-test-coverage:
+  - control-plane/org-unit-service/pkg/test/department_api_test.go
+x-authorize:
+  resource-type: department
+  action: read
+tags:
+  - Departments
+parameters:
+  - $ref: "../../parameters/DepartmentsFilterBy.yaml"
+  - $ref: "../../parameters/DepartmentsSortBy.yaml"
+  - $ref: "../../parameters/DepartmentsVerbosity.yaml"
+  - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+  - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+  - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+responses:
+  200:
+    description: ok
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - departments
+          properties:
+            departments:
+              type: array
+              items:
+                $ref: "../../schemas/departments/DepartmentForList.yaml"
+            next:
+              type: integer
+              example: 1
+  400:
+    $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+  401:
+    $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+  403:
+    $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+  503:
+    $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,35 @@
+get:
+  summary: get client secret
+  x-service: identity-manager
+  x-test-coverage:
+    - /runai/control-plane/identity-manager/pkg/services/api_clients_service_test.go
+  operationId: get_client_secret
+  x-no-authorization: true
+  tags:
+  - Clients
+  parameters:
+  - $ref: "../../parameters/clientId.yaml"
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              secret:
+                type: string
+            example:
+              secret: "5g453dasidjn9d2873rh8rfunfe"
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

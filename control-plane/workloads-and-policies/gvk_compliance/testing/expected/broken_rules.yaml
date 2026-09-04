@@ -1,0 +1,311 @@
+brokenRules:
+- field: ghost
+  message: field ghost not found in breakdown
+  specSelector: self
+- field: known
+  message: no variation of field known matches spec selector unknownSelector
+  specSelector: unknownSelector
+- field: known
+  message: field known variation has no item selectors but rule requires whatever
+  specSelector: self
+- field: withItemSelectors
+  message: item selector missingOne not found in field withItemSelectors variation
+  specSelector: self
+- field: orphan
+  message: spec selector orphan not found in breakdown
+  specSelector: orphan
+- field: withItemSelectors
+  message: field withItemSelectors items.min (20) must be less than or equal to items.max
+    (5)
+  specSelector: self
+- field: getOnly
+  message: field getOnly formatter has no 'set' expression (required by 'set' enforcement)
+  specSelector: self
+- field: kvmapOnScalar
+  message: field kvmapOnScalar KeyValueMap set requires the target to be a map (got
+    string)
+  specSelector: self
+- field: noFormatter
+  message: field noFormatter has no formatter
+  specSelector: self
+- field: weird
+  message: field weird has unknown builtin formatter "Gibberish"
+  specSelector: self
+- field: emptyFormatter
+  message: field emptyFormatter formatter has neither get nor set expression
+  specSelector: self
+- field: setOnly
+  message: field setOnly formatter has no get expression (required by 'range' enforcement)
+  specSelector: self
+- field: invalidGetExpr
+  message: 'field invalidGetExpr has invalid get expression: invalid JQ in composed
+    selector: unexpected token "this"'
+  specSelector: self
+- field: invalidGetExpr
+  message: field invalidGetExpr formatter has no get expression (required by 'range'
+    enforcement)
+  specSelector: self
+- field: known
+  message: 'field known has invalid match pattern "[unterminated": error parsing regexp:
+    missing closing ]: `[unterminated`'
+  specSelector: self
+- field: known
+  message: 'field known has invalid quantityRange.max "not-a-quantity": quantities
+    must match the regular expression ''^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$'''
+  specSelector: self
+- field: known
+  message: 'field known has invalid quantityRange.min "also-not-a-quantity": quantities
+    must match the regular expression ''^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$'''
+  specSelector: self
+- field: known
+  message: 'field known has invalid quantityRange.step "still-not-a-quantity": quantities
+    must match the regular expression ''^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$'''
+  specSelector: self
+- field: known
+  message: field known value for 'elements' enforcement is not a slice (got string)
+  specSelector: self
+- field: known
+  message: field known value for 'elements' enforcement is not a slice (got string)
+  specSelector: self
+- field: setOnly
+  message: field setOnly formatter has no get expression (required by 'required' enforcement)
+  specSelector: self
+- field: intField
+  message: field intField value for 'match' enforcement is not a string (got float64)
+  specSelector: self
+- field: kvmapWithGet
+  message: field kvmapWithGet formatter has no get expression (required by 'options'
+    enforcement)
+  specSelector: self
+- field: known
+  message: 'field known range: range.min (10) must be less than or equal to range.max
+    (5)'
+  specSelector: self
+- field: known
+  message: 'field known range: range.step must be greater than 0, got 0'
+  specSelector: self
+- field: known
+  message: 'field known range: range.step (20) must be less than or equal to range.max-range.min
+    (9)'
+  specSelector: self
+- field: known
+  message: 'field known quantityRange: quantityRange.min (2Gi) must be less than or
+    equal to quantityRange.max (1Gi)'
+  specSelector: self
+- field: known
+  message: 'field known quantityRange: quantityRange.step must be greater than 0,
+    got 0'
+  specSelector: self
+- field: known
+  message: 'field known quantityRange: quantityRange.step (2Gi) must be less than
+    or equal to quantityRange.max-quantityRange.min (924Mi)'
+  specSelector: self
+- field: known
+  message: field known length.min (20) must be less than or equal to length.max (5)
+  specSelector: self
+- field: known
+  message: field known elements.min (20) must be less than or equal to elements.max
+    (5)
+  specSelector: self
+policy:
+  effectiveRules:
+  - enforcements:
+    - range:
+        max: 5
+    field: ghost
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        max: 5
+    field: known
+    sourceOfRule: null
+    specSelector: unknownSelector
+  - enforcements:
+    - range:
+        max: 5
+    field: known
+    itemSelector: whatever
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        max: 5
+    field: withItemSelectors
+    itemSelector: missingOne
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        max: 5
+    field: orphan
+    sourceOfRule: null
+    specSelector: orphan
+  - enforcements:
+    - range:
+        max: 5
+    field: noFormatter
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        max: 5
+    field: weird
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        max: 5
+    field: emptyFormatter
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        max: 5
+    field: setOnly
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - set:
+        value: whatever
+    field: getOnly
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        max: 5
+    field: invalidGetExpr
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - match: '[unterminated'
+    field: known
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - quantityRange:
+        max: not-a-quantity
+    field: known
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - quantityRange:
+        min: also-not-a-quantity
+    field: known
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - quantityRange:
+        step: still-not-a-quantity
+    field: known
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - elements:
+        max: 3
+    field: known
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - elements:
+        min: 3
+    field: known
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - required: true
+    field: setOnly
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - match: ^[0-9]+$
+    field: intField
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - set:
+        value: whatever
+    field: kvmapOnScalar
+    itemSelector: scalarValue
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - options:
+      - a
+      - b
+    field: kvmapWithGet
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        max: 5
+        min: 10
+    field: known
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        step: 0
+    field: known
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        max: 10
+        min: 1
+        step: 20
+    field: known
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - quantityRange:
+        max: 1Gi
+        min: 2Gi
+    field: known
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - quantityRange:
+        step: "0"
+    field: known
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - quantityRange:
+        max: 1Gi
+        min: 100Mi
+        step: 2Gi
+    field: known
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - length:
+        max: 5
+        min: 20
+    field: known
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - elements:
+        max: 5
+        min: 20
+    field: known
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - items:
+        max: 5
+        min: 20
+    field: withItemSelectors
+    itemSelector: onlyKnown
+    sourceOfRule: null
+    specSelector: self
+  workloadType:
+    group: test
+    kind: Synthetic
+    version: v1
+workload:
+  apiVersion: test/v1
+  intField: 42
+  kind: Synthetic
+  known: notAQuantity

@@ -1,0 +1,35 @@
+get:
+  tags:
+  - OpenID Connect
+  summary: OAuth 2.0 Authorization Server Metadata
+  x-service: identity-manager
+  x-test-coverage:
+  - pkg/services/api_openid_configuration_service_test.go
+  - integration-tests/tests/api_token_test.go
+  description: |
+    Returns the OAuth 2.0 Authorization Server metadata document.
+    This endpoint follows RFC 8414 (OAuth 2.0 Authorization Server Metadata).
+  operationId: get_oauth_authorization_server_metadata
+  x-no-authorization: true
+  responses:
+    '200':
+      description: OAuth 2.0 Authorization Server Metadata Document
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/OAuthAuthorizationServer.yaml'
+          examples:
+            metadata:
+              value:
+                issuer: "https://app.run.ai"
+                authorization_endpoint: "https://app.run.ai/api/v1/login"
+                token_endpoint: "https://app.run.ai/api/v2/token"
+                jwks_uri: "https://app.run.ai/auth/realms/runai/protocol/openid-connect/certs"
+                response_types_supported: ["code", "token", "id_token"]
+                grant_types_supported: ["authorization_code", "client_credentials", "refresh_token", "password"]
+                token_endpoint_auth_methods_supported: ["client_secret_post", "client_secret_basic"]
+                scopes_supported: ["openid", "profile", "email"]
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,21 @@
+type: object
+required:
+  - id
+  - createdAt
+  - updatedAt
+properties:
+  id:
+    type: string
+    format: uuid
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time
+  deletedAt:
+    type: string
+    nullable: true
+    format: date-time
+  tenantId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml'

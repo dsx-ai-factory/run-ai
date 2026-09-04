@@ -1,0 +1,17 @@
+type: object
+required:
+  - type
+  - reason
+properties:
+  type:
+    type: string
+    description: Type of node condition.
+  reason:
+    type: string
+    description: (brief) reason for the condition's last transition.
+    example: KubeletNotReady
+  message:
+    type: string
+    description: Human readable message indicating details about last transition.
+    example: container runtime status check may not have completed yet
+x-schema-name: NodeStatusConditionDetails

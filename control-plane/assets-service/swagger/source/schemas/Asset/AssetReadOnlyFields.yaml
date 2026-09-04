@@ -1,0 +1,52 @@
+required:
+  - id
+  - kind
+  - createdBy
+  - createdAt
+  - updatedBy
+  - updatedAt
+properties:
+  id:
+    $ref: "../../../../../infra/openapi/docs/schemas/assets/AssetId.yaml"
+  kind:
+    $ref: "../../../../../infra/openapi/docs/schemas/assets/AssetKind.yaml"
+  tenantId:
+    description: The id of the tenant.
+    type: integer
+    format: int32
+    nullable: true
+  createdBy:
+    description: The user who created the asset.
+    type: string
+    minLength: 1
+  createdAt:
+    description: The time at which the asset were created
+    type: string
+    minLength: 1
+    format: date-time
+  updatedBy:
+    description: The user who updated the asset.
+    type: string
+    minLength: 1
+  updatedAt:
+    description: The time at which the asset has been updated
+    type: string
+    minLength: 1
+    format: date-time
+  deletedAt:
+    description: Deletion time of the asset (relevant for assets that sync to the cluster)
+    type: string
+    minLength: 1
+    format: date-time
+  deletedBy:
+    description: The user who deleted the asset
+    type: string
+    minLength: 1
+  projectName:
+    description: The name of the project that the asset is associated with, for project scoped assets.
+    type: string
+    minLength: 1
+    nullable: true
+  updateCount:
+    $ref: "../../../../../infra/openapi/docs/schemas/sync/UpdateCount.yaml"
+type: object

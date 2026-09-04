@@ -1,0 +1,14 @@
+defaults:
+  image: ubuntu
+  environmentVariables:
+    instances:
+      - name: LOCKED_VAR
+        value: locked-value
+      - name: FREE_VAR
+        value: free-value
+rules:
+  environmentVariables:
+    instances:
+      locked:
+        - LOCKED_VAR
+

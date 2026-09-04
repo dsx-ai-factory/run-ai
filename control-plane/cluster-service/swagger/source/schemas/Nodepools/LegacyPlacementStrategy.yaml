@@ -1,0 +1,15 @@
+properties:
+  cpu:
+    type: string
+    enum:
+      - spread
+      - binpack
+    description: scheduling strategy for cpu
+    example: spread
+  gpu:
+    type: string
+    enum:
+      - spread
+      - binpack
+    description: scheduling strategy for gpu
+    example: spread

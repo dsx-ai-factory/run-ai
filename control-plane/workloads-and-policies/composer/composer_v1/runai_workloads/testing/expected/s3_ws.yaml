@@ -1,0 +1,66 @@
+Dinfw: null
+JobSpec:
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  environment:
+    items:
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  image:
+    value: ubuntu
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  priorityClassName:
+    value: high
+  s3:
+    items:
+      s3:
+        value:
+          bucket: private-bucket
+          key: AccessKeyId
+          path: /container/my-bucket
+          secret: SecretKey
+          secretName: my-access-key-secret
+          url: https://s3.amazonaws.com
+      s3-1:
+        value:
+          bucket: public-bucket
+          path: /container/everyones
+          url: https://uswest.s3.amazonaws
+      s3-2:
+        value:
+          bucket: private-bucket-with-token
+          key: AccessKeyId
+          path: /container/my-very-secret-bucket
+          secret: SecretKey
+          secretName: my-access-key-secret
+          sessionToken: my-session-token
+          url: https://s3.amazonaws.com
+  username:
+    value: test
+MasterSpec: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: s3, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: s3, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

@@ -1,0 +1,2 @@
+type: string
+description: A human-readable message describing the access rule IDs that failed to delete.

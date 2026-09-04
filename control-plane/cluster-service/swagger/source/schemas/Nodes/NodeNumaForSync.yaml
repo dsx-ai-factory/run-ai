@@ -1,0 +1,16 @@
+type: object
+x-internal: true
+required:
+  - name
+  - numaNodes
+properties:
+  name:
+    type: string
+    description: The name of the physical node.
+    example: worker-node-1
+  numaNodes:
+    type: array
+    description: The complete NUMA-node snapshot for this physical node. An empty array removes its existing NUMA-node details.
+    items:
+      $ref: './NumaNodeDetails.yaml'
+x-schema-name: NodeNumaForSync

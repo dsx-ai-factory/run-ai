@@ -1,0 +1,31 @@
+get:
+  summary: Get the cluster name.
+  description: Retrieve the name of the cluster by id.
+  x-service: cluster-service
+  x-test-coverage:
+    - cluster-service/pkg/services/api_clusters_service_test.go
+  operationId: get_cluster_name
+  x-no-authorization: true
+  tags:
+    - Clusters
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                type: string
+                example: "cluster-x"
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

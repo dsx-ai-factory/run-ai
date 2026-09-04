@@ -1,0 +1,5 @@
+properties:
+  meta:
+    $ref: "./TemplatePatchMetaFields.yaml"
+nullable: true
+type: object

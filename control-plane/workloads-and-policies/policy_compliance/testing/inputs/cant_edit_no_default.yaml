@@ -1,0 +1,8 @@
+rules:
+  image:
+    canEdit: false
+  compute:
+    extendedResources:
+      attributes:
+        quantity:
+          canEdit: false

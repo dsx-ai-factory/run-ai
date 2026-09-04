@@ -1,0 +1,1 @@
+{{- include "common.serviceMonitor" (list . .Values.authorization.serviceMonitor .Values.authorization) }}

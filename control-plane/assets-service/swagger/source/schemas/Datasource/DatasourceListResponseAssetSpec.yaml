@@ -1,0 +1,42 @@
+properties:
+  hostPath:
+    nullable: true
+    type: object
+    allOf:
+      - $ref: "../HostPath/HostPathSpec.yaml"
+  nfs:
+    nullable: true
+    type: object
+    allOf:
+      - $ref: "../NFS/NFSAssetSpec.yaml"
+  pvc:
+    nullable: true
+    type: object
+    allOf:
+      - $ref: "../PVC/PVCAssetSpec.yaml"
+  git:
+    nullable: true
+    type: object
+    allOf:
+      - $ref: "../Git/GitAssetSpec.yaml"
+  s3:
+    nullable: true
+    type: object
+    allOf:
+      - $ref: "../S3/S3AssetSpec.yaml"
+  config_map:
+    nullable: true
+    type: object
+    allOf:
+      - $ref: "../ConfigMap/ConfigMapAssetSpec.yaml"
+  secret:
+    nullable: true
+    type: object
+    allOf:
+      - $ref: "../Secret/SecretAssetSpec.yaml"
+  dataVolume:
+    nullable: true
+    type: object
+    x-internal: true
+    allOf:
+      - $ref: "../Datavolume/DataVolumeAssetSpec.yaml"

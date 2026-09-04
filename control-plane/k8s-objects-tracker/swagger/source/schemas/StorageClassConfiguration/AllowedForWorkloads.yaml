@@ -1,0 +1,3 @@
+type: boolean
+nullable: true
+description:  Allows workloads to include PVCs that use this storage class. When disabled, users cannot (a) include non-existing PVC assets created with this class in asset-based submissions, or (b) attach PVCs with existing=false to workloads using this class.

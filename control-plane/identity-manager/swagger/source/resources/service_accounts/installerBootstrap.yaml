@@ -1,0 +1,35 @@
+post:
+  summary: Mint a short-lived bootstrap JWT for the installer service account.
+  description: |
+    Returns a 2-hour Keycloak access token for the runai-internal.installer
+    service account. Called by cluster-service when generating the cluster
+    install command. The token is passed to the Helm hook as
+    --set cluster.bootstrapToken=<token> and used directly as a Bearer token
+    to call GET /clusters/{uuid}/control-plane-config — the installer client
+    secret never leaves the server.
+
+    When clusterId is provided, the token is minted from a dedicated
+    per-cluster installer client scoped to that cluster instead of the
+    shared one - the client is resolved (and, if needed, self-healed by
+    creating it) internally, so callers only need to say which cluster the
+    token is for.
+  x-service: identity-manager
+  x-test-coverage: not-applicable
+  operationId: mint_installer_bootstrap_token
+  x-no-authorization: true
+  tags:
+    - Service Accounts
+  parameters:
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml"
+  responses:
+    '200':
+      description: Bootstrap token minted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/ServiceAccounts/InstallerBootstrapResponse.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

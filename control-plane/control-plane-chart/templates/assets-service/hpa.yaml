@@ -1,0 +1,1 @@
+{{- include "common.hpa" (list . .Values.assetsService.autoscaling .Values.assetsService) -}}

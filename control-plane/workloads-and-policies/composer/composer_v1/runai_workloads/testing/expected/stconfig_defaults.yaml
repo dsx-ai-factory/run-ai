@@ -1,0 +1,90 @@
+Dinfw: null
+JobSpec:
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  environment:
+    items:
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  image:
+    value: ubuntu
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  priorityClassName:
+    value: high
+  pvcs:
+    items:
+      pvc:
+        value:
+          claimName: claim-existing
+          existingPvc: true
+          path: /path/ro
+          readOnly: true
+      pvc-1:
+        value:
+          claimName: static
+          existingPvc: false
+          path: /path/access/modes
+          readWriteOnce: true
+          size: 800M
+          storageClass: ""
+          volumeMode: Filesystem
+      pvc-2:
+        value:
+          claimName: small-volume
+          existingPvc: false
+          path: /path/rw
+          readOnly: false
+          readOnlyMany: true
+          readWriteMany: true
+          readWriteOnce: false
+          size: 10M
+          storageClass: small
+          volumeMode: Block
+      pvc-3:
+        value:
+          claimName: persistent-volume
+          existingPvc: false
+          path: /path/access/modes
+          readWriteMany: true
+          readWriteOnce: true
+          size: 1G
+          storageClass: persistent
+          volumeMode: Block
+      pvc-4:
+        value:
+          claimName: ephemeral-volume
+          ephemeral: true
+          existingPvc: false
+          path: /path/two
+          size: 2T
+          storageClass: ephemeral
+          volumeMode: Filesystem
+  username:
+    value: test
+MasterSpec: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: pvc_combo, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: pvc_combo, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

@@ -1,0 +1,65 @@
+post:
+  summary: Create tenant
+  x-service: tenants-manager
+  x-test-coverage:
+    - e2e/src/test/suites/sphinxSuite/tenant.test.ts
+  operationId: create_tenant_internal
+  x-no-authorization: true
+  tags:
+  - tenants
+  requestBody:
+    description: The tenant to create.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/Tenants/TenantCreationRequest.yaml'
+  responses:
+    201:
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Tenants/TenantCreationResponse.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    409:
+      $ref: '../../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+get:
+  summary: Get tenant
+  x-service: tenants-manager
+  x-test-coverage:
+    - src/test/suites/tenantSuite/tenantUserApi/tenantSystemApi.test.ts
+  operationId: get_tenant
+  x-no-authorization: true
+  tags:
+  - tenants
+  parameters:
+  - $ref: "../../parameters/query/tenantName.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Tenants/Tenant.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

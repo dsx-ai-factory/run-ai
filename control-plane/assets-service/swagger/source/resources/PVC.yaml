@@ -1,0 +1,82 @@
+get:
+  summary: List PVC assets.
+  description: Retrieves a list of PVC datasource assets.
+  operationId: list_pvc_assets
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_datasources_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - control-plane/assets-service/pkg/services/api_pvc_service_test.go
+    - e2e/src/test/suites/parallel/dataSource/dataSourceUI.test.ts
+    - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
+    - e2e/src/test/suites/parallel/submitUI/connectToJupiterUI.test.ts
+    - e2e/src/test/suites/advancedSuite/dataSource/existingPvcApi.test.ts
+  x-no-authorization: true
+  tags:
+    - PVC
+  parameters:
+    - $ref: "../parameters/query/optional/AssetNameFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetScopeFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetProjectFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetDepartmentFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetClusterFilter.yaml"
+    - $ref: "../parameters/query/optional/IncludeUsageInfo.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToProject.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToWorkloadType.yaml"
+    - $ref: "../parameters/query/optional/IncludeStatus.yaml"
+    - $ref: "../parameters/query/optional/AssetIdsFilter.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToReplicaType.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/PVC/PVCListResponse.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+
+post:
+  summary: Create a PVC asset.
+  description: Use to create a PVC datasource asset.
+  operationId: create_pvc_asset
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_datasources_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - control-plane/assets-service/pkg/services/api_pvc_service_test.go
+    - e2e/src/test/suites/parallel/dataSource/dataSourceUI.test.ts
+    - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
+    - e2e/src/test/suites/parallel/submitUI/connectToJupiterUI.test.ts
+    - e2e/src/test/suites/advancedSuite/dataSource/existingPvcApi.test.ts
+    - e2e/src/test/suites/advancedSuite/dataSource/existingPvcUI.test.ts
+  x-no-authorization: true
+  x-audit: true
+  tags:
+    - PVC
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/PVC/PVCCreationRequest.yaml"
+  responses:
+    202:
+      description: Request accepted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/PVC/PVCAsset.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    409:
+      $ref: "../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

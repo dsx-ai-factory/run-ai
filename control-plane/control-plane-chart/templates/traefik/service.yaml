@@ -1,0 +1,3 @@
+{{- if .Values.traefik.enabled }}
+{{- include "common.service" (list . .Values.traefik.service .Values.traefik) }}
+{{- end }}

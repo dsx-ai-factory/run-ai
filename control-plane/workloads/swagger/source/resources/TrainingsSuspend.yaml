@@ -1,0 +1,27 @@
+post:
+  summary: Suspend a training.
+  operationId: suspend_training
+  description: Suspend a training from running using a workload id.
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/trainings_service_test.go
+  x-authorize:
+    resource-type: trainings
+    action: update
+  tags:
+    - Trainings
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+  responses:
+    202:
+      $ref: "../../../../infra/openapi/docs/responses/202Accepted.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

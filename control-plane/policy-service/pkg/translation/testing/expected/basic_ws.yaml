@@ -1,0 +1,50 @@
+createdAt: "0001-01-01T00:00:00Z"
+createdBy: ""
+description: translation of my-policy
+id: ""
+projectId: "4500001"
+rules:
+- enforcements:
+  - required: true
+  - default:
+      value: 1
+  - range:
+      max: 8
+      min: 0.5
+      step: 0.5
+  field: compute-CpuCoreRequest
+  specSelector: workspaceSpec
+- enforcements:
+  - default:
+      value: 1Gi
+  - quantityRange:
+      max: 4Gi
+      min: 100Mi
+  field: compute-CpuMemoryRequest
+  specSelector: workspaceSpec
+- enforcements:
+  - range:
+      max: 4
+      min: 1
+  field: compute-GpuDevicesRequest
+  specSelector: workspaceSpec
+- enforcements:
+  - blocked: true
+  field: compute-LargeShmRequest
+  specSelector: workspaceSpec
+- enforcements:
+  - options:
+    - ubuntu
+    - redhat
+  - required: true
+  - set:
+      value: ubuntu
+  field: image
+  specSelector: workspaceSpec
+scope: project
+updatedAt: "0001-01-01T00:00:00Z"
+updatedBy: ""
+workloadType:
+  group: run.ai
+  kind: Workspace
+  version: v1

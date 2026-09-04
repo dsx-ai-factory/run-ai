@@ -1,0 +1,7 @@
+name: includeRequestedForDelete
+in: query
+required: false
+example: true
+schema:
+  type: boolean
+description: When true, includes clusters that are marked for deletion

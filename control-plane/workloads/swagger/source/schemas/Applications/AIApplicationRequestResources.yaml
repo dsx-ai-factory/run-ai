@@ -1,0 +1,11 @@
+type: object
+nullable: true
+properties:
+  gpu:
+    $ref: '../Common/RequestResourceCores.yaml'
+  gpuMemory:
+    $ref: '../Common/RequestResourceQuantity.yaml'
+  cpu:
+    $ref: '../Common/RequestResourceCores.yaml'
+  cpuMemory:
+    $ref: '../Common/RequestResourceQuantity.yaml'

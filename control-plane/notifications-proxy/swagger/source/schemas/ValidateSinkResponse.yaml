@@ -1,0 +1,11 @@
+type: object
+properties:
+  status:
+    type: boolean
+  message:
+    type: string
+required:
+  - status
+example:
+  status: false
+  message: smtp server validation failed

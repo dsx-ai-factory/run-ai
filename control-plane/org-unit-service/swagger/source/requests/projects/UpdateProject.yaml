@@ -1,0 +1,39 @@
+summary: Update project
+operationId: update_project
+x-service: org-unit-service
+description: Update project by Id
+x-test-coverage:
+  - control-plane/org-unit-service/pkg/test/project_api_test.go
+x-authorize:
+  resource-type: project
+  action: update
+  resource-id: projectId
+x-audit: true
+tags:
+  - Projects
+parameters:
+  - $ref: "../../parameters/ProjectId.yaml"
+requestBody:
+  description: Project to update.
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: "../../schemas/projects/ProjectUpdateRequest.yaml"
+responses:
+  200:
+    description: Updated
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/projects/Project.yaml"
+  400:
+    $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+  401:
+    $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+  403:
+    $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+  404:
+    $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+  503:
+    $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

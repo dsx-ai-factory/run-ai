@@ -1,0 +1,9 @@
+required:
+  - name
+properties:
+  name:
+    $ref: "./TemplateNameOptional.yaml"
+  description:
+    $ref: "./TemplateDescription.yaml"
+nullable: true
+type: object

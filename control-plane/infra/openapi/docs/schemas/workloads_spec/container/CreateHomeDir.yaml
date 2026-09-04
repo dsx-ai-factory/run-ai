@@ -1,0 +1,3 @@
+description: When set to `true`, creates a home directory for the container.
+type: boolean
+nullable: true

@@ -1,0 +1,4 @@
+{
+    "service_name": "old-auth-token-middleware",
+    "artifact_type": "go"
+  }

@@ -1,0 +1,94 @@
+delete:
+  summary: Delete an inference.
+  operationId: delete_inference
+  description: Delete an inference using a workload id.
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/inferences_service_test.go
+  x-authorize:
+    resource-type: inferences
+    action: delete
+  tags:
+    - Inferences
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+  responses:
+    202:
+      $ref: "../../../../infra/openapi/docs/responses/202Accepted.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+get:
+  summary: Get inference data.
+  operationId: get_inference
+  description: Retrieve inference details using a workload id.
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/inferences_service_test.go
+  x-authorize:
+    resource-type: inferences
+    action: read
+  tags:
+    - Inferences
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../../../infra/openapi/docs/schemas/inferences/Inference.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+patch:
+  summary: Update inference spec.
+  operationId: update_inference_spec
+  description: Update the specification of an existing inference workload.
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/inferences_service_test.go
+  x-authorize:
+    resource-type: inferences
+    action: update
+  tags:
+    - Inferences
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../../../infra/openapi/docs/schemas/inferences/InferenceUpdateRequest.yaml"
+  responses:
+    202:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../../../infra/openapi/docs/schemas/inferences/Inference.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

@@ -1,0 +1,21 @@
+required:
+  - clusterId
+  - operation
+properties:
+  uid:
+    type: number
+    example: 1
+  id:
+    type: string
+    example: "1"
+  name:
+    type: string
+    example: "type-a"
+  clusterId:
+    $ref: "../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  operation:
+    type: string
+    enum:
+      - CREATED
+      - DELETED
+

@@ -1,0 +1,3 @@
+{{- if .Values.auditService.enabled }}
+{{- include "common.service" (list . .Values.auditService.service .Values.auditService) }}
+{{- end }}

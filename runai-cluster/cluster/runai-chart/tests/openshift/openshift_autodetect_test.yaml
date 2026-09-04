@@ -1,0 +1,181 @@
+suite: Test OpenShift AutoDetect mode and default behavior
+
+# Note: helm-unittest cannot test the actual lookup() function as it has no cluster access.
+# In the test environment, lookup() returns empty, so AutoDetect will behave as Disabled.
+# These tests verify that:
+# 1. The template logic doesn't error when using AutoDetect or default (no mode)
+# 2. The lookup-based logic path is syntactically correct
+# 3. Resources are correctly NOT rendered when lookup returns empty (as in test environment)
+
+tests:
+  # Test default mode (no mode specified) - should default to AutoDetect
+  - it: should not render OCP resources when mode is default (AutoDetect) and no cluster detected
+    templates:
+      - templates/ocp/admission-webhooks.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render SCC resources when mode is default (AutoDetect) and no cluster detected
+    set:
+      openShift.securityContextConstraints.create: true
+    templates:
+      - templates/ocp/scc.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render openshift-monitoring resources in hooks when mode is default
+    set:
+      helmHooksHandler.enabled: true
+    templates:
+      - templates/hooks/post-install-rbac.yaml
+      - templates/hooks/post-upgrade-rbac.yaml
+    asserts:
+      - notMatchRegex:
+          path: metadata.namespace
+          pattern: ^openshift-monitoring$
+
+  # Test explicit AutoDetect mode
+  - it: should not render OCP resources when mode is AutoDetect and no cluster detected
+    set:
+      openShift.mode: AutoDetect
+      openShift.securityContextConstraints.create: true
+    templates:
+      - templates/ocp/admission-webhooks.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render SCC resources when mode is AutoDetect and no cluster detected
+    set:
+      openShift.mode: AutoDetect
+      openShift.securityContextConstraints.create: true
+    templates:
+      - templates/ocp/scc.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should not render openshift-monitoring resources in hooks when mode is AutoDetect
+    set:
+      openShift.mode: AutoDetect
+      helmHooksHandler.enabled: true
+    templates:
+      - templates/hooks/post-install-rbac.yaml
+    asserts:
+      - notMatchRegex:
+          path: metadata.namespace
+          pattern: ^openshift-monitoring$
+
+  - it: should not render openshift-monitoring resources in upgrade hooks when mode is AutoDetect
+    set:
+      openShift.mode: AutoDetect
+      helmHooksHandler.enabled: true
+    templates:
+      - templates/hooks/post-upgrade-rbac.yaml
+    asserts:
+      - notMatchRegex:
+          path: metadata.namespace
+          pattern: ^openshift-monitoring$
+
+  # Test that all OCP templates handle AutoDetect correctly
+  - it: should not render cluster-config-map when mode is AutoDetect
+    set:
+      openShift.mode: AutoDetect
+    templates:
+      - templates/ocp/cluster-config-map.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # Verify the helper function is evaluated correctly for non-OCP resources
+  - it: should render regular deployment regardless of OpenShift mode
+    set:
+      openShift.mode: AutoDetect
+      runai-operator.enabled: true
+    templates:
+      - templates/deployment.yaml
+    documentIndex: 0
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: metadata.name
+          value: runai-operator
+
+  # Test clusterroles don't contain openshift-monitoring when AutoDetect and no cluster
+  - it: should not render openshift-monitoring resources in clusterroles when mode is AutoDetect
+    set:
+      openShift.mode: AutoDetect
+      operands.rbac.prometheus.create: true
+      runai-operator.enabled: true
+    templates:
+      - templates/clusterroles/base.yaml
+    asserts:
+      - notMatchRegex:
+          path: metadata.namespace
+          pattern: ^openshift-monitoring$
+      - notMatchRegex:
+          path: subjects[*].namespace
+          pattern: ^openshift-monitoring$
+
+  # Test with no mode value set at all (testing values.yaml default)
+  - it: should handle missing mode value gracefully and default to AutoDetect behavior
+    set:
+      openShift.securityContextConstraints.create: true
+      # Explicitly not setting openShift.mode to test default behavior
+    templates:
+      - templates/ocp/scc.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # Test that the isOpenShift helper doesn't cause errors in complex templates
+  - it: should render hooks without errors when mode is AutoDetect
+    set:
+      openShift.mode: AutoDetect
+      helmHooksHandler.enabled: true
+      crdUpgrader.enabled: true
+    templates:
+      - templates/hooks/post-install-rbac.yaml
+    documentIndex: 1
+    asserts:
+      - isKind:
+          of: Role
+      - equal:
+          path: metadata.name
+          value: runai-post-install
+
+  # Verify case-sensitivity of mode value
+  - it: should handle AutoDetect with correct case
+    set:
+      openShift.mode: AutoDetect
+      openShift.securityContextConstraints.create: true
+    templates:
+      - templates/ocp/admission-webhooks.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # Test interaction with other OpenShift settings
+  - it: should respect securityContextConstraints.create=false even with AutoDetect mode
+    set:
+      openShift.mode: AutoDetect
+      openShift.securityContextConstraints.create: false
+    templates:
+      - templates/ocp/scc.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # Verify all admission webhook resources are not rendered
+  - it: should not render any admission webhook configurations when AutoDetect and no cluster
+    set:
+      openShift.mode: AutoDetect
+    templates:
+      - templates/ocp/admission-webhooks.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+

@@ -1,0 +1,88 @@
+allOf:
+  - required:
+    - namespace
+    - nodePoolsResources
+    - resources
+  - $ref: "ProjectV1ResponseCommonFields.yaml"
+  - properties:
+      name:
+        type: string
+        description: Project name.
+        example: team-a
+      nodePoolsResources:
+        type: array
+        items:
+          $ref: './NodePoolAssignedResourcesV1Response.yaml'
+        description: Resources assigned to this Project per Node Pool.
+      namespace:
+        type: string
+        description: The name of an existing namespace to use for the project in the cluster. Supported only for cluster versions 2.12 or higher.
+        example: ns-proj1
+      id:
+        type: integer
+        format: int32
+        description: Project id.
+        readOnly: true
+        example: 5
+      departmentId:
+        type: integer
+        format: int32
+        description: ID of the department that owns the project.
+        example: 2
+      tenantId:
+        type: integer
+        format: int32
+        description: ID of the tenant where the project is located.
+        example: 2
+      clusterUuid:
+        type: string
+        format: uuid
+        description: ID of the cluster where the project is located.
+        example: 71f69d83-ba66-4822-adf5-55ce55efd210
+      departmentName:
+        type: string
+        description: Name of the department where the project is located.
+        example: department-a
+      interactiveNodeAffinity:
+        type: string
+        example: none
+      trainNodeAffinity:
+        type: string
+        example: none
+      createdAt:
+        type: string
+        description: Creation date of the project.
+        format: date-time
+        example: 2021-12-14T16:04:15.099Z
+      status:
+        type: object
+        required:
+          - quotaStatuses
+        properties:
+          namespace:
+            type: string
+            description: The namespace of the project
+            example: runai-team-a
+          message:
+            type: string
+            description: Detailed phase message
+            example: NamespaceHandlerFailed
+          phase:
+            type: string
+            description: project's phase
+            example: Ready
+          conditions:
+            type: array
+            items:
+              type: object
+              additionalProperties:
+                type: string
+          quotaStatuses:
+            $ref: './QuotaStatusV1.yaml'
+      phase:
+        type: string
+        description: project's phase
+        example: Ready
+      quotaStatuses:
+        type: string
+        nullable: true

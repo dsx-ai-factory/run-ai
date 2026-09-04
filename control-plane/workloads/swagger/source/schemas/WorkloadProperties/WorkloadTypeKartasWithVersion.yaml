@@ -1,0 +1,16 @@
+type: array
+description: Lists the versions of the custom resource definition (CRD) supported for this workload type, such as v1, v1beta1, or v1alpha1. This enables the platform to correctly parse, interpret, and manage manifests for this workload type according to the specific structure and schema associated with each listed version.
+items:
+  type: object
+  properties:
+    version:
+      type: string
+      example: "v1"
+      description: The version of the resource definition k8s crd.
+    updatedAt:
+      x-internal: true
+      type: string
+      format: date-time
+      description: The timestamp for the last time the karta was updated.
+    karta:
+      $ref: "./WorkloadTypeKarta.yaml"

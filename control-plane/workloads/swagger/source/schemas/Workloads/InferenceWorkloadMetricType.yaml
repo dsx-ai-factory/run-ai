@@ -1,0 +1,5 @@
+type: string
+description: Specify which data to request.
+enum:
+  - THROUGHPUT
+  - LATENCY

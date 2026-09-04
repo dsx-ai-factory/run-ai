@@ -1,0 +1,129 @@
+@startuml migration-flow
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing true
+skinparam RoundCorner 8
+skinparam ParticipantPadding 25
+skinparam BoxPadding 15
+
+skinparam sequence {
+    ArrowColor #555555
+    ArrowFontName SansSerif
+    ArrowFontSize 11
+
+    ActorBorderColor #2C3E50
+    ActorBackgroundColor white
+    ActorFontColor #2C3E50
+    ActorFontSize 14
+
+    LifeLineBorderColor #BDC3C7
+    LifeLineBackgroundColor #ECF0F1
+
+    ParticipantBorderColor transparent
+    ParticipantBackgroundColor #34495E
+    ParticipantFontName SansSerif
+    ParticipantFontSize 13
+    ParticipantFontColor white
+
+    BoxBorderColor transparent
+    BoxFontName SansSerif
+    BoxFontSize 11
+    BoxFontColor #95A5A6
+}
+
+skinparam note {
+    BackgroundColor #FFF9C4
+    BorderColor #FBC02D
+    FontName SansSerif
+    FontSize 11
+    FontColor #424242
+}
+
+title <font size=20 color=#2C3E50>karta-migrate</font>\n<font size=12 color=#7F8C8D>helm upgrade ResourceInterface -> Karta migration</font>
+
+actor "helm" as Helm #2C3E50
+
+box "runai-cluster" #F0F4FF
+    participant "pre-upgrade\nJob" as Pre #2980B9
+    participant "post-upgrade\nJob" as Post #D35400
+    participant "EWI\ncontroller" as EWI #27AE60
+end box
+
+participant "kube\napi" as API #7F8C8D
+
+== <font color=#2980B9>1. Pre-upgrade hook (strict gate)</font> ==
+
+Helm -[#2980B9]> Pre : <b>helm upgrade</b>
+activate Pre
+
+Pre -[#2980B9]> API : list all ResourceInterfaces
+API -[#2980B9]-> Pre : 36 RIs
+
+loop for each RI
+    Pre -[#2980B9]> Pre : compute Karta spec\n+ conditions
+    Pre -[#2980B9]> API : create Karta\n(same name, same conditions)
+end
+
+Pre -[#2980B9]> API : reconcile RBAC\n(additional-workload-gvks ClusterRoles)
+
+== <font color=#2980B9>verify every Karta covers its RI</font> ==
+
+loop 15 x 2s
+    Pre -[#2980B9]> API : get Karta
+    alt all RI True conditions True on Karta
+        Pre -[#27AE60]> Pre : covered
+    else missing or stale
+        Pre -[#C62828]> Pre : retry
+    end
+end
+
+hnote right of Pre #E8F0FE
+  <color:#2980B9><b>strict gate</b></color>
+  if any Karta fails to cover its RI
+  after 15 attempts, the Job exits
+  non-zero and helm aborts the upgrade
+end note
+
+Pre -[#2980B9]-> Helm : exit 0
+deactivate Pre
+
+== <font color=#27AE60>2. Helm applies templates</font> ==
+
+Helm -[#27AE60]> API : install / upgrade resources
+Helm -[#27AE60]> EWI : EWI now online
+activate EWI
+
+EWI -[#27AE60]> API : reconcile every Karta\n(continuous)
+
+== <font color=#D35400>3. Post-upgrade hook (humble guest)</font> ==
+
+Helm -[#D35400]> Post : <b>helm post-upgrade</b>
+activate Post
+
+Post -[#D35400]> API : list ResourceInterfaces
+
+loop any RI without a matching Karta
+    note right of Post #FFF9C4
+        agent could have created
+        new RIs during the upgrade
+        window - backfill them
+    end note
+    Post -[#D35400]> API : create Karta
+end
+
+Post -[#D35400]> API : reconcile RBAC
+
+hnote right of Post #FFE8D9
+  <color:#D35400><b>does NOT verify status</b></color>
+  EWI now owns Karta status.
+  Racing it produces noise, not signal.
+end note
+
+Post -[#D35400]> API : strip RI finalizers
+Post -[#D35400]> API : delete RI CRD
+Post -[#D35400]-> Helm : exit 0
+deactivate Post
+
+deactivate EWI
+
+@enduml

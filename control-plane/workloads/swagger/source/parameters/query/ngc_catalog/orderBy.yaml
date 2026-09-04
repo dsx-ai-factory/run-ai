@@ -1,0 +1,8 @@
+name: orderBy
+in: query
+description: >
+  Sorting field and direction, comma separated (e.g., `dateCreated,DESC`).
+required: false
+schema:
+  type: string
+  example: dateCreated,DESC

@@ -1,0 +1,13 @@
+type: object
+required:
+  - config
+properties:
+  config:
+      $ref: "./EmailChannelConfigForPatch.yaml"
+example:
+  config:
+    username: email@gmail.com
+    password: 123456
+    smtpHost: smtp.gmail.com
+    from: email@gmail.com
+    subject: My subject

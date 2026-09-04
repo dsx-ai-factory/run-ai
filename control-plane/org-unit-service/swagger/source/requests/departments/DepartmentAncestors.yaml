@@ -1,0 +1,24 @@
+get:
+  summary: Get department ancestors
+  operationId: get_department_ancestors
+  x-no-authorization: true
+  x-internal: true
+  x-service: org-unit-service
+  x-test-coverage: not-applicable
+  tags:
+    - Departments
+  parameters:
+    - $ref: "../../../../../infra/openapi/docs/parameters/path/DepartmentId.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../infra/openapi/docs/schemas/scopes/Ancestors.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

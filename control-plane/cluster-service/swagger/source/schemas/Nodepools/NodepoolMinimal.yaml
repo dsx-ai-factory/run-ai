@@ -1,0 +1,24 @@
+type: object
+required:
+  - id
+  - name
+  - clusterId
+properties:
+  id:
+    $ref: '../../../../../infra/openapi/docs/schemas/resources/NodepoolId.yaml'
+  name:
+    type: string
+    example: "v100"
+    minLength: 1
+  clusterId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml'
+  phase:
+    $ref: "./NodepoolPhase.yaml"
+  gpuNetworkAccelerationDetected:
+    type: boolean
+    description: Signals to all relevant parties about GPUNetworkAcceleration being detected in some nodepool's nodes
+  schedulingCapabilities:
+    $ref: "./SchedulingCapabilities.yaml"
+  gpuTypes:
+    $ref: "./NodepoolGpuTypes.yaml"
+

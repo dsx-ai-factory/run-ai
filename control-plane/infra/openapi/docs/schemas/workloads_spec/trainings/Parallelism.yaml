@@ -1,0 +1,7 @@
+description:
+  Used with Hyperparameter Optimization. Specifies the maximum number
+  of pods the workload should run at any given time (applicable to standard training only).
+type: integer
+format: int32
+example: 1
+nullable: true

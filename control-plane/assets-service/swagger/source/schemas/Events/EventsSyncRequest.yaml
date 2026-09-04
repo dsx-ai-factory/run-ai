@@ -1,0 +1,8 @@
+type: object
+required:
+  - events
+properties:
+  events:
+    type: array
+    items:
+      $ref: './EventSyncFields.yaml'

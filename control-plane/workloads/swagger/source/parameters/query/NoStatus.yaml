@@ -1,0 +1,8 @@
+name: noStatus
+x-internal: true
+in: query
+required: false
+description: Return workload types without status.
+schema:
+  type: boolean
+  default: false

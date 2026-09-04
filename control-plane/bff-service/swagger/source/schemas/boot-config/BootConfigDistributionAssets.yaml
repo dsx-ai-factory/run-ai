@@ -1,0 +1,13 @@
+type: object
+required:
+  - profile
+properties:
+  profile:
+    type: string
+    enum:
+      - cc
+      - ce
+    description: >-
+      Selects the distribution-specific asset folder used by the frontend.
+      `cc` and `ce` are the currently agreed profile identifiers and may be
+      renamed when the final product terminology is defined.

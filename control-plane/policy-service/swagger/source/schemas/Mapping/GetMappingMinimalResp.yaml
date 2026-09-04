@@ -1,0 +1,10 @@
+type: object
+description: >-
+  The names and descriptions of the fields, spec selectors, and item selectors
+  of a workload type's mapping, without the full JQ expressions. Each leaf value
+  is the description of the corresponding element.
+properties:
+  fields:
+    $ref: "./MappingMinimalPerField.yaml"
+  specSelectors:
+    $ref: "./MappingMinimalSpecSelectors.yaml"

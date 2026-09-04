@@ -1,0 +1,9 @@
+image: ubuntu
+
+storage:
+  hostPath:
+    - path: /my/volume/1
+      mountPath: /mount/path/vol/1
+      mountPropagation: None
+    - path: /my/volume/2
+      mountPath: /mount/path/vol/2

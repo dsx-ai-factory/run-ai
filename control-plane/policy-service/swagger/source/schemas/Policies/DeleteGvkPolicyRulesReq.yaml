@@ -1,0 +1,4 @@
+type: object
+description: Delete one or more rules from a policy.
+allOf:
+  - $ref: "./PolicyRulesRef.yaml"

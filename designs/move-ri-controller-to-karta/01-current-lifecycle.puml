@@ -1,0 +1,160 @@
+@startuml 01-current-lifecycle
+!theme plain
+skinparam backgroundColor white
+skinparam shadowing true
+skinparam RoundCorner 8
+skinparam ParticipantPadding 25
+skinparam BoxPadding 15
+
+skinparam sequence {
+    ArrowColor #555555
+    ArrowFontName SansSerif
+    ArrowFontSize 11
+
+    ActorBorderColor #2C3E50
+    ActorBackgroundColor white
+    ActorFontColor #2C3E50
+    ActorFontSize 14
+
+    LifeLineBorderColor #BDC3C7
+    LifeLineBackgroundColor #ECF0F1
+
+    ParticipantBorderColor transparent
+    ParticipantBackgroundColor #34495E
+    ParticipantFontName SansSerif
+    ParticipantFontSize 13
+    ParticipantFontColor white
+
+    BoxBorderColor transparent
+    BoxFontName SansSerif
+    BoxFontSize 11
+    BoxFontColor #95A5A6
+}
+
+skinparam note {
+    BackgroundColor #FFF9C4
+    BorderColor #FBC02D
+    FontName SansSerif
+    FontSize 11
+    FontColor #424242
+}
+
+title <font size=20 color=#2C3E50><b>ResourceInterface - Current Lifecycle (v2.25)</b></font>\n<font size=12 color=#7F8C8D>How RI flows from Control Plane to Cluster and who uses it</font>
+
+box "Control Plane" #F0F4FF
+    participant "Workloads\nService" as WS #2980B9
+    database "PostgreSQL\n(JSONB)" as DB #2C3E50
+end box
+
+box "Cluster" #F0FFF0
+    participant "Agent" as Agent #27AE60
+    participant "EWI" as EWI #16A085
+    participant "Cluster-Sync" as CS #D35400
+    participant "Anyworkload" as AW #8E44AD
+end box
+
+box "Engine (managed by engine-operator)" #FFF8E1
+    participant "PodGrouper" as PG #E65100
+end box
+
+== <font color=#2980B9><b>Phase 1</b> - Seeding (Workloads Service startup)</font> ==
+
+activate WS #BBDEFB
+WS -[#2980B9]> WS : Go Migrations run at startup:\nBuild & validate <b>31 built-in RI specs</b>\nvia NewRIValidator()
+WS -[#2980B9]> DB : <b>Upsert 31 RIs as JSONB</b>\n(spec only - no TypeMeta)
+deactivate WS
+
+hnote over DB #E8F0FE
+  <color:#2980B9><b>Stored JSONB</b></color>
+  {"spec":{"structureDefinition":
+    {"rootComponent":{"name":"pytorchjob",
+     "kind":{"group":"kubeflow.org",...}}}}}
+end note
+
+== <font color=#27AE60><b>Phase 2</b> - Agent creates CRs (full reconciliation, every ~10s)</font> ==
+
+activate Agent #C8E6C9
+Agent -[#27AE60]> WS : <b>GET /api/v1/workload-types</b>
+activate WS #BBDEFB
+WS -[#2980B9]> DB : Query JSONB
+DB -[#555555]-> WS
+WS -[#555555]-> Agent : RI specs as <b>map[string]interface{}</b>\n(no Go type info on the wire)
+deactivate WS
+
+Agent -[#27AE60]> Agent : For each spec:\nGenerate name <b>"ri-{ver}-{group}-{kind}"</b>\nCompare labels (updatedAt)
+
+hnote right of Agent #E8F8E8
+  <color:#27AE60><b>Full reconciliation each cycle:</b></color>
+  - Create missing CRs
+  - Update changed CRs
+  - <b>Delete CRs not in CP response</b>
+end note
+
+Agent -[#27AE60]>] : <b>Create/Update</b> ResourceInterface CRs\napiVersion: <b>optimization.nvidia.com/v1alpha1</b>\nLabels: run.ai/resource-interface-{group,version,kind}
+deactivate Agent
+
+== <font color=#16A085><b>Phase 3</b> - EWI reconciles each RI</font> ==
+
+activate EWI #B2DFDB
+EWI -[#16A085]> EWI : <b>1.</b> Add finalizer <b>rid.kai.bolt/finalize</b>\n<b>2.</b> Validate RI structure\n<b>3.</b> Create RBAC ClusterRoles\n<b>4.</b> Set conditions:\n    RIValidated=True\n    CRDExists=True\n    RBACReady=True\n    SyncEnabled=True\n    <b>Ready=True</b>
+deactivate EWI
+
+== <font color=#D35400><b>Phase 4</b> - Cluster-Sync reports status to CP</font> ==
+
+activate CS #FFE0B2
+CS -[#D35400]> CS : Watch RI CR events (Add/Update/Delete)
+CS -[#D35400]> WS : <b>POST /workload-types/sync</b>\n{id, version, phase, conditions}
+deactivate CS
+
+== <font color=#8E44AD><b>Phase 5</b> - Anyworkload uses RI at runtime (workload creation)</font> ==
+
+activate AW #E1BEE7
+AW -[#8E44AD]> AW : User creates a workload (e.g., PyTorchJob)\nLookup <b>ResourceInterface</b> by GVK labels:\n  run.ai/resource-interface-group=kubeflow.org\n  run.ai/resource-interface-kind=PyTorchJob\n  run.ai/resource-interface-version=v1
+AW -[#8E44AD]> AW : Check <b>RBACReady=True</b> condition\nIf not ready -> set KartaNotReady,\nrequeue (block creation, don't delete existing)
+AW -[#8E44AD]> AW : Extract from RI spec:\n- podSpec path\n- replicas path\n- status definition\n- child components\nBuild WorkloadRunner CR
+deactivate AW
+
+== <font color=#E65100><b>Phase 6</b> - PodGrouper uses RI at runtime (gang scheduling)</font> ==
+
+activate PG #FFE0B2
+PG -[#E65100]> PG : A pod is created for a workload\nPodGrouper needs to determine gang scheduling
+
+PG -[#E65100]> PG : <b>List RI CRs</b> by GVK label selectors:\n  run.ai/resource-interface-group\n  run.ai/resource-interface-kind\n  run.ai/resource-interface-version\n(on-demand query, NOT via watcher)
+
+PG -[#E65100]> PG : Check: <b>DeletionTimestamp == nil</b>\n(only check - does NOT check status/conditions)
+
+PG -[#E65100]> PG : Build <b>StructureSummary</b> from RI spec\n(component tree, scale definitions, pod selectors)\nCache by RI UID in sync.Map
+
+PG -[#E65100]> PG : Use StructureSummary to:\n<b>1.</b> InferPodComponent - which component owns this pod\n<b>2.</b> GetPodGroupingEffectiveComponent - find gang group\n<b>3.</b> CalculateSubtreeScale - compute minAvailable\n<b>4.</b> Generate PodGroup name + metadata
+deactivate PG
+
+hnote over PG #FFF3E0
+  <color:#E65100><b>PodGrouper architecture:</b></color>
+  - Lives in <b>runai-engine</b> repo (separate from runai)
+  - Managed by <b>engine-operator</b> (via engine-config CR)
+  - go-operator -> engine-config CR -> engine-operator -> PodGrouper Deployment
+  - Uses <b>kai-bolt</b> types: boltv1alpha1.ResourceInterface
+  - Imports: instructions.NewStructureSummary(ri)
+  - Result: PodGroup CRs on cluster (gang scheduling)
+end note
+
+== <font color=#555555><b>Summary</b> - Who reads what from RI</font> ==
+
+hnote over Agent, PG #F5F5F5
+  <color:#555555><b>RI Consumers:</b></color>
+  - <b>Agent</b>: creates/updates/deletes RI CRs from CP data
+  - <b>EWI</b>: validates spec, sets conditions, adds finalizer
+  - <b>Cluster-Sync</b>: watches events, reports status to CP
+  - <b>Anyworkload</b>: reads spec + checks RBACReady condition (blocks if not ready)
+  - <b>PodGrouper</b>: reads spec only (no status check), builds gang scheduling groups
+  
+  <color:#555555><b>What each reads:</b></color>
+  | Component | Reads spec? | Reads status? | Reads labels? | Writes to RI? |
+  | Agent | No (creates from CP) | No | Yes (updatedAt) | Yes (create/update/delete) |
+  | EWI | Yes (validates) | Yes (sets conditions) | No | Yes (finalizer + status) |
+  | Cluster-Sync | No | Yes (reports) | No | No |
+  | Anyworkload | Yes (podSpec, replicas) | Yes (RBACReady) | Yes (GVK lookup) | No |
+  | PodGrouper | Yes (structure tree) | <b>No</b> | Yes (GVK lookup) | No |
+end note
+
+@enduml

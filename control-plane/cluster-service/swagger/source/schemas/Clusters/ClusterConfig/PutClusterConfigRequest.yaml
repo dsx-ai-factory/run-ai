@@ -1,0 +1,6 @@
+x-internal: true
+type: object
+description: PUT Cluster Configuration Request
+properties:
+  config:
+    $ref: "ClusterUserConfigData.yaml"

@@ -1,0 +1,25 @@
+description: Quantity of an extended resource.
+properties:
+  resource:
+    description: The name of the extended resource (mandatory)
+    type: string
+    example: hardware-vendor.example/foo
+    minLength: 1
+    maxLength: 253
+    nullable: true
+    pattern: .*
+  quantity:
+    description: The requested quantity for the resource.
+    type: string
+    example: 2
+    minLength: 1
+    maxLength: 63
+    nullable: true
+    pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+  exclude:
+    description: Use 'true' in case the extended resource is defined in defaults of the policy, and you wish to exclude it from the workload.
+    type: boolean
+    example: false
+    nullable: true
+nullable: true
+type: object

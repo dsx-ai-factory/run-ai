@@ -1,0 +1,30 @@
+required:
+  - name
+  - clusterId
+  - projectId
+  - namespace
+  - modelId
+properties:
+  name:
+    description: The name of the workload.
+    type: string
+    minLength: 1
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  projectId:
+    $ref: "../General/ProjectIdAsNumber.yaml"
+  namespace:
+    $ref: "../General/Namespace.yaml"
+  assets:
+    required:
+      - compute
+    properties:
+      compute:
+        $ref: "../../../../../infra/openapi/docs/schemas/assets/AssetId.yaml"
+  modelId:
+    description: The id of the model.
+    type: string
+    format: uuid
+    minLength: 1
+  specificEnv:
+    $ref: "../Workload/SpecificRunParams.yaml"

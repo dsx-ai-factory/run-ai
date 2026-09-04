@@ -1,0 +1,108 @@
+suite: BFF service boot configuration
+
+templates:
+  - templates/bff-service/configmap.yaml
+
+tests:
+  - it: renders public chart defaults
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: data.DISTRIBUTION_ASSETS_PROFILE
+          value: cc
+      - equal:
+          path: data.DOCS_BASE_URL
+          value: https://run-ai-docs.nvidia.com/self-hosted
+      - equal:
+          path: data.DOCS_VERSIONED
+          value: "true"
+      - equal:
+          path: data.SHOWS_CLUSTER_LOCATION_STEP
+          value: "true"
+      - equal:
+          path: data.UNLEASH_ENABLED
+          value: "false"
+      - notExists:
+          path: data.SUPPORT_URL
+      - notExists:
+          path: data.SUPPORT_LABEL
+      - notExists:
+          path: data.UNLEASH_CLIENT_KEY
+      - notExists:
+          path: data.VERSION_DISPLAY_PREFIX
+
+  - it: omits optional support actions when the deployment disables them
+    set:
+      bffService:
+        bootConfig:
+          support:
+            url: ""
+    asserts:
+      - notExists:
+          path: data.SUPPORT_URL
+      - notExists:
+          path: data.SUPPORT_LABEL
+
+  - it: renders deployment overrides as BFF environment variables
+    set:
+      bffService:
+        bootConfig:
+          distributionAssets:
+            profile: ce
+          docs:
+            baseUrl: /product-docs
+            versioned: false
+            whatsNew:
+              urlTemplate: "{docsBaseUrl}/updates"
+          version:
+            displayPrefix: "82403"
+          capabilities:
+            showsClusterLocationStep: false
+          support:
+            url: https://support.example.test/contact
+            label: Example support
+          unleash:
+            enabled: true
+            url: https://unleash.example/api/frontend
+            clientKey: browser-public-key
+            appName: browser-app
+            environment: development
+            project: example-project
+    asserts:
+      - equal:
+          path: data.DISTRIBUTION_ASSETS_PROFILE
+          value: ce
+      - equal:
+          path: data.DOCS_BASE_URL
+          value: /product-docs
+      - equal:
+          path: data.DOCS_VERSIONED
+          value: "false"
+      - equal:
+          path: data.VERSION_DISPLAY_PREFIX
+          value: "82403"
+      - equal:
+          path: data.SHOWS_CLUSTER_LOCATION_STEP
+          value: "false"
+      - equal:
+          path: data.SUPPORT_URL
+          value: https://support.example.test/contact
+      - equal:
+          path: data.SUPPORT_LABEL
+          value: Example support
+      - equal:
+          path: data.UNLEASH_ENABLED
+          value: "true"
+      - equal:
+          path: data.UNLEASH_CLIENT_KEY
+          value: browser-public-key
+      - equal:
+          path: data.UNLEASH_APP_NAME
+          value: browser-app
+      - equal:
+          path: data.UNLEASH_ENVIRONMENT
+          value: development
+      - equal:
+          path: data.UNLEASH_PROJECT
+          value: example-project

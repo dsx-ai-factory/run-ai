@@ -1,0 +1,47 @@
+name: "CI Alert"
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_url:
+        description: "URL of the failed CI run to investigate"
+        type: string
+        required: true
+  workflow_run:
+    workflows:
+      - "Commit to master"
+      - "Commit to vbranch"
+      - "Preinstall Diagnostics CI: commit to master"
+      - "Preinstall Diagnostics CI: commit to v* branch"
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-alert-${{ github.event.workflow_run.id || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  ci-run-alert:
+    name: CI Run Alert
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - name: Dispatch CI alert
+        uses: benc-uk/workflow-dispatch@31e2b3319479a63f0ab15bf800eff9e913504e26
+        with:
+          repo: run-ai/runai-actions
+          ref: main
+          workflow: ci-agentic-alert.yml
+          token: ${{ secrets.GIT_HUB_OSS }}
+          wait-for-completion: false
+          inputs: '{"run_url": ${{ toJSON(inputs.run_url || github.event.workflow_run.html_url) }}}'
+

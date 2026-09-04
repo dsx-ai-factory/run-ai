@@ -1,0 +1,9 @@
+allOf:
+  - $ref: "./DatavolumeStatus.yaml"
+  - type: object
+    properties:
+      isDeleted:
+        type: boolean
+        description: If true, the datavolume is deleted in the cluster and 'phase' field is irrelevant.
+        example: false
+        nullable: true

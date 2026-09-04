@@ -1,0 +1,60 @@
+Dinfw: null
+JobSpec:
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  cpu:
+    value: "1.3"
+  environment:
+    items:
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  extendedResources:
+    items:
+      ext-resource-gpu-amd:
+        value:
+          name: gpu/amd
+          quantity: 12M
+      ext-resource-gpu-google:
+        deleted: true
+      ext-resource-tesla-car:
+        value:
+          name: tesla/car
+          quantity: "12345"
+  image:
+    value: ubuntu
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  priorityClassName:
+    value: low
+  username:
+    value: test
+MasterSpec: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: ext_resources, Rules: , Type: Training'
+  images:
+  - ubuntu
+  name: 'Value: ext_resources, Rules: , Type: Training'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  requestedResources:
+    cpu:
+      request: 1.3
+    gpu: {}
+  submittedBy: test
+  type: Training
+  version: v2alpha1

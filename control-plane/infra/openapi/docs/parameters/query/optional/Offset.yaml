@@ -1,0 +1,8 @@
+name: offset
+in: query
+required: false
+description: The offset of the first item returned in the collection.
+schema:
+  type: integer
+  format: int32
+  example: 100

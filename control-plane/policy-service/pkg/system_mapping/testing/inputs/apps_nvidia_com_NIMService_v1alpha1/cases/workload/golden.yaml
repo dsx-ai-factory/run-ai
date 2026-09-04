@@ -1,0 +1,86 @@
+apiVersion: apps.nvidia.com/v1alpha1
+kind: NIMService
+metadata:
+  annotations:
+    example.com/annotation: test-value
+  labels:
+    app: test
+  name: test
+spec:
+  annotations:
+    pod.example.com/annotation: pod-test-value
+  authSecret: ngc-api-key
+  expose:
+    ingress:
+      annotations:
+        ingress.example.com/annotation: ing-value
+      enabled: false
+    service:
+      annotations:
+        service.example.com/annotation: svc-value
+      grpcPort: 9000
+      metricsPort: 9001
+      name: my-service
+      port: 8000
+      type: ClusterIP
+  groupID: 2000
+  image:
+    repository: placeholder
+    tag: placeholder
+  inferencePlatform: standalone
+  labels:
+    pod.app: test
+  metrics:
+    enabled: true
+    serviceMonitor:
+      additionalLabels:
+        additional-label: label-value
+      annotations:
+        monitor.example.com/annotation: monitor-value
+      interval: 30s
+      scrapeTimeout: 10s
+  multiNode:
+    backendType: lws
+    mpi:
+      mpiStartTimeout: 300
+    parallelism:
+      pipeline: 2
+      tensor: 4
+  nodeSelector:
+    test: somevalue
+  proxy:
+    certConfigMap: proxy-certs
+    httpProxy: http://proxy.example.com:3128
+    httpsProxy: http://proxy.example.com:3128
+    noProxy: localhost,.cluster.local
+  replicas: 1
+  runtimeClassName: gvisor
+  scale:
+    annotations:
+      scale.example.com/annotation: scale-value
+    enabled: true
+    hpa:
+      maxReplicas: 5
+      minReplicas: 1
+  schedulerName: default-scheduler
+  storage:
+    hostPath: /data/nim-cache
+    nimCache:
+      name: my-nim-cache
+      profile: throughput
+    pvc:
+      create: true
+      name: nim-service-pvc
+      size: 10Gi
+      storageClass: standard
+      subPath: cache
+      volumeAccessMode: ReadWriteOnce
+    readOnly: false
+    sharedMemorySizeLimit: 1Gi
+  tolerations:
+  - effect: NoSchedule
+    key: test
+    operator: Equal
+    tolerationSeconds: 60
+    value: somevalue
+  userID: 1000

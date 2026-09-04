@@ -1,0 +1,99 @@
+parameters:
+  - $ref: "../../../../infra/openapi/docs/parameters/path/AssetId.yaml"
+get:
+  summary: Get a template.
+  description: Retrieve the details of a template by id.
+  operationId: get_template_by_id
+  deprecated: true
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_template_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - e2e/src/test/suites/parallel/workloads/workspaceTemplateUI.test.ts
+    - e2e/src/test/suites/parallel/submitUI/connectToJupiterUI.test.ts
+  x-authorize:
+    resource-type: templates
+    action: read
+  tags:
+    - Template
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/WorkloadTemplate/WorkloadTemplate.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+put:
+  summary: Update a template.
+  description: Use to update the details of a template by id.
+  operationId: update_template
+  x-service: assets-service
+  deprecated: true
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_template_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - e2e/src/test/suites/parallel/workloads/workspaceTemplateUI.test.ts
+  x-authorize:
+    resource-type: templates
+    action: update
+  x-audit: true
+  tags:
+    - Template
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/WorkloadTemplate/WorkloadTemplateUpdateRequest.yaml"
+  responses:
+    202:
+      description: Request accepted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/WorkloadTemplate/WorkloadTemplate.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    409:
+      $ref: "../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+delete:
+  summary: Delete a template.
+  description: Use to delete a template by id.
+  operationId: delete_template_by_id
+  deprecated: true
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_template_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - e2e/src/test/suites/parallel/workloads/workspaceTemplateUI.test.ts
+    - e2e/src/test/suites/parallel/submitUI/connectToJupiterUI.test.ts
+  x-authorize:
+    resource-type: templates
+    action: delete
+  x-audit: true
+  tags:
+    - Template
+  responses:
+    202:
+      $ref: "../../../../infra/openapi/docs/responses/202Accepted.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

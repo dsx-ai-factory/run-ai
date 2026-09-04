@@ -1,0 +1,6 @@
+name: telemetryType
+in: query
+required: true
+description: Specifies the telemetry type.
+schema:
+  $ref: '../../schemas/Workloads/WorkloadTelemetryType.yaml'

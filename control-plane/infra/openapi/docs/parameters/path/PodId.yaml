@@ -1,0 +1,7 @@
+name: podId
+in: path
+description: The requested pod id.
+schema:
+  type: string
+  format: uuid
+required: true

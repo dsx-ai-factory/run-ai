@@ -1,0 +1,30 @@
+type: object
+required:
+  - scope
+properties:
+  scope:
+    $ref: "./Scope.yaml"
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterIdOptional.yaml"
+  departmentId:
+    description: The id of the department. Must be specified for department scoped assets.
+    type: string
+    nullable: true
+    minLength: 1
+  projectId:
+    description: The id of the project. Must be specified for project scoped assets.
+    type: integer
+    format: int32
+    nullable: true
+  autoDelete:
+    description: The asset will be deleted automatically. This is intended for internal use.
+    type: boolean
+    nullable: true
+    default: false
+  workloadSupportedTypes:
+    $ref: "./WorkloadSupportedTypes.yaml"
+  private:
+    description: The asset will be private to the user who created it. supported only for docker registry and generic secrets
+    type: boolean
+    nullable: true
+    default: false

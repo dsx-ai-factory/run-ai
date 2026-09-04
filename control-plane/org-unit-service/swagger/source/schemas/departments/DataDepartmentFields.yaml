@@ -1,0 +1,16 @@
+allOf:
+  - $ref: "./DataUpdatableDepartmentFields.yaml"
+  - type: object
+    required:
+      - name
+      - clusterId
+    properties:
+      name:
+        description: The unique name of the department within the cluster. Must be a valid Kubernetes name (lowercase, alphanumeric, hyphens allowed).
+        type: string
+        maxLength: 63
+        example: organization1
+      clusterId:
+        $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+      overtimeData:
+        $ref: "../OvertimeData.yaml"

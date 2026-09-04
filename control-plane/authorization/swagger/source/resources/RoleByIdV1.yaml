@@ -1,0 +1,34 @@
+get:
+  summary: Get a role by id.
+  description: Retrieve the details of a role by id. This endpoint is deprecated and will be removed in a future release. Use GET /api/v2/authorization/roles/{roleIdPath} instead.
+  operationId: get_role_v1
+  deprecated: true
+  x-service: authorization
+  x-test-coverage:
+    - control-plane/authorization/pkg/services/role_api_test.go
+  x-authorize:
+    resource-type: roles
+    action: read
+  tags:
+    - Roles
+  parameters:
+    - $ref: "../parameters/path/RoleIdPath.yaml"
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Roles/RoleV1.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

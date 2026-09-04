@@ -1,0 +1,33 @@
+get:
+  summary: Get clusters minimal data
+  operationId: get_clusters_minimal_data
+  x-service: cluster-service
+  description: Retrieve essential cluster data required for common operations (e.g., workload submission)
+  x-authorize:
+    resource-type: clusters-minimal
+    action: read
+  x-test-coverage:
+    - cluster-service/pkg/services/api_clusters_service_test.go
+  tags:
+    - Clusters
+  parameters:
+    - $ref: "../parameters/query/ClustersMinimalFilterBy.yaml"
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+  responses:
+    200:
+      description: ok
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              clusters:
+                type: array
+                items:
+                  $ref: "../schemas/Clusters/ClustersMinimalData.yaml"
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+

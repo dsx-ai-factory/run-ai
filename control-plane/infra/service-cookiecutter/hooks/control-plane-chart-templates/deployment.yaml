@@ -1,0 +1,14 @@
+{{- if .Values.[[ cookiecutter_app_name_camel_case_lower ]].enabled }}
+{{- include "common.deployment" (list . .Values.[[ cookiecutter_app_name_camel_case_lower ]] .Values.[[ cookiecutter_app_name_camel_case_lower ]].autoscaling .Values.[[ cookiecutter_app_name_camel_case_lower ]].serviceAccount "control-plane.[[ cookiecutter_app_name_camel_case_lower ]].deployment" ) }}
+{{- end }}
+
+{{- define "control-plane.[[ cookiecutter_app_name_camel_case_lower ]].deployment" -}}
+spec:
+  template:
+    spec:
+      initContainers:
+DB-CC-PREFIX        {{- include "awaitingPostgresReadinessContainer" . | nindent 8 }}
+        {{- include "common.initContainer" . | nindent 8 }}
+      containers:
+      - {{- include "common.container" . | nindent 8 }}
+{{- end }}

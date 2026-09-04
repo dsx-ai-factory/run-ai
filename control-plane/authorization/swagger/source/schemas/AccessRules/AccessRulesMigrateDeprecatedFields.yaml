@@ -1,0 +1,16 @@
+type: object
+description: Specifies the old (deprecated) role and the new (non-deprecated) role for access-rule migration.
+required:
+  - oldRoleId
+  - newRoleId
+properties:
+  oldRoleId:
+    type: integer
+    format: int32
+    description: The numeric ID of the deprecated role whose access rules should be migrated. Must be a deprecated role in the current tenant.
+    example: 53142648
+  newRoleId:
+    type: integer
+    format: int32
+    description: The numeric ID of the non-deprecated role to migrate access rules to. Must not be a deprecated role, and must be enabled.
+    example: 12345678

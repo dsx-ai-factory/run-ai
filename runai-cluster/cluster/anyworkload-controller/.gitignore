@@ -1,0 +1,6 @@
+# Build artifacts
+/bin/setup-envtest
+/bin/controller-gen
+
+# Generated test data
+tests/testdata/generated/

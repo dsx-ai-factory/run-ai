@@ -1,0 +1,72 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      template: test-configmap-volume
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      kai.scheduler/preemptibility: non-preemptible
+      priorityClassName: build
+      project: team-a
+      release: test-configmap-volume
+      workloadKind: InteractiveWorkload
+      workloadName: test-configmap-volume
+    name: job-3
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 0
+    completions: 1
+    maxIdleDurationSeconds: 1200
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          user: user.name
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          kai.scheduler/preemptibility: non-preemptible
+          priorityClassName: build
+          project: team-a
+          release: test-configmap-volume
+          run.ai/top-owner-uid: ""
+          workloadKind: InteractiveWorkload
+          workloadName: test-configmap-volume
+      spec:
+        containers:
+        - image: ubuntu
+          imagePullPolicy: Always
+          name: job-3
+          resources: {}
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+          - mountPath: /mnt/ed1
+            name: emptydir-volume-0
+          - mountPath: /mnt/ed2
+            name: emptydir-volume-1
+          - mountPath: /mnt/ed3
+            name: emptydir-volume-2
+          - mountPath: /mnt/ed4
+            name: emptydir-volume-3
+        restartPolicy: Never
+        schedulerName: runai-scheduler
+        volumes:
+        - emptyDir: {}
+          name: emptydir-volume-0
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 256Mi
+          name: emptydir-volume-1
+        - emptyDir: {}
+          name: emptydir-volume-2
+        - emptyDir:
+            sizeLimit: 1Gi
+          name: emptydir-volume-3
+  status: {}

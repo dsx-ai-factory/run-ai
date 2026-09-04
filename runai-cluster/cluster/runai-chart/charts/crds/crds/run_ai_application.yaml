@@ -1,0 +1,224 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: applications.run.ai
+spec:
+  group: run.ai
+  names:
+    kind: Application
+    listKind: ApplicationList
+    plural: applications
+    singular: application
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.action.type
+      name: Action
+      type: string
+    - jsonPath: .status.action.phase
+      name: Status
+      type: string
+    - jsonPath: .status.helmStatus.helmPhase
+      name: Helm Status
+      type: string
+    - jsonPath: .status.action.startedAt
+      name: Started
+      type: date
+    - jsonPath: .status.action.completedAt
+      name: Completed
+      type: date
+    - jsonPath: .status.action.message
+      name: Message
+      priority: 1
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Application is the Schema for the applications API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ApplicationSpec defines the desired state of Application
+            properties:
+              helm:
+                description: |-
+                  Helm contains optional Helm chart deployment configuration.
+                  When specified, the controller will deploy the Helm chart.
+                  When not specified, the controller will only track externally deployed resources.
+                properties:
+                  auth:
+                    description: Auth contains authentication configuration for private
+                      repositories
+                    properties:
+                      caFile:
+                        description: |-
+                          CAFile is the path to a CA certificate file for custom CA verification
+                          Typically loaded from the secret's "ca.crt" key
+                        type: string
+                      insecureSkipTLSVerify:
+                        description: InsecureSkipTLSVerify skips TLS certificate verification
+                          (not recommended for production)
+                        type: boolean
+                      secretRef:
+                        description: |-
+                          SecretRef references a Secret containing authentication credentials
+                          The Secret should contain keys based on the auth type:
+                          - For basic auth: "username" and "password"
+                          - For TLS: "ca.crt", "tls.crt", "tls.key"
+                          - For OCI registries: "dockerconfigjson" (same format as imagePullSecrets)
+                        properties:
+                          name:
+                            description: Name is the name of the Secret
+                            type: string
+                        required:
+                        - name
+                        type: object
+                    type: object
+                  chartRef:
+                    description: |-
+                      Reference to the chart to be installed by means of Repo, Version and Name.
+                      ChartRef and ChartUrl are mutually exclusive.
+                    properties:
+                      name:
+                        description: Chart name to deploy
+                        type: string
+                      repository:
+                        description: |-
+                          Repository is the Helm chart repository URL (HTTP/HTTPS or OCI)
+                          Examples: "https://charts.bitnami.com/bitnami", "oci://registry.example.com/charts"
+                        type: string
+                      version:
+                        description: Version is the chart version to deploy
+                        type: string
+                    required:
+                    - name
+                    - repository
+                    - version
+                    type: object
+                  chartUrl:
+                    description: |-
+                      URL pointing to the chart to be installed.
+                      ChartUrl and ChartRef are mutually exclusive.
+                    type: string
+                  requiresControlPlaneAuth:
+                    description: |-
+                      RequiresControlPlaneAuth indicates the chart is hosted by the control plane (an uploaded
+                      chart) and must be downloaded with the cluster's control-plane bearer token. Set by the
+                      control plane at sync time for uploaded charts; never set for user-provided ChartUrl charts.
+                    type: boolean
+                  values:
+                    additionalProperties:
+                      x-kubernetes-preserve-unknown-fields: true
+                    description: Values are the Helm values to override chart defaults
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                type: object
+                x-kubernetes-validations:
+                - message: exactly one of chartRef or chartUrl must be set
+                  rule: (has(self.chartRef) && !has(self.chartUrl)) || (!has(self.chartRef)
+                    && has(self.chartUrl))
+              source:
+                description: Source of the application (e.g., "helm", "dynamo")
+                type: string
+              type:
+                description: The type/name of the application (e.g., chart name)
+                type: string
+            type: object
+          status:
+            description: ApplicationStatus defines the observed state of Application
+            properties:
+              action:
+                description: |-
+                  Information about the action that is currently
+                  performed on the application, or the last action that
+                  has been performed on the application.
+                properties:
+                  completedAt:
+                    description: Operation completion time
+                    format: date-time
+                    type: string
+                  error:
+                    description: Operation error
+                    type: string
+                  message:
+                    description: Operation info message
+                    type: string
+                  phase:
+                    description: Phase
+                    type: string
+                  startedAt:
+                    description: Operation start time
+                    format: date-time
+                    type: string
+                  type:
+                    description: Action type (Install, Upgrade, Uninstall)
+                    type: string
+                type: object
+              helmStatus:
+                description: Status of the helm installer (only set when deployed
+                  via spec.helm)
+                properties:
+                  chartUrl:
+                    description: URL of the chart
+                    type: string
+                  helmError:
+                    description: |-
+                      Any error that occurred while preparing or executing
+                      install/upgrade/delete operation
+                    type: string
+                  helmPhase:
+                    description: |-
+                      Phase defines the phase of the Helm installer
+                      (queued, started, downloading, running, completed, failed)
+                    type: string
+                  releaseVersion:
+                    description: ReleaseVersion is the Helm release version numbering
+                    type: integer
+                type: object
+              k8sPhase:
+                description: k8sPhase is the recently observed phase of the application.
+                type: string
+              resources:
+                description: List of Resources that are related to this application
+                items:
+                  properties:
+                    controlPlaneId:
+                      type: string
+                    controlPlaneName:
+                      type: string
+                    kind:
+                      type: string
+                    name:
+                      type: string
+                    uid:
+                      type: string
+                  type: object
+                type: array
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

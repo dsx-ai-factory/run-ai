@@ -1,0 +1,83 @@
+openapi: "3.0.3"
+info:
+  title: ClusterService
+  version: "1.0"
+  description: An API for managing RunAi cluster objects (nodes).
+  contact:
+    name: "Run.AI"
+    url: "https://www.run.ai/"
+    email: "support@run.ai"
+servers:
+  - url: https://app.run.ai
+  - url: https://staging.run.ai
+  - url: https://test.run.ai
+  - url: http://localhost:8080
+paths:
+  /api/v1/clusters/{clusterUuid}/nodes:
+    $ref: "./resources/NodesByCluster.yaml"
+  /api/v1/clusters/{clusterUuid}/nodes/count:
+    $ref: "./resources/NodesCount.yaml"
+  /api/v1/clusters:
+    x-scope: [system, tenant]
+    $ref: "./resources/Clusters.yaml"
+  /api/v1/clusters/minimal:
+    $ref: "./resources/ClustersMinimalData.yaml"
+  /api/v1/clusters/{clusterUuid}/minimal:
+    $ref: "./resources/ClusterMinimalDataById.yaml"
+  /api/v1/clusters/{clusterUuid}:
+    x-scope: [system, tenant]
+    $ref: "./resources/ClusterById.yaml"
+  /api/v1/clusters/count:
+    $ref: "./resources/ClustersCount.yaml"
+  /api/v1/clusters/versions:
+    $ref: "./resources/ClusterVersions.yaml"
+  /api/v1/clusters/{clusterUuid}/metrics:
+    $ref: "./resources/ClusterMetrics.yaml"
+  /api/v1/clusters/{clusterUuid}/nodepools/{nodepoolName}/metrics:
+    $ref: "./resources/NodepoolMetrics.yaml"
+  /internal/node-pools/notification:
+    $ref: "./resources/NodepoolsNotification.yaml"
+  /internal/node-pools/settings:
+    $ref: "./resources/NodepoolsSettings.yaml"
+  /api/v1/node-pools:
+    $ref: "./resources/Nodepools.yaml"
+  /api/v1/node-pools/count:
+    $ref: "./resources/NodepoolsCount.yaml"
+  /api/v1/node-pools/minimal:
+    $ref: "./resources/NodepoolsMinimal.yaml"
+  /api/v1/node-pools/{nodepoolId}:
+    $ref: "./resources/NodepoolById.yaml"
+  /api/v1/node-pools/{nodepoolId}/minimal:
+    $ref: "./resources/NodepoolMinimalById.yaml"
+  /api/v1/clusters/{clusterUuid}/nodepools/status:
+    $ref: "./resources/NodepoolsSync.yaml"
+  /api/v1/clusters/{clusterUuid}/cluster-install-info:
+    x-scope: [system, tenant]
+    $ref: './resources/ClusterInstallationInfoById.yaml'
+  /internal/cluster-histories:
+    $ref: "./resources/ClusterHistories.yaml"
+  /api/v1/nodes:
+    $ref: "./resources/NodesRequest.yaml"
+  /api/v1/nodes/count:
+    $ref: "./resources/TenantNodesCount.yaml"
+  /api/v1/nodes/telemetry:
+    $ref: "./resources/NodesTelemetry.yaml"
+  /api/v1/nodes/{nodeId}/metrics:
+    $ref: "./resources/NodeMetrics.yaml"
+  /api/v1/network-topologies:
+    $ref: "./resources/NetworkTopologies.yaml"
+  /api/v1/network-topologies/count:
+    $ref: "./resources/NetworkTopologiesCount.yaml"
+  /api/v1/network-topologies/{networkTopologyId}:
+    $ref: "./resources/NetworkTopologyById.yaml"
+components:
+  parameters:
+    $ref: "./parameters/_index.yaml"
+  schemas:
+    $ref: "./schemas/_index.yaml"
+  responses:
+    $ref: "../../../infra/openapi/docs/responses/_index.yaml"
+  securitySchemes:
+    $ref: "./securitySchemes/_index.yaml"
+security:
+  - bearerAuth: []

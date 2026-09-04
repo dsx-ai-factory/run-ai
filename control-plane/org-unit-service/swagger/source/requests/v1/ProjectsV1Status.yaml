@@ -1,0 +1,30 @@
+put:
+  deprecated: true
+  summary: Update Project status
+  operationId: update_project_status_v1
+  x-service: org-unit-service
+  x-internal: true
+  x-authorize:
+    resource-type: project
+    action: sync
+  tags:
+    - Projects v1
+  parameters:
+    - $ref: "../../parameters/v1/ClusterIdV1.yaml"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/v1/ProjectV1StatusRequest.yaml"
+  responses:
+    201:
+      description: Project updated successfully.
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

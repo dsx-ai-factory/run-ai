@@ -1,0 +1,7 @@
+name: dataName
+in: query
+required: true
+description: the name of the datavolume
+schema:
+  type: string
+  minLength: 1

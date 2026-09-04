@@ -1,0 +1,7 @@
+name: projectId
+in: query
+description: project id to filter by
+required: false
+schema:
+  type: string
+  example: "1"

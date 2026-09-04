@@ -1,0 +1,11 @@
+properties:
+  worker:
+    allOf:
+      - $ref: "./ReplicaDefaultsV2.yaml"
+      - replace: me
+    nullable: true
+    type: object
+  master:
+    $ref: "./ReplicaDefaultsV2.yaml"
+nullable: true
+type: object

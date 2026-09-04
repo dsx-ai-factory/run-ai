@@ -1,0 +1,6 @@
+allOf:
+  - $ref: "../templates/TemplateCreationMeta.yaml"
+  - type: object
+    properties:
+      spec:
+        $ref: "DistributedInferenceTemplateSpec.yaml"

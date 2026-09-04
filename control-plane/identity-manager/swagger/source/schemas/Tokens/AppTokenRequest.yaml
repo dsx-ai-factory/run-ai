@@ -1,0 +1,15 @@
+type: object
+required:
+  - id
+  - name
+  - secret
+properties:
+  id:
+    type: string
+    maxLength: 64
+  name:
+    type: string
+    maxLength: 255
+  secret:
+    type: string
+    maxLength: 500

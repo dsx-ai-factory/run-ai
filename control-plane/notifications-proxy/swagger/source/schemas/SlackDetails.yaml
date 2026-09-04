@@ -1,0 +1,11 @@
+type: object
+properties:
+  settings:
+    type: object
+    properties:
+      workspaceName:
+        type: string
+        nullable: true
+      appCredentialsConfigured:
+        type: boolean
+        nullable: true

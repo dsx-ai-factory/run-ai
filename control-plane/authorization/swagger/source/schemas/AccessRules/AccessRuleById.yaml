@@ -1,0 +1,7 @@
+allOf:
+  - $ref: "./AccessRule.yaml"
+  - properties:
+      scopePath:
+        type: string
+        nullable: true
+        example: runai/production-cluster/dep-42/prj-73

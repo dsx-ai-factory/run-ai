@@ -1,0 +1,6 @@
+description: Share this volumes mount with other containers. If set to HostToContainer, this volume mount will receive all subsequent mounts that are mounted to this volume or any of its subdirectories. In case of multiple hostPath entries, this field should have the same value for all of them.
+type: string
+enum:
+  - None
+  - HostToContainer
+nullable: true

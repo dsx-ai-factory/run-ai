@@ -1,0 +1,7 @@
+properties:
+  worker:
+    $ref: "../Policy/ImposedAssets.yaml"
+  master:
+    $ref: "../Policy/ImposedAssets.yaml"
+nullable: true
+type: object

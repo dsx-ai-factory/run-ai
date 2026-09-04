@@ -1,0 +1,12 @@
+{
+    "target": {
+        "path": {
+            "deployment": "metrics-exporter"
+        },
+        "namespace": "runai"
+    },
+    "feature": {
+        "env": true,
+        "fs": "read"
+    }
+}

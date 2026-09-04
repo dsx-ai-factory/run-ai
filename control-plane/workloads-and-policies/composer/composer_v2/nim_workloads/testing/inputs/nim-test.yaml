@@ -1,0 +1,59 @@
+ngcAuthSecret: ngc-api-secret
+servingPort:
+  port: 8000
+  exposeExternally: true
+image: "nvcr.io/nim/deepseek-ai/deepseek-r1-distill-qwen-7b"
+imagePullPolicy: IfNotPresent
+imagePullSecrets:
+  - name: ngc-secret
+modelStore:
+  nimCache:
+    name: cache1
+  # pvc:
+    # - path: "shay-models"
+    #   existingPvc: false
+    #   readOnly: false
+    #   claimInfo:
+    #     size: "25Gi"
+    #     storageClass: "ebs-csi"
+    #     volumeMode: "Filesystem"
+    #     accessModes:
+    #       readWriteOnce: true
+    #     addedAttrValues:
+    #       - key: "shay1"
+    #         value: "aaa"
+    # - path: "shay-models"
+    #   claimName: "shay-pvc-project-7ruow"
+    #   readOnly: true
+    #   existingPvc: true
+  # hostPath:
+  #   - path: "/models"
+compute:
+  # gpuDevicesRequest: 1
+  # gpuRequestType: memory
+  gpuMemoryRequest: 1G
+  # gpuMemoryLimit: 2G
+# command: "list-model-profiles"
+# args: "-aaa -bbb"
+replicas: 1
+# podAffinity:
+#   key: "kubernetes.io/os"
+# tolerations:
+#   - name: "gpu-toleration"
+#     key: "nvidia.com/gpu"
+#     operator: "Equal"
+#     value: "v100"
+#     effect: "NoSchedule"
+#   - name: "node-toleration"
+#     key: "node-type"
+#     operator: "Exists"
+#     effect: "NoExecute"
+#     seconds: 300
+#   - key: "dedicated"
+#     operator: "Equal"
+#     value: "ml-workload"
+#     effect: "PreferNoSchedule"
+#   - key: "experimental"
+#     operator: "Exists"
+#     effect: "Any"
+# platform: kserve

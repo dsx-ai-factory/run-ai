@@ -1,0 +1,7 @@
+name: isWorkspace
+in: query
+required: false
+description: Filter results to workload of type workspace.
+schema:
+  type: boolean
+allowReserved: true

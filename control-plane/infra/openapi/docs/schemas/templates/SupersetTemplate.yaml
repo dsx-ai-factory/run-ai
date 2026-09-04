@@ -1,0 +1,20 @@
+allOf:
+  - $ref: "./TemplateMeta.yaml"
+  - type: object
+    properties:
+      runnable:
+        $ref: "../templates/RunnableInfo.yaml"
+      spec:
+        $ref: "../workloads_spec/SupersetSpec.yaml"
+      assets:
+        $ref: "../templates/TemplateAssetsIdsOptional.yaml"
+      masterSpecSameAsWorker:
+        $ref: "../distributed/MasterSpecSameAsWorker.yaml"
+      master:
+        $ref: "../distributed/TemplateMasterSection.yaml"
+      combinedSpec:
+        $ref: "../workloads_spec/SupersetSpec.yaml"
+      combinedMasterSpec:
+        $ref: "../distributed/MasterTemplateSpec.yaml"
+    nullable: true
+  - $ref: "../policy/TemplateComplianceInfo.yaml"

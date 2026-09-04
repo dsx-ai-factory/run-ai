@@ -1,0 +1,8 @@
+type: object
+properties:
+  msg:
+    type: string
+    nullable: true
+    description: The message content to display to all users (supports limited HTML)
+example:
+  msg: We are currently experiencing an unexpected outage affecting service-x. We're actively investigating the issue. We apologize for the disruption.

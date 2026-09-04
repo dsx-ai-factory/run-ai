@@ -1,0 +1,12 @@
+x-internal: true
+type: object
+description: Internal cluster configuration
+allOf:
+  - $ref: "../../Common/Metadata.yaml"
+  - type: object
+    properties:
+      clusterId:
+        type: string
+        format: uuid
+      config:
+        $ref: "ClusterFullConfigData.yaml"

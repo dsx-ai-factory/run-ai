@@ -1,0 +1,60 @@
+policy:
+  effectiveRules:
+  - enforcements:
+    - length:
+        min: 8
+    field: name
+    sourceOfRule: null
+    specSelector: entireWorkload
+  - enforcements:
+    - length:
+        min: 5
+    field: name
+    sourceOfRule: null
+    specSelector: allContainers
+  - enforcements:
+    - options:
+      - redhat
+    field: image
+    selectorParams:
+      containerName: worker
+    sourceOfRule: null
+    specSelector: appContainerByName
+  - enforcements:
+    - length:
+        min: 3
+    field: environmentVariables-Name
+    itemSelector: allEnvVars
+    sourceOfRule: null
+    specSelector: allContainers
+  - enforcements:
+    - options:
+      - MY_CONFIG
+    field: environmentVariables-Name
+    itemSelector: envVarFromConfigMap
+    sourceOfRule: null
+    specSelector: allContainers
+  workloadType:
+    group: apps
+    kind: Deployment
+    version: v1
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: my-deployment
+  spec:
+    template:
+      spec:
+        containers:
+        - env:
+          - name: PATH
+            value: /bin
+          - name: MY_CONFIG
+            valueFrom:
+              configMapKeyRef:
+                key: k
+                name: cm-x
+          name: main-worker
+        - image: redhat
+          name: worker

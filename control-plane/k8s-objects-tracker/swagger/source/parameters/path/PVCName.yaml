@@ -1,0 +1,6 @@
+name: pvcName
+in: path
+description: The pvc name.
+schema:
+  type: string
+required: true

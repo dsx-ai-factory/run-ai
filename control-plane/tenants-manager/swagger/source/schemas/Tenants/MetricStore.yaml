@@ -1,0 +1,79 @@
+MetricStore:
+  required:
+  - read
+  - write
+  type: object
+  properties:
+    read:
+      $ref: '#/MetricStoreEndpoint'
+    write:
+      $ref: '#/MetricStoreEndpoint'
+
+MetricStoreEndpoint:
+  required:
+  - url
+  type: object
+  properties:
+    url:
+      type: string
+      format: uri
+      example: http://mimir-nginx.mimir-test.svc:80/api/v1/query
+      minLength: 1
+      maxLength: 2048
+    auth:
+      nullable: true
+      type: object
+      properties:
+        basic:
+          nullable: true
+          type: object
+          properties:
+            username:
+              type: string
+              minLength: 1
+              maxLength: 255
+            password:
+              type: string
+              minLength: 1
+              maxLength: 500
+    headers:
+      nullable: true
+      type: object
+      additionalProperties:
+        type: string
+        maxLength: 1000
+      minProperties: 0
+      maxProperties: 50
+      example:
+        X-Scope-OrgID: id
+
+ExtendedMetricStore:
+  required:
+    - tenantId
+    - type
+    - datasourceId
+    - read
+    - write
+  type: object
+  properties:
+    tenantId:
+      description: The id of the tenant.
+      type: integer
+      format: int32
+      minimum: 1
+      maximum: 2147483647
+    type:
+      type: string
+      enum:
+        - grafanalabs
+        - mimir
+        - thanos
+    datasourceId:
+      description: Id of datasource
+      type: string
+      minLength: 1
+      maxLength: 64
+    read:
+      $ref: '#/MetricStoreEndpoint'
+    write:
+      $ref: '#/MetricStoreEndpoint'

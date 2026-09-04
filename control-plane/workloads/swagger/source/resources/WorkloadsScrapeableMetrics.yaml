@@ -1,0 +1,29 @@
+get:
+  summary: Get workloads metrics in openmetrics format for scraping.
+  operationId: get_workloads_scrapeable_metrics
+  x-service: workloads
+  x-internal: true
+  x-authorize:
+    resource-type: workload-integration-metrics
+    action: read
+  x-test-coverage:
+    - e2e/src/test/suites/playwright/serial/nv/metrics/workloadsMetricsExporter.test.ts
+  tags:
+    - Metrics
+  responses:
+    200:
+      description: OK
+      content:
+        text/plain:
+          schema:
+            type: string
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

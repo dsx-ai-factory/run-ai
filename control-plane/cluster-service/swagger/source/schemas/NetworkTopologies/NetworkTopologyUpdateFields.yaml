@@ -1,0 +1,7 @@
+type: object
+required:
+  - levels
+properties:
+  levels:
+    $ref: './NetworkTopologyLevels.yaml'
+x-schema-name: NetworkTopologyUpdateFields

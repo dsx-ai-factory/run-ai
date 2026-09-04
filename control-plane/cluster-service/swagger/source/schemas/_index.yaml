@@ -1,0 +1,70 @@
+# Nodes
+Node:
+  $ref: "./Nodes/Node.yaml"
+NodeExtended:
+  $ref: "./Nodes/NodeExtended.yaml"
+NodeAdditionalFields:
+  $ref: "./Nodes/NodeAdditionalFields.yaml"
+NodeAdditionalReadFields:
+  $ref: "./Nodes/NodeAdditionalReadFields.yaml"
+NodeForSync:
+  $ref: "./Nodes/NodeForSync.yaml"
+NodeNumaForSync:
+  $ref: "./Nodes/NodeNumaForSync.yaml"
+Nodes:
+  $ref: "./Nodes/Nodes.yaml"
+NodesSyncRequest:
+  $ref: "./Nodes/NodesSyncRequest.yaml"
+NodeInfo:
+  $ref: "./Nodes/NodeInfo.yaml"
+NumaInfo:
+  $ref: "./Nodes/NumaInfo.yaml"
+NumaInfoExtended:
+  $ref: "./Nodes/NumaInfoExtended.yaml"
+NumaNodeDetails:
+  $ref: "./Nodes/NumaNodeDetails.yaml"
+NumaNodesSyncRequest:
+  $ref: "./Nodes/NumaNodesSyncRequest.yaml"
+NodeMetricType:
+  $ref: "./Nodes/NodeMetricType.yaml"
+NodeStatusConditionDetails:
+  $ref: "./Nodes/NodeStatusConditionDetails.yaml"
+NodeTaint:
+  $ref: "./Nodes/NodeTaint.yaml"
+GpuInfo:
+  $ref: "./Nodes/GpuInfo.yaml"
+NodeFilterSortFields:
+  $ref: "./Nodes/NodeFilterSortFields.yaml"
+MetricsResponse:
+  $ref: '../../../../infra/openapi/docs/schemas/metrics/MetricsResponse.yaml'
+MeasurementResponse:
+  $ref: '../../../../infra/openapi/docs/schemas/metrics/MeasurementResponse.yaml'
+MetricsType:
+  $ref: '../../../../infra/openapi/docs/schemas/metrics/MetricsType.yaml'
+Ancestors:
+  $ref: '../../../../infra/openapi/docs/schemas/scopes/Ancestors.yaml'
+# Nodepool
+GPUResourceOptimization:
+  $ref: "./Nodepools/GPUResourceOptimization.yaml"
+SchedulingConfiguration:
+  $ref: "./Nodepools/SchedulingConfiguration.yaml"
+GpuPodsPlacementStrategy:
+  $ref: "./Nodepools/GpuPodsPlacementStrategy.yaml"
+CpuPodsPlacementStrategy:
+  $ref: "./Nodepools/CpuPodsPlacementStrategy.yaml"
+# NetworkTopologies
+NetworkTopology:
+  $ref: "./NetworkTopologies/NetworkTopology.yaml"
+NetworkTopologyCreateRequest:
+  $ref: "./NetworkTopologies/NetworkTopologyCreateRequest.yaml"
+NetworkTopologyUpdateFields:
+  $ref: "./NetworkTopologies/NetworkTopologyUpdateFields.yaml"
+# Settings
+ClusterSettingsKeyEnum:
+  $ref: "./Settings/ClusterSettingsKeyEnum.yaml"
+EnableAdvancedGpuMetricsSetting:
+  $ref: "./Settings/EnableAdvancedGpuMetricsSetting.yaml"
+ClusterSettingsGetResponse:
+  $ref: "./Settings/ClusterSettingsGetResponse.yaml"
+UpdateClusterSettingByKeyRequest:
+  $ref: "./Settings/UpdateClusterSettingByKeyRequest.yaml"

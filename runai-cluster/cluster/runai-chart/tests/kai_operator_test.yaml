@@ -1,0 +1,13 @@
+suite: Test upstream KAI operator
+
+templates:
+  - charts/kai-scheduler/templates/services/operator.yaml
+
+tests:
+  - it: should render the pinned upstream KAI operator
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: metadata.name
+          value: kai-operator

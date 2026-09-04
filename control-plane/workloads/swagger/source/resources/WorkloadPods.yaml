@@ -1,0 +1,48 @@
+get:
+  summary: Get workload pods by id.
+  description: Retrieve the details of workload pods by workload id.
+  operationId: get_workload_pods
+  x-service: workloads
+  x-test-coverage:
+    - e2e/src/test/suites/advancedSuite/workloads/workloadsApi.test.ts
+    - e2e/src/test/suites/metricsSuite/metricsApi.test.ts
+  x-authorize:
+    resource-type: workloads
+    action: read
+    resource-id: workloadId
+  tags:
+    - Pods
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+    - $ref: '../parameters/query/Deleted.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Search.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+    - $ref: '../parameters/query/PodsSort.yaml'
+    - $ref: '../parameters/query/PodsFilter.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - pods
+            properties:
+              next:
+                type: integer
+                example: 1
+              pods:
+                $ref: '../schemas/Pods/Pods.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,33 @@
+description: |
+  Layer 3 case "container" for nvidia.com/DynamoGraphDeployment/v1alpha1. SETs
+  container-level fields for all containers (all services, app and init)
+  via extraPodSpec.
+effectiveRules:
+  # ===== All containers (app + init, across all services) =====
+  - field: image
+    specSelector: allContainers
+    enforcements: [{ set: { value: "dynamo/service:v1" } }]
+  - field: imagePullPolicy
+    specSelector: allContainers
+    enforcements: [{ set: { value: IfNotPresent } }]
+  - field: resourceLimits
+    specSelector: allContainers
+    enforcements: [{ set: { key: cpu, value: "4" } }]
+  - field: resourceLimits
+    specSelector: allContainers
+    enforcements: [{ set: { key: memory, value: "8Gi" } }]
+  - field: resourceRequests
+    specSelector: allContainers
+    enforcements: [{ set: { key: cpu, value: "2" } }]
+  - field: resourceRequests
+    specSelector: allContainers
+    enforcements: [{ set: { key: memory, value: "4Gi" } }]
+  - field: allowPrivilegeEscalation
+    specSelector: allContainers
+    enforcements: [{ set: { value: false } }]
+  - field: runAsNonRoot
+    specSelector: allContainers
+    enforcements: [{ set: { value: true } }]
+  - field: runAsUser
+    specSelector: allContainers
+    enforcements: [{ set: { value: 1000 } }]

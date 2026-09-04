@@ -1,0 +1,4 @@
+type: string
+description: The NodePool id
+readOnly: true
+example: 5

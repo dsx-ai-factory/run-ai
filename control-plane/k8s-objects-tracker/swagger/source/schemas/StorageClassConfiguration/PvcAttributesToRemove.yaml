@@ -1,0 +1,11 @@
+description: optional list of attributes that you wish to remove
+properties:
+  attributesToRemove:
+    type: array
+    items:
+      type: string
+    example:
+      - dnsname
+      - dnsip
+type: object
+nullable: true

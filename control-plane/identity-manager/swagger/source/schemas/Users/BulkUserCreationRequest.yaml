@@ -1,0 +1,25 @@
+type: object
+required:
+- users
+
+properties:
+  users:
+    type: array
+    items:
+      $ref: 'UserCreationRequestBulk.yaml'
+    minItems: 1
+    maxItems: 10
+    description: Array of users to create. Maximum 10 users per batch.
+  notify:
+    type: boolean
+    description: When true, send an email to the user. The email includes a link to reset the password.
+    nullable: true
+
+example:
+  users:
+  - email: "user1@run.ai"
+    resetPassword: false
+  - email: "user2@run.ai"
+    resetPassword: true
+  - email: "user3@run.ai"
+  notify: true

@@ -1,0 +1,42 @@
+patch:
+  summary: Set the run state of a workload.
+  description: Sets the run state of a specific workload by ID. The desired state is provided in the request body.
+  operationId: set_workload_run_state
+  x-service: workloads-manager
+  x-test-coverage:
+    - control-plane/workloads-manager/pkg/services/services_test.go
+  x-authorize:
+    resource-type: workloads
+    action: update
+  x-internal: true
+  tags:
+    - Workloads V2
+  parameters:
+    - $ref: '../parameters/path/WorkloadV2Id.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/WorkloadsV2/WorkloadRunStateRequest.yaml'
+  responses:
+    202:
+      description: Run state request accepted.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/WorkloadsV2/WorkloadV2.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    409:
+      $ref: '../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

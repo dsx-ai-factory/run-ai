@@ -1,0 +1,36 @@
+properties:
+  accessKeySecret:
+    description: Name of the secret containing credentials of the S3 bucket. Used for private S3 buckets.
+    type: string
+    minLength: 1
+    example: my-access-key-secret
+    nullable: true
+    pattern: "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$"
+  secretKeyOfAccessKeyId:
+    description: The key to use for loading the access key id from the secret. The default is `AccessKeyId`.
+      For more information, see [Credentials access keys](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html).
+    type: string
+    minLength: 1
+    example: AccessKeyId
+    nullable: true
+    pattern: .*
+  secretKeyOfSecretKey:
+    description: The key to use for loading the secret key from the secret. The default is `SecretKey`.
+      For more information, see [Credentials access keys](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html).
+    type: string
+    minLength: 1
+    example: SecretKey
+    nullable: true
+    pattern: .*
+  awsSessionToken:
+    description:
+      An AWS session token. It should be provided (in addition to the access key ID and
+      secret access key) to authenticate to a bucket that is configured to use AWS
+      Security Token Service (STS).
+    type: string
+    minLength: 1
+    nullable: true
+    pattern: .*
+    x-internal: true
+nullable: true
+type: object

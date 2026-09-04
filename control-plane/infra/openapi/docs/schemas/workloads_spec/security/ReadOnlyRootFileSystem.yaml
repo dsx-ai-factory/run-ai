@@ -1,0 +1,4 @@
+description: If true, mounts the container's root filesystem as read-only.
+type: boolean
+example: false
+nullable: true

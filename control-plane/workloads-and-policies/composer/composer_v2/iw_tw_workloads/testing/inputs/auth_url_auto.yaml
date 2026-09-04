@@ -1,0 +1,4 @@
+image: ubuntu
+exposedUrls:
+  - container: 8080
+    authorizationType: authenticatedUsers

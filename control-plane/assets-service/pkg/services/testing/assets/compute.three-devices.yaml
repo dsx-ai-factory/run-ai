@@ -1,0 +1,9 @@
+spec:
+  gpuDevicesRequest: 3
+  gpuRequestType: 'portion'
+  gpuPortionRequest: 1
+  
+  cpuCoreRequest: 0.5
+  cpuCoreLimit: 2
+  cpuMemoryRequest: 20M
+  cpuMemoryLimit: 30M

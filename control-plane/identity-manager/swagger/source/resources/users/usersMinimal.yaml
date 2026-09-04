@@ -1,0 +1,36 @@
+get:
+  summary: Get minimal user display information.
+  description: |
+    Retrieve a list of users with minimal display information (id, username, firstName, lastName).
+    At least one of `search`, `id`, or `filterBy` is required to scope the lookup. Requires the users-minimal:read permission.
+  x-service: identity-manager
+  x-test-coverage:
+  - integration-tests/tests/api_users_test.go
+  operationId: get_users_minimal
+  x-authorize:
+    resource-type: users-minimal
+    action: read
+  tags:
+  - Users
+  parameters:
+  - $ref: "../../parameters/usersMinimalFilterBy.yaml"
+  - $ref: "../../parameters/usersMinimalSearch.yaml"
+  - $ref: "../../parameters/usersMinimalId.yaml"
+  - $ref: "../../parameters/limit.yaml"
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Users/UsersMinimal.yaml'
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

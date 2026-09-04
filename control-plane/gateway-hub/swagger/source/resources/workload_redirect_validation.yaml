@@ -1,0 +1,36 @@
+get:
+  summary: Validate the OAuth redirect_uri for workload auth flows
+  description: >
+    ForwardAuth endpoint for the workload-redirect-validation Traefik middleware.
+    Validates the redirect_uri query parameter against the cluster's registered
+    external URL. Returns 200 when the URI is valid so Traefik forwards the
+    request to Keycloak; returns 400 + HTML error page when invalid — Traefik
+    forwardAuth passes non-2xx responses directly to the client.
+  x-service: gateway-hub
+  x-test-coverage: not-applicable
+  operationId: validate_redirect
+  x-no-authorization: true
+  tags:
+  - Redirect Validation
+  parameters:
+  - name: redirect_uri
+    in: query
+    required: true
+    description: OAuth redirect URI to validate.
+    schema:
+      type: string
+  - name: client_id
+    in: query
+    required: true
+    description: OAuth client_id in the format runai-internal.<uuid>.workloads_auth.
+    schema:
+      type: string
+  responses:
+    200:
+      description: redirect_uri is valid for this cluster.
+    400:
+      description: redirect_uri is invalid or could not be validated.
+      content:
+        text/html:
+          schema:
+            type: string

@@ -1,0 +1,28 @@
+204NoContent:
+  $ref: "./204NoContent.yaml"
+400BadRequest:
+  $ref: "./400BadRequest.yaml"
+400BadSubmissionRequest:
+  $ref: "./400BadSubmissionRequest.yaml"
+401Unauthorized:
+  $ref: "./401Unauthorized.yaml"
+403Forbidden:
+  $ref: "./403Forbidden.yaml"
+404NotFound:
+  $ref: "./404NotFound.yaml"
+406NotAcceptable:
+  $ref: "./406NotAcceptable.yaml"
+409Conflict:
+  $ref: "./409Conflict.yaml"
+412PreconditionFailed:
+  $ref: "./412PreconditionFailed.yaml"
+413RequestEntityTooLarge:
+  $ref: "./413RequestEntityTooLarge.yaml"
+415UnsupportedMediaType:
+  $ref: "./415UnsupportedMediaType.yaml"
+500InternalServerError:
+  $ref: "./500InternalServerError.yaml"
+501NotImplemented:
+  $ref: "./501NotImplemented.yaml"
+503ServiceUnavailable:
+  $ref: "./503ServiceUnavailable.yaml"

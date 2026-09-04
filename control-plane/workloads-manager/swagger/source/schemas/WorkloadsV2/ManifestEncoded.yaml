@@ -1,0 +1,5 @@
+type: string
+format: byte
+maxLength: 2097152  # 2 MB base64 (~1.5 MB decoded YAML). Note: Default etcd limit is 1.5 MB total (including metadata), so manifests >750 KB may fail unless customer has configured etcd with --max-request-bytes=4194304 or higher. We set 2 MB to support customers with custom etcd configurations.
+example: YXBpVmVyc2lvbjogdjEKa2luZDogUG9kCm1ldGFkYXRhOgogIG5hbWU6IG15LXBvZApzcGVjOgogIGNvbnRhaW5lcnM6CiAgLSBuYW1lOiBuZ2lueAogICAgaW1hZ2U6IG5naW54OmxhdGVzdAo=
+description: Kubernetes YAML manifest encoded in base 64. Mutually exclusive with manifest.

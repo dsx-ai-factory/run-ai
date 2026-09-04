@@ -1,0 +1,68 @@
+get:
+  x-no-authorization: true
+  x-service: notifications-proxy
+  x-test-coverage:
+    - src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts
+  tags:
+    - Slack
+  operationId: getSlackNotificationState
+  summary: Get slack notification state
+  description: Get slack notification state
+  responses:
+    '200':
+      description: Slack Notifications state
+      content:
+        application/json:
+          schema:
+              $ref: '../schemas/NotificationStateStatus.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    501:
+      $ref: '../../../../infra/openapi/docs/responses/501NotImplemented.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+patch:
+  x-authorize:
+    resource-type: notification-settings
+    action: create
+  x-service: notifications-proxy
+  x-test-coverage:
+    - src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts
+  x-audit: true
+  tags:
+    - Slack
+  operationId: updateSlackNotificationState
+  summary: Update slack notification state
+  description: Update tenant slack notification state
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/NotificationStateStatus.yaml'
+  responses:
+    '200':
+      description: Slack Notifications state
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/NotificationStateStatus.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    501:
+      $ref: '../../../../infra/openapi/docs/responses/501NotImplemented.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

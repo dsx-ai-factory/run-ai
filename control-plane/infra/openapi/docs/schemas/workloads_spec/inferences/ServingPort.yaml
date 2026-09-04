@@ -1,0 +1,6 @@
+description: A port for accessing the inference service
+allOf:
+  - $ref: "./ServingPortContainerAndProtocol.yaml"
+  - $ref: "./ServingPortAccess.yaml"
+nullable: true
+type: object

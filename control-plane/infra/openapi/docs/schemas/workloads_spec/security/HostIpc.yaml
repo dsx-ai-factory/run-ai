@@ -1,0 +1,4 @@
+description: Whether to enable host IPC. Defaults to false.
+type: boolean
+example: false
+nullable: true

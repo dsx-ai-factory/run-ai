@@ -1,0 +1,26 @@
+type: object
+x-internal: true
+required:
+- id
+- clientId
+- secret
+
+properties:
+  id:
+    type: string
+  clientId:
+    type: string
+  secret:
+    type: string
+  redirectUris:
+    type: array
+    items:
+      type: string
+  attributes:
+    type: object
+example:
+  id: 3434c-12323ab-4ce2ea6-b44fc-db344d
+  clientId: name123
+  secret: "e32r3re23h65y5766k8i7k988l"
+  redirectUris: ["https://url1", "https://url2"]
+  attributes: {"key1": value, "key2": value}

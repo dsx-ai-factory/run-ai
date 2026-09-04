@@ -1,0 +1,7 @@
+type: object
+description: Authentication configuration required to access a private Helm repository or chart URL. This is used when the chart source requires credentials.
+properties:
+  assetId:
+    type: string
+    description: The ID of the asset to use for authentication.
+    format: uuid

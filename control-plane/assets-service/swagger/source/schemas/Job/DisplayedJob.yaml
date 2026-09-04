@@ -1,0 +1,108 @@
+## This one is taken from cluster-backend-api swagger.
+## Should be merged to shared-packages once possible.
+
+type: object
+properties:
+  JobId:
+    type: string
+    format: uuid
+    description: Unique identifier of the job.
+  podGroupId:
+    type: string
+    format: uuid
+    description: Unique identifier of the pod group.
+  jobName:
+    type: string
+    description: The name of the job.
+    example: job-0
+  jobType:
+    type: string
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  status:
+    type: string
+  statusTooltip:
+    type: string
+  imageName:
+    type: string
+    description: The name of the image executed by the pod.
+    example: tensorflow
+  user:
+    type: string
+    description: The owner of the job.
+  project:
+    type: string
+    description: The project that the pod group belongs to.
+  nodeId:
+    type: string
+    description: Unique identifier of the node.
+  creationTime:
+    type: string
+    description: Creation time of the job.
+  completionTime:
+    type: string
+    description: Completion time of the job.
+  totalRuntime:
+    type: string
+  totalWaitTime:
+    type: string
+  lastStatusUpdateTime:
+    type: number
+  msSinceLastStatusUpdate:
+    type: number
+  pending:
+    type: number
+  running:
+    type: number
+  parallelism:
+    type: number
+  completions:
+    type: number
+  failed:
+    type: number
+  succeeded:
+    type: number
+  currentAllocatedGPUs:
+    type: number
+  currentAllocatedGPUsMemory:
+    type: number
+  currentRequestedGPUs:
+    type: number
+  totalRequestedGPUs:
+    type: number
+  requestedGPUsPerPodGroup:
+    type: number
+  requestedGPUsMemoryPerPodGroup:
+    type: number
+  parentWorkloadName:
+    type: string
+  totalRequestedMemory:
+    type: number
+  totalRequestedCPU:
+    type: number
+  totalLimitCPU:
+    type: number
+  totalLimitMemory:
+    type: number
+  workloadKind:
+    type: number
+    description: Specifies the kind of k8s resource that owns the pod group.
+    example: runaijob
+  cliCommand:
+    type: string
+  requestedMigDevices:
+    type: string
+    deprecated: true
+  dynamicData:
+    type: object
+  existsInCluster:
+    type: boolean
+  isJupyter:
+    type: boolean
+    default: false
+    description: If true, it indicates that the pod group runs jupyter notebook.
+  jobUrl:
+    type: string
+  nodePool:
+    type: string
+    description: The node pool of the job.

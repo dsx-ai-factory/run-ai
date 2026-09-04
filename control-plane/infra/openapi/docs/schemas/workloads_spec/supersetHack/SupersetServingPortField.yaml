@@ -1,0 +1,5 @@
+properties:
+  servingPort:
+    $ref: "./SupersetServingPort.yaml"
+type: object
+nullable: true

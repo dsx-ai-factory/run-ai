@@ -1,0 +1,9 @@
+description: unexpected error
+content:
+  application/json:
+    schema:
+      $ref: './Error.yaml'
+    example:
+      code: 503
+      message: "Please try again in few minutes."
+

@@ -1,0 +1,7 @@
+name: aiApplicationId
+in: path
+required: true
+description: The unique identifier of the application.
+schema:
+  type: string
+  format: uuid

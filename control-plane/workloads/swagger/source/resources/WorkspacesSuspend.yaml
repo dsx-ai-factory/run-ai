@@ -1,0 +1,27 @@
+post:
+  summary: Suspend a workspace.
+  description: Suspend a workspace using the workspace id.
+  operationId: suspend_workspace
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/workspaces_service_test.go
+  x-authorize:
+    resource-type: workspaces
+    action: update
+  tags:
+    - Workspaces
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+  responses:
+    202:
+      $ref: "../../../../infra/openapi/docs/responses/202Accepted.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

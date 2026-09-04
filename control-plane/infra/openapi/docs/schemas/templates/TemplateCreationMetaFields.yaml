@@ -1,0 +1,12 @@
+required:
+  - name
+  - scopeType
+properties:
+  name:
+    $ref: "./TemplateName.yaml"
+  description:
+    $ref: "./TemplateDescription.yaml"
+  scopeType:
+    $ref: "../scopes/ScopeType.yaml"
+  scopeId:
+    $ref: "../scopes/ScopeIdOptional.yaml"

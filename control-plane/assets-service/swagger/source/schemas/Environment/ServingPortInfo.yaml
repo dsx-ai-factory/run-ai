@@ -1,0 +1,7 @@
+properties:
+  protocol:
+    type: string
+    enum: [grpc, http]
+    nullable: true
+nullable: true
+type: object

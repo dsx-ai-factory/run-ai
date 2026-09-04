@@ -1,0 +1,6 @@
+type: array
+items:
+  $ref: '../common/LabelValue.yaml'
+description: The topology levels of node (node address) according to nodepool assigned topology
+example: ['level-a', 'level-b']
+nullable: true

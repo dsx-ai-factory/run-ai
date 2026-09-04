@@ -1,0 +1,25 @@
+properties:
+  workspace:
+    description: Is workspace a supported workload type.
+    type: boolean
+    nullable: true
+  training:
+    description: Is training a supported workload type.
+    type: boolean
+    nullable: true
+  distributed:
+    description: Is distributed a supported workload type.
+    type: boolean
+    nullable: true
+  distFramework:
+    description: |
+      The distributed training framework used in the workload.
+      Note: The TF, XGBoost and JAX frameworks are deprecated and will be removed in a future release.
+    type: string
+    enum:
+      - MPI
+      - PyTorch
+      - TF
+      - XGBoost
+    nullable: true
+nullable: false

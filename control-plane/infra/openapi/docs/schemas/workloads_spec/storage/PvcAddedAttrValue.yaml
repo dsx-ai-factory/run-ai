@@ -1,0 +1,15 @@
+type: object
+required:
+  - key
+properties:
+  key:
+    type: string
+    minLength: 1
+    maxLength: 63
+    pattern: ^([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$
+    example: dnsname
+  value:
+    type: string
+    example: my.dns.com
+    pattern: .*
+    maxLength: 10000

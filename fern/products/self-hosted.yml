@@ -1,0 +1,1171 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fern-api/fern/main/product-yml.schema.json
+
+tabs:
+  documentation:
+    display-name: Documentation
+  reference:
+    display-name: Reference
+
+navigation:
+- tab: documentation
+  layout:
+  - page: Home
+    path: ../../docs/README.md
+  - section: Getting Started
+    contents:
+    - page: Overview
+      path: ../../docs/getting-started/overview.md
+    - page: Architecture and Components
+      slug: architecture
+      path: ../../docs/developer/architecture.md
+    - section: Quick Start Guides
+      slug: quick-starts
+      path: ../../docs/getting-started/quick-starts/README.md
+      contents:
+      - page: Deploy Infrastructure Quick Start
+        path: ../../docs/getting-started/quick-starts/deploy-infrastructure-quick-start.md
+      - page: Configure the Platform Quick Start
+        path: ../../docs/getting-started/quick-starts/configure-the-platform-quick-start.md
+      - page: Run Workloads Quick Start
+        path: ../../docs/getting-started/quick-starts/run-workloads-quick-start.md
+    - section: What's New
+      slug: whats-new
+      contents:
+      - page: What's New in Version 3.0
+        slug: whats-new-3-0
+        path: ../../docs/getting-started/whats-new/whats-new-3-0.md
+      - page: Deprecation Notifications
+        path: ../../docs/getting-started/whats-new/deprecation-notifications.md
+    - section: About NVIDIA Run:ai Enterprise
+      path: ../../docs/about-enterprise/README.md
+      contents:
+      - page: Support, Lifecycle, and Deprecation Policy
+        path: ../../docs/about-enterprise/product-support-policy.md
+  - section: Installation and Configuration
+    contents:
+    - page: Overview
+      path: ../../docs/installation-and-configuration/overview.md
+    - page: Support Matrix
+      path: ../../docs/installation-and-configuration/support-matrix.md
+    - section: System Requirements
+      path: ../../docs/installation-and-configuration/system-requirements/README.md
+      contents:
+      - page: Deployment Model
+        path: ../../docs/installation-and-configuration/system-requirements/deployment-model.md
+      - page: Infrastructure Requirements
+        path: ../../docs/installation-and-configuration/system-requirements/infrastructure-requirements.md
+      - page: Networking Setup
+        path: ../../docs/installation-and-configuration/system-requirements/networking-setup.md
+      - page: External Access to Critical Services
+        path: ../../docs/installation-and-configuration/system-requirements/external-access-to-critical-services.md
+      - page: Third-Party Services
+        path: ../../docs/installation-and-configuration/system-requirements/third-party-services.md
+    - section: Installation
+      slug: install
+      contents:
+      - section: Guided Installation (Recommended)
+        slug: guided-installation
+        path: ../../docs/installation-and-configuration/installation/guided-installation/README.md
+        contents:
+        - page: Same-Cluster Installation
+          path: ../../docs/installation-and-configuration/installation/guided-installation/same-cluster-installation.md
+        - page: Multi-Cluster Installation
+          path: ../../docs/installation-and-configuration/installation/guided-installation/multi-cluster-installation.md
+        - page: Configuration Reference
+          path: ../../docs/installation-and-configuration/installation/guided-installation/configuration-reference.md
+        - section: Configuration Templates
+          contents:
+          - page: Connected Templates
+            path: ../../docs/installation-and-configuration/installation/guided-installation/connected.md
+          - page: Air-Gapped Templates
+            path: ../../docs/installation-and-configuration/installation/guided-installation/air-gapped.md
+        - page: Prerequisites and Features
+          path: ../../docs/installation-and-configuration/installation/guided-installation/prerequisites-and-features.md
+      - section: Manual Helm
+        contents:
+        - page: Control Plane System Requirements
+          path: ../../docs/installation-and-configuration/installation/install-using-helm/cp-system-requirements.md
+        - page: Preparations
+          path: ../../docs/installation-and-configuration/installation/install-using-helm/preparations.md
+        - page: Install the Control Plane
+          path: ../../docs/installation-and-configuration/installation/install-using-helm/install-control-plane.md
+        - page: Cluster System Requirements
+          path: ../../docs/installation-and-configuration/installation/install-using-helm/system-requirements.md
+        - page: Install the Cluster
+          path: ../../docs/installation-and-configuration/installation/install-using-helm/helm-install.md
+      - page: Base Command Manager (BCM)
+        slug: bcm-install
+        path: ../../docs/installation-and-configuration/installation/bcm-install.md
+    - section: Configuration
+      slug: config
+      path: ../../docs/installation-and-configuration/configuration/README.md
+      contents:
+      - page: Node Roles
+        path: ../../docs/installation-and-configuration/configuration/node-roles.md
+      - page: Control Plane Configuration
+        path: ../../docs/installation-and-configuration/configuration/control-plane-config.md
+      - page: Cluster Configuration
+        path: ../../docs/installation-and-configuration/configuration/cluster-config.md
+      - page: Cluster Authentication
+        path: ../../docs/installation-and-configuration/configuration/cluster-authentication.md
+      - section: Networking
+        contents:
+        - page: Kubernetes Gateway API
+          path: ../../docs/installation-and-configuration/configuration/networking/kubernetes-gateway-api.md
+        - page: Service Mesh
+          path: ../../docs/installation-and-configuration/configuration/networking/service-mesh.md
+        - page: External Access to Containers
+          path: ../../docs/installation-and-configuration/configuration/networking/external-access-to-containers.md
+      - section: Security
+        contents:
+        - page: User Identity in Containers
+          path: ../../docs/installation-and-configuration/configuration/security/user-identity-in-containers.md
+        - page: Security Best Practices
+          path: ../../docs/installation-and-configuration/configuration/security/security-best-practices.md
+        - page: Secure Your Cluster
+          path: ../../docs/installation-and-configuration/configuration/security/secure-your-cluster.md
+      - page: Storage
+        path: ../../docs/installation-and-configuration/configuration/shared-storage.md
+      - section: Third-Party Integrations
+        contents:
+        - page: Supported Integrations
+          path: ../../docs/installation-and-configuration/configuration/third-party-integrations/supported-integrations.md
+        - page: Community Support Integrations
+          path: ../../docs/installation-and-configuration/configuration/third-party-integrations/community-support-integrations.md
+        - page: Karpenter
+          path: ../../docs/installation-and-configuration/configuration/third-party-integrations/karpenter.md
+    - section: Operations
+      slug: operate
+      path: ../../docs/installation-and-configuration/operations/README.md
+      contents:
+      - page: Clusters
+        path: ../../docs/installation-and-configuration/operations/clusters.md
+      - page: Scaling
+        path: ../../docs/installation-and-configuration/operations/scaling.md
+      - page: High Availability
+        path: ../../docs/installation-and-configuration/operations/high-availability.md
+      - page: Vertical Pod Autoscaling (VPA)
+        slug: vpa
+        path: ../../docs/installation-and-configuration/operations/vpa.md
+      - section: Maintenance
+        contents:
+        - page: Node Maintenance
+          path: ../../docs/installation-and-configuration/operations/maintenance/nodes-maintenance.md
+        - page: Backup and Restore
+          path: ../../docs/installation-and-configuration/operations/maintenance/cluster-restore.md
+      - section: Observability
+        path: ../../docs/installation-and-configuration/operations/observability/README.md
+        contents:
+        - page: System Monitoring
+          path: ../../docs/installation-and-configuration/operations/observability/system-monitoring.md
+        - page: Logs Collection
+          path: ../../docs/installation-and-configuration/operations/observability/logs-collection.md
+        - page: Event History
+          path: ../../docs/installation-and-configuration/operations/observability/event-history.md
+    - section: Upgrade
+      contents:
+      - page: Upgrade via Helm
+        path: ../../docs/installation-and-configuration/upgrade/helm.md
+    - section: Troubleshooting
+      slug: troubleshoot
+      contents:
+      - page: What Gets Deployed
+        path: ../../docs/installation-and-configuration/troubleshooting/what-gets-deployed.md
+  - section: Platform Management
+    contents:
+    - section: Authentication and Authorization
+      slug: authentication
+      contents:
+      - page: Authentication and Authorization
+        slug: overview
+        path: ../../docs/platform-management/authentication/overview.md
+      - page: Users
+        path: ../../docs/platform-management/authentication/users.md
+      - section: SSO
+        contents:
+        - page: Set Up SSO with SAML
+          slug: saml
+          path: ../../docs/platform-management/authentication/sso/saml.md
+        - page: Set Up SSO with OpenID Connect
+          slug: openidconnect
+          path: ../../docs/platform-management/authentication/sso/openidconnect.md
+        - page: Set Up SSO with OpenShift
+          slug: openshift
+          path: ../../docs/platform-management/authentication/sso/openshift.md
+      - page: Permissions
+        path: ../../docs/platform-management/authentication/permissions.md
+      - page: Roles
+        path: ../../docs/platform-management/authentication/roles.md
+      - page: Service Accounts (formerly applications)
+        slug: service-accounts
+        path: ../../docs/platform-management/authentication/service-accounts.md
+      - page: Access Rules
+        path: ../../docs/platform-management/authentication/accessrules.md
+      - page: Cluster Authentication
+        path: ../../docs/platform-management/authentication/cluster-authentication.md
+    - section: Manage AI Initiatives
+      contents:
+      - page: Adapting AI Initiatives to Your Organization
+        path: ../../docs/platform-management/aiinitiatives/adapting-ai-initiatives.md
+      - section: Managing Your Organization
+        slug: organization
+        contents:
+        - page: Projects
+          path: ../../docs/platform-management/aiinitiatives/organization/projects.md
+        - page: Departments
+          path: ../../docs/platform-management/aiinitiatives/organization/departments.md
+      - section: Managing Your Resources
+        slug: resources
+        contents:
+        - page: Nodes
+          path: ../../docs/platform-management/aiinitiatives/resources/nodes.md
+        - page: Configuring NVIDIA MIG Profiles
+          slug: mig-profiles
+          path: ../../docs/platform-management/aiinitiatives/resources/mig-profiles.md
+        - page: Using GB200 NVL72 and Multi-Node NVLink Domains
+          slug: using-gb200
+          path: ../../docs/platform-management/aiinitiatives/resources/using-gb200.md
+        - page: Accelerating Workloads with Network Topology-Aware Scheduling
+          slug: topology-aware-scheduling
+          path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling.md
+        - page: Enabling Spectrum-X Networking for NVIDIA Run:ai Workloads
+          path: ../../docs/platform-management/aiinitiatives/resources/enabling-spectrum-x-networking-for-nvidia-run-ai-workloads.md
+        - page: Configuring NUMA-Aware Scheduling
+          slug: numa-aware-scheduling
+          path: ../../docs/platform-management/aiinitiatives/resources/numa-aware-scheduling.md
+        - page: Node Pools
+          path: ../../docs/platform-management/aiinitiatives/resources/node-pools.md
+    - section: Scheduling and Resource Optimization
+      slug: runai-scheduler
+      contents:
+      - section: Scheduling
+        contents:
+        - page: 'The NVIDIA Run:ai Scheduler: Concepts and Principles'
+          slug: concepts-and-principles
+          path: ../../docs/platform-management/runai-scheduler/scheduling/concepts-and-principles.md
+        - page: How the Scheduler Works
+          path: ../../docs/platform-management/runai-scheduler/scheduling/how-the-scheduler-works.md
+        - page: Setting the Default Scheduler
+          slug: default-scheduler
+          path: ../../docs/platform-management/runai-scheduler/scheduling/default-scheduler.md
+        - page: Workload Priority and Preemption
+          slug: workload-priority-control
+          path: ../../docs/platform-management/runai-scheduler/scheduling/workload-priority-control.md
+        - section: Quick Starts
+          contents:
+          - page: Over Quota, Fairness and Preemption
+            slug: over-quota
+            path: ../../docs/platform-management/runai-scheduler/scheduling/quick-starts/over-quota.md
+      - section: Resource Optimization
+        contents:
+        - page: GPU Fractions
+          slug: fractions
+          path: ../../docs/platform-management/runai-scheduler/resource-optimization/fractions.md
+        - page: Dynamic GPU Fractions
+          slug: dynamic-fractions
+          path: ../../docs/platform-management/runai-scheduler/resource-optimization/dynamic-fractions.md
+        - page: Optimize Performance with Node Level Scheduler
+          slug: node-level-scheduler
+          path: ../../docs/platform-management/runai-scheduler/resource-optimization/node-level-scheduler.md
+        - page: GPU Time-Slicing
+          slug: time-slicing
+          path: ../../docs/platform-management/runai-scheduler/resource-optimization/time-slicing.md
+        - page: GPU Memory Swap
+          slug: memory-swap
+          path: ../../docs/platform-management/runai-scheduler/resource-optimization/memory-swap.md
+        - page: CPU Compute and Memory Allocation
+          slug: allocation-of-cpu-and-memory
+          path: ../../docs/platform-management/runai-scheduler/resource-optimization/allocation-of-cpu-and-memory.md
+        - section: Quick Starts
+          contents:
+          - page: Launching Workloads with GPU Fractions
+            slug: gpu-fractions-quickstart
+            path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/gpu-fractions-quickstart.md
+          - page: Launching Workloads with Dynamic GPU Fractions
+            slug: dynamic-gpu-fractions-quickstart
+            path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/dynamic-gpu-fractions-quickstart.md
+          - page: Launching Workloads with GPU Memory Swap
+            slug: gpu-memory-swap-quickstart
+            path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/gpu-memory-swap-quickstart.md
+    - section: Policies
+      contents:
+      - page: Policies and Rules
+        path: ../../docs/platform-management/policies/policies-and-rules.md
+      - section: NVIDIA Run:ai Native Workload Policies
+        slug: native-workload-policies
+        path: ../../docs/platform-management/policies/native-workload-policies.md
+        contents:
+        - page: Policy YAML Reference
+          path: ../../docs/platform-management/policies/policy-yaml-reference.md
+        - page: Policy YAML Examples
+          path: ../../docs/platform-management/policies/policy-yaml-examples.md
+      - section: Supported Workload Types Policies
+        slug: supported-workload-type-policies
+        path: ../../docs/platform-management/policies/supported-workload-type-policies.md
+        contents:
+        - page: Policy YAML Examples
+          slug: policy-yaml-examples-supported
+          path: ../../docs/platform-management/policies/policy-yaml-examples-supported.md
+        - page: Workload Types Policy Mapping
+          slug: workload-type-policy-mapping
+          path: ../../docs/platform-management/policies/workload-type-policy-mapping.md
+      - page: Scheduling Rules
+        path: ../../docs/platform-management/policies/scheduling-rules.md
+    - section: Monitor Performance and Health
+      slug: monitor-performance
+      contents:
+      - page: Before You Start
+        path: ../../docs/platform-management/monitor-performance/before-you-start.md
+      - page: Monitor Workloads by Category
+        slug: workload-categories
+        path: ../../docs/platform-management/monitor-performance/workload-categories.md
+      - page: GPU Profiling Metrics
+        path: ../../docs/platform-management/monitor-performance/gpu-profiling-metrics.md
+      - page: Metrics and Telemetry
+        slug: metrics
+        path: ../../docs/platform-management/monitor-performance/metrics.md
+      - page: Reports
+        path: ../../docs/platform-management/monitor-performance/reports.md
+    - section: Settings
+      contents:
+      - section: General Settings
+        path: ../../docs/settings/general-settings/README.md
+        contents:
+        - page: Notifications
+          path: ../../docs/settings/general-settings/notifications.md
+      - section: User Settings
+        contents:
+        - page: Notifications
+          path: ../../docs/settings/user-settings/notifications.md
+        - page: User Access Keys (formerly applications)
+          slug: user-access-keys
+          path: ../../docs/settings/user-settings/user-access-keys.md
+        - page: User Credentials
+          path: ../../docs/settings/user-settings/user-credentials.md
+  - section: Workloads in NVIDIA Run:ai
+    contents:
+    - page: Introduction to Workloads
+      path: ../../docs/workloads-in-nvidia-run-ai/introduction-to-workloads.md
+    - section: Workload Types and Features
+      slug: workload-types
+      contents:
+      - page: NVIDIA Run:ai Native Workloads
+        slug: native-workloads
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-types/native-workloads.md
+      - page: Supported Workload Types
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md
+      - section: Extending Workload Support with Karta
+        slug: extending-workload-support
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-types/extending-workload-support/README.md
+        contents:
+        - page: Defining a Karta
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-types/extending-workload-support/defining-a-karta.md
+        - page: Quick Start Templates
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-types/extending-workload-support/quick-start-templates.md
+      - page: Supported Features
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-types/supported-features.md
+    - page: Workloads
+      path: ../../docs/workloads-in-nvidia-run-ai/workloads.md
+    - section: Workload Assets
+      slug: assets
+      contents:
+      - page: Workload Assets
+        slug: overview
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/overview.md
+      - page: Environments
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/environments.md
+      - page: Data Sources
+        slug: datasources
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/datasources.md
+      - page: Data Volumes
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/data-volumes.md
+      - page: Compute Resources
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/compute-resources.md
+      - page: Credentials
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-assets/credentials.md
+    - section: Workload Templates
+      path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/README.md
+      contents:
+      - section: Workspace Templates
+        path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/workspace-templates/README.md
+        contents:
+        - page: Workspace Templates (Legacy)
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/workspace-templates/workspace-templates-legacy.md
+      - section: Training Templates
+        contents:
+        - page: Standard Training Templates
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/training-templates/standard-training-templates.md
+        - page: Distributed Training Templates
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/training-templates/distributed-training-templates.md
+      - section: Inference Templates
+        contents:
+        - page: NVIDIA NIM Inference Templates
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/inference-templates/nvidia-nim-inference-templates.md
+        - page: vLLM Inference Templates
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/inference-templates/hugging-face-inference-templates.md
+        - page: Custom Inference Templates
+          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/inference-templates/custom-inference-templates.md
+    - section: Experiment Using Workspaces
+      slug: using-workspaces
+      contents:
+      - page: Running Workspaces
+        slug: running-workspace
+        path: ../../docs/workloads-in-nvidia-run-ai/using-workspaces/running-workspace.md
+      - section: Quick Starts
+        contents:
+        - page: Running Jupyter Notebooks Using Workspaces
+          slug: jupyter-quickstart
+          path: ../../docs/workloads-in-nvidia-run-ai/using-workspaces/quick-starts/jupyter-quickstart.md
+    - section: Train Models Using Training
+      slug: using-training
+      contents:
+      - page: Train Models Using a Standard Training Workload
+        slug: train-models
+        path: ../../docs/workloads-in-nvidia-run-ai/using-training/train-models.md
+      - page: Train Models Using a Distributed Training Workload
+        slug: distributed-training-models
+        path: ../../docs/workloads-in-nvidia-run-ai/using-training/distributed-training-models.md
+      - page: 'Best Practices: Checkpointing Preemptible Training Workloads'
+        slug: checkpointing-preemptible-workloads
+        path: ../../docs/workloads-in-nvidia-run-ai/using-training/checkpointing-preemptible-workloads.md
+      - section: Quick Starts
+        contents:
+        - page: Run Your First Standard Training
+          slug: standard-training-quickstart
+          path: ../../docs/workloads-in-nvidia-run-ai/using-training/quick-starts/standard-training-quickstart.md
+        - page: Run Your First Distributed Training
+          slug: distributed-training-quickstart
+          path: ../../docs/workloads-in-nvidia-run-ai/using-training/quick-starts/distributed-training-quickstart.md
+    - section: Deploy Models Using Inference
+      slug: using-inference
+      contents:
+      - page: NVIDIA Run:ai Inference Overview
+        path: ../../docs/workloads-in-nvidia-run-ai/using-inference/nvidia-run-ai-inference-overview.md
+      - page: Deploy Inference Workloads with NVIDIA NIM
+        slug: nim-inference
+        path: ../../docs/workloads-in-nvidia-run-ai/using-inference/nim-inference.md
+      - page: Deploy Inference Workloads with vLLM
+        slug: hugging-face-inference
+        path: ../../docs/workloads-in-nvidia-run-ai/using-inference/hugging-face-inference.md
+      - page: Deploy Inference Workloads with Custom Server
+        slug: custom-inference
+        path: ../../docs/workloads-in-nvidia-run-ai/using-inference/custom-inference.md
+      - page: Deploy Distributed Inference Workloads
+        slug: distributed-inference
+        path: ../../docs/workloads-in-nvidia-run-ai/using-inference/distributed-inference.md
+      - page: Deploy NVIDIA Cloud Functions (NVCF) in NVIDIA Run:ai
+        slug: nvcf
+        path: ../../docs/workloads-in-nvidia-run-ai/using-inference/nvcf.md
+      - section: Quick Starts
+        contents:
+        - page: Run Your First Custom Inference Workload
+          slug: inference-quickstart
+          path: ../../docs/workloads-in-nvidia-run-ai/using-inference/quick-starts/inference-quickstart.md
+    - page: Submit Supported Workload Types via YAML
+      slug: submit-via-yaml
+      path: ../../docs/workloads-in-nvidia-run-ai/submit-via-yaml.md
+  - section: AI Applications
+    contents:
+    - page: Introduction to AI Applications
+      path: ../../docs/ai-applications/introduction-to-ai-applications.md
+    - page: AI Applications
+      path: ../../docs/ai-applications/ai-applications.md
+  - section: Tutorials
+    contents:
+    - section: Training Tutorials
+      contents:
+      - page: Distributed Training with PyTorch
+        slug: distributed-pytorch
+        path: ../../docs/tutorials/training-tutorials/distributed-pytorch.md
+      - page: Validating GPU Cluster Communication with NCCL Tests
+        slug: nccl-tests
+        path: ../../docs/tutorials/training-tutorials/nccl-tests.md
+    - section: Inference Tutorials
+      contents:
+      - page: NVIDIA NIM Distributed Inference Deployment
+        slug: nvidia-nim-distributed
+        path: ../../docs/tutorials/inference-tutorials/nvidia-nim-distributed.md
+      - page: Hugging Face Distributed Inference Deployment
+        slug: hugging-face-distributed
+        path: ../../docs/tutorials/inference-tutorials/hugging-face-distributed.md
+      - page: NVIDIA Dynamo Aggregated Inference Deployment
+        slug: aggregated-dynamo
+        path: ../../docs/tutorials/inference-tutorials/aggregated-dynamo.md
+      - page: NVIDIA Dynamo Disaggregated Inference Deployment
+        slug: disaggregated-dynamo
+        path: ../../docs/tutorials/inference-tutorials/disaggregated-dynamo.md
+      - page: Model-Free NIM Service Deployment
+        slug: nim-service
+        path: ../../docs/tutorials/inference-tutorials/nim-service.md
+    - section: Blueprint Tutorials
+      contents:
+      - page: RAG Blueprint Deployment from NGC Catalog
+        slug: rag-blueprint-deployment
+        path: ../../docs/tutorials/blueprint-tutorials/rag-blueprint-deployment.md
+  - section: Agents
+    contents:
+    - page: Overview
+      path: ../../docs/agents/overview.md
+    - section: MCP Server
+      contents:
+      - page: Deploy the MCP Server
+        path: ../../docs/agents/mcp-server/deploy.md
+      - page: Connect Your AI Tool
+        path: ../../docs/agents/mcp-server/connect.md
+      - page: Tools Reference
+        path: ../../docs/agents/tools-reference.md
+    - page: Agent Skills
+      path: ../../docs/agents/agent-skills.md
+  - section: Development
+    contents:
+    - link: Local Development
+      href: https://github.com/dsx-ai-factory/run-ai/blob/master/local-dev.md
+      target: _blank
+    - page: Service Reference
+      path: ../../docs/developer/services.md
+    - page: CRD Reference
+      path: ../../docs/developer/crds.md
+    - page: External Dependencies
+      path: ../../docs/developer/external-dependencies.md
+  - section: Resources
+    contents:
+    - page: Overview
+      path: ../../docs/resources/overview.md
+    - section: Videos
+      path: ../../docs/resources/videos/README.md
+      contents:
+      - page: Platform Overview
+        path: ../../docs/resources/videos/platform-overview.md
+      - page: How to Run a Jupyter Notebook Using Workspaces
+        path: ../../docs/resources/videos/how-to-run-a-jupyter-notebook-using-workspaces.md
+      - page: How to Run a Standard Training Job
+        path: ../../docs/resources/videos/how-to-run-a-standard-training-job.md
+      - page: How to Run a Nemo Training Job
+        path: ../../docs/resources/videos/how-to-run-a-nemo-training-job.md
+      - page: How to Deploy NVIDIA NIM Inference
+        path: ../../docs/resources/videos/how-to-deploy-nvidia-nim-inference.md
+      - page: How to Deploy Dynamo Inference Pipelines
+        path: ../../docs/resources/videos/how-to-deploy-dynamo-inference-pipelines.md
+      - page: How to Allocate GPU Resources Across Teams
+        path: ../../docs/resources/videos/how-to-allocate-gpu-resources-across-teams.md
+      - page: How to Run a Custom Inference Workload
+        path: ../../docs/resources/videos/how-to-run-a-custom-inference-workload.md
+      - page: Topology-Aware GPU Scheduling
+        path: ../../docs/resources/videos/topology-aware-gpu-scheduling.md
+      - page: Deploy and Manage NVIDIA RAG Blueprint
+        path: ../../docs/resources/videos/deploy-and-manage-nvidia-rag-blueprint.md
+      - page: How to Create an AI Application
+        path: ../../docs/resources/videos/how-to-create-an-ai-application.md
+      - page: Over-Quota GPU Usage with Fairness and Preemption
+        path: ../../docs/resources/videos/over-quota-gpu-usage-with-fairness-and-preemption.md
+      - page: How to Run a Distributed Training Job
+        path: ../../docs/resources/videos/how-to-run-a-distributed-training-job.md
+      - page: NVIDIA Run:ai on NVIDIA NVL72
+        path: ../../docs/resources/videos/nvidia-run-ai-on-nvidia-nvl72.md
+      - page: Simplify AI Workload Submission with Workload Assets
+        path: ../../docs/resources/videos/simplify-ai-workload-submission-with-workload-assets.md
+      - page: Create and Reuse Workload Templates
+        path: ../../docs/resources/videos/create-and-reuse-workload-templates.md
+      - page: Monitor GPU Usage and Platform Health
+        path: ../../docs/resources/videos/monitor-gpu-usage-and-platform-health.md
+    - page: Blogs
+      path: ../../docs/resources/blogs.md
+    - page: NVIDIA On-Demand Sessions
+      path: ../../docs/resources/nvidia-on-demand-sessions.md
+
+- tab: reference
+  layout:
+  - page: Home
+    path: ../../docs/rest-api/README.md
+  - section: REST API
+    contents:
+    - section: Getting Started
+      contents:
+      - page: About the REST API
+        path: ../../docs/rest-api/about-the-rest-api.md
+      - section: Using the REST API
+        contents:
+        - page: Making REST API Requests
+          path: ../../docs/rest-api/making-rest-api-requests.md
+        - page: Pagination
+          path: ../../docs/rest-api/pagination.md
+        - page: HTTP Status Codes
+          path: ../../docs/rest-api/http-status-codes.md
+      - page: How to Authenticate to the API
+        path: ../../docs/rest-api/how-to-authenticate-to-the-api.md
+      - page: NVIDIA Run:ai API Policy
+        path: ../../docs/rest-api/api-policy.md
+    - api: Endpoints
+      api-name: main-api
+      flattened: true
+      tag-description-pages: true
+      layout:
+      - section: Organizations
+        contents:
+        - clusters
+        - departments
+        - reports
+        - nodePools
+        - nodes
+        - projects
+        - logo
+        - researcherCommandLineInterface
+        - researcherCommandLineInterfaceDeprecated
+        - networkTopologies
+      - section: Authentication and Authorization
+        contents:
+        - accessKeys
+        - accessRules
+        - permissions
+        - applications
+        - serviceAccounts
+        - roles
+        - tokens
+        - users
+        - userApplications
+        - idps
+        - me
+        - settings
+        - orgUnit
+      - section: Audit
+        contents:
+        - auditLogs
+      - section: Datavolumes
+        contents:
+        - datavolumesApi
+      - section: Workloads
+        contents:
+        - events
+        - pods
+        - workloadsApi
+        - workloadsV2
+        - nvidiaNim
+        - workspaces
+        - trainings
+        - inferences
+        - revisions
+        - distributed
+        - workloadsBatch
+        - workloadProperties
+        - workloadTemplates
+        - distributedInferences
+      - section: Workload assets
+        contents:
+        - compute
+        - credentials
+        - datasources
+        - environment
+        - storageClasses
+        - storageClassConfiguration
+        - git
+        - hostPath
+        - nfs
+        - pvc
+        - registry
+        - s3
+        - configMap
+        - secret
+        - template
+      - section: Policies
+        contents:
+        - policy
+      - section: Notifications
+        contents:
+        - notificationState
+        - notificationTypes
+        - notificationChannels
+        - slack
+        - email
+        - subscriptions
+      - section: AI Applications
+        contents:
+        - aiApplicationsApi
+    - section: API Guides
+      contents:
+      - page: Interacting with Workloads Using the Cluster API
+        path: ../../docs/rest-api/api-guides/interacting-with-workloads-using-the-cluster-api.md
+      - page: Configuring Slack Notifications
+        path: ../../docs/rest-api/api-guides/configuring-slack-notifications.md
+      - page: Using Node Affinity via API
+        path: ../../docs/rest-api/api-guides/using-node-affinity-via-api.md
+      - page: NIM Observability Metrics via API
+        path: ../../docs/rest-api/api-guides/nim-observability-metrics-via-api.md
+    - section: API Python Client Reference
+      contents:
+      - page: API Python Client (runapy)
+        path: ../../docs/rest-api/api-python-client-reference/api-python-client-runapy.md
+      - page: Install and Configure the Client
+        path: ../../docs/rest-api/api-python-client-reference/install-and-configure-the-client.md
+  - section: CLI
+    contents:
+    - page: Install and Configure CLI
+      path: ../../docs/reference/cli/install-cli.md
+    - page: Add NVIDIA Run:ai Authorization to Kubeconfig
+      path: ../../docs/reference/cli/set-kubeconfig-parameters.md
+    - page: Auto Update CLI Mechanism
+      path: ../../docs/reference/cli/auto-update-cli-mechanism.md
+    - page: CLI Commands Examples
+      path: ../../docs/reference/cli/cli-examples.md
+
+    - section: Command Reference
+      slug: runai
+      path: ../../docs/reference/cli/runai/runai.md
+      contents:
+      - section: Application
+        contents:
+        - page: runai application
+          path: ../../docs/reference/cli/runai/runai_application.md
+        - page: runai application delete
+          path: ../../docs/reference/cli/runai/runai_application_delete.md
+        - page: runai application describe
+          path: ../../docs/reference/cli/runai/runai_application_describe.md
+        - page: runai application list
+          path: ../../docs/reference/cli/runai/runai_application_list.md
+        - page: runai application submit
+          path: ../../docs/reference/cli/runai/runai_application_submit.md
+      - section: Auth
+        contents:
+        - page: runai auth
+          path: ../../docs/reference/cli/runai/runai_auth.md
+        - page: runai auth get-token
+          path: ../../docs/reference/cli/runai/runai_auth_get-token.md
+      - section: Cluster
+        contents:
+        - page: runai cluster
+          path: ../../docs/reference/cli/runai/runai_cluster.md
+        - page: runai cluster list
+          path: ../../docs/reference/cli/runai/runai_cluster_list.md
+        - page: runai cluster set
+          path: ../../docs/reference/cli/runai/runai_cluster_set.md
+      - section: Compute
+        contents:
+        - page: runai compute
+          path: ../../docs/reference/cli/runai/runai_compute.md
+        - page: runai compute describe
+          path: ../../docs/reference/cli/runai/runai_compute_describe.md
+        - page: runai compute list
+          path: ../../docs/reference/cli/runai/runai_compute_list.md
+      - section: Config
+        contents:
+        - page: runai config
+          path: ../../docs/reference/cli/runai/runai_config.md
+        - page: runai config describe
+          path: ../../docs/reference/cli/runai/runai_config_describe.md
+        - page: runai config generate
+          path: ../../docs/reference/cli/runai/runai_config_generate.md
+        - page: runai config set
+          path: ../../docs/reference/cli/runai/runai_config_set.md
+      - section: Credential
+        contents:
+        - page: runai credential
+          path: ../../docs/reference/cli/runai/runai_credential.md
+        - page: runai credential list
+          path: ../../docs/reference/cli/runai/runai_credential_list.md
+      - section: Datasource
+        contents:
+        - page: runai datasource
+          path: ../../docs/reference/cli/runai/runai_datasource.md
+        - page: runai datasource describe
+          path: ../../docs/reference/cli/runai/runai_datasource_describe.md
+        - page: runai datasource list
+          path: ../../docs/reference/cli/runai/runai_datasource_list.md
+      - section: Datavolume
+        contents:
+        - page: runai datavolume
+          path: ../../docs/reference/cli/runai/runai_datavolume.md
+        - page: runai datavolume list
+          path: ../../docs/reference/cli/runai/runai_datavolume_list.md
+      - section: Department
+        contents:
+        - page: runai department
+          path: ../../docs/reference/cli/runai/runai_department.md
+        - page: runai department list
+          path: ../../docs/reference/cli/runai/runai_department_list.md
+      - section: Diagnostics
+        contents:
+        - page: runai diagnostics
+          path: ../../docs/reference/cli/runai/runai_diagnostics.md
+        - page: runai diagnostics collect-logs
+          path: ../../docs/reference/cli/runai/runai_diagnostics_collect-logs.md
+      - section: Environment
+        contents:
+        - page: runai environment
+          path: ../../docs/reference/cli/runai/runai_environment.md
+        - page: runai environment describe
+          path: ../../docs/reference/cli/runai/runai_environment_describe.md
+        - page: runai environment list
+          path: ../../docs/reference/cli/runai/runai_environment_list.md
+      - section: Inference
+        contents:
+        - page: runai inference
+          path: ../../docs/reference/cli/runai/runai_inference.md
+        - page: runai inference bash
+          path: ../../docs/reference/cli/runai/runai_inference_bash.md
+        - page: runai inference delete
+          path: ../../docs/reference/cli/runai/runai_inference_delete.md
+        - page: runai inference describe
+          path: ../../docs/reference/cli/runai/runai_inference_describe.md
+        - page: runai inference distributed
+          path: ../../docs/reference/cli/runai/runai_inference_distributed.md
+        - page: runai inference distributed bash
+          path: ../../docs/reference/cli/runai/runai_inference_distributed_bash.md
+        - page: runai inference distributed delete
+          path: ../../docs/reference/cli/runai/runai_inference_distributed_delete.md
+        - page: runai inference distributed describe
+          path: ../../docs/reference/cli/runai/runai_inference_distributed_describe.md
+        - page: runai inference distributed exec
+          path: ../../docs/reference/cli/runai/runai_inference_distributed_exec.md
+        - page: runai inference distributed list
+          path: ../../docs/reference/cli/runai/runai_inference_distributed_list.md
+        - page: runai inference distributed logs
+          path: ../../docs/reference/cli/runai/runai_inference_distributed_logs.md
+        - page: runai inference distributed port-forward
+          path: ../../docs/reference/cli/runai/runai_inference_distributed_port-forward.md
+        - page: runai inference distributed scale
+          path: ../../docs/reference/cli/runai/runai_inference_distributed_scale.md
+        - page: runai inference distributed submit
+          path: ../../docs/reference/cli/runai/runai_inference_distributed_submit.md
+        - page: runai inference exec
+          path: ../../docs/reference/cli/runai/runai_inference_exec.md
+        - page: runai inference list
+          path: ../../docs/reference/cli/runai/runai_inference_list.md
+        - page: runai inference logs
+          path: ../../docs/reference/cli/runai/runai_inference_logs.md
+        - page: runai inference nim
+          path: ../../docs/reference/cli/runai/runai_inference_nim.md
+        - page: runai inference nim bash
+          path: ../../docs/reference/cli/runai/runai_inference_nim_bash.md
+        - page: runai inference nim delete
+          path: ../../docs/reference/cli/runai/runai_inference_nim_delete.md
+        - page: runai inference nim describe
+          path: ../../docs/reference/cli/runai/runai_inference_nim_describe.md
+        - page: runai inference nim exec
+          path: ../../docs/reference/cli/runai/runai_inference_nim_exec.md
+        - page: runai inference nim list
+          path: ../../docs/reference/cli/runai/runai_inference_nim_list.md
+        - page: runai inference nim logs
+          path: ../../docs/reference/cli/runai/runai_inference_nim_logs.md
+        - page: runai inference nim port-forward
+          path: ../../docs/reference/cli/runai/runai_inference_nim_port-forward.md
+        - page: runai inference nim scale
+          path: ../../docs/reference/cli/runai/runai_inference_nim_scale.md
+        - page: runai inference nim submit
+          path: ../../docs/reference/cli/runai/runai_inference_nim_submit.md
+        - page: runai inference nim update
+          path: ../../docs/reference/cli/runai/runai_inference_nim_update.md
+        - page: runai inference port-forward
+          path: ../../docs/reference/cli/runai/runai_inference_port-forward.md
+        - page: runai inference standard
+          path: ../../docs/reference/cli/runai/runai_inference_standard.md
+        - page: runai inference standard bash
+          path: ../../docs/reference/cli/runai/runai_inference_standard_bash.md
+        - page: runai inference standard delete
+          path: ../../docs/reference/cli/runai/runai_inference_standard_delete.md
+        - page: runai inference standard describe
+          path: ../../docs/reference/cli/runai/runai_inference_standard_describe.md
+        - page: runai inference standard exec
+          path: ../../docs/reference/cli/runai/runai_inference_standard_exec.md
+        - page: runai inference standard list
+          path: ../../docs/reference/cli/runai/runai_inference_standard_list.md
+        - page: runai inference standard logs
+          path: ../../docs/reference/cli/runai/runai_inference_standard_logs.md
+        - page: runai inference standard port-forward
+          path: ../../docs/reference/cli/runai/runai_inference_standard_port-forward.md
+        - page: runai inference standard submit
+          path: ../../docs/reference/cli/runai/runai_inference_standard_submit.md
+        - page: runai inference standard update
+          path: ../../docs/reference/cli/runai/runai_inference_standard_update.md
+        - page: runai inference submit
+          path: ../../docs/reference/cli/runai/runai_inference_submit.md
+        - page: runai inference update
+          path: ../../docs/reference/cli/runai/runai_inference_update.md
+      - section: Kubeconfig
+        contents:
+        - page: runai kubeconfig
+          path: ../../docs/reference/cli/runai/runai_kubeconfig.md
+        - page: runai kubeconfig set
+          path: ../../docs/reference/cli/runai/runai_kubeconfig_set.md
+      - section: Login
+        contents:
+        - page: runai login
+          path: ../../docs/reference/cli/runai/runai_login.md
+        - page: runai login access-key
+          path: ../../docs/reference/cli/runai/runai_login_access-key.md
+        - page: runai login sso
+          path: ../../docs/reference/cli/runai/runai_login_sso.md
+        - page: runai login user
+          path: ../../docs/reference/cli/runai/runai_login_user.md
+      - section: Logout
+        contents:
+        - page: runai logout
+          path: ../../docs/reference/cli/runai/runai_logout.md
+      - section: Mpi
+        contents:
+        - page: runai mpi
+          path: ../../docs/reference/cli/runai/runai_mpi.md
+        - page: runai mpi attach
+          path: ../../docs/reference/cli/runai/runai_mpi_attach.md
+        - page: runai mpi bash
+          path: ../../docs/reference/cli/runai/runai_mpi_bash.md
+        - page: runai mpi delete
+          path: ../../docs/reference/cli/runai/runai_mpi_delete.md
+        - page: runai mpi describe
+          path: ../../docs/reference/cli/runai/runai_mpi_describe.md
+        - page: runai mpi exec
+          path: ../../docs/reference/cli/runai/runai_mpi_exec.md
+        - page: runai mpi list
+          path: ../../docs/reference/cli/runai/runai_mpi_list.md
+        - page: runai mpi logs
+          path: ../../docs/reference/cli/runai/runai_mpi_logs.md
+        - page: runai mpi port-forward
+          path: ../../docs/reference/cli/runai/runai_mpi_port-forward.md
+        - page: runai mpi resume
+          path: ../../docs/reference/cli/runai/runai_mpi_resume.md
+        - page: runai mpi submit
+          path: ../../docs/reference/cli/runai/runai_mpi_submit.md
+        - page: runai mpi suspend
+          path: ../../docs/reference/cli/runai/runai_mpi_suspend.md
+      - section: My Credential
+        contents:
+        - page: runai my-credential
+          path: ../../docs/reference/cli/runai/runai_my-credential.md
+        - page: runai my-credential create
+          path: ../../docs/reference/cli/runai/runai_my-credential_create.md
+        - page: runai my-credential delete
+          path: ../../docs/reference/cli/runai/runai_my-credential_delete.md
+        - page: runai my-credential list
+          path: ../../docs/reference/cli/runai/runai_my-credential_list.md
+      - section: Node
+        contents:
+        - page: runai node
+          path: ../../docs/reference/cli/runai/runai_node.md
+        - page: runai node list
+          path: ../../docs/reference/cli/runai/runai_node_list.md
+      - section: Nodepool
+        contents:
+        - page: runai nodepool
+          path: ../../docs/reference/cli/runai/runai_nodepool.md
+        - page: runai nodepool list
+          path: ../../docs/reference/cli/runai/runai_nodepool_list.md
+      - section: Project
+        contents:
+        - page: runai project
+          path: ../../docs/reference/cli/runai/runai_project.md
+        - page: runai project create
+          path: ../../docs/reference/cli/runai/runai_project_create.md
+        - page: runai project list
+          path: ../../docs/reference/cli/runai/runai_project_list.md
+        - page: runai project set
+          path: ../../docs/reference/cli/runai/runai_project_set.md
+      - section: PVC
+        contents:
+        - page: runai pvc
+          path: ../../docs/reference/cli/runai/runai_pvc.md
+        - page: runai pvc list
+          path: ../../docs/reference/cli/runai/runai_pvc_list.md
+      - section: Pytorch
+        contents:
+        - page: runai pytorch
+          path: ../../docs/reference/cli/runai/runai_pytorch.md
+        - page: runai pytorch attach
+          path: ../../docs/reference/cli/runai/runai_pytorch_attach.md
+        - page: runai pytorch bash
+          path: ../../docs/reference/cli/runai/runai_pytorch_bash.md
+        - page: runai pytorch delete
+          path: ../../docs/reference/cli/runai/runai_pytorch_delete.md
+        - page: runai pytorch describe
+          path: ../../docs/reference/cli/runai/runai_pytorch_describe.md
+        - page: runai pytorch exec
+          path: ../../docs/reference/cli/runai/runai_pytorch_exec.md
+        - page: runai pytorch list
+          path: ../../docs/reference/cli/runai/runai_pytorch_list.md
+        - page: runai pytorch logs
+          path: ../../docs/reference/cli/runai/runai_pytorch_logs.md
+        - page: runai pytorch port-forward
+          path: ../../docs/reference/cli/runai/runai_pytorch_port-forward.md
+        - page: runai pytorch resume
+          path: ../../docs/reference/cli/runai/runai_pytorch_resume.md
+        - page: runai pytorch submit
+          path: ../../docs/reference/cli/runai/runai_pytorch_submit.md
+        - page: runai pytorch suspend
+          path: ../../docs/reference/cli/runai/runai_pytorch_suspend.md
+      - section: Report
+        contents:
+        - page: runai report
+          path: ../../docs/reference/cli/runai/runai_report.md
+        - page: runai report metrics
+          path: ../../docs/reference/cli/runai/runai_report_metrics.md
+        - page: runai report metrics clear
+          path: ../../docs/reference/cli/runai/runai_report_metrics_clear.md
+        - page: runai report metrics config
+          path: ../../docs/reference/cli/runai/runai_report_metrics_config.md
+        - page: runai report metrics output
+          path: ../../docs/reference/cli/runai/runai_report_metrics_output.md
+      - section: Template
+        contents:
+        - page: runai template
+          path: ../../docs/reference/cli/runai/runai_template.md
+        - page: runai template describe
+          path: ../../docs/reference/cli/runai/runai_template_describe.md
+        - page: runai template list
+          path: ../../docs/reference/cli/runai/runai_template_list.md
+      - section: Training
+        contents:
+        - page: runai training
+          path: ../../docs/reference/cli/runai/runai_training.md
+        - page: runai training attach
+          path: ../../docs/reference/cli/runai/runai_training_attach.md
+        - page: runai training bash
+          path: ../../docs/reference/cli/runai/runai_training_bash.md
+        - page: runai training delete
+          path: ../../docs/reference/cli/runai/runai_training_delete.md
+        - page: runai training describe
+          path: ../../docs/reference/cli/runai/runai_training_describe.md
+        - page: runai training exec
+          path: ../../docs/reference/cli/runai/runai_training_exec.md
+        - page: runai training list
+          path: ../../docs/reference/cli/runai/runai_training_list.md
+        - page: runai training logs
+          path: ../../docs/reference/cli/runai/runai_training_logs.md
+        - page: runai training mpi
+          path: ../../docs/reference/cli/runai/runai_training_mpi.md
+        - page: runai training mpi attach
+          path: ../../docs/reference/cli/runai/runai_training_mpi_attach.md
+        - page: runai training mpi bash
+          path: ../../docs/reference/cli/runai/runai_training_mpi_bash.md
+        - page: runai training mpi delete
+          path: ../../docs/reference/cli/runai/runai_training_mpi_delete.md
+        - page: runai training mpi describe
+          path: ../../docs/reference/cli/runai/runai_training_mpi_describe.md
+        - page: runai training mpi exec
+          path: ../../docs/reference/cli/runai/runai_training_mpi_exec.md
+        - page: runai training mpi list
+          path: ../../docs/reference/cli/runai/runai_training_mpi_list.md
+        - page: runai training mpi logs
+          path: ../../docs/reference/cli/runai/runai_training_mpi_logs.md
+        - page: runai training mpi port-forward
+          path: ../../docs/reference/cli/runai/runai_training_mpi_port-forward.md
+        - page: runai training mpi resume
+          path: ../../docs/reference/cli/runai/runai_training_mpi_resume.md
+        - page: runai training mpi submit
+          path: ../../docs/reference/cli/runai/runai_training_mpi_submit.md
+        - page: runai training mpi suspend
+          path: ../../docs/reference/cli/runai/runai_training_mpi_suspend.md
+        - page: runai training port-forward
+          path: ../../docs/reference/cli/runai/runai_training_port-forward.md
+        - page: runai training pytorch
+          path: ../../docs/reference/cli/runai/runai_training_pytorch.md
+        - page: runai training pytorch attach
+          path: ../../docs/reference/cli/runai/runai_training_pytorch_attach.md
+        - page: runai training pytorch bash
+          path: ../../docs/reference/cli/runai/runai_training_pytorch_bash.md
+        - page: runai training pytorch delete
+          path: ../../docs/reference/cli/runai/runai_training_pytorch_delete.md
+        - page: runai training pytorch describe
+          path: ../../docs/reference/cli/runai/runai_training_pytorch_describe.md
+        - page: runai training pytorch exec
+          path: ../../docs/reference/cli/runai/runai_training_pytorch_exec.md
+        - page: runai training pytorch list
+          path: ../../docs/reference/cli/runai/runai_training_pytorch_list.md
+        - page: runai training pytorch logs
+          path: ../../docs/reference/cli/runai/runai_training_pytorch_logs.md
+        - page: runai training pytorch port-forward
+          path: ../../docs/reference/cli/runai/runai_training_pytorch_port-forward.md
+        - page: runai training pytorch resume
+          path: ../../docs/reference/cli/runai/runai_training_pytorch_resume.md
+        - page: runai training pytorch submit
+          path: ../../docs/reference/cli/runai/runai_training_pytorch_submit.md
+        - page: runai training pytorch suspend
+          path: ../../docs/reference/cli/runai/runai_training_pytorch_suspend.md
+        - page: runai training resume
+          path: ../../docs/reference/cli/runai/runai_training_resume.md
+        - page: runai training standard
+          path: ../../docs/reference/cli/runai/runai_training_standard.md
+        - page: runai training standard attach
+          path: ../../docs/reference/cli/runai/runai_training_standard_attach.md
+        - page: runai training standard bash
+          path: ../../docs/reference/cli/runai/runai_training_standard_bash.md
+        - page: runai training standard delete
+          path: ../../docs/reference/cli/runai/runai_training_standard_delete.md
+        - page: runai training standard describe
+          path: ../../docs/reference/cli/runai/runai_training_standard_describe.md
+        - page: runai training standard exec
+          path: ../../docs/reference/cli/runai/runai_training_standard_exec.md
+        - page: runai training standard list
+          path: ../../docs/reference/cli/runai/runai_training_standard_list.md
+        - page: runai training standard logs
+          path: ../../docs/reference/cli/runai/runai_training_standard_logs.md
+        - page: runai training standard port-forward
+          path: ../../docs/reference/cli/runai/runai_training_standard_port-forward.md
+        - page: runai training standard resume
+          path: ../../docs/reference/cli/runai/runai_training_standard_resume.md
+        - page: runai training standard submit
+          path: ../../docs/reference/cli/runai/runai_training_standard_submit.md
+        - page: runai training standard suspend
+          path: ../../docs/reference/cli/runai/runai_training_standard_suspend.md
+        - page: runai training submit
+          path: ../../docs/reference/cli/runai/runai_training_submit.md
+        - page: runai training suspend
+          path: ../../docs/reference/cli/runai/runai_training_suspend.md
+      - section: Upgrade
+        contents:
+        - page: runai upgrade
+          path: ../../docs/reference/cli/runai/runai_upgrade.md
+      - section: Version
+        contents:
+        - page: runai version
+          path: ../../docs/reference/cli/runai/runai_version.md
+      - section: Whoami
+        contents:
+        - page: runai whoami
+          path: ../../docs/reference/cli/runai/runai_whoami.md
+      - section: Workload
+        contents:
+        - page: runai workload
+          path: ../../docs/reference/cli/runai/runai_workload.md
+        - page: runai workload delete
+          path: ../../docs/reference/cli/runai/runai_workload_delete.md
+        - page: runai workload describe
+          path: ../../docs/reference/cli/runai/runai_workload_describe.md
+        - page: runai workload exec
+          path: ../../docs/reference/cli/runai/runai_workload_exec.md
+        - page: runai workload list
+          path: ../../docs/reference/cli/runai/runai_workload_list.md
+        - page: runai workload logs
+          path: ../../docs/reference/cli/runai/runai_workload_logs.md
+        - page: runai workload submit
+          path: ../../docs/reference/cli/runai/runai_workload_submit.md
+      - section: Workload Type
+        contents:
+        - page: runai workload-type
+          path: ../../docs/reference/cli/runai/runai_workload-type.md
+        - page: runai workload-type describe
+          path: ../../docs/reference/cli/runai/runai_workload-type_describe.md
+        - page: runai workload-type list
+          path: ../../docs/reference/cli/runai/runai_workload-type_list.md
+      - section: Workspace
+        contents:
+        - page: runai workspace
+          path: ../../docs/reference/cli/runai/runai_workspace.md
+        - page: runai workspace attach
+          path: ../../docs/reference/cli/runai/runai_workspace_attach.md
+        - page: runai workspace bash
+          path: ../../docs/reference/cli/runai/runai_workspace_bash.md
+        - page: runai workspace delete
+          path: ../../docs/reference/cli/runai/runai_workspace_delete.md
+        - page: runai workspace describe
+          path: ../../docs/reference/cli/runai/runai_workspace_describe.md
+        - page: runai workspace exec
+          path: ../../docs/reference/cli/runai/runai_workspace_exec.md
+        - page: runai workspace list
+          path: ../../docs/reference/cli/runai/runai_workspace_list.md
+        - page: runai workspace logs
+          path: ../../docs/reference/cli/runai/runai_workspace_logs.md
+        - page: runai workspace port-forward
+          path: ../../docs/reference/cli/runai/runai_workspace_port-forward.md
+        - page: runai workspace resume
+          path: ../../docs/reference/cli/runai/runai_workspace_resume.md
+        - page: runai workspace submit
+          path: ../../docs/reference/cli/runai/runai_workspace_submit.md
+        - page: runai workspace suspend
+          path: ../../docs/reference/cli/runai/runai_workspace_suspend.md

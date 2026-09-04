@@ -1,0 +1,12 @@
+description: List of groups that are allowed to access the URL. Note that authorizedUsers and authorizedGroups are mutually exclusive.
+type: array
+items:
+  type: string
+  ##WAIT_FOR_35331## minLength: 1
+  maxLength: 253
+  pattern: .*
+maxItems: 1000
+example:
+  - group-a
+  - group-b
+nullable: true

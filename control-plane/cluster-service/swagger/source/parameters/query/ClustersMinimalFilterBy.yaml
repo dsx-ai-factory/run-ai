@@ -1,0 +1,13 @@
+name: filterBy
+in: query
+required: false
+description: Filter clusters by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=.
+schema:
+  type: array
+  maxItems: 10
+  items:
+    type: string
+    pattern: "^(name)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
+  example: ["name==my-cluster"]
+explode: false
+

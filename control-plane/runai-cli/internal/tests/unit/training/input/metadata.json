@@ -1,0 +1,14 @@
+{
+    "capturedAt": "2025-12-15T09:06:05Z",
+    "workloadType": "Training",
+    "workloadId": "0586e34b-6c17-419b-9cc6-c091cb4d72f5",
+    "workloadName": "my-training-demo-123",
+    "apiUrl": "https://nael-env-001.runailabs.com",
+    "files": {
+        "workloadList": "workload_list.json",
+        "workloadDetailed": "workload_detailed.json",
+        "workloadSpec": "workload_spec.json",
+        "workloadPods": "workload_pods.json",
+        "workloadEvents": "workload_events.json"
+    }
+}
