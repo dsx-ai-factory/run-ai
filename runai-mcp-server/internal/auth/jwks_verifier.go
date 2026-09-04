@@ -13,8 +13,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/MicahParks/keyfunc/v3"
+	"github.com/golang-jwt/jwt/v5"
 	mcpauth "github.com/modelcontextprotocol/go-sdk/auth"
 	"github.com/rs/zerolog"
 )

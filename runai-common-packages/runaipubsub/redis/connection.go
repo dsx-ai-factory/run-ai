@@ -11,12 +11,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
-	config_models "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub/config"
-	"github.com/redis/go-redis/v9"
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream"
 	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
+	config_models "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub/config"
+	"github.com/redis/go-redis/v9"
 )
 
 type RedisStreamConnection struct {

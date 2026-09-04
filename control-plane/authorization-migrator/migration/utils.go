@@ -10,13 +10,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization-migrator/keycloak"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/orm"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/orm/clause"
-	"github.com/Nerzal/gocloak/v13"
 )
 
 const (

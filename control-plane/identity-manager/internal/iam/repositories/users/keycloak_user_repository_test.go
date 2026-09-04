@@ -13,13 +13,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Nerzal/gocloak/v13"
 	authMocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/auth/mocks"
 	kcMocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/gocloak/mocks"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 	helpers "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/repositories/users/helpers"
 	runaicloakMocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/runaicloak/mocks"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/utils"
-	"github.com/Nerzal/gocloak/v13"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

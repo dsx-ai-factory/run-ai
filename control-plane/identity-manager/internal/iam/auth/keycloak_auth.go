@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Nerzal/gocloak/v13"
 	gocloakInterface "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/gocloak"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/utils"
 	ptr "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/utils/pointer"
-	"github.com/Nerzal/gocloak/v13"
 )
 
 const (

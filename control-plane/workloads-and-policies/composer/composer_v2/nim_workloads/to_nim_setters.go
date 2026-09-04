@@ -10,12 +10,12 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/NVIDIA/k8s-nim-operator/api/apps/v1alpha1"
 	"github.com/distribution/reference"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	workloadsManagerApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
-	"github.com/NVIDIA/k8s-nim-operator/api/apps/v1alpha1"
 	autoscalingv2 "k8s.io/api/autoscaling/v2"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"

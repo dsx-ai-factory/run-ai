@@ -8,12 +8,12 @@ package auth_flow
 import (
 	"context"
 
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/auth"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/errors"
 	gocloakInterface "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/gocloak"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 	helpers "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/repositories/auth_flow/helpers"
-	"github.com/Nerzal/gocloak/v13"
 )
 
 type KeycloakAuthFlowRepository struct {

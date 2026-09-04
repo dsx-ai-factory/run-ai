@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/auth"
 	iamError "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/errors"
 	gocloakInterface "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/gocloak"
@@ -18,7 +19,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/runaicloak"
 	"github.com/go-resty/resty/v2"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/Nerzal/gocloak/v13"
 )
 
 type KeycloakAuthRepository struct {

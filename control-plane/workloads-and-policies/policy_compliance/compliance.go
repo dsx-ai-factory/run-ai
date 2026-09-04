@@ -23,10 +23,10 @@ import (
 
 	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 
+	"github.com/PaesslerAG/jsonpath"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
-	"github.com/PaesslerAG/jsonpath"
 )
 
 const jsonPathUnknownFieldError = "unknown key"

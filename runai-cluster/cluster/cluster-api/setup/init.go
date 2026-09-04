@@ -12,6 +12,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/config"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/logs/download"
 
+	"github.com/MicahParks/keyfunc"
 	authzclient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
 	workloadsapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/api"
@@ -43,7 +44,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/auth/providers/oidc/userinfo"
 	"github.com/go-chi/chi/v5"
 	kubeflowv1 "github.com/kubeflow/training-operator/pkg/apis/kubeflow.org/v1"
-	"github.com/MicahParks/keyfunc"
 	"github.com/rs/zerolog/log"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"

@@ -18,12 +18,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Rican7/retry"
+	"github.com/Rican7/retry/strategy"
 	"github.com/aws/smithy-go/ptr"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub"
 	"github.com/gocarina/gocsv"
-	"github.com/Rican7/retry"
-	"github.com/Rican7/retry/strategy"
 
 	audit "github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client"
 	events "github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events"

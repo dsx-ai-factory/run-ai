@@ -16,13 +16,13 @@ import (
 
 	"k8s.io/utils/ptr"
 
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/auth"
 	iamError "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/errors"
 	gocloakInterface "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/gocloak"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/runaicloak"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/config"
-	"github.com/Nerzal/gocloak/v13"
 )
 
 type KeycloakIdpRepository struct {

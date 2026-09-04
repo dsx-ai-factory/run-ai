@@ -16,8 +16,8 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/api"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/auth/providers/oidc/userinfo"
 	"github.com/MicahParks/keyfunc"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/auth/providers/oidc/userinfo"
 	"github.com/modern-go/reflect2"
 	"github.com/rs/zerolog/log"
 

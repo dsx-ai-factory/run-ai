@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	kcMocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/gocloak/mocks"
 	"github.com/Nerzal/gocloak/v13"
+	kcMocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/gocloak/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/utils/ptr"

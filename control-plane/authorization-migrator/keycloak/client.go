@@ -12,9 +12,9 @@ import (
 
 	"k8s.io/utils/ptr"
 
+	gocloak "github.com/Nerzal/gocloak/v13"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization-migrator/config"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
-	gocloak "github.com/Nerzal/gocloak/v13"
 )
 
 var (

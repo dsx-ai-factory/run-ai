@@ -16,10 +16,10 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/integration-tests/common"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/integration-tests/config"
 	iwv2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/interactiveworkload/v2alpha1"
-	"github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	kaitopologyv1alpha1 "github.com/kai-scheduler/KAI-scheduler/pkg/apis/kai/v1alpha1"
 	kaiv2alpha2 "github.com/kai-scheduler/KAI-scheduler/pkg/apis/scheduling/v2alpha2"
 	commonconstants "github.com/kai-scheduler/KAI-scheduler/pkg/common/constants"
+	"github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

@@ -16,8 +16,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/project-controller/pkg/common"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/project-controller/pkg/handlers"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/project-controller/pkg/test"
-	kaiv1alpha1 "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	kaiv2 "github.com/kai-scheduler/KAI-scheduler/pkg/apis/scheduling/v2"
+	kaiv1alpha1 "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"k8s.io/apimachinery/pkg/runtime"

@@ -5,8 +5,8 @@
 package mocks
 
 import (
-	mock "github.com/stretchr/testify/mock"
 	"github.com/ThreeDotsLabs/watermill/message"
+	mock "github.com/stretchr/testify/mock"
 )
 
 // NewPublisher creates a new instance of Publisher. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

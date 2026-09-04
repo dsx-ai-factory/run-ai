@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aws/smithy-go/ptr"
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
+	"github.com/aws/smithy-go/ptr"
 	dbconfig "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/config"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/internal/logger"
 	logmocks "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/internal/logger/mocks"

@@ -9,14 +9,14 @@ import (
 	"context"
 	"time"
 
+	"github.com/Rican7/retry"
+	"github.com/Rican7/retry/strategy"
 	"github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client/api"
 	auditconfig "github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client/config"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client/generated"
 	client_utils "github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
-	"github.com/Rican7/retry"
-	"github.com/Rican7/retry/strategy"
 )
 
 const (

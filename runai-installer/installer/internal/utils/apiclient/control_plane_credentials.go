@@ -9,8 +9,8 @@ import (
 	"context"
 	"fmt"
 
-	runaiclient "github.com/dsx-ai-factory/run-ai/runai-installer/clients/pkg/clients"
 	"github.com/Masterminds/semver/v3"
+	runaiclient "github.com/dsx-ai-factory/run-ai/runai-installer/clients/pkg/clients"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )

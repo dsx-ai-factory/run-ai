@@ -11,9 +11,9 @@ import (
 	"context"
 	"io"
 
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/go-resty/resty/v2"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/Nerzal/gocloak/v13"
 )
 
 //go:generate mockery --name GoCloak --output ./mocks --filename gocloak.go

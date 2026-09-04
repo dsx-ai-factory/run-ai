@@ -14,8 +14,8 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/pod-group-assigner/pkg/config"
-	"github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	kaipgconstants "github.com/kai-scheduler/KAI-scheduler/pkg/podgrouper/podgrouper/plugins/constants"
+	"github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 
 	admissionv1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"

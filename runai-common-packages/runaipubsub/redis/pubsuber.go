@@ -11,14 +11,14 @@ import (
 	"math"
 	"time"
 
+	"github.com/ThreeDotsLabs/watermill"
+	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/ThreeDotsLabs/watermill/message/router/middleware"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	config_models "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub/config"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub/logger"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub/retry"
 	"github.com/redis/go-redis/v9"
-	"github.com/ThreeDotsLabs/watermill"
-	"github.com/ThreeDotsLabs/watermill/message"
-	"github.com/ThreeDotsLabs/watermill/message/router/middleware"
 )
 
 type PubSuberConnection interface {

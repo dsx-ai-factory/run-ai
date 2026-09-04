@@ -13,8 +13,8 @@ import (
 	"strconv"
 	"strings"
 
-	pkgvalidation "github.com/dsx-ai-factory/run-ai/runai-installer/installer/pkg/validation"
 	"github.com/Masterminds/semver/v3"
+	pkgvalidation "github.com/dsx-ai-factory/run-ai/runai-installer/installer/pkg/validation"
 )
 
 type Spec struct {

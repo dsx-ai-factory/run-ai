@@ -6,9 +6,9 @@
 package users
 
 import (
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/utils"
-	"github.com/Nerzal/gocloak/v13"
 )
 
 const (

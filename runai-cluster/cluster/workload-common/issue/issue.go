@@ -7,8 +7,8 @@ package issue
 
 import (
 	"fmt"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	nvapi "github.com/NVIDIA/k8s-dra-driver-gpu/api/nvidia.com/resource/v1beta1"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	openshiftV1 "github.com/openshift/api/route/v1"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/zap"

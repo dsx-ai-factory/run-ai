@@ -14,8 +14,8 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/pod-group-assigner/pkg/config"
 	nodepoolutils "github.com/dsx-ai-factory/run-ai/runai-cluster/common/node-pool-utils/utils"
-	"github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	kaiv2alpha2 "github.com/kai-scheduler/KAI-scheduler/pkg/apis/scheduling/v2alpha2"
+	"github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

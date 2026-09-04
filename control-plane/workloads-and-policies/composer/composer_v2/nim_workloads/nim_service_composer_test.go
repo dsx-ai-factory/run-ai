@@ -18,9 +18,9 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	nimv1alpha1 "github.com/NVIDIA/k8s-nim-operator/api/apps/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils"
 	"github.com/ghodss/yaml"
-	nimv1alpha1 "github.com/NVIDIA/k8s-nim-operator/api/apps/v1alpha1"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/Nerzal/gocloak/v13"
 	authmocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/auth/mocks"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/errors"
 	gocloakmocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/gocloak/mocks"
@@ -18,7 +19,6 @@ import (
 	runaicloakmocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/runaicloak/mocks"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/utils"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/utils/pointer"
-	"github.com/Nerzal/gocloak/v13"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

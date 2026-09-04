@@ -12,8 +12,8 @@ import (
 	"net/http"
 	"strings"
 
-	idmclient "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client"
 	semver "github.com/Masterminds/semver/v3"
+	idmclient "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client"
 )
 
 const (

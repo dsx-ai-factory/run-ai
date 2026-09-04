@@ -9,11 +9,11 @@ import (
 	"context"
 	"testing"
 
+	"github.com/Nerzal/gocloak/v13"
 	authMocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/auth/mocks"
 	kcMocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/gocloak/mocks"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 	helpers "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/repositories/auth_flow/helpers"
-	"github.com/Nerzal/gocloak/v13"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -12,12 +12,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Nerzal/gocloak/v13"
 	authMocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/auth/mocks"
 	kcMocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/gocloak/mocks"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 	runaicloakMocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/runaicloak/mocks"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/Nerzal/gocloak/v13"
 	"github.com/stretchr/testify/assert"
 )
 

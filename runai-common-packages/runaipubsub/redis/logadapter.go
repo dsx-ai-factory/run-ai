@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub/logger"
 	"github.com/ThreeDotsLabs/watermill"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub/logger"
 )
 
 func NewLogger(l logger.Loggerer) *Logger {

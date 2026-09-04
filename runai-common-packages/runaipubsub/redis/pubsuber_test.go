@@ -12,6 +12,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	config_models "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub/config"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub/logger"
@@ -21,8 +23,6 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/ThreeDotsLabs/watermill/message"
-	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
 )
 
 type mockStreamConnection struct {

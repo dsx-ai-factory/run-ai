@@ -12,11 +12,11 @@ import (
 
 	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 
+	"github.com/Nerzal/gocloak/v13"
 	authMocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/auth/mocks"
 	kcMocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/gocloak/mocks"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/config"
-	"github.com/Nerzal/gocloak/v13"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/utils/ptr"

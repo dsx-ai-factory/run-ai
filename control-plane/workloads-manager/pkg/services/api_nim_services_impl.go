@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"strings"
 
+	nimv1alpha1 "github.com/NVIDIA/k8s-nim-operator/api/apps/v1alpha1"
 	authClient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v2/nim_workloads"
@@ -26,7 +27,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
-	nimv1alpha1 "github.com/NVIDIA/k8s-nim-operator/api/apps/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

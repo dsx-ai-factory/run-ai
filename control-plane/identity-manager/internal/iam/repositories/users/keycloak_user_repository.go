@@ -15,12 +15,12 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/errors"
 
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/auth"
 	gocloakInterface "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/gocloak"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 	helpers "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/repositories/users/helpers"
 	runaicloak "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/runaicloak"
-	"github.com/Nerzal/gocloak/v13"
 )
 
 const (

@@ -11,10 +11,10 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/Masterminds/semver/v3"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
-	"github.com/Masterminds/semver/v3"
 )
 
 const (

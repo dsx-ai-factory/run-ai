@@ -19,8 +19,8 @@ import (
 	tp "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/trainingpolicy/v2alpha1"
 	tw "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/trainingworkload/v2alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
-	kainodepool "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	kaiv1alpha1 "github.com/kai-scheduler/KAI-scheduler/pkg/apis/kai/v1alpha1"
+	kainodepool "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	"github.com/rs/zerolog"
 	"go.uber.org/zap"
 

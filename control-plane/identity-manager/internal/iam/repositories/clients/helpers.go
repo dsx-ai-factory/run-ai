@@ -9,11 +9,11 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/repositories/protocol_mapper"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/utils"
 	ptr "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/utils/pointer"
-	"github.com/Nerzal/gocloak/v13"
 )
 
 var reservedClientAttrKeys = map[string]struct{}{

@@ -11,12 +11,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
-	config_models "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub/config"
-	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub/pevent"
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/ThreeDotsLabs/watermill/message/router/middleware"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
+	config_models "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub/config"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub/pevent"
 )
 
 func (p *redisPubSuber) runAndWaitForRouter(ctx context.Context) error {

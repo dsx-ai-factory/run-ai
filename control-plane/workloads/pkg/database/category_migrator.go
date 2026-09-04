@@ -15,7 +15,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/orm"
 	"github.com/google/uuid"
-	_ "github.com/lib/pq"                                                 // Blank import for PostgreSQL driver registration
+	_ "github.com/lib/pq" // Blank import for PostgreSQL driver registration
 
 	"gorm.io/gorm"
 )

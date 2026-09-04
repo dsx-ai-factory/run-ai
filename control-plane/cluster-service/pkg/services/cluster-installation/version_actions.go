@@ -13,9 +13,9 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/versions"
 
+	"github.com/Masterminds/semver/v3"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
-	"github.com/Masterminds/semver/v3"
 )
 
 var (

@@ -20,8 +20,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/pod-group-assigner/pkg/controllers/common"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/pod-group-assigner/pkg/controllers/podgroup"
 	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/pod-group-assigner/pkg/scheme"
-	"github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	kaiv2alpha2 "github.com/kai-scheduler/KAI-scheduler/pkg/apis/scheduling/v2alpha2"
+	"github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 
 	corev1 "k8s.io/api/core/v1"

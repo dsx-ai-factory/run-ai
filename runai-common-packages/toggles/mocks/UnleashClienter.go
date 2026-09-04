@@ -5,8 +5,8 @@
 package mocks
 
 import (
-	mock "github.com/stretchr/testify/mock"
 	"github.com/Unleash/unleash-client-go/v3"
+	mock "github.com/stretchr/testify/mock"
 )
 
 // NewUnleashClienter creates a new instance of UnleashClienter. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

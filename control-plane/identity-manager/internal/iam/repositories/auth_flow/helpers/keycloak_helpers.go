@@ -6,8 +6,8 @@
 package authflow
 
 import (
-	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 	"github.com/Nerzal/gocloak/v13"
+	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 )
 
 func FromAuthFlowRepModel(authFlowRep *models.AuthenticationFlowRepresentation) *gocloak.AuthenticationFlowRepresentation {

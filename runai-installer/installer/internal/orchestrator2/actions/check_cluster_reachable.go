@@ -9,8 +9,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
 	semver "github.com/Masterminds/semver/v3"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
 )
 
 const minimumKubernetesVersion = "1.30.0"

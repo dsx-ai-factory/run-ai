@@ -10,9 +10,9 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/MicahParks/keyfunc"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/auth/providers/oidc/configuration"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/auth/providers/oidc/userinfo"
-	"github.com/MicahParks/keyfunc"
 	"github.com/rs/zerolog/log"
 )
 

@@ -12,8 +12,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/project-controller/pkg/common"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/project-controller/pkg/config"
 	multierror "github.com/hashicorp/go-multierror"
-	kaiv1alpha1 "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	schedv2 "github.com/kai-scheduler/KAI-scheduler/pkg/apis/scheduling/v2"
+	kaiv1alpha1 "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
