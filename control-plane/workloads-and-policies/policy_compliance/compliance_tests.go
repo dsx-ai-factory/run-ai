@@ -14,7 +14,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck // dot-import is the idiomatic ginkgo usage in test helpers
-	. "github.com/onsi/gomega" //nolint:staticcheck // dot-import is the idiomatic gomega usage in test helpers
+	. "github.com/onsi/gomega"    //nolint:staticcheck // dot-import is the idiomatic gomega usage in test helpers
 )
 
 type ComplianceTest struct {
