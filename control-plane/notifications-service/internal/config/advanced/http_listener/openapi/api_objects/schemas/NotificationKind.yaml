@@ -1,0 +1,18 @@
+type: object
+properties:
+  origin:
+    type: string
+  category:
+    type: string
+  type:
+    type: string
+  description:
+    type: string
+  template:
+    type: string
+required:
+  - origin
+  - category
+  - type
+  - description
+  - template

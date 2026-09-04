@@ -1,0 +1,29 @@
+allOf:
+  - $ref: "./AccessRuleCreationFieldsInternal.yaml"
+  - type: object
+    required:
+      - subjectType
+    properties:
+      subjectType:
+        $ref: './SubjectTypeExtended.yaml'
+  - $ref: "./EnrichmentDataFields.yaml"
+  - $ref: "./AccessRuleMetadataFields.yaml"
+  - type: object
+    properties:
+      predefinedRole:
+        type: object
+        nullable: true
+        properties:
+          id:
+            type: string
+            description: "Id of the predefined role for cluster permissions"
+            example: "12"
+          name:
+            type: string
+            description: "Name of the predefined role for cluster permissions"
+            example: "admin"
+      isDeleting:
+        type: boolean
+        default: false
+        description: "Indicates if the access rule is in 'Deleting' phase and should be deleted from the cluster"
+        example: false

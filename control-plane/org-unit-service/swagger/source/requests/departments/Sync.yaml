@@ -1,0 +1,42 @@
+get:
+  summary: get departments for sync
+  operationId: get_sync_departments
+  x-internal: true
+  x-authorize:
+    resource-type: department
+    action: sync
+  x-service: org-unit-service
+  x-test-coverage:
+    - e2e/src/test/suites/playwright/serial/regression/suricata/orgUnit/orgUnitSync.test.ts
+  tags:
+    - Departments
+  parameters:
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml'
+    - $ref: "../../parameters/UpdatedAfter.yaml"
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+  responses:
+    200:
+      description: ok
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - departments
+            properties:
+              departments:
+                type: array
+                items:
+                  $ref: "../../schemas/departments/DepartmentSync.yaml"
+              next:
+                type: integer
+                example: 1
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

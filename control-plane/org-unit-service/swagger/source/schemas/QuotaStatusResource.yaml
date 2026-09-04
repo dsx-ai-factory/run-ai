@@ -1,0 +1,17 @@
+type: object
+properties:
+  gpu:
+    type: number
+    format: double
+    description: The number of GPUs (allocated/requested/...).
+    example: 0
+  cpu:
+    type: number
+    format: double
+    description: CPU in Millicores (allocated/requested/...).
+    example: 1000
+  memory:
+    type: number
+    format: double
+    description: Memory in MB (allocated/requested/...).
+    example: 1000

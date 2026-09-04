@@ -1,0 +1,3 @@
+{{- if .Values.metricsService.enabled }}
+{{- include "common.hpa" (list . .Values.metricsService.autoscaling .Values.metricsService) -}}
+{{- end }}

@@ -1,0 +1,32 @@
+post:
+  summary: Batch delete reports
+  operationId: batch_delete_reports
+  x-internal: true
+  x-no-authorization: true
+  x-service: metrics-service
+  x-test-coverage:
+    - metrics-service/integration-tests/tests/report_test.go
+  tags:
+    - Reports
+  requestBody:
+    description: Report ids to get
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/ReportsIdsBatchRequest.yaml'
+  responses:
+    '202':
+      description: Accepted for deletion.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/schemas/batch/BatchResponseAsync.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

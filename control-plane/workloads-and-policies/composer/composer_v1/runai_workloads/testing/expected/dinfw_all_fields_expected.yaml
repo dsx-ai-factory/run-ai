@@ -1,0 +1,345 @@
+Dinfw:
+  leaderSpec:
+    annotations:
+      items:
+        deployment.kubernetes.io/revision:
+          value: "1"
+        distributed-inference/role:
+          value: leader
+    arguments:
+      value: -x my-script.py
+    capabilities:
+      items:
+        capability-0:
+          value:
+            capability: KILL
+        capability-1:
+          value:
+            capability: CHOWN
+        capability-2:
+          value:
+            capability: DAC_OVERRIDE
+    command:
+      value: python
+    configMapVolumes:
+      items:
+        config-map-leader-leader-app-config:
+          value:
+            mountPath: /config/leader
+            name: leader-config
+    cpu:
+      value: "1"
+    cpuLimit:
+      value: "4"
+    createHomeDir:
+      value: true
+    emptyDirVolumes:
+      items:
+        empty-dir-leader-leader-temp-storage:
+          value:
+            path: /tmp/leader-scratch
+            sizeLimit: 1Gi
+    environment:
+      items:
+        DISTRIBUTED_ROLE:
+          value: leader
+        HOME:
+          value: /home/leader-folder
+        LEADER_ID:
+          value: leader-001
+        RUNAI_JOB_NAME:
+          value: ${RUNAI_JOB_NAME}
+        RUNAI_PROJECT:
+          value: ${RUNAI_PROJECT}
+    gpu:
+      value: "0.5"
+    gpuDevices:
+      value: 2
+    image:
+      value: python:3.8
+    imagePullPolicy:
+      value: IfNotPresent
+    imagePullSecrets:
+      value: registry-secret USERCREDENTIAL:leader-user-credential shared-registry
+    labels:
+      items:
+        component:
+          value: distributed-inference-leader
+        run.ai/category:
+          value: Train
+        run.ai/control-plane-managed:
+          value: "true"
+        version:
+          value: v1.0.0
+    memory:
+      value: 2Gi
+    memoryLimit:
+      value: 8Gi
+    nodeAffinityRequired:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: disktype
+          operator: In
+          values:
+          - ssd
+        - key: region
+          operator: In
+          values:
+          - us-west1
+          - us-west2
+        - key: gpu-type
+          operator: In
+          values:
+          - nvidia-a100
+          - nvidia-v100
+    nodeType:
+      value: my-node-type
+    podAffinity:
+      value: true
+    podAffinitySchedulingRule:
+      value: requiredDuringSchedulingIgnoredDuringExecution
+    podAffinityTopology:
+      value: distributed-inference-group
+    pvcs:
+      items:
+        pvc-leader:
+          value:
+            claimName: dinfw_all_fields-project-ppppp
+            existingPvc: false
+            path: /data/leader-pvc
+            readOnly: false
+            size: 5Gi
+            storageClass: fast-ssd
+    readinessProbe:
+      values:
+        httpGetPort:
+          value: 8080
+    runAsGid:
+      value: 1000
+    runAsUid:
+      value: 1000
+    secretVolumes:
+      items:
+        secret-leader-leader-credentials:
+          value:
+            mountPath: /secrets/leader
+            name: leader-secret
+    tolerations:
+      items:
+        toleration-leader-gpu-taint:
+          value:
+            effect: NoSchedule
+            operator: Equal
+            tolerationKey: nvidia.com/gpu
+            tolerationValue: "true"
+        toleration-leader-leader-taint:
+          value:
+            effect: NoExecute
+            operator: Exists
+            tolerationKey: distributed-inference/leader
+    workingDir:
+      value: /home/leader-folder
+  metadata: {}
+  spec:
+    nodePools:
+      value: gpu-pool-a gpu-pool-b cpu-pool
+    priorityClassName:
+      value: low
+    replicas:
+      value: 2
+    restartPolicy:
+      value: RecreateGroupOnPodRestart
+    servingPorts:
+      items:
+        serving-port:
+          value:
+            authorizationType: authorizedUsers
+            authorizedUsers: user-a@example.com,user-b@example.com
+            exposeExternally: true
+            exposedUrl: https://my-distributed-inference.example.com
+            port: 8081
+            protocol: http
+    startupPolicy:
+      value: LeaderReady
+    username:
+      value: test
+    workers:
+      value: 3
+  status: {}
+  workerSpec:
+    annotations:
+      items:
+        deployment.kubernetes.io/revision:
+          value: "1"
+        distributed-inference/role:
+          value: worker
+    arguments:
+      value: -x wrk-script.py
+    capabilities:
+      items:
+        capability-0:
+          value:
+            capability: NET_BIND_SERVICE
+        capability-1:
+          value:
+            capability: SYS_TIME
+    command:
+      value: python
+    configMapVolumes:
+      items:
+        config-map-worker-wrk-app-config:
+          value:
+            mountPath: /config/worker
+            name: wrk-config
+    cpu:
+      value: "0.5"
+    cpuLimit:
+      value: "2"
+    createHomeDir:
+      value: true
+    emptyDirVolumes:
+      items:
+        empty-dir-worker-wrk-temp-storage:
+          value:
+            path: /tmp/wrk-scratch
+            sizeLimit: 512Mi
+    environment:
+      items:
+        DISTRIBUTED_ROLE:
+          value: worker
+        HOME:
+          value: /home/wrk-folder
+        LEADER_ADDRESS:
+          value: ${LEADER_SERVICE_HOST}
+        RUNAI_JOB_NAME:
+          value: ${RUNAI_JOB_NAME}
+        RUNAI_PROJECT:
+          value: ${RUNAI_PROJECT}
+        WORKER_ID:
+          value: wrk-${POD_NAME}
+    gpuDevices:
+      value: 1
+    gpuMemory:
+      value: 8Gi
+    image:
+      value: python:2.7
+    imagePullPolicy:
+      value: Always
+    imagePullSecrets:
+      value: registry-secret USERCREDENTIAL:wrk-user-credential shared-registry
+    labels:
+      items:
+        component:
+          value: distributed-inference-worker
+        run.ai/category:
+          value: Train
+        run.ai/control-plane-managed:
+          value: "true"
+        version:
+          value: v1.0.0
+    memory:
+      value: 1Gi
+    memoryLimit:
+      value: 4Gi
+    nodeAffinityRequired:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: wrk-type
+          operator: In
+          values:
+          - gpu-worker
+          - compute-worker
+        - key: zone
+          operator: In
+          values:
+          - zone-a
+          - zone-b
+    nodeType:
+      value: wrk-node-type
+    podAffinity:
+      value: true
+    podAffinitySchedulingRule:
+      value: preferredDuringSchedulingIgnoredDuringExecution
+    podAffinityTopology:
+      value: distributed-inference-wrk-group
+    pvcs:
+      items:
+        pvc-worker:
+          value:
+            claimName: dinfw_all_fields-project-ppppp
+            existingPvc: false
+            path: /data/wrk-pvc
+            readOnly: false
+            size: 2Gi
+            storageClass: standard-ssd
+    readinessProbe:
+      values:
+        httpGetPort:
+          value: 9090
+    runAsGid:
+      value: 1001
+    runAsUid:
+      value: 1001
+    secretVolumes:
+      items:
+        secret-worker-wrk-credentials:
+          value:
+            mountPath: /secrets/worker
+            name: wrk-secret
+    tolerations:
+      items:
+        toleration-worker-gpu-wrk-taint:
+          value:
+            effect: NoSchedule
+            operator: Equal
+            tolerationKey: nvidia.com/gpu
+            tolerationValue: "true"
+        toleration-worker-wrk-taint:
+          value:
+            effect: PreferNoSchedule
+            operator: Exists
+            tolerationKey: distributed-inference/worker
+    workingDir:
+      value: /home/wrk-folder
+JobSpec: {}
+MasterSpec: null
+Notification:
+  category: Train
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections:
+    - authorizationType: authorizedUsers
+      authorizedUsers:
+      - user-a@example.com
+      - user-b@example.com
+      connectionType: ServingPort
+      containerPort: 8081
+      correlationName: serving-port
+      name: ServingPort
+      toolType: custom
+    id: ""
+    name: Leader
+    replicaType: Leader
+  - connections: []
+    id: ""
+    name: Worker
+    replicaType: Worker
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: dinfw_all_fields, Rules: , Type: DistributedInference'
+  images:
+  - python:3.8
+  - python:2.7
+  name: 'Value: dinfw_all_fields, Rules: , Type: DistributedInference'
+  projectId: project-654-321
+  requestedNodePools:
+  - gpu-pool-a
+  - gpu-pool-b
+  - cpu-pool
+  requestedPods:
+    number: 8
+  submittedBy: test
+  type: DistributedInference
+  version: v1alpha1

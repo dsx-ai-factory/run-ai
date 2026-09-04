@@ -1,0 +1,8 @@
+description: The specified resource was not found.
+content:
+  application/json:
+    schema:
+      $ref: '../../../../../control-plane/infra/openapi/docs/responses/Error.yaml'
+    example:
+      code: 412
+      message: "Pod is not ready yet"

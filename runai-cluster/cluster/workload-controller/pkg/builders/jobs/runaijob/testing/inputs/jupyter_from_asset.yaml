@@ -1,0 +1,48 @@
+apiVersion: run.ai/v2alpha1
+kind: InteractiveWorkload
+metadata:
+  name: job-0
+  namespace: runai-team-a
+spec:
+  command:
+    value: "start-notebook.sh --NotebookApp.base_url=/${RUNAI_PROJECT}/${RUNAI_JOB_NAME} --NotebookApp.token='' --NotebookApp.password=''"
+  gpu:
+    value: "0"
+  environment:
+    items:
+      CHROME_HOME:
+        value: "yes"
+      CHROME_HOME_OPTS:
+        value: "-R"
+      NB_GID:
+        value: "20"
+      NB_UID:
+        value: "501"
+  image:
+    value: jupyter/scipy-notebook
+  imagePullPolicy:
+    value: IfNotPresent
+  name:
+    value: job-0
+  exportUrls:
+    items:
+      url-0:
+        value:
+          containerPort: 8888
+          customUrl: true
+  username:
+    value: user.name
+  runAsUser:
+    value: true
+  runAsUid:
+    value: 0
+  runAsGid:
+    value: 0
+  gitSync:
+    items:
+      git-a:
+        value:
+          directory: /tmp/repoa
+          password: mypassword
+          repository: http://github.com/repoa
+          username: myuser

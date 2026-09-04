@@ -1,0 +1,4 @@
+type: object
+allOf:
+    - $ref: "./EmailNotificationChannelConfig.yaml"
+    - $ref: "./SlackNotificationChannelConfig.yaml"

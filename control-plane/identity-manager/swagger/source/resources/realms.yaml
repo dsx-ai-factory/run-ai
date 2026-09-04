@@ -1,0 +1,79 @@
+put:
+  summary: Get or create runai realm
+  x-service: identity-manager
+  x-test-coverage:
+    - control-plane/identity-manager/pkg/services/api_realm_service_test.go
+  description: |
+    Get an existing realm or create a new one for runai tenant.
+  operationId: get_or_create_realm
+  x-no-authorization: true
+  tags:
+  - Realm
+  requestBody:
+    description: The tenant on behalf realm will be created.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Realms/RealmCreationRequest.yaml'
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Realms/RealmCreationResponse.yaml'
+    '201':
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Realms/RealmCreationResponse.yaml'
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '409':
+      $ref: '../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+post:
+  summary: Create runai realm
+  x-service: identity-manager
+  x-test-coverage: not-applicable
+  description: |
+    Create a new realm for runai tenant.
+  operationId: create_realm
+  x-no-authorization: true
+  tags:
+  - Realm
+  requestBody:
+    description: The tenant on behalf realm will be created.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Realms/RealmCreationRequest.yaml'
+  responses:
+    '201':
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Realms/RealmCreationResponse.yaml'
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '409':
+      $ref: '../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

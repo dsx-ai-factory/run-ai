@@ -1,0 +1,6 @@
+name: projectName
+in: query
+required: false
+description: The name of the project. If empty - tenant scoped.
+schema:
+  type: string

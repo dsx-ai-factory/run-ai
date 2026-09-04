@@ -1,0 +1,11 @@
+properties:
+  meta:
+    $ref: "../Policy/PolicyMeta.yaml"
+  policy:
+    $ref: "./NimServicePolicyDefaultsAndRules.yaml"
+  effective:
+    $ref: "./NimServicePolicyDefaultsAndRules.yaml"
+  effectiveUpdatedAt:
+    $ref: "../General/Timestamp.yaml"
+nullable: true
+type: object

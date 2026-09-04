@@ -1,0 +1,147 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: route-enabled-workload-auth-proxy
+    run.ai/workload-runner: route-enabled-workload
+  name: route-enabled-workload-auth-proxy
+  namespace: runai-test
+  ownerReferences:
+  - apiVersion: run.ai/v1alpha1
+    kind: WorkloadRunner
+    name: route-enabled-workload
+    uid: test-uid-12345
+  resourceVersion: "1"
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 4180
+  selector:
+    app: route-enabled-workload-auth-proxy
+    run.ai/workload-runner: route-enabled-workload
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: secure-service
+  namespace: runai-test
+  ownerReferences:
+  - apiVersion: run.ai/v1alpha1
+    kind: WorkloadRunner
+    name: route-enabled-workload
+    uid: test-uid-12345
+  resourceVersion: "1"
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    app: secure-app
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: route-enabled-workload-auth-proxy
+    run.ai/workload-runner: route-enabled-workload
+  name: route-enabled-workload-auth-proxy
+  namespace: runai-test
+  ownerReferences:
+  - apiVersion: run.ai/v1alpha1
+    kind: WorkloadRunner
+    name: route-enabled-workload
+    uid: test-uid-12345
+  resourceVersion: "1"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: route-enabled-workload-auth-proxy
+      run.ai/workload-runner: route-enabled-workload
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: route-enabled-workload-auth-proxy
+        run.ai/workload-runner: route-enabled-workload
+    spec:
+      containers:
+      - args:
+        - --provider=keycloak-oidc
+        - --upstream=http://secure-service.runai-test.svc.cluster.local:8080
+        - --redirect-url=https://secure.apps.cluster.example.com/oauth2/callback
+        - --oidc-issuer-url=https://auth.example.com
+        - --scope=openid
+        - --http-address=0.0.0.0:4180
+        - --proxy-prefix=/oauth2
+        - --reverse-proxy=true
+        - --skip-provider-button=true
+        - --whitelist-domain=secure.apps.cluster.example.com
+        - --cookie-domain=secure.apps.cluster.example.com
+        - --cookie-httponly=true
+        - --cookie-secure=true
+        - --code-challenge-method=S256
+        - --cookie-refresh=10m
+        - --cookie-samesite=lax
+        - --skip-jwt-bearer-tokens=true
+        - --extra-jwt-issuers=https://auth.example.com=runai
+        - --custom-templates-dir=/usr/share/oauth2-proxy
+        - --pass-authorization-header=false
+        - --cookie-name=route-enabled-workload-auth-proxy
+        - --email-domain=*
+        env:
+        - name: OAUTH2_PROXY_COOKIE_PATH
+          value: /
+        envFrom:
+        - secretRef:
+            name: oauth2-proxy-secret
+        image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0
+        imagePullPolicy: IfNotPresent
+        name: oauth2-proxy
+        ports:
+        - containerPort: 4180
+          name: port-4180
+          protocol: TCP
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+        volumeMounts:
+        - mountPath: /etc/runai/auth/users
+          name: runai-auth
+      volumes:
+      - emptyDir: {}
+        name: runai-auth
+status: {}
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    haproxy.router.openshift.io/timeout: 60s
+  name: secure-route
+  namespace: runai-test
+  ownerReferences:
+  - apiVersion: run.ai/v1alpha1
+    kind: WorkloadRunner
+    name: route-enabled-workload
+    uid: test-uid-12345
+  resourceVersion: "1"
+spec:
+  host: secure.apps.cluster.example.com
+  path: /
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: route-enabled-workload-auth-proxy
+    weight: null
+status: {}

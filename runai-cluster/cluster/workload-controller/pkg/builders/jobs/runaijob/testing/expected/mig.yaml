@@ -1,0 +1,51 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      template: job-0-2022-05-25t03-37-19
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      project: team-a
+      release: job-0-2022-05-25t03-37-19
+      runai/job-index: "346"
+      workloadKind: TrainingWorkload
+      workloadName: job-0-2022-05-25t03-37-19
+    name: job-0
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 6
+    completions: 1
+    maxIdleDurationSeconds: 2400
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          nvidia.com/mig-1g.5gb: "1"
+          user: roman
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          project: team-a
+          release: job-0-2022-05-25t03-37-19
+          run.ai/top-owner-uid: ""
+          runai/job-index: "346"
+          workloadKind: TrainingWorkload
+          workloadName: job-0-2022-05-25t03-37-19
+      spec:
+        containers:
+        - image: gcr.io/run-ai-demo/mat-mul
+          imagePullPolicy: Always
+          name: job-0
+          resources: {}
+          securityContext:
+            allowPrivilegeEscalation: true
+            seccompProfile:
+              type: RuntimeDefault
+        restartPolicy: Never
+        schedulerName: runai-scheduler
+  status: {}

@@ -1,0 +1,5 @@
+description: The metric to use for autoscaling (mandatory).
+type: string
+pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
+example: "http_requests_total"
+nullable: true

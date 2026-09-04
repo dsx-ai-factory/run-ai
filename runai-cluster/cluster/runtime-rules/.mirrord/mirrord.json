@@ -1,0 +1,12 @@
+{
+  "target": {
+    "path": {
+      "deployment": "runtime-rules"
+    },
+    "namespace": "runai"
+  },
+  "feature": {
+    "env": true,
+    "fs": "read"
+  }
+}

@@ -1,0 +1,76 @@
+get:
+  summary: List storage class configurations
+  description: Retrieves a list of storage class configurations defined in the system.
+  operationId: list_storage_class_configuration
+  tags:
+    - Storage Class Configuration
+  x-csp: true
+  x-service: k8s-objects-tracker
+  x-test-coverage:
+    - k8s-objects-tracker/pkg/services/api_storage_class_configuration_service_test.go
+  x-authorize:
+    resource-type: storage-class-configuration
+    action: read
+  parameters:
+    - $ref: "../parameters/query/optional/StorageClassConfigurationFilterBy.yaml"
+    - $ref: "../parameters/query/optional/StorageClassConfigurationSortBy.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/StorageClassConfiguration/StorageClassConfigurationListResponse.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+post:
+    summary: Create storage class configuration
+    description: |
+      Creates a new storage class configuration in the NVIDIA Run:ai platform.
+      This endpoint enables administrators to define storage class behavior and customize their usage settings.
+    operationId: create_storage_class_configuration
+    tags:
+        - Storage Class Configuration
+    x-csp: true
+    x-service: k8s-objects-tracker
+    x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_storage_class_configuration_service_test.go
+    x-authorize:
+      resource-type: storage-class-configuration
+      action: create
+    requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/StorageClassConfiguration/StorageClassConfigurationCreationRequest.yaml'
+    responses:
+        201:
+            description: Executed successfully.
+            content:
+              application/json:
+                schema:
+                  $ref: '../schemas/StorageClassConfiguration/StorageClassConfiguration.yaml'
+        400:
+            $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+        401:
+            $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+        403:
+            $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+        404:
+            $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+        500:
+            $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+        503:
+            $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

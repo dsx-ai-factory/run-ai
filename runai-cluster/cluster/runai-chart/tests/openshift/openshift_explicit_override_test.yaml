@@ -1,0 +1,53 @@
+suite: Test OpenShift mode-based configuration
+
+# Note: Auto-detection using lookup() cannot be tested in helm-unittest 
+# as it has no cluster access. Auto-detection should be tested manually with 'helm install'.
+# These tests verify that explicit mode values work correctly.
+
+tests:
+  # Explicit mode=Enabled tests
+  - it: should render OCP resources when mode is Enabled (regardless of cluster type)
+    set:
+      openShift.mode: Enabled
+      openShift.securityContextConstraints.create: true
+    templates:
+      - templates/ocp/admission-webhooks.yaml
+    asserts:
+      - isNotEmpty: {}
+
+  - it: should render openshift-monitoring resources when mode is Enabled
+    set:
+      openShift.mode: Enabled
+      helmHooksHandler.enabled: true
+    templates:
+      - templates/hooks/post-install-rbac.yaml
+    documentSelector:
+      path: metadata.namespace
+      value: openshift-monitoring
+      matchMany: true
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: openshift-monitoring
+
+  # Explicit mode=Disabled tests
+  - it: should NOT render OCP resources when mode is Disabled (regardless of cluster type)
+    set:
+      openShift.mode: Disabled
+      openShift.securityContextConstraints.create: true
+    templates:
+      - templates/ocp/admission-webhooks.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should NOT render openshift-monitoring resources when mode is Disabled
+    set:
+      openShift.mode: Disabled
+      helmHooksHandler.enabled: true
+    templates:
+      - templates/hooks/post-install-rbac.yaml
+    asserts:
+      - notMatchRegex:
+          path: metadata.namespace
+          pattern: ^openshift-monitoring$

@@ -1,0 +1,2326 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: support@run.ai
+  description: An API for managing catalogs
+  title: catalog-service
+  version: 2.0.0
+servers:
+- url: https://app.run.ai
+- url: https://staging.run.ai
+- url: https://test.run.ai
+- url: http://localhost:8080
+security:
+- bearerAuth: []
+paths:
+  /:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: Executed successfully.
+      summary: health check
+      tags:
+      - Health
+      x-service: catalog-service
+      x-no-authorization: true
+    x-internal: true
+  /api/v1/registries:
+    get:
+      description: List registry integrations.
+      operationId: list_registry_integrations
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistryIntegrationListResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List registry integrations
+      tags:
+      - Registries
+      x-service: catalog-service
+      x-authorize:
+        resource-type: registries
+        action: read
+    post:
+      description: Create registry integration.
+      operationId: create_registry_integration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistryIntegrationCreationRequest'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistryIntegration'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "409":
+          content:
+            application/json:
+              example:
+                code: 409
+                message: Resource with this name already exists
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource already exists
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create registry integration
+      tags:
+      - Registries
+      x-service: catalog-service
+      x-authorize:
+        resource-type: registries
+        action: create
+  /api/v1/registries/{RegistryIntegrationId}:
+    delete:
+      description: Delete registry integration.
+      operationId: delete_registry_integration
+      parameters:
+      - explode: false
+        in: path
+        name: RegistryIntegrationId
+        required: true
+        schema:
+          description: The ID of the registry integration.
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "202":
+          content:
+            application/json:
+              example:
+                code: 202
+                message: Request has been accepted.
+              schema:
+                $ref: '#/components/schemas/HttpResponse'
+          description: Accepted.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Delete registry integration
+      tags:
+      - Registries
+      x-service: catalog-service
+      x-authorize:
+        resource-type: registries
+        action: delete
+    get:
+      description: Get registry integration by id.
+      operationId: get_registry_integration_by_id
+      parameters:
+      - explode: false
+        in: path
+        name: RegistryIntegrationId
+        required: true
+        schema:
+          description: The ID of the registry integration.
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistryIntegration'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get registry integration by id
+      tags:
+      - Registries
+      x-service: catalog-service
+      x-authorize:
+        resource-type: registries
+        action: read
+    put:
+      description: Update registry integration.
+      operationId: update_registry_integration
+      parameters:
+      - explode: false
+        in: path
+        name: RegistryIntegrationId
+        required: true
+        schema:
+          description: The ID of the registry integration.
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistryIntegrationUpdateRequest'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistryIntegration'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "409":
+          content:
+            application/json:
+              example:
+                code: 409
+                message: Resource with this name already exists
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource already exists
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Update registry integration
+      tags:
+      - Registries
+      x-service: catalog-service
+      x-authorize:
+        resource-type: registries
+        action: update
+  /api/v1/registries/{RegistryIntegrationId}/images:
+    get:
+      description: List requested images.
+      operationId: list_images
+      parameters:
+      - explode: false
+        in: path
+        name: RegistryIntegrationId
+        required: true
+        schema:
+          description: The ID of the registry integration.
+          format: uuid
+          type: string
+        style: simple
+      - description: Filter results by a free text search.
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          example: test project
+          type: string
+        style: form
+      - description: The asset ID to use for accessing resources that require API
+          key authentication
+        explode: true
+        in: query
+        name: assetId
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImagesListResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List images by registry-integration id
+      tags:
+      - Images
+      x-service: catalog-service
+      x-authorize:
+        resource-type: registries
+        action: read
+  /api/v1/registries/{RegistryIntegrationId}/images/tags:
+    get:
+      operationId: get_image_tags
+      parameters:
+      - explode: false
+        in: path
+        name: RegistryIntegrationId
+        required: true
+        schema:
+          description: The ID of the registry integration.
+          format: uuid
+          type: string
+        style: simple
+      - description: The name of the image to get the tags for
+        example: runai/viper-catalog-service:latest
+        explode: true
+        in: query
+        name: ImageName
+        required: true
+        schema:
+          type: string
+        style: form
+      - description: The asset ID to use for accessing resources that require API
+          key authentication
+        explode: true
+        in: query
+        name: assetId
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageTags'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get the image's tags
+      tags:
+      - Images
+      x-service: catalog-service
+      x-authorize:
+        resource-type: registries
+        action: read
+  /api/v1/helm-repos:
+    get:
+      description: List helm repos.
+      operationId: list_helm_repos
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelmRepoListResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: "List helm repos. [Experimental]"
+      tags:
+      - HelmRepos
+      x-service: catalog-service
+      x-authorize:
+        resource-type: registries
+        action: read
+    post:
+      description: Create helm repo.
+      operationId: create_helm_repo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HelmRepoCreationRequest'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelmRepo'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "409":
+          content:
+            application/json:
+              example:
+                code: 409
+                message: Resource with this name already exists
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource already exists
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: "Create helm repo. [Experimental]"
+      tags:
+      - HelmRepos
+      x-service: catalog-service
+      x-authorize:
+        resource-type: registries
+        action: create
+  /api/v1/helm-repos/{HelmRepoId}:
+    delete:
+      description: Delete helm repo.
+      operationId: delete_helm_repo
+      parameters:
+      - explode: false
+        in: path
+        name: HelmRepoId
+        required: true
+        schema:
+          description: The ID of the helm repo.
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "202":
+          content:
+            application/json:
+              example:
+                code: 202
+                message: Request has been accepted.
+              schema:
+                $ref: '#/components/schemas/HttpResponse'
+          description: Accepted.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: "Delete helm repo. [Experimental]"
+      tags:
+      - HelmRepos
+      x-service: catalog-service
+      x-authorize:
+        resource-type: registries
+        action: delete
+    get:
+      description: Get helm repo by id.
+      operationId: get_helm_repo_by_id
+      parameters:
+      - explode: false
+        in: path
+        name: HelmRepoId
+        required: true
+        schema:
+          description: The ID of the helm repo.
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelmRepo'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: "Get helm repo by id. [Experimental]"
+      tags:
+      - HelmRepos
+      x-service: catalog-service
+      x-authorize:
+        resource-type: registries
+        action: read
+    put:
+      description: Update helm repo.
+      operationId: update_helm_repo
+      parameters:
+      - explode: false
+        in: path
+        name: HelmRepoId
+        required: true
+        schema:
+          description: The ID of the helm repo.
+          format: uuid
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HelmRepoUpdateRequest'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelmRepo'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "409":
+          content:
+            application/json:
+              example:
+                code: 409
+                message: Resource with this name already exists
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource already exists
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: "Update helm repo. [Experimental]"
+      tags:
+      - HelmRepos
+      x-service: catalog-service
+      x-authorize:
+        resource-type: registries
+        action: update
+  /api/v1/helm-repos/{HelmRepoId}/charts:
+    get:
+      description: Fetch and list all charts and their versions from a helm repo.
+      operationId: browse_helm_repo_charts
+      parameters:
+      - explode: false
+        in: path
+        name: HelmRepoId
+        required: true
+        schema:
+          description: The ID of the helm repo.
+          format: uuid
+          type: string
+        style: simple
+      - description: The asset ID to use for accessing resources that require API
+          key authentication
+        explode: true
+        in: query
+        name: assetId
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelmChartListResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: "Browse helm repo charts. [Experimental]"
+      tags:
+      - HelmRepos
+      x-service: catalog-service
+      x-authorize:
+        resource-type: registries
+        action: read
+  /api/v1/huggingface/catalog:
+    get:
+      description: Proxy to the Hugging Face catalog search API.
+      operationId: search_hugging_face_catalog
+      parameters:
+      - description: "Search query used to look up Hugging Face models. Accepts a\
+          \ full repository ID (`org/model`), a standalone model name, or a partial\
+          \ match string."
+        example: meta-llama/Llama-3.1-405B-Instruct or Llama-3.1-405B-Instruct or
+          Llama-3.1-405B
+        explode: true
+        in: query
+        name: query
+        required: false
+        schema:
+          pattern: "^/?[A-Za-z0-9._-/]+$"
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HuggingFaceModelSearchResults'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Search Hugging Face models.
+      tags:
+      - Inferences
+      x-service: catalog-service
+      x-test-coverage:
+      - control-plane/catalog-service/pkg/services/api_inferences_service_test.go
+      - control-plane/catalog-service/pkg/services/huggingface/huggingface_info_test.go
+      x-authorize:
+        resource-type: inferences
+        action: create
+  /api/v1/catalog/settings:
+    get:
+      operationId: get_catalog_settings
+      parameters:
+      - description: If exists will return the relevant resource for the tenant ID
+        example: "1008"
+        explode: true
+        in: query
+        name: tenantId
+        required: false
+        schema:
+          default: ""
+          type: string
+        style: form
+        x-scope:
+        - system
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogSettingsGetResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get catalog settings
+      tags:
+      - Settings
+      x-service: catalog-service
+      x-test-coverage: not-applicable
+      x-authorize:
+        resource-type: settings
+        action: read
+    x-scope:
+    - system
+    - tenant
+  /api/v1/catalog/settings/{key}:
+    get:
+      operationId: get_catalog_setting_by_key
+      parameters:
+      - description: The settings key
+        explode: false
+        in: path
+        name: key
+        required: true
+        schema:
+          $ref: '#/components/schemas/CatalogSettingsKeyEnum'
+        style: simple
+      - description: If exists will return the relevant resource for the tenant ID
+        example: "1008"
+        explode: true
+        in: query
+        name: tenantId
+        required: false
+        schema:
+          default: ""
+          type: string
+        style: form
+        x-scope:
+        - system
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                enableNgcIntegration:
+                  value:
+                    enabled: false
+              schema:
+                $ref: '#/components/schemas/GetEnableNgcIntegration'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get catalog setting by key
+      tags:
+      - Settings
+      x-service: catalog-service
+      x-test-coverage: not-applicable
+      x-authorize:
+        resource-type: settings
+        action: read
+    put:
+      operationId: update_catalog_setting_by_key
+      parameters:
+      - description: The settings key
+        explode: false
+        in: path
+        name: key
+        required: true
+        schema:
+          $ref: '#/components/schemas/CatalogSettingsKeyEnum'
+        style: simple
+      - description: If exists will return the relevant resource for the tenant ID
+        example: "1008"
+        explode: true
+        in: query
+        name: tenantId
+        required: false
+        schema:
+          default: ""
+          type: string
+        style: form
+        x-scope:
+        - system
+      requestBody:
+        content:
+          application/json:
+            examples:
+              enableNgcIntegration:
+                value:
+                  enabled: false
+            schema:
+              $ref: '#/components/schemas/UpdateCatalogSettingByKeyRequest'
+        required: true
+      responses:
+        "200":
+          description: Setting successfully updated
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Update catalog setting by key
+      tags:
+      - Settings
+      x-service: catalog-service
+      x-test-coverage: not-applicable
+      x-authorize:
+        resource-type: settings
+        action: update
+    x-scope:
+    - system
+    - tenant
+components:
+  parameters:
+    RegistryIntegrationId:
+      explode: false
+      in: path
+      name: RegistryIntegrationId
+      required: true
+      schema:
+        description: The ID of the registry integration.
+        format: uuid
+        type: string
+      style: simple
+    Search:
+      description: Filter results by a free text search.
+      explode: true
+      in: query
+      name: search
+      required: false
+      schema:
+        example: test project
+        type: string
+      style: form
+    AssetIdOptional:
+      description: The asset ID to use for accessing resources that require API key
+        authentication
+      explode: true
+      in: query
+      name: assetId
+      required: false
+      schema:
+        type: string
+      style: form
+    ImageName:
+      description: The name of the image to get the tags for
+      example: runai/viper-catalog-service:latest
+      explode: true
+      in: query
+      name: ImageName
+      required: true
+      schema:
+        type: string
+      style: form
+    HelmRepoId:
+      explode: false
+      in: path
+      name: HelmRepoId
+      required: true
+      schema:
+        description: The ID of the helm repo.
+        format: uuid
+        type: string
+      style: simple
+    HuggingFaceSearchQuery:
+      description: "Search query used to look up Hugging Face models. Accepts a full\
+        \ repository ID (`org/model`), a standalone model name, or a partial match\
+        \ string."
+      example: meta-llama/Llama-3.1-405B-Instruct or Llama-3.1-405B-Instruct or Llama-3.1-405B
+      explode: true
+      in: query
+      name: query
+      required: false
+      schema:
+        pattern: "^/?[A-Za-z0-9._-/]+$"
+        type: string
+      style: form
+    TenantId:
+      description: If exists will return the relevant resource for the tenant ID
+      example: "1008"
+      explode: true
+      in: query
+      name: tenantId
+      required: false
+      schema:
+        default: ""
+        type: string
+      style: form
+      x-scope:
+      - system
+    CatalogSettingsKey:
+      description: The settings key
+      explode: false
+      in: path
+      name: key
+      required: true
+      schema:
+        $ref: '#/components/schemas/CatalogSettingsKeyEnum'
+      style: simple
+  responses:
+    "400BadRequest":
+      content:
+        application/json:
+          example:
+            code: 400
+            message: Required parameter is missing
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Bad request.
+    "401Unauthorized":
+      content:
+        application/json:
+          example:
+            code: 401
+            message: Issuer is not familiar.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unauthorized
+    "403Forbidden":
+      content:
+        application/json:
+          example:
+            code: 403
+            message: You do not have sufficient permissions.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Forbidden
+    "500InternalServerError":
+      content:
+        application/json:
+          example:
+            code: 500
+            message: Something went wrong.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+    "503ServiceUnavailable":
+      content:
+        application/json:
+          example:
+            code: 503
+            message: Please try again in few minutes.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+    "409Conflict":
+      content:
+        application/json:
+          example:
+            code: 409
+            message: Resource with this name already exists
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource already exists
+    "404NotFound":
+      content:
+        application/json:
+          example:
+            code: 404
+            message: Resource id not found.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource was not found
+    "202Accepted":
+      content:
+        application/json:
+          example:
+            code: 202
+            message: Request has been accepted.
+          schema:
+            $ref: '#/components/schemas/HttpResponse'
+      description: Accepted.
+    "204NoContent":
+      description: No Content.
+    "400BadSubmissionRequest":
+      content:
+        application/json:
+          example:
+            code: 400
+            message: The workload request does not comply with the policy set by the
+              administrator
+          schema:
+            $ref: '#/components/schemas/SubmissionError'
+      description: Bad submission request.
+    "406NotAcceptable":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Not acceptable request
+    "412PreconditionFailed":
+      content:
+        application/json:
+          example:
+            code: 412
+            message: Precondition failed
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource was not found.
+    "413RequestEntityTooLarge":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Request entity too large
+    "415UnsupportedMediaType":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unsupported media type
+    "501NotImplemented":
+      content:
+        application/json:
+          example:
+            code: 501
+            message: Not implemented
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+  schemas:
+    ScopeType:
+      enum:
+      - system
+      - tenant
+      - cluster
+      - department
+      - project
+      type: string
+    ScopeId:
+      description: "The id of the cluster, department or project, depending on the\
+        \ scope type."
+      type: string
+    TenantId:
+      description: The id of the tenant.
+      example: 1001
+      format: int32
+      type: integer
+    ClusterId:
+      description: The id of the cluster.
+      example: 71f69d83-ba66-4822-adf5-55ce55efd210
+      format: uuid
+      type: string
+    DepartmentId:
+      description: The id of the department.
+      example: "2"
+      minLength: 1
+      pattern: .*
+      type: string
+    ProjectId:
+      description: The id of the project.
+      example: "1"
+      pattern: .*
+      type: string
+    RegistryIntegration:
+      example:
+        scopeId: scopeId
+        updatedBy: updatedBy
+        departmentId: "2"
+        description: description
+        clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+        url: url
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        createdBy: createdBy
+        scopeType: system
+        tenantId: 1001
+        name: name
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        projectId: "1"
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        createdAt:
+          description: The date and time the registry integration was created.
+          format: date-time
+          type: string
+        updatedAt:
+          description: The date and time the registry integration was updated.
+          format: date-time
+          type: string
+        createdBy:
+          description: The user who created the registry integration.
+          type: string
+        updatedBy:
+          description: The user who updated the registry integration.
+          type: string
+        scopeType:
+          $ref: '#/components/schemas/ScopeType'
+        scopeId:
+          description: "The id of the cluster, department or project, depending on\
+            \ the scope type."
+          type: string
+        tenantId:
+          description: The id of the tenant.
+          example: 1001
+          format: int32
+          type: integer
+        clusterId:
+          description: The id of the cluster.
+          example: 71f69d83-ba66-4822-adf5-55ce55efd210
+          format: uuid
+          type: string
+        departmentId:
+          description: The id of the department.
+          example: "2"
+          minLength: 1
+          pattern: .*
+          type: string
+        projectId:
+          description: The id of the project.
+          example: "1"
+          pattern: .*
+          type: string
+        id:
+          description: The ID of the registry integration.
+          format: uuid
+          type: string
+        name:
+          description: The name of the registry integration.
+          type: string
+        url:
+          description: The type of the registry integration.
+          type: string
+        description:
+          description: The description of the registry integration.
+          type: string
+      required:
+      - createdAt
+      - createdBy
+      - id
+      - name
+      - scopeType
+      - updatedAt
+      - updatedBy
+      - url
+      type: object
+    RegistryIntegrations:
+      description: The list of registry-integrations.
+      items:
+        $ref: '#/components/schemas/RegistryIntegration'
+      type: array
+    RegistryIntegrationListResponse:
+      example:
+        registries:
+        - scopeId: scopeId
+          updatedBy: updatedBy
+          departmentId: "2"
+          description: description
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          url: url
+          createdAt: 2000-01-23T04:56:07.000+00:00
+          createdBy: createdBy
+          scopeType: system
+          tenantId: 1001
+          name: name
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          projectId: "1"
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        - scopeId: scopeId
+          updatedBy: updatedBy
+          departmentId: "2"
+          description: description
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          url: url
+          createdAt: 2000-01-23T04:56:07.000+00:00
+          createdBy: createdBy
+          scopeType: system
+          tenantId: 1001
+          name: name
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          projectId: "1"
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        registries:
+          description: The list of registry-integrations.
+          items:
+            $ref: '#/components/schemas/RegistryIntegration'
+          type: array
+      required:
+      - registries
+    Error:
+      example:
+        code: 400
+        message: Bad request - Resource should have a name
+      properties:
+        code:
+          maximum: 599
+          minimum: 100
+          type: integer
+        message:
+          type: string
+        details:
+          type: string
+      required:
+      - code
+      - message
+    RegistryIntegrationCreationRequest:
+      example:
+        scopeId: scopeId
+        scopeType: system
+        name: name
+        description: description
+        version: version
+        url: url
+      properties:
+        name:
+          description: The name of the registry integration.
+          type: string
+        url:
+          description: The URL of the registry integration.
+          type: string
+        scopeType:
+          $ref: '#/components/schemas/ScopeType'
+        scopeId:
+          description: "The id of the cluster, department or project, depending on\
+            \ the scope type."
+          type: string
+        description:
+          description: The description of the registry integration.
+          type: string
+        version:
+          description: The version of the registry integration.
+          type: string
+          x-internal: true
+      required:
+      - name
+      - scopeId
+      - scopeType
+      - url
+      type: object
+    RegistryIntegrationUpdateRequest:
+      example:
+        name: name
+        url: url
+      properties:
+        url:
+          description: The URL of the registry integration.
+          type: string
+        name:
+          description: The name of the registry integration.
+          type: string
+      type: object
+    HttpResponse:
+      example:
+        code: 139
+        message: message
+      properties:
+        code:
+          maximum: 599
+          minimum: 100
+          type: integer
+        message:
+          type: string
+      required:
+      - code
+      - message
+    Image:
+      description: The image name.
+      type: string
+    Images:
+      description: The list of images.
+      items:
+        $ref: '#/components/schemas/Image'
+      type: array
+    ImagesListResponse:
+      example:
+        images:
+        - null
+        - null
+        prefix: prefix
+      properties:
+        images:
+          description: The list of images.
+          items:
+            $ref: '#/components/schemas/Image'
+          type: array
+        prefix:
+          description: The prefix of the image names.
+          nullable: true
+          type: string
+      required:
+      - images
+    ImageTags:
+      example:
+        name: name
+        tags:
+        - tags
+        - tags
+      properties:
+        name:
+          description: The name of the image
+          type: string
+        tags:
+          description: The tags of the image
+          items:
+            type: string
+          type: array
+      required:
+      - name
+      - tags
+      type: object
+    HelmRepo:
+      example:
+        scopeId: scopeId
+        updatedBy: updatedBy
+        departmentId: "2"
+        description: description
+        clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+        isPrivate: true
+        url: url
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        createdBy: createdBy
+        scopeType: system
+        tenantId: 1001
+        name: name
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        projectId: "1"
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        createdAt:
+          description: The date and time the helm repo was created.
+          format: date-time
+          type: string
+        updatedAt:
+          description: The date and time the helm repo was updated.
+          format: date-time
+          type: string
+        createdBy:
+          description: The user who created the helm repo.
+          type: string
+        updatedBy:
+          description: The user who updated the helm repo.
+          type: string
+        scopeType:
+          $ref: '#/components/schemas/ScopeType'
+        scopeId:
+          description: "The id of the cluster, department or project, depending on\
+            \ the scope type."
+          type: string
+        tenantId:
+          description: The id of the tenant.
+          example: 1001
+          format: int32
+          type: integer
+        clusterId:
+          description: The id of the cluster.
+          example: 71f69d83-ba66-4822-adf5-55ce55efd210
+          format: uuid
+          type: string
+        departmentId:
+          description: The id of the department.
+          example: "2"
+          minLength: 1
+          pattern: .*
+          type: string
+        projectId:
+          description: The id of the project.
+          example: "1"
+          pattern: .*
+          type: string
+        id:
+          description: The ID of the helm repo.
+          format: uuid
+          type: string
+        name:
+          description: The name of the helm repo.
+          type: string
+        url:
+          description: The URL of the helm repo.
+          type: string
+        isPrivate:
+          description: Whether the helm repo requires authentication to browse.
+          type: boolean
+        description:
+          description: The description of the helm repo.
+          type: string
+      required:
+      - createdAt
+      - createdBy
+      - id
+      - isPrivate
+      - name
+      - scopeType
+      - updatedAt
+      - updatedBy
+      - url
+      type: object
+    HelmRepos:
+      description: The list of helm repos.
+      items:
+        $ref: '#/components/schemas/HelmRepo'
+      type: array
+    HelmRepoListResponse:
+      example:
+        helmRepos:
+        - scopeId: scopeId
+          updatedBy: updatedBy
+          departmentId: "2"
+          description: description
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          isPrivate: true
+          url: url
+          createdAt: 2000-01-23T04:56:07.000+00:00
+          createdBy: createdBy
+          scopeType: system
+          tenantId: 1001
+          name: name
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          projectId: "1"
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        - scopeId: scopeId
+          updatedBy: updatedBy
+          departmentId: "2"
+          description: description
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          isPrivate: true
+          url: url
+          createdAt: 2000-01-23T04:56:07.000+00:00
+          createdBy: createdBy
+          scopeType: system
+          tenantId: 1001
+          name: name
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          projectId: "1"
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        helmRepos:
+          description: The list of helm repos.
+          items:
+            $ref: '#/components/schemas/HelmRepo'
+          type: array
+      required:
+      - helmRepos
+    HelmRepoCreationRequest:
+      example:
+        scopeId: scopeId
+        scopeType: system
+        name: name
+        description: description
+        isPrivate: true
+        url: url
+      properties:
+        name:
+          description: The name of the helm repo.
+          type: string
+        url:
+          description: The URL of the helm repo.
+          type: string
+        isPrivate:
+          description: Whether the helm repo requires authentication to browse.
+          type: boolean
+        scopeType:
+          $ref: '#/components/schemas/ScopeType'
+        scopeId:
+          description: "The id of the cluster, department or project, depending on\
+            \ the scope type."
+          type: string
+        description:
+          description: The description of the helm repo.
+          type: string
+      required:
+      - name
+      - scopeId
+      - scopeType
+      - url
+      type: object
+    HelmRepoUpdateRequest:
+      example:
+        name: name
+        isPrivate: true
+        url: url
+      properties:
+        url:
+          description: The URL of the helm repo.
+          type: string
+        name:
+          description: The name of the helm repo.
+          type: string
+        isPrivate:
+          description: Whether the helm repo requires authentication to browse.
+          nullable: true
+          type: boolean
+      type: object
+    HelmChartVersion:
+      example:
+        appVersion: appVersion
+        created: 2000-01-23T04:56:07.000+00:00
+        description: description
+        version: version
+      properties:
+        version:
+          description: The version of the chart (SemVer).
+          type: string
+        appVersion:
+          description: The application version the chart represents.
+          type: string
+        description:
+          description: A one-line description of the chart version.
+          type: string
+        created:
+          description: The date and time this chart version was created.
+          format: date-time
+          type: string
+      required:
+      - version
+      type: object
+    HelmChart:
+      example:
+        versions:
+        - appVersion: appVersion
+          created: 2000-01-23T04:56:07.000+00:00
+          description: description
+          version: version
+        - appVersion: appVersion
+          created: 2000-01-23T04:56:07.000+00:00
+          description: description
+          version: version
+        name: name
+      properties:
+        name:
+          description: The name of the helm chart.
+          type: string
+        versions:
+          description: The list of available versions for this chart.
+          items:
+            $ref: '#/components/schemas/HelmChartVersion'
+          type: array
+      required:
+      - name
+      - versions
+      type: object
+    HelmChartListResponse:
+      example:
+        charts:
+        - versions:
+          - appVersion: appVersion
+            created: 2000-01-23T04:56:07.000+00:00
+            description: description
+            version: version
+          - appVersion: appVersion
+            created: 2000-01-23T04:56:07.000+00:00
+            description: description
+            version: version
+          name: name
+        - versions:
+          - appVersion: appVersion
+            created: 2000-01-23T04:56:07.000+00:00
+            description: description
+            version: version
+          - appVersion: appVersion
+            created: 2000-01-23T04:56:07.000+00:00
+            description: description
+            version: version
+          name: name
+      properties:
+        charts:
+          description: The list of charts in the helm repo.
+          items:
+            $ref: '#/components/schemas/HelmChart'
+          type: array
+      required:
+      - charts
+      type: object
+    HuggingFaceModelItem:
+      example:
+        gated: false
+        trending: true
+        downloads: 558919
+        id: meta-llama/Llama-3.1-405B-Instruct
+      properties:
+        id:
+          description: the huggingface model id
+          example: meta-llama/Llama-3.1-405B-Instruct
+          type: string
+        gated:
+          example: false
+          type: boolean
+        downloads:
+          example: 558919
+          type: integer
+        trending:
+          description: indicates if the model is trending
+          example: true
+          type: boolean
+      type: object
+    HuggingFaceModelSearchResults:
+      example:
+        resources:
+        - gated: false
+          trending: true
+          downloads: 558919
+          id: meta-llama/Llama-3.1-405B-Instruct
+        - gated: false
+          trending: true
+          downloads: 558919
+          id: meta-llama/Llama-3.1-405B-Instruct
+      properties:
+        resources:
+          items:
+            $ref: '#/components/schemas/HuggingFaceModelItem'
+          type: array
+      type: object
+    GetEnableNgcIntegration:
+      example:
+        stage: stage
+        displayName: displayName
+        description: description
+        value:
+          enabled: true
+      properties:
+        value:
+          $ref: '#/components/schemas/GetEnableNgcIntegration_value'
+        displayName:
+          readOnly: true
+          type: string
+        description:
+          readOnly: true
+          type: string
+        stage:
+          readOnly: true
+          type: string
+      type: object
+    CatalogSettingsGetResponse:
+      example:
+        enableNgcIntegration:
+          stage: stage
+          displayName: displayName
+          description: description
+          value:
+            enabled: true
+      properties:
+        enableNgcIntegration:
+          $ref: '#/components/schemas/GetEnableNgcIntegration'
+      type: object
+    CatalogSettingsKeyEnum:
+      enum:
+      - enableNgcIntegration
+      type: string
+    UpdateCatalogSettingByKeyRequest:
+      example:
+        enabled: false
+      properties:
+        enabled:
+          nullable: true
+          type: boolean
+      type: object
+    EnableNgcIntegrationSetting:
+      example:
+        enabled: false
+      properties:
+        enabled:
+          nullable: true
+          type: boolean
+      type: object
+    ComplianceIssues:
+      nullable: true
+      properties:
+        complianceIssues:
+          items:
+            $ref: '#/components/schemas/ComplianceIssues_complianceIssues_inner'
+          type: array
+      type: object
+    SubmissionError:
+      allOf:
+      - $ref: '#/components/schemas/Error'
+      - $ref: '#/components/schemas/ComplianceIssues'
+    GetEnableNgcIntegration_value:
+      example:
+        enabled: true
+      properties:
+        enabled:
+          nullable: true
+          type: boolean
+      type: object
+    ComplianceIssues_complianceIssues_inner:
+      properties:
+        field:
+          example: compute.gpuDevicesRequest
+          type: string
+        details:
+          example: value must be no less than 3
+          type: string
+      required:
+      - details
+      - field
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      description: Bearer authentication
+      scheme: bearer
+      type: http

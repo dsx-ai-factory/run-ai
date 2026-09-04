@@ -1,0 +1,111 @@
+Dinfw: null
+JobSpec:
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  environment:
+    items:
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  exposedUrls:
+    items:
+      url:
+        value:
+          containerPort: 8080
+          customUrl: true
+          url: http://google.com/runai
+      url-1:
+        value:
+          authorizedGroups: group-a,group-b
+          containerPort: 8081
+      url-2:
+        value:
+          authorizedUsers: user-a,user-b
+          containerPort: 8082
+      url-3:
+        value:
+          authorizedUsers: user-a,user-b
+          containerPort: 8083
+      url-4:
+        value:
+          authorizedGroups: group-c,group-d
+          containerPort: 8084
+  image:
+    value: ubuntu
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  priorityClassName:
+    value: high
+  username:
+    value: test
+MasterSpec: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections:
+    - connectionType: ExternalUrl
+      containerPort: 8080
+      correlationName: url
+      name: my-jupyter
+      toolType: jupyter
+      url: http://google.com/runai
+    - authorizedGroups:
+      - group-a
+      - group-b
+      connectionType: ExternalUrl
+      containerPort: 8081
+      correlationName: url-1
+      exposedUrlPath: /project/test
+      exposedUrlSubDomain: project-test
+      name: url-1
+      toolType: tensor
+    - authorizedUsers:
+      - user-a
+      - user-b
+      connectionType: ExternalUrl
+      containerPort: 8082
+      correlationName: url-2
+      exposedUrlPath: /project/test/url-2
+      exposedUrlSubDomain: project-test-url-2
+      name: my-tool
+      toolType: custom
+    - authorizedUsers:
+      - user-a
+      - user-b
+      connectionType: ExternalUrl
+      containerPort: 8083
+      correlationName: url-3
+      exposedUrlPath: /project/test/url-3
+      exposedUrlSubDomain: project-test-url-3
+      name: url-3
+      toolType: by-users
+    - authorizedGroups:
+      - group-c
+      - group-d
+      connectionType: ExternalUrl
+      containerPort: 8084
+      correlationName: url-4
+      exposedUrlPath: /project/test/url-4
+      exposedUrlSubDomain: project-test-url-4
+      name: url-4
+      toolType: by-groups
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: urls, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: urls, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

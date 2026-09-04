@@ -1,0 +1,37 @@
+post:
+  summary: Get the effective policy by type and scope. The effective policy is a
+    combination of the policy provided for the given scope (if exist) and the 
+    effective policies of its parent scopes.
+  operationId: get_effective_policy
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/service_gvk_policies_test.go
+  x-authorize:
+    resource-type: policies
+    action: read
+  tags:
+    - Policy
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Policies/WorkloadTypeAndScope.yaml"
+  responses:
+    200:
+      description: Policy found.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Policies/EffectiveRules.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+

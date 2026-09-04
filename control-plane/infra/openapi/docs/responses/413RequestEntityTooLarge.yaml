@@ -1,0 +1,5 @@
+description: Request entity too large
+content:
+  application/json:
+    schema:
+      $ref: './Error.yaml'

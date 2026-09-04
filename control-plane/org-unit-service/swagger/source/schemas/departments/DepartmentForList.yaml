@@ -1,0 +1,41 @@
+allOf:
+  - $ref: "./DataDepartmentFields.yaml"
+  - type: object
+    required:
+      - id
+      - createdAt
+      - updatedAt
+      - totalResources
+    properties:
+      id:
+        type: string
+        example: 50
+      createdAt:
+        type: string
+        format: date-time
+      updatedAt:
+        type: string
+        format: date-time
+      createdBy:
+        type: string
+      updatedBy:
+        type: string
+      children:
+        type: array
+        nullable: true
+        items:
+          $ref: "./DepartmentProjectChild.yaml"
+      status:
+        type: object
+        nullable: true
+        properties:
+          quotaStatus:
+            $ref: '../QuotaStatus.yaml'
+      totalResources:
+        $ref: "../TotalResources.yaml"
+        nullable: true
+      resources:
+        type: array
+        items:
+          $ref: "../../schemas/Resources.yaml"
+        description: Resources assigned to this Organization per Node Pool

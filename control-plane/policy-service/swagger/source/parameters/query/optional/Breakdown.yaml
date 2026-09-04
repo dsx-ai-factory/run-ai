@@ -1,0 +1,9 @@
+name: breakdown
+in: query
+required: false
+description: >-
+  When true, includes a breakdown object with resolved fields and spec
+  selectors from the Mapping subsystem. Most callers should leave this off.
+schema:
+  type: boolean
+x-internal: true

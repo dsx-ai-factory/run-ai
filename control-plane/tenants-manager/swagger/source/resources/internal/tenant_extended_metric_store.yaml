@@ -1,0 +1,25 @@
+get:
+  summary: Get tenant Metric Store with type and datasouce id
+  x-service: tenants-manager
+  x-test-coverage: not-applicable
+  operationId: get_tenant_extended_metric_store
+  x-no-authorization: true
+  tags:
+    - Internal
+  parameters:
+    - $ref: "../../parameters/path/tenantId.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Tenants/MetricStore.yaml#/ExtendedMetricStore'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

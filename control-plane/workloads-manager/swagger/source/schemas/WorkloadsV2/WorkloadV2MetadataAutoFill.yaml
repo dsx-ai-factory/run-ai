@@ -1,0 +1,63 @@
+type: object
+required:
+  - id
+  - gvk
+  - projectName
+  - clusterId
+  - tenantId
+  - departmentId
+  - departmentName
+  - createdAt
+  - createdBy
+  - updatedAt
+  - updatedBy
+properties:
+  id:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads/WorkloadId.yaml'
+  gvk:
+    $ref: "./GVK.yaml"
+  projectName:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/ProjectName.yaml'
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  tenantId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml"
+  departmentId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/DepartmentId.yaml'
+  departmentName:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/DepartmentName.yaml'
+  createdAt:
+    type: string
+    format: date-time
+    description: The timestamp for when the workload was created.
+    example: "2024-01-15T10:30:00Z"
+  createdBy:
+    type: string
+    description: Identifier of the user who created the workload.
+    maxLength: 250
+    format: .*
+    example: user@run.ai
+  updatedAt:
+    type: string
+    format: date-time
+    description: The timestamp for the last time the workload was updated.
+    example: "2024-01-15T10:35:00Z"
+  updatedBy:
+    type: string
+    description: Identifier of the user who last updated the workload.
+    maxLength: 250
+    format: .*
+    example: user@run.ai
+  deletedAt:
+    type: string
+    format: date-time
+    description: The timestamp indicating when the workload was deleted.
+    example: "2024-01-15T10:35:00Z"
+    nullable: true
+  deletedBy:
+    type: string
+    maxLength: 250
+    format: .*
+    description:  Identifier of the user who deleted the workload.
+    example: user@run.ai
+    nullable: true

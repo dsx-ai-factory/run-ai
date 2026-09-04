@@ -1,0 +1,126 @@
+{
+  "general": {
+    "name": "my-nim-service",
+    "id": "a22ecd44-f863-444d-b69d-0cc0d26bbc55",
+    "type": "NIMService",
+    "phase": "Running",
+    "phaseMessage": "deployment \"my-nim-service\" successfully rolled out",
+    "project": "test-nim",
+    "department": "default",
+    "createdAt": "2025-12-15T08:58:24.919632Z",
+    "updatedAt": "2025-12-15T09:07:57.791339Z",
+    "submittedBy": "test@run.ai",
+    "priority": "very-high (150)",
+    "category": "Deploy",
+    "environmentVariables": {
+      "MODEL_NAME": "llama-2-7b",
+      "NIM_MODE": "inference"
+    },
+    "command": "",
+    "cliCommand": "runai inference nim submit my-nim-service -p test-nim"
+  },
+  "workloadDetails": {
+    "preemptible": false,
+    "images": [
+      "gcr.io/run-ai-lab/nim-cpu:latest"
+    ]
+  },
+  "compute": {
+    "requestedResources": {
+      "gpuCompute": {
+        "requested": 0
+      },
+      "cpuCores": {
+        "requested": 0
+      },
+      "gpuMemory": {
+        "request": "",
+        "limit": ""
+      },
+      "cpuMemory": {
+        "request": "10M",
+        "limit": ""
+      }
+    },
+    "allocatedResources": {
+      "gpuCompute": 0,
+      "cpuCores": 0,
+      "gpuMemory": "",
+      "cpuMemory": ""
+    },
+    "requestedNodePools": [
+      "default"
+    ]
+  },
+  "networks": [
+    {
+      "name": "NIMService",
+      "toolType": "NIMService",
+      "connectionType": "ExternalUrl",
+      "url": "https://aviados-dev.runailabs.com/test-nim/my-nim-service",
+      "port": 8080
+    }
+  ],
+  "podsInfo": {
+    "pods": [],
+    "runningPods": 1
+  },
+  "spec": {
+    "podLabels": [
+      {
+        "name": "app",
+        "value": "nim-service"
+      },
+      {
+        "name": "env",
+        "value": "production"
+      }
+    ],
+    "annotations": [
+      {
+        "name": "runai-submit-command",
+        "value": "runai inference nim submit my-nim-service -p test-nim"
+      }
+    ],
+    "autoScaling": {},
+    "runaiCliCommand": "runai inference nim submit my-nim-service -p test-nim",
+    "servingConfiguration": {}
+  },
+  "GPUAcceleration": null,
+  "nim": {
+    "image": "gcr.io/run-ai-lab/nim-cpu:latest",
+    "ngcAuthSecret": "my-ngc",
+    "category": "Deploy",
+    "preemptibility": "non-preemptible",
+    "servingPort": 8000,
+    "exposeExternally": true,
+    "serviceType": "ClusterIP",
+    "cpuCoreRequest": 0.1,
+    "cpuMemoryRequest": "10M",
+    "modelStoreType": "PVC",
+    "modelStoreAccessMode": "ReadOnlyMany",
+    "autoscalingEnabled": false,
+    "multiNodeEnabled": false,
+    "environmentVariables": {
+      "MODEL_NAME": "llama-2-7b",
+      "NIM_MODE": "inference"
+    },
+    "labels": [
+      {
+        "name": "app",
+        "value": "nim-service"
+      },
+      {
+        "name": "env",
+        "value": "production"
+      }
+    ],
+    "annotations": [
+      {
+        "name": "runai-submit-command",
+        "value": "runai inference nim submit my-nim-service -p test-nim"
+      }
+    ],
+    "replicasReady": 1
+  }
+}

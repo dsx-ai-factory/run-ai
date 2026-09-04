@@ -1,0 +1,31 @@
+apiVersion: run.ai/v2alpha1
+kind: DistributedWorkload
+metadata:
+  name: job-1
+  namespace: runai-team-a
+  uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+spec:
+  jobType: PyTorchJob
+  name:
+    value: job-1
+  configMapVolumes:
+    items:
+      configmap-volume-1:
+        value:
+          name: cm-db-setting
+          mountPath: /etc/db.conf
+      configmap-volume-2:
+        value:
+          name: cm-app-setting
+          mountPath: /etc/app.conf
+  workers:
+    value: 1
+  username:
+    value: user.name
+masterSpec:
+  configMapVolumes:
+    items:
+      configmap-volume-master:
+        value:
+          name: cm-master-setting
+          mountPath: /etc/master.conf

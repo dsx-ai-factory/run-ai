@@ -1,0 +1,41 @@
+get:
+  summary: Count data volumes.
+  description: Retrieve the number of data volumes.
+  operationId: count_datavolumes
+  x-service: datavolumes-service
+  x-test-coverage:
+    - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+  x-authorize:
+    resource-type: datavolumes
+    action: read
+  tags:
+    - Datavolumes
+  parameters:
+    - $ref: '../parameters/query/mandatory/DatavolumesRequestType.yaml'
+    - $ref: '../parameters/query/optional/DatavolumesUsableInProjectId.yaml'
+    - $ref: '../parameters/query/optional/DatavolumesFilter.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Search.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - count
+            properties:
+              count:
+                type: integer
+                format: int64
+                example: 1
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

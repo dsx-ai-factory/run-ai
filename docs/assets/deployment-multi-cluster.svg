@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 440" width="680" height="440">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, sans-serif; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748B"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="680" height="440" fill="#FFFFFF" rx="6"/>
+
+  <!-- Title -->
+  <text x="340" y="34" text-anchor="middle" font-size="15" font-weight="700" fill="#1E293B">Multi-Cluster Deployment</text>
+
+  <!-- ── TOP: Kubernetes Cluster 1 (Control Plane) ── -->
+  <rect x="180" y="52" width="320" height="120" rx="10" fill="#F8FAFC" stroke="#94A3B8" stroke-width="2" stroke-dasharray="8 4"/>
+  <!-- Label tab -->
+  <rect x="192" y="44" width="188" height="20" rx="4" fill="#94A3B8"/>
+  <text x="286" y="58" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF">Kubernetes Cluster 1</text>
+
+  <!-- Control Plane box inside Cluster 1 -->
+  <rect x="204" y="72" width="272" height="84" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5"/>
+  <rect x="204" y="72" width="5" height="84" rx="4" fill="#3B82F6"/>
+  <text x="342" y="107" text-anchor="middle" font-size="14" font-weight="700" fill="#1E3A5F">NVIDIA Run:ai</text>
+  <text x="342" y="125" text-anchor="middle" font-size="14" font-weight="700" fill="#1E3A5F">Control Plane</text>
+  <text x="342" y="145" text-anchor="middle" font-size="11" fill="#64748B">Manages all connected clusters</text>
+
+  <!-- ── TRUNK LINE down from Cluster 1 ── -->
+  <line x1="340" y1="172" x2="340" y2="218" stroke="#64748B" stroke-width="2"/>
+  <!-- "Manages" label on trunk -->
+  <text x="356" y="200" font-size="11" font-weight="600" fill="#64748B">Manages</text>
+
+  <!-- ── HORIZONTAL BRANCH LINE ── -->
+  <line x1="140" y1="218" x2="540" y2="218" stroke="#64748B" stroke-width="2"/>
+
+  <!-- Branch down to Cluster 2 -->
+  <line x1="140" y1="218" x2="140" y2="258" stroke="#64748B" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+  <!-- Branch down to Cluster n -->
+  <line x1="540" y1="218" x2="540" y2="258" stroke="#64748B" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+  <!-- Ellipsis (more clusters) -->
+  <text x="340" y="226" text-anchor="middle" font-size="20" font-weight="700" fill="#CBD5E1">· · ·</text>
+
+  <!-- ── BOTTOM LEFT: Kubernetes Cluster 2 ── -->
+  <rect x="40" y="258" width="200" height="152" rx="10" fill="#F8FAFC" stroke="#94A3B8" stroke-width="2" stroke-dasharray="8 4"/>
+  <!-- Label tab -->
+  <rect x="52" y="250" width="168" height="20" rx="4" fill="#94A3B8"/>
+  <text x="136" y="264" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF">Kubernetes Cluster 2</text>
+
+  <!-- Cluster box in Cluster 2 -->
+  <rect x="56" y="278" width="168" height="116" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5"/>
+  <rect x="56" y="278" width="5" height="116" rx="4" fill="#22C55E"/>
+  <text x="141" y="316" text-anchor="middle" font-size="13" font-weight="700" fill="#14532D">NVIDIA Run:ai</text>
+  <text x="141" y="334" text-anchor="middle" font-size="13" font-weight="700" fill="#14532D">Cluster</text>
+  <text x="141" y="357" text-anchor="middle" font-size="11" fill="#64748B">GPU scheduling</text>
+  <text x="141" y="373" text-anchor="middle" font-size="11" fill="#64748B">Workload management</text>
+
+  <!-- ── BOTTOM RIGHT: Kubernetes Cluster n ── -->
+  <rect x="440" y="258" width="200" height="152" rx="10" fill="#F8FAFC" stroke="#94A3B8" stroke-width="2" stroke-dasharray="8 4"/>
+  <!-- Label tab -->
+  <rect x="452" y="250" width="168" height="20" rx="4" fill="#94A3B8"/>
+  <text x="536" y="264" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF">Kubernetes Cluster n</text>
+
+  <!-- Cluster box in Cluster n -->
+  <rect x="456" y="278" width="168" height="116" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5"/>
+  <rect x="456" y="278" width="5" height="116" rx="4" fill="#22C55E"/>
+  <text x="541" y="316" text-anchor="middle" font-size="13" font-weight="700" fill="#14532D">NVIDIA Run:ai</text>
+  <text x="541" y="334" text-anchor="middle" font-size="13" font-weight="700" fill="#14532D">Cluster</text>
+  <text x="541" y="357" text-anchor="middle" font-size="11" fill="#64748B">GPU scheduling</text>
+  <text x="541" y="373" text-anchor="middle" font-size="11" fill="#64748B">Workload management</text>
+
+  <!-- Footer note -->
+  <text x="340" y="428" text-anchor="middle" font-size="11" fill="#94A3B8">Each cluster requires its own load balancer, ingress controller, FQDNs, and TLS certificates.</text>
+</svg>

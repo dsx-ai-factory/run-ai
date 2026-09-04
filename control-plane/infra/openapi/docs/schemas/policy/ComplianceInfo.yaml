@@ -1,0 +1,15 @@
+description: Compliance of an asset with creation of workloads in a given project.
+properties:
+  imposed:
+    description: Whether the asset is imposed on created workloads by the administrator.
+    type: boolean
+  compliance:
+    description: Whether the asset info complies with creation of workloads in the project.
+    type: boolean
+  reason:
+    description: For asset that does not comply, specify one or more reason why.
+    type: array
+    items:
+      $ref: "./ComplianceInfoReason.yaml"
+nullable: true
+type: object

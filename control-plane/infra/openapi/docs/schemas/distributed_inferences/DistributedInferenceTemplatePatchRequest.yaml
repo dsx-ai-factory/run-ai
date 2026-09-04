@@ -1,0 +1,7 @@
+allOf:
+  - $ref: "../templates/TemplatePatchMeta.yaml"
+  - type: object
+    properties:
+      spec:
+        $ref: "DistributedInferenceTemplateSpec.yaml"
+  - $ref: "../common/FieldsToClear.yaml"

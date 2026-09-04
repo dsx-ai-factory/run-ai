@@ -1,0 +1,41 @@
+errors:
+- code: 400
+  message: 'field image failed options validation: value "abc" is not one of [ubuntu,
+    redhat]'
+- code: 400
+  message: 'field command failed length validation: the number of elements must be
+    no less than 5'
+policy:
+  effectiveRules:
+  - enforcements:
+    - options:
+      - ubuntu
+      - redhat
+    field: image
+    sourceOfRule: null
+    specSelector: allContainers
+  - enforcements:
+    - length:
+        min: 5
+    field: command
+    sourceOfRule: null
+    specSelector: allContainers
+  workloadType:
+    group: apps
+    kind: Deployment
+    version: v1
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: test-deployment
+  spec:
+    template:
+      spec:
+        containers:
+        - command:
+          - x
+          - true
+          - z
+          image: abc
+          name: main

@@ -1,0 +1,4 @@
+description: The capacity of the PVC.
+type: string
+example: 100Gi
+nullable: true

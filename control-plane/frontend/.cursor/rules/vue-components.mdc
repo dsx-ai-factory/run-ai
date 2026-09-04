@@ -1,0 +1,113 @@
+---
+description: Vue component conventions for Run:ai frontend
+globs: ["**/*.vue"]
+alwaysApply: false
+---
+
+# Vue Components
+
+## Component API
+
+**New components**: Use Composition API with `<script setup lang="ts">`
+**Existing components**: Maintain Options API (`defineComponent`) for consistency
+
+## Canonical Examples
+
+- **Composition API**: See `src/components/common/runai-form-wrapper/runai-form-wrapper.vue`
+- **Options API (existing)**: See `src/components/common/runai-btn/runai-btn.vue`
+- **Props typing**: See `src/components/common/runai-btn/runai-btn.vue` for PropType usage
+
+## Key Patterns
+
+- All interactive elements MUST have `aid` attribute for test automation
+- Use kebab-case for component names in templates: `<runai-btn>`
+- Use kebab-case for events: `@update:model-value`
+- Export types from shared files (Vue 3.5+ requirement)
+- **Prefer template refs** over `document.querySelector` - use `ref="myElement"` + `$refs.myElement`. Only use querySelector when refs are not available (e.g., elements outside component scope)
+
+## Props Interface Exporting (Vue 3.5 + TypeScript Composite Mode)
+
+**IMPORTANT**: Due to `"composite": true` in tsconfig, Props interfaces must be exported based on component usage:
+
+### Rule: When to Export Props Interface
+
+1. **Component WITH barrel export** (has `index.ts` that re-exports the component):
+   ```typescript
+   // ✅ MUST export Props
+   export interface Props {
+     someProp: string;
+   }
+   const props = defineProps<Props>();
+   ```
+
+2. **Component WITHOUT barrel export** (directly imported, no `index.ts`):
+   ```typescript
+   // ✅ Do NOT export Props
+   interface Props {
+     someProp: string;
+   }
+   const props = defineProps<Props>();
+   ```
+
+### Why This Matters
+
+- TypeScript needs to generate type declarations for barrel-exported components
+- Non-exported `interface Props` in barrel-exported components causes error:
+  `TS4023: Exported variable '__VLS_export' has or is using name 'Props' ... but cannot be named`
+- Components without barrel exports don't need the export (keeps interfaces internal)
+
+### How to Check
+
+Look for `index.ts` in the component's directory that exports it:
+```typescript
+// If this exists in index.ts:
+export { default as MyComponent } from "./my-component.vue";
+// Then use: export interface Props in my-component.vue
+```
+
+**Always use `interface Props`** (not `IProps`) for consistency with Vue ecosystem.
+
+## Component Priority
+
+**Prefer Run:ai components over raw Quasar components** when available:
+- `<runai-btn>` over `<q-btn>`
+- `<runai-select>` over `<q-select>`
+- `<runai-input>` over `<q-input>`
+- Check `src/components/common/` for available wrappers
+
+Only use raw Quasar components (`q-*`) when no Run:ai wrapper exists.
+
+## Cluster Version Checks
+
+**When adding new features**, consider if they require a minimum cluster version:
+
+1. Define version constant in `src/models/cluster.model.ts` or `src/common/version.constant.ts`
+2. Use `clusterStore.isClusterVersionSufficient(clusterId, MIN_VERSION)` to check
+3. Use `isNewerVersion()` from `src/utils/version.util/version.util.ts` for comparisons
+
+Example: See `TRAINING_DISTRIBUTED_MIN_VERSION` usage in `src/views/workload/workload-index.vue`
+
+## Styling
+
+**Always prefer Quasar utility classes first** (`q-pa-md`, `q-mb-lg`, `flex`, `row`, `col-6`).
+Only add custom CSS in `<style>` when Quasar classes don't cover the need.
+
+## What ESLint Enforces (don't duplicate)
+
+- Component tag order, attribute hyphenation, event naming
+- No `this` in templates, v-on hyphenation
+- Order of options in defineComponent
+
+
+
+# Vue Async DOM Updates
+
+## Prefer `nextTick` over `setTimeout`
+
+When waiting for DOM updates after reactive state changes, use Vue's `nextTick` instead of `setTimeout`:
+
+**Avoid:**
+someReactiveChange();
+setTimeout(() => {
+  // code that needs updated DOM
+}, 300);

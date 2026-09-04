@@ -1,0 +1,144 @@
+{
+  "actualPhase": "Pending",
+  "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+  "createdAt": "2025-12-15T08:58:28.012976Z",
+  "createdBy": "test@run.ai",
+  "departmentId": "4500000",
+  "desiredPhase": "Running",
+  "name": "my-training-demo-123",
+  "projectId": "4500002",
+  "requestedName": "my-training-demo-123",
+  "spec": {
+    "annotations": [
+      {
+        "name": "owner",
+        "value": "data-science-team"
+      },
+      {
+        "name": "runai-submit-command",
+        "value": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai training submit my-training-demo-123 --project team-b --image gcr.io/knative-samples/helloworld-go --image-pull-policy IfNotPresent --working-dir /app -g 1 --runs 5 --parallelism 2 --backoff-limit 3 --restart-policy OnFailure --environment-variable BATCH_SIZE=32 --environment-variable EPOCHS=100 --environment-variable LEARNING_RATE=0.001 --label experiment=demo --label framework=custom --annotation owner=data-science-team --existing-pvc claimname=my-simple-pvc,path=/data --external-url container=8080,authgroups=ml-team:data-scientists:platform-ops --auto-deletion-time-after-completion 1h --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 1000 --supplemental-groups 2000,3000 --capability SYS_PTRACE --capability NET_ADMIN --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --command -- sh -c 'echo \"Training simulation\"; sleep 30'"
+      }
+    ],
+    "autoDeletionTimeAfterCompletionSeconds": 3600,
+    "backoffLimit": 3,
+    "category": "Train",
+    "command": "sh -c 'echo \"Training simulation\"; sleep 30'",
+    "completions": 5,
+    "compute": {
+      "gpuDevicesRequest": 1
+    },
+    "createHomeDir": false,
+    "environmentVariables": [
+      {
+        "name": "BATCH_SIZE",
+        "value": "32"
+      },
+      {
+        "name": "EPOCHS",
+        "value": "100"
+      },
+      {
+        "name": "LEARNING_RATE",
+        "value": "0.001"
+      }
+    ],
+    "exposedUrls": [
+      {
+        "authorizedGroups": [
+          "ml-team",
+          "data-scientists",
+          "platform-ops"
+        ],
+        "container": 8080
+      }
+    ],
+    "image": "gcr.io/knative-samples/helloworld-go",
+    "imagePullPolicy": "IfNotPresent",
+    "labels": [
+      {
+        "name": "experiment",
+        "value": "demo"
+      },
+      {
+        "name": "framework",
+        "value": "custom"
+      }
+    ],
+    "nodePools": [
+      "default"
+    ],
+    "nodeType": "gpu-nodes",
+    "parallelism": 2,
+    "restartPolicy": "OnFailure",
+    "security": {
+      "capabilities": [
+        "SYS_PTRACE",
+        "NET_ADMIN"
+      ],
+      "privileged": false,
+      "runAsGid": 1000,
+      "runAsUid": 1000,
+      "supplementalGroups": "2000,3000",
+      "uidGidSource": "custom"
+    },
+    "storage": {
+      "emptyDirVolume": [
+        {
+          "path": "/emptydir",
+          "sizeLimit": "1G"
+        }
+      ],
+      "git": [
+        {
+          "path": "/git",
+          "repository": "https://github.com/run-ai",
+          "revision": "test"
+        }
+      ],
+      "hostPath": [
+        {
+          "mountPath": "/hostpath",
+          "path": "/host/path"
+        }
+      ],
+      "pvc": [
+        {
+          "claimName": "my-simple-pvc",
+          "existingPvc": true,
+          "path": "/local/pvc",
+          "readOnly": false
+        },
+        {
+          "claimInfo": {
+            "accessModes": {
+              "readWriteOnce": true
+            },
+            "size": "1G",
+            "storageClass": "standard",
+            "volumeMode": "Filesystem"
+          },
+          "claimName": "claim-24mqhfjj7j",
+          "ephemeral": false,
+          "path": "/local/vol"
+        }
+      ],
+      "s3": [
+        {
+          "bucket": "bucket-name",
+          "path": "/s3",
+          "url": "https://bucket-name.s3.region-code.amazonaws.com/object-key"
+        }
+      ]
+    },
+    "tolerations": [
+      {
+        "effect": "NoSchedule",
+        "key": "nvidia.com/gpu",
+        "operator": "Equal",
+        "value": "true"
+      }
+    ],
+    "workingDir": "/app"
+  },
+  "workloadId": "0586e34b-6c17-419b-9cc6-c091cb4d72f5"
+}

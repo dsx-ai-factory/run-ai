@@ -1,0 +1,4 @@
+image: ubuntu
+
+security:
+  privileged: true

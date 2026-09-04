@@ -1,0 +1,4 @@
+allOf:
+  - $ref: "./AssetUpdatableFields.yaml"
+example:
+  name: my-asset

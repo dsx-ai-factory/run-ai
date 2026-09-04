@@ -1,0 +1,23 @@
+get:
+  tags:
+  - Version
+  x-no-authorization: true
+  x-test-coverage: not-applicable
+  x-service: bff-service
+  summary: get version
+  description: |
+    Get version.
+  operationId: get_version
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/VersionResponse.yaml'
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,25 @@
+{{- include "common.configMap" (list . .Values.keycloakx "control-plane.keycloakx.configmap") }}
+{{- define "control-plane.keycloakx.configmap" -}}
+{{- $top := first . }}
+data:
+  KC_SPI_CONNECTIONS_HTTP_CLIENT_DEFAULT_DISABLE_TRUST_MANAGER: "true"
+  KC_HOSTNAME_STRICT: "false"
+  KC_HTTP_PORT: "8080"
+  KC_LOG_CONSOLE_OUTPUT: "json"
+  KC_SPI_CLIENT_JPA_SEARCHABLE_ATTRIBUTES: "runai.cluster_id,runai.is_external,runai.client_type,runai.created.by"
+  KC_METRICS_ENABLED: "true"
+  KC_HTTP_METRICS_HISTOGRAMS_ENABLED: "true"
+  {{- if $top.Values.keycloakx.config.otelEnable }}
+  OTEL_EXPORTER_OTLP_ENDPOINT: {{ $top.Values.keycloakx.config.otelEndpoint }}
+  OTEL_SERVICE_NAME: {{ $top.Values.keycloakx.config.otelServiceName }}
+  OTEL_TRACES_EXPORTER: {{ $top.Values.keycloakx.config.otelTracesExporter }}
+  OTEL_LOGS_EXPORTER: {{ $top.Values.keycloakx.config.otelLogsExporter }}
+  OTEL_METRICS_EXPORTER: {{ $top.Values.keycloakx.config.otelMetricsExporter }}
+  JAVA_OPTS_APPEND: -Djgroups.dns.query=keycloak-headless -javaagent:/opt/keycloak/agent/opentelemetry-javaagent.jar
+  {{- else }}
+  JAVA_OPTS_APPEND: -Djgroups.dns.query=keycloak-headless
+  {{- end }}
+  KC_HOSTNAME:  {{ printf "https://%s/auth" ($top.Values.global.domain) }}
+  KC_RUNAI_AUTHORIZATION_SERVICE_URL: {{ $top.Values.keycloakx.config.authorizationServiceUrl | default (printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.authorization.name ($top.Values.authorization.service.port | toString)) | quote }}
+  KC_RUNAI_AUDIT_SERVICE_URL: {{ $top.Values.keycloakx.config.auditServiceUrl | default (printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.auditService.name ($top.Values.auditService.service.port | toString)) | quote }}
+{{- end }}

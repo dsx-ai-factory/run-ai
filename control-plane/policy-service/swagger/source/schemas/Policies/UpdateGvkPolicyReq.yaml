@@ -1,0 +1,5 @@
+type: object
+description: Update a policy.
+allOf:
+  - $ref: "./PolicyDescriptionField.yaml"
+  - $ref: "./PolicyRules.yaml"

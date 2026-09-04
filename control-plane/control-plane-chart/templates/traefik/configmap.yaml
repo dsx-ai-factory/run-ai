@@ -1,0 +1,496 @@
+{{- if .Values.traefik.enabled }}
+  {{- include "common.configMap" (list . .Values.traefik "control-plane.traefik.configmap") }}
+  {{- end }}
+  {{- define "control-plane.traefik.configmap" -}}
+  {{- $top := first . }}
+  {{/* System scoped routers */}}
+  {{- $managementTenantURL := "" -}}
+  {{- $hostTemplate := "" -}}
+  {{- $systemScopedTenantsManagerApisRule := "" -}}
+  {{- if $top.Values.global.multiTenancy.enabled -}}
+  {{- $hostTemplate = $top.Values.identityManager.config.hostTemplate | default (printf "https://{{.}}.%s" ($top.Values.global.domain)) -}}
+  {{- $managementTenantURL = $hostTemplate | replace "{{.}}" (default "console" $top.Values.global.management.name) | replace "https://" "" -}}
+  {{- $systemScopedTenantsManagerApisRule = printf "((Method(`POST`) || Method(`PUT`) || Method(`DELETE`) || Method(`PATCH`)) && PathPrefix(`/api/v1/tenants`) && Host(`%s`))" $managementTenantURL -}}
+  {{- end }}
+data:
+  services.yaml: |
+    http:
+      services:
+        frontend-service:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.frontend.name ( $top.Values.frontend.service.port | toString ) }}
+        assets-service:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.assetsService.name ( $top.Values.assetsService.service.port | toString ) }}
+        policy-service:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.policyService.name ( $top.Values.policyService.service.port | toString ) }}
+        authorization-service:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.authorization.name ( $top.Values.authorization.service.port | toString ) }}
+        tenants-manager-service:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.tenantsManager.name ( $top.Values.tenantsManager.service.port | toString ) }}
+        {{- if $top.Values.redoc.docsSite.url }}
+        redoc-service:
+          loadBalancer:
+            servers:
+            - url: {{ $top.Values.redoc.docsSite.url | quote }}
+        {{- end }}
+        identity-manager-service:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.identityManager.name ( $top.Values.identityManager.service.port | toString ) }}
+        cluster-service:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.clusterService.name ( $top.Values.clusterService.service.port | toString ) }}
+        catalog-service:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.catalogService.name ( $top.Values.catalogService.service.port | toString ) }}
+        workloads-manager:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.workloadsManager.name ( $top.Values.workloadsManager.service.port | toString ) }}
+        workloads-helper:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.workloadsHelper.name ( $top.Values.workloadsHelper.service.port | toString ) }}
+        k8s-objects-tracker:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.k8sObjectsTracker.name ( $top.Values.k8sObjectsTracker.service.port | toString ) }}
+        workloads-service:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.workloads.name ( $top.Values.workloads.service.port | toString ) }}
+        org-unit-service:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.orgUnitService.name ( $top.Values.orgUnitService.service.port | toString ) }}
+        datavolumes-service:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.datavolumes.name ( $top.Values.datavolumes.service.port | toString ) }}
+        cli-exposer:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.cliExposer.name ( $top.Values.cliExposer.service.port | toString ) }}
+        audit-service:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.auditService.name ( $top.Values.auditService.service.port | toString ) }}
+        notifications-proxy:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.notificationsProxy.name ( $top.Values.notificationsProxy.service.port | toString ) }}
+        unleash-edge-service:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.unleashEdge.name ( $top.Values.unleashEdge.service.port | toString ) }}
+        researcher-service:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s:%s" $top.Values.researcherBackendService.service.externalName ( $top.Values.researcherBackendService.service.port | toString ) }}
+        cluster-api:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s:%s" $top.Values.clusterApiBackendService.service.externalName ( $top.Values.clusterApiBackendService.service.port | toString ) }}
+      {{- if $top.Values.thanos.enabled }}
+        thanos-service:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-receive:%s" $top.Values.thanos.fullnameOverride ( 19291 | toString ) }}
+        {{- end }}
+        keycloak-service:
+          loadBalancer:
+            servers:
+            {{- if $top.Values.keycloakx.enabled }}
+            - url: {{ printf "http://%s:%s" "keycloak-http" ( 80 | toString ) }}
+            {{- else }}
+            - url: {{ printf "%s" $top.Values.global.keycloakx.host }}
+            {{- end }}
+        bff-service:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.bffService.name ( $top.Values.bffService.service.port | toString ) }}
+        telemetry-service:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.telemetryService.name ( $top.Values.telemetryService.service.port | toString ) }}
+        {{- if $top.Values.tempBackendSettings.enabled }}
+        temp-backend-settings-service:
+          loadBalancer:
+            servers:
+            - url: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.tempBackendSettings.name ( $top.Values.tempBackendSettings.service.port | toString ) }}
+        {{- end }}
+
+  routes.yaml: |
+    http:
+      routers:
+        frontend-router:
+          rule: {{ range $index, $rule := $top.Values.frontend.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}{{if $top.Values.global.multiTenancy.enabled}} && !Host(`{{ $managementTenantURL }}`){{end}}
+          entryPoints:
+          - web
+          {{- if not $top.Values.global.seo.allowSearchEngineIndexing }}
+          middlewares:
+          - seo-noindex
+          {{- end }}
+          service: frontend-service
+          priority: 1
+        tenants-manager-router:
+          rule: {{ range $index, $rule := $top.Values.tenantsManager.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}({{ $rule }}){{ end }}{{- if $top.Values.global.multiTenancy.enabled }} || {{ $systemScopedTenantsManagerApisRule }}{{- end }}
+          entryPoints:
+          - web
+          service: tenants-manager-service
+          middlewares:
+          - tenants-manager-customer-headers
+          - runai-auth
+          - no-cache
+          priority: 3
+        authorization-router:
+          rule: {{ range $index, $rule := $top.Values.authorization.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: authorization-service
+          middlewares:
+          - runai-auth
+          - no-cache
+          priority: 3
+        assets-router:
+          rule: {{ range $index, $rule := $top.Values.assetsService.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: assets-service
+          middlewares:
+          - runai-auth
+          - no-cache
+          priority: 3
+        policy-router:
+          rule: {{ range $index, $rule := $top.Values.policyService.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: policy-service
+          middlewares:
+          - runai-auth
+          - no-cache
+          priority: 3
+        {{- if $top.Values.redoc.docsSite.url }}
+        redoc-router:
+          rule: "Path(`/api/docs`) || PathPrefix(`/redoc`) || PathPrefix(`/api/redoc`) || PathPrefix(`/api/runai-logo-api`) || PathPrefix(`/runai-logo-api`)"
+          entryPoints:
+          - web
+          service: redoc-service
+          middlewares:
+          - redoc-redirect-external-docs
+          priority: 100
+        {{- end }}
+        identity-manager-router:
+          rule: {{ range $index, $rule := $top.Values.identityManager.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: identity-manager-service
+          middlewares:
+          - runai-auth
+          - no-cache
+          priority: 3
+        identity-manager-unauthenticated-router:
+          rule: {{ range $index, $rule := $top.Values.identityManager.exposedRulesUnauthenticated }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: identity-manager-service
+          middlewares:
+          - no-cache
+          priority: 3
+        identity-manager-unauthenticated-hostname-router:
+          rule: {{ range $index, $rule := $top.Values.identityManager.exposedRulesUnauthenticatedWithHostname }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: identity-manager-service
+          middlewares:
+          {{- if $top.Values.global.multiTenancy.enabled }}
+          - runai-extract-tenant-id
+          {{- end }}
+          - no-cache
+          priority: 3
+        cluster-service-router:
+          rule: {{ range $index, $rule := $top.Values.clusterService.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: cluster-service
+          middlewares:
+          - replace-old-urls-cluster-service
+          - runai-auth
+          - no-cache
+          priority: 3
+        catalog-service-router:
+          rule: {{ range $index, $rule := $top.Values.catalogService.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: catalog-service
+          middlewares:
+          - runai-auth
+          - no-cache
+          priority: 3
+        workloads-helper-router:
+          rule: {{ range $index, $rule := $top.Values.workloadsHelper.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: workloads-helper
+          middlewares:
+          - runai-auth
+          - no-cache
+          priority: 5
+        workloads-manager-router:
+          rule: {{ range $index, $rule := $top.Values.workloadsManager.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: workloads-manager
+          middlewares:
+          - runai-auth
+          - no-cache
+          priority: 3
+        workloads-service-router:
+          rule: {{ range $index, $rule := $top.Values.workloads.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: workloads-service
+          middlewares:
+          - runai-auth
+          - no-cache
+          priority: 4
+        org-unit-service-router:
+          rule: {{ range $index, $rule := $top.Values.orgUnitService.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: org-unit-service
+          middlewares:
+          - runai-auth
+          - no-cache
+          priority: 4
+        datavolumes-service-router:
+          rule: {{ range $index, $rule := $top.Values.datavolumes.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: datavolumes-service
+          middlewares:
+          - runai-auth
+          - no-cache
+          priority: 4
+        k8s-objects-tracker-router:
+          rule: {{ range $index, $rule := $top.Values.k8sObjectsTracker.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: k8s-objects-tracker
+          middlewares:
+          - runai-auth
+          - no-cache
+          priority: 3
+        cli-exposer-router:
+          rule: {{ range $index, $rule := $top.Values.cliExposer.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: cli-exposer
+          middlewares:
+          - runai-auth
+          - no-cache
+          priority: 3
+        cli-exposer-unauthenticated-router:
+          rule: {{ range $index, $rule := $top.Values.cliExposer.exposedRulesUnauthenticated }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: cli-exposer
+          middlewares:
+          - no-cache
+          priority: 4
+        audit-service-router:
+          rule: {{ range $index, $rule := $top.Values.auditService.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: audit-service
+          middlewares:
+          - runai-auth
+          - no-cache
+          priority: 3
+        notifications-proxy-router:
+          rule: {{ range $index, $rule := $top.Values.notificationsProxy.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: notifications-proxy
+          middlewares:
+          - runai-auth
+          - no-cache
+          priority: 3
+        notifications-proxy-unauthenticated-router:
+          rule: {{ range $index, $rule := $top.Values.notificationsProxy.exposedRulesUnauthenticated }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: notifications-proxy
+          middlewares:
+          - no-cache
+          priority: 4
+        bff-service-router:
+          rule: {{ range $index, $rule := $top.Values.bffService.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: bff-service
+          middlewares:
+          - runai-auth
+          - no-cache
+          priority: 3
+        bff-service-unauthenticated-router:
+          rule: {{ range $index, $rule := $top.Values.bffService.exposedRulesUnauthenticated }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: bff-service
+          middlewares:
+          - no-cache
+          priority: 4
+        unleash-edge-router:
+          rule: "PathPrefix(`/api/frontend`)"
+          entryPoints:
+          - web
+          service: unleash-edge-service
+          priority: 3
+        keycloak-router:
+          rule: "PathPrefix(`/auth`) && !PathRegexp(`^/auth(/+.*)?metrics/?$`)"
+          entryPoints:
+          - web
+          service: keycloak-service
+          middlewares:
+          - keycloak-custom-headers
+          priority: 3
+        keycloak-workload-router:
+          rule: "PathPrefix(`/auth`) && QueryRegexp(`client_id`, `^.*workloads_auth$`) && QueryRegexp(`redirect_uri`, `^.*$`) && !PathRegexp(`^/auth(/+.*)?metrics/?$`)"
+          entryPoints:
+          - web
+          service: keycloak-service
+          middlewares:
+          - keycloak-custom-headers
+          - workload-redirect-validation
+          priority: 5
+        oidc-error-router:
+          rule: "PathPrefix(`/auth/realms/runai/broker/oidc/endpoint`)"
+          entryPoints:
+          - web
+          service: keycloak-service
+          middlewares:
+          - oidc-error-handler
+          priority: 6
+        researcher-router:
+          rule: "PathPrefix(`/researcher`) || PathPrefix(`/cli`) || PathPrefix(`/oauth2`)"
+          entryPoints:
+          - web
+          service: researcher-service
+          priority: 3
+        cluster-api-router:
+            rule: "PathPrefix(`/cluster-api`)"
+            entryPoints:
+            - web
+            service: cluster-api
+            priority: 3
+        {{- if $top.Values.thanos.enabled }}
+        thanos-router:
+          rule: "PathPrefix(`/api/v1/receive`)"
+          entryPoints:
+          - web
+          service: thanos-service
+          priority: 3
+        {{- end }}
+        telemetry-service-router:
+          rule: {{ range $index, $rule := $top.Values.telemetryService.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: telemetry-service
+          middlewares:
+          - runai-auth
+          - no-cache
+          priority: 3
+        {{- if $top.Values.tempBackendSettings.enabled }}
+        temp-backend-settings-router:
+          rule: {{ range $index, $rule := $top.Values.tempBackendSettings.exposedRules }}{{ if eq $index 0 }}{{ else }} || {{ end }}{{ printf "(%s)" $rule }}{{ end }}
+          entryPoints:
+          - web
+          service: temp-backend-settings-service
+          middlewares:
+          - runai-auth
+          - no-cache
+          priority: 2
+        {{- end }}
+  middlewares.yaml: |
+    http:
+      middlewares:
+        tenants-manager-customer-headers:
+          headers:
+            customRequestHeaders:
+              saas_service_alias: {{ printf "%s-%s" $top.Values.fullnameOverride $top.Values.tenantsManager.name | quote }}
+        keycloak-custom-headers:
+          headers:
+            customRequestHeaders:
+            {{- if $top.Values.keycloakx.enabled }}
+              saas_service_alias: "keycloak-http"
+            {{- else }}
+              saas_service_alias: {{ printf "%s" $top.Values.global.keycloakx.host | quote }}
+            {{- end }}
+        content-security-policy:
+          headers:
+            contentSecurityPolicy: {{ $top.Values.global.security.contentSecurityPolicy | quote }}
+            contentTypeNosniff: true
+            frameDeny: true
+            referrerPolicy: "strict-origin-when-cross-origin"
+        no-cache:
+          headers:
+            customResponseHeaders:
+              Cache-Control: "no-store, no-cache, must-revalidate, max-age=0"
+              Pragma: "no-cache"
+        runai-extract-tenant-id:
+          forwardAuth:
+            address: {{ printf "http://%s:%v/internal/plugins/extract-tenant-id" $top.Values.traefik.gatewayHub.host $top.Values.traefik.gatewayHub.port | quote }}
+            authResponseHeaders:
+              - X-Runai-Tenant-Id
+        runai-auth:
+          forwardAuth:
+            address: {{ printf "http://%s:%v/internal/plugins/authentication-handler" $top.Values.traefik.gatewayHub.host $top.Values.traefik.gatewayHub.port | quote }}
+            authResponseHeaders:
+              - X-Runai-Tenant-Id
+              - X-Runai-Subject-Id
+              - X-Runai-Subject-Type
+              - X-Runai-Groups
+              - X-Runai-Supplemental-Groups
+              - X-Runai-GID
+              - X-Runai-UID
+              - X-Runai-Is-Management-Tenant
+              - X-Runai-Client-Id
+              - X-Runai-Session-Id
+        workload-redirect-validation:
+          forwardAuth:
+            address: {{ printf "http://%s:%v/internal/plugins/workload-redirect-validation" $top.Values.traefik.gatewayHub.host $top.Values.traefik.gatewayHub.port | quote }}
+        replace-old-urls-cluster-service:
+          replacePathRegex:
+            regex: "^/v1/k8s/clusters(.*)"
+            replacement: "/api/v1/clusters$1"
+        oidc-error-handler:
+          errors:
+            status:
+            - "401"
+            service: frontend-service
+            query: "/error-pages/missing-claim.html"
+        {{- if not $top.Values.global.seo.allowSearchEngineIndexing }}
+        seo-noindex:
+          headers:
+            customResponseHeaders:
+              X-Robots-Tag: "noindex, nofollow"
+        {{- end }}
+        {{- if $top.Values.redoc.docsSite.url }}
+        redoc-redirect-external-docs:
+          redirectRegex:
+            regex: ".*"
+            replacement: {{ $top.Values.redoc.docsSite.url | quote }}
+        {{- end }}
+  {{- end }}

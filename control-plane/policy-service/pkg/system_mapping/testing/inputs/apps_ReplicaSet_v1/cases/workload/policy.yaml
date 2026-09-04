@@ -1,0 +1,46 @@
+description: |
+  Layer 3 case "workload" for apps/ReplicaSet/v1. SETs every field reachable
+  through the replicaSetSpec and selector field groups (i.e. everything in
+  .spec at or above the pod template).
+
+  ReplicaSet's spec is intentionally minimal — only replicas and minReadySeconds
+  are exposed at this level (no rollout strategy, no progress deadline, no
+  pause). The selector fields below are shared with all apps/v1 controllers
+  via the selector field group.
+
+  Custom formatters used here:
+    * matchExprSelector uses runai-selector (one rule per match expression).
+
+  All other replicaSetSpec / selector fields are KeyValue / KeyValueMap. Read
+  together with cases/workload/golden.yaml.
+effectiveRules:
+  # ----- replicaSetSpec scalar fields -----
+  - field: replicas
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 1 } }]
+  - field: minReadySeconds
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 0 } }]
+
+  # ----- selector ----
+  # matchLabelsSelector uses KeyValueMap to add entries to selector.matchLabels.
+  # matchExprSelector uses runai-selector (one rule per match expression).
+  - field: matchLabelsSelector
+    specSelector: workloadSpec
+    enforcements: [{ set: { key: "app", value: "test" } }]
+  - field: matchExprSelector
+    specSelector: workloadSpec
+    enforcements:
+      - set:
+          key: test
+          operator: In
+          values: ["v1", "v2"]
+
+  # ----- pod template metadata -----
+  # Add a label via policy (must match selector.matchLabels for K8s validation)
+  - field: labels
+    specSelector: podMetadata
+    enforcements: [{ set: { key: "app", value: "test" } }]
+  - field: annotations
+    specSelector: podMetadata
+    enforcements: [{ set: { key: "example.com/annotation", value: "test-value" } }]

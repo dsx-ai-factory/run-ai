@@ -1,0 +1,4 @@
+description: Unique identifier of the asset.
+type: string
+format: uuid
+minLength: 1

@@ -1,0 +1,28 @@
+apiVersion: run.ai/v2alpha1
+kind: DistributedWorkload
+metadata:
+  name: dist-0
+  namespace: runai-team-a
+  uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+spec:
+  jobType: XGBoostJob
+  name:
+    value: dist-0
+  ports:
+    items:
+      port-80:
+        value:
+          autoGenerate: false
+          container: 80
+          external: 8000
+      port-90:
+        value:
+          autoGenerate: false
+          container: 90
+          external: 9000
+  workers:
+    value: 1
+  serviceType:
+    value: LoadBalancer
+  username:
+    value: user.name

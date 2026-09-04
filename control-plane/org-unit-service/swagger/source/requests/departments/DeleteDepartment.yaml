@@ -1,0 +1,28 @@
+summary: Delete department
+operationId: delete_department
+x-service: org-unit-service
+description: Delete department by Id
+x-test-coverage:
+  - control-plane/org-unit-service/pkg/test/department_api_test.go
+x-authorize:
+  resource-type: department
+  action: delete
+  resource-id: departmentId
+x-audit: true
+tags:
+  - Departments
+parameters:
+  - $ref: "../../../../../infra/openapi/docs/parameters/path/DepartmentId.yaml"
+responses:
+  204:
+    description: Deleted
+  400:
+    $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+  401:
+    $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+  403:
+    $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+  404:
+    $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+  503:
+    $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

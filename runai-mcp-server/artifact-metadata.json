@@ -1,0 +1,23 @@
+{
+  "service_name": "runai-mcp-server",
+  "artifact_type": "container",
+  "enabled": true,
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "notifications": {
+    "slack": {
+      "mention": "@sphinx"
+    }
+  },
+  "make": {
+    "test": {
+      "runs_on": "ubuntu-latest-8-cores"
+    }
+  },
+  "jira": {
+    "team_name": "Sphinx"
+  },
+  "ngc": {
+    "guest_access": true
+  }
+}

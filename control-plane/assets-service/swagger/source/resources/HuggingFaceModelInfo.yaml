@@ -1,0 +1,36 @@
+post:
+  summary: Get info of a Hugging Face model.
+  description: Retrieves various information of a given Hugging Face model.
+  operationId: get_hugging_face_model_info
+  x-service: assets-service
+  x-internal: true
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_inference_service_huggingface_model_info_test.go
+    - e2e/src/test/suites/parallel/inference/inferenceHuggingFaceModelInfo.test.ts
+  x-authorize:
+    resource-type: inferences
+    action: create
+  tags:
+    - Inferences
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Inference/HuggingFaceModelInfoRequest.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Inference/HuggingFaceModelInfo.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400SubmissionErrorV2.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

@@ -1,0 +1,102 @@
+get:
+  summary: Get the cluster's Node Pools.
+  operationId: legacy_get_nodepools
+  x-service: cluster-service
+  description: >-
+    Retrieve all the node pools with details from the cluster by Universally Unique Identifier (UUID). Deprecated, please use /api/v1/node-pools instead.
+  deprecated: true
+  x-test-coverage:
+    - cluster-service/pkg/services/api_nodepools_service_test.go
+  x-authorize:
+    resource-type: nodepools
+    action: read
+  tags:
+    - NodePools
+  parameters:
+    - name: clusterId
+      in: path
+      description: Unique identifier of the cluster
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        format: uuid
+  responses:
+    200:
+      description: Node pools returned successfully.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../schemas/Nodepools/LegacyNodePool.yaml"
+    403:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyError.yaml'
+    404:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyErrorInt32.yaml'
+    default:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyError.yaml'
+post:
+  summary: Create a Node Pool.
+  operationId: legacy_create_nodepool
+  x-service: cluster-service
+  description: >-
+    Use to create a node pool in a cluster by Universally Unique Identifier (UUID). Deprecated, please use /api/v1/node-pools instead.
+  deprecated: true
+  x-test-coverage:
+    - cluster-service/pkg/services/api_nodepools_service_test.go
+  x-authorize:
+    resource-type: nodepools
+    action: create
+  x-audit: true
+  tags:
+    - NodePools
+  parameters:
+    - name: clusterId
+      in: path
+      description: Unique identifier of the cluster
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        format: uuid
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Nodepools/LegacyNodePoolCreateRequest.yaml"
+  responses:
+    201:
+      description: Created
+    400:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyError.yaml'
+    409:
+      description: conflict error
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyError.yaml'
+    default:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyError.yaml'

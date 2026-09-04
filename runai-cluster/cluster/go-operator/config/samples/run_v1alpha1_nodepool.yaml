@@ -1,0 +1,6 @@
+apiVersion: run.run.ai/v1alpha1
+kind: NodePool
+metadata:
+  name: nodepool-sample
+spec:
+  # TODO(user): Add fields here

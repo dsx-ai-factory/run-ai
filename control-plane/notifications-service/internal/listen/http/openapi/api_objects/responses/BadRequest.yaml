@@ -1,0 +1,8 @@
+content:
+  application/json:
+    schema:
+      $ref: "../schemas/APIError.yaml"
+    example:
+      code: 400
+      message: "Bad request - Resource should have a name"
+description: Bad request

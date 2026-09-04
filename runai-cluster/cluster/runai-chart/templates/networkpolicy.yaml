@@ -1,0 +1,15 @@
+{{- if and (index .Values "runai-operator" "enabled") (index .Values "runai-operator" "networkPolicy" "enabled") }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: runai-operator
+spec:
+  podSelector:
+    matchLabels:
+      name: runai
+  # Forbid all ingress traffic
+  policyTypes:
+    - Ingress
+  ingress:
+    - {}
+{{- end }}

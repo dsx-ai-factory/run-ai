@@ -1,0 +1,458 @@
+description: |
+  Layer 3 case "workspaceSpec" for run.ai/Workspace/v1. A deliberately
+  exhaustive policy that exercises as many nativeSpec fields as possible:
+  every container / compute / security / scheduling / lifecycle scalar, the
+  object fields (probes, nodeAffinityRequired, podAffinity), every whole
+  array (labels, annotations, environmentVariables, imagePullSecrets,
+  tolerations, ports, exposedUrls, relatedUrls) and every storage array
+  (pvc, hostPath, nfs, git, s3, configMapVolume, secretVolume, dataVolume,
+  emptyDirVolume) with all their attributes.
+
+  The trailing "item selector" section then re-enters the arrays it just
+  built through both the "allXxx" (attributes-style: set one attribute on
+  every instance) and "xxxByName" (target one instance) item selectors, so
+  each item selector and inner-field SpecRef is exercised at least once. The
+  overriding values are intentionally distinct so the golden proves the
+  selector actually matched and wrote.
+
+effectiveRules:
+  # ============================================================
+  # Container fields
+  # ============================================================
+  - field: image
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: "test-image:latest" } }]
+  - field: command
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: "python main.py" } }]
+  - field: args
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: "--verbose" } }]
+  - field: workingDir
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: "/app" } }]
+  - field: createHomeDir
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: true } }]
+  - field: stdin
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: false } }]
+  - field: tty
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: false } }]
+  - field: imagePullPolicy
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: "Always" } }]
+  - field: probes
+    specSelector: workspaceSpec
+    enforcements:
+      - set:
+          value:
+            readiness:
+              initialDelaySeconds: 5
+              periodSeconds: 10
+              timeoutSeconds: 1
+              successThreshold: 1
+              failureThreshold: 3
+              handler:
+                httpGet:
+                  path: /healthz
+                  port: 8080
+
+  # ============================================================
+  # Scheduling
+  # ============================================================
+  - field: category
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: "training" } }]
+  - field: nodeType
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: "gpu" } }]
+  - field: nodePools
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: ["pool-1", "pool-2"] } }]
+  - field: priorityClass
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: "high-priority" } }]
+  - field: preemptibility
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: "preemptible" } }]
+  - field: nodeAffinityRequired
+    specSelector: workspaceSpec
+    enforcements:
+      - set:
+          value:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: example.com/zone
+                    operator: In
+                    values: [us-west]
+  - field: podAffinity
+    specSelector: workspaceSpec
+    enforcements:
+      - set:
+          value:
+            type: Required
+            key: kubernetes.io/hostname
+
+  # ============================================================
+  # Lifecycle
+  # ============================================================
+  - field: backoffLimit
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: 3 } }]
+  - field: autoDeletionTimeAfterCompletionSeconds
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: 3600 } }]
+  - field: terminateAfterPreemption
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: false } }]
+  - field: terminationGracePeriodSeconds
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: 30 } }]
+  - field: restartPolicy
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: "Never" } }]
+
+  # ============================================================
+  # Compute
+  # ============================================================
+  - field: compute-CpuCoreRequest
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: 1.0 } }]
+  - field: compute-CpuCoreLimit
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: 2.0 } }]
+  - field: compute-CpuMemoryRequest
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: "1Gi" } }]
+  - field: compute-CpuMemoryLimit
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: "2Gi" } }]
+  - field: compute-GpuDevicesRequest
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: 1 } }]
+  - field: compute-GpuPortionRequest
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: 0.5 } }]
+  - field: compute-GpuPortionLimit
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: 1.0 } }]
+  - field: compute-GpuMemoryRequest
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: "4Gi" } }]
+  - field: compute-GpuMemoryLimit
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: "8Gi" } }]
+  - field: compute-GpuRequestType
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: "portion" } }]
+  - field: compute-LargeShmRequest
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: true } }]
+  - field: compute-ExtendedResources
+    specSelector: workspaceSpec
+    enforcements:
+      - set:
+          resource: nvidia.com/gpu
+          quantity: "1"
+
+  # ============================================================
+  # Security
+  # ============================================================
+  - field: security-AllowPrivilegeEscalation
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: false } }]
+  - field: security-Capabilities
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: ["NET_ADMIN"] } }]
+  - field: security-HostIpc
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: false } }]
+  - field: security-HostNetwork
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: false } }]
+  - field: security-Privileged
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: false } }]
+  - field: security-ReadOnlyRootFilesystem
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: false } }]
+  - field: security-RunAsGid
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: 1000 } }]
+  - field: security-RunAsNonRoot
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: true } }]
+  - field: security-RunAsUid
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: 1000 } }]
+  - field: security-SupplementalGroups
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: "1000,2000" } }]
+  - field: security-SeccompProfileType
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: "RuntimeDefault" } }]
+  - field: security-UidGidSource
+    specSelector: workspaceSpec
+    enforcements: [{ set: { value: "custom" } }]
+
+  # ============================================================
+  # Itemized arrays — each "set" creates one array item (merged by the
+  # formatter's array key). Every column of the item is populated to
+  # exercise the create-item breakdown.
+  # ============================================================
+  - field: labels
+    specSelector: workspaceSpec
+    enforcements:
+      - set: { name: app, value: test }
+  - field: annotations
+    specSelector: workspaceSpec
+    enforcements:
+      - set: { name: description, value: test-workload }
+  - field: environmentVariables
+    specSelector: workspaceSpec
+    enforcements:
+      - set:
+          name: ENV_VAR
+          value: test-value
+          description: an environment variable
+  - field: imagePullSecrets
+    specSelector: workspaceSpec
+    enforcements:
+      - set: { name: registry-secret, userCredential: true }
+  - field: tolerations
+    specSelector: workspaceSpec
+    enforcements:
+      - set:
+          name: gpu-toleration
+          key: nvidia.com/gpu
+          value: "true"
+          operator: Equal
+          effect: NoSchedule
+          seconds: 3600
+  - field: ports
+    specSelector: workspaceSpec
+    enforcements:
+      - set:
+          name: http
+          container: 8080
+          external: 80
+          serviceType: ClusterIP
+          toolName: jupyter
+          toolType: jupyter-notebook
+  - field: exposedUrls
+    specSelector: workspaceSpec
+    enforcements:
+      - set:
+          name: web
+          container: 8080
+          url: https://test.example.com
+          authorizationType: authorizedUsers
+          authorizedUsers: [user@example.com]
+          authorizedGroups: [group-a]
+          toolName: jupyter
+          toolType: jupyter-notebook
+  - field: relatedUrls
+    specSelector: workspaceSpec
+    enforcements:
+      - set: { name: docs, url: https://docs.example.com, type: documentation }
+
+  # ============================================================
+  # Storage arrays (create-item; one "set" per volume)
+  # ============================================================
+  - field: storage-Pvc
+    specSelector: workspaceSpec
+    enforcements:
+      - set:
+          name: data-pvc
+          path: /data
+          existingPvc: false
+          readOnly: false
+          ephemeral: false
+          dataSharing: true
+          size: 1G
+          storageClass: standard
+          volumeMode: Filesystem
+          readWriteOnce: true
+          readOnlyMany: false
+          readWriteMany: false
+          addedAttrValues:
+            - key: extra
+              value: val
+      - set:
+          name: existing-pvc
+          path: /existing
+          claimName: existing-claim
+          existingPvc: true
+          readOnly: true
+  - field: storage-HostPath
+    specSelector: workspaceSpec
+    enforcements:
+      - set:
+          name: host-data
+          mountPath: /mnt/host
+          path: /var/data
+          readOnly: false
+          mountPropagation: None
+  - field: storage-Nfs
+    specSelector: workspaceSpec
+    enforcements:
+      - set:
+          name: nfs-share
+          path: /export
+          server: nfs.example.com
+          mountPath: /mnt/nfs
+          readOnly: false
+  - field: storage-Git
+    specSelector: workspaceSpec
+    enforcements:
+      - set:
+          name: code-repo
+          repository: https://github.com/example/repo
+          branch: main
+          revision: HEAD
+          path: /workspace/repo
+          passwordSecret: git-secret
+          secretKeyOfPassword: password
+          secretKeyOfUser: username
+          secretRefName: git-secret-ref
+          authenticationMethod: password
+          secretRefSecretKeyOfUser: username
+          secretRefSecretKeyOfPassword: password
+  - field: storage-S3
+    specSelector: workspaceSpec
+    enforcements:
+      - set:
+          name: s3-bucket
+          bucket: my-bucket
+          path: /data
+          url: https://s3.amazonaws.com
+          accessKeySecret: s3-secret
+          awsSessionToken: token-secret
+          secretKeyOfAccessKeyId: access-key-id
+          secretKeyOfSecretKey: secret-key
+  - field: storage-ConfigMapVolume
+    specSelector: workspaceSpec
+    enforcements:
+      - set:
+          name: config
+          configMap: my-configmap
+          mountPath: /etc/config
+          subPath: config.yaml
+          defaultMode: "0644"
+  - field: storage-SecretVolume
+    specSelector: workspaceSpec
+    enforcements:
+      - set:
+          name: secrets
+          secret: my-secret
+          mountPath: /etc/secrets
+          defaultMode: "0644"
+  - field: storage-DataVolume
+    specSelector: workspaceSpec
+    enforcements:
+      - set: { id: 123e4567-e89b-12d3-a456-426614174000, mountPath: /mnt/data }
+  - field: storage-EmptyDirVolume
+    specSelector: workspaceSpec
+    enforcements:
+      - set: { name: scratch, path: /scratch, medium: Memory, sizeLimit: 1Gi }
+
+  # ============================================================
+  # Item selectors — attributes-style (allXxx: set one attribute on
+  # every instance) and targeted (xxxByName: one instance). These run
+  # after the whole-array SETs above so the items already exist.
+  # ============================================================
+  - field: labels-Value
+    specSelector: workspaceSpec
+    itemSelector: labelByName
+    selectorParams: { labelName: app }
+    enforcements: [{ set: { value: "test-set-by-name" } }]
+  - field: annotations-Value
+    specSelector: workspaceSpec
+    itemSelector: allAnnotations
+    enforcements: [{ set: { value: "annotated-by-all" } }]
+  - field: environmentVariables-Value
+    specSelector: workspaceSpec
+    itemSelector: allEnvVars
+    enforcements: [{ set: { value: "env-set-for-all" } }]
+  - field: environmentVariables-Description
+    specSelector: workspaceSpec
+    itemSelector: envVarByName
+    selectorParams: { envVarName: ENV_VAR }
+    enforcements: [{ set: { value: "described-by-name" } }]
+  - field: imagePullSecrets-UserCredential
+    specSelector: workspaceSpec
+    itemSelector: imagePullSecretByName
+    selectorParams: { secretName: registry-secret }
+    enforcements: [{ set: { value: false } }]
+  - field: tolerations-Effect
+    specSelector: workspaceSpec
+    itemSelector: tolerationByName
+    selectorParams: { tolerationName: gpu-toleration }
+    enforcements: [{ set: { value: "NoExecute" } }]
+  - field: ports-ServiceType
+    specSelector: workspaceSpec
+    itemSelector: portByName
+    selectorParams: { portName: http }
+    enforcements: [{ set: { value: "NodePort" } }]
+  - field: exposedUrls-AuthorizationType
+    specSelector: workspaceSpec
+    itemSelector: exposedUrlByName
+    selectorParams: { urlName: web }
+    enforcements: [{ set: { value: "authorizedGroups" } }]
+  - field: relatedUrls-Type
+    specSelector: workspaceSpec
+    itemSelector: relatedUrlByName
+    selectorParams: { urlName: docs }
+    enforcements: [{ set: { value: "external" } }]
+  - field: compute-ExtendedResources-Quantity
+    specSelector: workspaceSpec
+    itemSelector: extendedResourceByResource
+    selectorParams: { resource: nvidia.com/gpu }
+    enforcements: [{ set: { value: "2" } }]
+  - field: storage-Pvc-ReadOnly
+    specSelector: workspaceSpec
+    itemSelector: pvcByName
+    selectorParams: { pvcName: data-pvc }
+    enforcements: [{ set: { value: true } }]
+  - field: storage-HostPath-ReadOnly
+    specSelector: workspaceSpec
+    itemSelector: hostPathByName
+    selectorParams: { hostPathName: host-data }
+    enforcements: [{ set: { value: true } }]
+  - field: storage-Nfs-ReadOnly
+    specSelector: workspaceSpec
+    itemSelector: nfsByName
+    selectorParams: { nfsName: nfs-share }
+    enforcements: [{ set: { value: true } }]
+  - field: storage-Git-Branch
+    specSelector: workspaceSpec
+    itemSelector: gitByName
+    selectorParams: { gitName: code-repo }
+    enforcements: [{ set: { value: "release" } }]
+  - field: storage-S3-Path
+    specSelector: workspaceSpec
+    itemSelector: s3ByName
+    selectorParams: { s3Name: s3-bucket }
+    enforcements: [{ set: { value: "/datasets" } }]
+  - field: storage-ConfigMapVolume-MountPath
+    specSelector: workspaceSpec
+    itemSelector: configMapVolumeByName
+    selectorParams: { configMapName: config }
+    enforcements: [{ set: { value: "/etc/config-2" } }]
+  - field: storage-SecretVolume-MountPath
+    specSelector: workspaceSpec
+    itemSelector: secretVolumeByName
+    selectorParams: { secretName: secrets }
+    enforcements: [{ set: { value: "/etc/secrets-2" } }]
+  - field: storage-DataVolume-MountPath
+    specSelector: workspaceSpec
+    itemSelector: dataVolumeById
+    selectorParams: { dataVolumeId: 123e4567-e89b-12d3-a456-426614174000 }
+    enforcements: [{ set: { value: "/mnt/data-2" } }]
+  - field: storage-EmptyDirVolume-SizeLimit
+    specSelector: workspaceSpec
+    itemSelector: emptyDirVolumeByName
+    selectorParams: { emptyDirName: scratch }
+    enforcements: [{ set: { value: "2Gi" } }]

@@ -1,0 +1,79 @@
+policy:
+  id: test-policy
+  effectiveRules:
+    # Three rules, all KeyValueMap + specRef + value-only set form, targeting
+    # the three distinct target shapes the CopyTargetKeys fan-out has to handle.
+    # The compiled set expression is in every case:
+    #     { "<specRef>": { ($ARGS.named.key // "value"): $ARGS.named.value } }
+    # which (with no "key" arg) evaluates to:
+    #     { "<specRef>": { "value": <v> } }
+    # CopyTargetKeys must navigate into srcValue["<specRef>"] and v["<specRef>"]
+    # before fanning the placeholder across the target's keys.
+
+    # Case A: target map has keys -> fan-out runs, every existing key gets the
+    # placeholder. This is the original bug reported through the API
+    # (podMetadata.labels has app=sleep-ubuntu; expect app=true after the rule).
+    - field: labels
+      specSelector: podMetadata
+      enforcements:
+        - set: { value: "true" }
+
+    # Case B: target map exists but is empty ({}). Fan-out loop iterates zero
+    # times and the placeholder is deleted, so the rule produces no labels
+    # (the empty target stays empty, never gets a stray "value" key).
+    - field: labels
+      specSelector: workloadMetadata
+      enforcements:
+        - set: { value: "fan-empty" }
+
+    # Case C: target path is missing entirely (annotations not present under
+    # workloadMetadata). Navigation returns an empty fallback target, the
+    # placeholder is deleted, and the merge writes {} for the missing branch
+    # — an empty map rather than the literal "value" key. No phantom keys leak.
+    - field: annotations
+      specSelector: workloadMetadata
+      enforcements:
+        - set: { value: "fan-missing" }
+
+  breakdown:
+    fields:
+      labels:
+        - specSelectors: [podMetadata, workloadMetadata]
+          formatter:
+            builtin: KeyValueMap
+          specRef: labels
+      annotations:
+        - specSelectors: [workloadMetadata]
+          formatter:
+            builtin: KeyValueMap
+          specRef: annotations
+
+    specSelectors:
+      # Pod template metadata: has labels with one existing key -> case A.
+      podMetadata:
+        query: "( .spec.template.metadata )"
+      # Workload metadata: labels is present but {} -> case B; annotations is
+      # absent -> case C. Same selector drives both rules.
+      workloadMetadata:
+        query: "( .metadata )"
+
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: sleep-ubuntu
+    namespace: runai-ofer
+    labels: {}
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: sleep-ubuntu
+    template:
+      metadata:
+        labels:
+          app: sleep-ubuntu
+      spec:
+        containers:
+          - name: sleep
+            image: ubuntu

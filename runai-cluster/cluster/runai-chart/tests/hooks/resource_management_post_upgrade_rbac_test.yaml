@@ -1,0 +1,79 @@
+suite: Test resource-management post-upgrade cleanup permissions
+
+templates:
+  - templates/hooks/post-upgrade-rbac.yaml
+
+tests:
+  # The cleanup deletes the legacy managed-nodes-config and its CRD, but only after
+  # confirming the kai twin exists - hence get on the kai side and get+delete on the
+  # legacy one. It is a singleton, so it is fetched by name rather than listed.
+  - it: should allow deleting the legacy managed-nodes-config once its kai twin exists
+    set:
+      helmHooksHandler.enabled: true
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - run.ai
+            resources:
+              - managednodesconfigs
+            verbs:
+              - get
+              - delete
+        documentIndex: 3
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - kai.resources
+            resources:
+              - departments
+              - projects
+              - nodepools
+              - managednodesconfigs
+            verbs:
+              - get
+        documentIndex: 3
+      # The legacy CRDs themselves are deleted at the end of the cleanup.
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - apiextensions.k8s.io
+            resources:
+              - customresourcedefinitions
+            verbs:
+              - get
+              - delete
+        documentIndex: 3
+
+  - it: should allow clearing the legacy org units' finalizers before deleting them
+    set:
+      helmHooksHandler.enabled: true
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - scheduling.run.ai
+            resources:
+              - departments
+            verbs:
+              - list
+              - patch
+              - delete
+        documentIndex: 3
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - run.ai
+            resources:
+              - projects
+              - nodepools
+            verbs:
+              - list
+              - patch
+              - delete
+        documentIndex: 3

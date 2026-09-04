@@ -1,0 +1,144 @@
+services:
+  notification-proxy-integration-test:
+    profiles:
+      - run-tests
+    build:
+      context: ../
+      dockerfile: ./integration_tests/Dockerfile
+    environment:
+      - NOTIFICATIONS_PROXY_HOST=notifications-proxy:8080
+      - NOTIFY_CONFIG_URL=http://notifications-service:8085
+      - NOTIFY_URL=http://notifications-service:5000
+      - NOTIFY_HOST=notifications-service
+      - RUNAI_ENV_DOMAIN=http://notifications-proxy:8080
+      - SLACK_BASE_URL=http://slack-mock:8081
+      - USE_LOCALHOST_REDIRECT=false
+      - PUBSUB_TYPE=redis
+      - PUBSUB_URL=redis:6379
+      - SECRETS_MOUNT_PATH=/etc/secrets
+    depends_on:
+      notifications-proxy:
+        condition: service_healthy
+    volumes:
+      - ./secrets:/etc/secrets
+    links:
+      - smtp
+      - slack-mock
+
+  notifications-proxy:
+    profiles:
+    - run-setup
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVICE_NAME=notifications-proxy-service
+      - USE_MOCKS=true
+      - NOTIFY_CONFIG_URL=http://notifications-service:8085
+      - SERVICE_PORT=8080
+      - PUBSUB_TYPE=redis
+      - PUBSUB_URL=redis:6379
+      - SECRETS_MOUNT_PATH=/etc/secrets
+      - BATCH_INTERVAL_SEC=1
+      - BATCH_MAX_SIZE=1
+      - RUNAI_ENV_DOMAIN=http://notifications-proxy:8080
+      - SLACK_BASE_URL=http://slack-mock:8081
+      - MULTI_TENANCY_ENABLED=true
+      - LOG_LEVEL=debug
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=runai
+      - DB_SSL_MODE=disable
+      - DB_SCHEMA=notifications_proxy
+    volumes:
+      - ./secrets:/etc/secrets
+    depends_on:
+      notifications-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      slack-mock:
+        condition: service_started
+    links:
+      - slack-mock
+    healthcheck:
+      test: ["CMD", "/notifications-proxy", "--health"]
+      interval: 2s
+      timeout: 10s
+      retries: 10
+      start_period: 2s
+  
+  notifications-service:
+    build:
+      context: ../../notifications-service
+      dockerfile: Dockerfile
+      target: integration
+    profiles:
+      - run-setup
+    ports:
+      - "5000:5000"
+      - "8085:8085"
+    volumes:
+      - ./config/notifications-service/config.advanced.yaml:/config.yaml
+    environment:
+      - CONF_PATH=/config.yaml
+      - ENV_CONFIG_PROVIDER=advanced
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: curl --fail "http://localhost:8085/api/v1/config/health" || exit 1
+      interval: 2s
+      timeout: 10s
+      retries: 10
+      start_period: 2s
+
+  postgres:
+    image: postgres:latest
+    environment:
+      LOG_LEVEL: debug
+      POSTGRES_DB: postgres
+      POSTGRES_USER: runai
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./config/initdb:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  smtp:
+    image: mailhog/mailhog:v1.0.1
+    profiles:
+      - smtp
+    entrypoint: ["/bin/sh", "-c", "MailHog &>/dev/null"]
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    expose:
+      - "1025"
+      - "8025"
+
+  redis:
+    image: redis:8.8-alpine
+    container_name: redis
+    ports:
+      - '6379:6379'
+    command: redis-server
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+
+  slack-mock:
+    container_name: slack-mock
+    profiles:
+      - slack
+    build:
+      context: ./slack
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"

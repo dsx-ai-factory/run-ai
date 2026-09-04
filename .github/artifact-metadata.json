@@ -1,0 +1,13 @@
+{
+  "service_name": "github",
+  "artifact_type": "github",
+  "cache_artifacts": false,
+  "notifications": {
+    "slack": {
+      "mention": "@devops-team"
+    }
+  },
+  "jira": {
+    "team_name": "Devops Team"
+  }
+}

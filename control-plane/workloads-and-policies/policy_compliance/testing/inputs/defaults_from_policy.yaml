@@ -1,0 +1,23 @@
+defaults:
+  security:
+    uidGidSource: custom
+rules:
+  ports:
+    attributes:
+      container:
+        defaultFrom:
+          field: external
+          factor: 1
+    instances:
+      canAdd: true
+  security:
+    runAsGid:
+      defaultFrom:
+        field: security.runAsUid
+        factor: 2
+  compute:
+    cpuCoreRequest:
+      max: 5
+      defaultFrom:
+        field: compute.cpuCoreLimit
+        factor: 0.5

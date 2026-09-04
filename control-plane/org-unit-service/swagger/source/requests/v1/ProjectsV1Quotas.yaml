@@ -1,0 +1,30 @@
+get:
+  deprecated: true
+  x-internal: true
+  x-authorize:
+    resource-type: project
+    action: read
+  x-service: org-unit-service
+  operationId: get_projects_quotas_v1
+  summary: Get project quotas.
+  tags:
+    - Projects v1
+  parameters:
+    - $ref: "../../parameters/v1/ClusterIdV1.yaml"
+  responses:
+    200:
+      description: ok
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/v1/ProjectQuotasV1.yaml"
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

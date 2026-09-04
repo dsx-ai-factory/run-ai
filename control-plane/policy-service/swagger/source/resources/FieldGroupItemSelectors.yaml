@@ -1,0 +1,38 @@
+delete:
+  summary: Delete item selectors from a field group. [experimental]
+  description: Delete one or more item selectors from an existing field group.
+  operationId: delete_field_group_item_selectors
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/service_mapping_field_group_test.go
+  x-authorize:
+    resource-type: policies
+    action: update
+  x-audit: true
+  tags:
+    - Spec mapping
+  parameters:
+    - $ref: "../parameters/path/FieldGroupNameParam.yaml"
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Mapping/FieldGroupDeleteItemSelectorsRequest.yaml"
+  responses:
+    200:
+      description: Item selector(s) deleted from the field group.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Mapping/FieldGroup.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+

@@ -1,0 +1,8 @@
+type: string
+enum:
+  - Queued
+  - Applying
+  - Deleting
+  - Synced
+  - Deleted
+  - Failed

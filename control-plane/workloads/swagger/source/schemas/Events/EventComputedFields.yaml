@@ -1,0 +1,6 @@
+type: object
+required:
+  - tenantId
+properties:
+  tenantId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml'

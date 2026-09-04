@@ -1,0 +1,25 @@
+description: Annotation details to be populated into the container.
+properties:
+  name:
+    description: The name of the annotation (mandatory)
+    type: string
+    minLength: 1
+    maxLength: 63
+    example: billing
+    nullable: true
+    pattern: .*
+  value:
+    description: The value of the annotation.
+    type: string
+    example: my-billing-unit
+    maxLength: 10000
+    nullable: true
+    pattern: .*
+  exclude:
+    description: Use 'true' in case the annotation is defined in defaults of the policy, and you wish to exclude it from the workload.
+    type: boolean
+    default: false
+    example: false
+    nullable: true
+nullable: true
+type: object

@@ -1,0 +1,45 @@
+Config: {}
+Service:
+  apiVersion: serving.knative.dev/v1
+  kind: Service
+  metadata:
+    annotations:
+      run.ai/submitted-by: tester
+    labels:
+      app: service
+      createdBy: Service
+      project: team-a
+      release: my-llm
+      run.ai/control-plane-managed: "true"
+      run.ai/converted-from-native: "true"
+      workloadKind: Inference
+      workloadName: my-llm
+    name: my-llm
+    namespace: runai-team-a
+  spec:
+    template:
+      metadata:
+        labels:
+          app: service
+          createdBy: Service
+          project: team-a
+          release: my-llm
+          workloadKind: Inference
+          workloadName: my-llm
+      spec:
+        containers:
+        - image: my-llm:latest
+          name: my-llm
+          ports:
+          - containerPort: 8080
+          resources: {}
+          volumeMounts:
+          - mountPath: /models
+            name: data-volume-dv-models
+            readOnly: true
+        schedulerName: runai-scheduler
+        volumes:
+        - name: data-volume-dv-models
+          persistentVolumeClaim:
+            claimName: data-volume-models-pvc
+  status: {}

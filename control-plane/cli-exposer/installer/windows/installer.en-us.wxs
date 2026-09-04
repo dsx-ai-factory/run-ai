@@ -1,0 +1,18 @@
+<!--
+This file contains the declaration of all the localizable strings.
+-->
+<WixLocalization xmlns="http://wixtoolset.org/schemas/v4/wxl" Culture="en-US">
+
+  <String Id="DowngradeError" Value="A newer version of [ProductName] is already installed." />
+  <String Id="WelcomeDlgDescription" Value="The setup wizard will install Run:ai CLI on your computer. "/>
+  <String Id="InstallDirDlgTitle" Value="{\WixUI_Font_Title}Set the destination folder"/>
+  <String Id="VerifyReadyDlgInstallTitle" Value="{\WixUI_Font_Title}Ready to install the Run:AI CLI"/>
+  <String Id="InstallDirDlgFolderLabel" Value="Select where you want to install Run:ai CLI"/>
+  <String Id="InstallDirDlgDescription" Value=""/>
+  <String Id="ExitDialogTitle" Overridable="yes" Value="{\WixUI_Font_Title}Completed the [ProductName] Setup Wizard" />
+  <String Id="ExitDialogDescription" Value=""/>
+  <String Id="VerifyReadyDlgInstallText" Value="Click Install to begin installation.\n
+Click Back to review or change any of your installation settings\n.
+Click Cancel to exit the wizard."/>
+
+</WixLocalization>

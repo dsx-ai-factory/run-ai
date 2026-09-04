@@ -1,0 +1,13 @@
+type: object
+additionalProperties: false
+nullable: true
+description: Configuration applied to PVCs that are created and reconciled alongside the workload.
+example:
+  cleanupOnCompletion: true
+properties:
+  cleanupOnCompletion:
+    description: |
+      Delete the workload-owned PVCs when the workload reaches a terminal state.
+      When unset, the cluster default behavior applies.
+    type: boolean
+    nullable: true

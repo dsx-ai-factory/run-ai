@@ -1,0 +1,8 @@
+type: object
+properties:
+  match:
+    description: Requires the value of the field to match the regular expression.
+    type: string
+    nullable: true
+example:
+  match: "^[a-z]*$"

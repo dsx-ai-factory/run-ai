@@ -1,0 +1,112 @@
+parameters:
+  - $ref: "../../../../infra/openapi/docs/parameters/path/AssetId.yaml"
+get:
+  tags:
+    - HostPath
+  parameters:
+    - $ref: "../parameters/query/optional/IncludeUsageInfo.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToProject.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToWorkloadType.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToReplicaType.yaml"
+  summary: Get a hostPath asset.
+  description: Use to retrieve the details of a hostPath datasource by id.
+  operationId: get_host_path_by_id
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_datasources_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - control-plane/assets-service/pkg/services/api_host_path_service_test.go
+    - e2e/src/test/suites/parallel/dataSource/dataSourceUI.test.ts
+    - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
+  x-authorize:
+    resource-type: host-path-assets
+    action: read
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/HostPath/HostPathAsset.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+put:
+  tags:
+    - HostPath
+  summary: Update a hostPath asset.
+  description: Use to update the details of a hostPath datasource by id.
+  operationId: update_host_path_by_id
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_datasources_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - control-plane/assets-service/pkg/services/api_host_path_service_test.go
+    - e2e/src/test/suites/parallel/dataSource/dataSourceUI.test.ts
+    - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
+  x-authorize:
+    resource-type: host-path-assets
+    action: update
+  x-audit: true
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/HostPath/HostPathUpdateRequest.yaml"
+  responses:
+    202:
+      description: Request accepted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/HostPath/HostPathAsset.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+delete:
+  tags:
+    - HostPath
+  summary: Delete a hostPath asset.
+  description: Use to delete a hostPath datasource asset by id.
+  operationId: delete_host_path_by_id
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_datasources_service_test.go
+    - control-plane/assets-service/pkg/services/api_workloads_service_test.go
+    - control-plane/assets-service/pkg/services/api_host_path_service_test.go
+    - e2e/src/test/suites/parallel/dataSource/dataSourceUI.test.ts
+    - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
+  x-authorize:
+    resource-type: host-path-assets
+    action: delete
+  x-audit: true
+  responses:
+    202:
+      $ref: "../../../../infra/openapi/docs/responses/202Accepted.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    412:
+      $ref: "../../../../infra/openapi/docs/responses/412PreconditionFailed.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

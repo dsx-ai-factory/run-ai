@@ -1,0 +1,26 @@
+properties:
+  configMap:
+    description: The name of the ConfigMap resource. (mandatory)
+    type: string
+    minLength: 1
+    maxLength: 253
+    nullable: true
+    pattern: "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$"
+  mountPath:
+    description: Local path within the workload to which the ConfigMap will be mapped to. (mandatory)
+    type: string
+    minLength: 1
+    maxLength: 4096
+    nullable: true
+    pattern: .*
+  subPath:
+    description: Path within the volume from which the container's volume should be mounted.
+    type: string
+    minLength: 1
+    maxLength: 4096
+    nullable: true
+    pattern: .*
+  defaultMode:
+    $ref: "./DefaultMode.yaml"
+nullable: true
+type: object

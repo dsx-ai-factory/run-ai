@@ -1,0 +1,6 @@
+name: key
+in: path
+required: true
+description: The workloads setting key
+schema:
+  $ref: "./workloadsSettingsKeyEnum.yaml"

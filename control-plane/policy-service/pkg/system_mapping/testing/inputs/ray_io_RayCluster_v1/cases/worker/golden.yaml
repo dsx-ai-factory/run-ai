@@ -1,0 +1,37 @@
+apiVersion: ray.io/v1
+kind: RayCluster
+metadata:
+  name: test
+spec:
+  headGroupSpec:
+    template:
+      spec:
+        containers:
+        - image: placeholder-head
+          name: test
+        initContainers:
+        - image: placeholder-head-init
+          name: test
+  workerGroupSpecs:
+  - groupName: test
+    idleTimeoutSeconds: 120
+    maxReplicas: 5
+    minReplicas: 1
+    numOfHosts: 2
+    rayStartParams:
+      num-cpus: "4"
+      num-gpus: "1"
+    replicas: 3
+    template:
+      metadata:
+        annotations:
+          example.com/worker-ann: worker-value
+        labels:
+          ray.io/group: test
+      spec:
+        containers:
+        - image: placeholder-worker
+          name: test
+        initContainers:
+        - image: placeholder-worker-init
+          name: test

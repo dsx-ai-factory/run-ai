@@ -1,0 +1,42 @@
+apiVersion: optimization.nvidia.com/v1alpha1
+kind: ResourceInterface
+metadata:
+  creationTimestamp: "2026-05-10T06:38:29Z"
+  finalizers:
+  - rid.kai.bolt/finalize
+  generation: 1
+  labels:
+    run.ai/resource-interface-group: apps
+    run.ai/resource-interface-kind: ReplicaSet
+    run.ai/resource-interface-updated-at: 2026-05-10T06-35-07Z
+    run.ai/resource-interface-version: v1
+    run.ai/workload-type-id: d733c3dd-0de1-4f9e-9d24-7e9968e4dd3b
+  name: ri-v1-apps-replicaset
+  resourceVersion: "8692"
+  uid: 8731c4cb-4b94-4d21-ade2-33f49ba2d0eb
+spec:
+  optimizationInstructions: {}
+  structureDefinition:
+    rootComponent:
+      kind:
+        group: apps
+        kind: ReplicaSet
+        version: v1
+      name: ""
+status:
+  conditions:
+  - lastTransitionTime: "2026-05-10T06:38:48Z"
+    message: ""
+    reason: CRDExists
+    status: "True"
+    type: CRDExists
+  - lastTransitionTime: "2026-05-10T06:38:48Z"
+    message: ""
+    reason: RBACReady
+    status: "True"
+    type: RBACReady
+  - lastTransitionTime: "2026-05-10T06:38:48Z"
+    message: ""
+    reason: SyncEnabled
+    status: "True"
+    type: SyncEnabled

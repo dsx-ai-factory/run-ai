@@ -1,0 +1,120 @@
+BatchJobTarget:
+  Config:
+    pvcs:
+    - metadata:
+        name: claim-rw
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10M
+        storageClassName: my-storage
+    - metadata:
+        name: access-modes
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        - ReadWriteMany
+        resources:
+          requests:
+            storage: 1G
+    pvcsConfig:
+      cleanupOnCompletion: true
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: pvc
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: pvc
+      name: pvc
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: pvc
+            workloadKind: Workspace
+            workloadName: pvc
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: pvc
+            image: ubuntu
+            name: pvc
+            resources: {}
+            volumeMounts:
+            - mountPath: /path/ro
+              name: pvc
+              readOnly: true
+            - mountPath: /path/rw
+              name: pvc-1
+            - mountPath: /path/access/modes
+              name: pvc-2
+            - mountPath: /path/two
+              name: pvc-3
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+          volumes:
+          - name: pvc
+            persistentVolumeClaim:
+              claimName: claim-existing
+              readOnly: true
+          - name: pvc-1
+            persistentVolumeClaim:
+              claimName: claim-rw
+          - name: pvc-2
+            persistentVolumeClaim:
+              claimName: access-modes
+          - ephemeral:
+              volumeClaimTemplate:
+                metadata: {}
+                spec:
+                  accessModes:
+                  - ReadWriteOnce
+                  resources:
+                    requests:
+                      storage: 1G
+                  storageClassName: my-storage
+            name: pvc-3
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: pvc, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: pvc, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

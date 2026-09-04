@@ -1,0 +1,4 @@
+image: my-llm:latest
+servingPort:
+  container: 80
+  authorizationType: public

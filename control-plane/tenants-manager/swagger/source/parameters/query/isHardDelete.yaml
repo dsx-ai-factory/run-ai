@@ -1,0 +1,5 @@
+name: isHardDelete
+in: query
+description: Boolean indicator for soft/hard delete
+schema:
+  type: boolean

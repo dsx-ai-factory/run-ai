@@ -1,0 +1,15 @@
+# AuthorizationType
+
+## Enum
+
+
+* `AUTHENTICATED_USERS` (value: `"authenticatedUsers"`)
+
+* `AUTHORIZED_USERS` (value: `"authorizedUsers"`)
+
+* `AUTHORIZED_GROUPS` (value: `"authorizedGroups"`)
+
+
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

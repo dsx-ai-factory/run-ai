@@ -1,0 +1,93 @@
+policy:
+  id: test-policy
+  effectiveRules:
+    - field: name
+      specSelector: entireWorkload
+      enforcements:
+        - length: { min: 8 }
+    - field: name
+      specSelector: allContainers
+      enforcements:
+        - length: { min: 5 }
+    - field: image
+      specSelector: appContainerByName
+      selectorParams:
+        containerName: worker
+      enforcements:
+        - options: [redhat]
+    - field: environmentVariables-Name
+      specSelector: allContainers
+      itemSelector: allEnvVars
+      enforcements:
+        - length: { min: 3 }
+    - field: environmentVariables-Name
+      specSelector: allContainers
+      itemSelector: envVarFromConfigMap
+      enforcements:
+        - options: [MY_CONFIG]
+
+  breakdown:
+    fields:
+      name:
+        - specSelectors: [entireWorkload]
+          specRef: metadata.name
+          formatter:
+            builtin: KeyValue
+        - specSelectors: [allContainers]
+          specRef: name
+          formatter:
+            builtin: KeyValue
+      image:
+        - specSelectors: [appContainerByName]
+          specRef: image
+          formatter:
+            builtin: KeyValue
+      environmentVariables-Name:
+        - specSelectors: [allContainers]
+          specRef: name
+          formatter:
+            builtin: KeyValue
+          itemSelectors:
+            allEnvVars:
+              query: "(.env // [])[]"
+            envVarFromConfigMap:
+              query: '(.env // [])[] | select(.valueFrom.configMapKeyRef != null)'
+    specSelectors:
+      entireWorkload:
+        query: "."
+      allContainers:
+        query: |
+          (
+            .spec.template.spec.containers[]?,
+            .spec.template.spec.initContainers[]?
+          )
+          | select(.)
+      appContainerByName:
+        query: |
+          (
+            .spec.template.spec.containers[]?
+          )
+          | select(.name == $ARGS.named.containerName)
+        argsInfo:
+          containerName: string
+
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: my-deployment                  # 13 chars, passes length.min 8
+  spec:
+    template:
+      spec:
+        containers:
+          - name: main-worker            # 11 chars, passes length.min 5
+            env:
+              - name: PATH               # 4 chars, passes length.min 3
+                value: /bin
+              - name: MY_CONFIG          # passes options
+                valueFrom:
+                  configMapKeyRef:
+                    name: cm-x
+                    key: k
+          - name: worker                 # 6 chars, passes length.min 5
+            image: redhat                # passes options [redhat]

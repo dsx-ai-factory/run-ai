@@ -1,0 +1,4 @@
+allOf:
+  - $ref: "../Common/BaseFields.yaml"
+  - $ref: "./DatavolumeCreationFields.yaml"
+  - $ref: "./EnrichmentDataFields.yaml"

@@ -1,0 +1,29 @@
+properties:
+  sourceOfRule:
+    $ref: "./SourceOfRule.yaml"
+  required:
+    description: Whether the field is mandatory. default to false.
+    type: boolean
+    nullable: true
+  canEdit:
+    description: Whether the value of the field is editable. default to true
+    type: boolean
+    nullable: true
+  min:
+    description: The minimum value that the field can be assigned to.
+    type: number
+    nullable: true
+  max:
+    description: The maximum value that the field can be assigned to.
+    type: number
+    nullable: true
+  step:
+    description: The minimal difference between two values the field can be assigned to.
+      For example, min=2, max=3, step=0.25 implies that the values the field can hold
+      are 2, 2.25, 2.5 and 3.
+    type: number
+    nullable: true
+  defaultFrom:
+    $ref: "./DefaultFromRule.yaml"
+nullable: true
+type: object

@@ -1,0 +1,103 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-advice-restart-controller-project
+rules:
+  - apiGroups:
+      - heimdall.nvidia.com
+    resources:
+      - advices
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - restartrequests
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+---
+# Run:AI AdviceRestartController
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-advice-restart-controller
+rules:
+  - apiGroups:
+      - heimdall.nvidia.com
+    resources:
+      - advices
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - restartrequests
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-advice-restart-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-advice-restart-controller
+subjects:
+  - kind: ServiceAccount
+    name: advice-restart-controller
+    namespace: {{ .Release.Namespace }}
+---
+# Workload types monitored by Heimdall. Add new workload CRDs here as they are supported.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-heimdall-workloads
+rules:
+  - apiGroups:
+      - kubeflow.org
+    resources:
+      - pytorchjobs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - distributedworkloads
+      - workloadrunners
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-advice-restart-controller-heimdall-workloads
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-heimdall-workloads
+subjects:
+  - kind: ServiceAccount
+    name: advice-restart-controller
+    namespace: {{ .Release.Namespace }}

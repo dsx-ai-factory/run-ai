@@ -1,0 +1,30 @@
+type: object
+properties:
+  quantityRange:
+    type: object
+    description: >
+      Enforces a Kubernetes resource quantity to fall within the inclusive
+      range [min, max], optionally restricted to increments of `step` starting
+      from `min`. All bounds must be valid Kubernetes quantities such as 100m,
+      1Gi, or 500Mi.
+    nullable: true
+    properties:
+      min:
+        description: Enforces the minimum quantity value of the field.
+        type: string
+        nullable: true
+      max:
+        description: Enforces the maximum quantity value of the field.
+        type: string
+        nullable: true
+      step:
+        description: >
+          Restricts the field value to specific quantity increments starting
+          from `min` (or from 0 when `min` is absent).
+        type: string
+        nullable: true
+example:
+  quantityRange:
+    min: "10Mi"
+    max: "1Gi"
+    step: "500Mi"

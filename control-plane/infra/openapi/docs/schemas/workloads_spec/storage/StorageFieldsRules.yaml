@@ -1,0 +1,26 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+# frontend only
+nullable: true
+properties:
+  configMapVolume:
+    $ref: ./ConfigMapsRules.yaml
+  dataVolume:
+    $ref: ./DataVolumesRules.yaml
+  emptyDirVolume:
+    $ref: ./EmptyDirsRules.yaml
+  git:
+    $ref: ./GitsRules.yaml
+  hostPath:
+    $ref: ./HostPathsRules.yaml
+  nfs:
+    $ref: ./NfssRules.yaml
+  pvc:
+    $ref: ./PvcsRules.yaml
+  s3:
+    $ref: ./S3sRules.yaml
+  secretVolume:
+    $ref: ./SecretsRules.yaml
+type: object

@@ -1,0 +1,3 @@
+description: The specification of a PVC volume.
+$ref: "./NimServicePvcFields.yaml"
+nullable: true

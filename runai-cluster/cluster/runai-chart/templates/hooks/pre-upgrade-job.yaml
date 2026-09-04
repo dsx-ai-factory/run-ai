@@ -1,0 +1,92 @@
+{{- if .Values.helmHooksHandler.enabled }}
+{{- $runai_operator := index .Values "runai-operator" -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pre-upgrade
+  namespace: runai
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "3"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- include "jobAnnotations" . | nindent 4 }}
+  labels:
+    run.ai/hook: pre-upgrade
+    {{- include "jobLabels" . | nindent 4 }}
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      annotations:
+        {{- include "jobAnnotations" . | nindent 8 }}
+      labels:
+        {{- include "jobLabels" . | nindent 8 }}
+        run.ai/hook: pre-upgrade
+    spec:
+      serviceAccountName: {{ .Values.global.serviceAccountName | default "runai-pre-upgrade" }}
+      restartPolicy: Never
+      containers:
+        - name: pre-upgrade
+          image: {{ include "helmHooksHandler.image" . }}
+          imagePullPolicy: {{ .Values.helmHooksHandler.image.pullPolicy }}
+          args:
+            - --pre-upgrade
+            - --control-plane-url={{ include "controlPlane.url" . }}
+            - --control-plane-client-id={{ include "controlPlane.clientID" . }}
+            - --control-plane-client-secret=@/runai/config/client_secret
+            - --control-plane-bootstrap-token={{ .Values.controlPlane.bootstrapToken }}
+            - --cluster-version={{ .Chart.AppVersion }}
+            - --cluster-uid={{ include "cluster.uid" . }}
+            - --cluster-url={{ include "cluster.url" . }}
+            - --custom-ca-enabled={{ .Values.global.customCA.enabled }}
+            - --custom-ca-secret-name={{ .Values.global.customCA.secret.name }}
+            - --custom-ca-secret-key={{ .Values.global.customCA.secret.key }}
+            - --custom-ca-secret-optional={{ .Values.global.customCA.secret.optional }}
+            - --image-registry={{ .Values.global.image.registry }}
+            - --development-headless={{ .Values.development.headless }}
+            - --development-skip-dependency-checks={{ .Values.development.skipDependeciesChecks }}
+            - --disable-infrastructure-metrics-remote-write={{ .Values.global.metrics.disableInfrastructureMetricsRemoteWrite }}
+            {{- if .Values.global.nmc }}
+            - --nmc-enabled={{ .Values.global.nmc.enabled }}
+            - --nmc-remote-cluster-api-server-url={{ .Values.global.nmc.remoteCluster.apiServer.url }}
+            - --nmc-service-account-name={{ .Values.global.serviceAccountName }}
+            - --nmc-allowed-service-accounts={{ include "nmcServiceAccountArgs" . }}
+            {{- end }}
+            - --additional-image-pull-secrets={{ include "additionalImagePullSecretsArg" . }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            {{- toYaml .Values.helmHooksHandler.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /runai/config
+{{- if .Values.global.customCA.enabled }}
+            - mountPath: /etc/ssl/certs/runai-ca.pem
+              name: runai-ca-cert
+              subPath: runai-ca.pem
+{{- end }}
+      imagePullSecrets:{{ include "imagePullSecretList" .| nindent 8 }}
+      volumes:
+        - name: config
+          projected:
+            sources:
+            {{- include "controlPlane.secret.volume" . | nindent 12 }}
+{{- if .Values.global.customCA.enabled }}
+        - secret:
+            items:
+            - key: {{ .Values.global.customCA.secret.key }}
+              path: runai-ca.pem
+            secretName: {{ .Values.global.customCA.secret.name }}
+            optional: {{ .Values.global.customCA.secret.optional }}
+          name: runai-ca-cert
+{{- end }}
+      affinity:{{- include "deploymentAffinity" .| nindent 8 }}
+      tolerations: {{- include "deploymentTolerations" .| nindent 8 }}
+{{- end }}

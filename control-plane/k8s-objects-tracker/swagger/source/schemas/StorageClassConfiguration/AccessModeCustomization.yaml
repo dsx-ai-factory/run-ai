@@ -1,0 +1,12 @@
+description: Controls whether PVC access modes are required and what defaults to apply.
+properties:
+  required:
+    type: boolean
+    description: If true, the accessMode field is mandatory when creating a PVC that uses this storage class.
+    nullable: true
+  default:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/PvcAccessModes.yaml"
+  supportedValues:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/PvcSupportedAccessModes.yaml"
+type: object
+nullable: true

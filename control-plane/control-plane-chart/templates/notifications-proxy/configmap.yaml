@@ -1,0 +1,39 @@
+{{- if .Values.notificationsProxy.enabled }}
+{{- include "common.configMap" (list . .Values.notificationsProxy "control-plane.notificationsProxy.configmap") }}
+{{- end }}
+
+{{- define "control-plane.notificationsProxy.configmap" -}}
+{{- $top := first . }}
+data:
+  LOG_LEVEL: {{ $top.Values.notificationsProxy.config.logLevel | quote }}
+  SERVICE_PORT: {{ $top.Values.notificationsProxy.service.port | quote }}
+  SERVICE_NAME: {{ $top.Values.notificationsProxy.name | quote }}
+  TRACING_ENABLED: {{ if hasKey $top.Values.notificationsProxy.config "tracingEnabled" }}{{ $top.Values.notificationsProxy.config.tracingEnabled | quote }}{{ else }}{{ $top.Values.global.config.tracingEnabled | quote }}{{ end }}
+  AUDIT_ENABLED: {{ if hasKey $top.Values.notificationsProxy.config "auditEnabled" }}{{ $top.Values.notificationsProxy.config.auditEnabled | quote }}{{ else }}{{ $top.Values.global.config.auditEnabled | quote }}{{ end }}
+  AUDIT_ENABLE_PRINT_TO_STDOUT: {{ if hasKey $top.Values.notificationsProxy.config "auditEnablePrintToStdout" }}{{ $top.Values.notificationsProxy.config.auditEnablePrintToStdout | quote }}{{ else }}{{ $top.Values.global.config.auditEnablePrintToStdout | quote }}{{ end }}
+  AUDIT_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.auditService.name ($top.Values.auditService.service.port | toString) | quote }}
+  DB_NAME: {{ $top.Values.notificationsProxy.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_HOST: {{ $top.Values.notificationsProxy.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SSL_MODE: {{ $top.Values.notificationsProxy.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_PORT: {{ $top.Values.notificationsProxy.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  DB_SCHEMA: {{ $top.Values.notificationsProxy.config.dbScheme | default "notifications_proxy" | quote }}
+  PUBSUB_URL: {{ $top.Values.global.pubsub.url | quote }}
+  PUBSUB_TYPE: {{ $top.Values.global.pubsub.type | quote }}
+  PUBSUB_ENABLE_ADDITIONAL_SUBSCRIBER: {{ $top.Values.global.pubsub.additionalSubscriber.enabled | quote }}
+  {{- if $top.Values.global.pubsub.additionalSubscriber.enabled }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_TYPE: {{ $top.Values.global.pubsub.additionalSubscriber.type | quote }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_URL: {{ $top.Values.global.pubsub.additionalSubscriber.url | quote }}
+  {{- end }}
+  {{- $cacheEnabled := $top.Values.notificationsProxy.config.cacheEnabled | default false }}
+  CACHE_ENABLED: {{ $cacheEnabled | quote }}
+  {{- if eq (toString $cacheEnabled) "true" }}
+  CACHE_URL: {{ $top.Values.global.cache.url | quote }}
+  CACHE_READ_URL: {{ $top.Values.global.cache.readUrl | quote }}
+  CACHE_TYPE: {{ $top.Values.global.cache.type | quote }}
+  {{- end }}
+  NOTIFY_CONFIG_URL: {{ $top.Values.notificationsProxy.config.notificationConfigUrl | default (printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.notificationsService.name (toString $top.Values.notificationsService.config.app.api_port)) | quote }}
+  RUNAI_ENV_DOMAIN: {{ ($top.Values.notificationsProxy.config.hostTemplate) |  default (printf "https://%s" ( $top.Values.global.domain)) }}
+  NOTIFY_URL: {{ $top.Values.notificationsProxy.config.notifyClient.notifyUrl | quote }}
+  CONFIG_URL: {{ $top.Values.notificationsProxy.config.notifyClient.configUrl | quote }}
+  MULTI_TENANCY_ENABLED: {{ $top.Values.global.multiTenancy.enabled | quote }}
+{{- end }}

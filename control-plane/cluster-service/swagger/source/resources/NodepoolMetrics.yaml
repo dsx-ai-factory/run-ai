@@ -1,0 +1,45 @@
+get:
+  summary: Get the node pool metrics data.
+  description: Retrieve the node pool metrics data by Universally Unique Identifier (UUID).
+  operationId: get_nodepool_metrics
+  x-service: cluster-service
+  x-test-coverage:
+    - e2e/src/test/suites/metricsSuite/metricsApi.test.ts
+  x-authorize:
+    resource-type: nodepools
+    action: read
+  tags:
+    - NodePools
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/path/NodepoolPath.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/StartRequired.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/EndRequired.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/NumberOfSamples.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/MetricsType.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/schemas/metrics/MetricsResponse.yaml'
+        text/csv: { }
+    207:
+      description: Partial success.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/schemas/metrics/MetricsResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

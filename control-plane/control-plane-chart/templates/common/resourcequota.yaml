@@ -1,0 +1,19 @@
+{{- if .Values.resourceQuota.enabled }}
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: {{ .Values.resourceQuota.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  hard:
+    pods: {{ .Values.resourceQuota.hardLimit.pods | quote }}
+  scopeSelector:
+    matchExpressions:
+      - operator: In
+        scopeName: PriorityClass
+        values:
+        {{- range .Values.resourceQuota.scopeSelector.priorityClasses }}
+          - {{ . | quote }}
+        {{- end }}
+{{- end }}
+

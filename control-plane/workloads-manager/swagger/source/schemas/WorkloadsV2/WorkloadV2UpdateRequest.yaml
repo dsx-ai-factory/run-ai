@@ -1,0 +1,8 @@
+type: object
+properties:
+  metadata:
+    $ref: "./WorkloadV2MetadataUpdateParams.yaml"
+  manifest:
+    $ref: "./Manifest.yaml"
+  manifestBase64Encoded:
+    $ref: "./ManifestEncoded.yaml"

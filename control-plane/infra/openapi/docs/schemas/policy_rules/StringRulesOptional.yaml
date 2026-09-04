@@ -1,0 +1,15 @@
+properties:
+  sourceOfRule:
+    $ref: "./SourceOfRule.yaml"
+  canEdit:
+    description: Whether the value of the field is editable, default to true
+    type: boolean
+    nullable: true
+  options:
+    description: Set of options that the value of the field must be chosen from.
+    type: array
+    items:
+      $ref: "./StringOption.yaml"
+    nullable: true
+nullable: true
+type: object

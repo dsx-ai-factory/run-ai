@@ -1,0 +1,8 @@
+name: includeAncestors
+in: query
+description: include resources of both requested scope, and its ancestors. for example,
+  if project scope is requested with includeAncestors=true, department and cluster scoped
+  assets will be included in the response.
+schema:
+  type: boolean
+required: false

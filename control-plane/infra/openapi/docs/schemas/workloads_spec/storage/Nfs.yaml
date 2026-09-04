@@ -1,0 +1,33 @@
+properties:
+  path:
+    description: Path that is exported by the NFS server (mandatory). 
+      For more information, see [NFS](https://kubernetes.io/docs/concepts/storage/volumes#nfs).
+    type: string
+    minLength: 1
+    maxLength: 4096
+    example: /container/nfs
+    nullable: true
+    pattern: .*
+  readOnly:
+    description: Force the NFS export to be mounted with read-only permissions.
+    type: boolean
+    default: true
+    nullable: true
+  server:
+    description: The hostname or IP address of the NFS server. (mandatory)
+    type: string
+    minLength: 1
+    maxLength: 253
+    example: my.nfs.com
+    nullable: true
+    pattern: .*
+  mountPath:
+    description: The path that the NFS volume will be mounted to when in use. (mandatory)
+    type: string
+    minLength: 1
+    maxLength: 4096
+    example: /local/nfs
+    nullable: true
+    pattern: .*
+nullable: true
+type: object

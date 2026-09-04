@@ -1,0 +1,131 @@
+{{- $installGRPCForwarder := false -}}
+
+{{- if .Values.thanos.query.stores }}
+  {{- range $store := .Values.thanos.query.stores }}
+    {{- if (contains "port-forwarder" $store ) }}
+      {{- $installGRPCForwarder = true}}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- if $installGRPCForwarder }}
+## Optional gRPC port-forwarder used on OpenShift to expose the cluster's existing Thanos querier as an additional store.
+## When enabled it lets the in-cluster Thanos federate with an external (e.g. customer-managed) Thanos instance over gRPC,
+## so historical metrics from both stores remain queryable.
+kind: Service
+apiVersion: v1
+metadata:
+  name: thanos-querier-grpc
+  namespace: openshift-monitoring
+spec:
+  ports:
+    - name: grpc
+      protocol: TCP
+      port: 10901
+      targetPort: 10901
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/component: query-layer
+    app.kubernetes.io/instance: thanos-querier
+    app.kubernetes.io/name: thanos-query
+    app.kubernetes.io/part-of: openshift-monitoring
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: thanos-grpc-port-forwarder
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: thanos-grpc-port-forwarder
+  template:
+    metadata:
+      labels:
+        name: thanos-grpc-port-forwarder
+    spec:
+      serviceAccountName: thanos-port-forwarder
+      restartPolicy: Always
+      containers:
+        - name: kubectl
+          image: {{ .Values.global.image.registry }}/kubectl:1.25
+          command:
+            - kubectl
+            - port-forward
+            - --namespace=openshift-monitoring
+            - svc/thanos-querier-grpc
+            - "--address=0.0.0.0"
+            - "10901:10901"
+          ports:
+            - containerPort: 10901
+              protocol: TCP
+          imagePullPolicy: IfNotPresent
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: thanos-grpc-port-forwarder
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+    - protocol: TCP
+      port: 10901
+      targetPort: 10901
+  type: ClusterIP
+  selector:
+    name: thanos-grpc-port-forwarder
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: thanos-port-forwarder
+  namespace: openshift-monitoring
+rules:
+  - verbs:
+      - get
+      - watch
+      - list
+    apiGroups:
+      - ''
+    resources:
+      - services
+  - verbs:
+      - get
+      - watch
+      - list
+    apiGroups:
+      - ''
+    resources:
+      - pods
+  - verbs:
+      - get
+      - watch
+      - list
+      - create
+      - update
+    apiGroups:
+      - ''
+    resources:
+      - pods/portforward
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: thanos-port-forwarder
+  namespace: {{ .Release.Namespace }}
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: thanos-port-forwarder
+  namespace: openshift-monitoring
+subjects:
+  - kind: ServiceAccount
+    name: thanos-port-forwarder
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: thanos-port-forwarder
+{{- end }}

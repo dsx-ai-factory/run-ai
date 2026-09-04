@@ -1,0 +1,7 @@
+name: departmentId
+in: query
+description: Filter using the department id.
+required: false
+schema:
+  type: string
+  example: "1"

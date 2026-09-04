@@ -1,0 +1,103 @@
+AuditLog:
+  type: object
+  required:
+    - tenant_id
+    - subject
+    - subject_type
+    - action
+    - result
+  properties:
+    id:
+      type: string
+      format: uuid
+      maxLength: 40
+    timestamp:
+      type: string
+      format: date-time
+      example: '2022-01-01T03:49:52.531Z'
+    tenant_id:
+      type: string
+      description: the ID of the tenant
+      example: 12345
+    subject:
+      type: string
+      maxLength: 500
+      minLength: 1
+      description: the user/app which triggered this API
+      example: researcher@run.ai
+    subject_type:
+      type: string
+      enum:
+        - User
+        - App
+      default: User
+    source_ip:
+      type: string
+      format: ipv4
+      maxLength: 250
+    action:
+      type: string
+      enum:
+        - create
+        - update
+        - delete
+        - sign-in
+        - sign-out
+        - reset-password
+    http_method:
+      type: string
+      enum:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - CREATE
+    url:
+      type: string
+      format: uri
+      maxLength: 2000
+    entity_type:
+      type: string
+      example: project
+      maxLength: 500
+    entity_name:
+      type: string
+      example: project-1
+    entity_id:
+      type: string
+      example: '1234'
+    result:
+      type: string
+      enum:
+        - Succeeded
+        - Failed
+    http_status_code:
+      type: integer
+      example: 200
+      maximum: 599
+    cluster_name:
+      type: string
+      example: 'my favorite cluster'
+      maxLength: 500
+    cluster_id:
+      type: string
+      format: uuid
+      maxLength: 40
+    request_id:
+      type: string
+      format: uuid
+      example: "bb0c4742-e52f-4d5e-bfee-2c4ff57c339c"
+      maxLength: 40
+    metadata:
+      type: object
+      maxProperties: 10
+      additionalProperties:
+        type: string
+
+AuditLogs:
+  type: array
+  items:
+    $ref: '#/AuditLog'
+  x-schema-name: AuditLog
+

@@ -1,0 +1,114 @@
+DistributedTarget:
+  Config: {}
+  Framework: PyTorch
+  JaxJob: null
+  MasterSpec: null
+  MpiJob: null
+  ObjectMeta: null
+  PyTorchJob:
+    apiVersion: kubeflow.org/v1
+    kind: PyTorchJob
+    metadata:
+      annotations:
+        run.ai/auto-delete-after-completion-sec: "864000"
+        run.ai/submitted-by: tester
+      labels:
+        app: pytorchjob
+        createdBy: PyTorchJob
+        project: test
+        release: basic
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: basic
+      name: basic
+      namespace: runai-test
+    spec:
+      nprocPerNode: "1"
+      pytorchReplicaSpecs:
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                gpu-fraction: "0.5"
+                gpu-fraction-num-devices: "1"
+                user: tester
+              labels:
+                app: pytorchjob
+                createdBy: PyTorchJob
+                project: test
+                release: basic
+                workloadKind: Distributed
+                workloadName: basic
+            spec:
+              containers:
+              - args:
+                - -x
+                - my-script.py
+                command:
+                - python-3.8
+                env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: basic
+                - name: HOME
+                  value: /home/my-folder
+                image: ubuntu
+                name: pytorch
+                resources: {}
+                securityContext:
+                  runAsNonRoot: true
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /local/directory
+                  name: host-path-worker
+                  readOnly: true
+                - mountPath: /local/nfs
+                  name: nfs-worker
+                  readOnly: true
+                workingDir: /home/my-folder
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - hostPath:
+                  path: /container/directory
+                name: host-path-worker
+              - name: nfs-worker
+                nfs:
+                  path: /container/nfs
+                  server: my.nfs.com
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: None
+        ttlSecondsAfterFinished: 864000
+    status: {}
+  RunPolicy: null
+  TFJob: null
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: PyTorchJob
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-basic/, Framework: PyTorch'
+  images:
+  - ubuntu
+  name: 'basic/, Framework: PyTorch'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

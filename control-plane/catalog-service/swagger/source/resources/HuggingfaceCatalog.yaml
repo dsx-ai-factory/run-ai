@@ -1,0 +1,31 @@
+get:
+  summary: Search Hugging Face models.
+  x-internal: true
+  description: Proxy to the Hugging Face catalog search API.
+  operationId: search_hugging_face_catalog
+  x-service: catalog-service
+  x-test-coverage:
+    - control-plane/catalog-service/pkg/services/api_inferences_service_test.go
+    - control-plane/catalog-service/pkg/services/huggingface/huggingface_info_test.go
+  x-authorize:
+    resource-type: inferences
+    action: create
+  tags:
+    - Inferences
+  parameters:
+    - $ref: "../parameters/query/optional/HuggingFaceSearchQuery.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/huggingface/HuggingFaceModelSearchResults.yaml"
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

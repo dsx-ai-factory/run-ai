@@ -1,0 +1,11 @@
+# local files
+.local/
+
+# output files
+out/
+
+# compiled binaries
+bin/
+/resource-rec
+/workload-submitter
+/extract-vpa-recommendations

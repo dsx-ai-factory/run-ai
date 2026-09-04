@@ -1,0 +1,12 @@
+apiVersion: run.ai/v1
+kind: RemoteConfig
+metadata:
+  labels:
+    app.kubernetes.io/name: remoteconfig
+    app.kubernetes.io/instance: remoteconfig-sample
+    app.kubernetes.io/part-of: operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: operator
+  name: remoteconfig-sample
+spec:
+  # TODO(user): Add fields here

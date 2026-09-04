@@ -1,0 +1,7 @@
+type: object
+description: List of field groups.
+properties:
+  items:
+    type: array
+    items:
+      $ref: "./FieldGroup.yaml"

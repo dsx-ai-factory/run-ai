@@ -1,0 +1,14 @@
+{{- if .Values.workloadsManager.enabled }}
+{{- include "common.deployment" (list . .Values.workloadsManager .Values.workloadsManager.autoscaling .Values.workloadsManager.serviceAccount "control-plane.workloadsManager.deployment" ) }}
+{{- end }}
+
+{{- define "control-plane.workloadsManager.deployment" -}}
+spec:
+  template:
+    spec:
+      initContainers:
+        {{- include "awaitingPostgresReadinessContainer" . | nindent 8 }}
+        {{- include "common.initContainer" . | nindent 8 }}
+      containers:
+      - {{- include "common.container" . | nindent 8 }}
+{{- end }}

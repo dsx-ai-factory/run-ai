@@ -1,0 +1,49 @@
+openapi: 3.0.3
+info:
+  version: 0.0.1
+  title: Notifications Service Notify API
+  description: API for notifications-service events listener endpoint
+tags:
+  - name: notify
+    description: Notify API
+paths:
+  /notify:
+    post:
+      tags:
+        - notify
+      operationId: notify
+      description: creates an event to be notify
+      
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./api_objects/schemas/Notification.yaml"
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkRequest.yaml"
+        '400':
+          $ref: "./api_objects/responses/BadRequest.yaml"
+        '429':
+          $ref: "./api_objects/responses/QueueIsFull.yaml"
+  /notify_batch:
+    post:
+      tags:
+        - notify
+      operationId: notifyBatch
+      description: creates a batch of events to be notified
+      
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./api_objects/schemas/Notifications.yaml"
+      responses:
+        '200':
+          $ref: "./api_objects/responses/OkNotifyBatchResponse.yaml"
+        '400':
+          $ref: "./api_objects/responses/BadRequest.yaml"
+        '429':
+          $ref: "./api_objects/responses/QueueIsFull.yaml"

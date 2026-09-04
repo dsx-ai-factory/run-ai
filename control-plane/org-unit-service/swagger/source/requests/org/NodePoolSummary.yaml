@@ -1,0 +1,29 @@
+get:
+  summary: Get org units summary per nodepool
+  operationId: orgs_node_pool_summary
+  x-service: org-unit-service
+  x-no-authorization: true
+  x-internal: true
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/org_unit_test.go
+  tags:
+    - Org unit
+  parameters:
+    - $ref: "../../parameters/NodepoolId.yaml"
+    - $ref: "../../parameters/NodepoolSummaryType.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - orgUnitsNodepoolSummary
+            properties:
+              orgUnitsNodepoolSummary:
+                $ref: '../../schemas/OrgUnitsNodepoolSummary.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

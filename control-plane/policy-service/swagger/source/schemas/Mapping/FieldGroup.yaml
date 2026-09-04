@@ -1,0 +1,77 @@
+type: object
+description: >-
+  A field group: a named bundle of policy-controllable fields. Each field
+  references a formatter (or a direct specRef) plus optional item selectors. The
+  field group also defines its own item selectors, which are JQ queries that
+  filter items of an itemized field.
+required:
+  - name
+properties:
+  name:
+    $ref: "./FieldGroupName.yaml"
+  description:
+    $ref: "./MappingDescriptionOptional.yaml"
+  fields:
+    $ref: "./FieldGroupFieldsWithScope.yaml"
+  itemSelectors:
+    $ref: "./ItemSelectorsWithScope.yaml"
+
+  id:
+    $ref: "./FieldGroupId.yaml"
+  scope:
+    $ref: "./MappingScope.yaml"
+
+  createdBy:
+    description: The identifier of the user who created the field group.
+    type: string
+    minLength: 1
+  createdAt:
+    description: The time at which the field group was created.
+    type: string
+    minLength: 1
+    format: date-time
+  updatedBy:
+    description: The identifier of the user who last updated the field group.
+    type: string
+    minLength: 1
+  updatedAt:
+    description: The time at which the field group was last updated.
+    type: string
+    minLength: 1
+    format: date-time
+
+example:
+  id: d0eb98d0-9c23-4294-9b12-f13672251c33
+  scope: tenant
+  createdBy: someone
+  createdAt: 2025-01-03T11:22:33.000Z
+  updatedBy: someone.else
+  updatedAt: 2025-01-05T12:34:56.000Z
+  name: podSpec
+  description: fields of a pod spec
+  fields:
+    ports:
+      formatter: podSpec
+      description: ports of a pod
+      scope: tenant
+    ports-Name:
+      formatter: KeyValue
+      specRef: name
+      type: string
+      itemSelectors:
+        - allPorts
+        - portsByContainerPort
+      scope: system
+  itemSelectors:
+    allPorts:
+      description: All the ports.
+      query: (.ports // [])[]
+      scope: system
+    portsByContainerPort:
+      description: Ports by container port.
+      query:
+        (.ports // [])[]
+        | select(.containerPort == $ARGS.named.containerPort)
+      argsInfo:
+        containerPort: integer
+      scope: system

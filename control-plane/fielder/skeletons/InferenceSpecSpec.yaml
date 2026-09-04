@@ -1,0 +1,3 @@
+allOf:
+  - replace: me
+  - $ref: "../workloads_spec/inferences/InferenceFields.yaml"

@@ -1,0 +1,13 @@
+type: object
+required:
+  - name
+  - clusterUuid
+properties:
+  name:
+    type: string
+    description: The node name
+  clusterUuid:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml'
+  networkTopologyLabelValues:
+    $ref: '../../../../../infra/openapi/docs/schemas/resources/NetworkTopologyLabelValuesOptional.yaml'
+x-schema-name: NodeInternal

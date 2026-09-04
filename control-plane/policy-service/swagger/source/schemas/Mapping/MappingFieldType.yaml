@@ -1,0 +1,16 @@
+description: The data type of the field.
+type: string
+enum:
+  - string
+  - boolean
+  - integer
+  - number
+  - quantity
+  - ipaddress
+  - integers
+  - numbers
+  - strings
+  - namesArray
+  - object
+
+

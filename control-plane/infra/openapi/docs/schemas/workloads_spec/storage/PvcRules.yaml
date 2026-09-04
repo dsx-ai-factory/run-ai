@@ -1,0 +1,11 @@
+properties:
+  claimName:
+    $ref: "../../policy_rules/StringRules.yaml"
+  path:
+    $ref: "../../policy_rules/StringRules.yaml"
+  readOnly:
+    $ref: "../../policy_rules/BooleanRules.yaml"
+  claimInfo:
+    $ref: "./ClaimInfoRules.yaml"
+nullable: true
+type: object

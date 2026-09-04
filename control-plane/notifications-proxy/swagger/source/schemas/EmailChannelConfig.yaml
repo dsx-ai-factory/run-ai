@@ -1,0 +1,5 @@
+type: object
+required:
+  - smtpHost
+allOf:
+  - $ref: "./EmailNotificationChannelConfig.yaml"

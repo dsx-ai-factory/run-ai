@@ -1,0 +1,49 @@
+#path
+RoleIdPath:
+  $ref: "./path/RoleIdPath.yaml"
+PermissionSetId:
+  $ref: "./path/PermissionSetId.yaml"
+AccessRuleId:
+  $ref: "./path/AccessRuleId.yaml"
+AuthorizationSettingsKey:
+  $ref: "./path/AuthorizationSettingsKey.yaml"
+ClusterUuid:
+  $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+#query
+SubjectIds:
+  $ref: "./query/SubjectIds.yaml"
+Limit:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml"
+Offset:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml"
+LastUpdated:
+  $ref: "./query/LastUpdated.yaml"
+IncludeDeleted:
+  $ref: "./query/IncludeDeleted.yaml"
+IncludeInternal:
+  $ref: "./query/IncludeInternal.yaml"
+SubjectType:
+  $ref: "./query/SubjectType.yaml"
+SubjectId:
+  $ref: "./query/SubjectId.yaml"
+ScopeId:
+  $ref: "./query/ScopeId.yaml"
+DepartmentIds:
+  $ref: "./query/DepartmentIds.yaml"
+ProjectIds:
+  $ref: "./query/ProjectIds.yaml"
+Roles:
+  $ref: "./query/Roles.yaml"
+FilterByCluster:
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml"
+SubjectTypeOptional:
+  $ref: "./query/SubjectTypeOptional.yaml"
+ScopeIdOptional:
+  $ref: "./query/ScopeIdOptional.yaml"
+AccessRulesFilter:
+  $ref: "./query/AccessRulesFilter.yaml"
+SortOrder: 
+  $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+AccessRulesSort: 
+   $ref: "./query/AccessRulesSort.yaml"  
+

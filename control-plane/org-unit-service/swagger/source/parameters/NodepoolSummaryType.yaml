@@ -1,0 +1,7 @@
+name: nodepoolSummaryType
+in: query
+required: true
+description: Specify which summary to request.
+example: positiveQuota
+schema:
+  $ref: '../schemas/OrgUnitsNodepoolSummaryType.yaml'

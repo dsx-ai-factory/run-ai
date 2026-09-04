@@ -1,0 +1,1993 @@
+openapi: 3.0.3
+info:
+  description: An API for managing tenants objects and their associated resources.
+  title: Tenant Management
+  version: "1.0"
+servers:
+- url: http://localhost:8080
+security:
+- bearerAuth: []
+paths:
+  /:
+    get:
+      description: health check
+      operationId: health
+      responses:
+        "200":
+          description: Executed successfully.
+      summary: health check
+      tags:
+      - health
+      x-service: tenants-manager
+      x-no-authorization: true
+    x-internal: true
+  /api/v1/tenants:
+    get:
+      description: Retrieve a list of tenants and their details.
+      operationId: get_tenants
+      parameters:
+      - description: Include soft-deleted tenants in the response when `true`.
+        explode: true
+        in: query
+        name: deleted
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
+      - description: Filter tenants by name
+        explode: true
+        in: query
+        name: name
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Filter tenants by alias
+        explode: true
+        in: query
+        name: alias
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenants'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get a list of tenants.
+      tags:
+      - Tenant
+      x-service: tenants-manager
+      x-test-coverage:
+      - e2e/src/test/suites/sphinxSuite/tenant.test.ts
+      x-authorize:
+        resource-type: tenant
+        action: read
+    post:
+      operationId: create_tenant
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantCreationRequest'
+        description: The tenant to create.
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantCreationResponse'
+          description: Created
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "409":
+          content:
+            application/json:
+              example:
+                code: 409
+                message: Resource with this name already exists
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource already exists
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create tenant
+      tags:
+      - Tenant
+      x-service: tenants-manager
+      x-test-coverage:
+      - e2e/src/test/suites/sphinxSuite/tenant.test.ts
+      x-authorize:
+        resource-type: tenant
+        action: create
+    x-scope:
+    - system
+  /api/v1/tenants/{tenantId}:
+    delete:
+      operationId: delete_tenant_by_id
+      parameters:
+      - description: The id of the tenant to retrieve
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          format: int32
+          minimum: 0
+          type: integer
+        style: simple
+      - description: Boolean indicator for soft/hard delete
+        explode: true
+        in: query
+        name: isHardDelete
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/delete_tenant_by_id_200_response'
+          description: tenant uid that was deleted.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: soft/hard delete tenant
+      tags:
+      - Tenant
+      x-service: tenants-manager
+      x-test-coverage:
+      - e2e/src/test/suites/sphinxSuite/delete_scripts/deleteScript.test.ts
+      x-authorize:
+        resource-type: tenant
+        action: delete
+        resource-id: tenantId
+    get:
+      operationId: get_tenant_by_id
+      parameters:
+      - description: The id of the tenant to retrieve
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          format: int32
+          minimum: 0
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get tenant
+      tags:
+      - Tenant
+      x-service: tenants-manager
+      x-test-coverage:
+      - e2e/src/test/suites/sphinxSuite/tenantCreation.test.ts
+      x-authorize:
+        resource-type: tenant
+        action: read
+        resource-id: tenantId
+    patch:
+      description: Update tenant properties such as alias.
+      operationId: update_tenant_by_id
+      parameters:
+      - description: The id of the tenant to retrieve
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          format: int32
+          minimum: 0
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantUpdateRequest'
+        description: The tenant properties to update.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+          description: Tenant updated successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "409":
+          content:
+            application/json:
+              example:
+                code: 409
+                message: Resource with this name already exists
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource already exists
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Update tenant
+      tags:
+      - Tenant
+      x-service: tenants-manager
+      x-test-coverage: not-applicable
+      x-authorize:
+        resource-type: tenant
+        action: update
+        resource-id: tenantId
+    x-scope:
+    - system
+  /internal/management/api/v1/tenants:
+    get:
+      operationId: management_get_tenants_internal
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenants'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get tenants list internal
+      tags:
+      - internal
+      x-service: tenants-manager
+      x-test-coverage: not-applicable
+      x-no-authorization: true
+    x-internal: true
+  /internal/api/v1/tenants:
+    get:
+      operationId: get_tenant
+      parameters:
+      - description: The name of the tenant to retrieve
+        explode: true
+        in: query
+        name: tenantName
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get tenant
+      tags:
+      - tenants
+      x-service: tenants-manager
+      x-test-coverage:
+      - src/test/suites/tenantSuite/tenantUserApi/tenantSystemApi.test.ts
+      x-no-authorization: true
+    post:
+      operationId: create_tenant_internal
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantCreationRequest'
+        description: The tenant to create.
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantCreationResponse'
+          description: Created
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "409":
+          content:
+            application/json:
+              example:
+                code: 409
+                message: Resource with this name already exists
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource already exists
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Create tenant
+      tags:
+      - tenants
+      x-service: tenants-manager
+      x-test-coverage:
+      - e2e/src/test/suites/sphinxSuite/tenant.test.ts
+      x-no-authorization: true
+    x-internal: true
+  /internal/api/v1/tenants/{tenantId}:
+    delete:
+      operationId: delete_tenant_by_id_internal
+      parameters:
+      - description: The id of the tenant to retrieve
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          format: int32
+          minimum: 0
+          type: integer
+        style: simple
+      - description: Boolean indicator for soft/hard delete
+        explode: true
+        in: query
+        name: isHardDelete
+        required: false
+        schema:
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/delete_tenant_by_id_200_response'
+          description: tenant uid that was deleted.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: soft/hard delete tenant
+      tags:
+      - tenants
+      x-service: tenants-manager
+      x-test-coverage: not-applicable
+      x-no-authorization: true
+    get:
+      operationId: get_tenant_by_id_internal
+      parameters:
+      - description: The id of the tenant to retrieve
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          format: int32
+          minimum: 0
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get tenant by id
+      tags:
+      - tenants
+      x-service: tenants-manager
+      x-test-coverage: not-applicable
+      x-no-authorization: true
+    x-internal: true
+  /internal/api/v1/tenants/resolve:
+    get:
+      operationId: get_tenant_by_name_or_alias
+      parameters:
+      - description: The name or alias of the tenant to resolve
+        explode: true
+        in: query
+        name: tenantName
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+          description: Tenant found
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get tenant by name or alias
+      tags:
+      - Internal
+      x-service: tenants-manager
+      x-test-coverage: not-applicable
+      x-no-authorization: true
+    x-internal: true
+  /internal/api/v1/tenants/{tenantId}/domain:
+    get:
+      operationId: get_tenant_domain
+      parameters:
+      - description: The id of the tenant to retrieve
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          format: int32
+          minimum: 0
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                format: byte
+                type: string
+              x-default: true
+          description: Tenant domain
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get tenant domain
+      tags:
+      - Internal
+      x-service: tenants-manager
+      x-test-coverage:
+      - /runai/control-plane/tenants-manager/pkg/services/api_tenant_service_test.go
+      x-no-authorization: true
+    x-internal: true
+  /api/v1/logo:
+    get:
+      deprecated: true
+      description: Retrieve the base64 logo file. This endpoint is deprecated and
+        will be removed in a future release. Use GET /api/v1/branding/settings/logo
+        instead.
+      operationId: get_tenant_logo
+      parameters:
+      - description: If exists will return the relevant resource for the tenant ID
+        example: "1008"
+        explode: true
+        in: query
+        name: tenantId
+        required: false
+        schema:
+          default: ""
+          type: string
+        style: form
+        x-scope:
+        - system
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_tenant_logo_200_response'
+          description: Tenant logo (PNG or SVG).
+        "204":
+          description: No Content.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get tenant logo. (base64)
+      tags:
+      - Logo
+      x-test-coverage:
+      - src/test/suites/tenantSuite/tenantUserApi/tenantSystemApi.test.ts
+      x-service: tenants-manager
+      x-no-authorization: true
+    post:
+      deprecated: true
+      description: Use to upload a base64 logo file (PNG or SVG). Max size 128kb.
+        This endpoint is deprecated and will be removed in a future release. Use PUT
+        /api/v1/branding/settings/logo instead.
+      operationId: upload_tenant_logo
+      parameters:
+      - description: If exists will return the relevant resource for the tenant ID
+        example: "1008"
+        explode: true
+        in: query
+        name: tenantId
+        required: false
+        schema:
+          default: ""
+          type: string
+        style: form
+        x-scope:
+        - system
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoCreationRequest'
+      responses:
+        "200":
+          description: Logo uploaded.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "413":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Request entity too large
+        "415":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unsupported media type
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Upload logo for tenant. (base64)
+      tags:
+      - Logo
+      x-test-coverage:
+      - src/test/suites/tenantSuite/tenantUserApi/tenantSystemApi.test.ts
+      x-service: tenants-manager
+      x-authorize:
+        resource-type: branding-settings
+        action: update
+      x-audit: true
+    x-scope:
+    - system
+    - tenant
+  /internal/api/v1/tenants/{tenantId}/metric-store:
+    get:
+      operationId: get_tenant_metric_store
+      parameters:
+      - description: The id of the tenant to retrieve
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          format: int32
+          minimum: 0
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricStore'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get tenant Metric Store
+      tags:
+      - Internal
+      x-service: tenants-manager
+      x-test-coverage: not-applicable
+      x-no-authorization: true
+  /internal/api/v1/tenants/{tenantId}/extended-metric-store:
+    get:
+      operationId: get_tenant_extended_metric_store
+      parameters:
+      - description: The id of the tenant to retrieve
+        explode: false
+        in: path
+        name: tenantId
+        required: true
+        schema:
+          format: int32
+          minimum: 0
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtendedMetricStore'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get tenant Metric Store with type and datasouce id
+      tags:
+      - Internal
+      x-service: tenants-manager
+      x-test-coverage: not-applicable
+      x-no-authorization: true
+  /internal/api/v1/logos:
+    get:
+      operationId: get_all_logos
+      parameters:
+      - description: Number of logos to skip (default 0)
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          format: int32
+          minimum: 0
+          type: integer
+        style: form
+      - description: "Maximum number of logos to return (default 50, max 100)"
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantLogosResponse'
+          description: List of tenant logos for the requested page.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get all tenant logos (paginated)
+      tags:
+      - Internal
+      x-service: tenants-manager
+      x-test-coverage:
+      - api/internal/service/api_internal_service_test.go
+      x-no-authorization: true
+    x-internal: true
+components:
+  parameters:
+    deleted:
+      description: Include soft-deleted tenants in the response when `true`.
+      explode: true
+      in: query
+      name: deleted
+      required: false
+      schema:
+        default: false
+        type: boolean
+      style: form
+    filterByName:
+      description: Filter tenants by name
+      explode: true
+      in: query
+      name: name
+      required: false
+      schema:
+        type: string
+      style: form
+    filterByAlias:
+      description: Filter tenants by alias
+      explode: true
+      in: query
+      name: alias
+      required: false
+      schema:
+        type: string
+      style: form
+    tenantId:
+      description: The id of the tenant to retrieve
+      explode: false
+      in: path
+      name: tenantId
+      required: true
+      schema:
+        format: int32
+        minimum: 0
+        type: integer
+      style: simple
+    isHardDelete:
+      description: Boolean indicator for soft/hard delete
+      explode: true
+      in: query
+      name: isHardDelete
+      required: false
+      schema:
+        type: boolean
+      style: form
+    tenantName:
+      description: The name of the tenant to retrieve
+      explode: true
+      in: query
+      name: tenantName
+      required: true
+      schema:
+        type: string
+      style: form
+    tenantId-2:
+      description: If exists will return the relevant resource for the tenant ID
+      example: "1008"
+      explode: true
+      in: query
+      name: tenantId
+      required: false
+      schema:
+        default: ""
+        type: string
+      style: form
+      x-scope:
+      - system
+  responses:
+    "400BadRequest":
+      content:
+        application/json:
+          example:
+            code: 400
+            message: Required parameter is missing
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Bad request.
+    "401Unauthorized":
+      content:
+        application/json:
+          example:
+            code: 401
+            message: Issuer is not familiar.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unauthorized
+    "403Forbidden":
+      content:
+        application/json:
+          example:
+            code: 403
+            message: You do not have sufficient permissions.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Forbidden
+    "500InternalServerError":
+      content:
+        application/json:
+          example:
+            code: 500
+            message: Something went wrong.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+    "503ServiceUnavailable":
+      content:
+        application/json:
+          example:
+            code: 503
+            message: Please try again in few minutes.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+    "404NotFound":
+      content:
+        application/json:
+          example:
+            code: 404
+            message: Resource id not found.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource was not found
+    "409Conflict":
+      content:
+        application/json:
+          example:
+            code: 409
+            message: Resource with this name already exists
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource already exists
+    "204NoContent":
+      description: No Content.
+    "413RequestEntityTooLarge":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Request entity too large
+    "415UnsupportedMediaType":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unsupported media type
+    "400BadSubmissionRequest":
+      content:
+        application/json:
+          example:
+            code: 400
+            message: The workload request does not comply with the policy set by the
+              administrator
+          schema:
+            $ref: '#/components/schemas/SubmissionError'
+      description: Bad submission request.
+    "406NotAcceptable":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Not acceptable request
+    "412PreconditionFailed":
+      content:
+        application/json:
+          example:
+            code: 412
+            message: Precondition failed
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource was not found.
+    "501NotImplemented":
+      content:
+        application/json:
+          example:
+            code: 501
+            message: Not implemented
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+  schemas:
+    TenantId:
+      description: The id of the tenant.
+      example: 1001
+      format: int32
+      type: integer
+    Tenant:
+      example:
+        id: 1
+        name: example
+        displayName: Example
+        alias: example-alias
+        status: Ready
+        tenantId: 123
+        createdAt: 2020-01-01T00:00:00Z
+        updatedAt: 2020-01-02T00:00:00Z
+        deletedAt: null
+      properties:
+        id:
+          description: The id of the tenant.
+          example: 1001
+          format: int32
+          type: integer
+        mimirId:
+          type: string
+        uuid:
+          description: The universally unique identifier of the tenant.
+          format: uuid
+          type: string
+        name:
+          description: The internal system name of the tenant.
+          type: string
+        displayName:
+          description: The name of the tenant as shown to users within the tenant.
+          type: string
+        alias:
+          description: An optional alias for the tenant.
+          type: string
+        smg:
+          type: boolean
+        status:
+          description: |
+            The current status of the tenant.
+            Possible values:
+            - Creating
+            - Failed
+            - Updating
+            - Deleted
+            - Deleting
+            - Ready
+          enum:
+          - Creating
+          - Failed
+          - Updating
+          - Deleted
+          - Deleting
+          - Ready
+          type: string
+        diagnostics:
+          description: "Most recent provisioning failure message. Only populated by\
+            \ GET /tenants/{id} when status is Failed."
+          type: string
+        createdAt:
+          description: The date and time when the tenant was created.
+          format: date-time
+          type: string
+        updatedAt:
+          description: The date and time when the tenant was last updated.
+          format: date-time
+          type: string
+        contractType:
+          enum:
+          - normal
+          - trial
+          type: string
+      required:
+      - contractType
+      - createdAt
+      - id
+      - name
+      - smg
+      - status
+      - updatedAt
+      - uuid
+      type: object
+    Tenants:
+      items:
+        $ref: '#/components/schemas/Tenant'
+      type: array
+      x-schema-name: Tenants
+    Error:
+      example:
+        code: 400
+        message: Bad request - Resource should have a name
+      properties:
+        code:
+          maximum: 599
+          minimum: 100
+          type: integer
+        message:
+          type: string
+        details:
+          type: string
+      required:
+      - code
+      - message
+    Roles:
+      description: "The role assigned to the tenant's admin user. Possible value:\
+        \ System administrator."
+      enum:
+      - System administrator
+      - Cloud operator
+      nullable: true
+      type: string
+    MetricStoreEndpoint:
+      example:
+        headers:
+          X-Scope-OrgID: id
+        auth:
+          basic:
+            password: password
+            username: username
+        url: http://mimir-nginx.mimir-test.svc:80/api/v1/query
+      properties:
+        url:
+          example: http://mimir-nginx.mimir-test.svc:80/api/v1/query
+          format: uri
+          maxLength: 2048
+          minLength: 1
+          type: string
+        auth:
+          $ref: '#/components/schemas/MetricStoreEndpoint_auth'
+        headers:
+          additionalProperties:
+            maxLength: 1000
+            type: string
+          example:
+            X-Scope-OrgID: id
+          maxProperties: 50
+          minProperties: 0
+          nullable: true
+          type: object
+      required:
+      - url
+      type: object
+    MetricStore:
+      example:
+        read:
+          headers:
+            X-Scope-OrgID: id
+          auth:
+            basic:
+              password: password
+              username: username
+          url: http://mimir-nginx.mimir-test.svc:80/api/v1/query
+        write:
+          headers:
+            X-Scope-OrgID: id
+          auth:
+            basic:
+              password: password
+              username: username
+          url: http://mimir-nginx.mimir-test.svc:80/api/v1/query
+      properties:
+        read:
+          $ref: '#/components/schemas/MetricStoreEndpoint'
+        write:
+          $ref: '#/components/schemas/MetricStoreEndpoint'
+      required:
+      - read
+      - write
+      type: object
+    TenantCreationRequest:
+      example:
+        password: password
+        role: System administrator
+        contractType: normal
+        name: name
+        alias: tenant-alias
+        metricStore: "{}"
+        email: admin@example.com
+      properties:
+        name:
+          description: The name of the tenant.
+          example: name
+          maxLength: 255
+          minLength: 2
+          pattern: "^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$"
+          type: string
+        alias:
+          description: An optional alias for the tenant. Must be unique across all
+            tenant names and aliases.
+          example: tenant-alias
+          maxLength: 255
+          minLength: 2
+          nullable: true
+          pattern: "^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$"
+          type: string
+        email:
+          description: The email of the tenant's admin user.
+          example: admin@example.com
+          maxLength: 254
+          minLength: 5
+          pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+          type: string
+        password:
+          description: "The password for the tenant's admin user. Must contain at\
+            \ least 1 special character, 1 uppercase letter, 1 lowercase letter, 1\
+            \ digit, and be at least 8 characters long."
+          maxLength: 255
+          minLength: 8
+          nullable: true
+          type: string
+        contractType:
+          enum:
+          - normal
+          - ""
+          type: string
+        role:
+          $ref: '#/components/schemas/Roles'
+        metricStore:
+          allOf:
+          - $ref: '#/components/schemas/MetricStore'
+          nullable: true
+          type: object
+          writeOnly: true
+      required:
+      - email
+      - name
+      type: object
+    TenantCreationResponse:
+      example:
+        tenant:
+          id: 1
+          name: example
+          displayName: Example
+          status: Ready
+          tenantId: 123
+          created_at: 2020-01-01T00:00:00Z
+          updated_at: 2020-01-02T00:00:00Z
+          deleted_at: null
+        additionalData:
+          tenantDomain: tenant.example.com
+          customerUser:
+            user@tenant: Abc!23
+      properties:
+        tenant:
+          $ref: '#/components/schemas/Tenant'
+        additionalData:
+          description: additional data for tenant creation
+          nullable: true
+          type: object
+      required:
+      - tenant
+      type: object
+    TenantUpdateRequest:
+      example:
+        alias: tenant-alias
+      properties:
+        alias:
+          description: An optional alias for the tenant. Must be unique across all
+            tenant names and aliases.
+          example: tenant-alias
+          maxLength: 255
+          minLength: 2
+          nullable: true
+          pattern: "^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$"
+          type: string
+      type: object
+    LogoCreationRequest:
+      example:
+        logo: logo
+      properties:
+        logo:
+          description: Base64 logo file
+          maxLength: 500000
+          minLength: 1
+          type: string
+      required:
+      - logo
+      type: object
+    ExtendedMetricStore:
+      example:
+        read:
+          headers:
+            X-Scope-OrgID: id
+          auth:
+            basic:
+              password: password
+              username: username
+          url: http://mimir-nginx.mimir-test.svc:80/api/v1/query
+        tenantId: 171976545
+        datasourceId: datasourceId
+        type: grafanalabs
+        write:
+          headers:
+            X-Scope-OrgID: id
+          auth:
+            basic:
+              password: password
+              username: username
+          url: http://mimir-nginx.mimir-test.svc:80/api/v1/query
+      properties:
+        tenantId:
+          description: The id of the tenant.
+          format: int32
+          maximum: 2147483647
+          minimum: 1
+          type: integer
+        type:
+          enum:
+          - grafanalabs
+          - mimir
+          - thanos
+          type: string
+        datasourceId:
+          description: Id of datasource
+          maxLength: 64
+          minLength: 1
+          type: string
+        read:
+          $ref: '#/components/schemas/MetricStoreEndpoint'
+        write:
+          $ref: '#/components/schemas/MetricStoreEndpoint'
+      required:
+      - datasourceId
+      - read
+      - tenantId
+      - type
+      - write
+      type: object
+    TenantLogo:
+      example:
+        tenantId: 0
+        logo: logo
+      properties:
+        tenantId:
+          format: int64
+          type: integer
+        logo:
+          description: "Data URL of the logo (e.g. \"data:image/png;base64,...\")"
+          type: string
+      required:
+      - logo
+      - tenantId
+      type: object
+    TenantLogosResponse:
+      example:
+        logos:
+        - tenantId: 0
+          logo: logo
+        - tenantId: 0
+          logo: logo
+      properties:
+        logos:
+          items:
+            $ref: '#/components/schemas/TenantLogo'
+          type: array
+      required:
+      - logos
+      type: object
+    ComplianceIssues:
+      nullable: true
+      properties:
+        complianceIssues:
+          items:
+            $ref: '#/components/schemas/ComplianceIssues_complianceIssues_inner'
+          type: array
+      type: object
+    SubmissionError:
+      allOf:
+      - $ref: '#/components/schemas/Error'
+      - $ref: '#/components/schemas/ComplianceIssues'
+    delete_tenant_by_id_200_response:
+      example:
+        uid: uid
+      properties:
+        uid:
+          type: string
+      required:
+      - uid
+      type: object
+    get_tenant_logo_200_response:
+      example:
+        logo: logo
+      properties:
+        logo:
+          type: string
+      required:
+      - logo
+      type: object
+    MetricStoreEndpoint_auth_basic:
+      example:
+        password: password
+        username: username
+      nullable: true
+      properties:
+        username:
+          maxLength: 255
+          minLength: 1
+          type: string
+        password:
+          maxLength: 500
+          minLength: 1
+          type: string
+      type: object
+    MetricStoreEndpoint_auth:
+      example:
+        basic:
+          password: password
+          username: username
+      nullable: true
+      properties:
+        basic:
+          $ref: '#/components/schemas/MetricStoreEndpoint_auth_basic'
+      type: object
+    ComplianceIssues_complianceIssues_inner:
+      properties:
+        field:
+          example: compute.gpuDevicesRequest
+          type: string
+        details:
+          example: value must be no less than 3
+          type: string
+      required:
+      - details
+      - field
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      description: Bearer authentication
+      scheme: bearer
+      type: http

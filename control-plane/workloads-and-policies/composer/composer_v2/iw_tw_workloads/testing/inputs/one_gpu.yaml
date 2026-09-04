@@ -1,0 +1,5 @@
+image: ubuntu
+
+compute:
+  gpuDevicesRequest: 1
+

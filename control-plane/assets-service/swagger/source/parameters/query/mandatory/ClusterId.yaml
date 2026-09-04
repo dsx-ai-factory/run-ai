@@ -1,0 +1,8 @@
+name: clusterId
+in: query
+required: true
+description: The unique id of the cluster.
+schema:
+  type: string
+  minLength: 1
+  format: uuid

@@ -1,0 +1,7 @@
+properties:
+  attributes:
+    $ref: "./HostPathInstance.yaml"
+  instances:
+    $ref: "./HostPathItems.yaml"
+nullable: true
+type: object

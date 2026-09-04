@@ -1,0 +1,27 @@
+errors:
+- code: 400
+  message: 'field image failed required validation: field is required but missing
+    from the spec (path=".spec.template.spec.containers[1].image")'
+policy:
+  effectiveRules:
+  - enforcements:
+    - required: true
+    field: image
+    sourceOfRule: null
+    specSelector: allContainers
+  workloadType:
+    group: apps
+    kind: Deployment
+    version: v1
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: required-multi
+  spec:
+    template:
+      spec:
+        containers:
+        - image: ubuntu
+          name: has-image
+        - name: missing-image

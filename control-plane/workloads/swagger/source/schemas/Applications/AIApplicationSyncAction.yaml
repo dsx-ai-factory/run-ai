@@ -1,0 +1,5 @@
+type: string
+description: defines sync action for this item
+enum:
+  - Upsert
+  - Delete

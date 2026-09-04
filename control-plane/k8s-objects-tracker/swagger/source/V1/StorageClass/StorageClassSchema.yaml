@@ -1,0 +1,97 @@
+components:
+  parameters:
+    V1Storage_class_name:
+      in: path
+      name: storage_class_name
+      description: Unique identifier of the storageClass
+      required: true
+      schema:
+        type: string
+        format: string
+    uuid:
+      in: path
+      name: uuid
+      description: Unique identifier of the cluster
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    V1BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/V1Error'
+    V1NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/V1Error'
+    V1Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/V1Error'
+    V1Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/V1Error'
+    V1ServiceUnavailable:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/V1Error'
+  schemas:
+    V1StorageClassNames:
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              storageClasses:
+                type: array
+                items:
+                  type: string
+                example: ["standard"]
+            example:
+              storageClasses: ["standard"]
+    x-schema-name: StorageClasses
+    V1StorageClasses:
+      type: array
+      items:
+        $ref: "#/components/schemas/V1StorageClass"
+      x-schema-name: StorageClasses
+    V1StorageClass:
+      required:
+        - storage_class_name
+      x-schema-name: StorageClasses
+      properties:
+        storage_class_name:
+          type: string
+          description: Identifier of the storage class
+        is_default:
+          type: boolean
+          description: Indicator if the storage class is the default storage class
+    V1Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          minimum: 100
+          maximum: 599
+        message:
+          type: string
+        details:
+          type: string
+      example:
+        code: 400
+        message: "Bad request - Resource should have a name"

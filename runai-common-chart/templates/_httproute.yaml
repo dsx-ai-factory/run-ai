@@ -1,0 +1,59 @@
+{{- define "control-plane.httproute" -}}
+{{- $top := first . }}
+{{- $httproute := index . 1 }}
+
+{{- $name := $httproute.name -}}
+{{- $serviceName := $httproute.serviceName -}}
+{{- $servicePort := $httproute.servicePort | default 80 -}}
+{{- $domain := $httproute.domain -}}
+{{- $extraDomains := $httproute.extraDomains -}}
+{{- $parentRefs := $httproute.parentRefs -}}
+{{- $multiTenancy := $httproute.multiTenancy -}}
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "common.fullname" $top }}-{{ $name }}
+  labels:
+    {{- include "common.labels" $top | nindent 4 }}
+spec:
+  {{- if $parentRefs }}
+  parentRefs:
+    {{- range $parentRefs }}
+    - name: {{ .name }}
+      {{- if .namespace }}
+      namespace: {{ .namespace }}
+      {{- end }}
+      {{- if .sectionName }}
+      sectionName: {{ .sectionName }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  hostnames:
+    - "{{ $domain }}"
+  {{- if $multiTenancy }}
+    - "*.{{ $domain }}"
+  {{- end }}
+  {{- range $extraDomains }}
+    - "{{ . }}"
+  {{- end }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ $serviceName }}
+          port: {{ $servicePort }}
+      filters:
+        - type: ResponseHeaderModifier
+          responseHeaderModifier:
+            set:
+              - name: X-Content-Type-Options
+                value: nosniff
+              - name: X-Frame-Options
+                value: DENY
+              - name: Referrer-Policy
+                value: strict-origin-when-cross-origin
+---
+{{- end -}}

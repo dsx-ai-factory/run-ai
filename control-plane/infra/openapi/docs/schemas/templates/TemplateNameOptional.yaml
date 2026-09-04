@@ -1,0 +1,4 @@
+description: The name of the template.
+type: string
+example: my-template-name
+nullable: true

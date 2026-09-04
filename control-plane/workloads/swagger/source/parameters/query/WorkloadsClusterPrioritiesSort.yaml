@@ -1,0 +1,6 @@
+name: sortBy
+in: query
+required: false
+schema:
+  type: string
+  enum: [name, source, value, phase]

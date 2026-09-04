@@ -1,0 +1,32 @@
+description: |
+  Layer 3 case "pod" for leaderworkerset.x-k8s.io/LeaderWorkerSet/v1. SETs
+  pod-level fields (podSpec, podMetadata) for leader and worker templates.
+effectiveRules:
+  # ----- leader pod metadata -----
+  - field: labels
+    specSelector: leaderPodMetadata
+    enforcements: [{ set: { key: "role", value: "leader" } }]
+  - field: annotations
+    specSelector: leaderPodMetadata
+    enforcements: [{ set: { key: "pod.example.com/role", value: "leader" } }]
+
+  # ----- worker pod metadata -----
+  - field: labels
+    specSelector: workerPodMetadata
+    enforcements: [{ set: { key: "role", value: "worker" } }]
+  - field: annotations
+    specSelector: workerPodMetadata
+    enforcements: [{ set: { key: "pod.example.com/role", value: "worker" } }]
+
+  # ----- all pod specs -----
+  - field: serviceAccountName
+    specSelector: allPodSpecs
+    enforcements: [{ set: { value: "lws-sa" } }]
+  - field: terminationGracePeriodSeconds
+    specSelector: allPodSpecs
+    enforcements: [{ set: { value: 60 } }]
+
+  # ----- container image (verify policy modifies skeleton) -----
+  - field: image
+    specSelector: allContainers
+    enforcements: [{ set: { value: "lws/worker:v1" } }]

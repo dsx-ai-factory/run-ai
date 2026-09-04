@@ -1,0 +1,20 @@
+# permissions for end users to view runaijobs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runaijob-viewer-role
+rules:
+- apiGroups:
+  - run.ai.run.ai
+  resources:
+  - runaijobs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - run.ai.run.ai
+  resources:
+  - runaijobs/status
+  verbs:
+  - get

@@ -1,0 +1,44 @@
+get:
+  summary: Get departments node pool resources
+  operationId: get_department_node_pool_resources
+  x-service: org-unit-service
+  description: List departments node pool resources
+  x-authorize:
+    resource-type: department
+    action: read
+  tags:
+    - Departments
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/node_pool_resources_api_test.go
+  parameters:
+    - $ref: "../../parameters/DepartmentNodePoolResourcesFilterBy.yaml"
+    - $ref: "../../parameters/DepartmentNodePoolResourcesSortBy.yaml"
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/Search.yaml"
+  responses:
+    200:
+      description: ok
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - nodePoolResources
+            properties:
+              nodePoolResources:
+                type: array
+                items:
+                  $ref: "../../schemas/nodePoolResources/DepartmentNodePoolResources.yaml"
+              next:
+                type: integer
+                example: 1
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

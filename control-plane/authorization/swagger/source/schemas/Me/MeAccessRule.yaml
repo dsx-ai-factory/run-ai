@@ -1,0 +1,17 @@
+allOf:
+  - $ref: "../AccessRules/AccessRuleCreationFieldsInternal.yaml"
+  - type: object
+    required:
+      - subjectType
+    properties:
+      subjectType:
+        $ref: '../AccessRules/SubjectTypeExtended.yaml'
+  - $ref: "../AccessRules/EnrichmentDataFields.yaml"
+  - required: [ tenantId ]
+  - properties:
+      id:
+        type: integer
+        format: int32
+        example: 32
+      tenantId:
+        $ref: '../../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml'

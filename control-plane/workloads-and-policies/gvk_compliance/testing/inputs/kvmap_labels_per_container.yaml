@@ -1,0 +1,90 @@
+policy:
+  id: test-policy
+  effectiveRules:
+    # --- add/override labels on every container via the custom "labels" field ---
+    # Custom set expression takes both key and value, so each rule adds one
+    # label. Rules 1-3 add new labels; rule 4 overrides an existing one via
+    # the same mechanism (deep merge with overwrite=true).
+    - field: labels
+      specSelector: allContainers
+      enforcements:
+        - set: { key: a, value: "1" }
+    - field: labels
+      specSelector: allContainers
+      enforcements:
+        - set: { key: b, value: "2" }
+    - field: labels
+      specSelector: allContainers
+      enforcements:
+        - set: { key: c, value: "3" }
+    - field: labels
+      specSelector: allContainers
+      enforcements:
+        - set: { key: existing, value: newValue }
+
+    # --- on container-2 only: rewrite label values ---
+    # allLabels narrows the JQ output to the labels map itself (a reference
+    # into the workload). KeyValueMap + CopyTargetKeys then fans "X" across
+    # every existing key.
+    - field: labels-value
+      specSelector: appContainerByName
+      selectorParams:
+        containerName: container-2
+      itemSelector: allLabels
+      enforcements:
+        - set: { value: "X" }
+
+    # Single-key update via the custom "labels" formatter (key + value args).
+    # "Y" must be quoted: unquoted YAML treats Y/N/On/Off/... as booleans.
+    - field: labels
+      specSelector: appContainerByName
+      selectorParams:
+        containerName: container-2
+      enforcements:
+        - set: { key: b, value: "Y" }
+
+  breakdown:
+    fields:
+      # Custom setExpr — builds a single-entry labels map from key+value args.
+      # Conjungo then deep-merges it into the target container. Reachable
+      # through both allContainers (mass add/override) and appContainerByName
+      # (targeted per-container update).
+      labels:
+        - specSelectors: [allContainers, appContainerByName]
+          formatter:
+            setExpr: |
+              {
+                "labels": {
+                  ($ARGS.named.key): $ARGS.named.value
+                }
+              }
+
+      # KeyValueMap builtin — operates on whatever map the spec|item selector
+      # emits. allLabels returns the labels map itself (a reference into the
+      # workload) so CopyTargetKeys can fan the set value across every key.
+      labels-value:
+        - specSelectors: [appContainerByName]
+          formatter:
+            builtin: KeyValueMap
+          itemSelectors:
+            allLabels:
+              query: ".labels // {}"
+
+    specSelectors:
+      allContainers:
+        query: "(.containers // [])[]"
+      appContainerByName:
+        query: "(.containers // [])[] | select(.name == $ARGS.named.containerName)"
+        argsInfo:
+          containerName: string
+
+workload:
+  apiVersion: test/v1
+  kind: Synthetic
+  containers:
+    - name: container-1
+      labels:
+        existing: oldValue
+    - name: container-2
+      labels:
+        existing: oldValue

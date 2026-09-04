@@ -1,0 +1,7 @@
+properties:
+  concurrencyHardLimit:
+    description: The maximum number of requests allowed to flow to a single replica at any time. 0 means no limit
+    type: integer
+    format: int32
+    minimum: 0
+    nullable: true

@@ -1,0 +1,35 @@
+post:
+  summary: Create Multiple Access Rules
+  description: Creates a batch of access rules in a single operation. Requires a list of access rule objects, each specifying the subject, role, and scope. Returns the result of the operation, including which rules were successfully created and any that failed, along with error messages if applicable.
+  operationId: access_rules_batch_create
+  x-service: authorization
+  x-audit: true
+  x-test-coverage:
+    - control-plane/authorization/pkg/services/access_rules_batch_api_test.go
+  x-authorize:
+    resource-type: access_rules
+    action: create
+  tags:
+    - Access rules
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/AccessRules/AccessRulesBatchCreateFields.yaml'
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/AccessRules/AccessRulesBatchCreateResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

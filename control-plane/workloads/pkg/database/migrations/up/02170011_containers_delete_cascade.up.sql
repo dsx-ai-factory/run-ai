@@ -1,0 +1,10 @@
+-- SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+-- SPDX-License-Identifier: Apache-2.0
+
+alter table containers
+drop constraint if exists fk_containers_unique_pods;
+
+alter table containers
+    add constraint fk_containers_unique_pods
+        foreign key (pod_id) references pods
+            on delete cascade;

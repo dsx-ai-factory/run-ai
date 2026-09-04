@@ -1,0 +1,11 @@
+description: Executed successfully.
+x-internal: true
+content:
+  application/json:
+    schema:
+      properties:
+        id:
+          type: string
+
+      example:
+        id: 3434c-12323ab-4ce2ea6-b44fc-db344d

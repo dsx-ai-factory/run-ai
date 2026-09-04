@@ -1,0 +1,52 @@
+suite: support-entitled features (call-home)
+templates:
+  - templates/validate.yaml
+
+tests:
+  #
+  # Non support-entitled install defaults
+  #   helm install runai-backend .
+  #
+  - it: does not fail validation on a default non support-entitled install
+    template: templates/validate.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  #
+  # Opt-out
+  #   helm install runai-backend . --set supportEntitled=true \
+  #     --set telemetryService.enabled=false
+  #
+  - it: opting out of call-home when support-entitled does not fail validation
+    template: templates/validate.yaml
+    set:
+      supportEntitled: true
+      telemetryService.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  #
+  # Guardrail
+  #   helm install runai-backend . --set telemetryService.enabled=true   # rejected: not support-entitled
+  #
+  - it: fails when call-home is enabled without supportEntitled
+    template: templates/validate.yaml
+    set:
+      telemetryService.enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: "telemetryService (call-home) is available only on a support-entitled release; set supportEntitled=true to enable it"
+
+  #
+  # A support-entitled release enables call-home on its own (derived from supportEntitled)
+  #   helm install runai-backend . --set supportEntitled=true
+  #
+  - it: supportEntitled alone passes validation
+    template: templates/validate.yaml
+    set:
+      supportEntitled: true
+    asserts:
+      - hasDocuments:
+          count: 0

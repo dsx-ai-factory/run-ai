@@ -1,0 +1,25 @@
+get:
+  summary: Get the inference or revision ancestors.
+  operationId: get_inference_ancestors
+  x-no-authorization: true
+  x-service: workloads
+  x-internal: true
+  x-test-coverage:
+    - e2e/src/test/suites/playwright/parallel/inference/inferenceRevisions.test.ts
+  tags:
+    - Inferences
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/schemas/scopes/Ancestors.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

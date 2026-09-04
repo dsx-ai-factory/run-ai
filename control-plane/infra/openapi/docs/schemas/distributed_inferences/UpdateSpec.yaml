@@ -1,0 +1,15 @@
+description: The specifications of the inference to be updated.
+properties:
+  spec:
+    allOf:
+      - type: object
+        properties:
+          replicas:
+            description: Specifies the number of leader-worker sets to deploy. Each replica represents a group consisting of one leader pod and multiple worker pods. For example, setting replicas to 3 will create 3 independent groups, each with its own leader and corresponding set of workers.
+            type: integer
+            format: int32
+            minimum: 0
+            maximum: 1000
+            example: 2
+            nullable: true
+        nullable: true

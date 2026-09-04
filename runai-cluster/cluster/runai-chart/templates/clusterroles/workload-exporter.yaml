@@ -1,0 +1,93 @@
+{{- if .Values.operands.rbac.base.create }}
+# Run:AI WorkloadExporter
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-workload-exporter
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - namespaces
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - run.ai
+      - scheduling.run.ai
+    resources:
+      - externalworkloads
+      - trainingworkloads
+      - interactiveworkloads
+      - distributedworkloads
+      - inferenceworkloads
+      - distributedinferenceworkloads
+      - projects
+      - nodepools
+      - queues
+      - podgroups
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - kai.resources
+    resources:
+      - projects
+      - nodepools
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - scheduling.k8s.io
+    resources:
+      - priorityclasses
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - create
+      - get
+      - list
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+      - events
+    verbs:
+      - list
+      - get
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-workload-exporter
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-workload-exporter
+subjects:
+  - kind: ServiceAccount
+    name: workload-exporter
+    namespace: runai
+{{- end }}

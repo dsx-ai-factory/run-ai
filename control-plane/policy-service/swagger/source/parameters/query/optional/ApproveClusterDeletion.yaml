@@ -1,0 +1,7 @@
+name: approveClusterDeletion
+in: query
+required: false
+description: Required when modifying or deleting a policy if the tenant includes one or more clusters running version 2.20 or earlier. 
+  In such cases, the platform must delete the policy from the affected clusters. This flag indicates that the administrator approves this deletion.
+schema:
+  type: boolean

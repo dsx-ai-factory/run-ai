@@ -1,0 +1,46 @@
+get:
+  summary: Get pod metrics data.
+  description: Retrieve pod's metrics data for use in analysis applications.
+  operationId: get_workload_pod_metrics
+  x-service: workloads
+  x-test-coverage:
+    - e2e/src/test/suites/metricsSuite/metricsApi.test.ts
+  x-authorize:
+    resource-type: workloads
+    action: read
+    resource-id: workloadId
+  tags:
+    - Pods
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/path/PodId.yaml"
+    - $ref: "../parameters/query/PodMetricTypes.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/StartRequired.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/EndRequired.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/NumberOfSamples.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/schemas/metrics/MetricsCompositeResponse.yaml'
+        text/csv: { }
+    207:
+      description: Partial success.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/schemas/metrics/MetricsCompositeResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

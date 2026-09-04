@@ -1,0 +1,197 @@
+suite: Test HTTPRoute for Gateway API
+
+templates:
+  - templates/common/httproute.yaml
+
+tests:
+  # --- Basic rendering ---
+
+  - it: should not render HTTPRoute when gatewayAPI is disabled
+    set:
+      global.gatewayAPI.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render HTTPRoute when gatewayAPI is enabled
+    set:
+      global.gatewayAPI.enabled: true
+      global.gatewayAPI.parentRefs:
+        - name: test-gateway
+          namespace: gateway-system
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: HTTPRoute
+      - equal:
+          path: apiVersion
+          value: gateway.networking.k8s.io/v1
+
+  # --- parentRefs ---
+
+  - it: should set parentRefs from values
+    set:
+      global.gatewayAPI.enabled: true
+      global.gatewayAPI.parentRefs:
+        - name: my-gateway
+          namespace: gateway-ns
+          sectionName: https
+    asserts:
+      - equal:
+          path: spec.parentRefs[0].name
+          value: my-gateway
+      - equal:
+          path: spec.parentRefs[0].namespace
+          value: gateway-ns
+      - equal:
+          path: spec.parentRefs[0].sectionName
+          value: https
+
+  - it: should support multiple parentRefs
+    set:
+      global.gatewayAPI.enabled: true
+      global.gatewayAPI.parentRefs:
+        - name: gateway-1
+          namespace: ns-1
+        - name: gateway-2
+          namespace: ns-2
+    asserts:
+      - equal:
+          path: spec.parentRefs[0].name
+          value: gateway-1
+      - equal:
+          path: spec.parentRefs[1].name
+          value: gateway-2
+
+  - it: should omit optional parentRef fields when not set
+    set:
+      global.gatewayAPI.enabled: true
+      global.gatewayAPI.parentRefs:
+        - name: minimal-gateway
+    asserts:
+      - equal:
+          path: spec.parentRefs[0].name
+          value: minimal-gateway
+      - isNull:
+          path: spec.parentRefs[0].namespace
+      - isNull:
+          path: spec.parentRefs[0].sectionName
+
+  # --- Hostnames ---
+
+  - it: should set hostname from global domain
+    set:
+      global.gatewayAPI.enabled: true
+      global.domain: app.example.com
+      global.gatewayAPI.parentRefs:
+        - name: test-gateway
+    asserts:
+      - contains:
+          path: spec.hostnames
+          content: "app.example.com"
+
+  - it: should include wildcard hostname when multiTenancy is enabled
+    set:
+      global.gatewayAPI.enabled: true
+      global.multiTenancy.enabled: true
+      global.domain: app.example.com
+      global.gatewayAPI.parentRefs:
+        - name: test-gateway
+    asserts:
+      - contains:
+          path: spec.hostnames
+          content: "app.example.com"
+      - contains:
+          path: spec.hostnames
+          content: "*.app.example.com"
+
+  - it: should not include wildcard hostname when multiTenancy is disabled
+    set:
+      global.gatewayAPI.enabled: true
+      global.multiTenancy.enabled: false
+      global.domain: app.example.com
+      global.gatewayAPI.parentRefs:
+        - name: test-gateway
+    asserts:
+      - contains:
+          path: spec.hostnames
+          content: "app.example.com"
+      - notContains:
+          path: spec.hostnames
+          content: "*.app.example.com"
+
+  - it: should include extra domains in hostnames
+    set:
+      global.gatewayAPI.enabled: true
+      global.domain: app.example.com
+      global.ingress.extraDomains:
+        - extra1.example.com
+        - extra2.example.com
+      global.gatewayAPI.parentRefs:
+        - name: test-gateway
+    asserts:
+      - contains:
+          path: spec.hostnames
+          content: "app.example.com"
+      - contains:
+          path: spec.hostnames
+          content: "extra1.example.com"
+      - contains:
+          path: spec.hostnames
+          content: "extra2.example.com"
+
+  # --- Routing ---
+
+  - it: should route to traefik service on port 8080
+    set:
+      global.gatewayAPI.enabled: true
+      global.gatewayAPI.parentRefs:
+        - name: test-gateway
+    asserts:
+      - equal:
+          path: spec.rules[0].backendRefs[0].port
+          value: 8080
+      - matchRegex:
+          path: spec.rules[0].backendRefs[0].name
+          pattern: ".*-traefik$"
+
+  - it: should use PathPrefix match on root
+    set:
+      global.gatewayAPI.enabled: true
+      global.gatewayAPI.parentRefs:
+        - name: test-gateway
+    asserts:
+      - equal:
+          path: spec.rules[0].matches[0].path.type
+          value: PathPrefix
+      - equal:
+          path: spec.rules[0].matches[0].path.value
+          value: /
+
+  # --- Filters ---
+
+  - it: should include ResponseHeaderModifier filter with security headers
+    set:
+      global.gatewayAPI.enabled: true
+      global.gatewayAPI.parentRefs:
+        - name: test-gateway
+    asserts:
+      - equal:
+          path: spec.rules[0].filters[0].type
+          value: ResponseHeaderModifier
+      - contains:
+          path: spec.rules[0].filters[0].responseHeaderModifier.set
+          content:
+            name: X-Content-Type-Options
+            value: nosniff
+      - contains:
+          path: spec.rules[0].filters[0].responseHeaderModifier.set
+          content:
+            name: X-Frame-Options
+            value: DENY
+      - contains:
+          path: spec.rules[0].filters[0].responseHeaderModifier.set
+          content:
+            name: Referrer-Policy
+            value: strict-origin-when-cross-origin

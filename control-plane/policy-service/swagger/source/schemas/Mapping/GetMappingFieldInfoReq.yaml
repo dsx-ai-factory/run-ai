@@ -1,0 +1,16 @@
+type: object
+description: >-
+  The workload type and the field references for which a detailed mapping
+  breakdown is requested.
+properties:
+  workloadType:
+    description: >-
+      The Kubernetes group, version, and kind of the workload type whose mapping
+      is queried.
+    allOf:
+      - $ref: "../../../../../workloads-manager/swagger/source/schemas/WorkloadsV2/GVK.yaml"
+  fieldsRef:
+    description: The field references to retrieve the detailed breakdown for.
+    type: array
+    items:
+      $ref: "./BreakdownFieldRef.yaml"

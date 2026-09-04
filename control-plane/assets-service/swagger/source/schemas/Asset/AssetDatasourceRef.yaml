@@ -1,0 +1,15 @@
+description: Reference information about a datasource asset.
+required:
+  - id
+  - name
+  - kind
+properties:
+  id:
+    $ref: "../../../../../infra/openapi/docs/schemas/assets/AssetId.yaml"
+  name:
+    $ref: "../Asset/AssetName.yaml"
+  kind:
+    $ref: "../../../../../infra/openapi/docs/schemas/assets/AssetKind.yaml"
+  overrides:
+    $ref: "../../../../../infra/openapi/docs/schemas/assets/DataSourceOverrides.yaml"
+    deprecated: true

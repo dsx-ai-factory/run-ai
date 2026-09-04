@@ -1,0 +1,25 @@
+description: Defines the default, supported units, and range constraints for PVC claim sizes. These settings control the requested storage capacity when creating a PVC using this storage class.
+properties:
+  default:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/PvcClaimSize.yaml"
+  supportedUnits:
+    description: 'Units supported for specifying PVC sizes. Valid values: "MB", "MiB", "GB", "GiB", "TB", "TiB".'
+    type: array
+    items:
+      type: string
+      enum:
+        - MB
+        - MiB
+        - GB
+        - GiB
+        - TB
+        - TiB
+  min:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/PvcClaimMinSize.yaml"
+  max:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/PvcClaimMaxSize.yaml"
+  step:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/storage/PvcClaimStepSize.yaml"
+type: object
+nullable: true
+

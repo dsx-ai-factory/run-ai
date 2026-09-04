@@ -1,0 +1,194 @@
+type: object
+required:
+  - type
+  - name
+  - id
+  - source
+  - priorityClassName
+  - clusterId
+  - projectName
+  - projectId
+  - departmentName
+  - departmentId
+  - namespace
+  - createdAt
+  - phase
+  - k8sPhase
+properties:
+  type:
+    type: string
+    example: "runai-job"
+  name:
+    type: string
+    example: "very-important-job"
+  group:
+    type: string
+    example: "ray.io"
+  version:
+    type: string
+    example: "v1"
+  externalWorkloadName:
+    type: string
+    example: "iw-runai-very-important-job"
+  id:
+    type: string
+    format: uuid
+  submittedBy:
+    type: string
+    example: "researcher@run.ai"
+  priorityClassName:
+    type: string
+    example: "high-priority"
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  projectName:
+    type: string
+    example: "proj-1"
+  projectId:
+    type: string
+    example: "1"
+  departmentName:
+    type: string
+    example: "department-1"
+  departmentId:
+    type: string
+    example: "1"
+  namespace:
+    type: string
+    example: "runai-proj-1"
+  createdAt:
+    type: string
+    format: date-time
+    example: 2022-01-01T03:49:52.531Z
+  requestedResources:
+    $ref: "./WorkloadRequestResources.yaml"
+  actionsSupport:
+    $ref: "../Common/ActionsSupport.yaml"
+  phase:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads/Phase.yaml"
+  source:
+    $ref: "./Source.yaml"
+  conditions:
+    $ref: "../Common/Conditions.yaml"
+  phaseMessage:
+    type: string
+    example : 'Not enough resources in the requested nodepool'
+  k8sPhase:
+    type: string
+    example: 'Pending'
+  requestedPods:
+    $ref: "./RequestedPods.yaml"
+  requestedNodePools:
+    type: array
+    items:
+      type: string
+      example: "default"
+  images:
+    type: array
+    items:
+      type: string
+      example: "alpine:latest"
+  distributedFramework:
+    type: string
+    example: "Pytorch"
+  childrenIds:
+    type: array
+    writeOnly: true
+    items:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+  urls:
+    type: array
+    items:
+      type: string
+  networkStatus:
+    $ref: "./WorkloadNetworkStatus.yaml"
+  additionalFields:
+    type: string
+    format: json
+    example: '{"someSpecialField":"value"}'
+  priority:
+    type: integer
+    format: int32
+    example: 100
+    nullable: true
+  fullySaasWorkload:
+    type: boolean
+    example: true
+  environmentVariables:
+    type: object
+    additionalProperties:
+      type: string
+  command:
+    type: string
+    example: "sleep"
+  arguments:
+    type: string
+    example: "1000"
+  schedulingConditions:
+    type: array
+    nullable: true
+    items:
+      $ref: "./PhaseReasons/SchedulingCondition.yaml"
+  category:
+    type: string
+    example: Train
+  guaranteedRuntimeEndsAt:
+    type: string
+    format: date-time
+    example: 2025-08-01T03:49:52.531Z
+    nullable: true
+    description: A timestamp indicating when the workload will reach its minimum guaranteed runtime, as defined by minGuaranteedRuntime.
+      Until this time, the workload is considered non-preemptible and cannot be interrupted by higher-priority workloads.
+  applicationId:
+    type: string
+    nullable: true
+  applicationName:
+    type: string
+    nullable: true
+  topology:
+    type: object
+    nullable: true
+    properties:
+      name:
+        type: string
+      preferredPlacement:
+        type: string
+      requiredPlacement:
+        type: string
+  preemptibility:
+    type: string
+    example: "non-preemptible"
+    nullable: true
+  structureElements:
+    type: array
+    nullable: true
+    writeOnly: true
+    description: Flat list of intermediate child elements. May be truncated if too many.
+    items:
+      $ref: "./WorkloadElement.yaml"
+  structureElementsTotalCount:
+    type: integer
+    format: int32
+    nullable: true
+    writeOnly: true
+    description: Total number of structure elements before truncation. Null if no structure exists.
+  endpoints:
+    type: array
+    items:
+      $ref: "./EndpointSync.yaml"
+  nodeAffinities:
+    $ref: "../Pods/NodeAffinity/WorkloadNodeAffinities.yaml"
+  resourceRefs:
+    type: array
+    writeOnly: true
+    description: Existing resources (PVCs, Secrets, ConfigMaps) referenced by the workload's pod template. Surfaced at the application level as resourceConnections.
+    items:
+      $ref: "../Common/ResourceRef.yaml"

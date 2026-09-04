@@ -1,0 +1,143 @@
+{
+  "tenantId": 1001,
+  "runningPods": 0,
+  "phaseUpdatedAt": "2025-12-15T08:58:35.277346Z",
+  "k8sPhaseUpdatedAt": "2025-12-15T08:58:28.051196Z",
+  "updatedAt": "2025-12-15T08:59:24.401794Z",
+  "source": "CLI",
+  "deletedAt": null,
+  "type": "Training",
+  "name": "my-training-demo-123",
+  "id": "0586e34b-6c17-419b-9cc6-c091cb4d72f5",
+  "priority": 40,
+  "priorityClassName": "low",
+  "submittedBy": "test@run.ai",
+  "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+  "projectName": "team-b",
+  "projectId": "4500002",
+  "departmentName": "default",
+  "departmentId": "4500000",
+  "namespace": "runai-team-b",
+  "createdAt": "2025-12-15T08:58:28.012976Z",
+  "workloadRequestedResources": {
+    "gpuRequestType": "portion",
+    "gpu": {
+      "request": 1
+    }
+  },
+  "podsRequestedResources": {
+    "gpuRequestType": "portion",
+    "gpu": {
+      "limit": 2,
+      "request": 2
+    },
+    "cpu": {
+      "request": 0.2
+    },
+    "cpuMemory": {
+      "request": "209715200"
+    }
+  },
+  "allocatedResources": {},
+  "actionsSupport": {
+    "delete": true,
+    "suspend": true
+  },
+  "phase": "Pending",
+  "conditions": [
+    {
+      "type": "Ready",
+      "status": "False",
+      "message": "job is not running",
+      "lastTransitionTime": "2025-12-15T08:58:34Z"
+    },
+    {
+      "type": "LastReconcileSucceeded",
+      "status": "True",
+      "lastTransitionTime": "2025-12-15T08:58:34Z"
+    },
+    {
+      "type": "Suspended",
+      "status": "False",
+      "lastTransitionTime": "2025-12-15T08:58:34Z"
+    },
+    {
+      "type": "Failed",
+      "status": "False",
+      "lastTransitionTime": "2025-12-15T08:58:34Z"
+    },
+    {
+      "type": "Succeeded",
+      "status": "False",
+      "lastTransitionTime": "2025-12-15T08:58:34Z"
+    },
+    {
+      "type": "Pending",
+      "status": "True",
+      "lastTransitionTime": "2025-12-15T08:58:35Z"
+    },
+    {
+      "type": "Initialized",
+      "status": "False",
+      "reason": "InCreatingPhase",
+      "lastTransitionTime": "2025-12-15T08:58:34Z"
+    },
+    {
+      "type": "Degraded",
+      "status": "False",
+      "lastTransitionTime": "2025-12-15T08:58:34Z"
+    }
+  ],
+  "k8sPhase": "",
+  "requestedPods": {
+    "parallelism": 2,
+    "completions": 5
+  },
+  "requestedNodePools": [
+    "default"
+  ],
+  "images": [
+    "gcr.io/knative-samples/helloworld-go"
+  ],
+  "urls": [
+    "https://nael-env-001.runailabs.com/team-b/my-training-demo-123"
+  ],
+  "environments": [
+    {
+      "connections": [
+        {
+          "name": "url",
+          "toolType": "custom",
+          "connectionType": "ExternalUrl",
+          "url": "https://nael-env-001.runailabs.com/team-b/my-training-demo-123",
+          "authorizedGroups": [
+            "ml-team",
+            "data-scientists",
+            "platform-ops"
+          ],
+          "containerPort": 8080,
+          "correlationName": "url",
+          "exposedUrlSubDomain": "team-b-my-training-demo-123",
+          "exposedUrlPath": "/team-b/my-training-demo-123"
+        }
+      ],
+      "name": "",
+      "id": ""
+    }
+  ],
+  "additionalFields": {
+    "cliCommand": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai training submit my-training-demo-123 --project team-b --image gcr.io/knative-samples/helloworld-go --image-pull-policy IfNotPresent --working-dir /app -g 1 --runs 5 --parallelism 2 --backoff-limit 3 --restart-policy OnFailure --environment-variable BATCH_SIZE=32 --environment-variable EPOCHS=100 --environment-variable LEARNING_RATE=0.001 --label experiment=demo --label framework=custom --annotation owner=data-science-team --existing-pvc claimname=my-simple-pvc,path=/data --external-url container=8080,authgroups=ml-team:data-scientists:platform-ops --auto-deletion-time-after-completion 1h --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 1000 --supplemental-groups 2000,3000 --capability SYS_PTRACE --capability NET_ADMIN --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --command -- sh -c 'echo \"Training simulation\"; sleep 30'"
+  },
+  "preemptible": true,
+  "fullySaasWorkload": true,
+  "environmentVariables": {
+    "BATCH_SIZE": "32",
+    "EPOCHS": "100",
+    "LEARNING_RATE": "0.001",
+    "RUNAI_JOB_NAME": "${RUNAI_JOB_NAME}",
+    "RUNAI_PROJECT": "${RUNAI_PROJECT}"
+  },
+  "command": "sh -c 'echo \"Training simulation\"; sleep 30'",
+  "totalPendingTimeSeconds": 449,
+  "category": "Train"
+}

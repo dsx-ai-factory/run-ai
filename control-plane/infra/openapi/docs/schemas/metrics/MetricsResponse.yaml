@@ -1,0 +1,8 @@
+type: object
+required:
+  - measurements
+properties:
+  measurements:
+    type: array
+    items:
+      $ref: './MeasurementResponse.yaml'

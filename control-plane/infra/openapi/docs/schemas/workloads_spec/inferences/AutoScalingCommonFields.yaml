@@ -1,0 +1,12 @@
+allOf:
+  - $ref: "./MetricThresholdPercentageField.yaml"
+  - $ref: "./InferencesMinReplicasField.yaml"
+  - $ref: "./InferencesMaxReplicasField.yaml"
+  - $ref: "./InitialReplicasField.yaml"
+  - $ref: "./ActivationReplicasField.yaml"
+  - $ref: "./ConcurrencyHardLimitField.yaml"
+  - $ref: "./ScaleToZeroRetentionField.yaml"
+  - $ref: "./ScaleDownDelayField.yaml"
+  - $ref: "./InitializationTimeoutField.yaml"
+nullable: true
+type: object

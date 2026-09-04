@@ -1,0 +1,12 @@
+required:
+  - numWorkers
+  - distFramework
+properties:
+  numWorkers:
+    $ref: "./DistributedNumWorkers.yaml"
+  framework:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/distributed/DistributedFramework.yaml"
+  master:
+    $ref: "./DistributedMasterData.yaml"
+nullable: true
+type: object

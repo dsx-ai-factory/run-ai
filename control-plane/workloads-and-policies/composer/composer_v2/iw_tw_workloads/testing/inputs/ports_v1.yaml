@@ -1,0 +1,25 @@
+image: jupyter/tensorflow-notebook
+imagePullPolicy: IfNotPresent
+command: /bin/bash
+args: "-c 'tensorboard --logdir=/tmp/logs --bind_all --port 6006 & python -m http.server 8080 & python -m http.server 8081 & start-notebook.sh --NotebookApp.token=\"\"'"
+compute:
+  gpuDevicesRequest: 1
+ports:
+  - container: 8888
+    serviceType: NodePort
+    toolType: jupyter-notebook
+    toolName: Jupyter
+  - container: 6006
+    serviceType: NodePort
+    toolType: tensorboard
+    toolName: TensorBoard
+  - container: 8080
+    serviceType: LoadBalancer
+    toolType: custom
+    toolName: HTTP Server 1
+  - container: 8081
+    serviceType: LoadBalancer
+    toolType: custom
+    toolName: HTTP Server 2
+nodePools:
+  - default

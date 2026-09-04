@@ -1,0 +1,9 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+tolerations:
+  - name: nvidia-gpu
+    key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule

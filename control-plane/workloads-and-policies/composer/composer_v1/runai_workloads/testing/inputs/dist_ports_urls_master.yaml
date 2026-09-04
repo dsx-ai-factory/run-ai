@@ -1,0 +1,39 @@
+exposedUrls:
+  - container: 443
+    toolName: tool-url-mcust
+    toolType: custom
+    url: https://ofer-test-f.runailabs.com/secret
+    name: name-url-cust
+  - container: 80
+    toolName: tool-url-mauto
+    toolType: jupyter
+  - container: 8080
+    name: name-url-mauto
+  - container: 8082
+image: nginx:alpine
+imagePullPolicy: IfNotPresent
+nodePools:
+  - default
+ports:
+  - container: 80
+    serviceType: NodePort
+    toolName: tool-np-mauto
+    toolType: custom
+  - container: 443
+    external: 30050
+    serviceType: NodePort
+    toolName: tool-np-mcust
+    toolType: jupyter
+  - container: 80
+    serviceType: LoadBalancer
+    toolName: tool-lb
+    toolType: custom
+  - serviceType: NodePort
+    container: 8080
+    name: name-np-auto
+  - serviceType: NodePort
+    container: 8081
+  - container: 8080
+    serviceType: LoadBalancer
+    toolType: matlab
+    name: name-lb

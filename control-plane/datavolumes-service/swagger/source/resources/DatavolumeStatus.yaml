@@ -1,0 +1,35 @@
+put:
+  summary: Update the status of the datavolume form the cluster
+  operationId: update_datavolume_status
+  x-service: datavolumes-service
+  x-test-coverage:
+    - src/test/suites/advancedSuite/datavolumes/datavolumesApi.test.ts
+  x-authorize:
+    resource-type: datavolumes
+    action: sync
+  tags:
+    - Datavolumes
+  parameters:
+    - $ref: "../parameters/path/DatavolumeId.yaml"
+  requestBody:
+    description: The status of the datavolume in the cluster.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Datavolumes/DatavolumeStatusInternal.yaml'
+  responses:
+    204:
+      $ref: '../../../../infra/openapi/docs/responses/204NoContent.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

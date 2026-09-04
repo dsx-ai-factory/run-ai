@@ -1,0 +1,20 @@
+type: object
+nullable: true
+
+required:
+- clientId
+- clientSecret
+- discoverDocumentUrl
+
+properties:
+  clientId:
+    type: string
+  clientSecret:
+    type: string
+  scopes:
+    type: array
+    items:
+      type: string
+      pattern: '^([a-zA-Z0-9-._:]+)(\s[a-zA-Z0-9-._:]+)*$'
+  mandatoryClaim:
+    $ref: './MandatoryClaim.yaml'

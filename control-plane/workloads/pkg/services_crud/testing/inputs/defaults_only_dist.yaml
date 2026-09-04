@@ -1,0 +1,39 @@
+defaults:
+  worker:
+    image: ubuntu-worker
+    compute:
+      cpuCoreLimit: 10
+      extendedResources:
+        instances:
+          - resource: worker/bbb
+          - resource: worker/ddd
+            quantity: 110M
+        attributes:
+          quantity: 120M
+    storage:
+      pvc:
+        attributes:
+          claimInfo:
+            storageClass: standard-worker
+            size: 1M
+        instances:
+          - path: "/worker/bbb"
+  master:
+    image: ubuntu-master
+    compute:
+      cpuCoreLimit: 11
+      extendedResources:
+        instances:
+          - resource: master/bbb
+          - resource: master/ddd
+            quantity: 111M
+        attributes:
+          quantity: 121M
+    storage:
+      pvc:
+        attributes:
+          claimInfo:
+            storageClass: standard-master
+            size: 2M
+        instances:
+          - path: "/master/bbb"

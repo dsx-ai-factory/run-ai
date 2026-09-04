@@ -1,0 +1,6 @@
+description: Set of pvc persistent volume claims to use in the workload.
+type: array
+items:
+  $ref: "./PvcInstance.yaml"
+maxItems: 1000
+nullable: true

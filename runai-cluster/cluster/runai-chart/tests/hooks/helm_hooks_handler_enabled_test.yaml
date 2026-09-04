@@ -1,0 +1,108 @@
+suite: Test Helm Hooks Handler enabled flag
+
+tests:
+  - it: should render Helm Hooks Handler pre-install Job when enabled is true
+    set:
+      helmHooksHandler.enabled: true
+    templates:
+      - templates/hooks/pre-install-job.yaml
+    documentSelector:
+      path: kind
+      value: Job
+    asserts:
+      - isKind:
+          of: Job
+      - equal:
+          path: metadata.name
+          value: pre-install
+  - it: should not render Helm Hooks Handler pre-install Job when enabled is false
+    set:
+      helmHooksHandler.enabled: false
+    templates:
+      - templates/hooks/pre-install-job.yaml
+    asserts:
+      - notExists: {}
+  - it: should render Helm Hooks Handler pre-upgrade Job when enabled is true
+    set:
+      helmHooksHandler.enabled: true
+    templates:
+      - templates/hooks/pre-upgrade-job.yaml
+    documentSelector:
+      path: kind
+      value: Job
+    asserts:
+      - isKind:
+          of: Job
+      - equal:
+          path: metadata.name
+          value: pre-upgrade
+  - it: should not render Helm Hooks Handler pre-upgrade Job when enabled is false
+    set:
+      helmHooksHandler.enabled: false
+    templates:
+      - templates/hooks/pre-upgrade-job.yaml
+    asserts:
+      - notExists: {}
+  - it: should render Helm Hooks Handler post-install Job when enabled is true
+    set:
+      helmHooksHandler.enabled: true
+    templates:
+      - templates/hooks/post-install-job.yaml
+    documentSelector:
+      path: kind
+      value: Job
+    asserts:
+      - isKind:
+          of: Job
+      - equal:
+          path: metadata.name
+          value: post-install
+  - it: should not render Helm Hooks Handler post-install Job when enabled is false
+    set:
+      helmHooksHandler.enabled: false
+    templates:
+      - templates/hooks/post-install-job.yaml
+    asserts:
+      - notExists: {}
+  - it: should render Helm Hooks Handler post-upgrade Job when enabled is true
+    set:
+      helmHooksHandler.enabled: true
+    templates:
+      - templates/hooks/post-upgrade-job.yaml
+    documentSelector:
+      path: kind
+      value: Job
+    asserts:
+      - isKind:
+          of: Job
+      - equal:
+          path: metadata.name
+          value: post-upgrade
+  - it: should not render Helm Hooks Handler post-upgrade Job when enabled is false
+    set:
+      helmHooksHandler.enabled: false
+    templates:
+      - templates/hooks/post-upgrade-job.yaml
+    asserts:
+      - notExists: {}
+  - it: should render Helm Hooks Handler pre-delete Job when enabled is true
+    set:
+      helmHooksHandler.enabled: true
+    templates:
+      - templates/hooks/pre-delete-job.yaml
+    documentSelector:
+      path: kind
+      value: Job
+    asserts:
+      - isKind:
+          of: Job
+      - equal:
+          path: metadata.name
+          value: pre-delete
+  - it: should not render Helm Hooks Handler pre-delete Job when enabled is false
+    set:
+      helmHooksHandler.enabled: false
+    templates:
+      - templates/hooks/pre-delete-job.yaml
+    asserts:
+      - notExists: {} 

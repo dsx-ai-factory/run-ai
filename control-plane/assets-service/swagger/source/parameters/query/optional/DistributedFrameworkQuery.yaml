@@ -1,0 +1,7 @@
+name: distributedFramework
+in: query
+required: false
+description: Filter results to workload of type distributed and distributedFramework.
+schema:
+  type: string
+allowReserved: true

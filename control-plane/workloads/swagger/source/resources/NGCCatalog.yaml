@@ -1,0 +1,35 @@
+get:
+  summary: Search NGC Catalog Resources
+  x-internal: true
+  description: >
+    Proxy to the NGC catalog search API for CONTAINER resources.
+  parameters:
+    - $ref: "../parameters/query/ngc_catalog/filter.yaml"
+    - $ref: "../parameters/query/ngc_catalog/query.yaml"
+    - $ref: "../parameters/query/ngc_catalog/orderBy.yaml"
+    - $ref: "../parameters/query/ngc_catalog/page.yaml"
+    - $ref: "../parameters/query/ngc_catalog/pageSize.yaml"
+  operationId: get_nim_catalog
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/inferences_service_test.go
+  x-authorize:
+    resource-type: inferences
+    action: read
+  tags:
+    - Inferences
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/NGCCatalog/catalog.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

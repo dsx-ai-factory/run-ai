@@ -1,0 +1,10 @@
+{
+  "service_name": "runai-installer",
+  "enabled": true,
+  "artifact_type": "cli",
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin",
+  "jira": {
+    "team_name": "Griffin Team"
+  }
+}

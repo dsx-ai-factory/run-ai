@@ -1,0 +1,2 @@
+com.runai.keycloak.broker.oidc.mappers.CustomClaimToUserAttribute
+com.runai.keycloak.broker.oidc.mappers.ClaimValidator

@@ -1,0 +1,59 @@
+Dinfw: null
+JobSpec:
+  autoDeletionTimeAfterCompletionSeconds:
+    value: 2592000
+  environment:
+    items:
+      RUNAI_JOB_NAME:
+        value: ${RUNAI_JOB_NAME}
+      RUNAI_PROJECT:
+        value: ${RUNAI_PROJECT}
+  image:
+    value: ubuntu
+  labels:
+    items:
+      run.ai/control-plane-managed:
+        value: "true"
+  maxScale:
+    value: 2
+  minScale:
+    value: 2
+  ports:
+    items:
+      serving-port:
+        value:
+          container: 8081
+          protocol: http
+          serviceType: ServingPort
+  priorityClassName:
+    value: very-high
+  username:
+    value: test
+MasterSpec: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections:
+    - authorizationType: public
+      connectionType: ServingPort
+      containerPort: 8081
+      correlationName: serving-port
+      name: ServingPort
+      toolType: custom
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: autoscaling_only_min_2, Rules: , Type: Inference'
+  images:
+  - ubuntu
+  name: 'Value: autoscaling_only_min_2, Rules: , Type: Inference'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Inference
+  version: v2alpha1

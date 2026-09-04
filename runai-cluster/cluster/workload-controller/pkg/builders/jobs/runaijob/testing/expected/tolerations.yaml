@@ -1,0 +1,65 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      template: taints1
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      kai.scheduler/preemptibility: non-preemptible
+      priorityClassName: build
+      project: team-a
+      release: taints1
+      workloadKind: InteractiveWorkload
+      workloadName: taints1
+    name: test1
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 0
+    completions: 1
+    maxIdleDurationSeconds: 1200
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          user: user.name
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          kai.scheduler/preemptibility: non-preemptible
+          priorityClassName: build
+          project: team-a
+          release: taints1
+          run.ai/top-owner-uid: ""
+          workloadKind: InteractiveWorkload
+          workloadName: taints1
+      spec:
+        containers:
+        - image: ubuntu
+          imagePullPolicy: IfNotPresent
+          name: test1
+          resources: {}
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+        restartPolicy: Never
+        schedulerName: runai-scheduler
+        tolerations:
+        - effect: NoSchedule
+          key: key1
+          operator: Equal
+          value: aaa
+        - effect: NoExecute
+          key: key2
+          operator: Exists
+        - effect: PreferNoSchedule
+          key: key3
+          operator: Equal
+        - key: key4
+          operator: Exists
+          tolerationSeconds: 5
+  status: {}

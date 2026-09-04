@@ -1,0 +1,20 @@
+properties:
+  defaults:
+    allOf:
+      - $ref: "./DistributedInferenceDefaultsV2.yaml"
+    nullable: true
+    type: object
+  rules:
+    allOf:
+      - $ref: "./DistributedInferenceRulesV2.yaml"
+    nullable: true
+    type: object
+  imposedAssets:
+    $ref: "./DistributedInferenceImposedAssets.yaml"
+  status:
+    $ref: "../Policy/PolicyValidationStatus.yaml"
+  defaultFromOrder:
+    x-internal: true
+    $ref: "../Policy/DefaultFromOrder.yaml"
+nullable: true
+type: object

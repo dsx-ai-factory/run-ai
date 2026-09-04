@@ -1,0 +1,46 @@
+description: |
+  Layer 3 case "parameterized-dependency" for nvidia.com/DynamoGraphDeployment/v1alpha1.
+  
+  Tests the dependency mechanism with parameterized spec selectors. The key test is:
+  - servicePodSpec depends on serviceSpec with path "extraPodSpec"
+  - serviceSpec uses selectorParams.serviceName to locate the specific service
+  - The dependency mechanism must pass the params to the parent selector
+  
+  The skeleton has service-c with NO extraPodSpec. This policy targets service-c via
+  selectorParams: { serviceName: "service-c" }. The dependency mechanism must:
+  1. Use the serviceName param when running serviceSpec's parent query
+  2. Create extraPodSpec under service-c (NOT service-a or service-b)
+
+effectiveRules:
+  # Target servicePodSpec for service-c only (parameterized selector)
+  # service-c has NO extraPodSpec in the skeleton - the dependency mechanism must create it
+  - field: serviceAccountName
+    specSelector: servicePodSpec
+    selectorParams:
+      serviceName: service-c
+    enforcements: [{ set: { value: inference-sa } }]
+  
+  # Also set priorityClassName to show the path is properly created
+  - field: priorityClassName
+    specSelector: servicePodSpec
+    selectorParams:
+      serviceName: service-c
+    enforcements: [{ set: { value: high-priority } }]
+
+  # Set tolerations using the custom formatter
+  - field: tolerations
+    specSelector: servicePodSpec
+    selectorParams:
+      serviceName: service-c
+    enforcements: 
+      - set:
+          key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+
+  # Set extraPodMetadata for service-c to also test that metadata path creation works
+  - field: labels
+    specSelector: servicePodMetadata
+    selectorParams:
+      serviceName: service-c
+    enforcements: [{ set: { key: "app", value: "dynamo-inference" } }]

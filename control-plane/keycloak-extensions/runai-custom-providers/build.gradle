@@ -1,0 +1,56 @@
+plugins {
+    id 'java'
+}
+
+test {
+    useJUnitPlatform()
+    jvmArgs += [
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.util=ALL-UNNAMED'
+    ]
+}
+
+repositories {
+    mavenLocal()
+    maven {
+        url = uri('https://repo.maven.apache.org/maven2/')
+    }
+}
+
+group = 'com.runai.keycloak'
+description = 'Runai custom SPI package'
+
+configurations {
+    testImplementation.extendsFrom compileOnly
+}
+
+dependencies {
+    // Keycloak SPI deps are provided at runtime by the server
+    compileOnly "org.keycloak:keycloak-core:26.6.+"
+    compileOnly "org.keycloak:keycloak-server-spi:26.6.+"
+    compileOnly "org.keycloak:keycloak-services:26.6.+"
+    compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.+'
+    compileOnly 'jakarta.ws.rs:jakarta.ws.rs-api:4.0.+'
+    compileOnly 'org.slf4j:slf4j-api:2.0.+'
+
+    testImplementation 'org.glassfish.jersey.core:jersey-server:4.0.+'
+    testImplementation 'org.slf4j:slf4j-simple:2.0.+'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.+'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.+'
+    testImplementation 'org.mockito:mockito-core:5.2.+'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.2.+'
+    testImplementation 'org.assertj:assertj-core:3.27.7'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}

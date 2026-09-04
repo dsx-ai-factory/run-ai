@@ -1,0 +1,15 @@
+type: object
+nullable: true
+properties:
+  gpuRequestType:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuRequestType.yaml"
+  gpu:
+    $ref: '../Common/RequestResourceCores.yaml'
+  gpuMemory:
+    $ref: '../Common/RequestResourceQuantity.yaml'
+  cpu:
+    $ref: '../Common/RequestResourceCores.yaml'
+  cpuMemory:
+    $ref: '../Common/RequestResourceQuantity.yaml'
+  extendedResources:
+    $ref: "../Common/WorkloadsExtendedResources.yaml"

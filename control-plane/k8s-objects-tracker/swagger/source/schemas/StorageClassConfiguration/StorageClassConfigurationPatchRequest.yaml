@@ -1,0 +1,12 @@
+type: object
+properties:
+    permissions:
+        $ref: "./StorageClassPermissions.yaml"
+    customization:
+        type: object
+        allOf:
+            - $ref: "./StorageClassCustomization.yaml"
+            - $ref: "./PvcAttributesToRemove.yaml"
+        nullable: true
+
+

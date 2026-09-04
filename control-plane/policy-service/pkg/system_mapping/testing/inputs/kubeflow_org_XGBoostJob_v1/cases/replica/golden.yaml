@@ -1,0 +1,38 @@
+apiVersion: kubeflow.org/v1
+kind: XGBoostJob
+metadata:
+  name: test
+spec:
+  xgbReplicaSpecs:
+    Master:
+      replicas: 2
+      restartPolicy: OnFailure
+      template:
+        metadata:
+          annotations:
+            replica.example.com/role: master
+          labels:
+            replica.type: master
+        spec:
+          containers:
+          - image: xgboost/xgboost:1.7.0
+            name: xgboost
+          initContainers:
+          - image: xgboost/xgboost:1.7.0
+            name: init
+    Worker:
+      replicas: 4
+      restartPolicy: OnFailure
+      template:
+        metadata:
+          annotations:
+            replica.example.com/role: worker
+          labels:
+            replica.type: worker
+        spec:
+          containers:
+          - image: xgboost/xgboost:1.7.0
+            name: xgboost
+          initContainers:
+          - image: xgboost/xgboost:1.7.0
+            name: init

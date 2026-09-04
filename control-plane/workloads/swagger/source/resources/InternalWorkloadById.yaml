@@ -1,0 +1,34 @@
+patch:
+  summary: patch the workload phase from the client.
+  operationId: internal_patch_workload_phase
+  x-internal: true
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/workloads_api_test.go
+  x-no-authorization: true
+  tags:
+    - Workloads
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+  requestBody:
+    description: The workload info in the cluster.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Workloads/WorkloadPatchFields.yaml'
+  responses:
+    204:
+      $ref: '../../../../infra/openapi/docs/responses/204NoContent.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,10 @@
+
+DB_HOST: "postgres"
+DB_PORT: "5432"
+DB_USER: "runai"
+DB_PASSWORD: "password"
+DB_NAME: "runai"
+DB_SCHEMA: "bff_service"
+BFF_SERVICE_HOST: "bff-service"
+BFF_SERVICE_PORT: "8080"
+USE_MOCKS: "true"

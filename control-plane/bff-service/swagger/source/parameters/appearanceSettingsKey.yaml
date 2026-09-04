@@ -1,0 +1,6 @@
+name: key
+in: path
+required: true
+description: The appearance setting key
+schema:
+  $ref: "./appearanceSettingsKeyEnum.yaml"

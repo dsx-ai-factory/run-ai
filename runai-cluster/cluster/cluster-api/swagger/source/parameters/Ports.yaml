@@ -1,0 +1,8 @@
+in: query
+name: ports
+required: true
+description: List of ports to forward to the pod.
+schema:
+  type: array
+  items:
+    type: integer

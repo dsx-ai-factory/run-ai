@@ -1,0 +1,81 @@
+apiVersion: kubeflow.org/v1
+kind: PyTorchJob
+metadata:
+  annotations:
+    image: ""
+    template: dist-0
+    user: shay.asoolin
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: pytorchjob
+    createdBy: PyTorchJob
+    project: team-a
+    release: dist-0
+    run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+    workloadKind: DistributedWorkload
+    workloadName: dist-0
+  name: dist-0
+  namespace: runai-team-a
+spec:
+  nprocPerNode: "2"
+  pytorchReplicaSpecs:
+    Master:
+      replicas: 1
+      template:
+        metadata:
+          annotations:
+            totalGPUs: "4"
+            totalGPUsMemory: "0"
+            user: shay.asoolin
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: dist-0
+        spec:
+          containers:
+          - env:
+            - name: ENV_MASTER
+              value: env0
+            image: ubuntu
+            imagePullPolicy: IfNotPresent
+            name: pytorch
+            resources: {}
+            securityContext:
+              allowPrivilegeEscalation: false
+              seccompProfile:
+                type: RuntimeDefault
+          schedulerName: runai-scheduler
+    Worker:
+      replicas: 2
+      template:
+        metadata:
+          annotations:
+            totalGPUs: "4"
+            totalGPUsMemory: "0"
+            user: shay.asoolin
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: dist-0
+        spec:
+          containers:
+          - env:
+            - name: ENV_WORKER
+              value: env1
+            imagePullPolicy: IfNotPresent
+            name: pytorch
+            resources:
+              limits:
+                nvidia.com/gpu: "2"
+            securityContext:
+              seccompProfile:
+                type: RuntimeDefault
+          schedulerName: runai-scheduler
+  runPolicy:
+    backoffLimit: 12
+    cleanPodPolicy: None
+status: {}

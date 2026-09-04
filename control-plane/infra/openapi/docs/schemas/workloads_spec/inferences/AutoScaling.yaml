@@ -1,0 +1,5 @@
+allOf:
+  - $ref: "./AutoScalingCommonFields.yaml"
+  - $ref: "./AutoScalingMetricFields.yaml"
+nullable: true
+type: object

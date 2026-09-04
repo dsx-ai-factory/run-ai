@@ -1,0 +1,10 @@
+type: object
+properties:
+  key:
+    type: string
+    example: tenant.limit_quota_over_subscription
+  value:
+    example: true
+example:
+  key: tenant.limit_quota_over_subscription
+  value: true

@@ -1,0 +1,7 @@
+description: The service type of the port (mandatory).
+type: string
+enum:
+  - LoadBalancer
+  - NodePort
+  - ClusterIP
+nullable: true

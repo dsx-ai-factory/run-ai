@@ -1,0 +1,20 @@
+properties:
+  defaults:
+    allOf:
+    - $ref: "./WorkspacePolicyDefaultsV2.yaml"
+    nullable: true
+    type: object
+  rules:
+    allOf:
+    - $ref: "./WorkspacePolicyRulesV2.yaml"
+    nullable: true
+    type: object
+  imposedAssets:
+    $ref: "../Policy/ImposedAssets.yaml"
+  status:
+    $ref: "../Policy/PolicyValidationStatus.yaml"
+  defaultFromOrder:
+    x-internal: true
+    $ref: "../Policy/DefaultFromOrder.yaml"
+nullable: true
+type: object

@@ -1,0 +1,59 @@
+get:
+  tags:
+    - Registry
+  summary: Get registries.
+  description: Retrieve a list of registries assets.
+  operationId: list_registries
+  x-service: assets-service
+  x-no-authorization: true
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_registry_service_test.go
+  parameters:
+    - $ref: "../parameters/query/optional/AssetNameFilter.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Registry/RegistryListResponse.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+post:
+  tags:
+    - Registry
+  summary: Create a registry asset.
+  description: Use to create a registry asset containing a registry base url and credentials.
+  operationId: create_registry
+  x-service: assets-service
+  x-no-authorization: true
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_registry_service_test.go
+  x-audit: true
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Registry/RegistryCreationRequest.yaml"
+  responses:
+    201:
+      description: Request accepted successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Registry/Registry.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    409:
+      $ref: "../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

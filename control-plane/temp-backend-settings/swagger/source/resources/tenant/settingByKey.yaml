@@ -1,0 +1,30 @@
+get:
+  operationId: getTenantSettingsByKey
+  tags:
+  - Tenant
+  summary: Get a tenant setting by key.
+  deprecated: true
+  x-no-authorization: true
+  x-service: temp-backend-settings
+  x-test-coverage:
+  - src/test/suites/tenantSuite/tenantUserApi/tenantSystemApi.test.ts
+  description: Retrieve a specific tenant setting by key. This endpoint is deprecated and will be removed in a future release. Migrated settings are available under [/api/docs#tag/Settings](/api/docs#tag/Settings).
+  parameters:
+  - $ref: '../../parameters/settingKey.yaml'
+  - $ref: '../../parameters/tenantId.yaml'
+  responses:
+    200:
+      description: The requested setting.
+      content:
+        application/json:
+          schema:
+            description: A boolean value that indicates if the requested setting is enabled.
+            type: boolean
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

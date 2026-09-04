@@ -1,0 +1,15 @@
+image: alpine
+command: sleep 1000
+imagePullPolicy: IfNotPresent
+nodePools:
+  - default
+environmentVariables: []
+annotations: []
+labels: []
+tolerations: []
+compute: {}
+security:
+  uidGidSource: fromTheImage
+exposedUrls: []
+ports: []
+relatedUrls: []

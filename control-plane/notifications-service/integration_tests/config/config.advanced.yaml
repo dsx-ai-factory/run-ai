@@ -1,0 +1,40 @@
+app:
+  log_level: debug
+  api_port: 8085
+history:
+  enabled: true
+  cleanup:
+    max_age_duration: 1m
+    max_events_per_user: 5
+    interval_duration: 5s
+database:
+  host: "postgres"
+  port: "5432"
+  database: runai
+  schema: public
+  user: runai
+  password: admin
+  ssl_mode: disable
+  encrypt_decrypt_key: 0123456789abcdefghwertol
+
+router:
+  concurrent_limit: 50
+  cached_events: 1000
+
+listeners:
+  http-runai:
+    type: http_listener
+    port: 5000
+  smtp-runai:
+    type: smtp_listener
+
+sinks:
+  history:
+    type: history
+  email1:
+    type: email
+    user: smtp_user
+    password: password
+    smtp_host: smtp.mail.com
+    smtp_port: 587
+    smtp_tls_enabled: true

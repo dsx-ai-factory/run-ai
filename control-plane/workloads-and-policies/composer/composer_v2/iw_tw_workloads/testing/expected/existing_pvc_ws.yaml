@@ -1,0 +1,90 @@
+BatchJobTarget:
+  Config: {}
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: existing_pvc
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: existing_pvc
+      name: existing_pvc
+      namespace: runai-test
+    spec:
+      backoffLimit: 6
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: existing_pvc
+            workloadKind: Workspace
+            workloadName: existing_pvc
+        spec:
+          containers:
+          - args:
+            - --NotebookApp.base_url=/test/existing_pvc
+            - --NotebookApp.token=
+            command:
+            - start-notebook.sh
+            env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: existing_pvc
+            image: jupyter/scipy-notebook
+            imagePullPolicy: IfNotPresent
+            name: existing_pvc
+            resources:
+              requests:
+                cpu: 100m
+                memory: 100M
+            volumeMounts:
+            - mountPath: /tmp/ofer
+              name: pvc
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+          volumes:
+          - name: pvc
+            persistentVolumeClaim:
+              claimName: oferb2-pvc-874hj
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: existing-pvc-env-id
+    name: existing-pvc-env-name
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: existing_pvc, Rules: , Type: Workspace'
+  images:
+  - jupyter/scipy-notebook
+  name: 'Value: existing_pvc, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  requestedResources:
+    cpu:
+      request: 0.1
+    cpuMemory:
+      request: 100M
+    gpu:
+      request: 0
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

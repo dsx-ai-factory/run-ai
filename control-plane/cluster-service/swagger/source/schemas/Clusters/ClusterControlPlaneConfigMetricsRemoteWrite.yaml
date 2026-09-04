@@ -1,0 +1,49 @@
+type: object
+description: The cluster's metrics remote write configuration.
+properties:
+  label:
+    type: string
+    description: Remote write label.
+    example: label
+    minLength: 1  # Must have a value
+    maxLength: 253  # Label identifier format
+  url:
+    type: string
+    description: Remote write url.
+    example: https://metrics.example.com
+    minLength: 1  # Must have a value
+    maxLength: 2048  # Standard maximum URL length
+  orgID:
+    deprecated: true
+    type: string
+    description: Remote write org ID. Deprecated, use headers instead.
+    example: orgID
+    minLength: 1  # Must have a value
+    maxLength: 100  # Organization identifier format
+  headers:
+    type: object
+    description: Remote write headers.
+    minProperties: 0  # Headers are optional
+    maxProperties: 20  # Typical: 1-3 headers; supports complex routing/auth scenarios
+    additionalProperties:
+      type: string
+      description: Remote write header.
+      example: header
+      minLength: 0  # Header values can be empty (valid HTTP)
+      maxLength: 1024  # HTTP header value limit
+  credentials:
+    type: object
+    description: Remote write credentials.
+    properties:
+      username:
+        type: string
+        description: Remote write username.
+        example: user
+        minLength: 1  # Must have a value
+        maxLength: 253  # Username/email format support
+      password:
+        type: string
+        description: Remote write password.
+        example: password
+        minLength: 1  # Must have a value
+        maxLength: 1024  # Supports long secure passwords

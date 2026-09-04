@@ -1,0 +1,11 @@
+type: object
+properties:
+  idleTimeout:
+    type: number
+    description: Duration in minutes that a user can remain inactive before their browser session automatically expires and requires re-authentication
+    default: 0
+    minimum: 0
+    maximum: 10080
+    nullable: true
+example:
+  idleTimeout: 0

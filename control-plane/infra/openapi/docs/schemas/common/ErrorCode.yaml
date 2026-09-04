@@ -1,0 +1,3 @@
+type: integer
+format: int32
+description: A numeric code representing the error type.

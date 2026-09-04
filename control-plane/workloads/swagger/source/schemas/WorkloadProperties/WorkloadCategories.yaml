@@ -1,0 +1,4 @@
+type: array
+items:
+  $ref: './WorkloadCategory.yaml'
+x-schema-name: WorkloadCategories

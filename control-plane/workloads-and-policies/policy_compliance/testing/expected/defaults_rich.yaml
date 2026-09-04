@@ -1,0 +1,50 @@
+compute:
+  extendedResources:
+  - quantity: 10M
+    resource: aaa/b1
+  - quantity: 20M
+    resource: aaa/b2
+  - quantity: 30M
+    resource: aaa/b3
+  - _field_: compute.extendedResources
+environmentVariables:
+- name: HOME
+  value: home-from-policy
+- name: USER
+  value: user-from-policy
+- name: GROUP
+  value: group-from-policy
+- _field_: environmentVariables
+image: ubuntu
+imagePullPolicy: Always
+nodePools:
+- np1-from-policy
+- np2-from-policy
+security:
+  capabilities:
+  - KILL
+  - CHOWN
+  runAsNonRoot: true
+storage:
+  hostPath:
+  - mountPath: /mount/path/hp1
+    name: hp1
+    path: /path/hp1
+  - mountPath: /mount/path/hp2
+    name: hp2
+    path: /path/hp2
+  - mountPath: /mount/path/noname
+    name: pol-2
+    path: /path/noname
+  - _field_: storage.hostPath
+  s3:
+  - name: s3a
+    path: /path/s3a
+    url: https://s3a.amazonaws.com
+  - name: pol-1
+    path: /path/noname
+    url: https://noname.amazonaws.com
+  - name: s3b
+    path: /path/s3b
+    url: https://s3b.amazonaws.com
+  - _field_: storage.s3

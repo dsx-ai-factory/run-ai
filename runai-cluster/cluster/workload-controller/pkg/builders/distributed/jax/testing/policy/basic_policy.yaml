@@ -1,0 +1,12 @@
+apiVersion: run.ai/v2alpha1
+kind: DistributedPolicy
+metadata:
+  name: distpolicy
+  namespace: runai-team-a
+spec:
+  gpu:
+    value: "1"
+  environment:
+    items:
+      RUNAI_SLEEP_SECS:
+        value: "60"

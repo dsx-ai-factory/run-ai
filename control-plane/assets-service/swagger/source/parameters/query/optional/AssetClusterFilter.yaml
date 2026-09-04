@@ -1,0 +1,11 @@
+name: clusterId
+in: query
+description:
+  Filter results by Universally Unique Identifier (UUID) of the cluster. If scope filter is cluster,
+  only assets from the specific cluster will be included in the response.
+  Otherwise, the response will include cluster, tenant and system assets.
+required: false
+schema:
+  type: string
+  format: uuid
+  example: "d73a738f-fab3-430a-8fa3-5241493d7128"

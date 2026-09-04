@@ -1,0 +1,29 @@
+type: object
+required:
+  - type
+  - reason
+properties:
+  type:
+    type: string
+    description: Type of Nodepool condition.
+  reason:
+    type: string
+    description: (brief) reason for the condition's last transition.
+    example: TopologyMismatch
+  message:
+    type: string
+    description: Human readable message indicating details about last transition.
+    example: Network Topology labels mismatch
+  status:
+    type: string
+    description: The status of the condition, can be True or False
+    enum: [ "True", "False" ]
+  nodes:
+    type: array
+    description: Names of the nodes related to the nodepool condition
+    items:
+      type: string
+    example:
+      - node1
+      - node2
+x-schema-name: NodepoolConditionDetails

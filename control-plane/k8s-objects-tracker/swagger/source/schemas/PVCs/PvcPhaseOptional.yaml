@@ -1,0 +1,7 @@
+description: status of the pvc
+type: string
+enum:
+  - Bound
+  - Lost
+  - Pending
+nullable: true

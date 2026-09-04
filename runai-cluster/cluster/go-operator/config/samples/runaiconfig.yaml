@@ -1,0 +1,18 @@
+apiVersion: run.ai/v1
+kind: RunaiConfig
+metadata:
+  name: test
+  namespace: runai
+  finalizers:
+    - run.ai/finalize
+spec:
+  prometheus:
+    enabled: true
+    spec:
+      remoteWrite:
+        - url: https://prometheus-blocks-prod-us-central1.grafana.net/api/prom/push
+          writeRelabelConfigs:
+            - sourceLabels:
+                - __name__
+              regex: <comes from backend/RunAIConfigProvider>
+              action: keep

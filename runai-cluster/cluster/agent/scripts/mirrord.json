@@ -1,0 +1,10 @@
+{
+  "accept_invalid_certificates": false,
+  "feature": {
+    "network": {
+      "incoming": "steal",
+      "outgoing": true
+    },
+    "env": true
+  }
+}

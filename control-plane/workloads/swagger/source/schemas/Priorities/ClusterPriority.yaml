@@ -1,0 +1,8 @@
+allOf:
+  - type: object
+  - properties:
+      phase:
+        type: string
+        example: "Ready"
+        description: Current phase of the priority in the specified cluster
+  - $ref: "./BasePriority.yaml"

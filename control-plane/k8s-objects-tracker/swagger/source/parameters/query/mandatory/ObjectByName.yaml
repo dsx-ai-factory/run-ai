@@ -1,0 +1,6 @@
+name: name
+in: query
+description: filter by name
+schema:
+  type: string
+required: true

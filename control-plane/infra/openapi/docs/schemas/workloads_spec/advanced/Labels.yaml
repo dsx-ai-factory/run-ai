@@ -1,0 +1,6 @@
+description: Set of labels to populate into the container running the workload.
+type: array
+items:
+  $ref: "./Label.yaml"
+maxItems: 1000
+nullable: true

@@ -1,0 +1,101 @@
+suite: BFF service ConfigMap cache configuration
+
+templates:
+  - templates/bff-service/configmap.yaml
+
+tests:
+  - it: includes CACHE_ENABLED, CACHE_URL, CACHE_READ_URL, CACHE_TYPE when cacheEnabled is true
+    set:
+      bffService:
+        config:
+          cacheEnabled: true
+      global:
+        cache:
+          url: "redis:6379"
+          readUrl: "redis-read:6379"
+          type: "redis"
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: data.CACHE_ENABLED
+          value: "true"
+      - equal:
+          path: data.CACHE_URL
+          value: "redis:6379"
+      - equal:
+          path: data.CACHE_READ_URL
+          value: "redis-read:6379"
+      - equal:
+          path: data.CACHE_TYPE
+          value: "redis"
+
+  - it: omits cache keys when cacheEnabled is false
+    set:
+      bffService:
+        config:
+          cacheEnabled: false
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - notExists:
+          path: data.CACHE_URL
+      - notExists:
+          path: data.CACHE_READ_URL
+      - notExists:
+          path: data.CACHE_TYPE
+
+  - it: uses bffService.config cache overrides when set (over global.cache)
+    set:
+      bffService:
+        config:
+          cacheEnabled: true
+          cacheUrl: "custom-cache:6380"
+          cacheReadUrl: "custom-cache-read:6380"
+          cacheType: "memcached"
+      global:
+        cache:
+          url: "redis:6379"
+          readUrl: "redis-read:6379"
+          type: "redis"
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: data.CACHE_ENABLED
+          value: "true"
+      - equal:
+          path: data.CACHE_URL
+          value: "custom-cache:6380"
+      - equal:
+          path: data.CACHE_READ_URL
+          value: "custom-cache-read:6380"
+      - equal:
+          path: data.CACHE_TYPE
+          value: "memcached"
+
+  - it: uses global.cache url, readUrl and type when cacheEnabled true and bffService.config cache not set
+    set:
+      bffService:
+        config:
+          cacheEnabled: true
+      global:
+        cache:
+          url: "nats:4222"
+          readUrl: "nats:4222"
+          type: "nats"
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: data.CACHE_ENABLED
+          value: "true"
+      - equal:
+          path: data.CACHE_URL
+          value: "nats:4222"
+      - equal:
+          path: data.CACHE_READ_URL
+          value: "nats:4222"
+      - equal:
+          path: data.CACHE_TYPE
+          value: "nats"

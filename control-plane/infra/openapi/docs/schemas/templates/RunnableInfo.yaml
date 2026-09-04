@@ -1,0 +1,11 @@
+description: whether the template can be submitted, as is
+properties:
+  isRunnable:
+    type: boolean
+    description: indication if the template is runnable, as is
+    example: false
+  issue:
+    type: string
+    nullable: true
+    description: if the template is non runnable, specify a reason
+    example: mandatory image is not provided

@@ -1,0 +1,9 @@
+type: string
+enum:
+  - Required
+  - None
+description: |
+  MNNVL (Multi-Node NVLink) mode:
+  - Required: The workload is configured to use MNNVL acceleration. The workload type and at least one project’s node pool must support MNNVL, or the request fails. When set, the workload is scheduled only on compatible nodes, and may remain pending until sufficient MNNVL-capable capacity is available.
+  - None: The workload will not use MNNVL acceleration, even if MNNVL-capable nodes are available.
+example: Required

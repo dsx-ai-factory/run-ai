@@ -1,0 +1,7 @@
+ports:
+  - name: FIXED_PORT
+    container: 9999
+  - name: CAN_CHANGE_PORT
+    container: 9998
+  - name: ADDED_PORT
+    container: 9998

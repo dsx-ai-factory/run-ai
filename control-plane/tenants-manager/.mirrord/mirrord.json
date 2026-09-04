@@ -1,0 +1,23 @@
+{
+    "target": {
+        "path": {
+            "deployment": "runai-backend-tenants-manager",
+            "container": "tenants-manager"
+        },
+        "namespace": "runai-backend"
+    },
+    "feature": {
+        "env": true,
+        "fs": {
+            "mode": "read",
+            "read_only": [
+                "/etc/secrets.*"
+            ]
+        },
+        "network": {
+            "incoming": {
+                "mode": "steal"
+            }
+        }
+    }
+}

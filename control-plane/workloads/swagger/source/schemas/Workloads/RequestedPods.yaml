@@ -1,0 +1,29 @@
+type: object
+properties:
+  number:
+    type: integer
+    format: int32
+    example: 1
+    nullable: true
+  min:
+    type: integer
+    format: int32
+    example: 2
+    nullable: true
+  max:
+    type: integer
+    format: int32
+    example: 5
+    nullable: true
+  parallelism:
+    type: integer
+    format: int32
+    description: "specifies how many Pods can run in parallel"
+    example: 3
+    nullable: true
+  completions:
+    type: integer
+    description: "specifies how many Pods should terminate successfully before the Workload is completed"
+    format: int32
+    example: 5
+    nullable: true

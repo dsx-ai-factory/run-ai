@@ -1,0 +1,14 @@
+type: object
+description: Compatibility networking configuration sent to agents through the existing networking update field.
+nullable: true
+properties:
+  externalAccess:
+    description: External access configuration for exposing the endpoint outside the cluster.
+    $ref: "./ExternalAccess.yaml"
+  services:
+    description: Kubernetes service to create or reference for this endpoint (maximum one).
+    type: array
+    maxItems: 1
+    items:
+      $ref: "./AgentNetworkingService.yaml"
+    nullable: true

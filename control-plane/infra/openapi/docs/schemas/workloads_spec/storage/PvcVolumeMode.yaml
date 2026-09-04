@@ -1,0 +1,6 @@
+description: Default volume mode for the PVC. Choose between Filesystem (default) or Block.
+type: string
+enum:
+  - Filesystem
+  - Block
+nullable: true

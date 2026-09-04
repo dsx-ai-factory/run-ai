@@ -1,0 +1,7 @@
+required:
+  - entries
+properties:
+  entries:
+    type: array
+    items:
+      $ref: "./ModelAsset.yaml"

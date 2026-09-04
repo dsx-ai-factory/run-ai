@@ -1,0 +1,7 @@
+allOf:
+  - replace: me
+  - $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/distributed_inferences/DistributedInferenceStartupPolicyFieldRules.yaml"
+  - $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/distributed_inferences/DistributedInferenceWorkersFieldRules.yaml"
+  - $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/distributed_inferences/DistributedInferenceReplicasFieldRules.yaml"
+nullable: true
+type: object

@@ -1,0 +1,6 @@
+description: Set of data volumes to use in the workload.
+type: array
+items:
+  $ref: "./DataVolumeInstance.yaml"
+maxItems: 1000
+nullable: true

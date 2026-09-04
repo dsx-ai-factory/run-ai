@@ -1,0 +1,8 @@
+name: workloadId
+in: query
+description: The id of the workload
+required: false
+schema:
+  type: string
+  format: uuid
+  example: "d73a738f-fab3-430a-8fa3-5241493d7128"

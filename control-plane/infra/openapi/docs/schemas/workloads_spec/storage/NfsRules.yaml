@@ -1,0 +1,11 @@
+properties:
+  path:
+    $ref: "../../policy_rules/StringRules.yaml"
+  readOnly:
+    $ref: "../../policy_rules/BooleanRules.yaml"
+  server:
+    $ref: "../../policy_rules/StringRules.yaml"
+  mountPath:
+    $ref: "../../policy_rules/StringRules.yaml"
+nullable: true
+type: object

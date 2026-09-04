@@ -1,0 +1,11 @@
+properties:
+  authorizationType:
+    $ref: "./ServingPortAccessAuthorizationTypeEnum.yaml"
+  authorizedUsers:
+    $ref: "../connectivity/AuthorizedUsers.yaml"
+  authorizedGroups:
+    $ref: "../connectivity/AuthorizedGroups.yaml"
+  clusterLocalAccessOnly:
+    description: Configure the serving port URL to be available only on the cluster-local network, and not externally. Defaults to false
+    type: boolean
+    nullable: true

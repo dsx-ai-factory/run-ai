@@ -1,0 +1,39 @@
+description: |
+  Layer 3 case "workload" for kubeflow.org/MPIJob/v1. SETs workload-level
+  fields (runPolicy, slotsPerWorker) and workloadMetadata (labels, annotations
+  on the MPIJob resource itself).
+effectiveRules:
+  # ----- workloadMetadata (MPIJob labels/annotations) -----
+  - field: labels
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "app", value: "mpi-test" } }]
+  - field: annotations
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "example.com/annotation", value: "test-value" } }]
+
+  # ----- runPolicy fields -----
+  - field: runPolicy-CleanPodPolicy
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: Running } }]
+  - field: runPolicy-TTLSecondsAfterFinished
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 3600 } }]
+  - field: runPolicy-ActiveDeadlineSeconds
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 86400 } }]
+  - field: runPolicy-BackoffLimit
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 3 } }]
+  - field: runPolicy-Suspend
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: false } }]
+
+  # ----- MPI-specific fields -----
+  - field: slotsPerWorker
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 2 } }]
+
+  # ----- container image (verify policy modifies skeleton) -----
+  - field: image
+    specSelector: allContainers
+    enforcements: [{ set: { value: "mpioperator/mpi-horovod:2.0" } }]

@@ -1,0 +1,3 @@
+allOf:
+  - $ref: "./NgcApiKeyCreationSpec.yaml"
+  - $ref: "../Credentials/EncryptionKeyId.yaml" 

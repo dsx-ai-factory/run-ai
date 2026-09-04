@@ -1,0 +1,49 @@
+apiVersion: kubeflow.org/v1
+kind: TFJob
+metadata:
+  annotations:
+    image: ubuntu
+    template: job-0-20220125-034942
+    user: user.name
+    workloadApiVersion: run.ai/v2alpha1
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  deletionTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: tfjob
+    createdBy: TFJob
+    project: team-a
+    release: job-0
+    run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+    workloadKind: DistributedWorkload
+    workloadName: job-0-20220125-034942
+  name: job-0
+  namespace: runai-team-a
+spec:
+  runPolicy:
+    backoffLimit: 18
+    cleanPodPolicy: Running
+  tfReplicaSpecs:
+    Worker:
+      replicas: 3
+      template:
+        metadata:
+          annotations:
+            totalGPUs: "0"
+            totalGPUsMemory: "0"
+            user: user.name
+          labels:
+            project: team-a
+            run.ai/top-owner-uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+            workloadKind: DistributedWorkload
+            workloadName: job-0-20220125-034942
+        spec:
+          containers:
+          - image: ubuntu
+            imagePullPolicy: IfNotPresent
+            name: tensorflow
+            resources: {}
+            securityContext:
+              seccompProfile:
+                type: RuntimeDefault
+          schedulerName: runai-scheduler
+status: {}

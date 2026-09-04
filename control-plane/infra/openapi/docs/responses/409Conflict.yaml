@@ -1,0 +1,8 @@
+description: The specified resource already exists
+content:
+  application/json:
+    schema:
+      $ref: './Error.yaml'
+    example:
+      code: 409
+      message: "Resource with this name already exists"

@@ -1,0 +1,7 @@
+image: ubuntu
+
+storage:
+  emptyDirVolume:
+    - path: /mount/empty/1
+    - name: ed2
+      exclude: true

@@ -1,0 +1,30 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package nfs
+
+import (
+	mapset "github.com/deckarep/golang-set/v2"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/api/specset/parser"
+)
+
+const (
+	Path      = "path"
+	Server    = "server"
+	MountPath = "mountpath"
+	ReadWrite = "readwrite"
+
+	ParserName = "NfsParser"
+)
+
+var (
+	Nfs = []string{Path, Server, MountPath, ReadWrite}
+)
+
+// path=PATH,server=SERVER,mountpath=MOUNT_PATH,readwrite
+
+func NewParser(cmv string) *parser.AttributeMapper {
+	return parser.NewAttributeMapper(cmv, parser.NewLooseMapParser(ParserName, mapset.NewSet[string](Nfs...)))
+}

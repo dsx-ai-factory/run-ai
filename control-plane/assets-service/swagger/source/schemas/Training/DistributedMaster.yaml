@@ -1,0 +1,12 @@
+properties:
+  sameAsWorker:
+    description: if true, indicates that the master should be identical to the worker. In this case
+      assets and specificRunParams should not be provided.
+    type: boolean
+    example: true
+  assets:
+    $ref: "./OptionalAssetIds.yaml"
+  specificRunParams:
+    $ref: "./TrainingSpecificRunParams.yaml"
+nullable: true
+type: object

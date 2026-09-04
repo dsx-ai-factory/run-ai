@@ -1,0 +1,73 @@
+defaults:
+  worker:
+    image: ubuntu-worker
+    environmentVariables:
+      instances:
+        - name: name_from_the_policy_worker
+          value: value_from_the_policy_worker
+    compute:
+      cpuCoreLimit: 10
+      extendedResources:
+        instances:
+          - resource: worker/bbb
+          - resource: worker/ddd
+            quantity: 110M
+        attributes:
+          quantity: 120M
+    storage:
+      pvc:
+        attributes:
+          claimInfo:
+            storageClass: standard-worker
+            size: 2M
+        instances:
+          - path: "/worker/bbb"
+  master:
+    image: ubuntu-master
+    environmentVariables:
+      instances:
+        - name: name_from_the_policy_master
+          value: value_from_the_policy_master
+    compute:
+      cpuCoreLimit: 11
+      extendedResources:
+        instances:
+          - resource: master/bbb
+          - resource: master/ddd
+            quantity: 111M
+        attributes:
+          quantity: 121M
+    storage:
+      pvc:
+        attributes:
+          claimInfo:
+            storageClass: standard-master
+        instances:
+          - path: "/master/bbb"
+rules:
+  worker:
+    image:
+      required: true
+    workingDir:
+      required: true
+    storage:
+      pvc:
+        attributes:
+          claimInfo:
+            storageClass:
+              canEdit: false
+        instances:
+          canAdd: false
+  master:
+    image:
+      required: true
+    createHomeDir:
+      required: true
+    storage:
+      pvc:
+        attributes:
+          claimInfo:
+            storageClass:
+              canEdit: false
+        instances:
+          canAdd: false

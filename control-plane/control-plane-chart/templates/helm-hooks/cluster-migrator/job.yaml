@@ -1,0 +1,14 @@
+{{- if .Values.clusterMigrator.enabled }}
+{{- include "common.job" (list . .Values.clusterMigrator .Values.clusterMigrator.serviceAccount "control-plane.clusterMigrator.job") }}
+{{- end }}
+
+{{- define "control-plane.clusterMigrator.job" -}}
+spec:
+  template:
+    spec:
+      containers:
+      - {{- include "common.container" . | nindent 12 }}
+      restartPolicy: OnFailure
+      initContainers:
+        {{- include "awaitingClusterServiceReadiness" . | nindent 12 }}
+{{- end }}

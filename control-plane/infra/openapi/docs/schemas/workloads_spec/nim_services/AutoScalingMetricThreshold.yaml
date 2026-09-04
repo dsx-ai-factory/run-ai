@@ -1,0 +1,4 @@
+description: The threshold to use with the specified metric for autoscaling (mandatory).
+type: integer
+format: int32
+nullable: true

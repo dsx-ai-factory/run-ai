@@ -1,0 +1,77 @@
+flatWorkloads:
+  Distributed: null
+  Inferences: null
+  Trainings:
+  - actualPhase: Creating
+    clusterId: ""
+    createdAt: "0001-01-01T00:00:00Z"
+    createdBy: ""
+    desiredPhase: Running
+    name: no_specific_params_train
+    projectId: ""
+    requestedName: no_specific_params_train
+    spec:
+      annotations:
+      - name: run.ai/assets-info
+        value: ""
+      args: -x myscript.py
+      command: python3
+      compute:
+        gpuDevicesRequest: 1
+        gpuMemoryLimit: 20M
+        gpuMemoryRequest: 10M
+        gpuRequestType: memory
+      createHomeDir: true
+      environmentVariables:
+      - name: HOME
+        value: /my/home
+      - name: USER
+        value: my-user
+      exposedUrls: []
+      image: ubuntu
+      ports: []
+      relatedUrls: []
+      security:
+        allowPrivilegeEscalation: false
+        hostIpc: true
+        hostNetwork: true
+        runAsGid: 30
+        runAsNonRoot: true
+        runAsUid: 500
+        seccompProfileType: RuntimeDefault
+        supplementalGroups: 2,3,5,8
+        uidGidSource: custom
+      storage:
+        configMapVolume:
+        - configMap: my-config-map
+          mountPath: /my-path
+        git:
+        - branch: master
+          path: /my/path
+          repository: my.repository
+        hostPath:
+        - mountPath: /external/path
+          mountPropagation: None
+          path: /container/path
+          readOnly: true
+        nfs:
+        - mountPath: /external/path
+          path: /container/path
+          readOnly: true
+          server: my.nfs.com
+        pvc:
+        - claimName: existing-claim
+          existingPvc: true
+          path: /my/existing/pvc/path
+          readOnly: true
+        - claimName: non-existing-claim
+          existingPvc: true
+          path: /my/non/existing/pvc/path
+          readOnly: true
+        s3:
+        - bucket: my-bucket
+          path: /container/my-bucket
+          url: https://s3.amazonaws.com
+      workingDir: /my/home
+    workloadId: ""
+  Workspaces: null

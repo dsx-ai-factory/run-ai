@@ -1,0 +1,32 @@
+policy:
+  effectiveRules:
+  - enforcements:
+    - set:
+        key: new-label
+        value: new-value
+    field: matchLabelsSelector
+    sourceOfRule: null
+    specSelector: workloadSpec
+  workloadType:
+    group: apps
+    kind: Deployment
+    version: v1
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: test
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: test
+        new-label: new-value
+    template:
+      metadata:
+        labels:
+          app: test
+      spec:
+        containers:
+        - image: nginx
+          name: c

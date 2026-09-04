@@ -1,0 +1,51 @@
+post:
+  tags:
+  - Tokens
+  summary: Create an access token v1
+  deprecated: true
+  x-service: identity-manager
+  x-test-coverage:
+  - src/test/suites/sphinxSuite/tenant.test.ts
+  description: |
+    Create tokens using the `grant_type` parameter.
+    This endpoint is deprecated. Use `/api/v2/token` instead.
+  operationId: grant_token
+  x-no-authorization: true
+  x-audit: true
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/Tokens/TokenRequest.yaml'
+        examples:
+          client_credentials:
+            value:
+              $ref: './examples/client_credentials.yaml'
+            description: "Obtain the clientID and the clientSecret using service accounts or access keys endpoints"
+          refresh_token:
+            value:
+              $ref: './examples/refresh_token.yaml'
+          exchange_token:
+            value:
+              $ref: './examples/exchange_token.yaml'
+          external_token_exchange:
+            value:
+              $ref: './examples/external_token.yaml'
+          app_token (deprecated):
+            x-internal: true
+            value:
+              $ref: './examples/app_token.yaml'
+            description: "Deprecated - Obtain the appID and the appSecret using applications or access keys endpoints"
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Tokens/TokenResponse.yaml'
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

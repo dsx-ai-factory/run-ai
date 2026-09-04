@@ -1,0 +1,9 @@
+type: string
+enum:
+  - Use
+  - DontUse
+  - Auto
+nullable: true
+default: Auto
+description: GPUNetworkAccelerationDetection is a strategy to use
+  for GPU Network Acceleration detection

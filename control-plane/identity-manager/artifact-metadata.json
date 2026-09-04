@@ -1,0 +1,19 @@
+{
+  "service_name": "identity-manager",
+  "artifact_type": "container",
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "notifications": {
+    "slack": {
+      "mention": "@sphinx"
+    }
+  },
+  "make": {
+    "test": {
+      "runs_on": "ubuntu-latest-8-cores"
+    }
+  },
+  "jira": {
+    "team_name": "Sphinx"
+  }
+}

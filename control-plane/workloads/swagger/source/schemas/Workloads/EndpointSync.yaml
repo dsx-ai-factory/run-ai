@@ -1,0 +1,14 @@
+allOf:
+  - $ref: "./Endpoint.yaml"
+  - type: object
+    properties:
+      sourceRef:
+        type: object
+        description: A reference to the Kubernetes resource responsible for exposing the endpoint. This identifies the underlying object (such as an Ingress or Service) that defines the network routing configuration.
+        properties:
+          kind:
+            type: string
+            description: The Kubernetes resource kind that exposes the endpoint (for example, Ingress or Service).
+          name:
+            type: string
+            description: The name of the Kubernetes resource exposing the endpoint.

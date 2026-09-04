@@ -1,0 +1,6 @@
+type: object
+properties:
+  projectManualOverQuota:
+    $ref: "./NodePoolSetting.yaml"
+  cpuResourcesQuota:
+    $ref: "./NodePoolSetting.yaml"

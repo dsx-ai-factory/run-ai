@@ -1,0 +1,6 @@
+description: The type of external tool that is associated with the connection. External tool typically runs in the cloud and require external url for connecting to it.
+type: string
+minLength: 1
+enum:
+  - wandb
+  - comet

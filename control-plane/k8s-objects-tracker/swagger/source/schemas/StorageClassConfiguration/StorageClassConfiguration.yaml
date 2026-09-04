@@ -1,0 +1,29 @@
+type: object
+required:
+  - id
+  - tenantId
+  - scopeType
+  - scopeId
+  - name
+properties:
+  id:
+    description: The unique identifier of the storage class configuration.
+    type: string
+    format: uuid
+  tenantId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml"
+  scopeType:
+    description: "Currently supported value: 'cluster', which is also the default."
+    type: string
+    enum:
+      - cluster
+    default: cluster
+    example: cluster
+  scopeId:
+    $ref: "../Scopes/ScopeClusterId.yaml"
+  name:
+    $ref: "./StorageClassName.yaml"
+  permissions:
+    $ref: "./StorageClassPermissions.yaml"
+  customization:
+    $ref: "./StorageClassCustomization.yaml"

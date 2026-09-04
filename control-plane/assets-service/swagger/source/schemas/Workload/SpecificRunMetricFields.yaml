@@ -1,0 +1,10 @@
+properties:
+  thresholdMetric:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/AutoScalingMetric.yaml"
+  thresholdValue:
+    description: The threshold value to use with the specified metric for autoscaling
+    type: integer
+    format: int32
+    nullable: true
+type: object
+nullable: true

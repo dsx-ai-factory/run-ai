@@ -1,0 +1,5 @@
+allOf:
+  - $ref: "../../policy_rules/StringRulesCommon.yaml"
+  - $ref: "./NimServiceServingPortAuthorizationTypeOptions.yaml"
+nullable: true
+type: object

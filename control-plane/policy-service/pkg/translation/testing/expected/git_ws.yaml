@@ -1,0 +1,50 @@
+createdAt: "0001-01-01T00:00:00Z"
+createdBy: ""
+description: translation of my-policy
+id: ""
+projectId: "4500001"
+rules:
+- enforcements:
+  - set:
+      branch: main
+      name: karta-main
+      path: /karta/test
+      repository: https://github.com/run-ai/karta
+  - default:
+      branch: test
+      name: karts-test
+      path: /karta/main
+      repository: https://github.com/run-ai/karta
+  field: storage-Git
+  specSelector: workspaceSpec
+- enforcements:
+  - options:
+    - karta-main
+    - karts-test
+  field: storage-Git-ItemKey
+  itemSelector: allGits
+  specSelector: workspaceSpec
+- enforcements:
+  - set:
+      value: main
+  field: storage-Git-Branch
+  itemSelector: allGits
+  specSelector: workspaceSpec
+- enforcements:
+  - options:
+    - https://github.com/example/default.git
+    - https://github.com/example/repo.git
+    - https://github.com/example/other-repo.git
+  - required: true
+  - default:
+      value: https://github.com/example/default.git
+  field: storage-Git-Repository
+  itemSelector: allGits
+  specSelector: workspaceSpec
+scope: project
+updatedAt: "0001-01-01T00:00:00Z"
+updatedBy: ""
+workloadType:
+  group: run.ai
+  kind: Workspace
+  version: v1

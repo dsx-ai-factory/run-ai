@@ -1,0 +1,6 @@
+apiVersion: run.ai/v1alpha1
+kind: DataVolume
+metadata:
+  name: datavolume-sample
+spec:
+  # TODO(user): Add fields here

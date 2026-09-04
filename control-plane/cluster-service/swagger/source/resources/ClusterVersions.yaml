@@ -1,0 +1,30 @@
+get:
+  summary: Get cluster versions.
+  description: Retrieve the cluster versions
+  x-internal: true
+  x-service: cluster-service
+  x-test-coverage:
+    - src/test/suites/advancedSuite/clusterService/clusterServiceApi.test.ts
+  operationId: get_cluster_versions
+  x-authorize:
+    resource-type: cluster
+    action: read
+  tags:
+    - Clusters
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Clusters/ClusterVersions.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

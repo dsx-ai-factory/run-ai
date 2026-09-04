@@ -1,0 +1,94 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+allOf:
+- nullable: true
+  properties:
+    annotations:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
+    autoscaling:
+      nullable: true
+      properties:
+        maxReplicas:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+        metric:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+        metricThreshold:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+        minReplicas:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+        scaleWindowSeconds:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+      type: object
+    category:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    compute:
+      nullable: true
+      properties:
+        cpuCoreLimit:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/NumberRules.yaml
+        cpuCoreRequest:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/NumberRules.yaml
+        cpuMemoryLimit:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/QuantityRules.yaml
+        cpuMemoryRequest:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/QuantityRules.yaml
+        gpuDevicesRequest:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+        gpuMemoryLimit:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/QuantityRules.yaml
+        gpuMemoryRequest:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/QuantityRules.yaml
+        gpuPortionLimit:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/NumberRules.yaml
+        gpuPortionRequest:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/NumberRules.yaml
+        gpuRequestType:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuRequestRules.yaml
+      type: object
+    environmentVariables:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
+    image:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    imagePullPolicy:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/ImagePullPolicyRules.yaml
+    imagePullSecrets:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/ImagePullSecretsRules.yaml
+    labels:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
+    modelStore:
+      nullable: true
+      properties:
+        nimCache:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/nim_services/NimCacheRules.yaml
+        pvc:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/storage/PvcRules.yaml
+      type: object
+    multiNode:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/nim_services/NimServiceMultiNodeRules.yaml
+    ngcAuthSecret:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    nodePools:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/ArrayRules.yaml
+    preemptibility:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/PreemptibilityRules.yaml
+    priorityClass:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    probes:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/ProbesRules.yaml
+    replicas:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
+    security:
+      nullable: true
+      properties:
+        runAsGid:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRulesOptional.yaml
+        runAsUid:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRulesOptional.yaml
+      type: object
+    servingPort:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/nim_services/NimServiceServingPortRules.yaml
+    tolerations:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/TolerationsRules.yaml
+  type: object

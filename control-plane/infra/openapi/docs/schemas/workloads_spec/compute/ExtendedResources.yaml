@@ -1,0 +1,6 @@
+description: Extended resources and their quantity.
+type: array
+items:
+  $ref: "./ExtendedResource.yaml"
+maxItems: 1000
+nullable: true

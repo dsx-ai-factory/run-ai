@@ -1,0 +1,30 @@
+title: SupersetSpecAllOfSecurity
+nullable: true
+properties:
+  allowPrivilegeEscalation:
+    $ref: ./AllowPrivilegeEscalation.yaml
+  capabilities:
+    $ref: ./Capabilities.yaml
+  hostIpc:
+    $ref: ./HostIpc.yaml
+  hostNetwork:
+    $ref: ./HostNetwork.yaml
+  privileged:
+    allOf:
+    - $ref: ./Privileged.yaml
+    x-internal: true
+  readOnlyRootFilesystem:
+    $ref: ./ReadOnlyRootFileSystem.yaml
+  runAsGid:
+    $ref: ./RunAsGid.yaml
+  runAsNonRoot:
+    $ref: ./RunAsNonRoot.yaml
+  runAsUid:
+    $ref: ./RunAsUid.yaml
+  seccompProfileType:
+    $ref: ./SeccompProfileType.yaml
+  supplementalGroups:
+    $ref: ./SupplementalGroups.yaml
+  uidGidSource:
+    $ref: ./UidGidSource.yaml
+type: object

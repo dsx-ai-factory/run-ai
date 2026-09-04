@@ -1,0 +1,23 @@
+required:
+  - url
+  - credentialKind
+  - user
+  - password
+properties:
+  url:
+    description: The registry base url.
+    type: string
+    example: "https://hub.docker.com/"
+    minLength: 1
+  credentialKind:
+    $ref: "./CredentialKind.yaml"
+  user:
+    description: The name of the user.
+    type: string
+    example: admin
+    minLength: 1
+  password:
+    description: The password.
+    type: string
+    example: 12345678
+    minLength: 1

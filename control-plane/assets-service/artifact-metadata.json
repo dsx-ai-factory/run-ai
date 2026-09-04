@@ -1,0 +1,19 @@
+{
+  "service_name": "assets-service",
+  "artifact_type": "container",
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "make": {
+    "test": {
+      "runs_on": "ubuntu-latest-8-cores"
+    }
+  },
+  "notifications": {
+    "slack": {
+      "mention": "@viper"
+    }
+  },
+  "jira": {
+    "team_name": "Viper Team"
+  }
+}

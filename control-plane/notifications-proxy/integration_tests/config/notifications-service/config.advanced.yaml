@@ -1,0 +1,29 @@
+app:
+  log_level: debug
+  api_port: 8085
+  authorization_use_mock: true
+  authorization:
+    url: http://authorization-service-mock:4444
+database:
+  host: "postgres"
+  port: "5432"
+  database: runai
+  schema: public
+  user: runai
+  password: admin
+  ssl_mode: disable
+  encrypt_decrypt_key: 0123456789abcdefghwertol
+
+router:
+  concurrent_limit: 50
+  cached_events: 1000
+
+listeners:
+  http-runai:
+    type: http_listener
+    port: 5000
+
+sinks:
+  slack-3:
+    type: slack
+    api_token: xoxp-aaa

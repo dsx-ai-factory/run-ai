@@ -1,0 +1,38 @@
+apiVersion: leaderworkerset.x-k8s.io/v1
+kind: LeaderWorkerSet
+metadata:
+  annotations:
+    example.com/annotation: test-value
+  labels:
+    app: lws-test
+  name: test
+spec:
+  leaderWorkerTemplate:
+    leaderTemplate:
+      metadata: {}
+      spec:
+        containers:
+        - image: lws/worker:v1
+          name: leader
+        initContainers:
+        - image: lws/worker:v1
+          name: init
+    size: 1
+    workerTemplate:
+      metadata: {}
+      spec:
+        containers:
+        - image: lws/worker:v1
+          name: worker
+        initContainers:
+        - image: lws/worker:v1
+          name: init
+  networkConfig:
+    subdomainPolicy: Shared
+  replicas: 4
+  rolloutStrategy:
+    rollingUpdateConfiguration:
+      maxSurge: 25%
+      maxUnavailable: "0"
+    type: RollingUpdate
+  startupPolicy: LeaderReady

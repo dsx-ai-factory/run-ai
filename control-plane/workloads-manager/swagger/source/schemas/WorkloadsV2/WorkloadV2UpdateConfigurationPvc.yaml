@@ -1,0 +1,14 @@
+type: object
+additionalProperties: false
+description: |
+  PersistentVolumeClaim entry to be created and reconciled under the
+  WorkloadRunner on the cluster. Maps onto a Kubernetes `v1.PersistentVolumeClaim`
+  with a curated subset of fields exposed at the API layer.
+required:
+  - metadata
+  - spec
+properties:
+  metadata:
+    $ref: "./WorkloadV2UpdateConfigurationPvcMetadata.yaml"
+  spec:
+    $ref: "./WorkloadV2UpdateConfigurationPvcSpec.yaml"

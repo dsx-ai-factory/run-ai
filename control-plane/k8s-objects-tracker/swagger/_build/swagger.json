@@ -1,0 +1,6299 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "K8sObjectTracker",
+    "version": "1.0",
+    "description": "An API for tracking k8s object in the cluster",
+    "contact": {
+      "name": "Run.AI",
+      "url": "https://www.run.ai/",
+      "email": "support@run.ai"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://app.run.ai"
+    },
+    {
+      "url": "https://staging.run.ai"
+    },
+    {
+      "url": "https://test.run.ai"
+    },
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "health check",
+        "x-no-authorization": true,
+        "x-internal": true,
+        "operationId": "health",
+        "x-service": "k8s-objects-tracker",
+        "tags": [
+          "Health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully."
+          }
+        }
+      }
+    },
+    "/api/v1/pvcs": {
+      "get": {
+        "summary": "list details of pvcs",
+        "operationId": "list_pvcs",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-no-authorization": true,
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ScopeType"
+          },
+          {
+            "$ref": "#/components/parameters/ScopeId"
+          },
+          {
+            "$ref": "#/components/parameters/nameFilter"
+          },
+          {
+            "$ref": "#/components/parameters/FilterByCluster"
+          },
+          {
+            "$ref": "#/components/parameters/originFilter"
+          },
+          {
+            "$ref": "#/components/parameters/includeAncestors"
+          },
+          {
+            "$ref": "#/components/parameters/includeDescendants"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PVCListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/pvcs/{clusterUuid}": {
+      "post": {
+        "summary": "sync the names of cluster-wide pvcs to the control plane.",
+        "description": "this API is used by cluster versions < 2.17",
+        "deprecated": true,
+        "operationId": "sync_cluster_wide_pvc_names_v1",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PVCNames"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PVCNames"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v2/pvcs/{clusterUuid}": {
+      "post": {
+        "summary": "sync the details of cluster-wide pvcs to the control plane",
+        "operationId": "sync_cluster_wide_pvcs_v2",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PVCs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PVCs"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/pvcs/{clusterUuid}/{pvcName}": {
+      "post": {
+        "summary": "upload the name of cluster-wide pvc to the control plane",
+        "description": "this API is used by cluster versions < 2.17",
+        "deprecated": true,
+        "operationId": "create_cluster_wide_pvc_v1",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/PVCName"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "unused": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PVCName"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete cluster-wide PVC",
+        "description": "this API is used by cluster versions < 2.17",
+        "deprecated": true,
+        "operationId": "delete_cluster_wide_pvc_v1",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/PVCName"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v2/pvcs/{clusterUuid}/{pvcName}": {
+      "post": {
+        "summary": "upload the details of cluster-wide pvc to the control plane",
+        "operationId": "create_cluster_wide_pvc_v2",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/PVCName"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PVCCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PVC"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete cluster-wide PVC",
+        "operationId": "delete_cluster_wide_pvc_v2",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/PVCName"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/pvcs/{clusterUuid}/department/{departmentId}": {
+      "post": {
+        "summary": "sync the names of department-wide pvcs to the control plane",
+        "description": "this API is used by cluster versions < 2.17",
+        "deprecated": true,
+        "operationId": "sync_department_wide_pvc_names_v1",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PVCNames"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PVCNames"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v2/pvcs/{clusterUuid}/department/{departmentId}": {
+      "post": {
+        "summary": "sync the details of department-wide pvcs to the control plane",
+        "operationId": "sync_department_wide_pvcs_v2",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PVCs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PVCs"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v2/pvcs/{clusterUuid}/departments/{departmentId}": {
+      "post": {
+        "summary": "sync the details of department-wide pvcs to the control plane",
+        "operationId": "sync_departments_wide_pvcs_v2",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PVCs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PVCs"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/pvcs/{clusterUuid}/department/{departmentId}/{pvcName}": {
+      "post": {
+        "summary": "upload the name of department-wide pvc to the control plane",
+        "description": "this API is used by cluster versions < 2.17",
+        "deprecated": true,
+        "operationId": "create_department_wide_pvc_v1",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentId"
+          },
+          {
+            "$ref": "#/components/parameters/PVCName"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "unused": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PVCName"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete department-wide PVC",
+        "description": "this API is used by cluster versions < 2.17",
+        "deprecated": true,
+        "operationId": "delete_department_wide_pvc_v1",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentId"
+          },
+          {
+            "$ref": "#/components/parameters/PVCName"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v2/pvcs/{clusterUuid}/department/{departmentId}/{pvcName}": {
+      "post": {
+        "summary": "upload the details of department-wide pvc to the control plane",
+        "operationId": "create_department_wide_pvc_v2",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentId"
+          },
+          {
+            "$ref": "#/components/parameters/PVCName"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PVCCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PVC"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete department-wide PVC",
+        "operationId": "delete_department_wide_pvc_v2",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentId"
+          },
+          {
+            "$ref": "#/components/parameters/PVCName"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v2/pvcs/{clusterUuid}/departments/{departmentId}/{pvcName}": {
+      "post": {
+        "summary": "upload the details of department-wide pvc to the control plane",
+        "operationId": "create_departments_wide_pvc_v2",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentId"
+          },
+          {
+            "$ref": "#/components/parameters/PVCName"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PVCCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PVC"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete department-wide PVC",
+        "operationId": "delete_departments_wide_pvc_v2",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentId"
+          },
+          {
+            "$ref": "#/components/parameters/PVCName"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/pvcs/{clusterUuid}/namespace/{namespace}": {
+      "post": {
+        "summary": "sync the names of project pvcs to the control plane",
+        "description": "this API is used by cluster versions < 2.17",
+        "deprecated": true,
+        "operationId": "sync_project_pvc_names_v1",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PVCNames"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PVCNames"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v2/pvcs/{clusterUuid}/namespace/{namespace}": {
+      "post": {
+        "summary": "sync the details of project pvcs to the control plane",
+        "operationId": "sync_project_pvcs_v2",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PVCs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PVCs"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v2/pvcs/{clusterUuid}/namespaces/{namespace}": {
+      "post": {
+        "summary": "sync the details of project pvcs to the control plane",
+        "operationId": "sync_projects_pvcs_v2",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PVCs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PVCs"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/pvcs/{clusterUuid}/namespace/{namespace}/{pvcName}": {
+      "post": {
+        "summary": "upload the name of project pvc to the control plane",
+        "description": "this API is used by cluster versions < 2.17",
+        "deprecated": true,
+        "operationId": "create_project_pvc_v1",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          },
+          {
+            "$ref": "#/components/parameters/PVCName"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "unused": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PVCName"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete project PVC",
+        "description": "this API is used by cluster versions < 2.17",
+        "deprecated": true,
+        "operationId": "delete_project_pvc_v1",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          },
+          {
+            "$ref": "#/components/parameters/PVCName"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v2/pvcs/{clusterUuid}/namespace/{namespace}/{pvcName}": {
+      "post": {
+        "summary": "upload the details of project pvc to the control plane",
+        "operationId": "create_project_pvc_v2",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          },
+          {
+            "$ref": "#/components/parameters/PVCName"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PVCCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PVC"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete project PVC",
+        "operationId": "delete_project_pvc_v2",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          },
+          {
+            "$ref": "#/components/parameters/PVCName"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v2/pvcs/{clusterUuid}/namespaces/{namespace}/{pvcName}": {
+      "post": {
+        "summary": "upload the details of project pvc to the control plane",
+        "operationId": "create_projects_pvc_v2",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          },
+          {
+            "$ref": "#/components/parameters/PVCName"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PVCCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PVC"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete project PVC",
+        "operationId": "delete_projects_pvc_v2",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          },
+          {
+            "$ref": "#/components/parameters/PVCName"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/secrets": {
+      "get": {
+        "summary": "list details of secrets",
+        "operationId": "list_secrets",
+        "tags": [
+          "Secrets"
+        ],
+        "x-internal": true,
+        "x-no-authorization": true,
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_secrets_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ScopeType"
+          },
+          {
+            "$ref": "#/components/parameters/ScopeId"
+          },
+          {
+            "$ref": "#/components/parameters/nameFilter"
+          },
+          {
+            "$ref": "#/components/parameters/secretTypeFilter"
+          },
+          {
+            "$ref": "#/components/parameters/FilterByCluster"
+          },
+          {
+            "$ref": "#/components/parameters/originFilter"
+          },
+          {
+            "$ref": "#/components/parameters/includeAncestors"
+          },
+          {
+            "$ref": "#/components/parameters/privateFilter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecretListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/secrets/{clusterUuid}": {
+      "post": {
+        "summary": "sync the details of cluster-wide secrets to the control plane",
+        "operationId": "sync_cluster_wide_secrets",
+        "tags": [
+          "Secrets"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_secrets_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Secrets"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Secrets"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/secrets/{clusterUuid}/{secretName}": {
+      "post": {
+        "summary": "upload the details of cluster-wide secret to the control plane",
+        "operationId": "create_cluster_wide_secret",
+        "tags": [
+          "Secrets"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_secrets_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/SecretName"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SecretCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecretCreationRequest"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete cluster-wide secret",
+        "operationId": "delete_cluster_wide_secret",
+        "tags": [
+          "Secrets"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_secrets_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/SecretName"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/secrets/{clusterUuid}/department/{departmentId}": {
+      "post": {
+        "summary": "sync the details of department-wide secrets to the control plane",
+        "operationId": "sync_department_wide_secrets",
+        "tags": [
+          "Secrets"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_secrets_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Secrets"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Secrets"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/secrets/{clusterUuid}/department/{departmentId}/{secretName}": {
+      "post": {
+        "summary": "upload the details of department-wide secret to the control plane",
+        "operationId": "create_department_wide_secret",
+        "tags": [
+          "Secrets"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_secrets_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentId"
+          },
+          {
+            "$ref": "#/components/parameters/SecretName"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SecretCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Secret"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete department-wide secret",
+        "operationId": "delete_department_wide_secret",
+        "tags": [
+          "Secrets"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_secrets_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentId"
+          },
+          {
+            "$ref": "#/components/parameters/SecretName"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/secrets/{clusterUuid}/departments/{departmentId}": {
+      "post": {
+        "summary": "sync the details of department-wide secrets to the control plane",
+        "operationId": "sync_departments_wide_secrets",
+        "tags": [
+          "Secrets"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_secrets_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Secrets"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Secrets"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/secrets/{clusterUuid}/departments/{departmentId}/{secretName}": {
+      "post": {
+        "summary": "upload the details of department-wide secret to the control plane",
+        "operationId": "create_departments_wide_secret",
+        "tags": [
+          "Secrets"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_secrets_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentId"
+          },
+          {
+            "$ref": "#/components/parameters/SecretName"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SecretCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Secret"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete department-wide secret",
+        "operationId": "delete_departments_wide_secret",
+        "tags": [
+          "Secrets"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_secrets_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentId"
+          },
+          {
+            "$ref": "#/components/parameters/SecretName"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/secrets/{clusterUuid}/namespace/{namespace}": {
+      "post": {
+        "summary": "sync the details of project secrets to the control plane",
+        "operationId": "sync_project_secrets",
+        "tags": [
+          "Secrets"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_secrets_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Secrets"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Secrets"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/secrets/{clusterUuid}/namespace/{namespace}/{secretName}": {
+      "post": {
+        "summary": "upload the details of project-wide secret to the control plane",
+        "operationId": "create_project_secret",
+        "tags": [
+          "Secrets"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_secrets_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          },
+          {
+            "$ref": "#/components/parameters/SecretName"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SecretCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Secret"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete project secret",
+        "operationId": "delete_project_secret",
+        "tags": [
+          "Secrets"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_secrets_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          },
+          {
+            "$ref": "#/components/parameters/SecretName"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/secrets/{clusterUuid}/namespaces/{namespace}": {
+      "post": {
+        "summary": "sync the details of project secrets to the control plane",
+        "operationId": "sync_projects_secrets",
+        "tags": [
+          "Secrets"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_secrets_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Secrets"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Secrets"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/secrets/{clusterUuid}/namespaces/{namespace}/{secretName}": {
+      "post": {
+        "summary": "upload the details of project-wide secret to the control plane",
+        "operationId": "create_projects_secret",
+        "tags": [
+          "Secrets"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_secrets_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          },
+          {
+            "$ref": "#/components/parameters/SecretName"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SecretCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Secret"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete project secret",
+        "operationId": "delete_projects_secret",
+        "tags": [
+          "Secrets"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_secrets_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          },
+          {
+            "$ref": "#/components/parameters/SecretName"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/k8s/clusters/{clusterUuid}/{namespace}/secrets": {
+      "post": {
+        "summary": "upload the details of a secret to the control plane",
+        "description": "this API is used by cluster versions < 2.15",
+        "operationId": "obsolete_create_secret",
+        "tags": [
+          "Secrets"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_secrets_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SingleSecret"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleSecret"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/k8s/clusters/{clusterUuid}/{namespace}/secrets/sync": {
+      "post": {
+        "summary": "upload the details of secrets to the control plane",
+        "description": "this API is used by cluster versions < 2.15",
+        "operationId": "obsolete_sync_secret",
+        "tags": [
+          "Secrets"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_secrets_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AllSecrets"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllSecrets"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/k8s/clusters/{clusterUuid}/{namespace}/secrets/{secretName}": {
+      "delete": {
+        "summary": "delete secret",
+        "description": "this API is used by cluster versions < 2.15",
+        "operationId": "obsolete_delete_secret",
+        "tags": [
+          "Secrets"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_secrets_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          },
+          {
+            "$ref": "#/components/parameters/SecretName"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/k8s/clusters/{clusterUuid}/{namespace}/pvcs": {
+      "post": {
+        "summary": "upload the details of PVC to the control plane",
+        "description": "this API is used by cluster versions < 2.15",
+        "operationId": "obsolete_create_pvc",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SinglePVC"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SinglePVC"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/k8s/clusters/{clusterUuid}/{namespace}/pvcs/sync": {
+      "post": {
+        "summary": "upload the details of PVCs to the control plane",
+        "description": "this API is used by cluster versions < 2.15",
+        "operationId": "obsolete_sync_pvc",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AllPVCs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllPVCs"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/k8s/clusters/{clusterUuid}/{namespace}/pvcs/{pvcName}": {
+      "delete": {
+        "summary": "delete PVC",
+        "description": "this API is used by cluster versions < 2.15",
+        "operationId": "obsolete_delete_pvc",
+        "tags": [
+          "PVCs"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "credentials",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_pvcs_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          },
+          {
+            "$ref": "#/components/parameters/PVCName"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/config-maps": {
+      "get": {
+        "summary": "list details of ConfigMaps",
+        "operationId": "list_configMaps",
+        "tags": [
+          "ConfigMaps"
+        ],
+        "x-internal": true,
+        "x-no-authorization": true,
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_configmaps_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ScopeType"
+          },
+          {
+            "$ref": "#/components/parameters/ScopeId"
+          },
+          {
+            "$ref": "#/components/parameters/nameFilter"
+          },
+          {
+            "$ref": "#/components/parameters/FilterByCluster"
+          },
+          {
+            "$ref": "#/components/parameters/includeAncestors"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigMapsListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/config-maps/{clusterUuid}": {
+      "post": {
+        "summary": "sync the details of cluster-wide ConfigMaps to the control plane",
+        "operationId": "sync_cluster_wide_configmaps_v1",
+        "tags": [
+          "ConfigMaps"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "cm-volume-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_configmaps_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigMaps"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigMaps"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/config-maps/{clusterUuid}/{configMapName}": {
+      "post": {
+        "summary": "upload the details of cluster-wide ConfigMap to the control plane",
+        "operationId": "create_cluster_wide_configmap_v1",
+        "tags": [
+          "ConfigMaps"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "cm-volume-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_configmaps_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/ConfigMapName"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigMap"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigMap"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete cluster-wide ConfigMap",
+        "operationId": "delete_cluster_wide_configmap_v1",
+        "tags": [
+          "ConfigMaps"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "cm-volume-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_configmaps_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/ConfigMapName"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/config-maps/{clusterUuid}/departments/{departmentId}": {
+      "post": {
+        "summary": "sync the details of department-wide ConfigMaps to the control plane",
+        "operationId": "sync_departments_wide_configmap_v1",
+        "tags": [
+          "ConfigMaps"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "cm-volume-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_configmaps_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigMaps"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigMaps"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/config-maps/{clusterUuid}/departments/{departmentId}/{configMapName}": {
+      "post": {
+        "summary": "upload the details of department-wide ConfigMap to the control plane",
+        "operationId": "create_departments_wide_configmap_v1",
+        "tags": [
+          "ConfigMaps"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "cm-volume-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_configmaps_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentId"
+          },
+          {
+            "$ref": "#/components/parameters/ConfigMapName"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigMap"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigMap"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete department-wide ConfigMap",
+        "operationId": "delete_departments_wide_configmap_v1",
+        "tags": [
+          "ConfigMaps"
+        ],
+        "x-service": "k8s-objects-tracker",
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "cm-volume-assets",
+          "action": "sync"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/DepartmentId"
+          },
+          {
+            "$ref": "#/components/parameters/ConfigMapName"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/config-maps/{clusterUuid}/namespaces/{namespace}": {
+      "post": {
+        "summary": "sync the details of project ConfigMaps to the control plane",
+        "operationId": "sync_projects_configmaps_v1",
+        "tags": [
+          "ConfigMaps"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "cm-volume-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_configmaps_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigMaps"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigMaps"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/config-maps/{clusterUuid}/namespaces/{namespace}/{configMapName}": {
+      "post": {
+        "summary": "upload the details of project ConfigMap to the control plane",
+        "operationId": "create_projects_configmap_v1",
+        "tags": [
+          "ConfigMaps"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "cm-volume-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_configmaps_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          },
+          {
+            "$ref": "#/components/parameters/ConfigMapName"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfigMap"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigMap"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete project ConfigMap",
+        "operationId": "delete_projects_configmap_v1",
+        "tags": [
+          "ConfigMaps"
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "cm-volume-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_configmaps_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterUuid"
+          },
+          {
+            "$ref": "#/components/parameters/Namespace"
+          },
+          {
+            "$ref": "#/components/parameters/ConfigMapName"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/k8s/clusters/{uuid}/storage-classes": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/uuid"
+        }
+      ],
+      "get": {
+        "summary": "Get all storageClasses from a cluster.",
+        "description": "this API is used by cluster versions < 2.20",
+        "deprecated": true,
+        "operationId": "V1GetStorageClasses",
+        "tags": [
+          "Storage Classes"
+        ],
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "src/test/suites/playwright/parallel/dataSource/storageClassApi.test.ts"
+        ],
+        "x-audit": false,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "read"
+        },
+        "parameters": [
+          {
+            "name": "includeNone",
+            "in": "query",
+            "description": "Include runai-none storage class to be able to create PVCs without a storage class",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/V1StorageClassNames"
+          },
+          "401": {
+            "$ref": "#/components/responses/V1Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/V1NotFound"
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a storageClass.",
+        "description": "this API is used by cluster versions < 2.20",
+        "deprecated": true,
+        "operationId": "V1CreateStorageClass",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/uuid"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V1StorageClass"
+              }
+            }
+          }
+        },
+        "tags": [
+          "Storage Classes"
+        ],
+        "x-internal": true,
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "src/test/suites/playwright/parallel/dataSource/storageClassApi.test.ts"
+        ],
+        "x-audit": false,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "responses": {
+          "200": {
+            "description": "Expected response to a valid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1StorageClass"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/V1Forbidden"
+          },
+          "403": {
+            "$ref": "#/components/responses/V1Forbidden"
+          },
+          "503": {
+            "$ref": "#/components/responses/V1ServiceUnavailable"
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/k8s/clusters/{uuid}/storage-classes/{storage_class_name}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/uuid"
+        },
+        {
+          "$ref": "#/components/parameters/V1Storage_class_name"
+        }
+      ],
+      "put": {
+        "summary": "Update a storageClass.",
+        "description": "this API is used by cluster versions < 2.20",
+        "deprecated": true,
+        "operationId": "V1UpdateStorageClass",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V1StorageClass"
+              }
+            }
+          }
+        },
+        "tags": [
+          "Storage Classes"
+        ],
+        "x-internal": true,
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "src/test/suites/playwright/parallel/dataSource/storageClassApi.test.ts"
+        ],
+        "x-audit": false,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "responses": {
+          "200": {
+            "description": "Expected response to a valid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1StorageClasses"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/V1Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/V1NotFound"
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a storageClass.",
+        "description": "this API is used by cluster versions < 2.20",
+        "deprecated": true,
+        "operationId": "V1DeleteStorageClass",
+        "tags": [
+          "Storage Classes"
+        ],
+        "x-internal": true,
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "src/test/suites/playwright/parallel/dataSource/storageClassApi.test.ts"
+        ],
+        "x-audit": false,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "delete"
+        },
+        "responses": {
+          "200": {
+            "description": "Expected response to a valid request"
+          },
+          "401": {
+            "$ref": "#/components/responses/V1Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/V1NotFound"
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/k8s/clusters/{uuid}/storage-classes/sync": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/uuid"
+        }
+      ],
+      "post": {
+        "summary": "Sync storageClass to a cluster.",
+        "description": "this API is used by cluster versions < 2.20",
+        "deprecated": true,
+        "operationId": "V1SyncStorageClass",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V1StorageClasses"
+              }
+            }
+          }
+        },
+        "tags": [
+          "Storage Classes"
+        ],
+        "x-internal": true,
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "src/test/suites/playwright/parallel/dataSource/storageClassApi.test.ts"
+        ],
+        "x-audit": false,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "responses": {
+          "200": {
+            "description": "Expected response to a valid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1StorageClass"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/V1Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/V1Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/V1NotFound"
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/storage-classes": {
+      "get": {
+        "summary": "get a Storage Class/Classes for a given cluster",
+        "operationId": "getStorageClasses",
+        "tags": [
+          "Storage Classes"
+        ],
+        "x-audit": false,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "read"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_storage_classes_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterIdRequired"
+          },
+          {
+            "$ref": "#/components/parameters/nameFilter"
+          },
+          {
+            "name": "includeNone",
+            "in": "query",
+            "description": "Include runai-none storage class, which is used for static provisioning of PVC. In static provisioning storage is omitted.",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageClasses"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "post": {
+        "summary": "create a Storage Class",
+        "operationId": "createStorageClass",
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-audit": false,
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_storage_classes_service_test.go"
+        ],
+        "tags": [
+          "Storage Classes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StorageClass"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageClass"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "put": {
+        "summary": "update a Storage Class",
+        "operationId": "updateStorageClass",
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-audit": false,
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_storage_classes_service_test.go"
+        ],
+        "tags": [
+          "Storage Classes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StorageClass"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageClass"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "delete a Storage Class",
+        "operationId": "deleteStorageClass",
+        "tags": [
+          "Storage Classes"
+        ],
+        "x-internal": true,
+        "x-test-coverage": [
+          "e2e/src/test/suites/playwright/parallel/viper/dataSource/storageClassApi.test.ts"
+        ],
+        "x-service": "k8s-objects-tracker",
+        "x-audit": false,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "delete"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterIdRequired"
+          },
+          {
+            "$ref": "#/components/parameters/ObjectByName"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v2/storage-classes": {
+      "get": {
+        "summary": "get a Storage Class/Classes for a given cluster",
+        "operationId": "getStorageClassesV2",
+        "tags": [
+          "Storage Classes"
+        ],
+        "x-audit": false,
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "read"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_storage_classes_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterIdRequired"
+          },
+          {
+            "$ref": "#/components/parameters/nameFilter"
+          },
+          {
+            "name": "includeNone",
+            "in": "query",
+            "description": "Include runai-none storage class, which is used for static provisioning of PVC. In static provisioning storage is omitted.",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageClassesV2"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/storage-classes/sync": {
+      "post": {
+        "summary": "Sync cluster Storage Classes",
+        "description": "Use to sync cluster storage classes",
+        "operationId": "sync_storage_class",
+        "x-authorize": {
+          "resource-type": "pvc-assets",
+          "action": "sync"
+        },
+        "x-service": "k8s-objects-tracker",
+        "x-audit": false,
+        "x-internal": true,
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_storage_classes_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterIdRequired"
+          }
+        ],
+        "tags": [
+          "Storage Classes"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StorageClasses"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageClasses"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/storage-class-configuration": {
+      "get": {
+        "summary": "List storage class configurations",
+        "description": "Retrieves a list of storage class configurations defined in the system.",
+        "operationId": "list_storage_class_configuration",
+        "tags": [
+          "Storage Class Configuration"
+        ],
+        "x-csp": true,
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_storage_class_configuration_service_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "storage-class-configuration",
+          "action": "read"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/StorageClassConfigurationFilterBy"
+          },
+          {
+            "$ref": "#/components/parameters/StorageClassConfigurationSortBy"
+          },
+          {
+            "$ref": "#/components/parameters/SortOrder"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageClassConfigurationListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create storage class configuration",
+        "description": "Creates a new storage class configuration in the NVIDIA Run:ai platform.\nThis endpoint enables administrators to define storage class behavior and customize their usage settings.\n",
+        "operationId": "create_storage_class_configuration",
+        "tags": [
+          "Storage Class Configuration"
+        ],
+        "x-csp": true,
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_storage_class_configuration_service_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "storage-class-configuration",
+          "action": "create"
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StorageClassConfigurationCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageClassConfiguration"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/storage-class-configuration/{id}": {
+      "get": {
+        "summary": "Get storage class configuration by id",
+        "description": "Retrieves a specific storage class configuration by its unique identifier. Use this endpoint to view detailed information about the configuration, including its permissions and customization options.\n",
+        "operationId": "get_storage_class_configuration_by_id",
+        "x-csp": true,
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_storage_class_configuration_service_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "storage-class-configuration",
+          "action": "read"
+        },
+        "tags": [
+          "Storage Class Configuration"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/StorageClassConfigurationId"
+          },
+          {
+            "name": "tenantId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Storage class configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageClassConfiguration"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Patch storage class configuration by id",
+        "description": "Partially updates an existing storage class configuration by its unique identifier. Use this endpoint to modify specific fields, such as permissions, customization values, or attributes, without replacing the entire configuration.",
+        "operationId": "patch_storage_class_configuration_by_id",
+        "x-csp": true,
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_storage_class_configuration_service_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "storage-class-configuration",
+          "action": "update"
+        },
+        "tags": [
+          "Storage Class Configuration"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/StorageClassConfigurationId"
+          },
+          {
+            "name": "tenantId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StorageClassConfigurationPatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Storage class configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageClassConfiguration"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update storage class configuration by id",
+        "description": "Updates an existing storage class configuration by its unique identifier. Use this endpoint to fully replace an existing configuration, including permissions and customization settings.",
+        "operationId": "update_storage_class_configuration_by_id",
+        "x-csp": true,
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_storage_class_configuration_service_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "storage-class-configuration",
+          "action": "update"
+        },
+        "tags": [
+          "Storage Class Configuration"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/StorageClassConfigurationId"
+          },
+          {
+            "name": "tenantId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StorageClassConfigurationUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Storage class configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageClassConfiguration"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete storage class configuration by id",
+        "description": "Deletes a specific storage class configuration by its unique identifier. Use this endpoint to permanently remove configurations that are no longer needed.",
+        "operationId": "delete_storage_class_configuration_by_id",
+        "x-csp": true,
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_storage_class_configuration_service_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "storage-class-configuration",
+          "action": "delete"
+        },
+        "tags": [
+          "Storage Class Configuration"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/StorageClassConfigurationId"
+          },
+          {
+            "name": "tenantId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Storage class configuration deleted"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/internal/api/v1/storage-class-configuration": {
+      "get": {
+        "summary": "list of storage class configuration (internal)",
+        "operationId": "list_storage_class_configuration_int",
+        "tags": [
+          "Storage Class Configuration"
+        ],
+        "x-internal": true,
+        "x-csp": true,
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_storage_class_configuration_service_test.go"
+        ],
+        "x-no-authorization": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/StorageClassConfigurationFilterBy"
+          },
+          {
+            "$ref": "#/components/parameters/StorageClassConfigurationSortBy"
+          },
+          {
+            "$ref": "#/components/parameters/SortOrder"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageClassConfigurationListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/internal/api/v1/cluster-objects/status": {
+      "get": {
+        "summary": "list of objects in the cluster and their found issues",
+        "operationId": "list_cluster_objects_status",
+        "tags": [
+          "ClusterObjectsStatus"
+        ],
+        "x-internal": true,
+        "x-no-authorization": true,
+        "x-service": "k8s-objects-tracker",
+        "x-test-coverage": [
+          "k8s-objects-tracker/pkg/services/api_cluster_objects_status_service_test.go"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/resourceTypeFilter"
+          },
+          {
+            "$ref": "#/components/parameters/secretTypeFilter"
+          },
+          {
+            "$ref": "#/components/parameters/ScopeId"
+          },
+          {
+            "$ref": "#/components/parameters/ScopeType"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClusterObjectsStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "ScopeType": {
+        "name": "scopeType",
+        "in": "query",
+        "required": false,
+        "description": "The type of resource we want to filter by.",
+        "schema": {
+          "type": "string",
+          "example": "project"
+        }
+      },
+      "ScopeId": {
+        "name": "scopeId",
+        "in": "query",
+        "description": "filter by scope id",
+        "schema": {
+          "type": "string"
+        },
+        "required": false
+      },
+      "nameFilter": {
+        "name": "name",
+        "in": "query",
+        "description": "filter by name",
+        "schema": {
+          "type": "string"
+        },
+        "required": false
+      },
+      "FilterByCluster": {
+        "name": "clusterId",
+        "in": "query",
+        "description": "Filter using the Universally Unique Identifier (UUID) of the cluster.",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "d73a738f-fab3-430a-8fa3-5241493d7128"
+        }
+      },
+      "originFilter": {
+        "name": "origin",
+        "in": "query",
+        "description": "filter by the origin of the resource. by default, we have to list only customer existing resources (to preserve backward compatibility) to list both existing pvc and assets related pvcs use 'all'.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "all",
+            "assets",
+            "existing"
+          ]
+        },
+        "required": false
+      },
+      "includeAncestors": {
+        "name": "includeAncestors",
+        "in": "query",
+        "description": "include resources of both requested scope, and its ancestors. for example, if project scope is requested with includeAncestors=true, department and cluster scoped assets will be included in the response.",
+        "schema": {
+          "type": "boolean"
+        },
+        "required": false
+      },
+      "includeDescendants": {
+        "name": "includeDescendants",
+        "in": "query",
+        "required": false,
+        "description": "Whether the query should include from all nested layers within the specified scope",
+        "schema": {
+          "type": "boolean"
+        }
+      },
+      "ClusterUuid": {
+        "name": "clusterUuid",
+        "in": "path",
+        "required": true,
+        "description": "The Universally Unique Identifier (UUID) of the cluster.",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "minLength": 1,
+          "example": "9f55255e-11ed-47c7-acef-fc4054768dbc"
+        }
+      },
+      "PVCName": {
+        "name": "pvcName",
+        "in": "path",
+        "description": "The pvc name.",
+        "schema": {
+          "type": "string"
+        },
+        "required": true
+      },
+      "DepartmentId": {
+        "name": "departmentId",
+        "in": "path",
+        "required": true,
+        "description": "The id of the department.",
+        "schema": {
+          "type": "string",
+          "example": "1",
+          "pattern": ".*"
+        }
+      },
+      "Namespace": {
+        "name": "namespace",
+        "in": "path",
+        "description": "The namespace of the project.",
+        "schema": {
+          "type": "string"
+        },
+        "required": true
+      },
+      "secretTypeFilter": {
+        "name": "secretType",
+        "in": "query",
+        "description": "filter by secret type. supported values - password, access-key, docker-registry.",
+        "schema": {
+          "type": "string"
+        },
+        "required": false
+      },
+      "privateFilter": {
+        "name": "includePrivate",
+        "in": "query",
+        "description": "include private secrets in the response. if not provided, we list only public secrets.",
+        "schema": {
+          "type": "boolean"
+        },
+        "required": false
+      },
+      "SecretName": {
+        "name": "secretName",
+        "in": "path",
+        "description": "The secret name.",
+        "schema": {
+          "type": "string"
+        },
+        "required": true
+      },
+      "ConfigMapName": {
+        "name": "configMapName",
+        "in": "path",
+        "description": "The Config Map name.",
+        "schema": {
+          "type": "string"
+        },
+        "required": true
+      },
+      "uuid": {
+        "in": "path",
+        "name": "uuid",
+        "description": "Unique identifier of the cluster",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "V1Storage_class_name": {
+        "in": "path",
+        "name": "storage_class_name",
+        "description": "Unique identifier of the storageClass",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "string"
+        }
+      },
+      "ClusterIdRequired": {
+        "name": "clusterId",
+        "in": "query",
+        "description": "The id of the cluster",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "d73a738f-fab3-430a-8fa3-5241493d7128"
+        }
+      },
+      "ObjectByName": {
+        "name": "name",
+        "in": "query",
+        "description": "filter by name",
+        "schema": {
+          "type": "string"
+        },
+        "required": true
+      },
+      "StorageClassConfigurationFilterBy": {
+        "name": "filterBy",
+        "in": "query",
+        "required": false,
+        "description": "Filter results by a parameter. Use the format field-name operator value. Operators are == Equals, != Not equals, <= Less than or equal, >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with and =$ Ends with. Dates are in ISO 8601 timestamp format and available for operators ==, !=, <= and >=.",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(name|tenantId|scopeType|scopeId)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
+          },
+          "example": [
+            "name!=some-name"
+          ]
+        },
+        "explode": false
+      },
+      "StorageClassConfigurationSortBy": {
+        "name": "sortBy",
+        "in": "query",
+        "required": false,
+        "description": "Sort results by a parameters.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "name",
+            "tenantId",
+            "scopeType",
+            "scopeId"
+          ]
+        }
+      },
+      "SortOrder": {
+        "name": "sortOrder",
+        "in": "query",
+        "required": false,
+        "description": "Sort results in descending or ascending order.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "default": "asc"
+        }
+      },
+      "Offset": {
+        "name": "offset",
+        "in": "query",
+        "required": false,
+        "description": "The offset of the first item returned in the collection.",
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "example": 100
+        }
+      },
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "The maximum number of entries to return.",
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "default": 50,
+          "minimum": 1,
+          "maximum": 500
+        }
+      },
+      "StorageClassConfigurationId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "unique identifier of the storage class configuration"
+      },
+      "resourceTypeFilter": {
+        "name": "resourceType",
+        "in": "query",
+        "description": "filter by resource type",
+        "schema": {
+          "$ref": "#/components/schemas/ClusterResourceType"
+        },
+        "required": false
+      },
+      "kotClusterUuid": {
+        "$ref": "#/components/parameters/ClusterUuid"
+      },
+      "departmentId": {
+        "$ref": "#/components/parameters/DepartmentId"
+      },
+      "namespace": {
+        "$ref": "#/components/parameters/Namespace"
+      },
+      "pvcName": {
+        "$ref": "#/components/parameters/PVCName"
+      },
+      "secretName": {
+        "$ref": "#/components/parameters/SecretName"
+      },
+      "name": {
+        "$ref": "#/components/parameters/nameFilter"
+      },
+      "type": {
+        "$ref": "#/components/parameters/secretTypeFilter"
+      },
+      "scopeId": {
+        "$ref": "#/components/parameters/ScopeId"
+      },
+      "origin": {
+        "$ref": "#/components/parameters/originFilter"
+      }
+    },
+    "schemas": {
+      "ClusterId": {
+        "description": "The id of the cluster.",
+        "type": "string",
+        "format": "uuid",
+        "example": "71f69d83-ba66-4822-adf5-55ce55efd210"
+      },
+      "ScopeType": {
+        "description": "the scope type of the resource.",
+        "type": "string"
+      },
+      "ScopeId": {
+        "description": "The id of the tenant, cluster, department or project, depending on the scope type.",
+        "type": "string",
+        "pattern": ".*"
+      },
+      "PVCName": {
+        "description": "name of the pvc.",
+        "type": "string",
+        "example": "pvc-1"
+      },
+      "Origin": {
+        "type": "string",
+        "description": "the origin of the resource. if not specified, customer existing resource is assumed. resource with origin 'assets' is originated from an asset in the control plane",
+        "enum": [
+          "assets",
+          "existing"
+        ],
+        "nullable": true
+      },
+      "PvcPhaseOptional": {
+        "description": "status of the pvc",
+        "type": "string",
+        "enum": [
+          "Bound",
+          "Lost",
+          "Pending"
+        ],
+        "nullable": true
+      },
+      "PvcCapacityOptional": {
+        "description": "The capacity of the PVC.",
+        "type": "string",
+        "example": "100Gi",
+        "nullable": true
+      },
+      "StorageClassNameOptional": {
+        "description": "The name of the storage class.",
+        "type": "string",
+        "example": "Standard",
+        "nullable": true
+      },
+      "PvcDataSharingOptional": {
+        "description": "A Flag to mark if the PVC data is shared.",
+        "type": "boolean",
+        "example": true,
+        "nullable": true
+      },
+      "PVCListInfo": {
+        "type": "object",
+        "required": [
+          "clusterId",
+          "scopeType",
+          "scopeId",
+          "name",
+          "origin"
+        ],
+        "properties": {
+          "clusterId": {
+            "$ref": "#/components/schemas/ClusterId"
+          },
+          "scopeType": {
+            "$ref": "#/components/schemas/ScopeType"
+          },
+          "scopeId": {
+            "$ref": "#/components/schemas/ScopeId"
+          },
+          "name": {
+            "$ref": "#/components/schemas/PVCName"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/Origin"
+          },
+          "phase": {
+            "$ref": "#/components/schemas/PvcPhaseOptional"
+          },
+          "requestedCapacity": {
+            "$ref": "#/components/schemas/PvcCapacityOptional"
+          },
+          "actualCapacity": {
+            "$ref": "#/components/schemas/PvcCapacityOptional"
+          },
+          "storageClassName": {
+            "$ref": "#/components/schemas/StorageClassNameOptional"
+          },
+          "dataSharing": {
+            "$ref": "#/components/schemas/PvcDataSharingOptional"
+          }
+        }
+      },
+      "PVCListResponse": {
+        "type": "object",
+        "required": [
+          "pvcs"
+        ],
+        "properties": {
+          "pvcs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PVCListInfo"
+            }
+          }
+        }
+      },
+      "Error": {
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "code": 400,
+          "message": "Bad request - Resource should have a name"
+        }
+      },
+      "PVCNames": {
+        "type": "object",
+        "required": [
+          "pvcs"
+        ],
+        "properties": {
+          "pvcs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PVCName"
+            }
+          }
+        }
+      },
+      "Issue": {
+        "type": "object",
+        "description": "an issue that was found while syncing the resource",
+        "required": [
+          "namespace",
+          "issue"
+        ],
+        "properties": {
+          "namespace": {
+            "type": "string",
+            "description": "the namespace of the resource"
+          },
+          "issue": {
+            "type": "string",
+            "description": "the issue found"
+          }
+        }
+      },
+      "Issues": {
+        "type": "array",
+        "description": "list of issues that was found while syncing the resource to the cluster",
+        "items": {
+          "$ref": "#/components/schemas/Issue"
+        }
+      },
+      "PVC": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/PVCName"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/Origin"
+          },
+          "issues": {
+            "$ref": "#/components/schemas/Issues"
+          },
+          "phase": {
+            "$ref": "#/components/schemas/PvcPhaseOptional"
+          },
+          "requestedCapacity": {
+            "$ref": "#/components/schemas/PvcCapacityOptional"
+          },
+          "actualCapacity": {
+            "$ref": "#/components/schemas/PvcCapacityOptional"
+          },
+          "storageClassName": {
+            "$ref": "#/components/schemas/StorageClassNameOptional"
+          },
+          "dataSharing": {
+            "$ref": "#/components/schemas/PvcDataSharingOptional"
+          }
+        }
+      },
+      "PVCs": {
+        "type": "object",
+        "required": [
+          "pvcs"
+        ],
+        "properties": {
+          "pvcs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PVC"
+            }
+          }
+        }
+      },
+      "PVCCreationRequest": {
+        "type": "object",
+        "properties": {
+          "origin": {
+            "$ref": "#/components/schemas/Origin"
+          },
+          "issues": {
+            "$ref": "#/components/schemas/Issues"
+          },
+          "phase": {
+            "$ref": "#/components/schemas/PvcPhaseOptional"
+          },
+          "requestedCapacity": {
+            "$ref": "#/components/schemas/PvcCapacityOptional"
+          },
+          "actualCapacity": {
+            "$ref": "#/components/schemas/PvcCapacityOptional"
+          },
+          "storageClassName": {
+            "$ref": "#/components/schemas/StorageClassNameOptional"
+          },
+          "dataSharing": {
+            "$ref": "#/components/schemas/PvcDataSharingOptional"
+          }
+        }
+      },
+      "SecretName": {
+        "type": "string",
+        "description": "name of the secret.",
+        "example": "secret-1"
+      },
+      "SecretType": {
+        "description": "type of the secret.",
+        "type": "string",
+        "enum": [
+          "access-key",
+          "password",
+          "docker-registry",
+          "generic"
+        ]
+      },
+      "SecretPrivate": {
+        "type": "boolean",
+        "description": "Whether the secret is private (user-credential).",
+        "example": false,
+        "default": false,
+        "nullable": true
+      },
+      "SecretListInfo": {
+        "type": "object",
+        "required": [
+          "clusterId",
+          "scopeType",
+          "scopeId",
+          "name",
+          "type",
+          "origin"
+        ],
+        "properties": {
+          "clusterId": {
+            "$ref": "#/components/schemas/ClusterId"
+          },
+          "scopeType": {
+            "$ref": "#/components/schemas/ScopeType"
+          },
+          "scopeId": {
+            "$ref": "#/components/schemas/ScopeId"
+          },
+          "name": {
+            "$ref": "#/components/schemas/SecretName"
+          },
+          "type": {
+            "$ref": "#/components/schemas/SecretType"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/Origin"
+          },
+          "private": {
+            "$ref": "#/components/schemas/SecretPrivate"
+          }
+        }
+      },
+      "SecretListResponse": {
+        "type": "object",
+        "required": [
+          "secrets"
+        ],
+        "properties": {
+          "secrets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SecretListInfo"
+            }
+          }
+        }
+      },
+      "Secret": {
+        "type": "object",
+        "required": [
+          "name",
+          "type"
+        ],
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/SecretName"
+          },
+          "type": {
+            "$ref": "#/components/schemas/SecretType"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/Origin"
+          },
+          "private": {
+            "$ref": "#/components/schemas/SecretPrivate"
+          },
+          "issues": {
+            "$ref": "#/components/schemas/Issues"
+          }
+        }
+      },
+      "Secrets": {
+        "type": "object",
+        "required": [
+          "secrets"
+        ],
+        "properties": {
+          "secrets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Secret"
+            }
+          }
+        }
+      },
+      "SecretCreationRequest": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/SecretType"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/Origin"
+          },
+          "private": {
+            "$ref": "#/components/schemas/SecretPrivate"
+          },
+          "issues": {
+            "$ref": "#/components/schemas/Issues"
+          }
+        }
+      },
+      "SingleSecret": {
+        "type": "object",
+        "required": [
+          "secret_name"
+        ],
+        "properties": {
+          "secret_name": {
+            "$ref": "#/components/schemas/SecretName"
+          }
+        }
+      },
+      "AllSecrets": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/SingleSecret"
+        }
+      },
+      "SinglePVC": {
+        "type": "object",
+        "required": [
+          "pvc_name"
+        ],
+        "properties": {
+          "pvc_name": {
+            "$ref": "#/components/schemas/PVCName"
+          }
+        }
+      },
+      "AllPVCs": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/SinglePVC"
+        }
+      },
+      "ConfigMapName": {
+        "description": "name of the ConfigMap.",
+        "type": "string",
+        "example": "cm-setting"
+      },
+      "ConfigMapListInfo": {
+        "type": "object",
+        "required": [
+          "clusterId",
+          "scopeType",
+          "scopeId",
+          "name"
+        ],
+        "properties": {
+          "clusterId": {
+            "$ref": "#/components/schemas/ClusterId"
+          },
+          "scopeType": {
+            "$ref": "#/components/schemas/ScopeType"
+          },
+          "scopeId": {
+            "$ref": "#/components/schemas/ScopeId"
+          },
+          "name": {
+            "$ref": "#/components/schemas/ConfigMapName"
+          }
+        }
+      },
+      "ConfigMapsListResponse": {
+        "type": "object",
+        "required": [
+          "configMaps"
+        ],
+        "properties": {
+          "configMaps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigMapListInfo"
+            }
+          }
+        }
+      },
+      "ConfigMap": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/ConfigMapName"
+          },
+          "issues": {
+            "$ref": "#/components/schemas/Issues"
+          }
+        }
+      },
+      "ConfigMaps": {
+        "type": "object",
+        "required": [
+          "configmaps"
+        ],
+        "properties": {
+          "configmaps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfigMap"
+            }
+          }
+        }
+      },
+      "V1Error": {
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "code": 400,
+          "message": "Bad request - Resource should have a name"
+        }
+      },
+      "V1StorageClass": {
+        "required": [
+          "storage_class_name"
+        ],
+        "x-schema-name": "StorageClasses",
+        "properties": {
+          "storage_class_name": {
+            "type": "string",
+            "description": "Identifier of the storage class"
+          },
+          "is_default": {
+            "type": "boolean",
+            "description": "Indicator if the storage class is the default storage class"
+          }
+        }
+      },
+      "V1StorageClasses": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/V1StorageClass"
+        },
+        "x-schema-name": "StorageClasses"
+      },
+      "StorageClass": {
+        "type": "object",
+        "required": [
+          "storage_class_name"
+        ],
+        "properties": {
+          "cluster_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Cluster ID which has sent the resource info",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "storage_class_name": {
+            "type": "string",
+            "description": "Storage class name",
+            "example": "my-storage-class"
+          },
+          "Spec": {
+            "type": "object",
+            "required": [
+              "is_default"
+            ],
+            "properties": {
+              "provisioner": {
+                "type": "string",
+                "description": "The provisioner type (unique name)",
+                "example": "kubernetes.io/aws-ebs"
+              },
+              "allow_volume_expansion": {
+                "type": "boolean",
+                "description": "Indicates whether the storage class allows volume expansion",
+                "example": true
+              },
+              "is_default": {
+                "type": "boolean",
+                "description": "Indicates whether the storage class is the default one",
+                "example": false
+              }
+            }
+          }
+        }
+      },
+      "StorageClasses": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StorageClass"
+            }
+          }
+        }
+      },
+      "StorageClassSpec": {
+        "type": "object",
+        "required": [
+          "isDefault"
+        ],
+        "properties": {
+          "provisioner": {
+            "type": "string",
+            "description": "The provisioner type (unique name)",
+            "example": "kubernetes.io/aws-ebs"
+          },
+          "allowVolumeExpansion": {
+            "type": "boolean",
+            "description": "Indicates whether the storage class allows volume expansion",
+            "example": true
+          },
+          "isDefault": {
+            "type": "boolean",
+            "description": "Indicates whether the storage class is the default one",
+            "example": false
+          }
+        }
+      },
+      "AllowedForAssets": {
+        "type": "boolean",
+        "nullable": true,
+        "description": "Determines whether PVC assets can be created using this storage class."
+      },
+      "AllowedForWorkloads": {
+        "type": "boolean",
+        "nullable": true,
+        "description": "Allows workloads to include PVCs that use this storage class. When disabled, users cannot (a) include non-existing PVC assets created with this class in asset-based submissions, or (b) attach PVCs with existing=false to workloads using this class."
+      },
+      "AllowedForEphemeralVolumes": {
+        "type": "boolean",
+        "nullable": true,
+        "description": "Allows workloads to create ephemeral volumes using this storage class. When disabled, users cannot (a) create PVC assets with autoDelete=true and ephemeral=true, or (b) include PVC instances with isEphemeral=false that use this storage class."
+      },
+      "AllowedForPersistentVolumes": {
+        "type": "boolean",
+        "nullable": true,
+        "description": "Allows workloads to create persistent volumes using this storage class. When disabled, users cannot (a) create PVC assets with autoDelete=true and ephemeral=true, or (b) include PVC instances with isEphemeral=false that use this storage class."
+      },
+      "AllowDataSharing": {
+        "type": "boolean",
+        "nullable": true,
+        "description": "Allows creation of PVCs using a shared volume."
+      },
+      "StorageClassPermissions": {
+        "type": "object",
+        "nullable": true,
+        "description": "Defines the access permissions and behavioral rules for this storage class.",
+        "properties": {
+          "allowedForAssets": {
+            "$ref": "#/components/schemas/AllowedForAssets"
+          },
+          "allowedForWorkloads": {
+            "$ref": "#/components/schemas/AllowedForWorkloads"
+          },
+          "allowedForEphemeralVolumes": {
+            "$ref": "#/components/schemas/AllowedForEphemeralVolumes"
+          },
+          "allowedForPersistentVolumes": {
+            "$ref": "#/components/schemas/AllowedForPersistentVolumes"
+          },
+          "allowDataSharing": {
+            "$ref": "#/components/schemas/AllowDataSharing"
+          }
+        }
+      },
+      "PvcAccessModes": {
+        "description": "Default access mode(s) applied to newly created PVCs unless explicitly overridden.",
+        "properties": {
+          "readWriteOnce": {
+            "description": "Mount the volume as read/write by a single node.",
+            "type": "boolean",
+            "default": true,
+            "nullable": true
+          },
+          "readOnlyMany": {
+            "description": "Mount the volume as read-only by many nodes.",
+            "type": "boolean",
+            "default": false,
+            "nullable": true
+          },
+          "readWriteMany": {
+            "description": "Mount the volume as read/write by many nodes.",
+            "type": "boolean",
+            "default": false,
+            "nullable": true
+          }
+        },
+        "nullable": true,
+        "type": "object"
+      },
+      "PvcSupportedAccessModes": {
+        "description": "Defines the access modes supported by the given storage class. These values indicate which access configurations can be used when creating PVCs with this class.",
+        "properties": {
+          "readWriteOnce": {
+            "description": "Indicates whether the readWriteOnce access mode is supported. This mode allows a volume to be mounted as read/write by a single node.",
+            "type": "boolean",
+            "default": true,
+            "nullable": true
+          },
+          "readOnlyMany": {
+            "description": "Indicates whether the readOnlyMany access mode is supported. This mode allows a volume to be mounted as read-only by many nodes.",
+            "type": "boolean",
+            "default": true,
+            "nullable": true
+          },
+          "readWriteMany": {
+            "description": "Indicates whether the readWriteMany access mode is supported. This mode allows a volume to be mounted as read/write by many nodes.",
+            "type": "boolean",
+            "default": true,
+            "nullable": true
+          }
+        },
+        "nullable": true,
+        "type": "object"
+      },
+      "AccessModeCustomization": {
+        "description": "Controls whether PVC access modes are required and what defaults to apply.",
+        "properties": {
+          "required": {
+            "type": "boolean",
+            "description": "If true, the accessMode field is mandatory when creating a PVC that uses this storage class.",
+            "nullable": true
+          },
+          "default": {
+            "$ref": "#/components/schemas/PvcAccessModes"
+          },
+          "supportedValues": {
+            "$ref": "#/components/schemas/PvcSupportedAccessModes"
+          }
+        },
+        "type": "object",
+        "nullable": true
+      },
+      "PvcVolumeMode": {
+        "description": "Default volume mode for the PVC. Choose between Filesystem (default) or Block.",
+        "type": "string",
+        "enum": [
+          "Filesystem",
+          "Block"
+        ],
+        "nullable": true
+      },
+      "VolumeModeCustomization": {
+        "description": "Defines whether the volumeMode field is required when creating PVCs and specifies default and supported modes for the storage class.",
+        "properties": {
+          "required": {
+            "type": "boolean",
+            "description": "Indicates whether the volumeMode field is mandatory when creating a PVC.",
+            "nullable": true
+          },
+          "default": {
+            "$ref": "#/components/schemas/PvcVolumeMode"
+          },
+          "supportedValues": {
+            "description": "Lists which volume modes are supported for this storage class.",
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "filesystem": {
+                "type": "boolean",
+                "description": "Indicates whether filesystem mode is supported. Filesystem allows the volume to be mounted as a filesystem, enabling the usage of directories and files.",
+                "default": true,
+                "nullable": true
+              },
+              "block": {
+                "type": "boolean",
+                "description": "Indicates whether block mode is supported. Exposes the volume as a block storage, which can be formatted or used by applications directly without a filesystem.",
+                "default": true,
+                "nullable": true
+              }
+            }
+          }
+        },
+        "type": "object",
+        "nullable": true
+      },
+      "PvcClaimSize": {
+        "description": "Requested size for the PVC. Mandatory when existingPvc is false. Recommended sizes: TB/GB/MB/TIB/GIB/MIB",
+        "type": "string",
+        "pattern": "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$",
+        "maxLength": 63,
+        "example": "1G",
+        "nullable": true
+      },
+      "PvcClaimMinSize": {
+        "description": "Minimum claim size allowed for PVCs created with this storage class. Mandatory when existingPvc = false. Recommended values: TB, GB, MB, TIB, GIB, MIB.",
+        "type": "string",
+        "pattern": "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$",
+        "example": "1G",
+        "nullable": true
+      },
+      "PvcClaimMaxSize": {
+        "description": "Maximum claim size allowed for PVCs created with this storage class. Mandatory when existingPvc = false. Recommended values: TB, GB, MB, TIB, GIB, MIB.",
+        "type": "string",
+        "pattern": "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$",
+        "example": "1G",
+        "nullable": true
+      },
+      "PvcClaimStepSize": {
+        "description": "Defines the incremental step between allowed numeric values (for example, 1, 0.1).",
+        "type": "string",
+        "pattern": "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$",
+        "example": "1G",
+        "nullable": true
+      },
+      "ClaimSizeCustomization": {
+        "description": "Defines the default, supported units, and range constraints for PVC claim sizes. These settings control the requested storage capacity when creating a PVC using this storage class.",
+        "properties": {
+          "default": {
+            "$ref": "#/components/schemas/PvcClaimSize"
+          },
+          "supportedUnits": {
+            "description": "Units supported for specifying PVC sizes. Valid values: \"MB\", \"MiB\", \"GB\", \"GiB\", \"TB\", \"TiB\".",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "MB",
+                "MiB",
+                "GB",
+                "GiB",
+                "TB",
+                "TiB"
+              ]
+            }
+          },
+          "min": {
+            "$ref": "#/components/schemas/PvcClaimMinSize"
+          },
+          "max": {
+            "$ref": "#/components/schemas/PvcClaimMaxSize"
+          },
+          "step": {
+            "$ref": "#/components/schemas/PvcClaimStepSize"
+          }
+        },
+        "type": "object",
+        "nullable": true
+      },
+      "PvcAddedAttributeFormat": {
+        "type": "string",
+        "description": "Defines the data type the attribute can accept. Enum: \"text\" \"number\" \"boolean\"",
+        "enum": [
+          "text",
+          "number",
+          "boolean"
+        ],
+        "nullable": true
+      },
+      "PvcAddedAttribute": {
+        "description": "Attribute that is added to any PVC of a given storage class.",
+        "required": [
+          "key"
+        ],
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The annotation key for the PVC. Must comply with Kubernetes naming rules: ≤63 characters, beginning and ending with an alphanumeric character ([A-Za-z0-9]), and may include dashes (-), underscores (_), or dots (.).",
+            "maxLength": 63,
+            "pattern": "^([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$",
+            "example": "dnsname"
+          },
+          "format": {
+            "description": "Defines the data type the attribute can accept. Enum: \"text\" \"number\" \"boolean\"",
+            "$ref": "#/components/schemas/PvcAddedAttributeFormat"
+          },
+          "display": {
+            "type": "string",
+            "minLength": 1,
+            "description": "User-friendly display name for the attribute, shown in the UI.",
+            "nullable": true,
+            "example": "DNS Name"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A description of the attribute's purpose or expected values.",
+            "nullable": true,
+            "example": "The host name of the DNS"
+          },
+          "placeholder": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Example or hint text for the attribute's value, displayed as a watermark or help message in the UI.",
+            "nullable": true,
+            "example": "enter hostname or IP address"
+          },
+          "required": {
+            "description": "Indicates whether this attribute is mandatory.",
+            "type": "boolean",
+            "nullable": true,
+            "example": "true"
+          },
+          "defaultValue": {
+            "description": "Default value assigned to the attribute when not explicitly provided.",
+            "type": "string",
+            "minLength": 1,
+            "nullable": true,
+            "example": "my.dns.com"
+          },
+          "validationRegexp": {
+            "description": "Regular expression used to validate user input for text attributes.",
+            "type": "string",
+            "minLength": 1,
+            "nullable": true,
+            "example": "^[a-zA-Z0-9.-_]+$"
+          },
+          "minValue": {
+            "description": "Minimum allowed value for attributes of type number.",
+            "type": "number",
+            "minLength": 1,
+            "nullable": true,
+            "example": "100"
+          },
+          "maxValue": {
+            "description": "Maximum allowed value for attributes of type number.",
+            "type": "number",
+            "minLength": 1,
+            "nullable": true,
+            "example": "200"
+          },
+          "step": {
+            "description": "Defines the incremental step between allowed numeric values (for example, 1, 0.1).",
+            "type": "number",
+            "minLength": 1,
+            "nullable": true,
+            "example": "5"
+          },
+          "validationError": {
+            "description": "Custom validation error message shown if input fails validation. If omitted, a default error message is generated automatically.",
+            "type": "string",
+            "minLength": 1,
+            "nullable": true,
+            "example": "Invalid URL"
+          }
+        },
+        "nullable": true,
+        "type": "object"
+      },
+      "AttributesCustomization": {
+        "description": "Defines additional annotation attributes to be applied to PVCs created under this storage class. Each attribute describes an annotation key and its expected value format, display name, and purpose.",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/PvcAddedAttribute"
+        }
+      },
+      "StorageClassCustomization": {
+        "description": "Optional UI/policy controls that define defaults and requirements when creating PVCs with this storage class.",
+        "properties": {
+          "accessMode": {
+            "$ref": "#/components/schemas/AccessModeCustomization"
+          },
+          "volumeMode": {
+            "$ref": "#/components/schemas/VolumeModeCustomization"
+          },
+          "claimSize": {
+            "$ref": "#/components/schemas/ClaimSizeCustomization"
+          },
+          "attributes": {
+            "$ref": "#/components/schemas/AttributesCustomization"
+          }
+        },
+        "type": "object",
+        "nullable": true
+      },
+      "StorageClassV2": {
+        "type": "object",
+        "required": [
+          "clusterId",
+          "storageClassName",
+          "spec"
+        ],
+        "properties": {
+          "clusterId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Cluster ID which has sent the resource info",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "storageClassName": {
+            "type": "string",
+            "description": "Storage class name",
+            "example": "my-storage-class"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/StorageClassSpec"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/StorageClassPermissions"
+          },
+          "customization": {
+            "$ref": "#/components/schemas/StorageClassCustomization"
+          }
+        }
+      },
+      "StorageClassesV2": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StorageClassV2"
+            }
+          }
+        }
+      },
+      "TenantId": {
+        "description": "The id of the tenant.",
+        "type": "integer",
+        "format": "int32",
+        "example": 1001
+      },
+      "ScopeClusterId": {
+        "description": "The ID of the cluster.",
+        "type": "string",
+        "format": "uuid"
+      },
+      "StorageClassName": {
+        "description": "The name of the storage class to which the configuration applies.",
+        "type": "string",
+        "example": "Standard"
+      },
+      "StorageClassConfiguration": {
+        "type": "object",
+        "required": [
+          "id",
+          "tenantId",
+          "scopeType",
+          "scopeId",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "description": "The unique identifier of the storage class configuration.",
+            "type": "string",
+            "format": "uuid"
+          },
+          "tenantId": {
+            "$ref": "#/components/schemas/TenantId"
+          },
+          "scopeType": {
+            "description": "Currently supported value: 'cluster', which is also the default.",
+            "type": "string",
+            "enum": [
+              "cluster"
+            ],
+            "default": "cluster",
+            "example": "cluster"
+          },
+          "scopeId": {
+            "$ref": "#/components/schemas/ScopeClusterId"
+          },
+          "name": {
+            "$ref": "#/components/schemas/StorageClassName"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/StorageClassPermissions"
+          },
+          "customization": {
+            "$ref": "#/components/schemas/StorageClassCustomization"
+          }
+        }
+      },
+      "StorageClassConfigurationListResponse": {
+        "type": "object",
+        "required": [
+          "storageClassConfigurations"
+        ],
+        "properties": {
+          "storageClassConfigurations": {
+            "description": "A list of storage class configuration objects. Each object defines the configuration details for a specific storage class.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StorageClassConfiguration"
+            }
+          },
+          "next": {
+            "type": "integer",
+            "example": 1
+          }
+        }
+      },
+      "StorageClassConfigurationCreationRequest": {
+        "type": "object",
+        "required": [
+          "scopeType",
+          "scopeId",
+          "name"
+        ],
+        "properties": {
+          "tenantId": {
+            "type": "integer",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TenantId"
+              }
+            ]
+          },
+          "scopeType": {
+            "type": "string",
+            "description": "the scope type of the configuration.",
+            "enum": [
+              "cluster"
+            ],
+            "default": "cluster",
+            "example": "cluster"
+          },
+          "scopeId": {
+            "$ref": "#/components/schemas/ScopeClusterId"
+          },
+          "name": {
+            "$ref": "#/components/schemas/StorageClassName"
+          },
+          "permissions": {
+            "$ref": "#/components/schemas/StorageClassPermissions"
+          },
+          "customization": {
+            "$ref": "#/components/schemas/StorageClassCustomization"
+          }
+        }
+      },
+      "StorageClassConfigurationUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "permissions": {
+            "$ref": "#/components/schemas/StorageClassPermissions"
+          },
+          "customization": {
+            "$ref": "#/components/schemas/StorageClassCustomization"
+          }
+        }
+      },
+      "PvcAttributesToRemove": {
+        "description": "optional list of attributes that you wish to remove",
+        "properties": {
+          "attributesToRemove": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "dnsname",
+              "dnsip"
+            ]
+          }
+        },
+        "type": "object",
+        "nullable": true
+      },
+      "StorageClassConfigurationPatchRequest": {
+        "type": "object",
+        "properties": {
+          "permissions": {
+            "$ref": "#/components/schemas/StorageClassPermissions"
+          },
+          "customization": {
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/StorageClassCustomization"
+              },
+              {
+                "$ref": "#/components/schemas/PvcAttributesToRemove"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "ClusterResourceType": {
+        "type": "string",
+        "enum": [
+          "pvc",
+          "secret",
+          "config-map"
+        ]
+      },
+      "ClusterObjectIssueType": {
+        "type": "string",
+        "enum": [
+          "ReplicationError",
+          "LostPhase",
+          "NotCreated"
+        ]
+      },
+      "ClusterObjectIssue": {
+        "type": "object",
+        "description": "an issue found while syncing the resource to the cluster",
+        "required": [
+          "scopeId",
+          "scopeType",
+          "issue"
+        ],
+        "properties": {
+          "scopeType": {
+            "$ref": "#/components/schemas/ScopeType"
+          },
+          "scopeId": {
+            "$ref": "#/components/schemas/ScopeId"
+          },
+          "issue": {
+            "$ref": "#/components/schemas/ClusterObjectIssueType"
+          }
+        }
+      },
+      "ClusterObjectStatus": {
+        "type": "object",
+        "description": "an object that exists in the cluster with a list of issues found while syncing it to the cluster.",
+        "required": [
+          "scopeId",
+          "scopeType",
+          "resourceType",
+          "resourceName"
+        ],
+        "properties": {
+          "scopeType": {
+            "$ref": "#/components/schemas/ScopeType"
+          },
+          "scopeId": {
+            "$ref": "#/components/schemas/ScopeId"
+          },
+          "resourceType": {
+            "$ref": "#/components/schemas/ClusterResourceType"
+          },
+          "resourceName": {
+            "type": "string"
+          },
+          "secretType": {
+            "$ref": "#/components/schemas/SecretType"
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClusterObjectIssue"
+            }
+          }
+        }
+      },
+      "ClusterObjectsStatus": {
+        "type": "object",
+        "required": [
+          "entries"
+        ],
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClusterObjectStatus"
+            }
+          }
+        }
+      },
+      "ComplianceIssues": {
+        "properties": {
+          "complianceIssues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "details",
+                "field"
+              ],
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "example": "compute.gpuDevicesRequest"
+                },
+                "details": {
+                  "type": "string",
+                  "example": "value must be no less than 3"
+                }
+              }
+            }
+          }
+        },
+        "nullable": true,
+        "type": "object"
+      },
+      "SubmissionError": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "$ref": "#/components/schemas/ComplianceIssues"
+          }
+        ]
+      }
+    },
+    "responses": {
+      "401Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 401,
+              "message": "Issuer is not familiar."
+            }
+          }
+        }
+      },
+      "403Forbidden": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 403,
+              "message": "You do not have sufficient permissions."
+            }
+          }
+        }
+      },
+      "404NotFound": {
+        "description": "The specified resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 404,
+              "message": "Resource id not found."
+            }
+          }
+        }
+      },
+      "500InternalServerError": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 500,
+              "message": "Something went wrong."
+            }
+          }
+        }
+      },
+      "503ServiceUnavailable": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 503,
+              "message": "Please try again in few minutes."
+            }
+          }
+        }
+      },
+      "204NoContent": {
+        "description": "No Content."
+      },
+      "400BadRequest": {
+        "description": "Bad request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 400,
+              "message": "Required parameter is missing"
+            }
+          }
+        }
+      },
+      "V1StorageClassNames": {
+        "description": "Expected response to a valid request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "storageClasses": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": [
+                    "standard"
+                  ]
+                }
+              },
+              "example": {
+                "storageClasses": [
+                  "standard"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "V1Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/V1Error"
+            }
+          }
+        }
+      },
+      "V1NotFound": {
+        "description": "The specified resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/V1Error"
+            }
+          }
+        }
+      },
+      "V1Forbidden": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/V1Error"
+            }
+          }
+        }
+      },
+      "V1ServiceUnavailable": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/V1Error"
+            }
+          }
+        }
+      },
+      "400BadSubmissionRequest": {
+        "description": "Bad submission request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SubmissionError"
+            },
+            "example": {
+              "code": 400,
+              "message": "The workload request does not comply with the policy set by the administrator"
+            }
+          }
+        }
+      },
+      "406NotAcceptable": {
+        "description": "Not acceptable request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "409Conflict": {
+        "description": "The specified resource already exists",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 409,
+              "message": "Resource with this name already exists"
+            }
+          }
+        }
+      },
+      "412PreconditionFailed": {
+        "description": "The specified resource was not found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 412,
+              "message": "Precondition failed"
+            }
+          }
+        }
+      },
+      "413RequestEntityTooLarge": {
+        "description": "Request entity too large",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "415UnsupportedMediaType": {
+        "description": "Unsupported media type",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "501NotImplemented": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 501,
+              "message": "Not implemented"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Bearer authentication"
+      }
+    }
+  }
+}

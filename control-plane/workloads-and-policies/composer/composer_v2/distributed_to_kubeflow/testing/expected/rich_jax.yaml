@@ -1,0 +1,121 @@
+DistributedTarget:
+  Config: {}
+  Framework: JAX
+  JaxJob:
+    apiVersion: kubeflow.org/v1
+    kind: JAXJob
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: jaxjob
+        createdBy: JAXJob
+        project: test
+        release: rich
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: rich
+      name: rich
+      namespace: runai-test
+    spec:
+      jaxReplicaSpecs:
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: jaxjob
+                createdBy: JAXJob
+                project: test
+                release: rich
+                workloadKind: Distributed
+                workloadName: rich
+            spec:
+              containers:
+              - args:
+                - --log-dir
+                - xxx
+                command:
+                - start
+                env:
+                - name: HOME
+                  value: /home/runai-home
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: rich
+                - name: LDAP_UID
+                  value: "500"
+                - name: LDAP_GID
+                  value: "30"
+                image: tensorboard:latest
+                imagePullPolicy: Always
+                name: jax
+                resources: {}
+                securityContext:
+                  allowPrivilegeEscalation: true
+                  capabilities:
+                    add:
+                    - KILL
+                    - CHOWN
+                  readOnlyRootFilesystem: true
+                  runAsGroup: 30
+                  runAsNonRoot: false
+                  runAsUser: 500
+                  seccompProfile:
+                    type: RuntimeDefault
+                stdin: true
+                tty: true
+                volumeMounts:
+                - mountPath: /home/runai-home
+                  name: user-data
+                workingDir: /my/home
+              dnsPolicy: ClusterFirstWithHostNet
+              hostIPC: true
+              hostNetwork: true
+              priorityClassName: build
+              schedulerName: runai-scheduler
+              securityContext:
+                fsGroup: 30
+              terminationGracePeriodSeconds: 55
+              volumes:
+              - emptyDir: {}
+                name: user-data
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: None
+    status: {}
+  MasterSpec: null
+  MpiJob: null
+  ObjectMeta: null
+  PyTorchJob: null
+  RunPolicy: null
+  TFJob: null
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: JAXJob
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-rich/, Framework: JAX'
+  images:
+  - tensorboard:latest
+  name: 'rich/, Framework: JAX'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

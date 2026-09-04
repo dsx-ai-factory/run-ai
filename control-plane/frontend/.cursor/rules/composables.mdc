@@ -1,0 +1,21 @@
+---
+description: Vue composable conventions for Run:ai frontend
+globs: ["**/composables/**/*.ts"]
+alwaysApply: false
+---
+
+# Composables
+
+## Canonical Examples
+
+- **Basic composable**: See `src/composables/use-refresh.composable.ts`
+- **Complex composable**: See `src/composables/org-unit/use-quota-validation.composable.ts`
+- **Composable testing**: See `src/composables/org-unit/use-quota-validation.composable.test.ts`
+
+## Key Patterns
+
+- Name files: `use-<name>.composable.ts`
+- Name functions: `use<Name>` (e.g., `useRefresh`, `useQuotaValidation`)
+- Use Vue lifecycle hooks (`onMounted`, `onUnmounted`) for setup/cleanup
+- Return typed refs and methods
+- Accept options as typed parameter object for complex composables

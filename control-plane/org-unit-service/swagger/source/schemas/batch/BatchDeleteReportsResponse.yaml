@@ -1,0 +1,47 @@
+type: object
+required:
+  - id
+  - accepted
+  - failed
+  - totalRequested
+  - totalAccepted
+  - totalFailed
+properties:
+  id:
+    type: string
+    format: uuid
+    description: The unique ID of the batch operation.
+  accepted:
+    type: array
+    description: IDs of reports accepted for deletion.
+    items:
+      type: string
+      format: uuid
+  failed:
+    type: array
+    description: Reports that could not be deleted, with per-report error details.
+    items:
+      $ref: "../../../../../infra/openapi/docs/schemas/batch/BatchResponseFailureItem.yaml"
+  totalRequested:
+    type: integer
+    description: Total number of items requested in the batch.
+  totalAccepted:
+    type: integer
+    description: Number of items accepted for deletion.
+  totalFailed:
+    type: integer
+    description: Number of items that failed.
+example:
+  id: "497f6eca-6276-4993-bfeb-53cbbbba6f08"
+  accepted:
+    - "8a7f3bcd-1234-5678-abcd-ef0123456789"
+  failed:
+    - id: "3f2504e0-4f89-11d3-9a0c-0305e82c3301"
+      code: 404
+      message: "report not found"
+    - id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+      code: 403
+      message: "user is not the report creator nor has tenant level delete project permissions"
+  totalRequested: 3
+  totalAccepted: 1
+  totalFailed: 2

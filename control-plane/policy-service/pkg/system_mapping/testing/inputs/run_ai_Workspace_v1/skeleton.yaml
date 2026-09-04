@@ -1,0 +1,11 @@
+# Minimal valid run.ai/Workspace/v1 manifest used as the starting point for every
+# Layer 3+4 case.
+#
+# This is a fictive GVK representing Run.ai native policy spec (WorkspaceSpecSpec).
+# The spec structure is flat with nested objects for compute/security/storage.
+apiVersion: run.ai/v1
+kind: Workspace
+metadata:
+  name: test
+spec:
+  image: placeholder

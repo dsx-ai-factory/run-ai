@@ -1,0 +1,76 @@
+apiVersion: kubeflow.org/v2beta1
+kind: MPIJob
+metadata:
+  name: test
+spec:
+  mpiReplicaSpecs:
+    Launcher:
+      replicas: 1
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - image: mpioperator/mpi-horovod:2.0
+            imagePullPolicy: IfNotPresent
+            name: mpi
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 1000
+          initContainers:
+          - image: mpioperator/mpi-horovod:2.0
+            imagePullPolicy: IfNotPresent
+            name: init
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 1000
+    Worker:
+      replicas: 2
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - image: mpioperator/mpi-horovod:2.0
+            imagePullPolicy: IfNotPresent
+            name: mpi
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 1000
+          initContainers:
+          - image: mpioperator/mpi-horovod:2.0
+            imagePullPolicy: IfNotPresent
+            name: init
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 1000

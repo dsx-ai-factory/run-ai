@@ -1,0 +1,114 @@
+apiVersion: optimization.nvidia.com/v1alpha1
+kind: ResourceInterface
+metadata:
+  creationTimestamp: "2026-05-10T06:38:29Z"
+  finalizers:
+  - rid.kai.bolt/finalize
+  generation: 1
+  labels:
+    run.ai/resource-interface-group: serving.kserve.io
+    run.ai/resource-interface-kind: InferenceService
+    run.ai/resource-interface-updated-at: 2026-05-10T06-35-08Z
+    run.ai/resource-interface-version: v1beta1
+    run.ai/workload-type-id: 8e5ed442-ac96-4df4-9638-ac98f549a40d
+  name: ri-v1beta1-serving-kserve-io-inferenceservice
+  resourceVersion: "8605"
+  uid: 19e1d1fd-4963-48c6-9e4e-8c12908afad0
+spec:
+  optimizationInstructions:
+    gangScheduling:
+      podGroups:
+      - members:
+        - componentName: predictor
+          groupByKeyPaths:
+          - .metadata.labels["serving.kserve.io/inferenceservice"]
+        - componentName: transformer
+          groupByKeyPaths:
+          - .metadata.labels["serving.kserve.io/inferenceservice"]
+        name: service
+  structureDefinition:
+    childComponents:
+    - kind:
+        group: apps
+        kind: Deployment
+        version: v1
+      name: predictor
+      ownerRef: inferenceservice
+      podSelector:
+        componentTypeSelector:
+          keyPath: .metadata.labels["component"]
+          value: predictor
+      scaleDefinition:
+        maxReplicasPath: .spec.predictor.maxReplicas
+        minReplicasPath: .spec.predictor.minReplicas
+      specDefinition:
+        fragmentedPodSpecDefinition:
+          containerPath: .spec.predictor.model
+        metadataPath: .spec.predictor
+        podSpecPath: .spec.predictor
+    - kind:
+        group: apps
+        kind: Deployment
+        version: v1
+      name: transformer
+      ownerRef: inferenceservice
+      podSelector:
+        componentTypeSelector:
+          keyPath: .metadata.labels["component"]
+          value: transformer
+      scaleDefinition:
+        maxReplicasPath: .spec.transformer.maxReplicas
+        minReplicasPath: .spec.transformer.minReplicas
+      specDefinition:
+        metadataPath: .spec.transformer
+        podSpecPath: .spec.transformer
+    rootComponent:
+      kind:
+        group: serving.kserve.io
+        kind: InferenceService
+        version: v1beta1
+      name: inferenceservice
+      specDefinition:
+        fragmentedPodSpecDefinition:
+          nodeAffinityPath: .spec.affinity.nodeAffinity
+          priorityClassNamePath: .spec.priorityClassName
+          resourcesPath: .spec.domain.resources
+      statusDefinition:
+        conditionsDefinition:
+          path: .status.conditions
+          statusFieldName: status
+          typeFieldName: type
+        statusMappings:
+          failed:
+          - byConditions:
+            - status: "False"
+              type: PredictorReady
+            - status: "False"
+              type: PredictorConfigurationReady
+            - status: "False"
+              type: RoutesReady
+          running:
+          - byConditions:
+            - status: "True"
+              type: PredictorReady
+            - status: "True"
+              type: RoutesReady
+            - status: "True"
+              type: LatestDeploymentReady
+status:
+  conditions:
+  - lastTransitionTime: "2026-05-10T06:38:45Z"
+    message: The CustomResourceDefinition for the group/kind does not exist
+    reason: CRDExists
+    status: "False"
+    type: CRDExists
+  - lastTransitionTime: "2026-05-10T06:38:45Z"
+    message: The RBAC permissions for the group/kind are not ready
+    reason: RBACReady
+    status: "False"
+    type: RBACReady
+  - lastTransitionTime: "2026-05-10T06:38:45Z"
+    message: The sync is not enabled
+    reason: SyncEnabled
+    status: "False"
+    type: SyncEnabled

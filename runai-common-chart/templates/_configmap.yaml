@@ -1,0 +1,28 @@
+{{- define "common.configMap.tpl" -}}
+{{- $top := first . }}
+{{- $obj := index . 1 }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  {{- include "common.metadata" (list $top $obj) | nindent 2 }}
+  {{- if and (($top.Values.global.config).argoRollouts) (ne $obj.argoRollouts false) }}
+  name: {{ include "common.fullname" $top }}-{{ $obj.name }}-{{ $top.Chart.Version }}
+  {{- else }}
+  name: {{ include "common.fullname" $top }}-{{ $obj.name }}
+  {{- end }}
+  {{- if or ($obj.annotations) ($top.Values.global.config).argoRollouts }}
+  annotations:
+    {{- with $obj.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- if and (($top.Values.global.config).argoRollouts) (ne $obj.argoRollouts false) }}
+    argocd.argoproj.io/sync-options: "Prune=false"
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    {{- end }}
+  {{- end }}
+data: {}
+{{- end }}
+
+{{- define "common.configMap" -}}
+{{- include "common.utils.merge" (append . "common.configMap.tpl") }}
+{{- end }}

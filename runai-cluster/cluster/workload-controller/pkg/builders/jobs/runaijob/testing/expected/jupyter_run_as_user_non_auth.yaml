@@ -1,0 +1,174 @@
+- apiVersion: run.ai/v1
+  kind: RunaiJob
+  metadata:
+    annotations:
+      JobUrl: https://cluster-domain.mock/team-a/job-3
+      template: job-3
+      workloadApiVersion: run.ai/v2alpha1
+    creationTimestamp: "2022-02-22T17:00:00Z"
+    deletionTimestamp: "2022-02-22T17:00:00Z"
+    labels:
+      app: runaijob
+      createdBy: RunaiJob
+      jupyter: "true"
+      kai.scheduler/preemptibility: non-preemptible
+      priorityClassName: build
+      project: team-a
+      release: job-3
+      workloadKind: InteractiveWorkload
+      workloadName: job-3
+    name: job-3
+    namespace: runai-team-a
+  spec:
+    activeDeadlineSeconds: 120
+    backoffLimit: 0
+    completions: 1
+    maxIdleDurationSeconds: 1200
+    parallelism: 1
+    template:
+      metadata:
+        annotations:
+          user: user.name
+        labels:
+          app: runaijob
+          createdBy: RunaiJob
+          kai.scheduler/preemptibility: non-preemptible
+          priorityClassName: build
+          project: team-a
+          release: job-3
+          run.ai/top-owner-uid: ""
+          workloadKind: InteractiveWorkload
+          workloadName: job-3
+      spec:
+        containers:
+        - args:
+          - start-notebook.sh
+          - --NotebookApp.base_url=/team-a/job-3
+          - --NotebookApp.token=''
+          - --NotebookApp.password=''
+          env:
+          - name: LDAP_UID
+            value: "501"
+          - name: LDAP_GID
+            value: "20"
+          image: jupyter/scipy-notebook
+          imagePullPolicy: IfNotPresent
+          name: job-3
+          resources:
+            limits:
+              nvidia.com/gpu: "1"
+          securityContext:
+            runAsGroup: 20
+            runAsUser: 501
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+          - mountPath: /tmp/repoa
+            name: code-sync-0
+        initContainers:
+        - env:
+          - name: GITSYNC_REPO
+            value: http://github.com/repoa
+          - name: GITSYNC_USERNAME
+            value: myuser
+          - name: GITSYNC_PASSWORD
+            value: mypassword
+          - name: GITSYNC_ROOT
+            value: /code-git-a
+          - name: GITSYNC_ONE_TIME
+            value: "true"
+          - name: HOME
+            value: /tmp
+          image: registry.k8s.io/git-sync/git-sync:v4.7.0
+          name: git-sync-git-a
+          resources: {}
+          securityContext:
+            runAsGroup: 20
+            runAsUser: 501
+          volumeMounts:
+          - mountPath: /code-git-a
+            name: code-sync-0
+        restartPolicy: Never
+        schedulerName: runai-scheduler
+        securityContext:
+          fsGroup: 20
+          supplementalGroups:
+          - 20
+          - 12
+          - 61
+          - 79
+          - 80
+          - 81
+          - 98
+          - 33
+          - 100
+          - 204
+          - 250
+          - 395
+          - 101
+          - 399
+          - 400
+          - 701
+        volumes:
+        - emptyDir: {}
+          name: code-sync-0
+  status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    jupyter: "true"
+    priorityClassName: build
+    project: team-a
+    release: job-3
+    workloadKind: InteractiveWorkload
+    workloadName: job-3
+  name: iw-job-3-jupyter
+  namespace: runai-team-a
+spec:
+  ports:
+  - name: port-job-3-8888-0
+    port: 80
+    protocol: TCP
+    targetPort: 8888
+  selector:
+    release: job-3
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 8g
+  creationTimestamp: "2022-02-22T17:00:00Z"
+  labels:
+    app: runaijob
+    createdBy: RunaiJob
+    jupyter: "true"
+    priorityClassName: build
+    project: team-a
+    release: job-3
+    workloadKind: InteractiveWorkload
+    workloadName: job-3
+  name: iw-job-3-jupyter
+  namespace: runai-team-a
+spec:
+  rules:
+  - host: cluster-domain.mock
+    http:
+      paths:
+      - backend:
+          service:
+            name: iw-job-3-jupyter
+            port:
+              number: 80
+        path: /team-a/job-3
+        pathType: Prefix
+status:
+  loadBalancer: {}

@@ -1,0 +1,47 @@
+{{- if .Values.datavolumes.enabled }}
+{{- include "common.configMap" (list . .Values.datavolumes "control-plane.datavolumes.configmap") }}
+{{- end }}
+
+{{- define "control-plane.datavolumes.configmap" -}}
+{{- $top := first . }}
+data:
+  SERVICE_PORT: {{ $top.Values.datavolumes.service.port | quote }}
+  SERVICE_NAME: {{ $top.Values.datavolumes.name | quote }}
+  SERVER_WRITE_TIMEOUT: {{ $top.Values.datavolumes.config.server.writeTimeout | quote }}
+  SERVER_READ_TIMEOUT: {{ $top.Values.datavolumes.config.server.readTimeout | quote }}
+  SERVER_IDLE_TIMEOUT: {{ $top.Values.datavolumes.config.server.idleTimeout | quote }}
+  TRACING_ENABLED: {{ if hasKey $top.Values.datavolumes.config "tracingEnabled" }}{{ $top.Values.datavolumes.config.tracingEnabled | quote }}{{ else }}{{ $top.Values.global.config.tracingEnabled | quote }}{{ end }}
+  AUDIT_ENABLED: {{ if hasKey $top.Values.datavolumes.config "auditEnabled" }}{{ $top.Values.datavolumes.config.auditEnabled | quote }}{{ else }}{{ $top.Values.global.config.auditEnabled | quote }}{{ end }}
+  AUDIT_ENABLE_PRINT_TO_STDOUT: {{ if hasKey $top.Values.datavolumes.config "auditEnablePrintToStdout" }}{{ $top.Values.datavolumes.config.auditEnablePrintToStdout | quote }}{{ else }}{{ $top.Values.global.config.auditEnablePrintToStdout | quote }}{{ end }}
+  AUDIT_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.auditService.name ($top.Values.auditService.service.port | toString) | quote }}
+  DB_NAME: {{ $top.Values.datavolumes.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_VERBOSE_LOGGING: {{ $top.Values.datavolumes.config.dbVerboseLogging | default $top.Values.global.postgresql.dbVerboseLogging | quote }}
+  DB_HOST: {{ $top.Values.datavolumes.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SSL_MODE: {{ $top.Values.datavolumes.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_PORT: {{ $top.Values.datavolumes.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  DB_SCHEMA: {{ $top.Values.datavolumes.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  DB_MIGRATION_FILES: {{ $top.Values.datavolumes.config.migrationFiles | quote }}
+  {{- $cacheEnabled := $top.Values.datavolumes.config.cacheEnabled | default false }}
+  CACHE_ENABLED: {{ $cacheEnabled | quote }}
+  {{- if eq (toString $cacheEnabled) "true" }}
+  CACHE_URL: {{ $top.Values.datavolumes.config.cacheUrl | default $top.Values.global.cache.url | quote }}
+  CACHE_READ_URL: {{ $top.Values.datavolumes.config.cacheReadUrl | default $top.Values.global.cache.readUrl | quote }}
+  CACHE_TYPE: {{ $top.Values.datavolumes.config.cacheType | default $top.Values.global.cache.type | quote }}
+  {{- end }}
+  ORG_UNIT_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.orgUnitService.name (toString $top.Values.orgUnitService.service.port) }}
+  BACKEND_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.tempBackendSettings.name (toString $top.Values.tempBackendSettings.service.port) }}
+  CLUSTER_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.clusterService.name (toString $top.Values.clusterService.service.port) }}
+  AUTHORIZATION_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.authorization.name ($top.Values.authorization.service.port | toString) | quote }}
+  AUTH_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.identityManager.name ($top.Values.identityManager.service.port | toString) | quote }}
+  CLUSTER_CACHE_EXPIRATION_SEC: {{ $top.Values.datavolumes.config.clusterCacheExpirationSeconds | quote }}
+  CLUSTER_CACHE_CLEANUP_SEC: {{ $top.Values.datavolumes.config.clusterCacheCleanupSeconds | quote }}
+  PROJECTS_CACHE_EXPIRATION_SEC: "600"
+  PROJECTS_CACHE_CLEANUP_SEC: "1200"
+  PUBSUB_URL: {{ $top.Values.global.pubsub.url | quote }}
+  PUBSUB_TYPE: {{ $top.Values.global.pubsub.type | quote }}
+  PUBSUB_ENABLE_ADDITIONAL_SUBSCRIBER: {{ $top.Values.global.pubsub.additionalSubscriber.enabled | quote }}
+  {{- if $top.Values.global.pubsub.additionalSubscriber.enabled }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_TYPE: {{ $top.Values.global.pubsub.additionalSubscriber.type | quote }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_URL: {{ $top.Values.global.pubsub.additionalSubscriber.url | quote }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,39 @@
+allOf:
+  - $ref: "./NetworkTopologyCreateRequest.yaml"
+  - type: object
+    required:
+      - id
+      - tenantId
+      - createdAt
+      - status
+    properties:
+      id:
+        $ref: './NetworkTopologyId.yaml'
+      tenantId:
+        $ref: '../../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml'
+      createdAt:
+        type: string
+        format: date-time
+        description: The timestamp for when the network topology was created
+      createdBy:
+        type: string
+        description: Identifier of the user who created the network topology
+        example: user@lab.com
+      phase:
+        type: string
+        description: 'Phase of the network topology in the cluster. Enum: Creating, Ready'
+        example: 'Ready'
+      source:
+        $ref: './NetworkTopologiesSource.yaml'
+      nodePools:
+        type: array
+        items:
+          type: string
+        nullable: true
+        readOnly: true
+        description: 'List of node-pools associated with this network topology'
+        example: [a100]
+      groveTopology:
+        $ref: './NetworkTopologyGrove.yaml'
+
+x-schema-name: NetworkTopology

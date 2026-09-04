@@ -1,0 +1,7 @@
+type: string
+enum:
+  - Ready
+  - NotReady
+  - Deleted
+description: Phase of the Access Rule in the cluster
+example: Ready

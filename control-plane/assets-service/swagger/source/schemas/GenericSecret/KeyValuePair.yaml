@@ -1,0 +1,15 @@
+description: Details of key-value pair to be stored in the credential.
+properties:
+  key:
+    description: The key of the secret
+    type: string
+    minLength: 1
+    example: secret-key
+    nullable: true
+  value:
+    description: The value of the secret.
+    type: string
+    example: my-secret
+    nullable: true
+nullable: true
+type: object

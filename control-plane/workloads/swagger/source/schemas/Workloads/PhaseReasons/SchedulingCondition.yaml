@@ -1,0 +1,36 @@
+type: object
+x-internal: true
+description: The scheduling condition synced from the podgroup status by the cluster-sync.
+required:
+  - nodePool
+  - reason
+properties:
+  nodePool:
+    type: string
+    example: "default"
+  reason:
+    $ref: "./PhaseReason.yaml"
+  queueDetails:
+    type: object
+    nullable: true
+    required:
+      - orgType
+    properties:
+      orgType:
+        $ref: "./OrgType.yaml"
+      exceedingResources:
+        $ref: "./QueueResources.yaml"
+      queueRequestedResources:
+        $ref: "./QueueResources.yaml"
+      queueDeservedResources:
+        $ref: "./QueueResources.yaml"
+      queueAllocatedResources:
+        $ref: "./QueueResources.yaml"
+      queueAllocatedNonPreemptibleResources:
+        $ref: "./QueueResources.yaml"
+      queueResourceLimits:
+        $ref: "./QueueResources.yaml"
+      podGroupRequestedResources:
+        $ref: "./QueueResources.yaml"
+      podGroupRequestedNonPreemptibleResources:
+        $ref: "./QueueResources.yaml"

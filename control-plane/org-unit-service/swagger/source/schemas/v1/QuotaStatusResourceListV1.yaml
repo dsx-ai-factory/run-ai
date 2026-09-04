@@ -1,0 +1,13 @@
+properties:
+  gpu:
+    type: number
+    description: The number of GPUs (allocated/requested/...).
+    example: 0
+  cpu:
+    type: number
+    description: CPU in Millicores (allocated/requested/...).
+    example: 1000
+  memory:
+    type: number
+    description: Memory in Mib (allocated/requested/...).
+    example: 1000

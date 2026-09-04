@@ -1,0 +1,11 @@
+description: Asset id and its kind.
+required:
+  - id
+  - kind
+properties:
+  id:
+    $ref: "./AssetId.yaml"
+  kind:
+    $ref: "./AssetKind.yaml"
+  overrides:
+    $ref: "./DataSourceOverrides.yaml"

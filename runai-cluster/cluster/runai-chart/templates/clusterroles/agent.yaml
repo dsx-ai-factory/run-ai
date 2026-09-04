@@ -1,0 +1,505 @@
+{{- if .Values.operands.rbac.base.create }}
+# Run:AI Agent
+# Connects between the Run:AI GPU cluster and the Run:AI Backend. Creates Project CRDs
+# This ClusterRole has no associated ClusterRoleBinding (only RoleBinding at the project level)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-agent-project
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - update
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+      - statefulsets
+      - replicasets
+      - daemonsets
+    verbs:
+      - create
+      - update
+      - patch
+      - get
+      - list
+      - watch
+      - delete
+  - apiGroups:
+      - batch
+    resources:
+      - jobs
+      - cronjobs
+    verbs:
+      - create
+      - update
+      - patch
+      - get
+      - list
+      - watch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - create
+      - update
+      - patch
+      - get
+      - list
+      - watch
+      - delete
+  - apiGroups:
+      - kubeflow.org
+    resources:
+      - mpijobs
+      - pytorchjobs
+      - tfjobs
+      - xgboostjobs
+      - jaxjobs
+    verbs:
+      - create
+      - update
+      - patch
+      - get
+      - list
+      - watch
+      - delete
+  - apiGroups:
+      - machinelearning.seldon.io
+    resources:
+      - seldondeployments
+    verbs:
+      - create
+      - update
+      - patch
+      - get
+      - list
+      - watch
+      - delete
+  - apiGroups:
+      - serving.knative.dev
+    resources:
+      - services
+      - revisions
+      - configurations
+    verbs:
+      - create
+      - update
+      - patch
+      - get
+      - list
+      - watch
+      - delete
+  - apiGroups:
+      - ray.io
+    resources:
+      - rayclusters
+      - rayjobs
+      - rayservices
+    verbs:
+      - create
+      - update
+      - patch
+      - get
+      - list
+      - watch
+      - delete
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - workflows
+    verbs:
+      - create
+      - update
+      - patch
+      - get
+      - list
+      - watch
+      - delete
+  - apiGroups:
+      - tekton.dev
+    resources:
+      - pipelineruns
+      - taskruns
+    verbs:
+      - create
+      - update
+      - patch
+      - get
+      - list
+      - watch
+      - delete
+  - apiGroups:
+      - kubevirt.io
+    resources:
+      - virtualmachines
+      - virtualmachineinstances
+    verbs:
+      - create
+      - update
+      - patch
+      - get
+      - list
+      - watch
+      - delete
+  - apiGroups:
+      - amlarc.azureml.com
+    resources:
+      - amljobs
+    verbs:
+      - create
+      - update
+      - patch
+      - get
+      - list
+      - watch
+      - delete
+  - apiGroups:
+      - workspace.devfile.io
+    resources:
+      - devworkspaces
+    verbs:
+      - create
+      - update
+      - patch
+      - get
+      - list
+      - watch
+      - delete
+  - apiGroups:
+      - leaderworkerset.x-k8s.io
+    resources:
+      - leaderworkersets
+    verbs:
+      - create
+      - update
+      - patch
+      - get
+      - list
+      - watch
+      - delete
+  - apiGroups:
+      - apps.nvidia.com
+    resources:
+      - nimcaches
+      - nimservices
+    verbs:
+      - create
+      - update
+      - patch
+      - get
+      - list
+      - watch
+      - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-agent
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - list
+      - get
+      - update
+      - create
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - serviceaccounts
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+      - persistentvolumeclaims
+    verbs:
+      - list
+      - get
+      - update
+      - create
+      - delete
+      - watch
+  - apiGroups:
+      - scheduling.k8s.io
+    resources:
+      - priorityclasses
+    verbs:
+      - list
+      - get
+      - update
+      - create
+      - delete
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - kartas
+    verbs:
+      - list
+      - get
+      - watch
+      - create
+      - update
+      - delete
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - list
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+  - apiGroups:
+      - run.ai
+    resources:
+      - projects
+      - nodepools
+      - nodepools/status
+      - accessrules
+      - accessrules/status
+      - datavolumes
+      - datavolumes/status
+      - trainingpolicies
+      - interactivepolicies
+      - inferencepolicies
+      - distributedpolicies
+      - trainingworkloads
+      - interactiveworkloads
+      - inferenceworkloads
+      - distributedworkloads
+      - distributedinferenceworkloads
+      - distributedinferenceworkloads/status
+      - distributedinferenceworkloads/scale
+      - workloadrunners
+      - workloadrunners/status
+      - applications
+      - applications/status
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - update
+      - watch
+  - apiGroups:
+      - kai.resources
+    resources:
+      - nodepools
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - update
+      - watch
+  - apiGroups:
+      - scheduling.run.ai
+    resources:
+      - departments
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - update
+      - watch
+  - apiGroups:
+      - kai.resources
+    resources:
+      - departments
+      - projects
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - update
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - clusters
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - create
+      - get
+      - update
+      - patch
+  - apiGroups:
+      - kai.scheduler
+    resources:
+      - topologies
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - update
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+      - statefulsets
+      - replicasets
+      - daemonsets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - batch
+    resources:
+      - jobs
+      - cronjobs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - kubeflow.org
+    resources:
+      - mpijobs
+      - pytorchjobs
+      - tfjobs
+      - xgboostjobs
+      - jaxjobs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - machinelearning.seldon.io
+    resources:
+      - seldondeployments
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - serving.knative.dev
+    resources:
+      - services
+      - revisions
+      - configurations
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ray.io
+    resources:
+      - rayclusters
+      - rayjobs
+      - rayservices
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - workflows
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - tekton.dev
+    resources:
+      - pipelineruns
+      - taskruns
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - kubevirt.io
+    resources:
+      - virtualmachines
+      - virtualmachineinstances
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - amlarc.azureml.com
+    resources:
+      - amljobs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - workspace.devfile.io
+    resources:
+      - devworkspaces
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - leaderworkerset.x-k8s.io
+    resources:
+      - leaderworkersets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apps.nvidia.com
+    resources:
+      - nimcaches
+      - nimservices
+    verbs:
+      - get
+      - list
+      - watch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-agent
+subjects:
+  - kind: ServiceAccount
+    name: runai-agent
+    namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-agent
+{{- end }}

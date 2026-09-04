@@ -1,0 +1,117 @@
+{{- if .Values.userAuth.rbac.create }}
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-data-and-storage-administrator
+rules:
+  - apiGroups:
+      - run.ai
+      - scheduling.run.ai
+    resources:
+      - departments
+      - projects
+      - datavolumes
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - kai.resources
+    resources:
+      - projects
+      - departments
+    verbs:
+      - get
+      - list
+  - apiGroups: {{ include "$extraJobsDeploymentsReadClusteredApiGroups" . | nindent 4 }}
+    resources: {{ include "$extraJobsDeploymentsReadClusteredResources" . | nindent 4 }}
+    verbs: {{ include "$readVerbs" . | nindent 4 }}
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-data-and-storage-administrator-ns-internal
+  labels:
+    run.ai/aggregate-to-data-storage-admin-ns: "true"
+rules:
+  - apiGroups: {{ include "$jobsPodsApiGroups" . | nindent 4 }}
+    resources: {{ include "$jobsPodsResources" . | nindent 4 }}
+    verbs: {{ include "$readVerbs" . | nindent 4 }}
+  - apiGroups: {{ include "$runaiApiGroups" . | nindent 4 }}
+    resources: {{ include "$runaijobsPodgroupsResources" . | nindent 4 }}
+    verbs: {{ include "$readVerbs" . | nindent 4 }}
+  - apiGroups: {{ include "$extraJobsDeploymentsReadNamespacedApiGroups" . | nindent 4 }}
+    resources: {{ include "$extraJobsDeploymentsReadNamespacedResources" . | nindent 4 }}
+    verbs: {{ include "$readVerbs" . | nindent 4 }}
+  - apiGroups: {{ include "$extraJobsDeploymentsWatchNamespacedApiGroups" . | nindent 4 }}
+    resources: {{ include "$extraJobsDeploymentsWatchNamespacedResources" . | nindent 4 }}
+    verbs:
+      - watch
+  - apiGroups: {{ include "$dataSourcesApiGroups" . | nindent 4 }}
+    resources: {{ include "$dataSourcesResources" . | nindent 4 }}
+    verbs: {{ include "$CRUDVerbs" . | nindent 4 }}
+  - apiGroups: {{ include "$policiesApiGroups" . | nindent 4 }}
+    resources: {{ include "$policiesResources" . | nindent 4 }}
+    verbs: {{ include "$readVerbs" . | nindent 4 }}
+  - apiGroups: {{ include "$credentialsApiGroups" . | nindent 4 }}
+    resources: {{ include "$credentialsResources" . | nindent 4 }}
+    verbs: {{ include "$readVerbs" . | nindent 4 }}
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-data-and-storage-administrator-ns
+aggregationRule:
+  clusterRoleSelectors:
+    - matchLabels:
+        run.ai/aggregate-to-data-storage-admin-ns: "true"
+    - matchLabels:
+        run.ai/additional-workload-gvks-read: "true"
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-data-and-storage-administrator-runai
+rules:
+  - apiGroups: {{ include "$policiesAndTemplatesApiGroups" . | nindent 4 }}
+    resources: {{ include "$policiesAndTemplatesResources" . | nindent 4 }}
+    verbs: {{ include "$readVerbs" . | nindent 4 }}
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-data-and-storage-administrator-runai-cs
+rules:
+  - apiGroups: {{ include "$dataSourcesApiGroups" . | nindent 4 }}
+    resources: {{ include "$dataSourcesResources" . | nindent 4 }}
+    verbs: {{ include "$CRUDVerbs" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-data-and-storage-administrator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-data-and-storage-administrator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: runai-data-and-storage-administrator-runai
+  namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-data-and-storage-administrator-runai
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: runai-data-and-storage-administrator-runai-cs
+  namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-data-and-storage-administrator-runai-cs
+{{- end }}
+

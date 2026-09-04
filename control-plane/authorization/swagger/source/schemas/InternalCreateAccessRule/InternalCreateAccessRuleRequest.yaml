@@ -1,0 +1,28 @@
+type: object
+required:
+  - subjectId
+  - subjectType
+  - roleName
+properties:
+  subjectId:
+    type: string
+    example: "user@run.ai"
+  subjectType:
+    $ref: '../AccessRules/SubjectType.yaml'
+  roleName:
+    $ref: './AllowedInternalCreateRoles.yaml'
+  scope:
+    required:
+      - id
+      - type
+    type: object
+    nullable: true
+    properties:
+      id:
+        type: string
+        example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+      type:
+        $ref: "../../../../../infra/openapi/docs/schemas/scopes/ScopeType.yaml"
+      name:
+        type: string
+        example: "my-scope"

@@ -1,0 +1,10 @@
+description: |
+  Determines when the worker pods should start during workload initialization. 
+   - `LeaderCreated`: Workers start after the leader pod is created.
+   - `LeaderReady`: Workers start only after the leader pod is ready.
+type: string
+enum:
+  - LeaderCreated
+  - LeaderReady
+nullable: true
+default: LeaderCreated

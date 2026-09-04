@@ -1,0 +1,40 @@
+policyInfo:
+  master:
+    defaults:
+      image: ubuntu-master
+      nodePools:
+      - node-pool-1-policy-master
+      - node-pool-2-policy-master
+    rules:
+      nodePools:
+        required: true
+      nodeType:
+        options:
+        - value: node-1-from-project
+        - value: node-2-from-project
+  worker:
+    defaults:
+      image: ubuntu-worker
+      nodePools:
+      - node-pool-1-from-project
+      - node-pool-2-from-project
+      nodeType: node-type-1-policy-worker
+    rules:
+      nodeType:
+        options:
+        - value: node-type-1-policy-worker
+        - value: node-type-2-policy-worker
+projectInfo:
+  name: project-1
+spec:
+  master:
+    image: ubuntu-master
+    nodePools:
+    - node-pool-1-policy-master
+    - node-pool-2-policy-master
+  worker:
+    image: ubuntu-worker
+    nodePools:
+    - node-pool-1-from-project
+    - node-pool-2-from-project
+    nodeType: node-type-1-policy-worker

@@ -1,0 +1,6 @@
+description: Set of tolerations to apply to the workload.
+type: array
+items:
+  $ref: "./Toleration.yaml"
+maxItems: 1000
+nullable: true

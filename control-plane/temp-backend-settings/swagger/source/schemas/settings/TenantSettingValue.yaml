@@ -1,0 +1,13 @@
+type: object
+description: A setting value for a specific tenant
+properties:
+  tenantId:
+    type: integer
+    description: The tenant ID
+  value:
+    oneOf:
+    - type: boolean
+    - type: number
+    - type: string
+    - type: object
+    description: The setting value (type varies based on the setting)

@@ -1,0 +1,7 @@
+type: string
+format: uuid
+description: |
+  Identifier of a Helm chart archive that was previously uploaded via the chart upload endpoint.
+  When provided, the control plane serves the uploaded chart to the cluster for installation instead of
+  resolving a Helm repository reference or a direct chart URL.
+example: 3fa85f64-5717-4562-b3fc-2c963f66afa6

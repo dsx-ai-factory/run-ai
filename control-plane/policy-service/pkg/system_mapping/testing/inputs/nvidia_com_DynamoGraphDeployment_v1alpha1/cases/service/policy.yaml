@@ -1,0 +1,62 @@
+description: |
+  Layer 3 case "service" for nvidia.com/DynamoGraphDeployment/v1alpha1. SETs
+  service-level fields (replicas, componentType, etc.) across all services
+  using allServiceSpecs selector.
+effectiveRules:
+  # ----- allServiceSpecs fields (applied to all services) -----
+  - field: replicas
+    specSelector: allServiceSpecs
+    enforcements: [{ set: { value: 5 } }]
+  - field: componentType
+    specSelector: allServiceSpecs
+    enforcements: [{ set: { value: inference } }]
+  - field: subComponentType
+    specSelector: allServiceSpecs
+    enforcements: [{ set: { value: model } }]
+  - field: dynamoNamespace
+    specSelector: allServiceSpecs
+    enforcements: [{ set: { value: "test-namespace" } }]
+  - field: globalDynamoNamespace
+    specSelector: allServiceSpecs
+    enforcements: [{ set: { value: true } }]
+  - field: serviceName
+    specSelector: allServiceSpecs
+    enforcements: [{ set: { value: "my-service" } }]
+  - field: sharedMemory-size
+    specSelector: allServiceSpecs
+    enforcements: [{ set: { value: "4Gi" } }]
+  - field: sharedMemory-disabled
+    specSelector: allServiceSpecs
+    enforcements: [{ set: { value: false } }]
+  - field: checkpoint-enabled
+    specSelector: allServiceSpecs
+    enforcements: [{ set: { value: true } }]
+  - field: checkpoint-checkpointRef
+    specSelector: allServiceSpecs
+    enforcements: [{ set: { value: "my-checkpoint" } }]
+  - field: multinode-nodeCount
+    specSelector: allServiceSpecs
+    enforcements: [{ set: { value: 4 } }]
+  - field: ingress-enabled
+    specSelector: allServiceSpecs
+    enforcements: [{ set: { value: true } }]
+  - field: ingress-host
+    specSelector: allServiceSpecs
+    enforcements: [{ set: { value: "api.example.com" } }]
+  - field: ingress-path
+    specSelector: allServiceSpecs
+    enforcements: [{ set: { value: "/v1" } }]
+  - field: ingress-ingressClassName
+    specSelector: allServiceSpecs
+    enforcements: [{ set: { value: "nginx" } }]
+  - field: modelRef-name
+    specSelector: allServiceSpecs
+    enforcements: [{ set: { value: "llama-model" } }]
+  - field: modelRef-namespace
+    specSelector: allServiceSpecs
+    enforcements: [{ set: { value: "models" } }]
+
+  # ----- container image (verify policy modifies skeleton) -----
+  - field: image
+    specSelector: allContainers
+    enforcements: [{ set: { value: "dynamo/service:v1" } }]

@@ -1,0 +1,72 @@
+get:
+  summary: Get a list of access keys.
+  description: Retrieve a list of the user's access keys.
+  x-service: identity-manager
+  operationId: get_access_keys
+  x-test-coverage:
+  - integration-tests/tests/api_access_keys_test.go
+  - pkg/services/api_access_keys_service_test.go
+  - e2e/src/test/suites/parallel/personalApplications/crudUserApplication.test.ts
+  - e2e/src/test/suites/parallel/personalApplications/userApplicationUi.test.ts
+  - e2e/src/test/suites/parallel/personalApplications/userAppStatusCodes.test.ts
+  x-no-authorization: true
+  tags:
+  - Access Keys
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/AccessKeys/AccessKeys.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+post:
+  summary: Create an access key.
+  description: Used to create an access key.
+  x-service: identity-manager
+  operationId: create_access_key
+  x-audit: true
+  x-no-authorization: true
+  x-test-coverage:
+  - integration-tests/tests/api_access_keys_test.go
+  - pkg/services/api_access_keys_service_test.go
+  - e2e/src/test/suites/parallel/personalApplications/crudUserApplication.test.ts
+  - e2e/src/test/suites/parallel/personalApplications/userApplicationUi.test.ts
+  - e2e/src/test/suites/parallel/personalApplications/userAppStatusCodes.test.ts
+  - e2e/src/test/suites/parallel/personalApplications/userAppLimitation.test.ts
+  tags:
+  - Access Keys
+  requestBody:
+    description: Access key object to create
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/AccessKeys/AccessKeyCreationRequest.yaml'
+  responses:
+    '201':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/AccessKeys/AccessKeyPostResponse.yaml'
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '409':
+      $ref: '../../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+

@@ -1,0 +1,8 @@
+name: Order
+in: query
+description: The order of the ranking (top/bottom)
+required: true
+example: top
+schema:
+  $ref: "../schemas/RankingOrderType.yaml"
+  

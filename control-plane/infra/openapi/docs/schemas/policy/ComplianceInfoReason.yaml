@@ -1,0 +1,15 @@
+description: An issue preventing the use of a template or asset for creating workloads in a given project.
+required:
+  - details
+properties:
+  field:
+    description: For policy related issues, includes a json path to the field in the policy for which the issue applies.
+    nullable: true
+    type: string
+    pattern: .*
+  details:
+    description: Explanation of the issue.
+    type: string
+    pattern: .*
+  rule:
+    $ref: "./PolicyRuleEnum.yaml"

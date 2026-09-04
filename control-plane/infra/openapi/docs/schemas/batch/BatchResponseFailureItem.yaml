@@ -1,0 +1,13 @@
+type: object
+required:
+  - id
+  - code
+  - message
+properties:
+  id:
+    type: string
+    format: uuid
+  code:
+    $ref: "../common/ErrorCode.yaml"
+  message:
+    $ref: "../common/ErrorMessage.yaml"

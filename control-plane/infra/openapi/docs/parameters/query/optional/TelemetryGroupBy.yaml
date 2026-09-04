@@ -1,0 +1,10 @@
+name: groupBy
+in: query
+description: segments to group the data by
+required: false
+schema:
+  type: array
+  maxItems: 2
+  items:
+    type: string
+    example: "department"

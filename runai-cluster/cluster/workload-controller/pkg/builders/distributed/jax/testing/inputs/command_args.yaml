@@ -1,0 +1,20 @@
+apiVersion: run.ai/v2alpha1
+kind: DistributedWorkload
+metadata:
+  name: job-0
+  namespace: runai-team-a
+  uid: b5efa366-77be-4da3-ac9b-b59483d02a99
+spec:
+  jobType: JAXJob
+  noMaster:
+    value: true
+  image:
+    value: ubuntu
+  name:
+    value: job-0
+  workers:
+    value: 3
+  command:
+    value: cmd1 cmd2 cmd3
+  arguments:
+    value: arg1 arg2 arg3

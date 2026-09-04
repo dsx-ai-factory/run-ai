@@ -1,0 +1,9 @@
+name: numberOfSamples
+in: query
+description: Maximum number of records to include in the file. The hard cap is 100,000. Use the offset parameter to page through additional records.
+required: false
+schema:
+  type: integer
+  minimum: 0
+  maximum: 100000
+  default: 20

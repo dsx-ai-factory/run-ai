@@ -1,0 +1,79 @@
+apiVersion: nvidia.com/v1alpha1
+kind: DynamoGraphDeployment
+metadata:
+  name: test-dynamo
+  namespace: default
+spec:
+  backendFramework: vllm
+  services:
+    service-a:
+      componentType: worker
+      extraPodSpec:
+        containers:
+        - image: dynamo/service:v1
+          imagePullPolicy: IfNotPresent
+          name: main
+          resources:
+            limits:
+              cpu: "4"
+              memory: 8Gi
+            requests:
+              cpu: "2"
+              memory: 4Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+        initContainers:
+        - image: dynamo/service:v1
+          imagePullPolicy: IfNotPresent
+          name: init
+          resources:
+            limits:
+              cpu: "4"
+              memory: 8Gi
+            requests:
+              cpu: "2"
+              memory: 4Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+      replicas: 1
+    service-b:
+      componentType: router
+      extraPodSpec:
+        containers:
+        - image: dynamo/service:v1
+          imagePullPolicy: IfNotPresent
+          name: main
+          resources:
+            limits:
+              cpu: "4"
+              memory: 8Gi
+            requests:
+              cpu: "2"
+              memory: 4Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+        initContainers:
+        - image: dynamo/service:v1
+          imagePullPolicy: IfNotPresent
+          name: init
+          resources:
+            limits:
+              cpu: "4"
+              memory: 8Gi
+            requests:
+              cpu: "2"
+              memory: 4Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+      replicas: 2
+    service-c:
+      componentType: inference
+      replicas: 1

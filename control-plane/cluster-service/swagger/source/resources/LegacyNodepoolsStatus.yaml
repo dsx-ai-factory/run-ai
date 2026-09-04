@@ -1,0 +1,64 @@
+put:
+  summary: Update the status of a Node Pool.
+  operationId: legacy_update_nodepool_status
+  x-service: cluster-service
+  description: >-
+    Use to update the status of a node pool by Universally Unique Identifier (UUID).
+  deprecated: true
+  x-test-coverage:
+    - cluster-service/pkg/services/api_nodepools_service_test.go
+  x-authorize:
+    resource-type: nodepools
+    action: sync
+  x-internal: true
+  tags:
+    - NodePools
+  parameters:
+    - name: clusterId
+      in: path
+      description: Unique identifier of the cluster
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        format: uuid
+    - in: query
+      name: name
+      schema:
+        type: string
+      required: true
+      description: The unique name identifying the Node Pool.
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Nodepools/LegacyNodePoolStatusRequest.yaml"
+    required: true
+  responses:
+    201:
+      description: Node Pool updated successfully.
+    400:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyError.yaml'
+    403:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyError.yaml'
+    404:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyErrorInt32.yaml'
+    503:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/LegacyErrorInt32.yaml'

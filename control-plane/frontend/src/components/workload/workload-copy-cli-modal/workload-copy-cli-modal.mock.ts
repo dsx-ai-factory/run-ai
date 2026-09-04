@@ -1,0 +1,35 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { Phase, Source, type Workload } from "@/swagger-models/workloads-client";
+
+export const workload1: Workload = {
+  priority: 1,
+  departmentName: "test_department",
+  departmentId: "test_department_id",
+  category: "test_category",
+  clusterId: "",
+  conditions: [],
+  createdAt: "",
+  id: "",
+  k8sPhase: "",
+  name: "ray",
+  namespace: "",
+  phase: Phase.Resuming,
+  priorityClassName: "",
+  projectId: "",
+  projectName: "",
+  type: "",
+  tenantId: 1,
+  runningPods: 10,
+  phaseUpdatedAt: "2024-01-16T12:00:00Z",
+  k8sPhaseUpdatedAt: "2024-01-16T12:05:00Z",
+  updatedAt: "2024-01-16T12:10:00Z",
+  source: Source.ControlPlane,
+  deletedAt: "",
+  additionalFields: {
+    cliCommand: "runai submit-dist pytorch --name myworkload",
+  },
+};

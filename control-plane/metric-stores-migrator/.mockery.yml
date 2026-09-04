@@ -1,0 +1,15 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+packages:
+  github.com/dsx-ai-factory/run-ai/control-plane/metric-stores-migrator/internal:
+    interfaces:
+      TenantsClienter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client:
+    interfaces:
+      MetricStoresClienter:
+        config:
+          dir: ./internal/mocks
+          pkgname: mocks

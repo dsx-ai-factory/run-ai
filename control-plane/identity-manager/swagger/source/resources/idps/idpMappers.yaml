@@ -1,0 +1,66 @@
+get:
+  summary: Get idp mappers
+  x-service: identity-manager
+  x-test-coverage:
+  - e2e/src/test/suites/ssoSuite/IDP/idpApi.test.ts
+  operationId: get_idp_mappers
+  x-authorize:
+    resource-type: security-settings
+    action: read
+  tags:
+  - Idps
+  parameters:
+  - $ref: '../../parameters/idp.yaml'
+  - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Idp/Mappers.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+put:
+  summary: Update idp mappers
+  x-service: identity-manager
+  x-test-coverage:
+  - e2e/src/test/suites/ssoSuite/IDP/idpApi.test.ts
+  operationId: update_idp_mappers
+  x-authorize:
+    resource-type: security-settings
+    action: update
+  x-audit: true
+  tags:
+  - Idps
+  parameters:
+  - $ref: '../../parameters/idp.yaml'
+  - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  requestBody:
+    description: Map of our mappers and their source in the external idp
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/Idp/Mappers.yaml'
+  responses:
+    '202':
+      description: Request accepted successfully.
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

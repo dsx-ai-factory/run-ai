@@ -1,0 +1,79 @@
+name: 'Integration Tests - Cluster'
+
+on:
+  schedule:
+    - cron: '1 6 * * 0-4' # Run at 06:01 on every day-of-week from Sunday through Thursday
+
+  workflow_dispatch:
+    inputs:
+      helm_chart_runai_version:
+        required: false
+        type: string
+        default: ''
+        description: 'The version of the Run:AI Helm chart to use'
+      helm_chart_runai_env:
+        required: false
+        type: string
+        default: 'test'
+        description: 'The environment repo to deploy the Run:AI Helm chart from'
+
+permissions:
+  contents: read
+
+jobs:
+  get-charts-version:
+    name: Get charts version
+    runs-on: ubuntu-latest
+    outputs:
+      charts_version: ${{ steps.get-charts-version.outputs.charts_version }}
+    steps:
+      - name: Get charts version
+        id: get-charts-version
+        run: |
+          helm repo add run-ai-charts-test https://runai.jfrog.io/artifactory/api/helm/run-ai-charts-test
+          helm repo update run-ai-charts-test
+
+          charts_version=$(helm search repo run-ai-charts-test/runai-cluster --devel | sort -V -k2 | tail -n2 | head -n1 | awk '{print $2}')
+          echo "Detected charts version: ${charts_version}"
+          echo "charts_version=${charts_version}" >> $GITHUB_OUTPUT
+          echo "slack-webhook=${{ secrets.SLACK_WEBHOOK_UNIFIED_INTEGRATION_TESTS }}" >> $GITHUB_OUTPUT
+
+  call-integration-test:
+    needs: [get-charts-version]
+    uses: run-ai/runai-actions/.github/workflows/cluster-ci-integration-tests.yml@main
+    secrets: inherit # nosemgrep: yaml.github-actions.security.secrets-inherit.secrets-inherit
+    with:
+      helm_chart_runai_version: ${{ github.event.inputs.helm_chart_runai_version || needs.get-charts-version.outputs.charts_version }}
+      helm_chart_runai_env: ${{ github.event.inputs.helm_chart_runai_env || 'test' }}
+      run_all_tests: ${{ true }}
+
+  notify-slack-success:
+    name: Slack Notification - Success
+    runs-on: ubuntu-latest
+    needs: [call-integration-test, get-charts-version]
+    if: always() && (needs.call-integration-test.result == 'success')
+    steps:
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_UNIFIED_INTEGRATION_TESTS }}
+          SLACK_CHANNEL: integration-tests
+          SLACK_COLOR: "good"
+          SLACK_TITLE: "Integration tests succeeded"
+          SLACK_MESSAGE: "Integration tests completed successfully. Everything is looking good!\nLink to pipeline: ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}"
+
+  notify-slack-failure:
+    name: Slack Notification - Failure
+    runs-on: ubuntu-latest
+    needs: [call-integration-test, get-charts-version]
+    if: always() && (needs.call-integration-test.result == 'failure')
+    steps:
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_UNIFIED_INTEGRATION_TESTS }}
+          SLACK_CHANNEL: integration-tests
+          SLACK_COLOR: "danger"
+          SLACK_TITLE: "Integration tests failed"
+          SLACK_MESSAGE: "Please check the logs to investigate the reason for failure.\nLink to pipeline: ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}"
+

@@ -1,0 +1,10 @@
+image: ubuntu
+storage:
+  pvc:
+    - claimName: access-modes
+      path: "/path/access/modes"
+      claimInfo:
+        size: 1G
+        accessModes:
+          readWriteOnce: true
+          readWriteMany: true

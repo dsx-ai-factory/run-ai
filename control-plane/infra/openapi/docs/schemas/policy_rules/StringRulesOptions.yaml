@@ -1,0 +1,7 @@
+properties:
+  options:
+    description: Set of options that the value of the field must be chosen from.
+    type: array
+    items:
+      $ref: "./StringOption.yaml"
+    nullable: true

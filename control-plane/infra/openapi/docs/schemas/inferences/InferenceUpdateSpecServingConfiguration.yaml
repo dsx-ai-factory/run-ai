@@ -1,0 +1,3 @@
+properties:
+  servingConfiguration:
+    $ref: "../workloads_spec/inferences/ServingConfiguration.yaml"

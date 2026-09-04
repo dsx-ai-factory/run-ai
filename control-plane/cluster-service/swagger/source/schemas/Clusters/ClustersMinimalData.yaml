@@ -1,0 +1,34 @@
+type: object
+required:
+  - uuid
+  - tenantId
+  - name
+  - createdAt
+properties:
+  uuid:
+    type: string
+    format: uuid
+  name:
+    type: string
+    format: .*
+  tenantId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/TenantId.yaml'
+  version:
+    type: string
+    format: .*
+    nullable: true
+  domain:
+    type: string
+    format: .*
+    nullable: true
+  platform:
+    $ref: './ClusterReportedStatusPlatform.yaml'
+  state:
+    $ref: './ClusterState.yaml'
+  ingressClass:
+    type: string
+    nullable: true
+    description: the ingress class that is configured for the cluster
+    example: nginx
+  dependenciesStatus:
+    $ref: './ClusterDependenciesStatus.yaml'

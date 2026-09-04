@@ -1,0 +1,2753 @@
+fields:
+  command:
+    name: "command"
+    variants:
+      - spec: container/Command.yaml
+        defaults: container/Command.yaml
+        rules: ../policy_rules/StringRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - InferenceRunParamsSpec
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+          - AssetsEnvSpecAndRunParams
+  args:
+    name: "args"
+    variants:
+      - spec: container/Args.yaml
+        defaults: container/Args.yaml
+        rules: ../policy_rules/StringRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - InferenceRunParamsSpec
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+          - AssetsEnvSpecAndRunParams
+  image:
+    name: "image"
+    variants:
+      - spec: container/Image.yaml
+        defaults: container/Image.yaml
+        rules: ../policy_rules/StringRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsEnvSpecOnly
+  imagePullPolicy:
+    name: "imagePullPolicy"
+    variants:
+      - spec: container/ImagePullPolicy.yaml
+        defaults: container/ImagePullPolicy.yaml
+        rules: container/ImagePullPolicyRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsEnvSpecOnly
+  environmentVariables:
+    name: environmentVariables
+    variants:
+      - spec: ./container/EnvironmentVariables.yaml
+        defaults: ./container/EnvironmentVariablesDefaults.yaml
+        rules: ../policy_rules/InstancesRules.yaml
+        name: flat
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - InferenceUpdateSpec
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - SpecificRunParamsRules
+      - spec: ../../../../../assets-service/swagger/source/schemas/Common/EnvironmentVariablesOfAsset.yaml
+        name: assets
+        targets:
+          - SpecificRunParamsSpec
+          - WorkspaceRunParamsSpec
+          - TrainingRunParamsSpec
+          - InferenceRunParamsSpec
+          - AssetsEnvSpecAndRunParams
+  workingDir:
+    name: "workingDir"
+    variants:
+      - spec: container/WorkingDir.yaml
+        defaults: container/WorkingDir.yaml
+        rules: ../policy_rules/StringRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsEnvSpecOnly
+  createHomeDir:
+    name: "createHomeDir"
+    variants:
+      - spec: container/CreateHomeDir.yaml
+        defaults: container/CreateHomeDir.yaml
+        rules: ../policy_rules/BooleanRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsEnvSpecOnly
+  stdin:
+    name: stdin
+    variants:
+      - spec: container/Stdin.yaml
+        defaults: container/Stdin.yaml
+        rules: ../policy_rules/BooleanRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaRules
+          - ReplicaDefaults
+          - AssetsEnvSpecOnly
+  tty:
+    name: tty
+    variants:
+      - spec: container/Tty.yaml
+        defaults: container/Tty.yaml
+        rules: ../policy_rules/BooleanRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaRules
+          - ReplicaDefaults
+          - AssetsEnvSpecOnly
+  probes:
+    name: "probes"
+    variants:
+      - spec: container/Probes.yaml
+        defaults: container/Probes.yaml
+        rules: container/ProbesRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsEnvSpecOnly
+  nodeType:
+    name: "nodeType"
+    variants:
+      - spec: resources/NodeType.yaml
+        defaults: resources/NodeType.yaml
+        rules: ../policy_rules/StringRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - InferenceRunParamsSpec
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+  nodePools:
+    name: "nodePools"
+    variants:
+      - spec: resources/NodePools.yaml
+        defaults: resources/NodePools.yaml
+        rules: ../policy_rules/ArrayRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - InferenceRunParamsSpec
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DinfCommonSpec
+          - DinfCommonDefaults
+          - DinfCommonRules
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+  nodeAffinityRequired:
+    name: "nodeAffinityRequired"
+    variants:
+      - spec: resources/NodeAffinityRequired.yaml
+        defaults: resources/NodeAffinityRequired.yaml
+        rules: ../policy_rules/ArbitraryRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - TrainingRunParamsSpec
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - InferenceRunParamsSpec
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+  podAffinity:
+    name: "podAffinity"
+    variants:
+      - spec: resources/PodAffinity.yaml
+        defaults: resources/PodAffinity.yaml
+        rules: resources/PodAffinityRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - InferenceRunParamsSpec
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+  category:
+    name: "category"
+    variants:
+      - spec: resources/Category.yaml
+        defaults: resources/Category.yaml
+        rules: ../policy_rules/StringRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - InferenceRunParamsSpec
+          - DinfCommonSpec
+          - DinfCommonDefaults
+          - DinfCommonRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+  preemptibility:
+    name: "preemptibility"
+    variants:
+      - spec: advanced/Preemptibility.yaml
+        defaults: advanced/Preemptibility.yaml
+        rules: advanced/PreemptibilityRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - InferenceRunParamsSpec
+          - DinfCommonSpec
+          - DinfCommonDefaults
+          - DinfCommonRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+  priorityClass:
+    name: "priorityClass"
+    variants:
+      - name: workerPriorityClass
+        spec: resources/PriorityClass.yaml
+        defaults: resources/PriorityClass.yaml
+        rules: ../policy_rules/StringRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - InferenceRunParamsSpec
+          - DinfCommonSpec
+          - DinfCommonDefaults
+          - DinfCommonRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+      - name: masterPriorityClass
+        spec: resources/PriorityClassMaster.yaml
+        defaults: resources/PriorityClass.yaml
+        rules: ../policy_rules/StringRules.yaml
+        targets:
+          - MasterSpec
+          - MasterTemplateSpec
+  terminateAfterPreemption:
+    name: terminateAfterPreemption
+    variants:
+      - spec: advanced/TerminateAfterPreemption.yaml
+        defaults: advanced/TerminateAfterPreemption.yaml
+        rules: ../policy_rules/BooleanRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceRunParamsSpec
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+  autoDeletionTimeAfterCompletion:
+    name: autoDeletionTimeAfterCompletionSeconds
+    variants:
+      - name: workerAutoDeletionTimeAfterCompletion
+        spec: advanced/AutoDeletionTimeAfterPreemption.yaml
+        defaults: advanced/AutoDeletionTimeAfterPreemption.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceRunParamsSpec
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+      - name: masterAutoDeletionTimeAfterCompletion
+        spec: advanced/AutoDeletionTimeAfterPreemptionMaster.yaml
+        defaults: advanced/AutoDeletionTimeAfterPreemption.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - MasterSpec
+          - MasterTemplateSpec
+  terminationGracePeriod:
+    name: terminationGracePeriodSeconds
+    variants:
+      - name: workerTerminationGracePeriod
+        spec: advanced/TerminationGracePeriod.yaml
+        defaults: advanced/TerminationGracePeriod.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceRunParamsSpec
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+      - name: masterTerminationGracePeriod
+        spec: advanced/TerminationGracePeriodMaster.yaml
+        defaults: advanced/TerminationGracePeriod.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - MasterSpec
+          - MasterTemplateSpec
+  annotations:
+    name: annotations
+    variants:
+      - spec: advanced/Annotations.yaml
+        defaults: advanced/AnnotationsDefaults.yaml
+        rules: ../policy_rules/InstancesRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - InferenceRunParamsSpec
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+  labels:
+    name: labels
+    variants:
+      - spec: advanced/Labels.yaml
+        defaults: advanced/LabelsDefaults.yaml
+        rules: ../policy_rules/InstancesRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - InferenceRunParamsSpec
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+  imagePullSecrets:
+    name: imagePullSecrets
+    variants:
+      - spec: advanced/ImagePullSecrets.yaml
+        defaults: advanced/ImagePullSecretsDefaults.yaml
+        rules: advanced/ImagePullSecretsRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - WorkspaceSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - DistributedSpec
+          - MasterSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - InferenceRunParamsSpec
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+  tolerations:
+    name: tolerations
+    variants:
+      - spec: advanced/Tolerations.yaml
+        defaults: advanced/TolerationsDefaults.yaml
+        rules: advanced/TolerationsRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - InferenceRunParamsSpec
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+
+  backoffLimit:
+    name: backoffLimit
+    variants:
+      - name: workerBackoffLimit
+        spec: advanced/BackoffLimit.yaml
+        defaults: advanced/BackoffLimit.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceRunParamsSpec
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+      - name: masterBackoffLimit
+        spec: advanced/BackoffLimitMaster.yaml
+        defaults: advanced/BackoffLimit.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - MasterSpec
+          - MasterTemplateSpec
+  completions:
+    name: "completions"
+    variants:
+      - spec: trainings/Completions.yaml
+        defaults: trainings/Completions.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+  parallelism:
+    name: "parallelism"
+    variants:
+      - spec: trainings/Parallelism.yaml
+        defaults: trainings/Parallelism.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+  restartPolicy:
+    name: "restartPolicy"
+    variants:
+      - spec: advanced/RestartPolicy.yaml
+        defaults: advanced/RestartPolicy.yaml
+        rules: advanced/RestartPolicyRule.yaml
+        targets:
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - TrainingRunParamsSpec
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - WorkspaceRunParamsSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceRunParamsSpec
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+      - name: dinf
+        spec: distributed_inferences/DistributedInferenceRestartPolicy.yaml
+        defaults: distributed_inferences/DistributedInferenceRestartPolicy.yaml
+        rules: distributed_inferences/DistributedInferenceRestartPolicyRules.yaml
+        targets:
+          - DinfCommonSpec
+          - DinfCommonDefaults
+          - DinfCommonRules
+      - name: sanitized
+        spec: supersetHack/SupersetRestartPolicy.yaml
+        defaults: supersetHack/SupersetRestartPolicy.yaml
+        rules: ../policy_rules/StringRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+  ports:
+    name: ports
+    variants:
+      - spec: connectivity/Ports.yaml
+        defaults: connectivity/PortsDefaults.yaml
+        rules: connectivity/PortsRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+  exposedUrls:
+    name: exposedUrls
+    variants:
+      - spec: connectivity/ExposedUrls.yaml
+        defaults: connectivity/ExposedUrlsDefaults.yaml
+        rules: connectivity/ExposedUrlsRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+  relatedUrls:
+    name: relatedUrls
+    variants:
+      - spec: connectivity/RelatedUrls.yaml
+        defaults: connectivity/RelatedUrlsDefaults.yaml
+        rules: connectivity/RelatedUrlsRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+  servingPort:
+    name: "servingPort"
+    variants:
+      - name: "inference"
+        spec: inferences/ServingPort.yaml
+        defaults: inferences/ServingPort.yaml
+        rules: inferences/ServingPortRules.yaml
+        targets:
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+      - name: "dinf"
+        spec: distributed_inferences/DistributedInferenceServingPort.yaml
+        defaults: distributed_inferences/DistributedInferenceServingPort.yaml
+        rules: distributed_inferences/DistributedInferenceServingPortRules.yaml
+        targets:
+          - DinfCommonSpec
+          - DinfCommonDefaults
+          - DinfCommonRules
+      - name: "nim_service"
+        spec: nim_services/NimServiceServingPort.yaml
+        defaults: nim_services/NimServiceServingPort.yaml
+        rules: nim_services/NimServiceServingPortRules.yaml
+        targets:
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+      - name: sanitized
+        spec: supersetHack/SupersetServingPort.yaml
+        defaults: supersetHack/SupersetServingPort.yaml
+        rules: supersetHack/SupersetServingPortRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+  dataVolume:
+    name: "storage.dataVolume"
+    variants:
+      - spec: storage/DataVolumeItems.yaml
+        defaults: storage/DataVolumesDefaults.yaml
+        rules: storage/DataVolumesRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - StorageFieldsSpec
+          - StorageFieldsDefaults
+          - StorageFieldsRules
+  pvc:
+    name: "storage.pvc"
+    variants:
+      - spec: storage/PvcItems.yaml
+        defaults: storage/PvcsDefaults.yaml
+        rules: storage/PvcsRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - StorageFieldsSpec
+          - StorageFieldsDefaults
+          - StorageFieldsRules
+  hostPath:
+    name: "storage.hostPath"
+    variants:
+      - spec: storage/HostPathItems.yaml
+        defaults: storage/HostPathsDefaults.yaml
+        rules: storage/HostPathsRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - StorageFieldsSpec
+          - StorageFieldsDefaults
+          - StorageFieldsRules
+  nfs:
+    name: "storage.nfs"
+    variants:
+      - spec: storage/NfsItems.yaml
+        defaults: storage/NfssDefaults.yaml
+        rules: storage/NfssRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - StorageFieldsSpec
+          - StorageFieldsDefaults
+          - StorageFieldsRules
+  git:
+    name: "storage.git"
+    variants:
+      - spec: storage/GitItems.yaml
+        defaults: storage/GitsDefaults.yaml
+        rules: storage/GitsRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - StorageFieldsSpec
+          - StorageFieldsDefaults
+          - StorageFieldsRules
+  configMapVolume:
+    name: "storage.configMapVolume"
+    variants:
+      - spec: storage/ConfigMapItems.yaml
+        defaults: storage/ConfigMapsDefaults.yaml
+        rules: storage/ConfigMapsRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - StorageFieldsSpec
+          - StorageFieldsDefaults
+          - StorageFieldsRules
+  secretVolume:
+    name: "storage.secretVolume"
+    variants:
+      - spec: storage/SecretItems.yaml
+        defaults: storage/SecretsDefaults.yaml
+        rules: storage/SecretsRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - StorageFieldsSpec
+          - StorageFieldsDefaults
+          - StorageFieldsRules
+  emptyDirVolume:
+    name: "storage.emptyDirVolume"
+    variants:
+      - spec: storage/EmptyDirItems.yaml
+        defaults: storage/EmptyDirsDefaults.yaml
+        rules: storage/EmptyDirsRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - StorageFieldsSpec
+          - StorageFieldsDefaults
+          - StorageFieldsRules
+  s3:
+    name: "storage.s3"
+    variants:
+      - spec: storage/S3Items.yaml
+        defaults: storage/S3sDefaults.yaml
+        rules: storage/S3sRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - StorageFieldsSpec
+          - StorageFieldsDefaults
+          - StorageFieldsRules
+  nimCache:
+    name: "modelStore.nimCache"
+    variants:
+      - spec: nim_services/NimCache.yaml
+        defaults: nim_services/NimCache.yaml
+        rules: nim_services/NimCacheRules.yaml
+        targets:
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+  nimServicePvc:
+    name: "modelStore.pvc"
+    variants:
+      - spec: nim_services/NimServicePvc.yaml
+        defaults: nim_services/NimServicePvc.yaml
+        rules: storage/PvcRules.yaml
+        targets:
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+  uidGidSource:
+    name: "security.uidGidSource"
+    variants:
+      - spec: security/UidGidSource.yaml
+        defaults: security/UidGidSource.yaml
+        rules: security/UidGidSourceRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsEnvSpecOnly
+  capabilities:
+    name: "security.capabilities"
+    variants:
+      - spec: security/Capabilities.yaml
+        defaults: security/Capabilities.yaml
+        rules: ../policy_rules/ArrayRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsEnvSpecOnly
+  seccompProfileType:
+    name: "security.seccompProfileType"
+    variants:
+      - spec: security/SeccompProfileType.yaml
+        defaults: security/SeccompProfileType.yaml
+        rules: security/SeccompProfileTypeRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsEnvSpecOnly
+  runAsNonRoot:
+    name: "security.runAsNonRoot"
+    variants:
+      - spec: security/RunAsNonRoot.yaml
+        defaults: security/RunAsNonRoot.yaml
+        rules: ../policy_rules/BooleanRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsEnvSpecOnly
+  readOnlyRootFilesystem:
+    name: "security.readOnlyRootFilesystem"
+    variants:
+      - spec: security/ReadOnlyRootFileSystem.yaml
+        defaults: security/ReadOnlyRootFileSystem.yaml
+        rules: ../policy_rules/BooleanRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsEnvSpecOnly
+  runAsUid:
+    name: security.runAsUid
+    variants:
+      - spec: security/RunAsUid.yaml
+        defaults: security/RunAsUid.yaml
+        rules: ../policy_rules/IntegerRulesOptional.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - TrainingRunParamsSpec
+          - WorkspaceRunParamsSpec
+          - InferenceRunParamsSpec
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+          - AssetsEnvSpecAndRunParams
+  runAsGid:
+    name: security.runAsGid
+    variants:
+      - spec: security/RunAsGid.yaml
+        defaults: security/RunAsGid.yaml
+        rules: ../policy_rules/IntegerRulesOptional.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - TrainingRunParamsSpec
+          - WorkspaceRunParamsSpec
+          - InferenceRunParamsSpec
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+          - AssetsEnvSpecAndRunParams
+  supplementalGroups:
+    name: security.supplementalGroups
+    variants:
+      - spec: security/SupplementalGroups.yaml
+        defaults: security/SupplementalGroups.yaml
+        rules: ../policy_rules/StringRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - TrainingRunParamsSpec
+          - WorkspaceRunParamsSpec
+          - InferenceRunParamsSpec
+          - SpecificRunParamsSpec
+          - SpecificRunParamsRules
+          - AssetsEnvSpecAndRunParams
+  hostIpc:
+    name: security.hostIpc
+    variants:
+      - spec: security/HostIpc.yaml
+        defaults: security/HostIpc.yaml
+        rules: ../policy_rules/BooleanRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsEnvSpecOnly
+  hostNetwork:
+    name: security.hostNetwork
+    variants:
+      - spec: security/HostNetwork.yaml
+        defaults: security/HostNetwork.yaml
+        rules: ../policy_rules/BooleanRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsEnvSpecOnly
+  allowPrivilegeEscalation:
+    name: security.allowPrivilegeEscalation
+    variants:
+      - spec: security/AllowPrivilegeEscalation.yaml
+        defaults: security/AllowPrivilegeEscalation.yaml
+        rules: ../policy_rules/BooleanRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - AssetsEnvSpecOnly
+  privileged:
+    name: security.privileged
+    variants:
+      - spec: security/Privileged.yaml
+        defaults: security/Privileged.yaml
+        rules: ../policy_rules/BooleanRules.yaml
+        internal: true
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceDefaults
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+  gpuDevicesRequest:
+    name: compute.gpuDevicesRequest
+    variants:
+      - spec: compute/GpuDevicesRequest.yaml
+        defaults: compute/GpuDevicesRequest.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsComputeSpec
+  gpuRequestType:
+    name: compute.gpuRequestType
+    variants:
+      - spec: compute/GpuRequestType.yaml
+        defaults: compute/GpuRequestType.yaml
+        rules: compute/GpuRequestRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsComputeSpec
+  gpuPortionRequest:
+    name: compute.gpuPortionRequest
+    variants:
+      - spec: compute/GpuPortionRequest.yaml
+        defaults: compute/GpuPortionRequest.yaml
+        rules: ../policy_rules/NumberRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsComputeSpec
+  gpuPortionLimit:
+    name: compute.gpuPortionLimit
+    variants:
+      - spec: compute/GpuPortionLimit.yaml
+        defaults: compute/GpuPortionLimit.yaml
+        rules: ../policy_rules/NumberRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsComputeSpec
+  gpuMemoryRequest:
+    name: compute.gpuMemoryRequest
+    variants:
+      - spec: compute/GpuMemoryRequest.yaml
+        defaults: compute/GpuMemoryRequest.yaml
+        rules: ../policy_rules/QuantityRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsComputeSpec
+  gpuMemoryLimit:
+    name: compute.gpuMemoryLimit
+    variants:
+      - spec: compute/GpuMemoryLimit.yaml
+        defaults: compute/GpuMemoryLimit.yaml
+        rules: ../policy_rules/QuantityRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsComputeSpec
+  cpuCoreRequest:
+    name: compute.cpuCoreRequest
+    variants:
+      - spec: compute/CpuCoreRequest.yaml
+        defaults: compute/CpuCoreRequest.yaml
+        rules: ../policy_rules/NumberRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsComputeSpec
+  cpuCoreLimit:
+    name: compute.cpuCoreLimit
+    variants:
+      - spec: compute/CpuCoreLimit.yaml
+        defaults: compute/CpuCoreLimit.yaml
+        rules: ../policy_rules/NumberRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsComputeSpec
+  cpuMemoryRequest:
+    name: compute.cpuMemoryRequest
+    variants:
+      - spec: compute/CpuMemoryRequest.yaml
+        defaults: compute/CpuMemoryRequest.yaml
+        rules: ../policy_rules/QuantityRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsComputeSpec
+  cpuMemoryLimit:
+    name: compute.cpuMemoryLimit
+    variants:
+      - spec: compute/CpuMemoryLimit.yaml
+        defaults: compute/CpuMemoryLimit.yaml
+        rules: ../policy_rules/QuantityRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsComputeSpec
+  largeShmRequest:
+    name: compute.largeShmRequest
+    variants:
+      - spec: compute/LargeShmRequest.yaml
+        defaults: compute/LargeShmRequest.yaml
+        rules: ../policy_rules/BooleanRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsComputeSpec
+  extendedResources:
+    name: compute.extendedResources
+    variants:
+      - spec: compute/ExtendedResources.yaml
+        defaults: compute/ExtendedResourcesDefaults.yaml
+        rules: compute/ExtendedResourcesRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - TrainingSpec
+          - TrainingTemplateSpec
+          - TrainingDefaults
+          - TrainingRules
+          - WorkspaceSpec
+          - WorkspaceTemplateSpec
+          - WorkspaceDefaults
+          - WorkspaceRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - MasterSpec
+          - MasterTemplateSpec
+          - ReplicaDefaults
+          - ReplicaRules
+          - InferenceSpec
+          - InferenceTemplateSpec
+          - InferenceUpdateSpec
+          - InferenceDefaults
+          - InferenceRules
+          - DinfLeaderWorkerSpec
+          - DinfLeaderWorkerTemplateSpec
+          - DinfLeaderWorkerDefaults
+          - DinfLeaderWorkerRules
+          - AssetsComputeSpec
+  numWorkers:
+    name: numWorkers
+    variants:
+      - spec: distributed/NumWorkers.yaml
+        defaults: distributed/NumWorkers.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - DistributedDefaults
+          - DistributedRules
+  segmentSize:
+    name: segmentSize
+    variants:
+      - spec: distributed/SegmentSize.yaml
+        targets:
+          - SupersetSpec
+          - DistributedSpec
+          - DistributedTemplateSpec
+  distributedFramework:
+    name: distributedFramework
+    variants:
+      - spec: distributed/DistributedFramework.yaml
+        defaults: distributed/DistributedFramework.yaml
+        rules: distributed/DistributedFrameworkRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - DistributedDefaults
+          - DistributedRules
+  slotsPerWorker:
+    name: slotsPerWorker
+    variants:
+      - spec: distributed/SlotsPerWorker.yaml
+        defaults: distributed/SlotsPerWorker.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - DistributedDefaults
+          - DistributedRules
+  sshAuthMountPath:
+    name: sshAuthMountPath
+    variants:
+      - spec: distributed/SshAuthMountPath.yaml
+        defaults: distributed/SshAuthMountPath.yaml
+        rules: ../policy_rules/StringRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - DistributedDefaults
+          - DistributedRules
+  mpiLauncherCreationPolicy:
+    name: mpiLauncherCreationPolicy
+    variants:
+      - spec: distributed/MpiLauncherCreationPolicy.yaml
+        defaults: distributed/MpiLauncherCreationPolicy.yaml
+        rules: distributed/MpiLauncherCreationPolicyRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - DistributedDefaults
+          - DistributedRules
+  minReplicas:
+    name: minReplicas
+    variants:
+      - spec: distributed/MinReplicas.yaml
+        defaults: distributed/MinReplicas.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - DistributedDefaults
+          - DistributedRules
+  autoScalingMinReplicas:
+    name: autoscaling.minReplicas
+    variants:
+      - spec: nim_services/AutoScalingMinReplicas.yaml
+        defaults: nim_services/AutoScalingMinReplicas.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+
+  maxReplicas:
+    name: maxReplicas
+    variants:
+      - spec: distributed/MaxReplicas.yaml
+        defaults: distributed/MaxReplicas.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - DistributedDefaults
+          - DistributedRules
+  autoScalingMaxReplicas:
+    name: autoscaling.maxReplicas
+    variants:
+      - spec: nim_services/AutoScalingMaxReplicas.yaml
+        defaults: nim_services/AutoScalingMaxReplicas.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+
+  replicas:
+    name: replicas
+    variants:
+      - spec: nim_services/NimServiceReplicas.yaml
+        defaults: nim_services/NimServiceReplicas.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+
+  metric:
+     name: autoscaling.metric
+     variants:
+       - spec: nim_services/AutoScalingMetricNim.yaml
+         defaults: nim_services/AutoScalingMetricNim.yaml
+         rules: ../policy_rules/StringRules.yaml
+         targets:
+           - NimServiceSpec
+           - NimServiceDefaults
+           - NimServiceRules
+  metricThreshold:
+    name: autoscaling.metricThreshold
+    variants:
+      - spec: nim_services/AutoScalingMetricThreshold.yaml
+        defaults: nim_services/AutoScalingMetricThreshold.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+  scaleWindowSeconds:
+    name: autoscaling.scaleWindowSeconds
+    variants:
+      - spec: nim_services/AutoScalingScaleWindowSeconds.yaml
+        defaults: nim_services/AutoScalingScaleWindowSeconds.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+
+  cleanPodPolicy:
+    name: cleanPodPolicy
+    variants:
+      - spec: distributed/CleanPodPolicy.yaml
+        defaults: distributed/CleanPodPolicy.yaml
+        rules: distributed/CleanPodPolicyRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - DistributedSpec
+          - DistributedTemplateSpec
+          - DistributedDefaults
+          - DistributedRules
+
+  ngcAuthSecret:
+    name: ngcAuthSecret
+    variants:
+      - spec: nim_services/NimServiceNgcAuthSecret.yaml
+        defaults: nim_services/NimServiceNgcAuthSecret.yaml
+        rules: ../policy_rules/StringRules.yaml
+        targets:
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+
+  multiNode:
+    name: multiNode
+    variants:
+      - spec: nim_services/NimServiceMultiNode.yaml
+        defaults: nim_services/NimServiceMultiNode.yaml
+        rules: nim_services/NimServiceMultiNodeRules.yaml
+        targets:
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+
+targets:
+  SupersetSpec:
+    type: spec
+    skeleton: SupersetSpec.yaml
+    path: infra/openapi/docs/schemas/workloads_spec/SupersetSpec.yaml
+  SupersetDefaults:
+    type: defaults
+    skeleton: SupersetDefaults.yaml
+    path: infra/openapi/docs/schemas/workloads_spec/SupersetDefaults.yaml
+    extractFields:
+      compute:
+        refFile: compute/SupersetDefaultsAllOfCompute.yaml
+      security:
+        refFile: security/SupersetDefaultsAllOfSecurity.yaml
+  SupersetRules:
+    type: rules
+    skeleton: SupersetRules.yaml
+    path: infra/openapi/docs/schemas/workloads_spec/SupersetRules.yaml
+    extractFields:
+      compute:
+        refFile: compute/SupersetRulesAllOfCompute.yaml
+      security:
+        refFile: security/SupersetRulesAllOfSecurity.yaml
+  DistributedSpec:
+    type: spec
+    skeleton: Empty.yaml
+    path: infra/openapi/docs/schemas/distributed/DistributedSpecSpec.yaml
+  DistributedTemplateSpec:
+    type: spec
+    skeleton: Empty.yaml
+    path: infra/openapi/docs/schemas/distributed/DistributedTemplateSpec.yaml
+  DistributedDefaults:
+    type: defaults
+    skeleton: DistributedPolicyDefaultsV2.yaml
+    path: policy-service/swagger/source/schemas/DistributedV2/DistributedPolicyDefaultsV2.yaml
+  DistributedRules:
+    type: rules
+    skeleton: DistributedPolicyRulesV2.yaml
+    path: policy-service/swagger/source/schemas/DistributedV2/DistributedPolicyRulesV2.yaml
+  MasterSpec:
+    type: spec
+    path: infra/openapi/docs/schemas/distributed/MasterSpec.yaml
+  MasterTemplateSpec:
+    type: spec
+    path: infra/openapi/docs/schemas/distributed/MasterTemplateSpec.yaml
+  ReplicaDefaults:
+    type: defaults
+    path: policy-service/swagger/source/schemas/DistributedV2/ReplicaDefaultsV2.yaml
+    extractFields:
+      compute:
+        refFile: compute/SupersetDefaultsAllOfCompute.yaml
+      security:
+        refFile: security/SupersetDefaultsAllOfSecurity.yaml
+  ReplicaRules:
+    type: rules
+    path: policy-service/swagger/source/schemas/DistributedV2/ReplicaRulesV2.yaml
+    extractFields:
+      compute:
+        refFile: compute/SupersetRulesAllOfCompute.yaml
+      security:
+        refFile: security/SupersetRulesAllOfSecurity.yaml
+  TrainingSpec:
+    type: spec
+    skeleton: Empty.yaml
+    path: infra/openapi/docs/schemas/trainings/TrainingSpecSpec.yaml
+  TrainingTemplateSpec:
+    type: spec
+    skeleton: Empty.yaml
+    path: infra/openapi/docs/schemas/trainings/TrainingTemplateSpec.yaml
+  TrainingDefaults:
+    type: defaults
+    skeleton: Empty.yaml
+    path: policy-service/swagger/source/schemas/TrainingV2/TrainingPolicyDefaultsV2.yaml
+    extractFields:
+      compute:
+        refFile: compute/SupersetDefaultsAllOfCompute.yaml
+      security:
+        refFile: security/SupersetDefaultsAllOfSecurity.yaml
+  TrainingRules:
+    type: rules
+    path: policy-service/swagger/source/schemas/TrainingV2/TrainingPolicyRulesV2.yaml
+    skeleton: Empty.yaml
+    extractFields:
+      compute:
+        refFile: compute/SupersetRulesAllOfCompute.yaml
+      security:
+        refFile: security/SupersetRulesAllOfSecurity.yaml
+  TrainingRunParamsSpec:
+    type: spec
+    skeleton: TrainingSpecificRunParams.yaml
+    path: assets-service/swagger/source/schemas/Training/TrainingSpecificRunParams.yaml
+    nameChange:
+      # in specific run params, no need for the section itself
+      security: {}
+  WorkspaceSpec:
+    type: spec
+    skeleton: Empty.yaml
+    path: infra/openapi/docs/schemas/workspaces/WorkspaceSpecSpec.yaml
+  WorkspaceTemplateSpec:
+    type: spec
+    skeleton: Empty.yaml
+    path: infra/openapi/docs/schemas/workspaces/WorkspaceTemplateSpec.yaml
+  WorkspaceDefaults:
+    type: defaults
+    skeleton: Empty.yaml
+    path: policy-service/swagger/source/schemas/WorkspaceV2/WorkspacePolicyDefaultsV2.yaml
+    extractFields:
+      compute:
+        refFile: compute/SupersetDefaultsAllOfCompute.yaml
+      security:
+        refFile: security/SupersetDefaultsAllOfSecurity.yaml
+  WorkspaceRules:
+    type: rules
+    skeleton: Empty.yaml
+    path: policy-service/swagger/source/schemas/WorkspaceV2/WorkspacePolicyRulesV2.yaml
+    extractFields:
+      compute:
+        refFile: compute/SupersetRulesAllOfCompute.yaml
+      security:
+        refFile: security/SupersetRulesAllOfSecurity.yaml
+  WorkspaceRunParamsSpec:
+    type: spec
+    skeleton: WorkspaceSpecificRunParams.yaml
+    path: assets-service/swagger/source/schemas/Workspace/WorkspaceSpecificRunParams.yaml
+    nameChange:
+      # in specific run params, no need for the section itself
+      security: {}
+  InferenceSpec:
+    type: spec
+    skeleton: InferenceSpecSpec.yaml
+    path: infra/openapi/docs/schemas/inferences/InferenceSpecSpec.yaml
+    nullable: false
+  InferenceTemplateSpec:
+    type: spec
+    skeleton: InferenceSpecSpec.yaml
+    path: infra/openapi/docs/schemas/inferences/InferenceTemplateSpec.yaml
+    nullable: false
+  InferenceUpdateSpec:
+    type: spec
+    skeleton: InferenceUpdateSpec.yaml
+    path: infra/openapi/docs/schemas/inferences/InferenceUpdateSpec.yaml
+  InferenceDefaults:
+    type: defaults
+    skeleton: InferencePolicyDefaultsV2.yaml
+    path: policy-service/swagger/source/schemas/InferenceV2/InferencePolicyDefaultsV2.yaml
+    extractFields:
+      compute:
+        refFile: compute/SupersetDefaultsAllOfCompute.yaml
+  InferenceRules:
+    type: rules
+    skeleton: InferencePolicyRulesV2.yaml
+    path: policy-service/swagger/source/schemas/InferenceV2/InferencePolicyRulesV2.yaml
+    extractFields:
+      compute:
+        refFile: compute/SupersetRulesAllOfCompute.yaml
+  InferenceRunParamsSpec:
+    type: spec
+    skeleton: InferenceSpecificRunParams.yaml
+    path: assets-service/swagger/source/schemas/Inference/InferenceSpecificRunParams.yaml
+    nameChange:
+      # in specific run params, no need for the section itself
+      security: {}
+  DinfCommonSpec:
+    type: spec
+    skeleton: DistributedInferenceCommonSpec.yaml
+    path: infra/openapi/docs/schemas/workloads_spec/distributed_inferences/DistributedInferenceCommonSpec.yaml
+  DinfCommonDefaults:
+    type: defaults
+    skeleton: DistributedInferenceCommonDefaults.yaml
+    path: policy-service/swagger/source/schemas/DistributedInferenceV2/DistributedInferenceCommonDefaultsV2.yaml
+  DinfCommonRules:
+    type: rules
+    skeleton: DistributedInferenceCommonRules.yaml
+    path: policy-service/swagger/source/schemas/DistributedInferenceV2/DistributedInferenceCommonRulesV2.yaml
+  DinfLeaderWorkerSpec:
+    type: spec
+    path: infra/openapi/docs/schemas/workloads_spec/distributed_inferences/DistributedInferenceLeaderWorkerSpec.yaml
+    nullable: false
+    extractFields:
+      security:
+        refFile: security/DistributedInferenceLeaderWorkerSpecSecurity.yaml
+  DinfLeaderWorkerDefaults:
+    type: defaults
+    path: policy-service/swagger/source/schemas/DistributedInferenceV2/DistributedInferenceLeaderWorkerDefaultsV2.yaml
+    nullable: false
+    extractFields:
+      compute:
+        refFile: compute/SupersetDefaultsAllOfCompute.yaml
+      security:
+        refFile: security/DistributedInferenceLeaderWorkerDefaultsV2Security.yaml
+  DinfLeaderWorkerRules:
+    type: rules
+    path: policy-service/swagger/source/schemas/DistributedInferenceV2/DistributedInferenceLeaderWorkerRulesV2.yaml
+    nullable: false
+    extractFields:
+      compute:
+        refFile: compute/SupersetRulesAllOfCompute.yaml
+  DinfLeaderWorkerTemplateSpec:
+    type: spec
+    path: infra/openapi/docs/schemas/workloads_spec/distributed_inferences/DistributedInferenceLeaderWorkerTemplateSpec.yaml
+    nullable: false
+    extractFields:
+      security:
+        refFile: security/DistributedInferenceLeaderWorkerSpecSecurity.yaml
+  NimServiceSpec:
+    type: spec
+    skeleton: Empty.yaml
+    path:  infra/openapi/docs/schemas/nim_services/NimServiceSpec.yaml
+    nullable: true
+  NimServiceDefaults:
+    type: defaults
+    skeleton: Empty.yaml
+    path: policy-service/swagger/source/schemas/NimService/NimServiceDefaults.yaml
+  NimServiceRules:
+    type: rules
+    skeleton: Empty.yaml
+    path: policy-service/swagger/source/schemas/NimService/NimServiceRules.yaml
+  SpecificRunParamsSpec:
+    type: spec
+    skeleton: SpecificRunParams.yaml
+    path: assets-service/swagger/source/schemas/Workload/SpecificRunParams.yaml
+    nameChange:
+      # in specific run params, no need for the section itself
+      security: {}
+  SpecificRunParamsRules:
+    type: rules
+    skeleton: SpecificRunParamsRules.yaml
+    path: assets-service/swagger/source/schemas/Workload/SpecificRunParamsRules.yaml
+    nameChange:
+      # in specific run params, no need for the section itself
+      security: {}
+  StorageFieldsSpec:
+    type: spec
+    comment: "frontend only"
+    path: infra/openapi/docs/schemas/workloads_spec/storage/StorageFields.yaml
+    nameChange:
+      # in common fields, no need for the section itself
+      storage: {}
+  StorageFieldsDefaults:
+    type: defaults
+    comment: "frontend only"
+    path: infra/openapi/docs/schemas/workloads_spec/storage/StorageFieldsDefaults.yaml
+    nameChange:
+      # in common fields, no need for the section itself
+      storage: {}
+  StorageFieldsRules:
+    type: rules
+    comment: "frontend only"
+    path: infra/openapi/docs/schemas/workloads_spec/storage/StorageFieldsRules.yaml
+    nameChange:
+      # in common fields, no need for the section itself
+      storage: {}
+  AssetsEnvSpecAndRunParams:
+    type: spec
+    path: assets-service/swagger/source/schemas/Environment/OverridableSpecFields.yaml
+    nameChange:
+      # in assets spec fields, no need for the section itself
+      security: {}
+  AssetsEnvSpecOnly:
+    type: spec
+    skeleton: NonOverridableSpecFields.yaml
+    path: assets-service/swagger/source/schemas/Environment/NonOverridableSpecFields.yaml
+    nameChange:
+      # in assets spec fields, no need for the section itself
+      security: {}
+  AssetsComputeSpec:
+    type: spec
+    path: assets-service/swagger/source/schemas/Compute/ComputeAssetSpec.yaml
+    nullable: false
+    nameChange:
+      # in assets spec fields, no need for the section itself
+      compute: {}

@@ -1,0 +1,32 @@
+get:
+  summary: Get the PVC history.
+  description: Retrieve PVC history details, including events, using a PVC id.
+  operationId: get_pvc_history
+  x-service: assets-service
+  x-test-coverage: 
+    - control-plane/assets-service/pkg/services/api_pvc_service_test.go
+  tags:
+    - PVC
+  x-authorize:
+    resource-type: pvc-assets
+    action: read
+    id: assetId
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/AssetId.yaml"
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Events/PVCHistoryResponse.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

@@ -1,0 +1,118 @@
+policyInfo:
+  master:
+    defaults:
+      compute:
+        cpuCoreLimit: 11
+        extendedResources:
+          attributes:
+            quantity: 121M
+          instances:
+          - resource: master/bbb
+          - quantity: 111M
+            resource: master/ddd
+      environmentVariables:
+        instances:
+        - name: name_from_the_policy_master
+          value: value_from_the_policy_master
+      image: ubuntu-master
+      storage:
+        pvc:
+          attributes:
+            claimInfo:
+              storageClass: standard-master
+          instances:
+          - path: /master/bbb
+    rules:
+      createHomeDir:
+        required: true
+      image:
+        required: true
+      storage:
+        pvc:
+          attributes:
+            claimInfo:
+              storageClass:
+                canEdit: false
+          instances:
+            canAdd: false
+  worker:
+    defaults:
+      compute:
+        cpuCoreLimit: 10
+        extendedResources:
+          attributes:
+            quantity: 120M
+          instances:
+          - resource: worker/bbb
+          - quantity: 110M
+            resource: worker/ddd
+      environmentVariables:
+        instances:
+        - name: name_from_the_policy_worker
+          value: value_from_the_policy_worker
+      image: ubuntu-worker
+      storage:
+        pvc:
+          attributes:
+            claimInfo:
+              size: 2M
+              storageClass: standard-worker
+          instances:
+          - path: /worker/bbb
+    rules:
+      image:
+        required: true
+      storage:
+        pvc:
+          attributes:
+            claimInfo:
+              storageClass:
+                canEdit: false
+          instances:
+            canAdd: false
+      workingDir:
+        required: true
+projectInfo:
+  name: project-1
+spec:
+  master:
+    compute:
+      cpuCoreLimit: 11
+      extendedResources:
+      - quantity: 121M
+        resource: master/bbb
+      - quantity: 111M
+        resource: master/ddd
+    environmentVariables:
+    - name: name_from_the_policy_master
+      value: value_from_the_policy_master
+    - name: env_name_from_asset
+      value: env_value_from_asset
+    image: image_from_asset
+    storage:
+      pvc:
+      - claimInfo:
+          storageClass: standard-master
+        name: pol-0
+        path: /master/bbb
+  worker:
+    compute:
+      cpuCoreLimit: 10
+      extendedResources:
+      - quantity: 120M
+        resource: worker/bbb
+      - quantity: 110M
+        resource: worker/ddd
+    environmentVariables:
+    - name: name_from_the_policy_worker
+      value: value_from_the_policy_worker
+    - name: env_name_from_asset
+      value: env_value_from_asset
+    image: image_from_asset
+    storage:
+      pvc:
+      - claimInfo:
+          size: 2M
+          storageClass: standard-worker
+        name: pol-0
+        path: /worker/bbb

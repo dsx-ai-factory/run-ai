@@ -1,0 +1,22 @@
+type: object
+description: an object that exists in the cluster with a list of issues found while syncing it to the cluster.
+required:
+  - scopeId
+  - scopeType
+  - resourceType
+  - resourceName
+properties:
+  scopeType:
+    $ref: "../Scopes/ScopeType.yaml"
+  scopeId:
+    $ref: "../Scopes/ScopeId.yaml"
+  resourceType:
+    $ref: "./ClusterResourceType.yaml"
+  resourceName:
+    type: string
+  secretType:
+    $ref: "../Secrets/SecretType.yaml"
+  issues:
+    type: array
+    items:
+      $ref: "./ClusterObjectIssue.yaml"

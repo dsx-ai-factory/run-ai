@@ -1,0 +1,10 @@
+type: object
+
+properties:
+  resourceName:
+    type: string
+  resource:
+    type: string
+  type:
+    type: string
+    enum: [url, file]

@@ -1,0 +1,41 @@
+type: object
+required:
+  - name
+  - description
+properties:
+  name:
+    type: string
+    description: The name of the role to create. Must be unique within the given scope.
+    example: "admin"
+    minLength: 1
+  description:
+    type: string
+    description: A description of the role.
+    example: "can manage all resources"
+  scopeType:
+    type: string
+    x-scope: [ system ]
+    default: tenant
+    description: "The type of scope where the role applies. Valid values: system, tenant"
+    enum:
+      - system
+      - tenant
+  scopeId:
+    type: string
+    x-scope: [ system ]
+    description: The ID of the scope where this role is defined.
+    nullable: true
+  enabled:
+    type: boolean
+    default: true
+    description: "Specifies whether the role is active. Default: true"
+    nullable: true
+  permissionSets:
+    type: array
+    description: The permission sets assigned to this role. Each item includes the UUID and name of the permission set.
+    items:
+      $ref: './RolePermissionSet.yaml'
+  kubernetesPermissions:
+    allOf:
+      - $ref: './KubernetesPermissions.yaml'
+    description: Defines the Kubernetes cluster permissions associated with this role.

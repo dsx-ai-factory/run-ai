@@ -1,0 +1,4 @@
+type: array
+description: The node affinities of a workload, which is an array of node affinity rules for different specs (e.g., worker, leader, master). Each item in the array specifies the node affinity for a particular spec.
+items:
+  $ref: "./WorkloadNodeAffinity.yaml"

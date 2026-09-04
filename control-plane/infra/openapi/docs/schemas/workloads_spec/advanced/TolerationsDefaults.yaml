@@ -1,0 +1,7 @@
+properties:
+  attributes:
+    $ref: "./Toleration.yaml"
+  instances:
+    $ref: "./Tolerations.yaml"
+nullable: true
+type: object

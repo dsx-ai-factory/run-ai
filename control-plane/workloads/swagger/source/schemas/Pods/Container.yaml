@@ -1,0 +1,16 @@
+type: object
+required:
+  - name
+  - image
+properties:
+  name:
+    type: string
+    example: "alpine"
+  image:
+    type: string
+    example: "alpine:latest"
+  startedAt:
+    type: string
+    nullable: true
+    format: date-time
+    example: 2022-01-01T03:49:52.531Z

@@ -1,0 +1,2 @@
+grantType: "external_token_exchange"
+externalToken: "access token from external idp"

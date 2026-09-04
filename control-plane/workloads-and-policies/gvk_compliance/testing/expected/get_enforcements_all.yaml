@@ -1,0 +1,187 @@
+errors:
+- code: 400
+  message: 'field item failed items validation: got at least 3 items, maximum is 2'
+- code: 400
+  message: 'field item failed items validation: got 4 items, minimum is 10'
+- code: 400
+  message: 'field numRangeMax failed range validation: must be no greater than 5'
+- code: 400
+  message: 'field numRangeMin failed range validation: must be no less than 5'
+- code: 400
+  message: 'field numRangeStep failed range validation: value 7 must be a multiple
+    of 5 from 0'
+- code: 400
+  message: 'field numRangeFull failed range validation: value 13 must be a multiple
+    of 4 from 11'
+- code: 400
+  message: 'field txtLengthMax failed length validation: the length must be no more
+    than 5'
+- code: 400
+  message: 'field txtLengthMin failed length validation: the length must be no less
+    than 5'
+- code: 400
+  message: 'field txtOptions failed options validation: value "hello" is not one of
+    [foo, bar]'
+- code: 400
+  message: 'field txtMatch failed match validation: value "abc" does not match pattern
+    "^[0-9]+$"'
+- code: 400
+  message: 'field qtyRangeMax failed quantityRange validation: value 2Gi exceeds maximum
+    1Gi'
+- code: 400
+  message: 'field qtyRangeMin failed quantityRange validation: value 100m is below
+    minimum 1Gi'
+- code: 400
+  message: 'field qtyRangeStep failed quantityRange validation: value 150m must be
+    a multiple of 100m from 0'
+- code: 400
+  message: 'field qtyRangeFull failed quantityRange validation: value 600Mi must be
+    a multiple of 500Mi from 10Mi'
+- code: 400
+  message: 'field listMax failed elements validation: the number of elements must
+    be no more than 2'
+- code: 400
+  message: 'field listMin failed elements validation: the number of elements must
+    be no less than 5'
+- code: 400
+  message: 'field missing failed required validation: field is required but missing
+    from the spec (path=".missing")'
+policy:
+  effectiveRules:
+  - enforcements:
+    - range:
+        max: 5
+    field: numRangeMax
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        min: 5
+    field: numRangeMin
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        step: 5
+    field: numRangeStep
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - range:
+        max: 150
+        min: 11
+        step: 4
+    field: numRangeFull
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - length:
+        max: 5
+    field: txtLengthMax
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - length:
+        min: 5
+    field: txtLengthMin
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - options:
+      - foo
+      - bar
+    field: txtOptions
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - match: ^[0-9]+$
+    field: txtMatch
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - quantityRange:
+        max: 1Gi
+    field: qtyRangeMax
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - quantityRange:
+        min: 1Gi
+    field: qtyRangeMin
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - quantityRange:
+        step: 100m
+    field: qtyRangeStep
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - quantityRange:
+        max: 1Gi
+        min: 10Mi
+        step: 500Mi
+    field: qtyRangeFull
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - elements:
+        max: 2
+    field: listMax
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - elements:
+        min: 5
+    field: listMin
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - required: true
+    field: missing
+    sourceOfRule: null
+    specSelector: self
+  - enforcements:
+    - items:
+        max: 2
+    field: item
+    sourceOfRule: null
+    specSelector: items
+  - enforcements:
+    - items:
+        min: 10
+    field: item
+    sourceOfRule: null
+    specSelector: items
+  workloadType:
+    group: test
+    kind: Synthetic
+    version: v1
+workload:
+  apiVersion: test/v1
+  items:
+  - a
+  - b
+  - c
+  - d
+  kind: Synthetic
+  listMax:
+  - a
+  - b
+  - c
+  - d
+  - e
+  listMin:
+  - a
+  numRangeFull: 13
+  numRangeMax: 10
+  numRangeMin: 0
+  numRangeStep: 7
+  qtyRangeFull: 600Mi
+  qtyRangeMax: 2Gi
+  qtyRangeMin: 100m
+  qtyRangeStep: 150m
+  txtLengthMax: abcdefghij
+  txtLengthMin: ab
+  txtMatch: abc
+  txtOptions: hello

@@ -1,0 +1,84 @@
+type: object
+required:
+  - name
+  - priorityClassName
+  - id
+  - workloadId
+  - clusterId
+  - createdAt
+  - containers
+  - k8sPhase
+properties:
+  name:
+    type: string
+    example: "pod-of-a-very-important-job"
+  priorityClassName:
+    type: string
+    example: "high-priority"
+  id:
+    type: string
+    format: uuid
+  workloadId:
+    type: string
+    format: uuid
+  revisionId:
+    type: string
+    format: uuid
+    nullable: true
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  projectId:
+    type: string
+    example: "1"
+  nodeName:
+    type: string
+    nullable: true
+    example: "gpu-node-1"
+  createdAt:
+    type: string
+    format: date-time
+    example: 2022-01-01T03:49:52.531Z
+  completedAt:
+    type: string
+    nullable: true
+    format: date-time
+    example: 2022-01-01T03:49:52.531Z
+  containers:
+    type: array
+    items:
+      $ref: "./Container.yaml"
+  currentNodePool:
+    type: string
+    nullable: true
+    example: "default"
+  requestedNodePools:
+    type: array
+    items:
+      type: string
+      example: "default"
+  requestedResources:
+    $ref: "./PodRequestResources.yaml"
+  allocatedResources:
+    $ref: "../Common/AllocatedResources.yaml"
+  tolerations:
+    $ref: "./PodTolerations.yaml"
+  k8sPhase:
+    type: string
+    example: 'Pending'
+  ip:
+    type: string
+    nullable: true
+    example: "10.244.1.1"
+  task:
+    type: string
+    nullable: true
+    description: "Identifies the function of the pod within a distributed workload (for example, leader, worker, or master)."
+    example: "leader"
+  nodeAffinity:
+    $ref: "./NodeAffinity/PodNodeAffinity.yaml"
+  elements:
+    type: array
+    nullable: true
+    items:
+      $ref: "./PodElement.yaml"
+    description: The workload structure elements this pod belongs to, ordered by hierarchy level.

@@ -1,0 +1,56 @@
+type: object
+required:
+  - name
+  - id
+  - parentName
+  - allocationValue
+  - utilizationValue
+properties:
+  name:
+    type: string
+    description: The name of the project
+    example: "Suricata"
+  id:
+    type: string
+    description: The id of the project
+    example: "1234"
+  parentName:
+    type: string
+    description: The name of the parent department
+    example: "Default"
+  allocationValue:
+    nullable: true
+    type: number
+    format: double
+    description: The metric value for the project. For allocation/utilization metrics this is the average GPU count; for gpuAllocationRatio it is a ratio (0–1+, e.g. 0.75 means 75% allocated).
+    example: 100
+  utilizationValue:
+    nullable: true
+    type: number
+    format: double
+    description: The utilization value of the project
+    example: 50
+  memoryUtilizationValue:
+    nullable: true
+    type: number
+    format: double
+    description: The memory utilization value of the project
+    example: 50
+  gpuQuota:
+    nullable: true
+    type: number
+    format: double
+    description: The GPU quota of the project
+    example: 8
+  runningWorkloadsCount:
+    nullable: true
+    type: integer
+    format: int32
+    description: The number of currently running workloads in the project
+    example: 5
+  pendingWorkloadsCount:
+    nullable: true
+    type: integer
+    format: int32
+    description: The number of currently pending workloads in the project
+    example: 2

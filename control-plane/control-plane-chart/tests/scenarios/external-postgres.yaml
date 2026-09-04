@@ -1,0 +1,10 @@
+# Bundled postgres disabled; credentials supplied directly. Exercises the
+# externalOnly branch in secret-generator.postgres-configs.
+postgresql:
+  enabled: false
+global:
+  postgresql:
+    auth:
+      password: external-user-pw
+      postgresPassword: external-admin-pw
+      host: external-pg.example.com

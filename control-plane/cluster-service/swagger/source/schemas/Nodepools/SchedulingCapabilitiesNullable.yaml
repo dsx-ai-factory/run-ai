@@ -1,0 +1,27 @@
+type: object
+x-internal: true
+properties:
+  adjustableWeights:
+    type: boolean
+    description: Whether to allow adjustable weights for the nodepool's resources.
+    example: true
+    default: false
+    nullable: true
+  ranks:
+    type: boolean
+    description: Whether to allow ranks for the nodepool's resources.
+    example: false
+    default: true
+    nullable: true
+  quota:
+    type: boolean
+    description: Whether to allow GPU quota for the nodepool's resources.
+    example: false
+    default: true
+    nullable: true
+  cpuQuota:
+    type: boolean
+    description: Whether to allow CPU quota for the nodepool's resources. Only allowed when allowQuota=true.
+    example: false
+    default: false
+    nullable: true

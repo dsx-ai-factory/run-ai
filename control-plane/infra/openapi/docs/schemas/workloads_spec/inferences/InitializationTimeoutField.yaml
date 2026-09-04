@@ -1,0 +1,8 @@
+properties:
+  initializationTimeoutSeconds:
+    description: Use `servingConfiguration.initializationTimeoutSeconds` instead.  If this field is set, it will be ignored and the value under `servingConfiguration` will be used. The maximum amount of time (in seconds) to wait for the container to become ready.
+    type: integer
+    format: int32
+    minimum: 1
+    nullable: true
+    deprecated: true

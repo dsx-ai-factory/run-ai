@@ -1,0 +1,18 @@
+type: object
+description: Batch of report IDs to delete.
+required:
+  - ids
+properties:
+  ids:
+    type: array
+    uniqueItems: true
+    minItems: 1
+    maxItems: 100
+    description: Array of report IDs to delete.
+    items:
+      type: string
+      format: uuid
+example:
+  ids:
+    - "497f6eca-6276-4993-bfeb-53cbbbba6f08"
+    - "8a7f3bcd-1234-5678-abcd-ef0123456789"

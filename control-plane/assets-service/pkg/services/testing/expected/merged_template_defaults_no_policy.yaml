@@ -1,0 +1,34 @@
+assets:
+  environment:
+    id: ""
+    name: ""
+distributed:
+  master:
+    assets:
+      environment:
+        id: ""
+        name: ""
+    specificRunParams:
+      command: spec-command
+      environmentVariables:
+      - name: env-1
+        value: value-1-from-spec
+      - name: env-2
+        value: spec-2-from-spec
+  numWorkers: 0
+meta:
+  clusterId: ""
+  createdAt: "0001-01-01T00:00:00Z"
+  createdBy: ""
+  desiredPhase: ""
+  name: ""
+  projectId: ""
+  requestedName: ""
+  workloadId: ""
+specificRunParams:
+  command: spec-command
+  environmentVariables:
+  - name: env-1
+    value: value-1-from-spec
+  - name: env-2
+    value: spec-2-from-spec

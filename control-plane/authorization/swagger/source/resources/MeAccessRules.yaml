@@ -1,0 +1,27 @@
+get:
+  summary: List the access rules assigned to the requesting user.
+  description: Retrieve the access rules assigned to the requesting user.
+  x-no-authorization: true
+  operationId: get_me_access_rules
+  x-service: authorization
+  x-test-coverage:
+    - control-plane/authorization/pkg/services/me_api_test.go
+  tags:
+    - Me
+  parameters:
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Search.yaml'
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Me/MeAccessRulesResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

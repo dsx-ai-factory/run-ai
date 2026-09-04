@@ -1,0 +1,62 @@
+{
+  "workloads": [
+    {
+      "tenantId": 1001,
+      "runningPods": 1,
+      "phaseUpdatedAt": "2025-12-15T08:58:34.351084Z",
+      "k8sPhaseUpdatedAt": "2025-12-15T08:58:24.983624Z",
+      "updatedAt": "2025-12-15T09:07:57.791339Z",
+      "source": "CLI",
+      "deletedAt": null,
+      "type": "NIMService",
+      "name": "my-nim-service",
+      "id": "a22ecd44-f863-444d-b69d-0cc0d26bbc55",
+      "priority": 150,
+      "priorityClassName": "very-high",
+      "submittedBy": "test@run.ai",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "projectName": "test-nim",
+      "projectId": "4500011",
+      "departmentName": "default",
+      "departmentId": "4500000",
+      "namespace": "runai-test-nim",
+      "createdAt": "2025-12-15T08:58:24.919632Z",
+      "workloadRequestedResources": {
+        "cpuCore": {
+          "request": 0.1
+        },
+        "cpuMemory": {
+          "request": "10M"
+        }
+      },
+      "podsRequestedResources": {},
+      "allocatedResources": {},
+      "actionsSupport": {
+        "delete": true
+      },
+      "phase": "Running",
+      "conditions": null,
+      "phaseMessage": "deployment \"my-nim-service\" successfully rolled out",
+      "k8sPhase": "",
+      "requestedPods": {
+        "min": 1,
+        "max": 1
+      },
+      "requestedNodePools": [
+        "default"
+      ],
+      "images": [
+        "gcr.io/run-ai-lab/nim-cpu:latest"
+      ],
+      "environments": [],
+      "additionalFields": {},
+      "preemptible": false,
+      "fullySaasWorkload": true,
+      "environmentVariables": {},
+      "command": "",
+      "category": "Deploy"
+    }
+  ]
+}
+
+

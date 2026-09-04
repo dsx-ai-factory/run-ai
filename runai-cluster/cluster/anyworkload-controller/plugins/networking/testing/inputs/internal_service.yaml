@@ -1,0 +1,17 @@
+runner:
+  name: internal-service-workload
+  namespace: runai-test
+
+networking:
+  services:
+  - create:
+      metadata:
+        name: internal-service
+      spec:
+        type: ClusterIP
+        ports:
+          - port: 8080
+            targetPort: 8080
+        selector:
+          app: internal-app
+  # No externalAccess - ClusterIP only

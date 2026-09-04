@@ -1,0 +1,42 @@
+get:
+  summary: Get the workload history.
+  description: Retrieve workload history details, including events, using a workload id.
+  operationId: get_workload_history
+  x-service: workloads
+  x-test-coverage:
+    - e2e/src/test/suites/parallel/workloads/jobsStatus.test.ts
+  x-authorize:
+    resource-type: workloads
+    action: read
+    id: workloadId
+  tags:
+    - Events
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - records
+            properties:
+              next:
+                type: integer
+                example: 1
+              records:
+                $ref: '../schemas/Events/HistoryRecords.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

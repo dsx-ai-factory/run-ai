@@ -1,0 +1,7 @@
+properties:
+  accessKeyAssetId:
+    description: ID of credentials asset of type access-key, for private S3 buckets.
+    type: string
+    format: uuid
+    minLength: 1
+    nullable: true

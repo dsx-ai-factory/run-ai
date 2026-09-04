@@ -1,0 +1,6 @@
+required:
+  - key
+properties:
+  key:
+    type: string
+    description: The NGC API key.
