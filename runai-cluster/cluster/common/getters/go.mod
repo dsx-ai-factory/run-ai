@@ -3,12 +3,12 @@ module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/getters
 go 1.26.3
 
 require (
-	github.com/hashicorp/go-multierror v1.1.1
-	github.com/kai-scheduler/KAI-scheduler v0.16.9
-	github.com/rs/zerolog v1.32.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-20240519090715-44f7f790e5ee
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20240218110754-50eb0f24b960
+	github.com/hashicorp/go-multierror v1.1.1
+	github.com/kai-scheduler/KAI-scheduler v0.16.9
+	github.com/rs/zerolog v1.32.0
 	k8s.io/api v0.35.4
 	k8s.io/apimachinery v0.35.4
 	sigs.k8s.io/controller-runtime v0.23.3

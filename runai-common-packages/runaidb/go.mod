@@ -5,11 +5,11 @@ go 1.26.3
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/aws/smithy-go v1.28.1
-	github.com/golang-migrate/migrate/v4 v4.19.1
-	github.com/jackc/pgx/v5 v5.10.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.24
+	github.com/golang-migrate/migrate/v4 v4.19.1
+	github.com/jackc/pgx/v5 v5.10.0
 	github.com/stretchr/testify v1.12.1
 	gorm.io/driver/postgres v1.6.2
 	gorm.io/gorm v1.31.2

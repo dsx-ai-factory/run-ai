@@ -3,12 +3,12 @@ module github.com/dsx-ai-factory/run-ai/control-plane/org-units-migrator
 go 1.26.3
 
 require (
-	github.com/google/uuid v1.6.0
-	github.com/onsi/ginkgo/v2 v2.32.1
-	github.com/onsi/gomega v1.43.0
 	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.4
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
+	github.com/google/uuid v1.6.0
+	github.com/onsi/ginkgo/v2 v2.32.1
+	github.com/onsi/gomega v1.43.0
 	gorm.io/driver/postgres v1.6.2 // indirect
 	gorm.io/gorm v1.31.2
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
@@ -41,6 +41,27 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.7.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
+	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7 // indirect
+	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0 // indirect
+	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.17 // indirect
+	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.4 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.6 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels v1.0.1 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.2 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/telemetry v1.0.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/versions v1.0.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client v0.0.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client v0.0.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities v0.0.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.7 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/setting v1.2.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
 	github.com/ebitengine/purego v0.10.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
@@ -109,27 +130,6 @@ require (
 	github.com/prometheus/procfs v0.16.1 // indirect
 	github.com/redis/go-redis/v9 v9.14.0 // indirect
 	github.com/rs/zerolog v1.35.1 // indirect
-	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7 // indirect
-	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.17 // indirect
-	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.4 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.6 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels v1.0.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.2 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/telemetry v1.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/versions v1.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.4 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.7 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.3 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/setting v1.2.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/segmentio/kafka-go v0.4.48 // indirect

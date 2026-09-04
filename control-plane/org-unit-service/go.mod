@@ -3,14 +3,6 @@ module github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service
 go 1.26.3
 
 require (
-	github.com/go-chi/chi/v5 v5.3.2
-	github.com/google/uuid v1.6.0
-	github.com/hashicorp/go-multierror v1.1.1
-	github.com/jackc/pgx/v5 v5.10.0
-	github.com/lib/pq v1.11.2
-	github.com/minio/minio-go/v7 v7.0.77
-	github.com/onsi/ginkgo/v2 v2.22.0
-	github.com/onsi/gomega v1.41.0
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
@@ -42,6 +34,14 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/s3 v1.0.4
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/setting v1.2.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25
+	github.com/go-chi/chi/v5 v5.3.2
+	github.com/google/uuid v1.6.0
+	github.com/hashicorp/go-multierror v1.1.1
+	github.com/jackc/pgx/v5 v5.10.0
+	github.com/lib/pq v1.11.2
+	github.com/minio/minio-go/v7 v7.0.77
+	github.com/onsi/ginkgo/v2 v2.22.0
+	github.com/onsi/gomega v1.41.0
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/exp v0.0.0-20250819193227-8b4c13bb791b
 	golang.org/x/time v0.12.0
@@ -78,6 +78,7 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.7.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/ebitengine/purego v0.10.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
@@ -148,7 +149,6 @@ require (
 	github.com/redis/go-redis/v9 v9.14.0 // indirect
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/rs/zerolog v1.35.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.2 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/segmentio/kafka-go v0.4.48 // indirect

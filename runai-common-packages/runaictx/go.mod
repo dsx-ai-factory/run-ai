@@ -3,12 +3,13 @@ module github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx
 go 1.26.3
 
 require (
-	github.com/rs/zerolog v1.35.1
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.12
+	github.com/rs/zerolog v1.35.1
 	github.com/stretchr/testify v1.12.1
 )
 
 require (
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
@@ -21,7 +22,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
 	github.com/sagikazarmark/locafero v0.7.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.12.0 // indirect
