@@ -18,7 +18,7 @@ import (
 	"time"
 
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck // dot import for test framework is intentional
-	. "github.com/onsi/gomega"    //nolint:staticcheck // dot import for test framework is intentional
+	. "github.com/onsi/gomega" //nolint:staticcheck // dot import for test framework is intentional
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"

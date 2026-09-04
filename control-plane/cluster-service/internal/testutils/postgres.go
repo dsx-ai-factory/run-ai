@@ -13,7 +13,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	dbconfig "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/config"
 	. "github.com/onsi/ginkgo/v2" //nolint:staticcheck // dot-import is the idiomatic ginkgo usage in test helpers
-	. "github.com/onsi/gomega"    //nolint:staticcheck // dot-import is the idiomatic gomega usage in test helpers
+	. "github.com/onsi/gomega" //nolint:staticcheck // dot-import is the idiomatic gomega usage in test helpers
 )
 
 // terminateContainer is only set on ginkgo process 1, which owns the container.
