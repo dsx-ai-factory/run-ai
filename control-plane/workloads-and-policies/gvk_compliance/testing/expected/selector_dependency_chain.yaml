@@ -1,0 +1,22 @@
+policy:
+  effectiveRules:
+  - enforcements:
+    - set:
+        value: injected-at-leaf
+    field: value
+    sourceOfRule: null
+    specSelector: leafMeta
+  workloadType:
+    group: test
+    kind: DeepWorkload
+    version: v1
+workload:
+  apiVersion: test/v1
+  kind: DeepWorkload
+  metadata:
+    name: deep-test
+  spec:
+    deep:
+      nested:
+        metadata:
+          value: injected-at-leaf

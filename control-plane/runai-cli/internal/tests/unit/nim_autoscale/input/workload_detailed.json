@@ -1,0 +1,49 @@
+{
+  "id": "5fa3c7f9-1089-4225-93e2-16d7f6c4c4a6",
+  "name": "mynim-auto",
+  "type": "NIMService",
+  "phase": "Running",
+  "phaseMessage": "deployment \"mynim-auto\" successfully rolled out",
+  "projectId": "4500011",
+  "projectName": "testnim",
+  "departmentName": "default",
+  "createdAt": "2026-03-10T16:41:36Z",
+  "updatedAt": "2026-03-10T16:43:17Z",
+  "submittedBy": "test@run.ai",
+  "priorityClassName": "very-high",
+  "priority": 150,
+  "images": ["gcr.io/run-ai-lab/nim-cpu:latest"],
+  "runningPods": 1,
+  "requestedPods": {
+    "number": 1
+  },
+  "workloadRequestedResources": {
+    "cpu": { "request": 0.1 },
+    "cpuMemory": { "request": "100M" },
+    "gpu": { "request": 0.0 }
+  },
+  "allocatedResources": {
+    "cpu": 0.1,
+    "cpuMemory": "100M",
+    "gpu": 0.0
+  },
+  "category": "Deploy",
+  "urls": ["https://test-cluster.runailabs.com/testnim/mynim-auto"],
+  "environments": [
+    {
+      "name": "NIMService",
+      "connections": [
+        {
+          "name": "NIMService",
+          "toolType": "NIMService",
+          "connectionType": "ExternalUrl",
+          "containerPort": 8080,
+          "url": "https://test-cluster.runailabs.com/testnim/mynim-auto"
+        }
+      ]
+    }
+  ],
+  "requestedNodePools": [],
+  "currentNodePools": ["default"],
+  "additionalFields": {}
+}

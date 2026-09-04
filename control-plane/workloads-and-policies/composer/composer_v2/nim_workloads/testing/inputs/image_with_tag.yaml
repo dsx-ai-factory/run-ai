@@ -1,0 +1,7 @@
+ngcAuthSecret: "ngc-secret"
+servingPort:
+  port: 8000
+modelStore:
+  nimCache:
+    name: "nim-cache"
+image: "nvidia/nim-llama3-8b-instruct:1.0.0"

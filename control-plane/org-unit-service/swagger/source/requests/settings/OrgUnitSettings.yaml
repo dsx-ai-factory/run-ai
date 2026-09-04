@@ -1,0 +1,30 @@
+get:
+  summary: Get org unit settings
+  operationId: get_org_unit_settings
+  x-service: org-unit-service
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/settings_test.go
+  x-authorize:
+    resource-type: settings
+    action: read
+  tags:
+    - Settings
+  parameters:
+    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/settings/OrgUnitSettingsGetResponse.yaml"
+    400:
+      $ref: "../../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    500:
+      $ref: "../../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

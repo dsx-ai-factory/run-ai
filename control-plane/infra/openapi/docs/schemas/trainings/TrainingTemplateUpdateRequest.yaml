@@ -1,0 +1,6 @@
+allOf:
+  - $ref: "../templates/TemplateUpdateMeta.yaml"
+  - properties:
+      spec:
+        $ref: "TrainingTemplateSpec.yaml"
+  - $ref: "../templates/TemplateAssets.yaml"

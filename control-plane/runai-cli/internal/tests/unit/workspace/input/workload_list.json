@@ -1,0 +1,159 @@
+{
+  "workloads": [
+    {
+      "tenantId": 1001,
+      "runningPods": 0,
+      "phaseUpdatedAt": "2025-12-15T08:58:34.891681Z",
+      "k8sPhaseUpdatedAt": "2025-12-15T08:58:28.728857Z",
+      "updatedAt": "2025-12-15T08:59:22.514455Z",
+      "source": "CLI",
+      "deletedAt": null,
+      "type": "Workspace",
+      "name": "my-workspace-demo-123",
+      "id": "eeaac0d9-db0b-4053-9839-86b808e4a7c5",
+      "priority": 125,
+      "priorityClassName": "high",
+      "submittedBy": "test@run.ai",
+      "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+      "projectName": "team-b",
+      "projectId": "4500002",
+      "departmentName": "default",
+      "departmentId": "4500000",
+      "namespace": "runai-team-b",
+      "createdAt": "2025-12-15T08:58:28.691571Z",
+      "workloadRequestedResources": {
+        "gpuRequestType": "portion",
+        "gpu": {
+          "request": 1
+        }
+      },
+      "podsRequestedResources": {
+        "gpuRequestType": "portion",
+        "gpu": {
+          "limit": 1,
+          "request": 1
+        },
+        "cpu": {
+          "limit": 0.1,
+          "request": 0.1
+        },
+        "cpuMemory": {
+          "limit": "100Mi",
+          "request": "104857600"
+        }
+      },
+      "allocatedResources": {},
+      "actionsSupport": {
+        "delete": true,
+        "suspend": true
+      },
+      "phase": "Pending",
+      "conditions": [
+        {
+          "type": "Ready",
+          "status": "False",
+          "message": "job is not running",
+          "lastTransitionTime": "2025-12-15T08:58:34Z"
+        },
+        {
+          "type": "LastReconcileSucceeded",
+          "status": "True",
+          "lastTransitionTime": "2025-12-15T08:58:34Z"
+        },
+        {
+          "type": "Suspended",
+          "status": "False",
+          "lastTransitionTime": "2025-12-15T08:58:34Z"
+        },
+        {
+          "type": "Failed",
+          "status": "False",
+          "lastTransitionTime": "2025-12-15T08:58:34Z"
+        },
+        {
+          "type": "Succeeded",
+          "status": "False",
+          "lastTransitionTime": "2025-12-15T08:58:34Z"
+        },
+        {
+          "type": "Pending",
+          "status": "True",
+          "lastTransitionTime": "2025-12-15T08:58:34Z"
+        },
+        {
+          "type": "Initialized",
+          "status": "False",
+          "reason": "InCreatingPhase",
+          "lastTransitionTime": "2025-12-15T08:58:34Z"
+        },
+        {
+          "type": "Degraded",
+          "status": "False",
+          "lastTransitionTime": "2025-12-15T08:58:34Z"
+        }
+      ],
+      "k8sPhase": "",
+      "requestedPods": {
+        "number": 1
+      },
+      "requestedNodePools": [
+        "default"
+      ],
+      "images": [
+        "jupyter/scipy-notebook"
+      ],
+      "urls": [
+        "https://nael-env-001.runailabs.com/team-b/my-workspace-demo-123",
+        "172.18.0.2:31888"
+      ],
+      "environments": [
+        {
+          "connections": [
+            {
+              "name": "url",
+              "toolType": "custom",
+              "connectionType": "ExternalUrl",
+              "url": "https://nael-env-001.runailabs.com/team-b/my-workspace-demo-123",
+              "authorizedUsers": [
+                "user1",
+                "user2",
+                "demo-user"
+              ],
+              "containerPort": 8888,
+              "correlationName": "url",
+              "exposedUrlSubDomain": "team-b-my-workspace-demo-123",
+              "exposedUrlPath": "/team-b/my-workspace-demo-123"
+            },
+            {
+              "name": "port",
+              "toolType": "",
+              "connectionType": "NodePort",
+              "url": "172.18.0.2:31888",
+              "containerPort": 8888,
+              "correlationName": "port",
+              "portResourceName": "port-my-workspace-demo-123-8888-0",
+              "serviceResourceName": "iw-my-workspace-demo-123-0-nodeport"
+            }
+          ],
+          "name": "",
+          "id": ""
+        }
+      ],
+      "additionalFields": {
+        "cliCommand": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai workspace submit my-workspace-demo-123 --project team-b --image jupyter/scipy-notebook --image-pull-policy IfNotPresent -g 1 --stdin --tty --port service-type=NodePort,container=8888,external=31888 --external-url container=8888,authusers=user1:user2:demo-user --environment-variable USER=developer --environment-variable WORKSPACE=demo --environment-variable JUPYTER_ENABLE_LAB=yes --label team=ml-platform --label purpose=development --label tool=jupyter --annotation 'description=Jupyter workspace with auth' --existing-pvc claimname=my-simple-pvc,path=/home/jovyan/work --restart-policy OnFailure --working-dir /home/jovyan --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 100 --capability NET_BIND_SERVICE --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --command -- start-notebook.sh --NotebookApp.token= --NotebookApp.password="
+      },
+      "preemptible": false,
+      "fullySaasWorkload": true,
+      "environmentVariables": {
+        "JUPYTER_ENABLE_LAB": "yes",
+        "RUNAI_JOB_NAME": "${RUNAI_JOB_NAME}",
+        "RUNAI_PROJECT": "${RUNAI_PROJECT}",
+        "USER": "developer",
+        "WORKSPACE": "demo"
+      },
+      "command": "start-notebook.sh --NotebookApp.token= --NotebookApp.password=",
+      "totalPendingTimeSeconds": 497,
+      "category": "Build"
+    }
+  ]
+}

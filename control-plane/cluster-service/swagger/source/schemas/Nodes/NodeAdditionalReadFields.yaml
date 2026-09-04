@@ -1,0 +1,15 @@
+type: object
+required:
+  - clusterUuid
+  - updatedAt
+properties:
+  id:
+    type: string
+    format: uuid
+    description: The unique identifier of the node.
+  clusterUuid:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  updatedAt:
+    type: string
+    format: date-time
+x-schema-name: NodeAdditionalReadFields

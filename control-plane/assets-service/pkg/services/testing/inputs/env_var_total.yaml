@@ -1,0 +1,25 @@
+assets:
+  environment: basic
+  compute: fraction
+specificRunParams:
+  command: command-from-specific-run-params
+  environmentVariables:
+    - name: HOME
+      value: home-from-specific-run-params
+    - name: FROM-CRED
+      credential:
+        AssetId: existing
+        key: my-cred-key
+  nodePools:
+    - my-node-a
+    - my-node-b
+  annotations:
+    - name: specific-ann-name1
+      value: specific-ann-val1
+    - name: specific-ann-name2
+      value: specific-ann-val2
+  labels:
+    - name: specific-label-name1
+      value: specific-label-val1
+    - name: specific-label-name2
+      value: specific-label-val2

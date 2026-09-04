@@ -1,0 +1,35 @@
+post:
+  summary: Get minimal mapping info. [experimental]
+  description: Retrieve the names and descriptions of fields, spec selectors, and item selectors for a workload type, without the full JQ expressions.
+  operationId: get_mapping_minimal
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/service_gvk_policies_test.go
+  x-authorize:
+    resource-type: policies
+    action: read
+  tags:
+    - Policy
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Mapping/GetMappingMinimalInfoReq.yaml"
+  responses:
+    200:
+      description: The names and descriptions of the mapping's fields, spec selectors, and item selectors.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Mapping/GetMappingMinimalResp.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+

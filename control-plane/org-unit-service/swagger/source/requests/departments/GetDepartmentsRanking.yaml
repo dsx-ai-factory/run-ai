@@ -1,0 +1,49 @@
+get:
+  summary: Get top 15 departments by highest or lowest average resource utilization or allocation
+  operationId: get_departments_ranking
+  x-service: org-unit-service
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/department_api_test.go
+  description: Get top 15 departments by highest or lowest average resource utilization or allocation
+  x-authorize:
+    resource-type: department
+    action: read
+  x-internal: true
+  tags:
+    - Departments
+  parameters:
+    - $ref: '../../parameters/OrgUnitRankingMetricType.yaml'
+    - $ref: '../../parameters/OrgUnitRankingOrderType.yaml'
+    - name: clusterId
+      in: query
+      required: true
+      schema:
+        type: string
+    - name: nodepoolName
+      description: The name of the node pool to filter by
+      in: query
+      required: false
+      schema:
+        type: string
+  responses:
+    200:
+      description: ok
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - departments
+            properties:
+              departments:
+                  type: array
+                  items:
+                    $ref: "../../schemas/departments/DepartmentGetRanking.yaml"
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

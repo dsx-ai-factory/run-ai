@@ -1,0 +1,76 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+properties:
+  annotations:
+    $ref: ../advanced/Annotations.yaml
+  args:
+    $ref: ../container/Args.yaml
+  command:
+    $ref: ../container/Command.yaml
+  compute:
+    nullable: true
+    properties:
+      cpuCoreLimit:
+        $ref: ../compute/CpuCoreLimit.yaml
+      cpuCoreRequest:
+        $ref: ../compute/CpuCoreRequest.yaml
+      cpuMemoryLimit:
+        $ref: ../compute/CpuMemoryLimit.yaml
+      cpuMemoryRequest:
+        $ref: ../compute/CpuMemoryRequest.yaml
+      extendedResources:
+        $ref: ../compute/ExtendedResources.yaml
+      gpuDevicesRequest:
+        $ref: ../compute/GpuDevicesRequest.yaml
+      gpuMemoryLimit:
+        $ref: ../compute/GpuMemoryLimit.yaml
+      gpuMemoryRequest:
+        $ref: ../compute/GpuMemoryRequest.yaml
+      gpuPortionLimit:
+        $ref: ../compute/GpuPortionLimit.yaml
+      gpuPortionRequest:
+        $ref: ../compute/GpuPortionRequest.yaml
+      gpuRequestType:
+        $ref: ../compute/GpuRequestType.yaml
+      largeShmRequest:
+        $ref: ../compute/LargeShmRequest.yaml
+    type: object
+  createHomeDir:
+    $ref: ../container/CreateHomeDir.yaml
+  environmentVariables:
+    $ref: ../container/EnvironmentVariables.yaml
+  image:
+    $ref: ../container/Image.yaml
+  imagePullPolicy:
+    $ref: ../container/ImagePullPolicy.yaml
+  labels:
+    $ref: ../advanced/Labels.yaml
+  nodeAffinityRequired:
+    $ref: ../resources/NodeAffinityRequired.yaml
+  nodeType:
+    $ref: ../resources/NodeType.yaml
+  podAffinity:
+    $ref: ../resources/PodAffinity.yaml
+  probes:
+    $ref: ../container/Probes.yaml
+  security:
+    $ref: ../security/DistributedInferenceLeaderWorkerSpecSecurity.yaml
+  storage:
+    nullable: true
+    properties:
+      configMapVolume:
+        $ref: ../storage/ConfigMapItems.yaml
+      emptyDirVolume:
+        $ref: ../storage/EmptyDirItems.yaml
+      pvc:
+        $ref: ../storage/PvcItems.yaml
+      secretVolume:
+        $ref: ../storage/SecretItems.yaml
+    type: object
+  tolerations:
+    $ref: ../advanced/Tolerations.yaml
+  workingDir:
+    $ref: ../container/WorkingDir.yaml
+type: object

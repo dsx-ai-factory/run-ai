@@ -1,0 +1,8 @@
+properties:
+  name:
+    type: string
+    example: "type"
+  cluster-id:
+    type: string
+    format: uuid
+    example: d73a738f-fab3-430a-8fa3-5241493d7128

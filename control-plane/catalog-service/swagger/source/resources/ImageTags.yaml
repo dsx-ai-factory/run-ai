@@ -1,0 +1,32 @@
+parameters:
+  - $ref: "../parameters/path/RegistryIntegrationId.yaml"
+get:
+  summary: Get the image's tags
+  operationId: get_image_tags
+  x-service: catalog-service
+  x-internal: true
+  x-authorize:
+    resource-type: registries
+    action: read
+  tags:
+    - Images
+  parameters:
+    - $ref: "../parameters/query/mandatory/ImageName.yaml"
+    - $ref: "../parameters/query/optional/AssetIdOptional.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/images/ImageTags.yaml"
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

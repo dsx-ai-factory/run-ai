@@ -1,0 +1,29 @@
+type: object
+properties:
+  id:
+    type: string
+    format: uuid
+  name:
+    $ref: "./AIApplicationName.yaml"
+  source:
+    type: string
+  type:
+    type: string
+  phase:
+    type: string
+  projectId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ProjectId.yaml"
+  projectName:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ProjectName.yaml"
+  spec:
+    $ref: "./AIApplicationSpec.yaml"
+  auth:
+    $ref: "./AIApplicationAuth.yaml"
+  desiredPhase:
+    type: string
+  requiresControlPlaneAuth:
+    type: boolean
+    description: |
+      Set by the control plane for charts it hosts itself (uploaded via chartId, which it rewrites to
+      a control-plane download URL). When true, the cluster application controller attaches its bearer
+      token when downloading the chart. Never set for user-provided chartURL charts.

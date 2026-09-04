@@ -1,0 +1,75 @@
+openapi: 3.0.3
+info:
+  title: Backend for Frontend Service
+  version: '1.0'
+  description: Backend for Frontend Service API
+  contact:
+    name: Run.AI
+    url: 'https://www.run.ai/'
+    email: support@run.ai
+servers:
+- url: 'http://localhost:8080'
+paths:
+  /health:
+    x-internal: true
+    x-service: bff-service
+    get:
+      summary: health check
+      operationId: health
+      x-no-authorization: true
+      x-service: bff-service
+      tags:
+      - Health
+      responses:
+        '200':
+          description: Executed successfully.
+  /_version:
+    x-internal: true
+    $ref: './resources/version.yaml'
+  /api/v1/boot-config:
+    x-internal: true
+    $ref: './resources/boot_config.yaml'
+  /api/v1/notifications/settings:
+    x-scope: [ system, tenant ]
+    $ref: './resources/notifications_settings.yaml'
+  /api/v1/system-notification:
+    x-scope: [ system ]
+    $ref: './resources/system_notification.yaml'
+  /api/v1/notifications/settings/{key}:
+    x-scope: [ system, tenant ]
+    $ref: './resources/notifications_setting.yaml'
+  /api/v1/ui-workloads/settings:
+    x-internal: true
+    x-scope: [ system, tenant ]
+    $ref: './resources/workloads_settings.yaml'
+  /api/v1/ui-workloads/settings/{key}:
+    x-internal: true
+    x-scope: [ system, tenant ]
+    $ref: './resources/workloads_setting.yaml'
+  /api/v1/ui-appearance/settings:
+    x-internal: true
+    x-scope: [ system, tenant ]
+    $ref: './resources/appearance_settings.yaml'
+  /api/v1/ui-appearance/settings/{key}:
+    x-internal: true
+    x-scope: [ system, tenant ]
+    $ref: './resources/appearance_setting.yaml'
+  /api/v1/branding/settings:
+    x-scope: [ system, tenant ]
+    $ref: './resources/branding_settings.yaml'
+  /api/v1/branding/settings/{key}:
+    x-scope: [ system, tenant ]
+    $ref: './resources/branding_setting.yaml'
+components:
+  schemas:
+    $ref: './schemas/_index.yaml'
+  responses:
+    $ref: '../../../infra/openapi/docs/responses/_index.yaml'
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      description: Bearer authentication
+      scheme: bearer
+      type: http
+security:
+- bearerAuth: []

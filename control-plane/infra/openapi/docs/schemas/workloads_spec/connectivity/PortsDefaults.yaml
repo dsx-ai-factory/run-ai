@@ -1,0 +1,7 @@
+properties:
+  attributes:
+    $ref: "./Port.yaml"
+  instances:
+    $ref: "./Ports.yaml"
+nullable: true
+type: object

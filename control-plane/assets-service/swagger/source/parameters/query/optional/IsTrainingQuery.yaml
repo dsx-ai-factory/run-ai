@@ -1,0 +1,7 @@
+name: isTraining
+in: query
+required: false
+description: Filter results to workload of type training.
+schema:
+  type: boolean
+allowReserved: true

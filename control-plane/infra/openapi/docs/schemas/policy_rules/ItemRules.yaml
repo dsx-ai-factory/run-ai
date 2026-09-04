@@ -1,0 +1,17 @@
+properties:
+  sourceOfRule:
+    $ref: "./SourceOfRule.yaml"
+  canAdd:
+    description: Whether it is permitted to add items. Default to true.
+    type: boolean
+    nullable: true
+  locked:
+    description: Set of keys for items that are "locked", i.e. cannot be removed or deleted.
+    type: array
+    items:
+      type: string
+    example:
+      - HOME
+      - USER
+nullable: true
+type: object

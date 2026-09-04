@@ -1,0 +1,37 @@
+post:
+  summary: Create a NVIDIA NIM service. [Experimental]
+  description: Create a NVIDIA NIM service
+  operationId: create_nim_service
+  x-service: workloads-manager
+  x-test-coverage:
+    - control-plane/workloads-manager/pkg/services/api_nim_services_impl_test.go
+  x-authorize:
+    resource-type: inferences
+    action: create
+  tags:
+    - NVIDIA NIM
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/NIMServices/NimServiceCreateRequest.yaml"
+  responses:
+    202:
+      description: Workload creation accepted
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/NIMServices/NimServiceResponse.yaml'
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400SubmissionErrorV2.yaml"
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    409:
+      $ref: '../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

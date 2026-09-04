@@ -1,0 +1,11 @@
+# Settings
+TenantSetting:
+  $ref: './Tenant/Setting.yaml'
+TenantSettingCreationRequest:
+  $ref: './TenantSetting/TenantSettingCreationRequest.yaml'
+TenantSettingCreationResponse:
+  $ref: './TenantSetting/TenantSettingCreationResponse.yaml'
+TenantSettingValue:
+  $ref: './settings/TenantSettingValue.yaml'
+TenantSettingsByKey:
+  $ref: './settings/TenantSettingsByKey.yaml'

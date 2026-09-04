@@ -1,0 +1,34 @@
+post:
+  tags:
+    - Assets
+  summary: Request the flat representation of an asset
+  description: Used by workloads-service for the unified API
+  operationId: request_asset_flat_format
+  x-internal: true
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_assets_service_test.go
+  x-no-authorization: true
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Asset/AssetFlatRequest.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Asset/AssetFlatResponse.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

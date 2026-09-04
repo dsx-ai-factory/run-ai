@@ -1,0 +1,59 @@
+{{- /*
+ResourceInterface -> Karta migration: pre-upgrade phase.
+
+Runs after the CRD upgrader (weight=0) and before the main chart deploys
+(weight>=2). Copies any existing RIs into Kartas with all conditions Ready,
+so the new EWI/anyworkload controllers find a fully populated Karta state
+when they start. Idempotent and a no-op on fresh installs (skipped via
+`hook: pre-upgrade` so it only fires on `helm upgrade`).
+*/}}
+{{- if .Values.kartaMigrate.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: karta-migrate-pre
+  namespace: runai
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- include "jobAnnotations" . | nindent 4 }}
+  labels:
+    run.ai/hook: karta-migrate-pre
+    {{- include "jobLabels" . | nindent 4 }}
+spec:
+  backoffLimit: {{ .Values.kartaMigrate.backoffLimit | default 3 }}
+  activeDeadlineSeconds: {{ .Values.kartaMigrate.activeDeadlineSeconds | default 600 }}
+  template:
+    metadata:
+      annotations:
+        {{- include "jobAnnotations" . | nindent 8 }}
+      labels:
+        run.ai/hook: karta-migrate-pre
+        {{- include "jobLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: karta-migrate
+      imagePullSecrets:{{ include "imagePullSecretList" . | nindent 8 }}
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: {{ include "kartaMigrate.image" . }}
+          imagePullPolicy: {{ .Values.kartaMigrate.image.pullPolicy | default "IfNotPresent" }}
+          command:
+            - /app/karta-migrate
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          {{- with .Values.kartaMigrate.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      affinity:{{- include "deploymentAffinity" . | nindent 8 }}
+      tolerations: {{- include "deploymentTolerations" . | nindent 8 }}
+{{- end }}

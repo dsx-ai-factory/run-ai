@@ -1,0 +1,8 @@
+image: ubuntu
+ports:
+  - external: 80
+  - external: 90
+security:
+  runAsUid: 100
+compute:
+  cpuCoreLimit: 20

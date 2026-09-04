@@ -1,0 +1,2246 @@
+openapi: 3.0.3
+info:
+  contact:
+    email: support@run.ai
+    name: Run.AI
+    url: https://www.run.ai/
+  description: Backend for Frontend Service API
+  title: Backend for Frontend Service
+  version: "1.0"
+servers:
+- url: http://localhost:8080
+security:
+- bearerAuth: []
+paths:
+  /health:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: Executed successfully.
+      summary: health check
+      tags:
+      - Health
+      x-no-authorization: true
+      x-service: bff-service
+    x-internal: true
+    x-service: bff-service
+  /_version:
+    get:
+      description: |
+        Get version.
+      operationId: get_version
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: get version
+      tags:
+      - Version
+      x-no-authorization: true
+      x-test-coverage: not-applicable
+      x-service: bff-service
+    x-internal: true
+  /api/v1/boot-config:
+    get:
+      description: "Returns deployment-resolved, browser-safe configuration required\
+        \ before the frontend mounts."
+      operationId: get_boot_config
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BootConfig'
+          description: Executed successfully.
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get frontend boot configuration
+      tags:
+      - BootConfig
+      x-no-authorization: true
+      x-test-coverage:
+      - integration-tests/tests/main_test.go
+      x-service: bff-service
+    x-internal: true
+  /api/v1/notifications/settings:
+    get:
+      description: Returns all notifications-related settings for the tenant.
+      operationId: get_notifications_settings
+      parameters:
+      - description: If exists will return the relevant resource for the tenant ID
+        example: "1008"
+        explode: true
+        in: query
+        name: tenantId
+        required: false
+        schema:
+          default: ""
+          type: string
+        style: form
+        x-scope:
+        - system
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationsSettingsGetAllResponse'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get notifications settings
+      tags:
+      - Settings
+      x-service: bff-service
+      x-test-coverage: not-applicable
+      x-authorize:
+        resource-type: settings
+        action: read
+    x-scope:
+    - system
+    - tenant
+  /api/v1/system-notification:
+    delete:
+      operationId: delete_system_notification
+      responses:
+        "200":
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Delete system notification
+      tags:
+      - System Notification
+      x-service: bff-service
+      x-test-coverage: not-applicable
+      x-authorize:
+        resource-type: notification-settings
+        action: update
+    get:
+      operationId: get_system_notification
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetSystemNotification'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get system notification
+      tags:
+      - System Notification
+      x-service: bff-service
+      x-test-coverage: not-applicable
+      x-no-authorization: true
+    put:
+      operationId: update_system_notification
+      requestBody:
+        content:
+          application/json:
+            example:
+              systemMessage:
+                $ref: ../examples/notifications_setting_examples.yaml
+            schema:
+              $ref: '#/components/schemas/UpdateSystemNotification'
+        required: true
+      responses:
+        "200":
+          description: System setting successfully updated
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Update system notification
+      tags:
+      - System Notification
+      x-service: bff-service
+      x-test-coverage: not-applicable
+      x-authorize:
+        resource-type: notification-settings
+        action: update
+    x-scope:
+    - system
+  /api/v1/notifications/settings/{key}:
+    get:
+      description: Returns a single notifications setting identified by the path key.
+      operationId: get_notifications_setting_by_key
+      parameters:
+      - description: Identifier of the notifications setting to retrieve or update.
+        explode: false
+        in: path
+        name: key
+        required: true
+        schema:
+          $ref: '#/components/schemas/notificationsSettingsKeyEnum'
+        style: simple
+      - description: If exists will return the relevant resource for the tenant ID
+        example: "1008"
+        explode: true
+        in: query
+        name: tenantId
+        required: false
+        schema:
+          default: ""
+          type: string
+        style: form
+        x-scope:
+        - system
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                adminMessage:
+                  value:
+                    value:
+                      id: 550e8400-e29b-41d4-a716-446655440000
+                      msg: System maintenance scheduled
+                      createdAt: 1706886400000
+                      enableDismiss: true
+                    displayName: Admin message
+                    description: Write a message that will be displayed to all users
+              schema:
+                $ref: '#/components/schemas/GetSettingResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get notifications setting by key
+      tags:
+      - Settings
+      x-service: bff-service
+      x-test-coverage: not-applicable
+      x-authorize:
+        resource-type: settings
+        action: read
+    put:
+      description: Updates a single notifications setting identified by the path key.
+      operationId: update_notifications_setting_by_key
+      parameters:
+      - description: Identifier of the notifications setting to retrieve or update.
+        explode: false
+        in: path
+        name: key
+        required: true
+        schema:
+          $ref: '#/components/schemas/notificationsSettingsKeyEnum'
+        style: simple
+      - description: If exists will return the relevant resource for the tenant ID
+        example: "1008"
+        explode: true
+        in: query
+        name: tenantId
+        required: false
+        schema:
+          default: ""
+          type: string
+        style: form
+        x-scope:
+        - system
+      requestBody:
+        content:
+          application/json:
+            examples:
+              adminMessage:
+                $ref: '#/components/examples/notifications_setting_examples'
+            schema:
+              $ref: '#/components/schemas/UpdateAdminMessage'
+        required: true
+      responses:
+        "200":
+          description: Setting successfully updated
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Update notifications setting by key
+      tags:
+      - Settings
+      x-service: bff-service
+      x-test-coverage: not-applicable
+      x-authorize:
+        resource-type: settings
+        action: update
+    x-scope:
+    - system
+    - tenant
+  /api/v1/ui-workloads/settings:
+    get:
+      operationId: get_workloads_settings
+      parameters:
+      - description: If exists will return the relevant resource for the tenant ID
+        example: "1008"
+        explode: true
+        in: query
+        name: tenantId
+        required: false
+        schema:
+          default: ""
+          type: string
+        style: form
+        x-scope:
+        - system
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkloadsSettingsGetAllResponse'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get workloads settings
+      tags:
+      - Settings
+      x-service: bff-service
+      x-test-coverage: not-applicable
+      x-authorize:
+        resource-type: settings
+        action: read
+    x-internal: true
+    x-scope:
+    - system
+    - tenant
+  /api/v1/ui-workloads/settings/{key}:
+    get:
+      operationId: get_workloads_setting_by_key
+      parameters:
+      - description: The workloads setting key
+        explode: false
+        in: path
+        name: key
+        required: true
+        schema:
+          $ref: '#/components/schemas/workloadsSettingsKeyEnum'
+        style: simple
+      - description: If exists will return the relevant resource for the tenant ID
+        example: "1008"
+        explode: true
+        in: query
+        name: tenantId
+        required: false
+        schema:
+          default: ""
+          type: string
+        style: form
+        x-scope:
+        - system
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                enableNIM:
+                  value:
+                    value:
+                      enabled: true
+                    displayName: NIM models
+                    description: Enable instant deployment of NIM models via the workload
+                      submission form
+                deletedWorkloadsView:
+                  value:
+                    value:
+                      enabled: true
+                    displayName: Deleted workloads view
+                    description: Enable to view deleted workloads in the Workloads
+                      view.
+                allowGPT2Model:
+                  value:
+                    value:
+                      enabled: true
+                    displayName: Allow GPT-2 model
+                    description: Enable to allow GPT-2 model.
+                enableModelCatalog:
+                  value:
+                    value:
+                      enabled: true
+                    displayName: Hugging face models
+                    description: Enable instant deployment of Hugging Face models
+                      via the Models view or the workload submission form.
+              schema:
+                $ref: '#/components/schemas/GetSettingResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get workloads setting by key
+      tags:
+      - Settings
+      x-service: bff-service
+      x-test-coverage: not-applicable
+      x-authorize:
+        resource-type: settings
+        action: read
+    put:
+      operationId: update_workloads_setting_by_key
+      parameters:
+      - description: The workloads setting key
+        explode: false
+        in: path
+        name: key
+        required: true
+        schema:
+          $ref: '#/components/schemas/workloadsSettingsKeyEnum'
+        style: simple
+      - description: If exists will return the relevant resource for the tenant ID
+        example: "1008"
+        explode: true
+        in: query
+        name: tenantId
+        required: false
+        schema:
+          default: ""
+          type: string
+        style: form
+        x-scope:
+        - system
+      requestBody:
+        content:
+          application/json:
+            examples:
+              enableNIM:
+                $ref: '#/components/examples/workloads_setting_examples'
+              deletedWorkloadsView:
+                $ref: '#/components/examples/workloads_setting_examples'
+              allowGPT2Model:
+                $ref: '#/components/examples/workloads_setting_examples'
+              enableModelCatalog:
+                $ref: '#/components/examples/workloads_setting_examples'
+            schema:
+              $ref: '#/components/schemas/update_workloads_setting_by_key_request'
+        required: true
+      responses:
+        "200":
+          description: Setting successfully updated
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Update workloads setting by key
+      tags:
+      - Settings
+      x-service: bff-service
+      x-test-coverage: not-applicable
+      x-authorize:
+        resource-type: settings
+        action: update
+    x-internal: true
+    x-scope:
+    - system
+    - tenant
+  /api/v1/ui-appearance/settings:
+    get:
+      operationId: get_appearance_settings
+      parameters:
+      - description: If exists will return the relevant resource for the tenant ID
+        example: "1008"
+        explode: true
+        in: query
+        name: tenantId
+        required: false
+        schema:
+          default: ""
+          type: string
+        style: form
+        x-scope:
+        - system
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppearanceSettingsGetAllResponse'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get appearance settings
+      tags:
+      - Settings
+      x-service: bff-service
+      x-test-coverage: not-applicable
+      x-authorize:
+        resource-type: settings
+        action: read
+    x-internal: true
+    x-scope:
+    - system
+    - tenant
+  /api/v1/ui-appearance/settings/{key}:
+    get:
+      operationId: get_appearance_setting_by_key
+      parameters:
+      - description: The appearance setting key
+        explode: false
+        in: path
+        name: key
+        required: true
+        schema:
+          $ref: '#/components/schemas/appearanceSettingsKeyEnum'
+        style: simple
+      - description: If exists will return the relevant resource for the tenant ID
+        example: "1008"
+        explode: true
+        in: query
+        name: tenantId
+        required: false
+        schema:
+          default: ""
+          type: string
+        style: form
+        x-scope:
+        - system
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                bannerConfig:
+                  value:
+                    value:
+                      enabled: true
+                      text: PRODUCTION ENVIRONMENT
+                      backgroundColor: '#D32F2F'
+                      fontColor: '#FFFFFF'
+                    displayName: Banner configuration
+                    description: Configure a persistent banner displayed at the top
+                      of the Run:ai UI for all authenticated users.
+              schema:
+                $ref: '#/components/schemas/GetSettingResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get appearance setting by key
+      tags:
+      - Settings
+      x-service: bff-service
+      x-test-coverage: not-applicable
+      x-authorize:
+        resource-type: settings
+        action: read
+    put:
+      operationId: update_appearance_setting_by_key
+      parameters:
+      - description: The appearance setting key
+        explode: false
+        in: path
+        name: key
+        required: true
+        schema:
+          $ref: '#/components/schemas/appearanceSettingsKeyEnum'
+        style: simple
+      - description: If exists will return the relevant resource for the tenant ID
+        example: "1008"
+        explode: true
+        in: query
+        name: tenantId
+        required: false
+        schema:
+          default: ""
+          type: string
+        style: form
+        x-scope:
+        - system
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bannerConfig:
+                $ref: '#/components/examples/appearance_setting_examples'
+            schema:
+              $ref: '#/components/schemas/UpdateBannerConfig'
+        required: true
+      responses:
+        "200":
+          description: Setting successfully updated
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Update appearance setting by key
+      tags:
+      - Settings
+      x-service: bff-service
+      x-test-coverage: not-applicable
+      x-authorize:
+        resource-type: settings
+        action: update
+    x-internal: true
+    x-scope:
+    - system
+    - tenant
+  /api/v1/branding/settings:
+    get:
+      description: Returns all branding-related settings for the tenant.
+      operationId: get_branding_settings
+      parameters:
+      - description: If exists will return the relevant resource for the tenant ID
+        example: "1008"
+        explode: true
+        in: query
+        name: tenantId
+        required: false
+        schema:
+          default: ""
+          type: string
+        style: form
+        x-scope:
+        - system
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandingSettingsGetAllResponse'
+          description: Executed successfully.
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get branding settings
+      tags:
+      - Settings
+      x-service: bff-service
+      x-test-coverage:
+      - integration-tests/tests/api_branding_settings_service_test.go
+      x-no-authorization: true
+    x-scope:
+    - system
+    - tenant
+  /api/v1/branding/settings/{key}:
+    get:
+      description: Returns a single branding setting identified by the path key.
+      operationId: get_branding_setting_by_key
+      parameters:
+      - description: Identifier of the branding setting to retrieve or update
+        explode: false
+        in: path
+        name: key
+        required: true
+        schema:
+          $ref: '#/components/schemas/brandingSettingsKeyEnum'
+        style: simple
+      - description: If exists will return the relevant resource for the tenant ID
+        example: "1008"
+        explode: true
+        in: query
+        name: tenantId
+        required: false
+        schema:
+          default: ""
+          type: string
+        style: form
+        x-scope:
+        - system
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                logo:
+                  value:
+                    value:
+                      logo: <base64-encoded-image>
+                    displayName: Logo
+                    description: Retrieve the base64 logo file.
+              schema:
+                $ref: '#/components/schemas/GetSettingResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get branding setting by key
+      tags:
+      - Settings
+      x-service: bff-service
+      x-test-coverage:
+      - integration-tests/tests/api_branding_settings_service_test.go
+      x-no-authorization: true
+    put:
+      description: Updates a single branding setting identified by the path key.
+      operationId: update_branding_setting_by_key
+      parameters:
+      - description: Identifier of the branding setting to retrieve or update
+        explode: false
+        in: path
+        name: key
+        required: true
+        schema:
+          $ref: '#/components/schemas/brandingSettingsKeyEnum'
+        style: simple
+      - description: If exists will return the relevant resource for the tenant ID
+        example: "1008"
+        explode: true
+        in: query
+        name: tenantId
+        required: false
+        schema:
+          default: ""
+          type: string
+        style: form
+        x-scope:
+        - system
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLogo'
+        required: true
+      responses:
+        "200":
+          description: Setting successfully updated.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "413":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Request entity too large
+        "415":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unsupported media type
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Update branding setting by key
+      tags:
+      - Settings
+      x-service: bff-service
+      x-test-coverage:
+      - integration-tests/tests/api_branding_settings_service_test.go
+      x-authorize:
+        resource-type: branding-settings
+        action: update
+    x-scope:
+    - system
+    - tenant
+components:
+  examples:
+    notifications_setting_examples:
+      value:
+        msg: System maintenance scheduled for this weekend
+        enableDismiss: true
+    workloads_setting_examples:
+      value:
+        enabled: true
+    appearance_setting_examples:
+      value:
+        enabled: true
+        text: PRODUCTION ENVIRONMENT
+        backgroundColor: '#D32F2F'
+        fontColor: '#FFFFFF'
+  parameters:
+    TenantId:
+      description: If exists will return the relevant resource for the tenant ID
+      example: "1008"
+      explode: true
+      in: query
+      name: tenantId
+      required: false
+      schema:
+        default: ""
+        type: string
+      style: form
+      x-scope:
+      - system
+    notificationsSettingsKey:
+      description: Identifier of the notifications setting to retrieve or update.
+      explode: false
+      in: path
+      name: key
+      required: true
+      schema:
+        $ref: '#/components/schemas/notificationsSettingsKeyEnum'
+      style: simple
+    workloadsSettingsKey:
+      description: The workloads setting key
+      explode: false
+      in: path
+      name: key
+      required: true
+      schema:
+        $ref: '#/components/schemas/workloadsSettingsKeyEnum'
+      style: simple
+    appearanceSettingsKey:
+      description: The appearance setting key
+      explode: false
+      in: path
+      name: key
+      required: true
+      schema:
+        $ref: '#/components/schemas/appearanceSettingsKeyEnum'
+      style: simple
+    brandingSettingsKey:
+      description: Identifier of the branding setting to retrieve or update
+      explode: false
+      in: path
+      name: key
+      required: true
+      schema:
+        $ref: '#/components/schemas/brandingSettingsKeyEnum'
+      style: simple
+  responses:
+    "400BadRequest":
+      content:
+        application/json:
+          example:
+            code: 400
+            message: Required parameter is missing
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Bad request.
+    "500InternalServerError":
+      content:
+        application/json:
+          example:
+            code: 500
+            message: Something went wrong.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+    "503ServiceUnavailable":
+      content:
+        application/json:
+          example:
+            code: 503
+            message: Please try again in few minutes.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+    "401Unauthorized":
+      content:
+        application/json:
+          example:
+            code: 401
+            message: Issuer is not familiar.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unauthorized
+    "403Forbidden":
+      content:
+        application/json:
+          example:
+            code: 403
+            message: You do not have sufficient permissions.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Forbidden
+    "404NotFound":
+      content:
+        application/json:
+          example:
+            code: 404
+            message: Resource id not found.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource was not found
+    "413RequestEntityTooLarge":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Request entity too large
+    "415UnsupportedMediaType":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unsupported media type
+    "204NoContent":
+      description: No Content.
+    "400BadSubmissionRequest":
+      content:
+        application/json:
+          example:
+            code: 400
+            message: The workload request does not comply with the policy set by the
+              administrator
+          schema:
+            $ref: '#/components/schemas/SubmissionError'
+      description: Bad submission request.
+    "406NotAcceptable":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Not acceptable request
+    "409Conflict":
+      content:
+        application/json:
+          example:
+            code: 409
+            message: Resource with this name already exists
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource already exists
+    "412PreconditionFailed":
+      content:
+        application/json:
+          example:
+            code: 412
+            message: Precondition failed
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource was not found.
+    "501NotImplemented":
+      content:
+        application/json:
+          example:
+            code: 501
+            message: Not implemented
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+  schemas:
+    VersionResponse:
+      example:
+        version: 0.0.0
+      properties:
+        version:
+          description: The version of the BFF service
+          example: 0.0.0
+          type: string
+      required:
+      - version
+      type: object
+    Error:
+      example:
+        code: 400
+        message: Bad request - Resource should have a name
+      properties:
+        code:
+          maximum: 599
+          minimum: 100
+          type: integer
+        message:
+          type: string
+        details:
+          type: string
+      required:
+      - code
+      - message
+    BootConfigDistributionAssets:
+      example:
+        profile: cc
+      properties:
+        profile:
+          description: Selects the distribution-specific asset folder used by the
+            frontend. `cc` and `ce` are the currently agreed profile identifiers and
+            may be renamed when the final product terminology is defined.
+          enum:
+          - cc
+          - ce
+          type: string
+      required:
+      - profile
+      type: object
+    BootConfigVersion:
+      example:
+        display: 2.25.9
+      properties:
+        display:
+          description: Deployment-resolved version text shown in the UI.
+          example: 2.25.9
+          type: string
+      required:
+      - display
+      type: object
+    BootConfigWhatsNew:
+      example:
+        label: What's New in 2.25
+        url: https://run-ai-docs.nvidia.com/self-hosted/getting-started/whats-new/whats-new-2-25
+      properties:
+        label:
+          example: What's New in 2.25
+          type: string
+        url:
+          example: https://run-ai-docs.nvidia.com/self-hosted/getting-started/whats-new/whats-new-2-25
+          type: string
+      required:
+      - label
+      - url
+      type: object
+    BootConfigDocs:
+      example:
+        baseUrl: https://run-ai-docs.nvidia.com/self-hosted
+        whatsNew:
+          label: What's New in 2.25
+          url: https://run-ai-docs.nvidia.com/self-hosted/getting-started/whats-new/whats-new-2-25
+      properties:
+        baseUrl:
+          description: Base URL used to resolve documentation links.
+          example: https://run-ai-docs.nvidia.com/self-hosted
+          type: string
+        whatsNew:
+          $ref: '#/components/schemas/BootConfigWhatsNew'
+      required:
+      - baseUrl
+      - whatsNew
+      type: object
+    BootConfigSupport:
+      example:
+        label: NVIDIA Run:ai support
+        url: https://www.nvidia.com/en-eu/support/enterprise/#contact-us
+      properties:
+        url:
+          description: Support destination. Omitted when the deployment does not provide
+            a support link.
+          example: https://www.nvidia.com/en-eu/support/enterprise/#contact-us
+          type: string
+        label:
+          example: NVIDIA Run:ai support
+          type: string
+      required:
+      - label
+      type: object
+    BootConfigCapabilities:
+      example:
+        showsClusterLocationStep: true
+      properties:
+        showsClusterLocationStep:
+          description: Whether onboarding should ask the user for the cluster location.
+          example: true
+          type: boolean
+      required:
+      - showsClusterLocationStep
+      type: object
+    BootConfigUnleashConfig:
+      properties:
+        url:
+          type: string
+        clientKey:
+          description: Browser-public Unleash frontend token.
+          type: string
+        appName:
+          type: string
+        environment:
+          type: string
+        project:
+          type: string
+      required:
+      - appName
+      - clientKey
+      - environment
+      - url
+      type: object
+    BootConfig:
+      example:
+        capabilities:
+          showsClusterLocationStep: true
+        docs:
+          baseUrl: https://run-ai-docs.nvidia.com/self-hosted
+          whatsNew:
+            label: What's New in 2.25
+            url: https://run-ai-docs.nvidia.com/self-hosted/getting-started/whats-new/whats-new-2-25
+        distributionAssets:
+          profile: cc
+        unleashConfig: "{}"
+        version:
+          display: 2.25.9
+        support:
+          label: NVIDIA Run:ai support
+          url: https://www.nvidia.com/en-eu/support/enterprise/#contact-us
+      properties:
+        distributionAssets:
+          $ref: '#/components/schemas/BootConfigDistributionAssets'
+        version:
+          $ref: '#/components/schemas/BootConfigVersion'
+        docs:
+          $ref: '#/components/schemas/BootConfigDocs'
+        support:
+          $ref: '#/components/schemas/BootConfigSupport'
+        capabilities:
+          $ref: '#/components/schemas/BootConfigCapabilities'
+        unleashConfig:
+          allOf:
+          - $ref: '#/components/schemas/BootConfigUnleashConfig'
+          nullable: true
+          type: object
+      required:
+      - capabilities
+      - distributionAssets
+      - docs
+      - support
+      - unleashConfig
+      - version
+      type: object
+    GetAdminMessage:
+      example:
+        value:
+          id: 550e8400-e29b-41d4-a716-446655440000
+          msg: System maintenance scheduled for this weekend
+          createdAt: 1706886400000
+          enableDismiss: true
+        displayName: Admin message
+        description: Write a message that will be displayed to all users
+      properties:
+        value:
+          $ref: '#/components/schemas/GetAdminMessage_value'
+        displayName:
+          description: Human-readable name for this setting
+          readOnly: true
+          type: string
+        description:
+          description: "Short explanation of what this setting controls, shown alongside\
+            \ the setting"
+          readOnly: true
+          type: string
+      type: object
+    NotificationsSettingsGetAllResponse:
+      description: Aggregated response containing all notifications settings configured
+        for the tenant
+      example:
+        adminMessage:
+          value:
+            id: 550e8400-e29b-41d4-a716-446655440000
+            msg: System maintenance scheduled for this weekend
+            createdAt: 1706886400000
+            enableDismiss: true
+          displayName: Admin message
+          description: Write a message that will be displayed to all users
+      properties:
+        adminMessage:
+          $ref: '#/components/schemas/GetAdminMessage'
+      type: object
+    GetSystemNotification:
+      example:
+        id: 550e8400-e29b-41d4-a716-446655440000
+        msg: System maintenance scheduled for this weekend
+        createdAt: 1706886400000
+        enableDismiss: true
+        displayName: System notification
+        description: A notification that will be displayed to all users
+      properties:
+        id:
+          description: Unique identifier for the admin message
+          type: string
+        msg:
+          description: The message content displayed to users. Supports a limited
+            HTML subset for basic formatting
+          type: string
+        createdAt:
+          description: "Time the message was created, as a Unix timestamp"
+          format: int64
+          type: integer
+        displayName:
+          description: Human-readable name for this setting
+          readOnly: true
+          type: string
+        description:
+          description: "Short explanation of what this setting controls, shown alongside\
+            \ the setting"
+          readOnly: true
+          type: string
+      type: object
+    UpdateSystemNotification:
+      example:
+        msg: We are currently experiencing an unexpected outage affecting service-x.
+          We're actively investigating the issue. We apologize for the disruption.
+      properties:
+        msg:
+          description: The message content to display to all users (supports limited
+            HTML)
+          nullable: true
+          type: string
+      type: object
+    notificationsSettingsKeyEnum:
+      enum:
+      - adminMessage
+      type: string
+    GetSettingResponse:
+      description: Dynamic settings response that varies by setting key
+      type: object
+    UpdateAdminMessage:
+      example:
+        msg: System maintenance scheduled for this weekend
+        enableDismiss: true
+      properties:
+        msg:
+          description: The message content displayed to users. Supports a limited
+            HTML subset for basic formatting
+          nullable: true
+          type: string
+        enableDismiss:
+          description: "When true, users can dismiss the message from; when false,\
+            \ the message persists until it is updated or removed"
+          nullable: true
+          type: boolean
+      type: object
+    GetEnableNIM:
+      example:
+        value:
+          enabled: true
+        displayName: NIM models
+        description: Enable instant deployment of NIM models via the workload submission
+          form
+      properties:
+        value:
+          $ref: '#/components/schemas/GetEnableNIM_value'
+        displayName:
+          description: Human-readable name for this setting
+          readOnly: true
+          type: string
+        description:
+          description: "Short explanation of what this setting controls, shown alongside\
+            \ the setting"
+          readOnly: true
+          type: string
+      type: object
+    GetDeletedWorkloadsView:
+      example:
+        value:
+          enabled: true
+        displayName: Deleted workloads view
+        description: Enable to view deleted workloads in the Workloads view.
+      properties:
+        value:
+          $ref: '#/components/schemas/GetDeletedWorkloadsView_value'
+        displayName:
+          description: Human-readable name for this setting
+          readOnly: true
+          type: string
+        description:
+          description: "Short explanation of what this setting controls, shown alongside\
+            \ the setting"
+          readOnly: true
+          type: string
+      type: object
+    GetAllowGPT2Model:
+      example:
+        value:
+          enabled: true
+        displayName: Allow GPT-2 model
+        description: Enable to allow GPT-2 model.
+        stage: Alpha
+      properties:
+        value:
+          $ref: '#/components/schemas/GetAllowGPT2Model_value'
+        displayName:
+          description: Human-readable name for this setting
+          readOnly: true
+          type: string
+        description:
+          description: "Short explanation of what this setting controls, shown alongside\
+            \ the setting"
+          readOnly: true
+          type: string
+        stage:
+          readOnly: true
+          type: string
+      type: object
+    GetEnableModelCatalog:
+      example:
+        value:
+          enabled: true
+        displayName: Hugging face models
+        description: Enable instant deployment of Hugging Face models via the Models
+          view or the workload submission form.
+      properties:
+        value:
+          $ref: '#/components/schemas/GetEnableModelCatalog_value'
+        displayName:
+          description: Human-readable name for this setting
+          readOnly: true
+          type: string
+        description:
+          description: "Short explanation of what this setting controls, shown alongside\
+            \ the setting"
+          readOnly: true
+          type: string
+        stage:
+          readOnly: true
+          type: string
+      type: object
+    WorkloadsSettingsGetAllResponse:
+      example:
+        enableModelCatalog:
+          value:
+            enabled: true
+          displayName: Hugging face models
+          description: Enable instant deployment of Hugging Face models via the Models
+            view or the workload submission form.
+        enableNim:
+          value:
+            enabled: true
+          displayName: NIM models
+          description: Enable instant deployment of NIM models via the workload submission
+            form
+        deletedWorkloadsView:
+          value:
+            enabled: true
+          displayName: Deleted workloads view
+          description: Enable to view deleted workloads in the Workloads view.
+        allowGPT2Model:
+          value:
+            enabled: true
+          displayName: Allow GPT-2 model
+          description: Enable to allow GPT-2 model.
+          stage: Alpha
+      properties:
+        enableNim:
+          $ref: '#/components/schemas/GetEnableNIM'
+        deletedWorkloadsView:
+          $ref: '#/components/schemas/GetDeletedWorkloadsView'
+        allowGPT2Model:
+          $ref: '#/components/schemas/GetAllowGPT2Model'
+        enableModelCatalog:
+          $ref: '#/components/schemas/GetEnableModelCatalog'
+      type: object
+    workloadsSettingsKeyEnum:
+      enum:
+      - enableNIM
+      - deletedWorkloadsView
+      - allowGPT2Model
+      - enableModelCatalog
+      type: string
+    UpdateEnableNIM:
+      example:
+        enabled: true
+      properties:
+        enabled:
+          description: Whether NIM models deployment is enabled
+          nullable: true
+          type: boolean
+      type: object
+    UpdateDeletedWorkloadsView:
+      example:
+        enabled: true
+      properties:
+        enabled:
+          description: Whether to view deleted workloads in the Workloads view.
+          nullable: true
+          type: boolean
+      type: object
+    UpdateAllowGPT2Model:
+      example:
+        enabled: true
+      properties:
+        enabled:
+          description: Whether to allow GPT-2 model.
+          nullable: true
+          type: boolean
+      type: object
+    UpdateEnableModelCatalog:
+      example:
+        enabled: true
+      properties:
+        enabled:
+          description: Whether to enable the model catalog (Hugging Face models).
+          nullable: true
+          type: boolean
+      type: object
+    GetBannerConfig:
+      example:
+        value:
+          enabled: true
+          text: PRODUCTION ENVIRONMENT
+          backgroundColor: '#D32F2F'
+          fontColor: '#FFFFFF'
+        displayName: Banner configuration
+        description: Configure a persistent banner displayed at the top of the Run:ai
+          UI for all authenticated users.
+      properties:
+        value:
+          $ref: '#/components/schemas/GetBannerConfig_value'
+        displayName:
+          description: Human-readable name for this setting
+          readOnly: true
+          type: string
+        description:
+          description: "Short explanation of what this setting controls, shown alongside\
+            \ the setting"
+          readOnly: true
+          type: string
+      type: object
+    AppearanceSettingsGetAllResponse:
+      description: Response containing all appearance settings
+      example:
+        bannerConfig:
+          value:
+            enabled: true
+            text: PRODUCTION ENVIRONMENT
+            backgroundColor: '#D32F2F'
+            fontColor: '#FFFFFF'
+          displayName: Banner configuration
+          description: Configure a persistent banner displayed at the top of the Run:ai
+            UI for all authenticated users.
+      properties:
+        bannerConfig:
+          $ref: '#/components/schemas/GetBannerConfig'
+      type: object
+    appearanceSettingsKeyEnum:
+      enum:
+      - bannerConfig
+      type: string
+    UpdateBannerConfig:
+      example:
+        enabled: true
+        text: PRODUCTION ENVIRONMENT
+        backgroundColor: '#D32F2F'
+        fontColor: '#FFFFFF'
+        fontSize: 14
+      properties:
+        enabled:
+          description: Whether the banner is displayed at the top of the UI for all
+            authenticated users.
+          nullable: true
+          type: boolean
+        text:
+          description: Message displayed in the banner. Required when `enabled` is
+            `true`. Maximum 500 characters.
+          maxLength: 500
+          nullable: true
+          type: string
+        backgroundColor:
+          description: "Background color of the banner. Accepts any valid CSS color\
+            \ value (hex, rgb, named). Maximum 50 characters."
+          maxLength: 50
+          nullable: true
+          type: string
+        fontColor:
+          description: "Text color of the banner. Accepts any valid CSS color value\
+            \ (hex, rgb, named). Maximum 50 characters."
+          maxLength: 50
+          nullable: true
+          type: string
+        fontSize:
+          description: Font size in pixels. Maximum 20. Defaults to 14 if omitted
+            or null.
+          maximum: 20
+          minimum: 1
+          nullable: true
+          type: integer
+      type: object
+    GetLogo:
+      example:
+        value:
+          logo: <base64-encoded-image>
+        displayName: Logo
+        description: Retrieve the base64 logo file.
+      properties:
+        value:
+          $ref: '#/components/schemas/GetLogo_value'
+        displayName:
+          description: Human-readable name for this setting
+          readOnly: true
+          type: string
+        description:
+          description: "Short explanation of what this setting controls, shown alongside\
+            \ the setting"
+          readOnly: true
+          type: string
+      type: object
+    BrandingSettingsGetAllResponse:
+      description: Aggregated response containing all branding settings configured
+        for the tenant
+      example:
+        logo:
+          value:
+            logo: <base64-encoded-image>
+          displayName: Logo
+          description: Retrieve the base64 logo file.
+      properties:
+        logo:
+          $ref: '#/components/schemas/GetLogo'
+      type: object
+    brandingSettingsKeyEnum:
+      enum:
+      - logo
+      type: string
+    UpdateLogo:
+      example:
+        logo: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+V4nEAAAAASUVORK5CYII="
+      properties:
+        logo:
+          description: Logo image as a base64-encoded string. Accepts PNG or SVG up
+            to 128 KB. Send an empty string to reset the logo
+          type: string
+      required:
+      - logo
+      type: object
+    AdminMessage:
+      $ref: '#/components/schemas/GetAdminMessage'
+    EnableNIM:
+      $ref: '#/components/schemas/GetEnableNIM'
+    BannerConfig:
+      $ref: '#/components/schemas/GetBannerConfig'
+    Logo:
+      $ref: '#/components/schemas/GetLogo'
+    ComplianceIssues:
+      nullable: true
+      properties:
+        complianceIssues:
+          items:
+            $ref: '#/components/schemas/ComplianceIssues_complianceIssues_inner'
+          type: array
+      type: object
+    SubmissionError:
+      allOf:
+      - $ref: '#/components/schemas/Error'
+      - $ref: '#/components/schemas/ComplianceIssues'
+    update_workloads_setting_by_key_request:
+      anyOf:
+      - $ref: '#/components/schemas/UpdateEnableNIM'
+      - $ref: '#/components/schemas/UpdateDeletedWorkloadsView'
+      - $ref: '#/components/schemas/UpdateAllowGPT2Model'
+      - $ref: '#/components/schemas/UpdateEnableModelCatalog'
+    GetAdminMessage_value:
+      properties:
+        id:
+          description: Unique identifier for the admin message
+          type: string
+        msg:
+          description: The message content displayed to users. Supports a limited
+            HTML subset for basic formatting
+          type: string
+        createdAt:
+          description: "Time the message was created, as a Unix timestamp"
+          format: int64
+          type: integer
+        enableDismiss:
+          description: "When true, users can dismiss the message from; when false,\
+            \ the message persists until it is updated or removed"
+          type: boolean
+      type: object
+    GetEnableNIM_value:
+      properties:
+        enabled:
+          description: Whether NIM models deployment is enabled
+          nullable: true
+          type: boolean
+      type: object
+    GetDeletedWorkloadsView_value:
+      properties:
+        enabled:
+          description: Whether to view deleted workloads in the Workloads view.
+          nullable: true
+          type: boolean
+      type: object
+    GetAllowGPT2Model_value:
+      properties:
+        enabled:
+          description: Whether to allow GPT-2 model.
+          nullable: true
+          type: boolean
+      type: object
+    GetEnableModelCatalog_value:
+      properties:
+        enabled:
+          description: Whether to enable the model catalog (Hugging Face models).
+          nullable: true
+          type: boolean
+      type: object
+    GetBannerConfig_value:
+      properties:
+        enabled:
+          description: Whether the banner is displayed at the top of the UI for all
+            authenticated users.
+          nullable: true
+          type: boolean
+        text:
+          description: Message displayed in the banner. Required when `enabled` is
+            `true`. Maximum 500 characters.
+          nullable: true
+          type: string
+        backgroundColor:
+          description: "Background color of the banner. Accepts any valid CSS color\
+            \ value (hex, rgb, named). Maximum 50 characters."
+          nullable: true
+          type: string
+        fontColor:
+          description: "Text color of the banner. Accepts any valid CSS color value\
+            \ (hex, rgb, named). Maximum 50 characters."
+          nullable: true
+          type: string
+        fontSize:
+          description: Font size in pixels. Maximum 20. Defaults to 14 if omitted
+            or null.
+          nullable: true
+          type: integer
+      type: object
+    GetLogo_value:
+      properties:
+        logo:
+          description: Logo image returned as a base64-encoded string. PNG and SVG
+            formats are supported
+          type: string
+      type: object
+    ComplianceIssues_complianceIssues_inner:
+      properties:
+        field:
+          example: compute.gpuDevicesRequest
+          type: string
+        details:
+          example: value must be no less than 3
+          type: string
+      required:
+      - details
+      - field
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      description: Bearer authentication
+      scheme: bearer
+      type: http

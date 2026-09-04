@@ -1,0 +1,9 @@
+name: departmentId
+in: query
+description: Filter results by department id. If scope filter is department,
+  only assets from the specific department will be included in the response.
+  Otherwise, the response will include department, cluster, tenant and system assets.
+required: false
+schema:
+  type: string
+  example: "1"

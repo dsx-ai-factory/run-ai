@@ -1,0 +1,9 @@
+description: Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the
+  created workload, per GPU device. Note that the workload will not be scheduled unless the system can
+  guarantee this amount of GPU memory to the workload.
+type: string
+pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+##WAIT_FOR_35331## minLength: 1
+maxLength: 63
+example: 10M
+nullable: true

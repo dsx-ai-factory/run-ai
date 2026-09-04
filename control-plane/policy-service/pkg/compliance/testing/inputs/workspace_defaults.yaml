@@ -1,0 +1,19 @@
+image: my_image
+
+annotations:
+  instances:
+    - name: name1
+      value: value1
+    - name: name2
+      exclude: true
+
+compute:
+  cpuCoreLimit: 2.0
+  extendedResources:
+    attributes:
+      quantity: 1M
+    instances:
+      - resource: nvidia/gpu
+        quantity: 2M
+      - resource: nvidia/cpu
+        quantity: "3"

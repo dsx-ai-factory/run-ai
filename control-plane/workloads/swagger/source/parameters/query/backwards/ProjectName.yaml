@@ -1,0 +1,5 @@
+name: projectName
+in: query
+required: false
+schema:
+  type: string

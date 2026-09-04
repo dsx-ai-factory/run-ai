@@ -1,0 +1,32 @@
+#path
+realm:
+  $ref: "./realm.yaml"
+
+idp:
+  $ref: "./idp.yaml"
+
+userId:
+  $ref: "./userId.yaml"
+
+email:
+  $ref: "./email.yaml"
+
+settingsKey:
+  $ref: "./settingsKey.yaml"
+
+#query
+
+code:
+  $ref: "./exchangeCode.yaml"
+
+redirect_url:
+  $ref: "./redirectUri.yaml"
+
+refresh_token:
+  $ref: "./refreshToken.yaml"
+
+app_type:
+  $ref: "./appType.yaml"
+
+is_hard_delete:
+  $ref: "./isHardDelete.yaml"

@@ -1,0 +1,19 @@
+---
+description: Styling conventions for Run:ai frontend (Quasar + SCSS)
+globs: ["**/*.vue", "**/*.scss"]
+alwaysApply: false
+---
+
+# Styling
+
+## Key Patterns
+
+- Always use `<style scoped lang="scss">`
+- Use `:deep()` to override Quasar component styles
+- Use CSS variables: `var(--b-text-main)`, `var(--b-text-sub)`
+- Use Quasar utility classes for spacing: `q-pa-md`, `q-mb-lg`
+
+## Canonical Examples
+
+- **Quasar classes**: See Quasar docs for `row`, `col`, `flex`, spacing utilities
+- **Design tokens**: See Figma Integration guide in Confluence (if mcp available)

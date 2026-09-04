@@ -1,0 +1,14 @@
+allOf:
+  - $ref: "./WorkloadTypeCreateUpdateInnerFields.yaml"
+  - $ref: "./WorkloadTypeAdditionalCreateFields.yaml"
+  - type: object
+    required:
+      - name
+      - group
+      - categoryId
+      - priorityId
+    properties:
+      resourceInterfaces:
+        $ref: "./WorkloadTypeResourceInterfaces.yaml"
+      kartas:
+        $ref: "./WorkloadTypeKartas.yaml"

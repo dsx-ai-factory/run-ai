@@ -1,0 +1,13 @@
+type: object
+properties:
+  msg:
+    type: string
+    nullable: true
+    description: The message content displayed to users. Supports a limited HTML subset for basic formatting
+  enableDismiss:
+    type: boolean
+    nullable: true
+    description: When true, users can dismiss the message from; when false, the message persists until it is updated or removed
+example:
+  msg: "System maintenance scheduled for this weekend"
+  enableDismiss: true

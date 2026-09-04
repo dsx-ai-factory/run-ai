@@ -1,0 +1,10 @@
+allOf:
+  - $ref: './HistogramValue.yaml'
+  - type: object
+    properties:
+      data:
+        example:
+          "0.001": 0
+          "0.005": 0
+          "+Inf": 6
+

@@ -1,0 +1,5 @@
+allOf:
+  - $ref: "./NodepoolCreateResponseFields.yaml"
+  - $ref: "./NodepoolSyncFields.yaml"
+  - $ref: "./NodepoolCalculatedFields.yaml"
+  - $ref: "./NodepoolDeprecatedFields.yaml"

@@ -1,0 +1,27 @@
+get:
+  summary: Get setting by key for all tenants
+  description: Retrieve a specific setting value for all tenants in the system
+  operationId: getSettingByKeyForAllTenants
+  x-no-authorization: true
+  x-service: temp-backend-settings
+  tags:
+  - Internal
+  parameters:
+  - $ref: '../../parameters/key.yaml'
+  responses:
+    '200':
+      description: Successfully retrieved setting for all tenants
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: true
+            description: Map of tenant IDs to setting values
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,6 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+compute:
+  gpuPortionRequest: 0.5

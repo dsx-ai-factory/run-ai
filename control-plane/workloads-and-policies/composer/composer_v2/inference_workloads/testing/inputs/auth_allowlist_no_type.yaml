@@ -1,0 +1,7 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  # authorizationType intentionally missing — populating the allowlist below
+  # without an explicit type should be rejected (would otherwise silently default to public).
+  authorizedUsers:
+    - alice@example.com

@@ -1,0 +1,36 @@
+get:
+  summary: Download an uploaded Helm chart archive.
+  description: |
+    Stream a previously uploaded Helm chart archive (.tgz) to the cluster for installation. The
+    cluster application controller fetches it with the per-cluster bearer token, so the request is
+    authenticated and scoped to the caller's tenant. Charts are transient storage: they are removed
+    after the application is deployed or when the retention TTL expires.
+  operationId: download_application_chart
+  x-internal: true
+  x-service: workloads
+  x-authorize:
+    resource-type: applications
+    action: read
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/ai_applications_service_test.go
+  tags:
+    - AI Applications
+  parameters:
+    - $ref: "../parameters/path/ChartId.yaml"
+  responses:
+    200:
+      description: The packaged Helm chart archive.
+      content:
+        application/octet-stream:
+          x-default: true
+          schema:
+            type: string
+            format: binary
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"

@@ -1,0 +1,36 @@
+type: object
+required:
+  - key
+  - source
+  - category
+  - label
+  - description
+  - type
+  - active
+properties:
+  key:
+    type: string
+    example: tenant.limit_quota_over_subscription
+  source:
+    type: string
+    example: Tenant
+  category:
+    type: string
+    example: Tenant
+  label:
+    type: string
+    example: Limit projects from exceeding department quota
+  description:
+    type: string
+    example: Enable to prevent projects' total quota from exceeding the department's quota
+  stage:
+    type: string
+    example: Beta
+  type:
+    type: string
+    example: Boolean
+  value:
+    example: true
+  active:
+    type: boolean
+    example: true

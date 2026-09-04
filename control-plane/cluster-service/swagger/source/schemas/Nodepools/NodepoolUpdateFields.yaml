@@ -1,0 +1,28 @@
+type: object
+properties:
+  labelKey:
+    type: string
+    nullable: true
+    description: Label key for associated nodes to the Node Pool (with value as in labelValue)
+    example: node-type
+    allOf:
+      - $ref: '../../../../../infra/openapi/docs/schemas/common/LabelKey.yaml'
+  labelValue:
+    type: string
+    nullable: true
+    description: Label value for associated nodes to the Node Pool (with key as in labelKey)
+    example: type-x
+    allOf:
+      - $ref: '../../../../../infra/openapi/docs/schemas/common/LabelValue.yaml'
+  schedulingCapabilities:
+    $ref: "./SchedulingCapabilitiesNullable.yaml"
+  gpuNetworkAccelerationLabelKey:
+    description: Label key by which to determine GPUNetworkAccelerationDetection nodes
+    type: string
+    nullable: true
+  gpuNetworkAccelerationDetection:
+    $ref: "./NodepoolGPUNetworkAccelerationDetection.yaml"
+  schedulingConfiguration:
+    $ref: "./SchedulingConfiguration.yaml"
+  networkTopologyId:
+    $ref: '../NetworkTopologies/NetworkTopologyIdOptional.yaml'

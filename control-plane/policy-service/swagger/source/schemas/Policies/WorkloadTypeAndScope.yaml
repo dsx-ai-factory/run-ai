@@ -1,0 +1,47 @@
+type: object
+description: >-
+  The workload type and scope this policy applies to. Together with the project
+  id, they form the unique triple that identifies a policy. The workload type
+  is the Kubernetes Group/Version/Kind of the workloads the policy governs, and
+  the scope is the level at which it takes effect. Currently only the project
+  scope is supported; tenant, cluster, and department are planned, and system
+  is not supported.
+required:
+  - workloadType
+  - scope
+properties:
+  workloadType:
+    $ref: "../../../../../workloads-manager/swagger/source/schemas/WorkloadsV2/GVK.yaml"
+  scope:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ScopeType.yaml"
+  clusterId:
+    description: >-
+      The id of the cluster the policy applies to. Required when the scope is
+      cluster.
+    allOf:
+      - $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+    type: string
+    nullable: true
+  departmentId:
+    description: >-
+      The id of the department the policy applies to. Required when the scope is
+      department.
+    allOf:
+      - $ref: "../../../../../infra/openapi/docs/schemas/scopes/DepartmentId.yaml"
+    type: string
+    nullable: true
+  projectId:
+    description: >-
+      The id of the project the policy applies to. Required when the scope is
+      project.
+    allOf:
+      - $ref: "../../../../../infra/openapi/docs/schemas/scopes/ProjectId.yaml"
+    type: string
+    nullable: true
+example:
+  workloadType:
+    group: apps
+    version: v1
+    kind: Deployment
+  scope: project
+  projectId: "1230001"

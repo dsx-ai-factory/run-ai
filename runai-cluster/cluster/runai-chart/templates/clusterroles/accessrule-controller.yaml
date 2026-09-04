@@ -1,0 +1,288 @@
+{{- if .Values.operands.rbac.base.create }}
+# Run:AI AccessRule Controller
+# Allows the reading of accessrule related data, reasding other Run:AI related CRDs, and CRUD of RoleBindings.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-accessrule-controller
+rules:
+  - apiGroups:
+      - run.ai
+    resources:
+      - accessrules
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - accessrules/status
+    verbs:
+      - get
+      - update
+      - patch
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - accessrules/finalizers
+    verbs:
+      - update
+      - patch
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - clusterroles
+      - clusterrolebindings
+      - rolebindings
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - clusterrolebindings
+      - clusterroles
+    resourceNames:
+      - runai-ai-practitioner
+      - runai-compute-resource-administrator
+      - runai-credentials-administrator
+      - runai-data-and-storage-administrator
+      - runai-data-source-administrator
+      - runai-department-administrator
+      - runai-department-viewer
+      - runai-editor
+      - runai-environment-administrator
+      - runai-l1-researcher
+      - runai-l2-researcher
+      - runai-ml-engineer
+      - runai-project-administrator
+      - runai-research-manager
+      - runai-system-administrator
+      - runai-template-administrator
+      - runai-viewer
+      - runai-data-volume-administrator
+    verbs:
+      - bind
+      - update
+      - patch
+  - apiGroups:
+      - run.ai
+    resources:
+      - projects
+    verbs:
+      - get
+      - list
+      - watch
+      - update
+      - patch
+  - apiGroups:
+      - scheduling.run.ai
+    resources:
+      - departments
+    verbs:
+      - get
+      - list
+      - watch
+  # kai.resources projects/departments are read when UseKaiOrgUnits is enabled (temporary dev-period
+  # flag). Read-only: the access rule controller resolves scopes and stamps owner references, it
+  # never mutates org units.
+  - apiGroups:
+      - kai.resources
+    resources:
+      - projects
+      - departments
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - serviceaccounts
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - create
+      - get
+      - list
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+      - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-accessrule-controller-project
+rules:
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - rolebindings
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - clusterroles
+    verbs:
+      - bind
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-accessrule-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-accessrule-controller
+subjects:
+  - kind: ServiceAccount
+    name: accessrule-controller
+    namespace: runai
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: runai-accessrule-controller-project
+  namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-accessrule-controller-project
+subjects:
+  - kind: ServiceAccount
+    name: accessrule-controller
+    namespace: runai
+---
+# Runai-backend
+{{- if (lookup "v1" "Namespace" "" "runai-backend") }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: runai-accessrule-controller-project
+  namespace: runai-backend
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-accessrule-controller-project
+subjects:
+  - kind: ServiceAccount
+    name: accessrule-controller
+    namespace: runai
+---
+{{- end }}
+# Runai-reservation
+{{- if (lookup "v1" "Namespace" "" "runai-reservation") }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: runai-accessrule-controller-project
+  namespace: runai-reservation
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-accessrule-controller-project
+subjects:
+  - kind: ServiceAccount
+    name: accessrule-controller
+    namespace: runai
+---
+{{- end }}
+# Training-operator
+{{- if (lookup "v1" "Namespace" "" "training-operator") }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: runai-accessrule-controller-project
+  namespace: training-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-accessrule-controller-project
+subjects:
+  - kind: ServiceAccount
+    name: accessrule-controller
+    namespace: runai
+---
+
+{{- end }}
+# Knative
+{{- if (lookup "v1" "Namespace" "" "knative") }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: runai-accessrule-controller-project
+  namespace: knative
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-accessrule-controller-project
+subjects:
+  - kind: ServiceAccount
+    name: accessrule-controller
+    namespace: runai
+---
+{{- end }}
+# Gpu-operator
+{{- if (lookup "v1" "Namespace" "" "gpu-operator") }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: runai-accessrule-controller-project
+  namespace: gpu-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-accessrule-controller-project
+subjects:
+  - kind: ServiceAccount
+    name: accessrule-controller
+    namespace: runai
+---
+{{- end }}
+# Nim-operator
+{{- if (lookup "v1" "Namespace" "" "nim-operator") }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: runai-accessrule-controller-project
+  namespace: nim-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-accessrule-controller-project
+subjects:
+  - kind: ServiceAccount
+    name: accessrule-controller
+    namespace: runai
+---
+{{- end }}
+{{- end }}

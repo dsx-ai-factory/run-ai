@@ -1,0 +1,12 @@
+type: object
+description: >-
+  Configuration issues detected by the server for the policy, along with its
+  current phase.
+properties:
+  phase:
+    $ref: "./PolicyPhase.yaml"
+  issues:
+    $ref: "./PolicyIssues.yaml"
+example:
+  issues:
+    - "specSelector portByName is not defined"

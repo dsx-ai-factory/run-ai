@@ -1,0 +1,12 @@
+type: object
+required:
+  - storageClassConfigurations
+properties:
+    storageClassConfigurations:
+      description: A list of storage class configuration objects. Each object defines the configuration details for a specific storage class.
+      type: array
+      items:
+        $ref: './StorageClassConfiguration.yaml'
+    next:
+      type: integer
+      example: 1

@@ -1,0 +1,3 @@
+properties:
+  uidGidSource:
+    $ref: "./UidGidSource.yaml"

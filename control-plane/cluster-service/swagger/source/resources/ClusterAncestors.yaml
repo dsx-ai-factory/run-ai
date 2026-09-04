@@ -1,0 +1,24 @@
+get:
+  summary: Get the cluster ancestors.
+  operationId: get_cluster_ancestors
+  x-no-authorization: true
+  x-service: cluster-service
+  x-test-coverage:
+    - src/test/suites/advancedSuite/permissions/accessRulesApi.test.ts
+  tags:
+    - Clusters
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/schemas/scopes/Ancestors.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

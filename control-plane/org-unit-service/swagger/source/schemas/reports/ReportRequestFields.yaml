@@ -1,0 +1,34 @@
+type: object
+required:
+  - name
+  - start
+  - end
+properties:
+  name:
+    type: string
+    maxLength: 250
+    example: '2023 GPU report'
+  description:
+    type: string
+    example: 'This report shows the GPU usage of all projects in the organization'
+  start:
+    type: string
+    format: date-time
+    description: timestamp from when to fetch data in UTC
+    example: '2023-06-07T09:09:18.211Z'
+  end:
+    type: string
+    format: date-time
+    description: timestamp until when to fetch data in UTC
+    example: '2023-06-07T12:09:18.211Z'
+  groupBy:
+    $ref: './ReportGroupByOptions.yaml'
+  filterBy:
+    type: array
+    description: Filter results by a parameter. Use the format field-name == value.
+    default: []
+    maxItems: 10
+    items:
+      type: string
+      pattern: "^(projectName|departmentName|clusterId)(==).+$"
+    example: ["projectName==some-name"]

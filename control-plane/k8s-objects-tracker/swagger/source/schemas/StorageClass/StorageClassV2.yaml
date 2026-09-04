@@ -1,0 +1,21 @@
+type: object
+required:
+  - clusterId
+  - storageClassName
+  - spec
+properties:
+  clusterId:
+    type: string
+    format: uuid
+    description: Cluster ID which has sent the resource info
+    example: 550e8400-e29b-41d4-a716-446655440000
+  storageClassName:
+    type: string
+    description: Storage class name
+    example: my-storage-class
+  spec:
+    $ref: "StorageClassSpec.yaml"
+  permissions:
+    $ref: "../StorageClassConfiguration/StorageClassPermissions.yaml"
+  customization:
+    $ref: "../StorageClassConfiguration/StorageClassCustomization.yaml"

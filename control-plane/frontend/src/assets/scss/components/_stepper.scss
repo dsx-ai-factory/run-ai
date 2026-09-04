@@ -1,0 +1,9 @@
+.q-stepper__label.q-stepper__line::after {
+  // coloring the line between items in the stepper header
+  background-color: $black-87;
+  padding-right: 60px;
+}
+.q-stepper__dot.q-stepper__line::before {
+  // coloring the line between items in the stepper header
+  background-color: $black-87;
+}

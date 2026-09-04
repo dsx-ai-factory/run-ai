@@ -1,0 +1,42 @@
+apiVersion: ray.io/v1
+kind: RayJob
+metadata:
+  name: test
+spec:
+  rayClusterSpec:
+    headGroupSpec:
+      template:
+        spec:
+          containers:
+          - image: placeholder-head
+            name: test
+          initContainers:
+          - image: placeholder-head-init
+            name: test
+    workerGroupSpecs:
+    - groupName: test
+      maxReplicas: 5
+      minReplicas: 1
+      rayStartParams:
+        num-gpus: "1"
+      replicas: 3
+      template:
+        metadata:
+          labels:
+            ray.io/group: test
+        spec:
+          containers:
+          - image: placeholder-worker
+            name: test
+          initContainers:
+          - image: placeholder-worker-init
+            name: test
+  submitterPodTemplate:
+    spec:
+      containers:
+      - image: placeholder-submitter
+        name: test
+      initContainers:
+      - image: placeholder-submitter-init
+        name: test
+      restartPolicy: Never

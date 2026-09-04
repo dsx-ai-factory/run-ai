@@ -1,0 +1,3 @@
+type: boolean
+nullable: true
+description: Allows workloads to create persistent volumes using this storage class. When disabled, users cannot (a) create PVC assets with autoDelete=true and ephemeral=true, or (b) include PVC instances with isEphemeral=false that use this storage class.

@@ -1,0 +1,12 @@
+allOf:
+  - $ref: "./StorageInstanceName.yaml"
+  - $ref: "./GitCommon.yaml"
+  - $ref: "./GitPassword.yaml"
+  - $ref: "../ExcludeField.yaml"
+  - type: object
+    properties:
+      secretRef:
+        $ref: "./GitSecretRef.yaml"
+    nullable: true
+nullable: true
+type: object

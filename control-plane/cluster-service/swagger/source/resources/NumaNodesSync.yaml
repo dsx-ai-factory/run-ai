@@ -1,0 +1,36 @@
+post:
+  summary: Sync NUMA nodes in a cluster.
+  description: Syncs NUMA-node snapshots for one or more physical nodes. Use deleteMissing for paginated full-cluster reconciliation.
+  operationId: sync_numa_nodes
+  x-service: cluster-service
+  x-test-coverage:
+    - control-plane/cluster-service/pkg/test/api_numa_nodes_service_test.go
+  x-authorize:
+    resource-type: nodes
+    action: sync
+  tags:
+    - Nodes
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+  requestBody:
+    description: NUMA-node snapshots to sync.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Nodes/NumaNodesSyncRequest.yaml'
+  responses:
+    204:
+      $ref: '../../../../infra/openapi/docs/responses/204NoContent.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

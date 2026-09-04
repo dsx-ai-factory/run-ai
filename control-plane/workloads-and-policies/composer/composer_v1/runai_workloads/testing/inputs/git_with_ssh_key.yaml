@@ -1,0 +1,12 @@
+image: ubuntu
+
+storage:
+  git:
+    - repository: "http://runai.public.github.com"
+      revision: "12345678"
+      path: /container/my-repository
+      secretRef:
+        authenticationMethod: ssh-key
+        name: my-ssh-secret
+    - repository: "https://runai.public.github.com"
+      path: /mount/git-defaults

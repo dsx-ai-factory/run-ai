@@ -1,0 +1,4 @@
+description: cluster, department or project id, depending on the scope type
+type: string
+nullable: true
+minLength: 1

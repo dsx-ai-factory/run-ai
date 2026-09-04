@@ -1,0 +1,4 @@
+description: The specifications of the workspace to be created.
+properties:
+  spec:
+    $ref: "./WorkspaceSpecSpec.yaml"

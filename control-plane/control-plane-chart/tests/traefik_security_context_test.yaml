@@ -1,0 +1,31 @@
+suite: Test Traefik Security Context
+
+templates:
+  - templates/traefik/deployment.yaml
+  - templates/traefik/configmap.yaml
+
+tests:
+  - it: should omit runAsUser on OpenShift
+    set:
+      global.config.kubernetesDistribution: openshift
+    documentSelector:
+      path: kind
+      value: Deployment
+      matchMany: true
+      skipEmptyTemplates: true
+    asserts:
+      - notExists:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+
+  - it: should set runAsUser on Kubernetes
+    set:
+      global.config.kubernetesDistribution: kubernetes
+    documentSelector:
+      path: kind
+      value: Deployment
+      matchMany: true
+      skipEmptyTemplates: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+          value: 65532

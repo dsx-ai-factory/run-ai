@@ -1,0 +1,7 @@
+properties:
+  attributes:
+    $ref: "./PvcInstance.yaml"
+  instances:
+    $ref: "./PvcItems.yaml"
+nullable: true
+type: object

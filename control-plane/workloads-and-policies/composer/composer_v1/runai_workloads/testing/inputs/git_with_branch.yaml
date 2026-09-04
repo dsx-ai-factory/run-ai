@@ -1,0 +1,10 @@
+image: ubuntu
+
+storage:
+  git:
+    - repository: "http://runai.public.github.com"
+      branch: "master"
+      path: /container/my-repository
+      passwordSecret: my-password-secret
+    - repository: "https://runai.public.github.com"
+      path: /mount/git-defaults

@@ -1,0 +1,147 @@
+services:
+
+  postgres:
+    profiles:
+      - localdebug
+    image: postgres:18.4
+    container_name: postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: runai
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    expose:
+      - 5432
+    volumes:
+      - ./config/postgres/initdb:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U runai"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  keycloak-extensions:
+    profiles:
+      - localdebug
+    container_name: keycloak-extensions
+    build:
+      context: ../../keycloak-extensions
+      dockerfile: Dockerfile
+    user: "0:0"
+    command: ["sh", "-c", "cp -r /extensions/providers/. /providers/ && cp -r /extensions/themes/. /themes/ && cp -r /extensions/agent/. /agent/ && tail -f /dev/null"]
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /providers/runai-custom-providers.jar"]
+      interval: 2s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - keycloak-providers:/providers
+      - keycloak-themes:/themes
+      - keycloak-agent:/agent
+
+  keycloak:
+    profiles:
+      - localdebug
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:26.7.0
+    env_file: config/keycloak/config.yaml
+    command:
+      - start-dev
+      - --features=token-exchange,admin-fine-grained-authz:v1
+    volumes:
+      - keycloak-providers:/opt/keycloak/providers
+      - keycloak-themes:/opt/keycloak/themes
+    ports:
+      - "8090:8080"
+      - "9000:9000"
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000;echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3;if [ $? -eq 0 ]; then echo 'Healthcheck Successful';exit 0;else echo 'Healthcheck Failed';exit 1;fi;"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      keycloak-extensions:
+        condition: service_healthy
+    extra_hosts:
+      - "discovery.url.com:host-gateway"
+
+  identity-manager:
+    profiles:
+      - localdebug
+    container_name: identity-manager
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    environment:
+      - SERVICE_NAME=identity-manager
+      - USE_MOCKS=true
+      - NOTIFICATIONS_ENABLED=false
+      - SERVER_HEALTH_ENDPOINT=/health
+    env_file: config/identity-manager/config.yaml
+    volumes:
+      - ./config/identity-manager/secrets:/etc/secrets
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "./identity-manager", "--health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    extra_hosts:
+      - "discovery.url.com:host-gateway"
+
+  identity-manager-tests:
+    profiles:
+      - notlocaldebug
+    build:
+      context: ../
+      dockerfile: integration-tests/Dockerfile
+    env_file: config/integ-tests/config.yaml
+    depends_on:
+      identity-manager:
+        condition: service_healthy
+
+  redis:
+    profiles:
+      - localdebug
+    image: redis:8.8-alpine
+    container_name: redis
+    ports:
+      - '6379:6379'
+    command: redis-server
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 10s
+      retries: 10
+      start_period: 2s
+
+  n1:
+    container_name: n1
+    profiles:
+      - nats-setup
+      - localdebug
+    image: nats:2.14.3-alpine
+    command: --user user --pass abc123  --name N1 --js -m 8222  -p 4222
+    ports:
+    - 4222:4222
+    - 8222:8222
+    healthcheck:
+      test: wget -qO- http://localhost:8222/varz || exit 1
+      interval: 2s
+      timeout: 10s
+      retries: 10
+      start_period: 2s
+
+volumes:
+  keycloak-providers:
+  keycloak-themes:
+  keycloak-agent:

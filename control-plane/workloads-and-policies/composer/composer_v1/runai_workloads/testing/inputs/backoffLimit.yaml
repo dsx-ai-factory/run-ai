@@ -1,0 +1,29 @@
+image: ubuntu
+command: python-3.8
+args: "-x my-script.py"
+environmentVariables:
+  - name: HOME
+    value: "/home/my-folder"
+workingDir: /home/my-folder
+nodePools:
+  - my-node-pool-a
+  - my-node-pool-b
+
+compute:
+  gpuDevicesRequest: 1
+  gpuRequestType: portion
+  gpuPortionRequest: 0.5
+
+backoffLimit: 12
+
+security:
+  uidGidSource: fromTheImage
+  runAsNonRoot: true
+
+
+
+
+
+
+
+

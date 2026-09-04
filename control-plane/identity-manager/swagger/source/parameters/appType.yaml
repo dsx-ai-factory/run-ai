@@ -1,0 +1,9 @@
+name: appType
+in: query
+required: true
+description: The type of application
+schema:
+  type: string
+  enum:
+    - Agent
+    - MimirWriter

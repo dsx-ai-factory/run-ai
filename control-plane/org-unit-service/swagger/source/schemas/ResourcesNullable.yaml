@@ -1,0 +1,50 @@
+properties:
+  nodePool:
+    required:
+      - id
+    properties:
+      id:
+        type: string
+        description: The ID of the node pool.
+        example: 22
+      name:
+        type: string
+        description: The name of the node pool.
+        example: default
+    description: The node pool to which this resource configuration applies.
+    type: object
+    nullable: true
+  gpu:
+    allOf:
+      - $ref: "./NonNullResource.yaml"
+      - description: Defines the GPU quota assignment, maximum GPU device allocation, and weight assigned that determines the fairshare of over-quota resources.
+  cpu:
+    type: object
+    nullable: true
+    allOf:
+      - $ref: "./Resource.yaml"
+      - description: Defines the CPU quota assignment in millicores (1000 millicores = 1 CPU core), maximum CPU allocation, and weight.
+  memory:
+    type: object
+    nullable: true
+    allOf:
+      - $ref: "./Resource.yaml"
+      - type: object
+        description: Defines the CPU memory quota assignment, maximum allocation, and weight.
+        required:
+          - units
+        properties:
+          units:
+            $ref: "./units.yaml"
+  rank:
+    type: string
+    nullable: true
+    description: The scheduling rank of this org-unit within the node pool. Determines the scheduling order of workloads between org-units. Workloads in higher-ranked org-units are scheduled before workloads in lower-ranked org-units. For example, all workloads in rank "High" will be scheduled before all workloads in rank "Medium".
+    default: "MediumLow"
+    example: "High"
+  priority:
+    deprecated: true
+    description: Deprecated. Use rank instead. The scheduling priority for workloads in this node pool.
+    type: string
+    nullable: true
+    example: Normal

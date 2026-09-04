@@ -1,0 +1,9 @@
+properties:
+  sourceOfRule:
+    $ref: "./SourceOfRule.yaml"
+  canAdd:
+    description: Whether it is permitted to add items. Default to true.
+    type: boolean
+    nullable: true
+nullable: true
+type: object

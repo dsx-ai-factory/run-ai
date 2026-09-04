@@ -1,0 +1,6 @@
+name: nodeName
+in: path
+description: The node name.
+schema:
+  type: string
+required: true

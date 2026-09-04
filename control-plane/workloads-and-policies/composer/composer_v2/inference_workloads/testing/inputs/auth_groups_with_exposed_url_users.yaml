@@ -1,0 +1,12 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: authorizedUsersOrGroups
+  authorizedGroups:
+    - serving-port-group
+exposedUrls:
+  - name: authenticated-external-url
+    container: 9090
+    authorizationType: authorizedUsers
+    authorizedUsers:
+      - external-url-user@example.com

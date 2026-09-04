@@ -1,0 +1,7 @@
+name: clusterId
+in: path
+schema:
+  type: string
+required: true
+description: The Universally Unique Identifier (UUID) of the cluster.
+example: 9f55255e-11ed-47c7-acef-fc4054768dbc

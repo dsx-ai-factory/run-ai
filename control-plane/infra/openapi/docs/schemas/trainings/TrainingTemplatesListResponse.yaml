@@ -1,0 +1,7 @@
+properties:
+  entries:
+    type: array
+    items:
+      $ref: "./TrainingTemplatesListResponseItem.yaml"
+  pagination:
+    $ref: "../common/PaginationInfo.yaml"

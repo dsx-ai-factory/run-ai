@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "allof-merge": "^0.6.7",
+    "js-yaml": "^4.1.1"
+  }
+}

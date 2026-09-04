@@ -1,0 +1,28 @@
+type: object
+nullable: true
+required:
+- idpBaseUrl
+- clientSecret
+
+properties:
+  clientId:
+    type: string
+    minLength: 1
+    maxLength: 255
+  idpBaseUrl:
+    type: string
+    pattern: '/^(https?://)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(:[0-9]{1,5})?(/[^\s]*)?$|^$/'
+    maxLength: 2048
+  clientSecret:
+    type: string
+    minLength: 1
+    maxLength: 500
+  scopes:
+    type: array
+    minItems: 0
+    maxItems: 50
+    items:
+      type: string
+      pattern: '^([a-zA-Z0-9-._:]+)(\s[a-zA-Z0-9-._:]+)*$'
+      minLength: 1
+      maxLength: 100

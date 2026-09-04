@@ -1,0 +1,5 @@
+POSTGRES_DB: postgres
+POSTGRES_USER: runai
+POSTGRES_PASSWORD: password
+
+log_min_messages: "ERROR"

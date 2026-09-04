@@ -1,0 +1,30 @@
+##########################################################################
+#    cpuCoreLimit(5) --> gpuPortionLimit(7.5)
+#                                                     ,---> runAsUid(10)
+#    cpuCoreRequest(3) --> gpuPortionRequest(10.5) --|
+#                                                    `---> runAsGid(2)
+##########################################################################
+rules:
+  compute:
+    gpuPortionLimit:
+      defaultFrom:
+        field: compute.cpuCoreLimit
+        factor: 1.5
+    gpuPortionRequest:
+      defaultFrom:
+        field: compute.cpuCoreRequest
+        factor: 3.5
+  security:
+    runAsUid:
+      defaultFrom:
+        field: compute.gpuPortionRequest
+    runAsGid:
+      defaultFrom:
+        field: compute.gpuPortionRequest
+        factor: 0.2
+  ports:
+    attributes:
+      container:
+        defaultFrom:
+          field: external
+          factor: 1

@@ -1,0 +1,19 @@
+allOf:
+  - $ref: "../templates/TemplateMeta.yaml"
+  - type: object
+    properties:
+      spec:
+        $ref: "./DistributedTemplateSpec.yaml"
+      assets:
+        $ref: "../templates/TemplateAssetsIds.yaml"
+      masterSpecSameAsWorker:
+        $ref: "./MasterSpecSameAsWorker.yaml"
+      master:
+        $ref: "./TemplateMasterSection.yaml"
+      runnable:
+        $ref: "../templates/RunnableInfo.yaml"
+      combinedSpec:
+        $ref: "./DistributedSpecSpec.yaml"
+      combinedMasterSpec:
+        $ref: "./MasterTemplateSpec.yaml"
+

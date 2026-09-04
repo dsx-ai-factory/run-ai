@@ -1,0 +1,26 @@
+type: object
+required:
+  - pods
+  - projectId
+  - workloadId
+properties:
+  projectId:
+    type: string
+    example: "1"
+  clusterId:
+    type: string
+    format: uuid
+    example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  workloadId:
+    type: string
+    example: "1"
+  pods:
+    type: array
+    items:
+      $ref: './PodSyncFields.yaml'
+  idsToIgnore:
+    type: array
+    description: pod ids to ignore when deleting.
+    items:
+      type: string
+      format: uuid

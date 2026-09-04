@@ -1,0 +1,9 @@
+name: complyToWorkloadType
+in: query
+required: false
+description:
+  Include workload creation compliance information of an asset, for a given workload type, as part of the response.
+  To check compliance, you need to provide both project id and workload type.
+schema:
+  type: string
+  enum: [Workspace, Training, Distributed, Inference, DistributedInference]

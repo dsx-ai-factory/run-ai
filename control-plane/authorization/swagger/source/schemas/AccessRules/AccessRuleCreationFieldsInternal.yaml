@@ -1,0 +1,26 @@
+type: object
+required:
+  - subjectId
+  - roleId
+  - scopeId
+  - scopeType
+properties:
+  subjectId:
+    type: string
+    example: "user@run.ai"
+    description: The unique identifier of the subject (e.g., user, group, or app).
+  roleId:
+    type: integer
+    format: int32
+    description: The numeric ID of the assigned role.
+    example: 53142648
+  scopeId:
+    type: string
+    description: The unique identifier of the scope.
+    example: "a418ed33-9399-48c0-a890-122cadd13bfd"
+  scopeType:
+    allOf:
+      - $ref: "../../../../../infra/openapi/docs/schemas/scopes/ScopeType.yaml"
+      - description: "The type of scope the access rule applies to. Valid values: system, tenant, cluster, department, project."
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"

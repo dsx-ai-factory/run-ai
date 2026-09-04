@@ -1,0 +1,35 @@
+get:
+  summary: Count nodepools
+  operationId: count_nodepools
+  x-service: cluster-service
+  description: Count nodepools
+  x-test-coverage:
+    - e2e/src/test/suites/playwright/parallel/nodepools/nodepoolsApi.test.ts
+  x-authorize:
+      resource-type: nodepools
+      action: read
+  tags:
+    - NodePools
+  parameters:
+    - $ref: "../parameters/query/NodepoolsFilterBy.yaml"
+  responses:
+    200:
+      description: ok
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              count:
+                type: integer
+                format: int64
+            required:
+              - count
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

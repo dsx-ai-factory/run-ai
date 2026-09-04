@@ -1,0 +1,6 @@
+description: Set of git repositories to use in the workload.
+type: array
+items:
+  $ref: "./GitInstance.yaml"
+maxItems: 1000
+nullable: true

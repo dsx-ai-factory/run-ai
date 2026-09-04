@@ -1,0 +1,25 @@
+{{- include "common.configMap" (list . .Values.cliExposer "control-plane.cliExposer.configmap") }}
+
+{{- define "control-plane.cliExposer.configmap" -}}
+{{- $top := first . }}
+data:
+  LOG_LEVEL: {{ $top.Values.cliExposer.config.logLevel | quote }}
+  SERVICE_PORT: {{ $top.Values.cliExposer.service.port | quote }}
+  SERVICE_NAME: {{ $top.Values.cliExposer.name | quote }}
+  SERVER_WRITE_TIMEOUT: {{ $top.Values.cliExposer.config.server.writeTimeout | quote }}
+  SERVER_READ_TIMEOUT: {{ $top.Values.cliExposer.config.server.readTimeout | quote }}
+  SERVER_IDLE_TIMEOUT: {{ $top.Values.cliExposer.config.server.idleTimeout | quote }}
+  AUDIT_ENABLED: {{ if hasKey $top.Values.cliExposer.config "auditEnabled" }}{{ $top.Values.cliExposer.config.auditEnabled | quote }}{{ else }}{{ $top.Values.global.config.auditEnabled | quote }}{{ end }}
+  AUDIT_ENABLE_PRINT_TO_STDOUT: {{ if hasKey $top.Values.cliExposer.config "auditEnablePrintToStdout" }}{{ $top.Values.cliExposer.config.auditEnablePrintToStdout | quote }}{{ else }}{{ $top.Values.global.config.auditEnablePrintToStdout | quote }}{{ end }}
+  AUDIT_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.auditService.name ($top.Values.auditService.service.port | toString) | quote }}
+  PUBSUB_URL: {{ $top.Values.global.pubsub.url | quote }}
+  PUBSUB_TYPE: {{ $top.Values.global.pubsub.type | quote }}
+  PUBSUB_ENABLE_ADDITIONAL_SUBSCRIBER: {{ $top.Values.global.pubsub.additionalSubscriber.enabled | quote }}
+  {{- if $top.Values.global.pubsub.additionalSubscriber.enabled }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_TYPE: {{ $top.Values.global.pubsub.additionalSubscriber.type | quote }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_URL: {{ $top.Values.global.pubsub.additionalSubscriber.url | quote }}
+  {{- end }}
+  TRACING_ENABLED: {{ if hasKey $top.Values.cliExposer.config "tracingEnabled" }}{{ $top.Values.cliExposer.config.tracingEnabled | quote }}{{ else }}{{ $top.Values.global.config.tracingEnabled | quote }}{{ end }}
+  AUDIT_ENABLED: {{ if hasKey $top.Values.cliExposer.config "auditEnabled" }}{{ $top.Values.cliExposer.config.auditEnabled | quote }}{{ else }}{{ $top.Values.global.config.auditEnabled | quote }}{{ end }}
+  AUDIT_ENABLE_PRINT_TO_STDOUT: {{ if hasKey $top.Values.cliExposer.config "auditEnablePrintToStdout" }}{{ $top.Values.cliExposer.config.auditEnablePrintToStdout | quote }}{{ else }}{{ $top.Values.global.config.auditEnablePrintToStdout | quote }}{{ end }}
+{{- end }}

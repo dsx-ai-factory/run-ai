@@ -1,0 +1,7 @@
+type: object
+description: List of formatters.
+properties:
+  items:
+    type: array
+    items:
+      $ref: "./Formatter.yaml"

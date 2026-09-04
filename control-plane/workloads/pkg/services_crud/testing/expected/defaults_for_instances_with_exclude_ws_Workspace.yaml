@@ -1,0 +1,269 @@
+meta:
+  clusterId: cluster-id
+  createdAt: "2020-07-01T00:00:00Z"
+  createdBy: user@run.ai
+  departmentId: department-id
+  desiredPhase: Running
+  name: ws-1
+  projectId: project-id
+  requestedName: ws-1
+  workloadId: ""
+policyInfo:
+  worker:
+    defaults:
+      annotations:
+        instances:
+        - name: ann-1
+          value: ann-value-1
+        - name: ann-2
+          value: ann-value-2
+        - name: ann-3
+          value: ann-value-3
+      compute:
+        extendedResources:
+          instances:
+          - quantity: 10M
+            resource: aaa/1
+          - quantity: 20M
+            resource: aaa/2
+          - quantity: 30M
+            resource: aaa/3
+      environmentVariables:
+        instances:
+        - name: env-1
+          value: env-value-1
+        - name: env-2
+          value: env-value-2
+        - name: env-3
+          value: env-value-3
+      exposedUrls:
+        instances:
+        - name: exposed-1
+          url: http://exposed.com/url/1
+        - name: exposed-2
+          url: http://exposed.com/url/2
+        - name: exposed-3
+          url: http://exposed.com/url/3
+      labels:
+        instances:
+        - name: label-1
+          value: label-value-1
+        - name: label-2
+          value: label-value-2
+        - name: label-3
+          value: label-value-3
+      ports:
+        instances:
+        - container: 9081
+          name: port-1
+        - container: 9082
+          name: port-2
+        - container: 9083
+          name: port-3
+      relatedUrls:
+        instances:
+        - name: related-1
+          type: google
+          url: http://related.com/url/1
+        - name: related-2
+          type: wandb
+          url: http://related.com/url/2
+        - name: related-3
+          type: wandb
+          url: http://related.com/url/3
+      storage:
+        configMapVolume:
+          instances:
+          - configMap: cm-1
+            mountPath: /cm/path-1
+            name: cm-1
+          - configMap: cm-2
+            mountPath: /cm/path-2
+            name: cm-2
+          - configMap: cm-3
+            mountPath: /cm/path-3
+            name: cm-3
+        dataVolume:
+          instances:
+          - id: 1234-0001
+            mountPath: /dv/path-1
+          - id: 1234-0002
+            mountPath: /dv/path-2
+          - id: 1234-0003
+            mountPath: /dv/path-3
+        git:
+          instances:
+          - name: git-1
+            path: /git/path-1
+          - name: git-2
+            path: /git/path-2
+          - name: git-3
+            path: /git/path-3
+        hostPath:
+          instances:
+          - mountPath: /hp/mount-path-1
+            name: hp-1
+            path: /hp/path-1
+          - mountPath: /hp/mount-path-2
+            name: hp-2
+            path: /hp/path-2
+          - mountPath: /hp/mount-path-3
+            name: hp-3
+            path: /hp/path-3
+        nfs:
+          instances:
+          - mountPath: /nfs/path-1
+            name: nfs-1
+            path: nfs-path-1
+            server: nfs-server-1
+          - mountPath: /nfs/path-2
+            name: nfs-2
+            path: nfs-path-2
+            server: nfs-server-2
+          - mountPath: /nfs/path-3
+            name: nfs-3
+            path: nfs-path-3
+            server: nfs-server-3
+        pvc:
+          instances:
+          - claimName: claim-pvc-1
+            existingPvc: true
+            name: pvc-1
+            path: /pvc/path-1
+          - claimName: claim-pvc-2
+            existingPvc: true
+            name: pvc-2
+            path: /pvc/path-2
+          - claimName: claim-pvc-3
+            existingPvc: true
+            name: pvc-3
+            path: /pvc/path-3
+        s3:
+          instances:
+          - name: s3-1
+            path: /s3/path-1
+          - name: s3-2
+            path: /s3/path-2
+          - name: s3-3
+            path: /s3/path-3
+projectInfo:
+  name: project-1
+spec:
+  worker:
+    annotations:
+    - exclude: true
+      name: ann-1
+    - name: ann-2
+      value: ann-value-2
+    - name: ann-3
+      value: modified-ann-3
+    category: Build
+    compute:
+      extendedResources:
+      - exclude: true
+        resource: aaa/1
+      - quantity: 20M
+        resource: aaa/2
+      - quantity: 3333M
+        resource: aaa/3
+    environmentVariables:
+    - exclude: true
+      name: env-1
+    - name: env-2
+      value: env-value-2
+    - name: env-3
+      value: modified-value-3
+    exposedUrls:
+    - exclude: true
+      name: exposed-1
+    - name: exposed-2
+      url: http://exposed.com/url/2
+    - name: exposed-3
+      url: http://exposed.com/modified-url/3
+    image: image-from-spec-worker
+    labels:
+    - exclude: true
+      name: label-1
+    - name: label-2
+      value: label-value-2
+    - name: label-3
+      value: modified-label-3
+    nodePools:
+    - default
+    ports:
+    - exclude: true
+      name: port-1
+    - container: 9082
+      name: port-2
+    - container: 19083
+      name: port-3
+    relatedUrls:
+    - exclude: true
+      name: related-1
+    - name: related-2
+      type: wandb
+      url: http://related.com/url/2
+    - name: related-3
+      url: http://related.com/modified-url/3
+    storage:
+      configMapVolume:
+      - configMap: cm-1
+        exclude: true
+        name: cm-1
+      - configMap: cm-2
+        mountPath: /cm/path-2
+        name: cm-2
+      - configMap: cm-3
+        mountPath: /cm/modified-path-3
+        name: cm-3
+      dataVolume:
+      - exclude: true
+        id: 1234-0001
+      - id: 1234-0002
+        mountPath: /dv/path-2
+      - id: 1234-0003
+        mountPath: /dv/modified-path-3
+      git:
+      - exclude: true
+        name: git-1
+      - name: git-2
+        path: /git/path-2
+      - name: git-3
+        path: /git/modified-path-3
+      hostPath:
+      - exclude: true
+        name: hp-1
+      - mountPath: /hp/mount-path-2
+        name: hp-2
+        path: /hp/path-2
+      - mountPath: /hp/modified-mount-path-3
+        name: hp-3
+        path: /hp/modified-path-3
+      nfs:
+      - exclude: true
+        name: nfs-1
+      - mountPath: /nfs/path-2
+        name: nfs-2
+        path: nfs-path-2
+        server: nfs-server-2
+      - name: nfs-3
+        path: /path/modified-path-1
+        server: modified-server-3
+      pvc:
+      - exclude: true
+        name: pvc-1
+      - claimName: claim-pvc-2
+        existingPvc: true
+        name: pvc-2
+        path: /pvc/path-2
+      - claimName: modified-claim-3
+        existingPvc: true
+        name: pvc-3
+        path: /path/modified-path-3
+      s3:
+      - exclude: true
+        name: s3-1
+      - name: s3-2
+        path: /s3/path-2
+      - name: s3-3
+        path: /s3/modified-path-3

@@ -1,0 +1,9 @@
+type: string
+description: Phase of the Datavolume in the cluster
+example: Ready
+enum:
+  - Ready
+  - NotReady
+  - Creating
+  - Deleting
+  - Unknown

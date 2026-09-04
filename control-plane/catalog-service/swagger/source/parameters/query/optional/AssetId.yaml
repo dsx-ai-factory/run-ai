@@ -1,0 +1,7 @@
+name: assetId
+in: query
+required: false
+description: The asset ID to use for accessing images that require API key authentication
+schema:
+  type: string
+

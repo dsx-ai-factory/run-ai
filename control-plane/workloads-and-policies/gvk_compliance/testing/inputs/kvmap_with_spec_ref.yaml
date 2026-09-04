@@ -1,0 +1,50 @@
+policy:
+  id: test-policy
+  effectiveRules:
+    # --- add a label to selector.matchLabels via KeyValueMap + specRef ---
+    # This exercises the pattern where KeyValueMap is bound to a spec selector
+    # that outputs a higher-level object (.spec), with a specRef narrowing
+    # the target to a nested map (selector.matchLabels).
+    #
+    # Compare with kvmap_labels_per_container.yaml which uses an item selector
+    # to narrow the target map.
+    - field: matchLabelsSelector
+      specSelector: workloadSpec
+      enforcements:
+        - set: { key: new-label, value: new-value }
+
+  breakdown:
+    fields:
+      # KeyValueMap builtin with specRef pointing at selector.matchLabels.
+      # The spec selector emits .spec, and specRef navigates from there to
+      # the target map. The expected behavior is that CopyTargetKeys should
+      # operate on .spec.selector.matchLabels (the specRef target), not on
+      # .spec (the spec selector output).
+      matchLabelsSelector:
+        - specSelectors: [workloadSpec]
+          formatter:
+            builtin: KeyValueMap
+          specRef: selector.matchLabels
+
+    specSelectors:
+      workloadSpec:
+        query: "( .spec )"
+
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: test
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: test
+    template:
+      metadata:
+        labels:
+          app: test
+      spec:
+        containers:
+          - name: c
+            image: nginx

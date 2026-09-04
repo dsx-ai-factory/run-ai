@@ -1,0 +1,13 @@
+type: object
+required:
+  - object
+  - retrievedAt
+properties:
+  object:
+    type: object
+    additionalProperties: true
+    description: The raw k8s object after sanitization (metadata.managedFields and last-applied-configuration annotation are stripped).
+  retrievedAt:
+    type: string
+    format: date-time
+    description: RFC3339 timestamp captured immediately after the k8s API server returned the object.

@@ -1,0 +1,6 @@
+type: string
+description: defines sync action for this item
+enum:
+  - Add
+  - Delete
+  - Update

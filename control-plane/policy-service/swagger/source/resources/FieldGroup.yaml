@@ -1,0 +1,67 @@
+post:
+  summary: Create a field group. [experimental]
+  description: Creates a field group object based on the provided specification.
+  operationId: create_field_group
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/service_mapping_field_group_test.go
+  x-authorize:
+    resource-type: policies
+    action: create
+  x-audit: true
+  tags:
+    - Spec mapping
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/Mapping/FieldGroupCreationRequest.yaml"
+  responses:
+    200:
+      description: Field group created.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Mapping/FieldGroup.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    409:
+      $ref: "../../../../infra/openapi/docs/responses/409Conflict.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+
+get:
+  summary: List field groups. [experimental]
+  description: Retrieve a list of field groups with details.
+  operationId: list_field_groups
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/service_mapping_field_group_test.go
+  x-authorize:
+    resource-type: policies
+    action: read
+  tags:
+    - Spec mapping
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml"
+  responses:
+    200:
+      description: List of field groups.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Mapping/FieldGroupListResponse.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+

@@ -1,0 +1,31 @@
+type: object
+description: The result of a migrate-deprecated operation.
+required:
+  - succeeded
+  - failed
+properties:
+  succeeded:
+    type: object
+    description: Access rules that were successfully migrated. `created` + `preExisting` together account for one entry per deleted old rule, so `len(deleted) == len(created) + len(preExisting)`.
+    required:
+      - created
+      - preExisting
+      - deleted
+    properties:
+      created:
+        type: array
+        description: New-role access rules that were freshly created as part of this migration.
+        items:
+          $ref: './AccessRule.yaml'
+      preExisting:
+        type: array
+        description: New-role access rules that already existed at the start of the call (same subject + scope + new role). No new rule was created for these, but the corresponding old (deprecated-role) rule was still deleted since the subject already has the new role on that scope.
+        items:
+          $ref: './AccessRule.yaml'
+      deleted:
+        $ref: './AccessRuleDeletionBatchIdsList.yaml'
+  failed:
+    type: array
+    description: Access rules that failed to migrate. Each item identifies the old access rule (still alive) and the failure reason.
+    items:
+      $ref: './AccessRulesMigrateDeprecatedFailureItem.yaml'

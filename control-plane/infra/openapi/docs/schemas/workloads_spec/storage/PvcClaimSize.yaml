@@ -1,0 +1,7 @@
+description: "Requested size for the PVC. Mandatory when existingPvc is false. Recommended sizes: TB/GB/MB/TIB/GIB/MIB"
+type: string
+pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+##WAIT_FOR_35331## minLength: 1
+maxLength: 63
+example: 1G
+nullable: true

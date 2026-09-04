@@ -1,0 +1,27 @@
+parameters:
+  - $ref: "../../../../infra/openapi/docs/parameters/path/AssetId.yaml"
+get:
+  tags:
+    - Credentials
+  summary: Get a NGC API key by id (internal).
+  description: Returns the NGC API key, by asset id (internal).
+  operationId: get_ngc_api_key_by_id_internal
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_credentials_service_test.go
+    - control-plane/assets-service/pkg/services/api_credentials_service_ngc_api_keys_test.go
+  x-no-authorization: true
+  x-internal: true
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/NgcApiKey/NgcApiKeyInternal.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"

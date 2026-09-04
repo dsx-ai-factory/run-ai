@@ -1,0 +1,35 @@
+description: A URL that is related to the workload. For example, a URL to an external
+  server providing statistics or logging about the workload.
+properties:
+  url:
+    description: The URL for connecting an external service related to the workload. (mandatory)
+    type: string
+    example: https://my-url.com
+    nullable: true
+    pattern: .*
+    ##WAIT_FOR_35331## minLength: 1
+    maxLength: 2048
+  type:
+    description: The type of service that the url provides. For example, wandb (Weights & Biases). (mandatory)
+    type: string
+    example: wandb
+    nullable: true
+    pattern: .*
+    ##WAIT_FOR_35331## minLength: 1
+    maxLength: 63
+  name:
+    description: Unique name to identify the instance. primarily used for policy locked rules.
+    type: string
+    example: url-instance-a
+    nullable: true
+    pattern: .*
+    ##WAIT_FOR_35331## minLength: 1
+    maxLength: 63
+  exclude:
+    description: Use 'true' in case the item is defined in defaults of the policy, and you wish to exclude it from the workload.
+    type: boolean
+    default: false
+    example: false
+    nullable: true
+nullable: true
+type: object

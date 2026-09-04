@@ -1,0 +1,95 @@
+name: Tag lane (trigger)
+
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+-saas.[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tag-trigger-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  reject-master-tags:
+    name: Reject tags from master
+    uses: run-ai/runai-actions/.github/workflows/reject-master-tags.yml@68480c9f692b91b3c5a3f0a9552b56534f757911
+
+  dispatch:
+    name: Dispatch to saas-configuration
+    needs: reject-master-tags
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@4d991eb9b905ef189e4c376166672c3f2f230481
+        with:
+          egress-policy: audit
+
+      - name: Resolve release branch
+        id: branch
+        env:
+          TARGET: ${{ needs.reject-master-tags.outputs.target }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          branch="${TARGET#refs/heads/}"
+          if printf '%s' "$branch" | grep -qE '^[0-9a-f]{40}$'; then
+            echo "::error title=Release not cut from a branch::Tag '${TAG}' targets commit ${branch} rather than a branch, so the release lane cannot be selected. Re-create the release against its release branch."
+            exit 1
+          fi
+          echo "Tag ${TAG} → release branch ${branch}"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+
+      - name: Cross-repo dispatch to saas-configuration/tag.yaml
+        uses: benc-uk/workflow-dispatch@31e2b3319479a63f0ab15bf800eff9e913504e26
+        with:
+          workflow: tag.yaml
+          repo: run-ai/saas-configuration
+          ref: ${{ steps.branch.outputs.branch }}
+          token: ${{ secrets.GIT_HUB_OSS }}
+          inputs: |
+            {
+              "tag": "${{ github.ref_name }}",
+              "sha": "${{ github.sha }}",
+              "caller_repo": "${{ github.repository }}"
+            }
+
+  # SaaS docs are unversioned ("latest") — fern/products/saas.yml has no
+  # versions block — so every SaaS release refreshes the published site.
+  # This rides the same reject-master-tags gate as the job above rather than
+  # living in its own `on: push: tags` workflow, which would race this lane and
+  # publish tags that were explicitly rejected here.
+  #
+  # GA tags are excluded: those publishes are driven manually by the product
+  # team via publish-fern-docs.yaml.
+  dispatch-fern-docs:
+    name: Dispatch docs publish to saas-configuration
+    needs: reject-master-tags
+    if: contains(github.ref_name, '-saas.')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      # toJSON() emits its own quotes — tag names may contain characters that
+      # would otherwise break out of the JSON payload.
+      - name: Cross-repo dispatch to saas-configuration/publish-fern-docs.yml
+        uses: benc-uk/workflow-dispatch@31e2b3319479a63f0ab15bf800eff9e913504e26 # v1
+        with:
+          workflow: publish-fern-docs.yml
+          repo: run-ai/saas-configuration
+          # the ref should be the branch name of the same tag in the caller repo
+          ref: ${{ github.ref_name }}
+          token: ${{ secrets.GIT_HUB_OSS }}
+          inputs: |
+            {
+              "ref":         ${{ toJSON(github.ref_name) }},
+              "reason":      ${{ toJSON(format('automatic SaaS publish for tag {0}', github.ref_name)) }},
+              "caller_repo": ${{ toJSON(github.repository) }}
+            }

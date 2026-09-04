@@ -1,0 +1,41 @@
+---
+description: TypeScript conventions for Run:ai frontend
+globs: ["**/*.ts", "**/*.vue"]
+alwaysApply: false
+---
+
+# TypeScript
+
+## Commands
+- `npm run typecheck`: Run TypeScript type checking
+- `npm run lint`: ESLint enforces most TS rules
+
+## Naming Conventions
+
+- Interfaces: Prefix with `I` → `IConfig`, `IUser`
+- Enums: Prefix with `E` → `EUserStatus`, `EClusterState`
+- Types: No prefix → `ValidationRule`
+
+## Key Patterns
+
+- Use `import type` for type-only imports
+- Export types from shared files, not inline in components (Vue 3.5+ requirement)
+- Prefix unused variables with `_` → `function handler(_event: MouseEvent)`
+- Type state explicitly: `isLoading: false as boolean`
+
+## Swagger Models
+
+**NEVER edit files in `src/swagger-models/`** - auto-generated from API specs.
+
+- Use `import type` for types, regular import for enums/constants
+- See usage in `src/views/workload/workload-index.vue`
+- Clients: `workloads-client`, `authorization-client`, `cluster-service-client`, etc.
+
+## Canonical Examples
+
+- **Interface definitions**: See `src/models/config.model.ts`
+- **Enum definitions**: See `src/models/cluster.model.ts`
+
+## What ESLint Enforces (don't duplicate)
+
+- No `any` type, no non-null assertion `!`, consistent type imports

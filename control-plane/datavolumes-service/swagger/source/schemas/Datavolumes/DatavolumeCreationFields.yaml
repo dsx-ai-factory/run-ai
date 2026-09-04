@@ -1,0 +1,36 @@
+type: object
+required:
+  - name
+  - projectId
+  - originPvcName
+properties:
+  name:
+    type: string
+    maxLength: 63
+    pattern: "^[a-z][-a-z0-9]{0,62}$"
+    example: "datavolume-a"
+    description: The name of the new data volume.
+  description:
+    type: string
+    maxLength: 127
+    description: A brief description of the data volume and its purpose.
+    example: "Results of experiment X"
+  originPvcName:
+    description: The name of the existing PVC that the new data volume is based on.
+    type: string
+    example: "pvc-a"
+  projectId:
+    description: The ID of the project whose namespace contains the origin PVC.
+    type: string
+    example: "5"
+  shouldDeleteOriginalVolume:
+    description: True is not supported. This parameter will be removed in a future release.
+    type: boolean
+    default: false
+    example: false
+  useOriginalVolume:
+    description: If true, the original storage volume will be used together with the data volume. Default true as long as "shouldDeleteOriginalVolume" is false.
+    type: boolean
+    default: true
+    example: true
+    nullable: true

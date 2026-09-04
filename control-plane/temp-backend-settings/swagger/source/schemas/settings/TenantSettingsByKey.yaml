@@ -1,0 +1,16 @@
+type: object
+description: A setting value across all tenants
+properties:
+  key:
+    type: string
+  values:
+    type: array
+    items:
+      $ref: './TenantSettingValue.yaml'
+example:
+  key: "CPUResourcesQuota"
+  values:
+  - tenantId: 1
+    value: true
+  - tenantId: 2
+    value: false

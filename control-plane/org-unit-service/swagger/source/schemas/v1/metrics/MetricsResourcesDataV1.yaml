@@ -1,0 +1,19 @@
+type: object
+required:
+  - numberOfPendingWorkloads
+  - gpu
+  - cpu
+  - memory
+properties:
+  numberOfPendingWorkloads:
+    type: integer
+    example: 1
+  gpu:
+    description: GPU resources in fractions. 0.7 = 70% of a gpu
+    $ref: './MetricsResourceDataV1.yaml'
+  cpu:
+    description: CPU resources in millicpus. 1000 = 1 cpu
+    $ref: './MetricsResourceDataV1.yaml'
+  memory:
+    description: Memory resources in megabytes. 1 = 10^6  (1000*1000)
+    $ref: './MetricsResourceDataV1.yaml'

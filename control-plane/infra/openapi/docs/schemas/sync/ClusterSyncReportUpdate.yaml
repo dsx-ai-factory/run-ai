@@ -1,0 +1,18 @@
+description: success/failure report of a single update attempt of the cluster
+properties:
+  id:
+    type: string
+    format: uuid
+    description: a unique id of the entity being updated (asset, workload, policy, etc).
+  updateCount:
+    $ref: "./UpdateCount.yaml"
+  updateAttemptTime:
+    description: the time in which the cluster attempted the update.
+    type: string
+    format: date-time
+    example: '2024-06-06T12:09:18.211Z'
+  message:
+    description: optional failure message for the case that the update has failed. should be sent null if the update was successful.
+    type: string
+    example: mandatory image was not provided.
+    nullable: true

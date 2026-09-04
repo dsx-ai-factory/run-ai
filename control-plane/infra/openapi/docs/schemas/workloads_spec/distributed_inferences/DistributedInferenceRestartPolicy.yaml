@@ -1,0 +1,10 @@
+description: |
+  Determines the behavior when a pod fails.
+  - `RecreateGroupOnPodRestart`: Restarts all pods in the group if any pod fails.
+  - `None`: No automatic restart behavior is applied.
+type: string
+enum:
+  - RecreateGroupOnPodRestart
+  - None
+nullable: true
+default: RecreateGroupOnPodRestart

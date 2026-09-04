@@ -1,0 +1,9 @@
+required:
+  - images
+properties:
+  images:
+    $ref: './Images.yaml'
+  prefix:
+    type: string
+    description: The prefix of the image names.
+    nullable: true

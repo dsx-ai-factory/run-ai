@@ -1,0 +1,119 @@
+post:
+  tags:
+  - Tokens
+  summary: Create an access token v2
+  x-service: identity-manager
+  x-test-coverage:
+  - pkg/services/api_tokens_v2_test.go
+  - integration-tests/tests/api_token_test.go
+  description: |
+    Use this endpoint to obtain an access token. Compliant with standard OAuth2 protocol and supports the common OAuth2 grant types.
+  operationId: grant_token_v2
+  x-no-authorization: true
+  x-audit: true
+  requestBody:
+    required: true
+    content:
+      application/x-www-form-urlencoded:
+        schema:
+          type: object
+          required:
+            - grant_type
+          properties:
+            grant_type:
+              type: string
+              description: |
+                The OAuth2 grant type. Determines the authentication flow and which parameters are required:
+
+                `client_credentials` - Authenticate as a service account or user access key using clientId and clientSecret.
+
+                `password` - Authenticate as a local user using username and password.
+
+                `external_token_exchange` - Authenticate as a service account or user using a token issued by the configured identity provider (IdP) for a Run:ai token. Requires externalToken.
+              enum:
+                - client_credentials
+                - password
+                - external_token_exchange
+            client_id:
+              type: string
+              description: The client identifier for a service account or user access key. Required when using the client_credentials grant type. Must be used together with clientSecret.
+            client_secret:
+              type: string
+              description: The client secret corresponding to the clientId. Required when using the client_credentials grant type. Must be used together with clientId.
+              format: password
+            username:
+              type: string
+              description: The username of a local user account. Required when using the password grant type. Must be used together with password.
+            password:
+              type: string
+              description: The password for the specified username. Required when using the password grant type. Must be used together with username.
+              format: password
+            external_token:
+              type: string
+              description: A valid token issued by the identity provider (IdP) that is configured in NVIDIA Run:ai. Required when using the external_token_exchange grant type.
+            refresh_token:
+              type: string
+              x-internal: true
+              description: The refresh token used to obtain a new access token. Required only when using the refresh_token grant type.
+            code:
+              type: string
+              x-internal: true
+              description: Authorization code issued by the authorization server. Used in the authorization_code grant to exchange the code for an access token.
+            redirect_uri:
+              type: string
+              x-internal: true
+              description: The redirect URI used during the authorization request. Required for the authorization_code grant to validate the redirect destination.
+            code_verifier:
+              type: string
+              pattern: '^[A-Za-z0-9._~-]+$'
+              x-internal: true
+              description: PKCE code verifier. Required when the authorization code was requested with a code_challenge.
+        examples:
+          client_credentials:
+            value:
+              grant_type: "client_credentials"
+              client_id: "my-client-id"
+              client_secret: "my-client-secret"
+            description: "Obtain the clientID and the clientSecret using service accounts or access keys endpoints"
+          password:
+            value:
+              grant_type: "password"
+              username: "user@example.com"
+              password: "password123"
+              client_id: "my-client-id"
+          external_token_exchange:
+            value:
+              grant_type: "external_token_exchange"
+              external_token: "access_token_from_external_idp"
+              client_id: "my-client-id"
+            description: "Exchange an external identity provider token for a Run:ai access token"
+  responses:
+    '200':
+      description: Successfully issued token
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Tokens/OAuth2TokenResponse.yaml'
+          example:
+            access_token: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+            token_type: "Bearer"
+            expires_in: 3600
+            refresh_token: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+            id_token: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+    '400':
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Tokens/OAuth2Error.yaml'
+    '401':
+      description: Client authentication failed
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Tokens/OAuth2Error.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+

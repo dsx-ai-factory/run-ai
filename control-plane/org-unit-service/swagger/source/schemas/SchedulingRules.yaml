@@ -1,0 +1,34 @@
+type: object
+nullable: true
+description: Scheduling rules that define time limits and idle GPU timeouts for workloads in this org-unit. These rules help manage resource utilization by automatically terminating or preempting idle or long-running workloads.
+properties:
+  interactiveJobTimeLimitSeconds:
+    type: integer
+    description: interactive job time limit in seconds
+    nullable: true
+    example: 100
+    minimum: 1
+  interactiveJobMaxIdleDurationSeconds:
+    type: integer
+    description: interactive job max idle duration in seconds
+    nullable: true
+    example: 100
+    minimum: 1
+  interactiveJobPreemptIdleDurationSeconds:
+    type: integer
+    description: interactive job preempt idle duration in seconds
+    nullable: true
+    example: 100
+    minimum: 1
+  trainingJobMaxIdleDurationSeconds:
+    type: integer
+    description: training job max idle duration in seconds
+    nullable: true
+    example: 100
+    minimum: 1
+  trainingJobTimeLimitSeconds:
+    type: integer
+    description: training job time limit in seconds
+    nullable: true
+    example: 100
+    minimum: 1

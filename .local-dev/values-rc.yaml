@@ -1,0 +1,16 @@
+# Extra Helm values for the runai-cluster chart in local dev.
+#
+# This file previously pinned imagePullPolicy: IfNotPresent for every service
+# under runai-operator.config. That dated from when images were side-loaded into
+# the Kind nodes with `kind load docker-image` and no registry existed, so a pull
+# would always fail.
+#
+# local-dev.sh now pushes images to a local registry (kind-registry:5000, exposed
+# to the host as localhost:5001) and Kind's containerd is configured to mirror
+# localhost:5001 to it. Pulls resolve, so the chart default (Always) works — and
+# is preferable: image tags are stable (0.0.0-dev), so IfNotPresent made nodes
+# reuse a cached layer and silently ignore rebuilt images.
+#
+# Kept as an empty mapping rather than deleted because local-dev.sh passes it
+# with --values, which fails if the file is missing.
+{}

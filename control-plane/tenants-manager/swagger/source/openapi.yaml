@@ -1,0 +1,65 @@
+openapi: '3.0.3'
+info:
+  title: Tenant Management
+  version: '1.0'
+  description: An API for managing tenants objects and their associated resources.
+servers:
+- url: http://localhost:8080
+paths:
+  /:
+    x-internal: true
+    get:
+      x-service: tenants-manager
+      description: health check
+      summary: health check
+      operationId: health
+      x-no-authorization: true
+      tags:
+      - health
+      responses:
+        200:
+          description: Executed successfully.
+  ##### Tenants API #####
+  /api/v1/tenants:
+    x-scope: [ system ]
+    $ref: './resources/tenant/tenants_public.yaml'
+  /api/v1/tenants/{tenantId}:
+    x-scope: [ system ]
+    $ref: './resources/tenant/tenant_by_id.yaml'
+  ##### Internal API #####
+  /internal/management/api/v1/tenants:
+    x-internal: true
+    $ref: './resources/management/management_internal.yaml'
+  /internal/api/v1/tenants:
+    x-internal: true
+    $ref: './resources/tenant/tenants.yaml'
+  /internal/api/v1/tenants/{tenantId}:
+    x-internal: true
+    $ref: './resources/tenant/tenant_by_id_internal.yaml'
+  /internal/api/v1/tenants/resolve:
+    x-internal: true
+    $ref: './resources/internal/tenant_resolve.yaml'
+  /internal/api/v1/tenants/{tenantId}/domain:
+    x-internal: true
+    $ref: './resources/internal/tenant_domain.yaml'
+  /api/v1/logo:
+    x-scope: [ system, tenant ]
+    $ref: './resources/logo/logo.yaml'
+  /internal/api/v1/tenants/{tenantId}/metric-store:
+    $ref: './resources/internal/tenant_metric_store.yaml'
+  /internal/api/v1/tenants/{tenantId}/extended-metric-store:
+    $ref: './resources/internal/tenant_extended_metric_store.yaml'
+  /internal/api/v1/logos:
+    x-internal: true
+    $ref: './resources/internal/logos.yaml'
+components:
+  parameters:
+    $ref: "./parameters/_index.yaml"
+  schemas:
+    $ref: "./schemas/_index.yaml"
+  responses:
+    $ref: "../../../infra/openapi/docs/responses/_index.yaml"
+  securitySchemes:
+    $ref: "./securitySchemes/_index.yaml"
+security:
+- bearerAuth: []

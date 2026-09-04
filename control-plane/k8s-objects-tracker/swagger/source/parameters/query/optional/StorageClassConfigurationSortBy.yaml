@@ -1,0 +1,7 @@
+name: sortBy
+in: query
+required: false
+description: Sort results by a parameters.
+schema:
+  type: string
+  enum: [name, tenantId, scopeType, scopeId]

@@ -1,0 +1,26 @@
+get:
+  summary: Reports availability
+  operationId: are_reports_available
+  x-no-authorization: true
+  x-service: org-unit-service
+  x-test-coverage:
+    - e2e/src/test/suites/advancedSuite/reportsApi/consumptionReport.test.ts
+  tags:
+    - Reports
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - isAvailable
+            properties:
+              isAvailable:
+                type: boolean
+                example: true
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,7 @@
+type: object
+required:
+  - weightsSum
+properties:
+  weightsSum:
+    type: number
+    format: double

@@ -1,0 +1,135 @@
+DistributedTarget:
+  Config: {}
+  Framework: TF
+  JaxJob: null
+  MasterSpec: null
+  MpiJob: null
+  ObjectMeta: null
+  PyTorchJob: null
+  RunPolicy: null
+  TFJob:
+    apiVersion: kubeflow.org/v1
+    kind: TFJob
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: tfjob
+        createdBy: TFJob
+        project: test
+        release: probes
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: probes
+      name: probes
+      namespace: runai-test
+    spec:
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: Running
+      tfReplicaSpecs:
+        Chief:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: tfjob
+                createdBy: TFJob
+                project: test
+                release: probes
+                workloadKind: Distributed
+                workloadName: probes
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: probes
+                image: ubuntu
+                name: tensorflow
+                readinessProbe:
+                  failureThreshold: 6
+                  httpGet:
+                    host: localhost
+                    path: /ready
+                    port: 8080
+                    scheme: HTTPS
+                  initialDelaySeconds: 2
+                  periodSeconds: 3
+                  successThreshold: 5
+                  timeoutSeconds: 4
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              priorityClassName: low
+              schedulerName: runai-scheduler
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: tfjob
+                createdBy: TFJob
+                project: test
+                release: probes
+                workloadKind: Distributed
+                workloadName: probes
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: probes
+                image: ubuntu
+                name: tensorflow
+                readinessProbe:
+                  failureThreshold: 6
+                  httpGet:
+                    host: localhost
+                    path: /ready
+                    port: 8080
+                    scheme: HTTPS
+                  initialDelaySeconds: 2
+                  periodSeconds: 3
+                  successThreshold: 5
+                  timeoutSeconds: 4
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              priorityClassName: low
+              schedulerName: runai-scheduler
+    status: {}
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: TFJob
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-probes/, Framework: TF'
+  images:
+  - ubuntu
+  name: 'probes/, Framework: TF'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

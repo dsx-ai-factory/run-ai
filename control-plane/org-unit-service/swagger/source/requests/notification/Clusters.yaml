@@ -1,0 +1,21 @@
+delete:
+  summary: Cluster deleted
+  operationId: cluster_deleted
+  x-no-authorization: true
+  x-service: org-unit-service
+  x-internal: true
+  tags:
+    - Notifications
+  parameters:
+    - $ref: "../../../../../infra/openapi/docs/parameters/path/ClusterId.yaml"
+  responses:
+    200:
+      description: deleted
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

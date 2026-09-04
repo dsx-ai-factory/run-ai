@@ -1,0 +1,4 @@
+WorkloadStatus:
+  $ref: "./WorkloadStatus.yaml"
+Object:
+  $ref: "./Object.yaml"

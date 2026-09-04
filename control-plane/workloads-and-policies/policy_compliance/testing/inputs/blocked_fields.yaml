@@ -1,0 +1,4 @@
+rules:
+  security:
+    supplementalGroups:
+      blocked: true

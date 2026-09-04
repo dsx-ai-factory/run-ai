@@ -1,0 +1,76 @@
+services:
+
+  postgres:
+    profiles:
+      - localdebug
+    image: postgres:18.4
+    container_name: postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: runai
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./config/postgres/initdb:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U runai"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  n1:
+    container_name: n1
+    profiles:
+      - nats-setup
+      - localdebug
+    image: nats:2.14.3-alpine
+    command: --user user --pass abc123  --name N1 --js -m 8222  -p 4222
+    ports:
+    - 4222:4222
+    - 8222:8222
+    healthcheck:
+      test: wget -qO- http://localhost:8222/varz || exit 1
+      interval: 2s
+      timeout: 10s
+      retries: 10
+      start_period: 2s
+
+  tenants-manager:
+    profiles:
+      - localdebug
+    container_name: tenants-manager
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    environment:
+      - SERVICE_NAME=tenants-manager
+      - USE_MOCKS=true
+      - NOTIFICATIONS_ENABLED=false
+      - SERVER_HEALTH_ENDPOINT=/
+    env_file: config/tenants-manager/config.yaml
+    volumes:
+      - ./config/tenants-manager/secrets:/etc/secrets
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "./tenants-manager", "--health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      postgres:
+        condition: service_healthy
+      n1:
+        condition: service_healthy
+
+  tenants-manager-tests:
+    profiles:
+      - notlocaldebug
+    build:
+      context: ../
+      dockerfile: integration-tests/Dockerfile
+    env_file: config/integ-tests/config.yaml
+    depends_on:
+      tenants-manager:
+        condition: service_healthy

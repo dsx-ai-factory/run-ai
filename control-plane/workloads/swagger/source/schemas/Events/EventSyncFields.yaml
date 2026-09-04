@@ -1,0 +1,34 @@
+type: object
+required:
+  - id
+  - clusterId
+  - type
+  - message
+  - reason
+  - createdAt
+  - source
+  - involvedObject
+properties:
+  id:
+    type: string
+    format: uuid
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  type:
+    type: string
+    example: "Normal"
+  message:
+    type: string
+    example: "Started container z"
+  reason:
+    type: string
+    example: "Started"
+  createdAt:
+    type: string
+    format: date-time
+    example: 2022-01-01T03:49:52.531Z
+  source:
+    type: string
+    example: "kubelet"
+  involvedObject:
+    $ref: "./InvolvedObject.yaml"

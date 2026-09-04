@@ -1,0 +1,7 @@
+description: The amount of CPU memory to allocate for this workload (1G, 20M, .etc). The workload will receive at least this amount of memory. Note that the workload will not be scheduled unless the system can guarantee this amount of memory to the workload
+type: string
+pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+example: 20M
+##WAIT_FOR_35331## minLength: 1
+maxLength: 63
+nullable: true

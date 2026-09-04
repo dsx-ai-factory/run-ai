@@ -1,0 +1,46 @@
+Config: {}
+Service:
+  apiVersion: serving.knative.dev/v1
+  kind: Service
+  metadata:
+    annotations:
+      example.com/cost-center: research
+      example.com/owner: alice@example.com
+      run.ai/submitted-by: tester
+    labels:
+      app: service
+      createdBy: Service
+      owner: alice
+      project: team-a
+      release: my-llm
+      run.ai/control-plane-managed: "true"
+      run.ai/converted-from-native: "true"
+      team: ml-platform
+      workloadKind: Inference
+      workloadName: my-llm
+    name: my-llm
+    namespace: runai-team-a
+  spec:
+    template:
+      metadata:
+        annotations:
+          example.com/cost-center: research
+          example.com/owner: alice@example.com
+        labels:
+          app: service
+          createdBy: Service
+          owner: alice
+          project: team-a
+          release: my-llm
+          team: ml-platform
+          workloadKind: Inference
+          workloadName: my-llm
+      spec:
+        containers:
+        - image: my-llm:latest
+          name: my-llm
+          ports:
+          - containerPort: 8080
+          resources: {}
+        schedulerName: runai-scheduler
+  status: {}

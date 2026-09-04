@@ -1,0 +1,10 @@
+description: A list of asset to be imposed on the workloads created in org units affected by this policy.
+properties:
+  datasources:
+    type: array
+    items:
+      type: string
+      format: uuid
+    nullable: true
+nullable: true
+type: object

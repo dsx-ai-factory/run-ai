@@ -1,0 +1,23 @@
+description: Quantity of an extended resource.
+type: object
+properties:
+  resource:
+    description: The name of the extended resource (mandatory)
+    type: string
+    example: hardware-vendor.example/foo
+    minLength: 1
+    nullable: true
+  quantity:
+    description: The requested quantity for the given resource.
+    type: string
+    example: 2
+    minLength: 1
+    nullable: true
+  exclude:
+    description: Whether to exclude this extended resource from the workload.
+      This is necessary in case the extended resource is inherited from the policy defaults
+      and it is desired not to include it in this workload.
+    type: boolean
+    example: false
+    nullable: true
+nullable: true

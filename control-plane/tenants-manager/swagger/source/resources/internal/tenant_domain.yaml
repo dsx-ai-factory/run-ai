@@ -1,0 +1,35 @@
+get:
+  summary: Get tenant domain
+  x-service: tenants-manager
+  x-test-coverage: 
+    - /runai/control-plane/tenants-manager/pkg/services/api_tenant_service_test.go
+  operationId: get_tenant_domain
+  x-no-authorization: true
+  tags:
+    - Internal
+  parameters:
+    - name: tenantId
+      in: path
+      required: true
+      description: The id of the tenant to retrieve
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+  responses:
+    200:
+      description: Tenant domain
+      content:
+        text/plain:
+          x-default: true
+          schema:
+            type: string
+            format: byte
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

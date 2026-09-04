@@ -1,0 +1,11 @@
+{{- include "common.configMap" (list . .Values.frontend "control-plane.frontend.configmap") }}
+
+{{- define "control-plane.frontend.configmap" -}}
+{{- $top := first . }}
+{{- $fipsMode := $top.Values.global.fipsMode | default "off" }}
+data:
+  FIPS_MODE: {{ $fipsMode | quote }}
+  {{- if or (eq $fipsMode "on") (eq $fipsMode "only") }}
+  OPENSSL_CONF: "/etc/ssl/openssl-fips.cnf"
+  {{- end }}
+{{- end }}

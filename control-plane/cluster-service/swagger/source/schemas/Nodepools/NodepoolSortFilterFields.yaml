@@ -1,0 +1,4 @@
+type: string
+enum: [ name, phase, clusterId, createdAt, updatedAt, networkTopologyName,
+        gpuNetworkAccelerationDetection, gpuNetworkAccelerationDetected,
+        gpuNetworkAccelerationLabelKey ]

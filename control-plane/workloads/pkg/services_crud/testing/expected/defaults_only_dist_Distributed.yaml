@@ -1,0 +1,76 @@
+policyInfo:
+  master:
+    defaults:
+      compute:
+        cpuCoreLimit: 11
+        extendedResources:
+          attributes:
+            quantity: 121M
+          instances:
+          - resource: master/bbb
+          - quantity: 111M
+            resource: master/ddd
+      image: ubuntu-master
+      storage:
+        pvc:
+          attributes:
+            claimInfo:
+              size: 2M
+              storageClass: standard-master
+          instances:
+          - path: /master/bbb
+  worker:
+    defaults:
+      compute:
+        cpuCoreLimit: 10
+        extendedResources:
+          attributes:
+            quantity: 120M
+          instances:
+          - resource: worker/bbb
+          - quantity: 110M
+            resource: worker/ddd
+      image: ubuntu-worker
+      storage:
+        pvc:
+          attributes:
+            claimInfo:
+              size: 1M
+              storageClass: standard-worker
+          instances:
+          - path: /worker/bbb
+projectInfo:
+  name: project-1
+spec:
+  master:
+    compute:
+      cpuCoreLimit: 11
+      extendedResources:
+      - quantity: 121M
+        resource: master/bbb
+      - quantity: 111M
+        resource: master/ddd
+    image: ubuntu-master
+    storage:
+      pvc:
+      - claimInfo:
+          size: 2M
+          storageClass: standard-master
+        name: pol-0
+        path: /master/bbb
+  worker:
+    compute:
+      cpuCoreLimit: 10
+      extendedResources:
+      - quantity: 120M
+        resource: worker/bbb
+      - quantity: 110M
+        resource: worker/ddd
+    image: ubuntu-worker
+    storage:
+      pvc:
+      - claimInfo:
+          size: 1M
+          storageClass: standard-worker
+        name: pol-0
+        path: /worker/bbb

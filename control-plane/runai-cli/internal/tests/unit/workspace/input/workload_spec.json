@@ -1,0 +1,151 @@
+{
+  "actualPhase": "Pending",
+  "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+  "createdAt": "2025-12-15T08:58:28.691571Z",
+  "createdBy": "test@run.ai",
+  "departmentId": "4500000",
+  "desiredPhase": "Running",
+  "name": "my-workspace-demo-123",
+  "projectId": "4500002",
+  "requestedName": "my-workspace-demo-123",
+  "spec": {
+    "annotations": [
+      {
+        "name": "description",
+        "value": "Jupyter workspace with auth"
+      },
+      {
+        "name": "runai-submit-command",
+        "value": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai workspace submit my-workspace-demo-123 --project team-b --image jupyter/scipy-notebook --image-pull-policy IfNotPresent -g 1 --stdin --tty --port service-type=NodePort,container=8888,external=31888 --external-url container=8888,authusers=user1:user2:demo-user --environment-variable USER=developer --environment-variable WORKSPACE=demo --environment-variable JUPYTER_ENABLE_LAB=yes --label team=ml-platform --label purpose=development --label tool=jupyter --annotation 'description=Jupyter workspace with auth' --existing-pvc claimname=my-simple-pvc,path=/home/jovyan/work --restart-policy OnFailure --working-dir /home/jovyan --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 100 --capability NET_BIND_SERVICE --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --command -- start-notebook.sh --NotebookApp.token= --NotebookApp.password="
+      }
+    ],
+    "category": "Build",
+    "command": "start-notebook.sh --NotebookApp.token= --NotebookApp.password=",
+    "compute": {
+      "gpuDevicesRequest": 1
+    },
+    "createHomeDir": false,
+    "environmentVariables": [
+      {
+        "name": "USER",
+        "value": "developer"
+      },
+      {
+        "name": "WORKSPACE",
+        "value": "demo"
+      },
+      {
+        "name": "JUPYTER_ENABLE_LAB",
+        "value": "yes"
+      }
+    ],
+    "exposedUrls": [
+      {
+        "authorizedUsers": [
+          "user1",
+          "user2",
+          "demo-user"
+        ],
+        "container": 8888
+      }
+    ],
+    "image": "jupyter/scipy-notebook",
+    "imagePullPolicy": "IfNotPresent",
+    "labels": [
+      {
+        "name": "team",
+        "value": "ml-platform"
+      },
+      {
+        "name": "purpose",
+        "value": "development"
+      },
+      {
+        "name": "tool",
+        "value": "jupyter"
+      }
+    ],
+    "nodePools": [
+      "default"
+    ],
+    "nodeType": "gpu-nodes",
+    "ports": [
+      {
+        "container": 8888,
+        "external": 31888,
+        "serviceType": "NodePort"
+      }
+    ],
+    "restartPolicy": "OnFailure",
+    "security": {
+      "capabilities": [
+        "NET_BIND_SERVICE"
+      ],
+      "privileged": false,
+      "runAsGid": 100,
+      "runAsUid": 1000,
+      "uidGidSource": "custom"
+    },
+    "stdin": true,
+    "storage": {
+      "emptyDirVolume": [
+        {
+          "path": "/emptydir",
+          "sizeLimit": "1G"
+        }
+      ],
+      "git": [
+        {
+          "path": "/git",
+          "repository": "https://github.com/run-ai",
+          "revision": "test"
+        }
+      ],
+      "hostPath": [
+        {
+          "mountPath": "/hostpath",
+          "path": "/host/path"
+        }
+      ],
+      "pvc": [
+        {
+          "claimName": "my-simple-pvc",
+          "existingPvc": true,
+          "path": "/local/pvc",
+          "readOnly": false
+        },
+        {
+          "claimInfo": {
+            "accessModes": {
+              "readWriteOnce": true
+            },
+            "size": "1G",
+            "storageClass": "standard",
+            "volumeMode": "Filesystem"
+          },
+          "claimName": "claim-24mqhfjj7j",
+          "ephemeral": false,
+          "path": "/local/vol"
+        }
+      ],
+      "s3": [
+        {
+          "bucket": "bucket-name",
+          "path": "/s3",
+          "url": "https://bucket-name.s3.region-code.amazonaws.com/object-key"
+        }
+      ]
+    },
+    "tolerations": [
+      {
+        "effect": "NoSchedule",
+        "key": "nvidia.com/gpu",
+        "operator": "Equal",
+        "value": "true"
+      }
+    ],
+    "tty": true,
+    "workingDir": "/home/jovyan"
+  },
+  "workloadId": "eeaac0d9-db0b-4053-9839-86b808e4a7c5"
+}

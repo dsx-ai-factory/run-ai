@@ -1,0 +1,35 @@
+policy:
+  id: test-policy
+  # The formatter declares arrayKey.argName = "id", so the set enforcement must
+  # provide an "id" arg in its value map. The rule omits it -> SetEnforcement
+  # returns a 400 error ("field items requires key 'id' to be set").
+  effectiveRules:
+    - field: items
+      specSelector: self
+      enforcements:
+        - set:
+            value: only-value
+
+  breakdown:
+    fields:
+      items:
+        - specSelectors: [self]
+          formatter:
+            setExpr: |
+              {
+                "items": [
+                  {
+                    "id": $ARGS.named.id,
+                    "value": $ARGS.named.value
+                  }
+                ]
+              }
+            arrayKey:
+              argName: id
+    specSelectors:
+      self:
+        query: "."
+
+workload:
+  apiVersion: test/v1
+  kind: Synthetic

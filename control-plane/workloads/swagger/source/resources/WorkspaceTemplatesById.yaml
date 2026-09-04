@@ -1,0 +1,134 @@
+get:
+  summary: Retrieve a specific workspace template by ID. [Experimental]
+  operationId: get_workspace_template
+  description: Retrieve a specific workspace template by ID.
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/templates_service_test.go
+  x-authorize:
+    resource-type: templates
+    action: read
+  tags:
+    - Workload templates
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/TemplateId.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../../../infra/openapi/docs/schemas/workspaces/WorkspaceTemplate.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+delete:
+  summary: Delete a workspace template by ID. [Experimental]
+  operationId: delete_workspace_template
+  description: Delete a workspace template by ID.
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/templates_service_test.go
+  x-authorize:
+    resource-type: templates
+    action: delete
+  tags:
+    - Workload templates
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/TemplateId.yaml"
+  responses:
+    204:
+      $ref: "../../../../infra/openapi/docs/responses/204NoContent.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+patch:
+  summary: Patch a workspace template by ID. [Experimental]
+  operationId: patch_workspace_template
+  description: Patch a workspace template by ID.
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/templates_service_test.go
+  x-authorize:
+    resource-type: templates
+    action: update
+  tags:
+    - Workload templates
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/TemplateId.yaml"
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../../../infra/openapi/docs/schemas/workspaces/WorkspaceTemplatePatchRequest.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../../../infra/openapi/docs/schemas/workspaces/WorkspaceTemplate.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+put:
+  summary: Update a workspace template by ID. [Experimental]
+  operationId: update_workspace_template
+  description: Update a workspace template by ID.
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/templates_service_test.go
+  x-authorize:
+    resource-type: templates
+    action: update
+  tags:
+    - Workload templates
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/TemplateId.yaml"
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../../../infra/openapi/docs/schemas/workspaces/WorkspaceTemplateUpdateRequest.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../../../infra/openapi/docs/schemas/workspaces/WorkspaceTemplate.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

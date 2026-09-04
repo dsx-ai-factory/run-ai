@@ -1,0 +1,14 @@
+# Minimal valid run.ai/Distributed/v1 manifest used as the starting point for every
+# Layer 3+4 case.
+#
+# This is a fictive GVK representing Run.ai native distributed policy spec.
+# The workload spec nests both replica specs under .spec: worker and master.
+apiVersion: run.ai/v1
+kind: Distributed
+metadata:
+  name: test
+spec:
+  worker:
+    image: placeholder
+  master:
+    image: placeholder

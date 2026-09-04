@@ -1,0 +1,38 @@
+authSecret: ngc-secret
+expose:
+  ingress:
+    enabled: false
+    spec: {}
+  router: {}
+  service:
+    port: 8000
+    type: ClusterIP
+image:
+  repository: nvidia/nim-llama3-8b-instruct
+  tag: 1.0.0
+inferencePlatform: standalone
+livenessProbe: {}
+metrics:
+  enabled: true
+  serviceMonitor: {}
+readinessProbe: {}
+replicas: 1
+scale:
+  enabled: true
+  hpa:
+    maxReplicas: 1
+    metrics:
+    - pods:
+        metric:
+          name: custom_metric_name
+        target:
+          averageValue: "100"
+          type: AverageValue
+      type: Pods
+    minReplicas: 1
+schedulerName: runai-scheduler
+startupProbe: {}
+storage:
+  nimCache:
+    name: nim-cache
+  pvc: {}

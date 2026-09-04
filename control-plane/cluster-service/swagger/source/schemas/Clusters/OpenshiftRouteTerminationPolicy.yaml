@@ -1,0 +1,7 @@
+type: string
+nullable: true
+enum:
+  - edge
+  - passthrough
+description: TLS termination policy for Run:ai-generated OpenShift Routes.
+example: edge

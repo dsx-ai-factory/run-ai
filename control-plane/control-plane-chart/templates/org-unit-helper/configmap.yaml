@@ -1,0 +1,25 @@
+{{- include "common.configMap" (list . .Values.orgUnitHelper "control-plane.orgUnitHelper.configmap") }}
+
+{{- define "control-plane.orgUnitHelper.configmap" -}}
+{{- $top := first . }}
+data:
+  LOG_LEVEL: {{ $top.Values.orgUnitHelper.config.logLevel | quote }}
+  SERVICE_NAME: {{ $top.Values.orgUnitHelper.name | quote }}
+  DB_NAME: {{ $top.Values.orgUnitService.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_VERBOSE_LOGGING: {{ $top.Values.orgUnitService.config.dbVerboseLogging | default $top.Values.global.postgresql.dbVerboseLogging | quote }}
+  DB_HOST: {{ $top.Values.orgUnitService.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SSL_MODE: {{ $top.Values.orgUnitService.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_SCHEMA: {{ $top.Values.orgUnitService.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  DB_PORT: {{ $top.Values.orgUnitService.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  TENANTS_MANAGER_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.tenantsManager.name ($top.Values.tenantsManager.service.port | toString ) }}
+  QUERY_24H_RANGE_INTERVAL_SECONDS: {{ $top.Values.orgUnitHelper.config.query24hRangeIntervalSeconds | quote }}
+  QUERY_7D_RANGE_INTERVAL_SECONDS: {{ $top.Values.orgUnitHelper.config.query7dRangeIntervalSeconds | quote }}
+  QUERY_30D_RANGE_INTERVAL_SECONDS: {{ $top.Values.orgUnitHelper.config.query30dRangeIntervalSeconds | quote }}
+  QUERY_24H_RANGE_INITIAL_SLEEP_SECONDS: {{ $top.Values.orgUnitHelper.config.query24hRangeInitialSleepSeconds | quote }}
+  QUERY_7D_RANGE_INITIAL_SLEEP_SECONDS: {{ $top.Values.orgUnitHelper.config.query7dRangeInitialSleepSeconds | quote }}
+  QUERY_30D_RANGE_INITIAL_SLEEP_SECONDS: {{ $top.Values.orgUnitHelper.config.query30dRangeInitialSleepSeconds | quote }}
+  RATE_LIMITER_LIMIT: {{ $top.Values.orgUnitHelper.config.rateLimiterLimit | quote }}
+  RATE_LIMITER_BURST: {{ $top.Values.orgUnitHelper.config.rateLimiterBurst | quote }}
+  DB_SKIP_DEFAULT_TRANSACTION: {{ $top.Values.orgUnitService.config.skipDefaultTransaction | quote }}
+  DB_FULL_SAVE_ASSOCIATIONS: {{ $top.Values.orgUnitService.config.fullSaveAssociations | quote }}
+{{- end }}

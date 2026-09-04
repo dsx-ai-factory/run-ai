@@ -1,0 +1,12 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+nodeAffinityRequired:
+  nodeSelectorTerms:
+    - matchExpressions:
+        - key: hardware
+          operator: In
+          values:
+            - a100
+            - h100

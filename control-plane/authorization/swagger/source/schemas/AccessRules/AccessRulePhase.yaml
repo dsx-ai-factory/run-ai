@@ -1,0 +1,8 @@
+type: string
+enum:
+  - Creating
+  - Ready
+  - NotReady
+  - Deleting
+description: Phase of the Access Rule in the cluster.
+example: Ready

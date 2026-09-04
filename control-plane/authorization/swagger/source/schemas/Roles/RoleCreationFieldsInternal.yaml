@@ -1,0 +1,14 @@
+allOf:
+  - $ref: "./RoleCreationFields.yaml"
+  - type: object
+    required:
+      - name
+      - description
+    properties:
+      permissions:
+        x-internal: true
+        deprecated: true
+        type: array
+        items:
+          $ref: './PostPermission.yaml'
+        x-schema-name: Permissions

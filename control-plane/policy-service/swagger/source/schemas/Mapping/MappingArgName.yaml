@@ -1,0 +1,7 @@
+type: string
+description: The name of an argument referenced by a JQ expression as $ARGS.named.<argName>. The
+  JQ expression may include arguments such as $ARGS.named.containerPort. In this case, containerPort is the argName.
+example: containerPort
+minLength: 1
+maxLength: 63
+pattern: ^[A-Za-z_][A-Za-z0-9_]*$

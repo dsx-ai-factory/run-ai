@@ -1,0 +1,113 @@
+get:
+  summary: Get external idps list
+  x-service: identity-manager
+  x-test-coverage:
+  - src/test/suites/ssoSuite/SAML/saml.test.ts
+  operationId: get_idps
+  x-authorize:
+    resource-type: security-settings
+    action: read
+  parameters:
+  - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  tags:
+  - Idps
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Idp/Idps.yaml'
+          examples:
+            saml:
+              value:
+              - alias: "saml"
+                type: "saml"
+                redirectUri: "https://domain/auth/realms/name/broker/saml/endpoint"
+                samlData: { signingCertificate: "signingCertificateExample", singleSignOnServiceUrl: "https://authhost/protocol/saml", entityId: "example.run.ai/runai", serviceProviderMetadataUrl: "https://example.runai.com/auth/realms/runai/broker/saml/endpoint/descriptor" }
+                mappers: { "gid": "GID", "groups": "GROUPS", "supplementaryGroups": "SUPPLEMENTARYGROUPS", "uid": "UID", "email": "email" }
+            oidc:
+              value:
+              - alias: "oidc"
+                type: "oidc"
+                redirectUri: "https://domain/auth/realms/name/broker/oidc/endpoint"
+                oidcData: { clientId: "my-client-id", clientSecret: "*******", scopes: [ "scope1", "scope2" ], mandatoryClaim: { claim: "my-claim", values: [ "val1", "val2" ] } }
+                mappers: { "gid": "GID", "groups": "GROUPS", "supplementaryGroups": "SUPPLEMENTARYGROUPS", "uid": "UID", "email": "email" }
+            openshift-v4:
+              value:
+              - alias: "openshift-v4"
+                type: "openshift-v4"
+                redirectUri: "https://domain/auth/realms/name/broker/openshift-v4/endpoint"
+                ocpData: { clientId: "my-client-id", clientSecret: "*******", idpBaseUrl: "https://authhost/ocp", scopes: [ "scope1", "scope2" ] }
+                mappers: { "gid": "metadata.gid", "groups": "groups", "supplementaryGroups": "supplementarygroups", "uid": "metadata.uid", "email": "metadata.name" }
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+post:
+  summary: Configure external idp
+  x-service: identity-manager
+  x-test-coverage:
+  - src/test/suites/ssoSuite/SAML/saml.test.ts
+  operationId: create_idp
+  x-authorize:
+    resource-type: security-settings
+    action: create
+  parameters:
+  - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  x-audit: true
+  tags:
+  - Idps
+  requestBody:
+    description: Idp configuration
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/Idp/IdpCreationRequest.yaml'
+        examples:
+          saml (by url):
+            value:
+              type: "saml"
+              samlData: { metadataXmlType: "url", metadataXmlUrl: "https://authhost/saml/metadata.xml" }
+              mappers: { "gid": "GID", "groups": "GROUPS", "supplementaryGroups": "SUPPLEMENTARYGROUPS", "uid": "UID", "email": "email" }
+          saml (by file):
+            value:
+              type: "saml"
+              samlData: { metadataXmlType: "file", fileName: "descriptor.xml", metadataXmlFile: "<file content in base64>" }
+              mappers: { "gid": "GID", "groups": "GROUPS", "supplementaryGroups": "SUPPLEMENTARYGROUPS", "uid": "UID", "email": "email" }
+          oidc:
+            value:
+              type: "oidc"
+              oidcData: { clientId: "my-client-id", clientSecret: "my-client-secret", discoverDocumentUrl: "https://authhost/openid-configuration", mandatoryClaim: { claim: "my-claim", values: [ "val1", "val2" ] } }
+              mappers: { "gid": "GID", "groups": "GROUPS", "supplementaryGroups": "SUPPLEMENTARYGROUPS", "uid": "UID", "email": "email" }
+          openshift-v4:
+            value:
+              type: "openshift-v4"
+              ocpData: { clientId: "my-client-id", clientSecret: "my-client-secret", idpBaseUrl: "https://authhost/ocp" }
+              mappers: { "gid": "metadata.gid", "groups": "groups", "supplementaryGroups": "supplementarygroups", "uid": "metadata.uid", "email": "metadata.name" }
+  responses:
+    '201':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Idp/IdpPostResponse.yaml'
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '409':
+      $ref: '../../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,5 @@
+{
+  "service_name": "build/makefile",
+  "artifact_type": "",
+  "force_build_all": true
+}

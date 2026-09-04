@@ -1,0 +1,24 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package runaistatus
+
+import (
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
+	statuscontract "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/status/contract"
+	commoninference "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/status/inference"
+)
+
+type InferenceServiceCondition = commoninference.ServiceCondition
+type InferenceServiceState = commoninference.ServiceState
+type InferenceInput = commoninference.Input
+
+func ComputeInferenceStatus(input InferenceInput) (v1alpha1.ExternalWorkloadPhase, string) {
+	result := commoninference.Calculate(input)
+	if result.Phase == statuscontract.Ready {
+		return v1alpha1.ExWRunningPhase, result.Message
+	}
+	return v1alpha1.ExternalWorkloadPhase(result.Phase), result.Message
+}

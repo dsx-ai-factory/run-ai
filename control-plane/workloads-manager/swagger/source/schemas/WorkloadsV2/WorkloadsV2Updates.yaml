@@ -1,0 +1,12 @@
+type: object
+properties:
+  requestInfo:
+    $ref: "../../../../../infra/openapi/docs/schemas/sync/RequestInfo.yaml"
+  responseInfo:
+    $ref: "../../../../../infra/openapi/docs/schemas/sync/ResponseInfo.yaml"
+  systemInfo:
+    $ref: "../../../../../infra/openapi/docs/schemas/sync/SystemInfo.yaml"
+  workloads:
+    type: array
+    items:
+      $ref: "./WorkloadV2Update.yaml"

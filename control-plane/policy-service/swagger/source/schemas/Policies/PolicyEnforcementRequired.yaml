@@ -1,0 +1,9 @@
+type: object
+properties:
+  required:
+    description: Requires the field to have a value, supplied either in the submission or by a policy default.
+    type: boolean
+    default: false
+    nullable: true
+example:
+  required: true

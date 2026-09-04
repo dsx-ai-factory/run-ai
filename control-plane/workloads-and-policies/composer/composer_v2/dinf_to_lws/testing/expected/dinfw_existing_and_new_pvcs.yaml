@@ -1,0 +1,113 @@
+Config:
+  mnnvl: None
+  networking:
+  - services:
+    - spec:
+        name: dinfw-test-lws-sp-0
+        ports:
+        - name: serving-port
+          port: 80
+          protocol: TCP
+          targetPort: 8080
+        selector:
+          leaderworkerset.sigs.k8s.io/name: test-lws-1234
+          leaderworkerset.sigs.k8s.io/worker-index: "0"
+        type: ClusterIP
+  pvcs:
+  - metadata:
+      name: generated-pvc-1
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+LeaderWorkerSet:
+  apiVersion: leaderworkerset.x-k8s.io/v1
+  kind: LeaderWorkerSet
+  metadata:
+    annotations:
+      run.ai/submitted-by: tester
+    labels:
+      app: leaderworkerset
+      createdBy: LeaderWorkerSet
+      project: team-a
+      release: test-lws
+      run.ai/control-plane-managed: "true"
+      run.ai/converted-from-native: "true"
+      workloadKind: DistributedInference
+      workloadName: test-lws
+    name: test-lws-1234
+    namespace: runai-team-a
+  spec:
+    leaderWorkerTemplate:
+      leaderTemplate:
+        metadata:
+          labels:
+            app: leaderworkerset
+            createdBy: LeaderWorkerSet
+            project: team-a
+            release: test-lws
+            workloadKind: DistributedInference
+            workloadName: test-lws
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: team-a
+            - name: RUNAI_JOB_NAME
+              value: test-lws
+            image: leader:latest
+            name: leader
+            ports:
+            - containerPort: 8080
+              name: port-8080
+              protocol: TCP
+            readinessProbe:
+              tcpSocket:
+                port: 8080
+            resources: {}
+            volumeMounts:
+            - mountPath: /shared
+              name: pvc-leader-shared
+          priorityClassName: very-high
+          schedulerName: runai-scheduler
+          volumes:
+          - name: pvc-leader-shared
+            persistentVolumeClaim:
+              claimName: shared-claim
+      restartPolicy: RecreateGroupOnPodRestart
+      size: 2
+      workerTemplate:
+        metadata:
+          labels:
+            app: leaderworkerset
+            createdBy: LeaderWorkerSet
+            project: team-a
+            release: test-lws
+            workloadKind: DistributedInference
+            workloadName: test-lws
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: team-a
+            - name: RUNAI_JOB_NAME
+              value: test-lws
+            image: worker:latest
+            name: worker
+            resources: {}
+            volumeMounts:
+            - mountPath: /models
+              name: pvc-worker-models
+          priorityClassName: very-high
+          schedulerName: runai-scheduler
+          volumes:
+          - name: pvc-worker-models
+            persistentVolumeClaim:
+              claimName: generated-pvc-1
+    replicas: 1
+    rolloutStrategy:
+      type: RollingUpdate
+    startupPolicy: LeaderCreated
+  status: {}

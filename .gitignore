@@ -1,0 +1,71 @@
+.DS_Store
+*.pyc
+
+# VSCode
+**/.vscode/*
+**/*.code-workspace
+*.pyc
+
+# intellij
+.idea/
+
+# Local History for Visual Studio Code
+**/.history/
+
+# Built Visual Studio Code Extensions
+**/*.vsix
+
+# Control-plane backup
+control-plane-works/*
+
+# Test coverage
+cover.out
+
+# Cursor workspace
+cursor-workspace.json
+.cursorrules
+.cursor/
+.cursorignore
+
+# Exception: Allow frontend team's shared cursor rules
+!control-plane/frontend/.cursor/
+!control-plane/frontend/.cursor/rules/
+!control-plane/frontend/.cursor/rules/**
+
+# Test cases mapping
+dgxc-customized-envs.sh
+test-results/
+
+logs/*
+runai/allure-results/*
+
+control-plane/infra/lint/linter.json
+runai-common-packages/linter.json
+runai-application-packages/linter.json
+
+# runai-installer
+runai-installer/provisioner-service/poller_docker_compose/runai-secrets/
+runai-installer/**/bin/
+runai-installer/**/cover.out
+runai-installer/**/*.test
+
+# runai-common-packages
+runai-common-packages/**/bin/
+runai-application-packages/validation/coverage.out
+
+# Local development
+.local-dev/logs/*
+.local-dev/certs/*
+.local-dev/hashes/*
+.local-dev/cluster-stamp
+
+# Go toolchain telemetry — emitted automatically by Go 1.23+ into $GOENV dirs;
+# never intentional and vary per developer machine.
+**/.config/go/telemetry/
+
+# Compiled service binaries (built by make build-go-amd / make build-go-arm).
+# These are build artifacts, not source.
+**/bin/*-amd64
+**/bin/*-arm64
+
+**/.gradle

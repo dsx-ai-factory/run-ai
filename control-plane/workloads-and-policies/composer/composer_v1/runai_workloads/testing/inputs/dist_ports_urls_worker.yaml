@@ -1,0 +1,32 @@
+distributedFramework: PyTorch
+exposedUrls:
+  - container: 443
+    toolName: tool-url-cust
+    name: name-url-auto
+image: nginx:alpine
+imagePullPolicy: IfNotPresent
+nodePools:
+  - default
+ports:
+  - container: 80
+    serviceType: NodePort
+    toolName: tool-np-auto
+    toolType: custom
+  - container: 443
+    external: 30041
+    serviceType: NodePort
+    toolName: tool-np-cust
+    toolType: jupyter
+  - container: 80
+    serviceType: LoadBalancer
+    toolName: tool-lb
+    toolType: custom
+  - serviceType: NodePort
+    container: 8080
+    name: name-np-auto
+  - serviceType: NodePort
+    container: 8081
+  - container: 8080
+    serviceType: LoadBalancer
+    toolType: matlab
+    name: name-lb

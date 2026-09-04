@@ -1,0 +1,52 @@
+@import "@vue-flow/core/dist/style.css";
+@import "@vue-flow/core/dist/theme-default.css";
+@import "@vue-flow/controls/dist/style.css";
+@import "@vue-flow/minimap/dist/style.css";
+
+.control-icon {
+  color: var(--icon-default);
+  font-size: 20px;
+  line-height: 1;
+  width: 20px;
+  height: 20px;
+}
+
+.vue-flow__controls {
+  box-shadow: var(--shadow-s);
+  border-radius: var(--b-border-radius-radius-xs);
+  overflow: hidden;
+}
+
+.vue-flow__controls-button {
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+  padding: var(--space-xs) var(--space-s);
+  background: var(--bg-primary-default);
+  border-bottom: 1px solid var(--border-subtle);
+
+  &:hover {
+    background: var(--bg-primary-hover);
+  }
+
+  &:first-child {
+    border-radius: var(--b-border-radius-radius-xs) var(--b-border-radius-radius-xs) 0 0;
+  }
+
+  &:last-child {
+    border-bottom: 0;
+    border-radius: 0 0 var(--b-border-radius-radius-xs) var(--b-border-radius-radius-xs);
+  }
+}
+
+.vue-flow__minimap {
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-primary-default);
+  box-shadow: var(--shadow-s);
+  overflow: hidden;
+
+  svg {
+    display: block;
+  }
+}

@@ -1,0 +1,169 @@
+Config:
+  mnnvl: None
+  networking:
+  - externalAccess:
+      ingress:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: dinfw-test-lws-sp-0
+        spec:
+          rules:
+          - host: test.run.ai
+            http:
+              paths:
+              - backend:
+                  service:
+                    name: dinfw-test-lws-sp-0
+                    port:
+                      number: 80
+                path: /team-a/test-lws
+                pathType: Prefix
+    services:
+    - spec:
+        name: dinfw-test-lws-sp-0
+        ports:
+        - name: serving-port
+          port: 80
+          protocol: TCP
+          targetPort: 8081
+        selector:
+          leaderworkerset.sigs.k8s.io/name: test-lws-1234
+          leaderworkerset.sigs.k8s.io/worker-index: "0"
+        type: ClusterIP
+  pvcs:
+  - metadata:
+      name: generated-pvc-1
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: fast-ssd
+  - metadata:
+      name: generated-pvc-2
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: fast-ssd
+LeaderWorkerSet:
+  apiVersion: leaderworkerset.x-k8s.io/v1
+  kind: LeaderWorkerSet
+  metadata:
+    annotations:
+      run.ai/submitted-by: tester
+    labels:
+      app: leaderworkerset
+      createdBy: LeaderWorkerSet
+      project: team-a
+      release: test-lws
+      run.ai/control-plane-managed: "true"
+      run.ai/converted-from-native: "true"
+      workloadKind: DistributedInference
+      workloadName: test-lws
+    name: test-lws-1234
+    namespace: runai-team-a
+  spec:
+    leaderWorkerTemplate:
+      leaderTemplate:
+        metadata:
+          labels:
+            app: leaderworkerset
+            createdBy: LeaderWorkerSet
+            project: team-a
+            release: test-lws
+            workloadKind: DistributedInference
+            workloadName: test-lws
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: team-a
+            - name: RUNAI_JOB_NAME
+              value: test-lws
+            image: python:3.8
+            name: leader
+            ports:
+            - containerPort: 8081
+              name: port-8081
+              protocol: TCP
+            readinessProbe:
+              tcpSocket:
+                port: 8081
+            resources: {}
+            volumeMounts:
+            - mountPath: /config/app/1
+              name: config-map-leader-app-config
+            - mountPath: /mount/empty/1
+              name: empty-dir-leader
+            - mountPath: /secrets/creds/1
+              name: secret-leader-credentials
+            - mountPath: /data/pvc
+              name: pvc-leader
+          priorityClassName: very-high
+          schedulerName: runai-scheduler
+          volumes:
+          - configMap:
+              name: my-config
+            name: config-map-leader-app-config
+          - emptyDir: {}
+            name: empty-dir-leader
+          - name: secret-leader-credentials
+            secret:
+              secretName: my-secret
+          - name: pvc-leader
+            persistentVolumeClaim:
+              claimName: generated-pvc-1
+      restartPolicy: RecreateGroupOnPodRestart
+      size: 2
+      workerTemplate:
+        metadata:
+          labels:
+            app: leaderworkerset
+            createdBy: LeaderWorkerSet
+            project: team-a
+            release: test-lws
+            workloadKind: DistributedInference
+            workloadName: test-lws
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: team-a
+            - name: RUNAI_JOB_NAME
+              value: test-lws
+            image: python:3.8
+            name: worker
+            resources: {}
+            volumeMounts:
+            - mountPath: /config/app/2
+              name: config-map-worker-app-config
+            - mountPath: /mount/empty/2
+              name: empty-dir-worker
+            - mountPath: /secrets/creds/2
+              name: secret-worker-credentials
+            - mountPath: /data/pvc
+              name: pvc-worker
+          priorityClassName: very-high
+          schedulerName: runai-scheduler
+          volumes:
+          - configMap:
+              name: my-config
+            name: config-map-worker-app-config
+          - emptyDir: {}
+            name: empty-dir-worker
+          - name: secret-worker-credentials
+            secret:
+              secretName: my-secret
+          - name: pvc-worker
+            persistentVolumeClaim:
+              claimName: generated-pvc-2
+    replicas: 1
+    rolloutStrategy:
+      type: RollingUpdate
+    startupPolicy: LeaderCreated
+  status: {}

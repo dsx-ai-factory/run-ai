@@ -1,0 +1,119 @@
+{{- $runai_operator := index .Values "runai-operator" -}}
+{{- if $runai_operator.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: runai-operator
+spec:
+  replicas: {{ $runai_operator.replicas }}
+  selector:
+    matchLabels:
+      name: runai
+  template:
+    metadata:
+      labels:
+        name: runai
+        app: runai-operator
+    spec:
+      serviceAccountName: {{ .Values.global.serviceAccountName | default "runai-operator" }}
+      containers:
+        - name: runai-go-operator
+          image: {{ include "fullImageName" . }}
+          imagePullPolicy: {{ $runai_operator.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            {{ toYaml $runai_operator.resources | nindent 12 }}
+          ports:
+            - name: metrics
+              containerPort: 8082
+              protocol: TCP
+          args:
+            {{- if .Values.global.nmc }}
+            - --nmc-enabled={{ .Values.global.nmc.enabled }}
+            - --nmc-remote-cluster-api-server-url={{ .Values.global.nmc.remoteCluster.apiServer.url }}
+            {{- end }}
+            {{- if $runai_operator.disableRunaiConfigFinalizer }}
+            - --disable-runai-config-finalizer={{ $runai_operator.disableRunaiConfigFinalizer }}
+            {{- end }}
+            {{- if $runai_operator.disableRunaiConfigFinalizer }}
+            - --disable-runai-config-finalizer={{ $runai_operator.disableRunaiConfigFinalizer }}
+            {{- end }}
+            {{- if $runai_operator.disableRunaiConfigFinalizer }}
+            - --disable-runai-config-finalizer={{ $runai_operator.disableRunaiConfigFinalizer }}
+            {{- end }}
+            {{- if .Values.development.enableProfiling }}
+            - --enable-profiler
+            {{- end }}
+            {{ include "leaderElectionArg" $runai_operator}}
+          env:
+            - name: IMG_DEFAULT_REGISTRY
+              value: {{ include "imageRegistry" . }}
+            - name: IMG_DEFAULT_VERSION
+              value: {{ $runai_operator.image.tag }}
+            {{- range $name, $image := .Values.thirdPartyImages }}
+            - name: IMG_THIRD_PARTY_{{ $name | replace "-" "_" | upper }}_REGISTRY
+              value: {{ required (printf "thirdPartyImages.%s.registry is required" $name) $image.registry | quote }}
+            - name: IMG_THIRD_PARTY_{{ $name | replace "-" "_" | upper }}_REPOSITORY
+              value: {{ required (printf "thirdPartyImages.%s.repository is required" $name) $image.repository | quote }}
+            - name: IMG_THIRD_PARTY_{{ $name | replace "-" "_" | upper }}_TAG
+              value: {{ required (printf "thirdPartyImages.%s.tag is required" $name) $image.tag | quote }}
+            {{- end }}
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: GODEBUG
+              value: {{ printf "fips140=%s" (include "globalFipsMode" .) | quote }}
+          {{- if .Values.global.customCA.enabled }}
+          volumeMounts:
+            - mountPath: /etc/ssl/certs/runai-ca.pem
+              name: runai-ca-cert
+              subPath: runai-ca.pem
+          {{- end }}
+          readinessProbe:
+            httpGet:
+              path: "/readyz"
+              port: 8083
+      imagePullSecrets:{{ include "imagePullSecretList" .| nindent 8 }}
+{{- if .Values.global.customCA.enabled }}
+      volumes:
+        - secret:
+            items:
+            - key: {{ .Values.global.customCA.secret.key }}
+              path: runai-ca.pem
+            secretName: {{ .Values.global.customCA.secret.name }}
+            optional: {{ .Values.global.customCA.secret.optional }}
+          name: runai-ca-cert
+{{- end }}
+      affinity:{{- include "deploymentAffinity" .| nindent 8 }}
+      tolerations: {{- include "deploymentTolerations" .| nindent 8 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: runai-operator
+  labels:
+    app: runai-operator
+  namespace: runai
+spec:
+  selector:
+    app: runai-operator
+  ports:
+    - name: metrics
+      port: 8082
+      protocol: TCP
+      targetPort: metrics
+  type: ClusterIP
+{{- end -}}

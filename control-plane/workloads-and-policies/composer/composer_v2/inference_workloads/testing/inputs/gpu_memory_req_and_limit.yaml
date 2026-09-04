@@ -1,0 +1,9 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+compute:
+  gpuDevicesRequest: 1
+  gpuRequestType: memory
+  gpuMemoryRequest: 10M
+  gpuMemoryLimit: 11M

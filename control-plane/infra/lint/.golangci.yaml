@@ -1,0 +1,85 @@
+version: "2"
+
+run:
+  tests: false
+  timeout: 10m
+  issues-exit-code: 1
+
+output:
+  formats:
+    json:
+      path: linter.json
+    text:
+      path: stdout
+      colors: true
+
+formatters:
+  enable:
+    - gofmt
+
+linters:
+  default: none
+  enable:
+    # Readability
+    - lll
+    # - wsl
+    - unused
+    - goconst
+    # - mnd
+
+    # Security
+    - gosec
+    - sqlclosecheck  # sql.Rows/sql.Stmt not closed
+    - rowserrcheck   # sql.Rows.Err() not checked after iteration
+
+    # Safety
+    - noctx  # HTTP client calls without context propagation
+
+    # Quality
+    # - errcheck
+    - govet
+    # - gosimple
+    - ineffassign
+    - staticcheck
+  settings:
+    lll:
+      line-length: 220
+      tab-width: 1
+    gosec:
+      excludes:
+        - G109
+        - G115
+      # Allowlist mode: only run SQL injection rules (G201/G202).
+      # Prevents noise from unrelated gosec rules while services clean up
+      # existing violations. Remove `includes` to enable all gosec rules.
+      includes:
+        - G201  # SQL query construction using format string
+        - G202  # SQL query construction using string concatenation
+  exclusions:
+    generated: lax
+    paths:
+      - bin
+      - vendor
+      - generated
+      - swagger
+      - testing.go
+    rules:
+      # Relax security/context linters in test files
+      - path: "_test\\.go"
+        linters: [gosec, noctx]
+      # Helpers under a test/ directory are only referenced from _test.go
+      # files, which golangci-lint does not load because run.tests is false.
+      # `unused` therefore reports every such helper as dead code.
+      - path: "(^|/)test/"
+        linters: [unused, noctx]
+      # TODO: Teams to fix their own lint issues for staticcheck and lll.
+      # gosec is now scoped to G201+G202 only via includes above, so it is
+      # no longer excluded per-team — new SQL injection patterns will be caught.
+
+issues:
+  new-from-rev: origin/master
+  max-same-issues: 50
+  max-issues-per-linter: 100
+
+severity:
+  default: error

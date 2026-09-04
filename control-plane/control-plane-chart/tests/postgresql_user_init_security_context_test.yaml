@@ -1,0 +1,25 @@
+suite: Test PostgreSQL User Init Security Context
+
+templates:
+  - templates/helm-hooks/postgresql-user-init/job.yaml
+
+tests:
+  - it: should omit runAsUser on OpenShift
+    set:
+      global.config.kubernetesDistribution: openshift
+    asserts:
+      - notExists:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+      - notExists:
+          path: spec.template.spec.initContainers[0].securityContext.runAsUser
+
+  - it: should set runAsUser on Kubernetes
+    set:
+      global.config.kubernetesDistribution: kubernetes
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+          value: 70
+      - equal:
+          path: spec.template.spec.initContainers[0].securityContext.runAsUser
+          value: 70

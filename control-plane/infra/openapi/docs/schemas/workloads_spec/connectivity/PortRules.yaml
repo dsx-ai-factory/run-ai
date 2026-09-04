@@ -1,0 +1,16 @@
+description: Rules for port attributes
+properties:
+  container:
+      $ref: "../../policy_rules/IntegerRules.yaml"
+  serviceType:
+    $ref: "./PortServiceTypeRules.yaml"
+  customExternalPort:
+    $ref: "../../policy_rules/BooleanRules.yaml"
+  external:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  toolType:
+    $ref: "../../policy_rules/StringRules.yaml"
+  toolName:
+    $ref: "../../policy_rules/StringRules.yaml"
+nullable: true
+type: object

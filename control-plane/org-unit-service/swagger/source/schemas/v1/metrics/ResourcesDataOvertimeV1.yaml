@@ -1,0 +1,10 @@
+allOf:
+  - $ref: './MetricsResourcesDataV1.yaml'
+  - type: object
+    required:
+      - timestamp
+    properties:
+      timestamp:
+        type: string
+        format: date-time
+        example: '2023-06-06T12:09:18.211Z'

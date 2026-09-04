@@ -1,0 +1,8 @@
+name: includeAncestors
+in: query
+x-internal: true
+description: When filtering by projectId, set includeAncestors=true to include templates from the project's 
+  parent department and cluster in the response. Any reason we are calling this includeAncestors
+schema:
+  type: boolean
+required: false

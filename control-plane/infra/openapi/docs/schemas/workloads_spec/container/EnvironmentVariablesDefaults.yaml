@@ -1,0 +1,5 @@
+properties:
+  instances:
+    $ref: "./EnvironmentVariables.yaml"
+nullable: true
+type: object

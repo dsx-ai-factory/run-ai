@@ -1,0 +1,666 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.0
+  name: externalworkloads.run.ai
+spec:
+  group: run.ai
+  names:
+    kind: ExternalWorkload
+    listKind: ExternalWorkloadList
+    plural: externalworkloads
+    shortNames:
+    - ew
+    singular: externalworkload
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: ExternalWorkload is the Schema for the externalworkloads API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ExternalWorkloadSpec defines the desired state of ExternalWorkload
+            properties:
+              additionalFields:
+                description: if we have more fields we want to pass to the server,
+                  we can use this field
+                type: string
+              creationTimestamp:
+                description: the CreationTimestamp of the associated workload object
+                format: date-time
+                type: string
+              departmentId:
+                type: string
+              departmentName:
+                type: string
+              group:
+                type: string
+              imageName:
+                type: string
+              nodeAffinities:
+                description: |-
+                  NodeAffinities captures the user-requested node affinity per pod template,
+                  extracted from the top owner. Each entry's specName matches the pod-template
+                  name in the owning workload (e.g. "worker", "master", "leader") and aligns
+                  with the control-plane WorkloadNodeAffinity API shape.
+                items:
+                  description: |-
+                    NodeAffinityEntry pairs a node-affinity scheduling specification with the
+                    pod-template SpecName it applies to (e.g. "worker", "master", "leader").
+                  properties:
+                    nodeAffinity:
+                      description: NodeAffinity is the scheduling constraint for pods
+                        of the named spec.
+                      properties:
+                        preferredDuringSchedulingIgnoredDuringExecution:
+                          description: |-
+                            The scheduler will prefer to schedule pods to nodes that satisfy
+                            the affinity expressions specified by this field, but it may choose
+                            a node that violates one or more of the expressions. The node that is
+                            most preferred is the one with the greatest sum of weights, i.e.
+                            for each node that meets all of the scheduling requirements (resource
+                            request, requiredDuringScheduling affinity expressions, etc.),
+                            compute a sum by iterating through the elements of this field and adding
+                            "weight" to the sum if the node matches the corresponding matchExpressions; the
+                            node(s) with the highest sum are the most preferred.
+                          items:
+                            description: |-
+                              An empty preferred scheduling term matches all objects with implicit weight 0
+                              (i.e. it's a no-op). A null preferred scheduling term matches no objects (i.e. is also a no-op).
+                            properties:
+                              preference:
+                                description: A node selector term, associated with
+                                  the corresponding weight.
+                                properties:
+                                  matchExpressions:
+                                    description: A list of node selector requirements
+                                      by node's labels.
+                                    items:
+                                      description: |-
+                                        A node selector requirement is a selector that contains values, a key, and an operator
+                                        that relates the key and values.
+                                      properties:
+                                        key:
+                                          description: The label key that the selector
+                                            applies to.
+                                          type: string
+                                        operator:
+                                          description: |-
+                                            Represents a key's relationship to a set of values.
+                                            Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.
+                                          type: string
+                                        values:
+                                          description: |-
+                                            An array of string values. If the operator is In or NotIn,
+                                            the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                            the values array must be empty. If the operator is Gt or Lt, the values
+                                            array must have a single element, which will be interpreted as an integer.
+                                            This array is replaced during a strategic merge patch.
+                                          items:
+                                            type: string
+                                          type: array
+                                          x-kubernetes-list-type: atomic
+                                      required:
+                                      - key
+                                      - operator
+                                      type: object
+                                    type: array
+                                    x-kubernetes-list-type: atomic
+                                  matchFields:
+                                    description: A list of node selector requirements
+                                      by node's fields.
+                                    items:
+                                      description: |-
+                                        A node selector requirement is a selector that contains values, a key, and an operator
+                                        that relates the key and values.
+                                      properties:
+                                        key:
+                                          description: The label key that the selector
+                                            applies to.
+                                          type: string
+                                        operator:
+                                          description: |-
+                                            Represents a key's relationship to a set of values.
+                                            Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.
+                                          type: string
+                                        values:
+                                          description: |-
+                                            An array of string values. If the operator is In or NotIn,
+                                            the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                            the values array must be empty. If the operator is Gt or Lt, the values
+                                            array must have a single element, which will be interpreted as an integer.
+                                            This array is replaced during a strategic merge patch.
+                                          items:
+                                            type: string
+                                          type: array
+                                          x-kubernetes-list-type: atomic
+                                      required:
+                                      - key
+                                      - operator
+                                      type: object
+                                    type: array
+                                    x-kubernetes-list-type: atomic
+                                type: object
+                                x-kubernetes-map-type: atomic
+                              weight:
+                                description: Weight associated with matching the corresponding
+                                  nodeSelectorTerm, in the range 1-100.
+                                format: int32
+                                type: integer
+                            required:
+                            - preference
+                            - weight
+                            type: object
+                          type: array
+                          x-kubernetes-list-type: atomic
+                        requiredDuringSchedulingIgnoredDuringExecution:
+                          description: |-
+                            If the affinity requirements specified by this field are not met at
+                            scheduling time, the pod will not be scheduled onto the node.
+                            If the affinity requirements specified by this field cease to be met
+                            at some point during pod execution (e.g. due to an update), the system
+                            may or may not try to eventually evict the pod from its node.
+                          properties:
+                            nodeSelectorTerms:
+                              description: Required. A list of node selector terms.
+                                The terms are ORed.
+                              items:
+                                description: |-
+                                  A null or empty node selector term matches no objects. The requirements of
+                                  them are ANDed.
+                                  The TopologySelectorTerm type implements a subset of the NodeSelectorTerm.
+                                properties:
+                                  matchExpressions:
+                                    description: A list of node selector requirements
+                                      by node's labels.
+                                    items:
+                                      description: |-
+                                        A node selector requirement is a selector that contains values, a key, and an operator
+                                        that relates the key and values.
+                                      properties:
+                                        key:
+                                          description: The label key that the selector
+                                            applies to.
+                                          type: string
+                                        operator:
+                                          description: |-
+                                            Represents a key's relationship to a set of values.
+                                            Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.
+                                          type: string
+                                        values:
+                                          description: |-
+                                            An array of string values. If the operator is In or NotIn,
+                                            the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                            the values array must be empty. If the operator is Gt or Lt, the values
+                                            array must have a single element, which will be interpreted as an integer.
+                                            This array is replaced during a strategic merge patch.
+                                          items:
+                                            type: string
+                                          type: array
+                                          x-kubernetes-list-type: atomic
+                                      required:
+                                      - key
+                                      - operator
+                                      type: object
+                                    type: array
+                                    x-kubernetes-list-type: atomic
+                                  matchFields:
+                                    description: A list of node selector requirements
+                                      by node's fields.
+                                    items:
+                                      description: |-
+                                        A node selector requirement is a selector that contains values, a key, and an operator
+                                        that relates the key and values.
+                                      properties:
+                                        key:
+                                          description: The label key that the selector
+                                            applies to.
+                                          type: string
+                                        operator:
+                                          description: |-
+                                            Represents a key's relationship to a set of values.
+                                            Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.
+                                          type: string
+                                        values:
+                                          description: |-
+                                            An array of string values. If the operator is In or NotIn,
+                                            the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                                            the values array must be empty. If the operator is Gt or Lt, the values
+                                            array must have a single element, which will be interpreted as an integer.
+                                            This array is replaced during a strategic merge patch.
+                                          items:
+                                            type: string
+                                          type: array
+                                          x-kubernetes-list-type: atomic
+                                      required:
+                                      - key
+                                      - operator
+                                      type: object
+                                    type: array
+                                    x-kubernetes-list-type: atomic
+                                type: object
+                                x-kubernetes-map-type: atomic
+                              type: array
+                              x-kubernetes-list-type: atomic
+                          required:
+                          - nodeSelectorTerms
+                          type: object
+                          x-kubernetes-map-type: atomic
+                      type: object
+                    specName:
+                      description: SpecName identifies the pod template within the
+                        owning workload (e.g. "worker", "master").
+                      type: string
+                  required:
+                  - specName
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - specName
+                x-kubernetes-list-type: map
+              originalWorkloadName:
+                type: string
+              originalWorkloadUID:
+                description: |-
+                  UID is a type that holds unique ID values, including UUIDs.  Because we
+                  don't ONLY use UUIDs, this is an alias to string.  Being a type captures
+                  intent and helps make sure that UIDs and names do not get conflated.
+                type: string
+              preemptibility:
+                type: string
+              priorityClassName:
+                type: string
+              projectId:
+                type: string
+              projectName:
+                type: string
+              requestedNodePools:
+                description: the following fields will be populated if the workload
+                  object contains the info
+                items:
+                  type: string
+                type: array
+              requestedPods:
+                properties:
+                  completions:
+                    description: Specifies the maximum desired number of pods the
+                      workload should run at any given time.
+                    format: int32
+                    type: integer
+                  maxReplicas:
+                    description: MaxReplicas denotes the maximum number of desired
+                      pods.
+                    format: int32
+                    type: integer
+                  minReplicas:
+                    description: MinReplicas denotes the minimum number of desired
+                      pods.
+                    format: int32
+                    type: integer
+                  parallelism:
+                    description: |-
+                      Parallelism - used with Hyperparameter Optimization. Specifies the number of successful pods
+                      the job should reach to be completed. The 'parallelism' flag should be smaller or equal to 'completions'
+                    format: int32
+                    type: integer
+                  replicas:
+                    description: Replicas is the number of desired pods.
+                    format: int32
+                    type: integer
+                type: object
+              requestedResources:
+                description: request and limit of each resource type we need
+                properties:
+                  claims:
+                    description: |-
+                      Claims lists the names of resources, defined in spec.resourceClaims,
+                      that are used by this container.
+
+                      This field depends on the
+                      DynamicResourceAllocation feature gate.
+
+                      This field is immutable. It can only be set for containers.
+                    items:
+                      description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                      properties:
+                        name:
+                          description: |-
+                            Name must match the name of one entry in pod.spec.resourceClaims of
+                            the Pod where this field is used. It makes that resource available
+                            inside a container.
+                          type: string
+                        request:
+                          description: |-
+                            Request is the name chosen for a request in the referenced claim.
+                            If empty, everything from the claim is made available, otherwise
+                            only the result of this request.
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                    x-kubernetes-list-map-keys:
+                    - name
+                    x-kubernetes-list-type: map
+                  limits:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: |-
+                      Limits describes the maximum amount of compute resources allowed.
+                      More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    type: object
+                  requests:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: |-
+                      Requests describes the minimum amount of compute resources required.
+                      If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                      otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                      More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                    type: object
+                type: object
+              storageRefs:
+                description: |-
+                  StorageRefs lists the existing PVCs, Secrets, and ConfigMaps referenced by
+                  this workload's pod template (volumes and imagePullSecrets).
+                items:
+                  description: |-
+                    StorageRef is a reference to an existing resource consumed by the workload's
+                    pod template. The external-workload-integrator resolves UID once per reconcile
+                    so cluster-sync passes it through instead of re-resolving on every sync.
+                  properties:
+                    kind:
+                      description: StorageRefKind enumerates the existing-resource
+                        kinds a workload can reference.
+                      enum:
+                      - PersistentVolumeClaim
+                      - Secret
+                      - ConfigMap
+                      type: string
+                    name:
+                      type: string
+                    uid:
+                      description: UID is the resolved Kubernetes UID of the referenced
+                        resource.
+                      type: string
+                  required:
+                  - kind
+                  - name
+                  type: object
+                type: array
+                x-kubernetes-list-type: atomic
+              topology:
+                properties:
+                  name:
+                    type: string
+                  preferredPlacement:
+                    type: string
+                  requiredPlacement:
+                    type: string
+                type: object
+              type:
+                description: the type of the workload - usually the k8s object's kind
+                type: string
+              urls:
+                description: urls of the workload, if exist
+                items:
+                  type: string
+                type: array
+              version:
+                type: string
+            type: object
+          status:
+            description: ExternalWorkloadStatus defines the observed state of ExternalWorkload
+            properties:
+              networkStatus:
+                description: WorkloadNetworkStatus defines the status of the network
+                  detected
+                properties:
+                  externalEndpoints:
+                    description: External endpoint discovered on workload
+                    items:
+                      properties:
+                        SourceRef:
+                          description: endpoint sourceRef
+                          properties:
+                            kind:
+                              description: endpoint sourceRef kind
+                              type: string
+                            name:
+                              description: endpoint sourceRef name
+                              type: string
+                          type: object
+                        host:
+                          description: endpoint host
+                          type: string
+                        path:
+                          description: endpoint path
+                          type: string
+                        port:
+                          description: endpoint port
+                          type: string
+                        protocol:
+                          description: endpoint protocol
+                          type: string
+                        sourceType:
+                          description: endpoint type
+                          type: string
+                        tlsEnabled:
+                          description: endpoint tls
+                          type: boolean
+                        url:
+                          description: endpoint url
+                          type: string
+                      type: object
+                    type: array
+                type: object
+              observedStatus:
+                description: ExternalWorkloadObservedStatus defines the observed status
+                  of the referred ExternalWorkload object
+                properties:
+                  childIds:
+                    description: the k8s UUIDs of all child objects of the workload
+                    items:
+                      properties:
+                        type:
+                          type: string
+                        uid:
+                          type: string
+                      required:
+                      - type
+                      - uid
+                      type: object
+                    type: array
+                  conditions:
+                    description: Represents the latest observed conditions of the
+                      original workload, if any.
+                    items:
+                      description: ObservedCondition describes the state of the original
+                        workload at a certain point.
+                      properties:
+                        lastTransitionTime:
+                          description: Last time the condition transitioned from one
+                            status to another.
+                          format: date-time
+                          nullable: true
+                          type: string
+                        message:
+                          description: A human readable message indicating details
+                            about the transition.
+                          type: string
+                        reason:
+                          description: The reason for the condition's last transition.
+                          type: string
+                        status:
+                          description: Status of the condition, one of True, False,
+                            Unknown.
+                          type: string
+                        type:
+                          description: Type of the condition.
+                          type: string
+                      required:
+                      - status
+                      - type
+                      type: object
+                    type: array
+                  k8sStatus:
+                    description: native k8s status
+                    type: string
+                  lastStatusChangeTime:
+                    description: the timestamp of the last status update (except sync
+                      status)
+                    format: date-time
+                    type: string
+                  message:
+                    description: a string describing the reason for the phase, if
+                      exists
+                    type: string
+                  phase:
+                    description: mapping native k8s statuses to pre-defined list of
+                      phases
+                    type: string
+                type: object
+              structureElements:
+                properties:
+                  elements:
+                    description: Flat list of intermediate child elements (levels
+                      1-3).
+                    items:
+                      properties:
+                        id:
+                          description: Generated UUID of the element
+                          type: string
+                        instanceKey:
+                          description: Instance identifier from ComponentInstanceSelector
+                            (e.g., "Frontend", "PrefillWorker").
+                          type: string
+                        k8sRef:
+                          description: Reference to the backing K8s object. Present
+                            for object-backed elements, nil for logical elements.
+                          properties:
+                            gvk:
+                              properties:
+                                group:
+                                  type: string
+                                kind:
+                                  type: string
+                                version:
+                                  type: string
+                              required:
+                              - group
+                              - kind
+                              - version
+                              type: object
+                            name:
+                              type: string
+                            uid:
+                              description: |-
+                                UID is a type that holds unique ID values, including UUIDs.  Because we
+                                don't ONLY use UUIDs, this is an alias to string.  Being a type captures
+                                intent and helps make sure that UIDs and names do not get conflated.
+                              type: string
+                          required:
+                          - gvk
+                          - name
+                          - uid
+                          type: object
+                        level:
+                          description: 'Hierarchy level: 1-3 only (intermediate child
+                            elements).'
+                          type: integer
+                        name:
+                          description: Display name / deterministic key for stable
+                            matching across recalculations.
+                          type: string
+                        parentId:
+                          description: Parent element ID. Empty for level 1 elements
+                            (parent is implicitly the workload).
+                          type: string
+                        replicaKey:
+                          description: Replica identifier if applicable.
+                          type: string
+                      required:
+                      - id
+                      - level
+                      - name
+                      type: object
+                    type: array
+                  lastCalculated:
+                    description: Last time structure was calculated.
+                    format: date-time
+                    type: string
+                required:
+                - elements
+                - lastCalculated
+                type: object
+              syncStatus:
+                description: WorkloadSyncStatus defines the status of the sync, reported
+                  by cluster-sync
+                properties:
+                  lastAttemptedSyncGeneration:
+                    description: the last generation that was attempted to be synced
+                      - in case sync failed
+                    format: int64
+                    type: integer
+                  lastAttemptedSyncStatusChangeTime:
+                    description: the last statusChangeTime that was attempted to be
+                      synced - in case sync failed
+                    format: date-time
+                    type: string
+                  lastSyncGeneration:
+                    description: the last object Generation that was observed and
+                      synced to control-plane - "Generation" is only for spec fields
+                    format: int64
+                    type: integer
+                  lastSyncStatusChangeTime:
+                    description: the last status change time that was observed and
+                      synced to control-plane.
+                    format: date-time
+                    type: string
+                  lastSyncStatusChecksum:
+                    description: the last observed and synced status change time (LastStatusChangeTime)
+                    format: int32
+                    type: integer
+                  lastSyncTimestamp:
+                    description: should be populated by the cluster-sync when syncing
+                      the object
+                    format: date-time
+                    type: string
+                  syncErrorMsg:
+                    description: in case of an error - a string describing the error
+                    type: string
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

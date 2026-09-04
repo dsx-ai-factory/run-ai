@@ -1,0 +1,6 @@
+SortOrder:
+  $ref: '../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml'
+Limit:
+  $ref: '../../../infra/openapi/docs/parameters/query/optional/NumberOfSamples.yaml'
+Offset:
+  $ref: '../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'

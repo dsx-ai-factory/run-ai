@@ -1,0 +1,16 @@
+{
+  "target": {
+    "path": {
+      "deployment": "runai-project-controller"
+    },
+    "namespace": "runai"
+  },
+  "feature": {
+    "env": true,
+    "fs": "read",
+    "network": {
+      "incoming": "steal",
+      "outgoing": true
+    }
+  }
+}

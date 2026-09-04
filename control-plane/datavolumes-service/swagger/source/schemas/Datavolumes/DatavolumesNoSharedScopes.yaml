@@ -1,0 +1,4 @@
+type: array
+items:
+  $ref: './DatavolumeNoSharedScopes.yaml'
+x-schema-name: DatavolumesNoSharedScopes

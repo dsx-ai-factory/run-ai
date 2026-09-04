@@ -1,0 +1,4 @@
+allOf:
+  - $ref: "./TemplateAssetsIds.yaml"
+type: object
+nullable: true

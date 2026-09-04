@@ -1,0 +1,47 @@
+required:
+  - name
+  - requestedName
+  - workloadId
+  - projectId
+  - clusterId
+  - createdBy
+  - createdAt
+  - desiredPhase
+properties:
+  name:
+    $ref: "./WorkloadName.yaml"
+  requestedName:
+    description: The name as was requested for the workload. 
+      If useGivenNameAsPrefix, in the creation request, is false, name and requestedName should be identical.
+      Otherwise, name should be composed of requestedName followed by a suffix of random characters.
+    type: string
+
+  workloadId:
+    $ref: "./WorkloadId.yaml"
+  projectId:
+    $ref: "../scopes/ProjectId.yaml"
+  departmentId:
+    $ref: "../scopes/DepartmentId.yaml"
+  clusterId:
+    $ref: "../scopes/ClusterId.yaml"
+
+  createdBy:
+    description: The user who created the workload
+    type: string
+    example: test@lab.com
+  createdAt:
+    description: The creation time of the workload.
+    type: string
+    format: date-time
+    example: 2022-01-01T03:49:52.531Z
+  deletedAt:
+    description: The deletion time of the workload.
+    type: string
+    nullable: true
+    format: date-time
+    example: 2022-01-01T03:49:52.531Z
+
+  desiredPhase:
+    $ref: "./WorkloadDesiredPhase.yaml"
+  actualPhase:
+    $ref: "./Phase.yaml"

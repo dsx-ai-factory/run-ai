@@ -1,0 +1,18 @@
+description: Request to submit a model-inference from a set of assets and an optional set of specific run parameters.
+required:
+  - meta
+  - assets
+properties:
+  meta:
+    $ref: "../../../../../infra/openapi/docs/schemas/workloads/WorkloadCreationMeta.yaml"
+  assets:
+    required:
+      - model
+      - compute
+    properties:
+      model:
+        $ref: "../../../../../infra/openapi/docs/schemas/assets/AssetId.yaml"
+      compute:
+        $ref: "../../../../../infra/openapi/docs/schemas/assets/AssetId.yaml"
+  specificRunParams:
+    $ref: "../Inference/InferenceSpecificRunParams.yaml"

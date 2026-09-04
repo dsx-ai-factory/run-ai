@@ -1,0 +1,34 @@
+post:
+  summary: Delete Multiple Access Rules
+  operationId: access_rules_batch
+  x-service: authorization
+  x-audit: true
+  x-test-coverage:
+  - control-plane/authorization/pkg/services/access_rules_batch_api_test.go
+  x-authorize:
+    resource-type: access_rules
+    action: delete
+  tags:
+    - Access rules
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/AccessRules/AccessRulesBatchFields.yaml'
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/AccessRules/AccessRuleDeletionBatchResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

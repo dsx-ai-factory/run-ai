@@ -1,0 +1,9 @@
+image: ubuntu
+
+storage:
+  emptyDirVolume:
+    - path: /mount/empty/1
+      sizeLimit: 256Mi
+      medium: Memory
+    - path: /mount/empty/2
+      medium: Memory

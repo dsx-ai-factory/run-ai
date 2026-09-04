@@ -1,0 +1,157 @@
+# Kitchen-sink reference manifest for apps.nvidia.com/NIMService/v1alpha1.
+# Contains every field covered by nimServiceSpec + nimServiceContainer +
+# metadata field groups — used by Layer 1/2 tests to verify that every mapped
+# field resolves correctly from the JQ spec selectors.
+apiVersion: apps.nvidia.com/v1alpha1
+kind: NIMService
+metadata:
+  name: test
+  # workloadMetadata (CR-level)
+  labels:
+    app: test
+  annotations:
+    example.com/annotation: "test-value"
+spec:
+  # ----- workload scalars -----
+  authSecret: ngc-api-key
+  replicas: 1
+  runtimeClassName: gvisor
+  schedulerName: default-scheduler
+  userID: 1000
+  groupID: 2000
+  inferencePlatform: standalone
+
+  # podAffinity / livenessProbe / readinessProbe / startupProbe are exposed
+  # as opaque OBJECTs in the mapping — empty objects satisfy the schema.
+  podAffinity: {}
+  livenessProbe: {}
+  readinessProbe: {}
+  startupProbe: {}
+
+  # ----- podMetadata (labels/annotations propagated to pods) -----
+  labels:
+    pod.app: test
+  annotations:
+    pod.example.com/annotation: "pod-test-value"
+
+  # ----- storage (three flavors; sharedMemorySizeLimit is orthogonal) -----
+  storage:
+    hostPath: /data/nim-cache
+    readOnly: false
+    sharedMemorySizeLimit: "1Gi"
+    nimCache:
+      name: my-nim-cache
+      profile: throughput
+    pvc:
+      name: nim-service-pvc
+      create: true
+      storageClass: standard
+      size: "10Gi"
+      subPath: cache
+      volumeAccessMode: ReadWriteOnce
+
+  # ----- expose -----
+  expose:
+    service:
+      type: ClusterIP
+      name: my-service
+      port: 8000
+      grpcPort: 9000
+      metricsPort: 9001
+      annotations:
+        service.example.com/annotation: svc-value
+    ingress:
+      enabled: false
+      annotations:
+        ingress.example.com/annotation: ing-value
+
+  # ----- multiNode -----
+  multiNode:
+    backendType: lws
+    parallelism:
+      pipeline: 2
+      tensor: 4
+    mpi:
+      mpiStartTimeout: 300
+
+  # ----- scale -----
+  scale:
+    enabled: true
+    annotations:
+      scale.example.com/annotation: scale-value
+    hpa:
+      minReplicas: 1
+      maxReplicas: 5
+
+  # ----- metrics -----
+  metrics:
+    enabled: true
+    serviceMonitor:
+      annotations:
+        monitor.example.com/annotation: monitor-value
+      additionalLabels:
+        additional-label: label-value
+      interval: "30s"
+      scrapeTimeout: "10s"
+
+  # ----- proxy -----
+  proxy:
+    httpProxy: "http://proxy.example.com:3128"
+    httpsProxy: "http://proxy.example.com:3128"
+    noProxy: "localhost,.cluster.local"
+    certConfigMap: proxy-certs
+
+  # ----- nodeSelector + tolerations -----
+  nodeSelector:
+    test: somevalue
+  tolerations:
+    - key: test
+      operator: Equal
+      value: somevalue
+      effect: NoSchedule
+      tolerationSeconds: 60
+
+  # ----- container-like: image / command / args / env / resources -----
+  image:
+    repository: nvcr.io/nim/llm
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+    pullSecrets: ["my-pull-secret"]
+  command: ["/opt/nim/start.sh"]
+  args: ["--config=/etc/nim/config.yaml"]
+  env:
+    - name: ENV_VALUE
+      value: "direct"
+    - name: ENV_CONFIGMAP
+      valueFrom:
+        configMapKeyRef:
+          name: my-config
+          key: config-key
+          optional: false
+    - name: ENV_FIELD
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.name
+    - name: ENV_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: my-secret
+          key: secret-key
+          optional: true
+    - name: ENV_RESOURCE
+      valueFrom:
+        resourceFieldRef:
+          containerName: test
+          divisor: "1"
+          resource: limits.cpu
+  resources:
+    requests:
+      cpu: "1"
+      memory: "4Gi"
+    limits:
+      cpu: "2"
+      memory: "8Gi"
+    claims:
+      - name: myclaim
+        request: shared-request

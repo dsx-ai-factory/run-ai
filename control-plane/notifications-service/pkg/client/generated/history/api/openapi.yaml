@@ -1,0 +1,315 @@
+openapi: 3.0.3
+info:
+  description: API for notifications-service config endpoint
+  title: Notifications Service Config API
+  version: 1.0.0
+servers:
+- url: /
+tags:
+- description: Events history API
+  name: events-history
+paths:
+  /api/v1/events:
+    delete:
+      description: "Deletes a batch of events for a specific user in a specific tenant,\
+        \ optionally filtered by read status"
+      operationId: deleteEvents
+      parameters:
+      - description: Tenant that owns the events
+        explode: true
+        in: query
+        name: tenantId
+        required: true
+        schema:
+          type: string
+        style: form
+      - description: User within the tenant whose events are returned or deleted;
+          only supported when tenantId is provided
+        explode: true
+        in: query
+        name: userId
+        required: true
+        schema:
+          type: string
+        style: form
+      - description: "When set, return or delete only events with this read status"
+        explode: true
+        in: query
+        name: read
+        required: false
+        schema:
+          nullable: true
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - events
+    get:
+      description: "Returns the list of events for a tenant user, optionally filtered\
+        \ by tenantId, userId (only supported if tenantId is provided), and read status"
+      operationId: getEvents
+      parameters:
+      - description: Tenant that owns the events
+        explode: true
+        in: query
+        name: tenantId
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: User within the tenant whose events are returned or deleted;
+          only supported when tenantId is provided
+        explode: true
+        in: query
+        name: userId
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "When set, return or delete only events with this read status"
+        explode: true
+        in: query
+        name: read
+        required: false
+        schema:
+          nullable: true
+          type: boolean
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Event"
+                type: array
+          description: List of events
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - events
+  /api/v1/events/{eventId}:
+    delete:
+      description: Deletes a specific event by id
+      operationId: deleteEvent
+      parameters:
+      - description: Unique identifier of the event
+        explode: false
+        in: path
+        name: eventId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: The specified resource was not found
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - events
+    patch:
+      description: Updates the read status of a specific event for a user
+      operationId: updateEventRead
+      parameters:
+      - description: Unique identifier of the event
+        explode: false
+        in: path
+        name: eventId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventReadUpdate"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                example: OK
+                type: string
+          description: OK
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Bad request - Resource should have a name
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Bad request
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: The specified resource was not found
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Internal server error
+              schema:
+                $ref: "#/components/schemas/APIError"
+          description: Internal server error
+      tags:
+      - events
+components:
+  responses:
+    Events:
+      content:
+        application/json:
+          schema:
+            items:
+              $ref: "#/components/schemas/Event"
+            type: array
+      description: List of events
+    InternalServerError:
+      content:
+        application/json:
+          example:
+            code: 500
+            message: Internal server error
+          schema:
+            $ref: "#/components/schemas/APIError"
+      description: Internal server error
+    OkRequest:
+      content:
+        application/json:
+          schema:
+            example: OK
+            type: string
+      description: OK
+    NotFound:
+      content:
+        application/json:
+          example:
+            code: 404
+            message: The specified resource was not found
+          schema:
+            $ref: "#/components/schemas/APIError"
+      description: The specified resource was not found
+    BadRequest:
+      content:
+        application/json:
+          example:
+            code: 400
+            message: Bad request - Resource should have a name
+          schema:
+            $ref: "#/components/schemas/APIError"
+      description: Bad request
+  schemas:
+    Event:
+      description: A persisted notification event for a tenant user
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        read: true
+        sourceListener: sourceListener
+        id: id
+        properties:
+          key: ""
+      properties:
+        id:
+          description: Unique ID of the event
+          type: string
+        sourceListener:
+          description: ID of the listener that received the event
+          type: string
+        properties:
+          additionalProperties: true
+          description: Event-specific dynamic properties
+          type: object
+        createdAt:
+          description: When the event was created
+          format: date-time
+          type: string
+        read:
+          description: Whether the event has been read
+          type: boolean
+      required:
+      - createdAt
+      - id
+      - properties
+      - read
+      - sourceListener
+      type: object
+    APIError:
+      example:
+        code: 400
+        message: Bad request - Resource should have a name
+      properties:
+        code:
+          maximum: 599
+          minimum: 100
+          type: integer
+        message:
+          type: string
+        details:
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    EventReadUpdate:
+      description: Update payload for event read status
+      example:
+        read: true
+      properties:
+        read:
+          description: "true to mark the event as read, false to mark it as unread"
+          nullable: true
+          type: boolean
+      type: object

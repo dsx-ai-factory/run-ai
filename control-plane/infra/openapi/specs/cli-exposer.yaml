@@ -1,0 +1,882 @@
+openapi: 3.0.0
+info:
+  version: 2.0.0
+  title: cli-exposer
+  description: An API for managing RunAI Researcher Command Line Interface
+  contact:
+    name: Run.AI
+    url: https://www.run.ai/
+    email: support@run.ai
+servers:
+  - url: https://app.run.ai
+  - url: https://staging.run.ai
+  - url: https://test.run.ai
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+paths:
+  /:
+    x-internal: true
+    get:
+      summary: health check
+      x-no-authorization: true
+      x-service: cli-exposer
+      x-internal: true
+      operationId: health
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Executed successfully.
+  /api/v1/cli-exposer/installer/unix:
+    get:
+      summary: Download Unix installer script
+      description: |
+        This endpoint returns a unix script that can be used to install the Run:ai CLI.
+      operationId: get_installer_unix
+      x-service: cli-exposer
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface
+      responses:
+        '200':
+          description: File download successful
+          content:
+            text/plain:
+              x-default: true
+              schema:
+                type: string
+              example: Contents of the file
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/cli-exposer/installer/unix/commands:
+    get:
+      summary: Get Unix installer script commands
+      description: |
+        This endpoint returns a unix script commands that can be used to install the Run:ai CLI.
+      operationId: get_installer_unix_commands
+      x-service: cli-exposer
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface
+      responses:
+        '200':
+          description: A text commands to install the CLI on Unix
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Command'
+              example: Contents of the commands to install the CLI on Unix
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/cli-exposer/installer/mac:
+    get:
+      summary: Download Mac installer script
+      description: |
+        This endpoint returns a Mac script that can be used to install the Run:ai CLI.
+      operationId: get_installer_mac
+      x-service: cli-exposer
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface
+      responses:
+        '200':
+          description: File download successful
+          content:
+            text/plain:
+              x-default: true
+              schema:
+                type: string
+              example: Contents of the file
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/cli-exposer/installer/mac/commands:
+    get:
+      summary: Get Mac installer script commands
+      description: |
+        This endpoint returns a Mac script commands that can be used to install the Run:ai CLI.
+      operationId: get_installer_mac_commands
+      x-service: cli-exposer
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface
+      responses:
+        '200':
+          description: A text commands to install the CLI on Mac
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Command'
+              example: Contents of the commands to install the CLI on Mac
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/cli-exposer/installer/linux:
+    get:
+      summary: Download Linux installer script
+      description: |
+        This endpoint returns a Linux script that can be used to install the Run:ai CLI.
+      operationId: get_installer_linux
+      x-service: cli-exposer
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface
+      responses:
+        '200':
+          description: File download successful
+          content:
+            text/plain:
+              x-default: true
+              schema:
+                type: string
+              example: Contents of the file
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/cli-exposer/installer/linux/commands:
+    get:
+      summary: Get Linux installer script commands
+      description: |
+        This endpoint returns a linux script commands that can be used to install the Run:ai CLI.
+      operationId: get_installer_linux_commands
+      x-service: cli-exposer
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface
+      responses:
+        '200':
+          description: A text commands to install the CLI on Linux
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Command'
+              example: Contents of the commands to install the CLI on Linux
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/cli-exposer/installer/windows/commands:
+    get:
+      summary: Get Windows MSI installer script commands
+      description: |
+        This endpoint returns a windows script commands that can be used to install the Run:ai CLI.
+      operationId: get_installer_windows_commands
+      x-service: cli-exposer
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface
+      responses:
+        '200':
+          description: A text commands to install the CLI on Windows
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Command'
+              example: Contents of the commands to install the CLI on Windows
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/cli-exposer/version:
+    get:
+      summary: Get CLI latest version
+      description: |
+        This endpoint compares the latest version of the CLI with the current local version. 
+        If the local version is outdated, the endpoint returns the latest version.
+      operationId: get_version
+      x-service: cli-exposer
+      x-internal: true
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/cli-exposer/dist/{operatingSystem}/{architecture}/runai:
+    get:
+      summary: Download RunAI Researcher command line binary
+      description: |
+        This endpoint returns a binary file that run the Run:ai CLI.
+      operationId: get_binary
+      x-service: cli-exposer
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface
+      parameters:
+        - $ref: '#/components/parameters/OperatingSystem'
+        - $ref: '#/components/parameters/Architecture'
+      responses:
+        '200':
+          description: File download successful
+          content:
+            application/octet-stream:
+              x-default: true
+              schema:
+                type: string
+                format: binary
+              example: Contents of the file
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/cli-exposer/docs/{documentName}:
+    get:
+      summary: Get CLI document by name
+      description: |
+        This endpoint returns a document of help for the Run:ai CLI.
+      operationId: get_manual_document
+      x-service: cli-exposer
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface
+      parameters:
+        - $ref: '#/components/parameters/DocumentName'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            text/html:
+              x-default: true
+              schema:
+                type: string
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/cli/installer/unix:
+    get:
+      deprecated: true
+      summary: Download Unix installer script
+      description: |
+        This endpoint returns a unix script that can be used to install the Run:ai CLI.
+      operationId: get_installer_unix_deprecated
+      x-service: cli-exposer
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface Deprecated
+      responses:
+        '200':
+          description: File download successful
+          content:
+            text/plain:
+              x-default: true
+              schema:
+                type: string
+              example: Contents of the file
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/cli/installer/unix/commands:
+    get:
+      deprecated: true
+      summary: Get Unix installer script commands
+      description: |
+        This endpoint returns a unix script commands that can be used to install the Run:ai CLI.
+      operationId: get_installer_unix_commands_deprecated
+      x-service: cli-exposer
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface Deprecated
+      responses:
+        '200':
+          description: A text commands to install the CLI on Unix
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Command'
+              example: Contents of the commands to install the CLI on Unix
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/cli/installer/mac:
+    get:
+      deprecated: true
+      summary: Download Mac installer script
+      description: |
+        This endpoint returns a Mac script that can be used to install the Run:ai CLI.
+      operationId: get_installer_mac_deprecated
+      x-service: cli-exposer
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface Deprecated
+      responses:
+        '200':
+          description: File download successful
+          content:
+            text/plain:
+              x-default: true
+              schema:
+                type: string
+              example: Contents of the file
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/cli/installer/mac/commands:
+    get:
+      deprecated: true
+      summary: Get Mac installer script commands
+      description: |
+        This endpoint returns a Mac script commands that can be used to install the Run:ai CLI.
+      operationId: get_installer_mac_commands_deprecated
+      x-service: cli-exposer
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface Deprecated
+      responses:
+        '200':
+          description: A text commands to install the CLI on Mac
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Command'
+              example: Contents of the commands to install the CLI on Mac
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/cli/installer/linux:
+    get:
+      deprecated: true
+      summary: Download Linux installer script
+      description: |
+        This endpoint returns a Linux script that can be used to install the Run:ai CLI.
+      operationId: get_installer_linux_deprecated
+      x-service: cli-exposer
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface Deprecated
+      responses:
+        '200':
+          description: File download successful
+          content:
+            text/plain:
+              x-default: true
+              schema:
+                type: string
+              example: Contents of the file
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/cli/installer/linux/commands:
+    get:
+      deprecated: true
+      summary: Get Linux installer script commands
+      description: |
+        This endpoint returns a linux script commands that can be used to install the Run:ai CLI.
+      operationId: get_installer_linux_commands_deprecated
+      x-service: cli-exposer
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface Deprecated
+      responses:
+        '200':
+          description: A text commands to install the CLI on Linux
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Command'
+              example: Contents of the commands to install the CLI on Linux
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/cli/installer/windows/commands:
+    get:
+      deprecated: true
+      summary: Get Windows MSI installer script commands
+      description: |
+        This endpoint returns a windows script commands that can be used to install the Run:ai CLI.
+      operationId: get_installer_windows_commands_deprecated
+      x-service: cli-exposer
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface Deprecated
+      responses:
+        '200':
+          description: A text commands to install the CLI on Windows
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Command'
+              example: Contents of the commands to install the CLI on Windows
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/cli/version:
+    get:
+      deprecated: true
+      summary: Get CLI latest version
+      description: |
+        This endpoint compares the latest version of the CLI with the current local version. 
+        If the local version is outdated, the endpoint returns the latest version.
+      operationId: get_version_deprecated
+      x-service: cli-exposer
+      x-internal: true
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface Deprecated
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/cli/dist/{operatingSystem}/{architecture}/runai:
+    get:
+      deprecated: true
+      summary: Download RunAI Researcher command line binary
+      description: |
+        This endpoint returns a binary file that run the Run:ai CLI.
+      operationId: get_binary_deprecated
+      x-service: cli-exposer
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface Deprecated
+      parameters:
+        - $ref: '#/components/parameters/OperatingSystem'
+        - $ref: '#/components/parameters/Architecture'
+      responses:
+        '200':
+          description: File download successful
+          content:
+            application/octet-stream:
+              x-default: true
+              schema:
+                type: string
+                format: binary
+              example: Contents of the file
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/cli/docs/{documentName}:
+    get:
+      deprecated: true
+      summary: Get CLI document by name
+      description: |
+        This endpoint returns a document of help for the Run:ai CLI.
+      operationId: get_manual_document_deprecated
+      x-service: cli-exposer
+      x-test-coverage:
+        - cli-exposer/pkg/services/api_cli_service_test.go
+      x-no-authorization: true
+      tags:
+        - Researcher Command Line Interface Deprecated
+      parameters:
+        - $ref: '#/components/parameters/DocumentName'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            text/html:
+              x-default: true
+              schema:
+                type: string
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+components:
+  responses:
+    400BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 400
+            message: Required parameter is missing
+    401Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 401
+            message: Issuer is not familiar.
+    404NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 404
+            message: Resource id not found.
+    500InternalServerError:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 500
+            message: Something went wrong.
+    503ServiceUnavailable:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 503
+            message: Please try again in few minutes.
+    204NoContent:
+      description: No Content.
+    400BadSubmissionRequest:
+      description: Bad submission request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubmissionError'
+          example:
+            code: 400
+            message: The workload request does not comply with the policy set by the administrator
+    403Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 403
+            message: You do not have sufficient permissions.
+    406NotAcceptable:
+      description: Not acceptable request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    409Conflict:
+      description: The specified resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 409
+            message: Resource with this name already exists
+    412PreconditionFailed:
+      description: The specified resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 412
+            message: Precondition failed
+    413RequestEntityTooLarge:
+      description: Request entity too large
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    415UnsupportedMediaType:
+      description: Unsupported media type
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    501NotImplemented:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 501
+            message: Not implemented
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer authentication
+  schemas:
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          minimum: 100
+          maximum: 599
+        message:
+          type: string
+        details:
+          type: string
+      example:
+        code: 400
+        message: Bad request - Resource should have a name
+    Command:
+      type: object
+      required:
+        - command
+      properties:
+        command:
+          type: string
+          maxLength: 200
+          minLength: 1
+          example: runai version
+          description: The commands that can be used to install the Run:ai CLI.
+    Version:
+      type: object
+      required:
+        - sdkVersion
+        - cpVersion
+        - needUpgrade
+      properties:
+        sdkVersion:
+          type: string
+          maxLength: 100
+          minLength: 1
+          example: 2.0.0
+          description: The version of the CLI SDK
+        cpVersion:
+          type: string
+          maxLength: 100
+          minLength: 1
+          example: 2.50.0
+          description: The version of the CP
+        needUpgrade:
+          type: boolean
+          default: false
+          example: false
+          description: Whether the CLI needs to be upgraded
+    ComplianceIssues:
+      properties:
+        complianceIssues:
+          type: array
+          items:
+            type: object
+            required:
+              - details
+              - field
+            properties:
+              field:
+                type: string
+                example: compute.gpuDevicesRequest
+              details:
+                type: string
+                example: value must be no less than 3
+      nullable: true
+      type: object
+    SubmissionError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - $ref: '#/components/schemas/ComplianceIssues'
+  parameters:
+    OperatingSystem:
+      name: operatingSystem
+      in: path
+      required: true
+      description: The operating system name.
+      schema:
+        type: string
+        enum:
+          - linux
+          - windows
+          - darwin
+        maxLength: 7
+        minLength: 4
+        example: linux
+    Architecture:
+      name: architecture
+      in: path
+      required: true
+      description: The architecture type.
+      schema:
+        type: string
+        maxLength: 10
+        minLength: 4
+        example: arm64
+    DocumentName:
+      name: documentName
+      in: path
+      required: true
+      description: The manual document name.
+      schema:
+        type: string
+        maxLength: 255
+        minLength: 4
+        pattern: ^[A-Za-z0-9_]+\.md$
+        example: runai.md

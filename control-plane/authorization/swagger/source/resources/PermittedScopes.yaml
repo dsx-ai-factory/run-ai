@@ -1,0 +1,43 @@
+post:
+  summary: Calculate permitted scopes.
+  description: Use to calculate user permitted scopes for an action on a resource.
+  x-service: authorization
+  x-test-coverage:
+    - control-plane/authorization/pkg/services/role_api_test.go
+  x-no-authorization: true
+  operationId: get_permitted_scopes
+  tags:
+    - Permissions
+  requestBody:
+    description: The request parameters.
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - resourceType
+          properties:
+            resourceType:
+              $ref: "../schemas/Roles/ResourceType.yaml"
+            action:
+              nullable: true
+              type: string
+              enum:
+                - create
+                - read
+                - update
+                - delete
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Evaluation/PermittedScopesActions.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,5 @@
+description: Optional unique identifier of the asset.
+type: string
+format: uuid
+minLength: 1
+nullable: true

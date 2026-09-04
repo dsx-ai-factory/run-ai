@@ -1,0 +1,7 @@
+description: Arguments to the command that the container running the workload executes.
+type: string
+minLength: 1
+maxLength: 10000
+example: -x my-script.py
+nullable: true
+pattern: .*

@@ -1,0 +1,280 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-anyworkload-controller-project
+rules:
+  - apiGroups:
+      - run.ai
+    resources:
+      - workloadrunners
+      - workloadrunners/status
+      - workloadrunners/finalizers
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - resource.nvidia.com
+    resources:
+      - computedomains
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - watch
+      - update
+---
+# Run:AI AnyworkloadController
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-anyworkload-controller
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - accessrules
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - kai.resources
+    resources:
+      - projects
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - authorization.k8s.io
+    resources:
+      - subjectaccessreviews
+    verbs:
+      - create
+  - apiGroups:
+      - ""
+    resources:
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+  - apiGroups:
+      - route.openshift.io
+    resources:
+      - routes
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+  - apiGroups:
+      - route.openshift.io
+    resources:
+      - routes/custom-host
+    verbs:
+      - create
+  - apiGroups:
+      - gateway.networking.k8s.io
+    resources:
+      - httproutes
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+  - apiGroups:
+      - run.ai
+    resources:
+      - kartas
+      - kartas/status
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - workloadrunners
+      - workloadrunners/status
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+  - apiGroups:
+      - run.ai
+    resources:
+      - restartrequests
+      - restartrequests/status
+      - restartrequests/finalizers
+    verbs:
+      - get
+      - list
+      - watch
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - resource.nvidia.com
+    resources:
+      - computedomains
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - persistentvolumeclaims
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: runai-anyworkload-controller-serviceaccounts
+  namespace: runai
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - serviceaccounts
+    resourceNames:
+      - runai-agent
+      - runtime-rules
+    verbs:
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: runai-anyworkload-controller-serviceaccounts
+  namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: runai-anyworkload-controller-serviceaccounts
+subjects:
+  - kind: ServiceAccount
+    name: anyworkload-controller
+    namespace: runai
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-anyworkload-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-anyworkload-controller
+subjects:
+  - kind: ServiceAccount
+    name: anyworkload-controller
+    namespace: runai
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-anyworkload-controller-additional-workload-gvks-read
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-additional-workload-gvks-read
+subjects:
+  - kind: ServiceAccount
+    name: anyworkload-controller
+    namespace: runai
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: runai-anyworkload-controller-additional-workload-gvks-crud
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-additional-workload-gvks-crud
+subjects:
+  - kind: ServiceAccount
+    name: anyworkload-controller
+    namespace: runai

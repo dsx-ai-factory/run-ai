@@ -1,0 +1,20 @@
+{
+  "feature": {
+    "network": {
+      "incoming": "mirror",
+      "outgoing": true
+    },
+    "fs": "local",
+    "env": true
+  },
+  "target": {
+    "path": {
+      "deployment": "advice-restart-controller",
+      "container": "advice-restart-controller"
+    },
+    "namespace": "runai"
+  },
+  "agent": {
+    "namespace": "runai"
+  }
+}

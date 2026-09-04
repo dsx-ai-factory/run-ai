@@ -1,0 +1,9 @@
+name: updatesAfter
+in: query
+description: list only data with update counter greater than the provided value. for example
+  updatesAfter=5 should fetch data with updates counter 6 and above.
+required: true
+schema:
+  type: integer
+  format: int64
+  example: 12345

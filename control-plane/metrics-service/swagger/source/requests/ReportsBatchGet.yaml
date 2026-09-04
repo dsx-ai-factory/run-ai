@@ -1,0 +1,32 @@
+post:
+  summary: Get a batch of reports.
+  operationId: batch_get_reports_by_ids
+  x-internal: true
+  x-no-authorization: true
+  x-service: metrics-service
+  x-test-coverage:
+    - metrics-service/integration-tests/tests/report_test.go
+  tags:
+    - Reports
+  requestBody:
+    description: Report ids to get.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/ReportsIdsBatchRequest.yaml'
+  responses:
+    200:
+      description: Status Ok. Reports retrieved successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/ReportsBatchGetResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

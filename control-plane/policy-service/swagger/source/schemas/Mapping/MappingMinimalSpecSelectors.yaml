@@ -1,0 +1,4 @@
+type: object
+description: Maps each spec selector name to its description.
+additionalProperties:
+  type: string

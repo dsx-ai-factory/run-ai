@@ -1,0 +1,69 @@
+get:
+  summary: get all clients
+  x-service: identity-manager
+  x-test-coverage:
+    -  runai/control-plane/identity-manager/pkg/services/api_clients_service_test.go
+  operationId: get_all_clients
+  x-no-authorization: true
+  tags:
+  - Clients
+  parameters:
+  - description: Filter results by client attribute.
+    in: query
+    name: filter
+    required: false
+    schema:
+      type: string
+    example: 'runai.cluster_id:123'
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Clients/Clients.yaml'
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+post:
+  summary: create internal client
+  x-service: identity-manager
+  x-test-coverage:
+    -  runai/control-plane/identity-manager/pkg/services/api_clients_service_test.go
+  operationId: create_internal_client
+  x-no-authorization: true
+  tags:
+  - Clients
+  requestBody:
+    description: Client object to create
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/Clients/ClientCreationRequest.yaml#/ClientCreationRequest'
+  responses:
+    '201':
+      $ref: '../../schemas/Clients/ClientCreationResponse.yaml'
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '409':
+      $ref: '../../../../../infra/openapi/docs/responses/409Conflict.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,2724 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Notifications Service Config API",
+    "version": "1.0.0",
+    "description": "API for notifications-service config endpoint",
+    "contact": {
+      "name": "Run.AI",
+      "url": "https://www.run.ai/",
+      "email": "support@run.ai"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://app.run.ai"
+    },
+    {
+      "url": "https://staging.run.ai"
+    },
+    {
+      "url": "https://test.run.ai"
+    },
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "x-internal": true,
+        "x-service": "notifications-proxy",
+        "summary": "health check",
+        "operationId": "health",
+        "x-no-authorization": true,
+        "tags": [
+          "Health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully."
+          }
+        }
+      }
+    },
+    "/api/v1/notification-types": {
+      "get": {
+        "x-no-authorization": true,
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "tags": [
+          "Notification Types"
+        ],
+        "operationId": "getNotificationTypes",
+        "summary": "Get notification types",
+        "description": "Get list of available notification types",
+        "responses": {
+          "200": {
+            "description": "Notification types",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationTypes"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/notification-state": {
+      "get": {
+        "deprecated": true,
+        "x-no-authorization": true,
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "tags": [
+          "Notification State"
+        ],
+        "operationId": "getNotificationState",
+        "summary": "Get notification state",
+        "description": "Get notification state",
+        "responses": {
+          "200": {
+            "description": "Notification state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationState"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "patch": {
+        "deprecated": true,
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "create"
+        },
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "x-audit": true,
+        "tags": [
+          "Notification State"
+        ],
+        "operationId": "updateNotificationState",
+        "summary": "Update notification state",
+        "description": "Update tenant notifications state",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationState"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notification Channel config",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationState"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/notification-state/detailed": {
+      "get": {
+        "deprecated": true,
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "read"
+        },
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "tags": [
+          "Notification State"
+        ],
+        "operationId": "getDetailedNotificationState",
+        "summary": "Get detailed notification state",
+        "description": "Get detailed notification state",
+        "responses": {
+          "200": {
+            "description": "Detailed notification state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DetailedNotificationState"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/email": {
+      "post": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "create"
+        },
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/advancedSuite/notificationsService/notifications.test.ts"
+        ],
+        "x-audit": true,
+        "tags": [
+          "Email"
+        ],
+        "operationId": "createEmail",
+        "summary": "Create email notification channel",
+        "description": "Create email notification channel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailChannel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email notification channel created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailChannel"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/409Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "delete"
+        },
+        "x-service": "notifications-proxy",
+        "x-audit": true,
+        "x-test-coverage": [
+          "src/test/suites/advancedSuite/notificationsService/notifications.test.ts"
+        ],
+        "tags": [
+          "Email"
+        ],
+        "operationId": "deleteEmail",
+        "summary": "Delete email notification channel",
+        "description": "Delete email notification channel",
+        "responses": {
+          "204": {
+            "description": "Email notification channel deleted"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "get": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "update"
+        },
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/advancedSuite/notificationsService/notifications.test.ts"
+        ],
+        "tags": [
+          "Email"
+        ],
+        "operationId": "getEmail",
+        "summary": "Get email notification channel",
+        "description": "Get email notification channel",
+        "responses": {
+          "200": {
+            "description": "Email notification channel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailChannel"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "put": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "update"
+        },
+        "x-service": "notifications-proxy",
+        "x-audit": true,
+        "x-test-coverage": [
+          "src/test/suites/advancedSuite/notificationsService/notifications.test.ts"
+        ],
+        "tags": [
+          "Email"
+        ],
+        "operationId": "updateEmail",
+        "summary": "Update email notification channel",
+        "description": "Update email notification channel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailChannel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email notification channel updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailChannel"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "patch": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "update"
+        },
+        "x-service": "notifications-proxy",
+        "x-audit": true,
+        "x-test-coverage": [
+          "src/test/suites/advancedSuite/notificationsService/notifications.test.ts"
+        ],
+        "tags": [
+          "Email"
+        ],
+        "operationId": "patchEmail",
+        "summary": "Patch email notification channel",
+        "description": "Patch email notification channel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailChannelForPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email notification channel patched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailChannel"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/email/state": {
+      "get": {
+        "x-no-authorization": true,
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notification/notification.test.ts"
+        ],
+        "tags": [
+          "Email"
+        ],
+        "operationId": "getEmailNotificationState",
+        "summary": "Get email notification state",
+        "description": "Get email notification state",
+        "responses": {
+          "200": {
+            "description": "Email Notification state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationStateStatus"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "patch": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "create"
+        },
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notification/notification.test.ts"
+        ],
+        "x-audit": true,
+        "tags": [
+          "Email"
+        ],
+        "operationId": "updateEmailNotificationState",
+        "summary": "Update email notification state",
+        "description": "Update tenant email notification state",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationStateStatus"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email Notification state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationStateStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/email/validate": {
+      "post": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "update"
+        },
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "tags": [
+          "Email"
+        ],
+        "operationId": "validateEmail",
+        "summary": "Validate configuration of Email Channel",
+        "description": "Validate configuration of Email Channel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailChannelConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email Channel validity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateSinkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/409Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/notification-channels": {
+      "get": {
+        "x-no-authorization": true,
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "tags": [
+          "NotificationChannels"
+        ],
+        "operationId": "getNotificationChannels",
+        "summary": "Get supported Notification Channels",
+        "description": "Get supported Notification Channels",
+        "responses": {
+          "200": {
+            "description": "Notification Channel types",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NotificationChannelMeta"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "post": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "update"
+        },
+        "x-service": "notifications-proxy",
+        "x-audit": true,
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "tags": [
+          "NotificationChannels"
+        ],
+        "operationId": "createNotificationChannel",
+        "summary": "Create notification channel",
+        "description": "Create notification channel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationChannel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notification channel created"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/409Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/slack": {
+      "get": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "update"
+        },
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/advancedSuite/notificationsService/notifications.test.ts"
+        ],
+        "tags": [
+          "Slack"
+        ],
+        "operationId": "getSlack",
+        "summary": "Get slack notification channel",
+        "description": "Get slack notification channel",
+        "responses": {
+          "200": {
+            "description": "Slack notification channel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlackNotificationChannel"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/409Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "patch": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "update"
+        },
+        "x-service": "notifications-proxy",
+        "x-audit": true,
+        "x-test-coverage": [
+          "src/test/suites/advancedSuite/notificationsService/notifications.test.ts"
+        ],
+        "tags": [
+          "Slack"
+        ],
+        "operationId": "patchSlack",
+        "summary": "Patch slack notification channel",
+        "description": "Patch slack notification channel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlackNotificationChannelPatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Slack notification channel patched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlackNotificationChannel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/slack/state": {
+      "get": {
+        "x-no-authorization": true,
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "tags": [
+          "Slack"
+        ],
+        "operationId": "getSlackNotificationState",
+        "summary": "Get slack notification state",
+        "description": "Get slack notification state",
+        "responses": {
+          "200": {
+            "description": "Slack Notifications state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationStateStatus"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "patch": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "create"
+        },
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "x-audit": true,
+        "tags": [
+          "Slack"
+        ],
+        "operationId": "updateSlackNotificationState",
+        "summary": "Update slack notification state",
+        "description": "Update tenant slack notification state",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationStateStatus"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Slack Notifications state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationStateStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/slack/state/detailed": {
+      "get": {
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "read"
+        },
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "tags": [
+          "Slack"
+        ],
+        "operationId": "getDetailedSlackNotificationState",
+        "summary": "Get detailed slack notification state",
+        "description": "Get detailed slack notification state",
+        "responses": {
+          "200": {
+            "description": "Detailed slack notification state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DetailedSlackNotificationsState"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/slack/app": {
+      "post": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "update"
+        },
+        "x-service": "notifications-proxy",
+        "x-test-coverage": "not-applicable",
+        "x-audit": true,
+        "tags": [
+          "Slack"
+        ],
+        "operationId": "createSlackApp",
+        "summary": "Create Slack app",
+        "description": "Create Slack app",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSlackAppRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created Slack app response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSlackAppResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "delete"
+        },
+        "x-service": "notifications-proxy",
+        "x-audit": true,
+        "x-test-coverage": "not-applicable",
+        "tags": [
+          "Slack"
+        ],
+        "operationId": "deleteSlackApp",
+        "summary": "Delete Slack app",
+        "description": "Delete Slack app",
+        "responses": {
+          "200": {
+            "description": "Deleted Slack app"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/slack/workspace": {
+      "post": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "update"
+        },
+        "x-service": "notifications-proxy",
+        "x-audit": true,
+        "x-test-coverage": "not-applicable",
+        "tags": [
+          "Slack"
+        ],
+        "operationId": "connectSlackWorkspace",
+        "summary": "Connect Slack workspace",
+        "description": "Connect Slack workspace",
+        "responses": {
+          "200": {
+            "description": "Slack OAuth redirect URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "redirectUrl": {
+                      "type": "string",
+                      "format": "uri",
+                      "example": "https://slack.com/oauth/v2/authorize?..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "delete"
+        },
+        "x-service": "notifications-proxy",
+        "x-audit": true,
+        "x-test-coverage": "not-applicable",
+        "tags": [
+          "Slack"
+        ],
+        "operationId": "disconnectSlackWorkspace",
+        "summary": "Disconnect Slack workspace",
+        "description": "Disconnect Slack workspace",
+        "responses": {
+          "200": {
+            "description": "Disconnected Slack workspace"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/slack/auth": {
+      "get": {
+        "x-internal": true,
+        "x-no-authorization": true,
+        "x-service": "notifications-proxy",
+        "x-test-coverage": "not-applicable",
+        "tags": [
+          "Slack"
+        ],
+        "operationId": "AuthorizeSlackApp",
+        "summary": "Authorize a Slack app",
+        "description": "Authorize a Slack app",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "description": "Handles the OAuth redirect from Slack. Exchanges the authorization code for an access token, new tenant associated sink for notifications created.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": true,
+            "description": "A CSRF token or UI redirect hint sent by the frontend.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated Slack app and sink created"
+          },
+          "400": {
+            "description": "Invalid request."
+          },
+          "500": {
+            "description": "Internal server error during token exchange."
+          }
+        }
+      }
+    },
+    "/api/v1/slack/validate": {
+      "post": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "read"
+        },
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "tags": [
+          "Slack"
+        ],
+        "operationId": "validateSlack",
+        "summary": "Validate configuration of Slack Channel",
+        "description": "Validate configuration of Slack Channel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlackNotificationChannelConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Slack Channel validity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateSinkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/409Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/notification-channels/slack/auth-app": {
+      "get": {
+        "deprecated": true,
+        "x-internal": true,
+        "x-no-authorization": true,
+        "x-service": "notifications-proxy",
+        "x-test-coverage": "not-applicable",
+        "tags": [
+          "Slack"
+        ],
+        "operationId": "AuthorizeSlackAppDeprecated",
+        "summary": "Authorize a Slack app",
+        "description": "Authorize a Slack app",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "description": "Handles the OAuth redirect from Slack. Exchanges the authorization code for an access token, new tenant associated sink for notifications created.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": true,
+            "description": "A CSRF token or UI redirect hint sent by the frontend.",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated Slack app and sink created"
+          },
+          "400": {
+            "description": "Invalid request."
+          },
+          "500": {
+            "description": "Internal server error during token exchange."
+          }
+        }
+      }
+    },
+    "/api/v1/notification-channels/slack/add-app": {
+      "get": {
+        "deprecated": true,
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "update"
+        },
+        "x-service": "notifications-proxy",
+        "x-audit": true,
+        "x-test-coverage": "not-applicable",
+        "tags": [
+          "Slack"
+        ],
+        "operationId": "addSlackAppDeprecated",
+        "summary": "Add Slack app",
+        "description": "Add Slack app",
+        "responses": {
+          "200": {
+            "description": "Slack OAuth redirect URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "redirectUrl": {
+                      "type": "string",
+                      "format": "uri",
+                      "example": "https://slack.com/oauth/v2/authorize?..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/v1/notification-channels/slack/create-app": {
+      "post": {
+        "deprecated": true,
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "update"
+        },
+        "x-service": "notifications-proxy",
+        "x-audit": true,
+        "x-test-coverage": "not-applicable",
+        "tags": [
+          "Slack"
+        ],
+        "operationId": "createSlackAppDeprecated",
+        "summary": "Create Slack app",
+        "description": "Create Slack app",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSlackAppRequestBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created Slack app response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSlackAppResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/notification-channels/{name}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/NotificationChannelName"
+        }
+      ],
+      "get": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "read"
+        },
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "tags": [
+          "NotificationChannels"
+        ],
+        "operationId": "getNotificationChannel",
+        "summary": "Get notification channel",
+        "description": "Get notification channel",
+        "responses": {
+          "200": {
+            "description": "Notification channel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationChannelResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "patch": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "update"
+        },
+        "x-service": "notifications-proxy",
+        "x-audit": true,
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "tags": [
+          "NotificationChannels"
+        ],
+        "operationId": "patchNotificationChannel",
+        "summary": "Patch notification channel",
+        "description": "Patch notification channel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationChannelForPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notification channel patched"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "put": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "update"
+        },
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "tags": [
+          "NotificationChannels"
+        ],
+        "operationId": "updateNotificationChannel",
+        "summary": "Update notification channel",
+        "description": "Update notification channel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationChannel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notification channel updated"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "delete"
+        },
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "tags": [
+          "NotificationChannels"
+        ],
+        "operationId": "deleteNotificationChannel",
+        "summary": "Delete notification channel",
+        "description": "Delete notification channel",
+        "responses": {
+          "204": {
+            "description": "Notification channel deleted"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/validate-notification-channel": {
+      "post": {
+        "x-authorize": {
+          "resource-type": "notification-settings",
+          "action": "read"
+        },
+        "x-service": "notifications-proxy",
+        "deprecated": true,
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "tags": [
+          "NotificationChannels"
+        ],
+        "operationId": "validateNotificationChannel",
+        "summary": "Validate configuration of Notification Channel",
+        "description": "Validate configuration of Notification Channel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationChannelForValidate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notification Channel validity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": true,
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/409Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions": {
+      "get": {
+        "x-no-authorization": true,
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "tags": [
+          "Subscriptions"
+        ],
+        "operationId": "getUserSubscriptions",
+        "summary": "Get user subscriptions",
+        "description": "Get user subscriptions",
+        "responses": {
+          "200": {
+            "description": "User subscriptions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscriptions"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "post": {
+        "x-no-authorization": true,
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "tags": [
+          "Subscriptions"
+        ],
+        "operationId": "createSubscription",
+        "summary": "Create user subscription",
+        "description": "Create user subscription",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Subscription"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Subscription created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/{id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/SubscriptionId"
+        }
+      ],
+      "put": {
+        "x-no-authorization": true,
+        "x-service": "notifications-proxy",
+        "x-audit": true,
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "tags": [
+          "Subscriptions"
+        ],
+        "operationId": "updateSubscription",
+        "summary": "Update user subscription",
+        "description": "Update user subscription",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscriptionForPut"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Subscription created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Subscription"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "x-no-authorization": true,
+        "x-service": "notifications-proxy",
+        "x-test-coverage": [
+          "src/test/suites/playwright/serial/regression/phoenix/notifications/notifications.test.ts"
+        ],
+        "tags": [
+          "Subscriptions"
+        ],
+        "operationId": "deleteSubscription",
+        "summary": "Delete user subscription",
+        "description": "Delete user subscription",
+        "responses": {
+          "204": {
+            "description": "Subscription deleted successfully"
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "501": {
+            "$ref": "#/components/responses/501NotImplemented"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Bearer authentication"
+      }
+    },
+    "schemas": {
+      "NotificationType": {
+        "type": "object",
+        "required": [
+          "category",
+          "type",
+          "description"
+        ],
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "category": "Workload status change",
+          "type": "Creating",
+          "description": "Workload and associated resources are being created in the cluster"
+        }
+      },
+      "NotificationTypes": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NotificationType"
+        }
+      },
+      "Error": {
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "code": 400,
+          "message": "Bad request - Resource should have a name"
+        }
+      },
+      "NotificationStateStatus": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "nullable": true
+          }
+        }
+      },
+      "NotificationState": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "$ref": "#/components/schemas/NotificationStateStatus"
+          },
+          "slack": {
+            "$ref": "#/components/schemas/NotificationStateStatus"
+          }
+        },
+        "example": {
+          "email": {
+            "enabled": true
+          },
+          "slack": {
+            "enabled": true
+          }
+        }
+      },
+      "SlackDetails": {
+        "type": "object",
+        "properties": {
+          "settings": {
+            "type": "object",
+            "properties": {
+              "workspaceName": {
+                "type": "string",
+                "nullable": true
+              },
+              "appCredentialsConfigured": {
+                "type": "boolean",
+                "nullable": true
+              }
+            }
+          }
+        }
+      },
+      "DetailedNotificationState": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "$ref": "#/components/schemas/NotificationStateStatus"
+          },
+          "slack": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NotificationStateStatus"
+              },
+              {
+                "$ref": "#/components/schemas/SlackDetails"
+              }
+            ]
+          }
+        },
+        "example": {
+          "email": {
+            "enabled": true
+          },
+          "slack": {
+            "enabled": true,
+            "settings": {
+              "workspaceName": "<your_workspace_name>",
+              "appCredentialsConfigured": true
+            }
+          }
+        }
+      },
+      "EmailAuthType": {
+        "type": "string",
+        "enum": [
+          "auth_login",
+          "auth_plain",
+          "auth_none",
+          ""
+        ],
+        "default": "auth_login"
+      },
+      "EmailNotificationChannelConfig": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 250
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 250
+          },
+          "smtpHost": {
+            "type": "string",
+            "maxLength": 250
+          },
+          "from": {
+            "type": "string",
+            "maxLength": 250
+          },
+          "smtpPort": {
+            "type": "integer",
+            "default": 587,
+            "maximum": 65535
+          },
+          "authType": {
+            "$ref": "#/components/schemas/EmailAuthType"
+          },
+          "smtpTlsEnabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "recipients": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "minItems": 0,
+            "maxItems": 100
+          },
+          "fromDisplayName": {
+            "type": "string",
+            "default": "Run:ai",
+            "maxLength": 250
+          },
+          "directNotifications": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "useAttachments": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "subject": {
+            "type": "string",
+            "default": "Run:ai notification - {{ .category }} {{ .reason }}",
+            "maxLength": 250
+          }
+        },
+        "example": {
+          "username": "email@gmail.com",
+          "password": 123456,
+          "smtpHost": "smtp.gmail.com",
+          "from": "email@gmail.com",
+          "subject": "My subject"
+        }
+      },
+      "EmailChannelConfig": {
+        "type": "object",
+        "required": [
+          "smtpHost"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EmailNotificationChannelConfig"
+          }
+        ]
+      },
+      "EmailChannel": {
+        "type": "object",
+        "required": [
+          "config"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/EmailChannelConfig"
+          }
+        },
+        "example": {
+          "config": {
+            "username": "email@gmail.com",
+            "password": 123456,
+            "smtpHost": "smtp.gmail.com",
+            "from": "email@gmail.com",
+            "subject": "My subject"
+          }
+        }
+      },
+      "EmailChannelConfigForPatch": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EmailNotificationChannelConfig"
+          }
+        ]
+      },
+      "EmailChannelForPatch": {
+        "type": "object",
+        "required": [
+          "config"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/EmailChannelConfigForPatch"
+          }
+        },
+        "example": {
+          "config": {
+            "username": "email@gmail.com",
+            "password": 123456,
+            "smtpHost": "smtp.gmail.com",
+            "from": "email@gmail.com",
+            "subject": "My subject"
+          }
+        }
+      },
+      "ValidateSinkResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "example": {
+          "status": false,
+          "message": "smtp server validation failed"
+        }
+      },
+      "NotificationChannelMeta": {
+        "type": "object",
+        "required": [
+          "name",
+          "type"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "email",
+              "slack"
+            ],
+            "default": "email"
+          }
+        },
+        "example": {
+          "name": "my-email",
+          "type": "email"
+        }
+      },
+      "NotificationChannelType": {
+        "type": "string",
+        "enum": [
+          "email",
+          "slack"
+        ],
+        "default": "email"
+      },
+      "SlackNotificationChannelConfig": {
+        "type": "object",
+        "properties": {
+          "recipients": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "minItems": 0,
+            "maxItems": 100
+          },
+          "directNotifications": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "apiToken": {
+            "type": "string",
+            "maxLength": 500
+          }
+        },
+        "example": {
+          "apiToken": "<your_api_token>"
+        }
+      },
+      "NotificationChannelConfig": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/EmailNotificationChannelConfig"
+          },
+          {
+            "$ref": "#/components/schemas/SlackNotificationChannelConfig"
+          }
+        ]
+      },
+      "NotificationChannelForPatch": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/NotificationChannelType"
+          },
+          "config": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NotificationChannelConfig"
+              }
+            ],
+            "example": {
+              "username": "email@gmail.com",
+              "password": 123456,
+              "smtpHost": "smtp.gmail.com",
+              "from": "email@gmail.com",
+              "subject": "My subject"
+            }
+          }
+        }
+      },
+      "NotificationChannel": {
+        "type": "object",
+        "required": [
+          "type",
+          "config"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationChannelForPatch"
+          }
+        ]
+      },
+      "SlackNotificationChannel": {
+        "type": "object",
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/SlackNotificationChannelConfig"
+          }
+        }
+      },
+      "SlackNotificationChannelPatchRequest": {
+        "type": "object",
+        "required": [
+          "config"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "readOnly": true
+          },
+          "config": {
+            "type": "object",
+            "properties": {
+              "recipients": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": [],
+                "minItems": 0,
+                "maxItems": 100
+              },
+              "directNotifications": {
+                "type": "boolean",
+                "nullable": true
+              }
+            }
+          }
+        }
+      },
+      "DetailedSlackNotificationsState": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationStateStatus"
+          },
+          {
+            "$ref": "#/components/schemas/SlackDetails"
+          }
+        ],
+        "example": {
+          "enabled": true,
+          "settings": {
+            "workspaceName": "<your_workspace_name>",
+            "appCredentialsConfigured": true
+          }
+        }
+      },
+      "CreateSlackAppRequestBody": {
+        "type": "object",
+        "required": [
+          "accessToken"
+        ],
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "The access token required for creating slack app",
+            "maxLength": 1000
+          }
+        },
+        "example": {
+          "accessToken": "<your_access_token>"
+        }
+      },
+      "CreateSlackAppResponse": {
+        "type": "object",
+        "required": [
+          "slackAppUrl"
+        ],
+        "properties": {
+          "slackAppUrl": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "slackAppUrl": "https://api.slack.com/apps/A089PHD5S0Q"
+        }
+      },
+      "NotificationChannelResponse": {
+        "type": "object",
+        "required": [
+          "type",
+          "config",
+          "name"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationChannel"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "NotificationChannelForValidate": {
+        "type": "object",
+        "required": [
+          "type",
+          "config"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/NotificationChannelForPatch"
+          }
+        ]
+      },
+      "SubscriptionEvent": {
+        "type": "object",
+        "required": [
+          "category",
+          "types"
+        ],
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "SubscriptionEvents": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/SubscriptionEvent"
+        },
+        "minItems": 0,
+        "maxItems": 100
+      },
+      "SubscriptionForPut": {
+        "type": "object",
+        "required": [
+          "events",
+          "channels"
+        ],
+        "properties": {
+          "events": {
+            "$ref": "#/components/schemas/SubscriptionEvents"
+          },
+          "channels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 0,
+            "maxItems": 100
+          }
+        },
+        "example": {
+          "events": [
+            {
+              "category": "cat1",
+              "types": [
+                "type1",
+                "type2"
+              ]
+            },
+            {
+              "category": "cat2",
+              "types": [
+                "type3",
+                "type4"
+              ]
+            }
+          ],
+          "channels": [
+            "email",
+            "email1"
+          ]
+        }
+      },
+      "Subscription": {
+        "type": "object",
+        "required": [
+          "events",
+          "channels"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SubscriptionForPut"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 100
+              }
+            }
+          }
+        ],
+        "example": {
+          "id": 1234,
+          "events": [
+            {
+              "category": "cat1",
+              "types": [
+                "type1",
+                "type2"
+              ]
+            },
+            {
+              "category": "cat2",
+              "types": [
+                "type3",
+                "type4"
+              ]
+            }
+          ],
+          "channels": [
+            "email",
+            "email1"
+          ]
+        }
+      },
+      "Subscriptions": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Subscription"
+        }
+      }
+    },
+    "responses": {
+      "401Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 401,
+              "message": "Issuer is not familiar."
+            }
+          }
+        }
+      },
+      "403Forbidden": {
+        "description": "Forbidden",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 403,
+              "message": "You do not have sufficient permissions."
+            }
+          }
+        }
+      },
+      "404NotFound": {
+        "description": "The specified resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 404,
+              "message": "Resource id not found."
+            }
+          }
+        }
+      },
+      "500InternalServerError": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 500,
+              "message": "Something went wrong."
+            }
+          }
+        }
+      },
+      "501NotImplemented": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 501,
+              "message": "Not implemented"
+            }
+          }
+        }
+      },
+      "503ServiceUnavailable": {
+        "description": "unexpected error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 503,
+              "message": "Please try again in few minutes."
+            }
+          }
+        }
+      },
+      "400BadRequest": {
+        "description": "Bad request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 400,
+              "message": "Required parameter is missing"
+            }
+          }
+        }
+      },
+      "409Conflict": {
+        "description": "The specified resource already exists",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 409,
+              "message": "Resource with this name already exists"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "NotificationChannelName": {
+        "name": "name",
+        "in": "path",
+        "description": "Notification Channel name",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 250
+        }
+      },
+      "SubscriptionId": {
+        "name": "id",
+        "in": "path",
+        "description": "Subscription id",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      }
+    }
+  }
+}

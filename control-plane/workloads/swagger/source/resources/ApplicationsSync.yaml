@@ -1,0 +1,30 @@
+post:
+  summary: Sync AI applications.
+  description: Sync AI applications.
+  operationId: sync_applications
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/ai_applications_service_test.go
+  x-authorize:
+    resource-type: workloads
+    action: sync
+  tags:
+    - AI Applications
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Applications/AIApplicationsForSync.yaml'
+  responses:
+    204:
+      $ref: "../../../../infra/openapi/docs/responses/204NoContent.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

@@ -1,0 +1,13 @@
+type: object
+properties:
+  limit:
+    type: string
+    nullable: true
+    pattern: "^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+    example: "2G"
+  request:
+    type: string
+    nullable: true
+    pattern: "^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
+    example: "200M"
+nullable: true

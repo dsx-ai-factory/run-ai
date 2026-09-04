@@ -1,0 +1,58 @@
+type: object
+required:
+- results
+
+properties:
+  results:
+    type: array
+    items:
+      type: object
+      required:
+      - success
+      properties:
+        success:
+          type: boolean
+          description: Whether the user creation was successful
+        user:
+          $ref: 'UserPostResponse.yaml'
+          description: Created user details (only present if success is true)
+          nullable: true
+        error:
+          type: object
+          description: Error details if creation failed (only present if success is false)
+          nullable: true
+          properties:
+            code:
+              type: integer
+              description: HTTP error code
+            message:
+              type: string
+              description: Error message
+  totalRequested:
+    type: integer
+    description: Total number of users requested for creation
+  totalSuccessful:
+    type: integer
+    description: Number of users successfully created
+  totalFailed:
+    type: integer
+    description: Number of users that failed to be created
+
+example:
+  results:
+  - success: true
+    user:
+      id: "0eeaf222-e503-4f35-9d9c-c419816272e3"
+      username: "user1@run.ai"
+      tempPassword: "asdasidjn9d"
+  - success: false
+    user:
+      id: ""
+      username: "user2@run.ai"
+      tempPassword: ""
+    error:
+      code: 409
+      message: "User already exists"
+  totalRequested: 2
+  totalSuccessful: 1
+  totalFailed: 1

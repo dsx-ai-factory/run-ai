@@ -1,0 +1,99 @@
+BatchJobTarget:
+  Config: {}
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/auto-delete-after-completion-sec: "864000"
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: basic_pc_preemptible
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: basic_pc_preemptible
+      name: basic_pc_preemptible
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            gpu-fraction: "0.5"
+            gpu-fraction-num-devices: "1"
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: basic_pc_preemptible
+            workloadKind: Workspace
+            workloadName: basic_pc_preemptible
+        spec:
+          containers:
+          - args:
+            - -x
+            - my-script.py
+            command:
+            - python-3.8
+            env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: basic_pc_preemptible
+            - name: HOME
+              value: /home/my-folder
+            image: ubuntu
+            name: basic_pc_preemptible
+            resources: {}
+            securityContext:
+              runAsNonRoot: true
+            volumeMounts:
+            - mountPath: /local/directory
+              name: host-path
+              readOnly: true
+            - mountPath: /local/nfs
+              name: nfs
+              readOnly: true
+            workingDir: /home/my-folder
+          priorityClassName: interactive-preemptible
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+          volumes:
+          - hostPath:
+              path: /container/directory
+            name: host-path
+          - name: nfs
+            nfs:
+              path: /container/nfs
+              server: my.nfs.com
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: basic_pc_preemptible, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: basic_pc_preemptible, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  requestedResources:
+    gpu:
+      request: 0.5
+    gpuRequestType: portion
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

@@ -1,0 +1,34 @@
+get:
+  summary: Get projects telemetry
+  operationId: get_projects_telemetry
+  x-service: org-unit-service
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/project_telemetry_test.go
+  description: Get projects telemetry data by the given query parameters
+  x-authorize:
+    resource-type: project
+    action: read
+  tags:
+    - Projects
+  parameters:
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml'
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/FilterByNodepoolId.yaml'
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/FilterByDepartment.yaml'
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/FilterByProject.yaml'
+    - $ref: '../../parameters/TelemetryGroupByProject.yaml'
+    - $ref: '../../parameters/TelemetryType.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../../infra/openapi/docs/schemas/metrics/TelemetryResponse.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

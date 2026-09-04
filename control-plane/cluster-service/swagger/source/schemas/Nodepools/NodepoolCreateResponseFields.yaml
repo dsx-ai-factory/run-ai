@@ -1,0 +1,38 @@
+type: object
+required:
+  - name
+  - labelKey
+  - labelValue
+  - clusterId
+properties:
+  name:
+    type: string
+    example: "v100"
+    minLength: 1
+  labelKey:
+    type: string
+    description: Label key for associated nodes to the Node Pool (with value as in labelValue)
+    example: node-type
+    minLength: 1
+  labelValue:
+    type: string
+    description: Label value for associated nodes to the Node Pool (with key as in labelKey)
+    example: type-x
+    minLength: 1
+  clusterId:
+    type: string
+    format: uuid
+    example: d73a738f-fab3-430a-8fa3-5241493d7128
+  schedulingCapabilities:
+    $ref: "./SchedulingCapabilities.yaml"
+  gpuNetworkAccelerationLabelKey:
+    description: Label key by which to determine GPUNetworkAccelerationDetection nodes
+    type: string
+  gpuNetworkAccelerationDetection:
+    $ref: "./NodepoolGPUNetworkAccelerationDetection.yaml"
+  networkTopologyName:
+    $ref: '../NetworkTopologies/NetworkTopologyNameOptional.yaml'
+  networkTopologyId:
+    $ref: '../NetworkTopologies/NetworkTopologyIdOptional.yaml'
+  schedulingConfiguration:
+    $ref: "./SchedulingConfiguration.yaml"

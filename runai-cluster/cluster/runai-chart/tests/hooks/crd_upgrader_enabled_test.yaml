@@ -1,0 +1,59 @@
+suite: Test CRD Upgrader enabled flag
+
+tests:
+  - it: should render CRD Upgrader Job when enabled is true
+    set:
+      crdUpgrader.enabled: true
+    templates:
+      - templates/hooks/upgrade_crds/job.yaml
+    documentSelector:
+      path: kind
+      value: Job
+    asserts:
+      - isKind:
+          of: Job
+      - equal:
+          path: metadata.name
+          value: runai-crd-upgrader
+      - equal:
+          path: spec.template.spec.automountServiceAccountToken
+          value: true
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="GODEBUG")].value
+          value: fips140=off
+      - equal:
+          path: spec.template.spec.containers[0].args[0]
+          value: --established-timeout=5m
+  - it: should allow overriding the Established timeout
+    set:
+      crdUpgrader.enabled: true
+      crdUpgrader.establishedTimeout: 8m
+    templates:
+      - templates/hooks/upgrade_crds/job.yaml
+    documentSelector:
+      path: kind
+      value: Job
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].args[0]
+          value: --established-timeout=8m
+  - it: should enable FIPS via GODEBUG when global.fipsMode is on
+    set:
+      crdUpgrader.enabled: true
+      global.fipsMode: "on"
+    templates:
+      - templates/hooks/upgrade_crds/job.yaml
+    documentSelector:
+      path: kind
+      value: Job
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[?(@.name=="GODEBUG")].value
+          value: fips140=on
+  - it: should not render CRD Upgrader Job when enabled is false
+    set:
+      crdUpgrader.enabled: false
+    templates:
+      - templates/hooks/upgrade_crds/job.yaml
+    asserts:
+      - notExists: {} 

@@ -1,0 +1,9 @@
+allOf:
+  - $ref: "./Workload.yaml"
+  - type: object
+    properties:
+      pendingSchedulingMessages:
+        nullable: true
+        type: array
+        items:
+          $ref: './PhaseReasons/PendingSchedulingMessage.yaml'

@@ -1,0 +1,20 @@
+type: object
+nullable: true
+
+properties:
+  metadataXmlUrl:
+    type: string
+    pattern: '/^(https?://)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(:[0-9]{1,5})?(/[^\s]*)?$|^$/'
+    maxLength: 2048
+  metadataXmlFile:
+    type: string
+    maxLength: 100000
+  fileName:
+    type: string
+    maxLength: 255
+  metadataXmlType:
+    allOf:
+      - $ref: '../../parameters/SamlCreationDataMetadataXmlTypeEnum.yaml'
+  entityId:
+    type: string
+    maxLength: 2048

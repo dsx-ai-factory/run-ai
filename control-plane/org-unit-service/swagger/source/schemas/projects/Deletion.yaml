@@ -1,0 +1,16 @@
+type: object
+nullable: true
+x-internal: true
+required:
+  - type
+  - timestamp
+  - force
+properties:
+  type:
+    $ref: "./DeletionTypes.yaml"
+  timestamp:
+    type: string
+    format: date-time
+  force:
+    type: boolean
+    default: false

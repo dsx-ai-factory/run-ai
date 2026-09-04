@@ -1,0 +1,24 @@
+type: object
+required:
+- tenantName
+- authClientID
+- authHost
+- isMultiTenant
+- redirectUrl
+properties:
+  tenantName:
+    type: string
+  authClientID:
+    type: string
+  authHost:
+    type: string
+  isMultiTenant:
+    type: boolean
+  redirectUrl:
+    type: string
+example:
+  tenantName: mytest
+  authClientID: runai-admin-ui
+  authHost: https://app.run.ai
+  isMultiTenant: false
+  redirectUrl: https://mytest.run.ai

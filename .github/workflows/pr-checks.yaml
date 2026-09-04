@@ -1,0 +1,320 @@
+name: PR checks
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      go-modules: ${{ steps.matrix.outputs.go-modules }}
+      python-projects: ${{ steps.matrix.outputs.python-projects }}
+      python-dep-projects: ${{ steps.matrix.outputs.python-dep-projects }}
+      node-projects: ${{ steps.matrix.outputs.node-projects }}
+      node-dep-projects: ${{ steps.matrix.outputs.node-dep-projects }}
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - id: matrix
+        run: |
+          set -euo pipefail
+          PREV_REF=$(git rev-parse HEAD~1)
+          all_changed=$(git diff --name-only --diff-filter=ACMDR "$PREV_REF" HEAD || true)
+
+          # Walk each changed file's ancestor directories looking for any of the given marker filenames.
+          # Emits each matched project root once (deduped) as a JSON array.
+          # $1 = space-separated marker filenames (e.g. "go.mod" or "pyproject.toml requirements.txt setup.py Pipfile")
+          walk() {
+            local markers="$1"
+            while read -r f; do
+              [ -z "$f" ] && continue
+              dir=$(dirname "$f")
+              while :; do
+                for m in $markers; do
+                  if [ -f "$dir/$m" ]; then
+                    echo "$dir"
+                    break 2
+                  fi
+                done
+                [ "$dir" = "." ] && break
+                [ "$dir" = "/" ] && break
+                dir=$(dirname "$dir")
+              done
+            done | sort -u | jq -R . | jq -sc .
+          }
+
+          # Go
+          go_changed=$(echo "$all_changed" | grep -E '\.go$|(^|/)go\.mod$|(^|/)go\.sum$' || true)
+          go_modules=$(echo "$go_changed" | walk "go.mod")
+
+          # Python — all changes (for lint discovery)
+          py_changed=$(echo "$all_changed" | grep -E '\.py$|(^|/)(pyproject\.toml|requirements\.txt|setup\.py|Pipfile|Pipfile\.lock)$' || true)
+          py_projects=$(echo "$py_changed" | walk "pyproject.toml requirements.txt setup.py Pipfile")
+          # Python — manifest-only changes (for audit)
+          py_dep_changed=$(echo "$all_changed" | grep -E '(^|/)(pyproject\.toml|requirements\.txt|setup\.py|Pipfile|Pipfile\.lock)$' || true)
+          py_dep_projects=$(echo "$py_dep_changed" | walk "pyproject.toml requirements.txt setup.py Pipfile")
+
+          # Node — all changes (for lint discovery)
+          js_changed=$(echo "$all_changed" | grep -E '\.(js|jsx|mjs|cjs|ts|tsx|vue)$|(^|/)(package\.json|package-lock\.json|yarn\.lock)$' || true)
+          js_projects=$(echo "$js_changed" | walk "package.json")
+          # Node — manifest-only changes (for audit)
+          js_dep_changed=$(echo "$all_changed" | grep -E '(^|/)(package\.json|package-lock\.json|yarn\.lock)$' || true)
+          js_dep_projects=$(echo "$js_dep_changed" | walk "package.json")
+
+          {
+            echo "go-modules=${go_modules:-[]}"
+            echo "python-projects=${py_projects:-[]}"
+            echo "python-dep-projects=${py_dep_projects:-[]}"
+            echo "node-projects=${js_projects:-[]}"
+            echo "node-dep-projects=${js_dep_projects:-[]}"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Resolved Go modules:           ${go_modules:-[]}"
+          echo "Resolved Python projects:      ${py_projects:-[]}"
+          echo "Resolved Python dep projects:  ${py_dep_projects:-[]}"
+          echo "Resolved Node projects:        ${js_projects:-[]}"
+          echo "Resolved Node dep projects:    ${js_dep_projects:-[]}"
+
+  go-lint:
+    needs: discover
+    if: needs.discover.outputs.go-modules != '[]' && needs.discover.outputs.go-modules != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJSON(needs.discover.outputs.go-modules) }}
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: ${{ matrix.module }}/go.mod
+          cache-dependency-path: ${{ matrix.module }}/go.sum
+
+      - uses: golangci/golangci-lint-action@4afd733a84b1f43292c63897423277bb7f4313a9 # v8
+        with:
+          working-directory: ${{ matrix.module }}
+          only-new-issues: true
+          install-mode: goinstall
+          version: v2.9.0
+
+  govulncheck:
+    needs: discover
+    if: needs.discover.outputs.go-modules != '[]' && needs.discover.outputs.go-modules != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJSON(needs.discover.outputs.go-modules) }}
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
+
+      - name: Run govulncheck (informational — does not gate merge)
+        continue-on-error: true
+        uses: golang/govulncheck-action@b625fbe08f3bccbe446d94fbf87fcc875a4f50ee # v1.0.4
+        with:
+          work-dir: ${{ matrix.module }}
+          go-version-file: ${{ matrix.module }}/go.mod
+          cache-dependency-path: ${{ matrix.module }}/go.sum
+          repo-checkout: false
+
+  py-lint:
+    needs: discover
+    if: needs.discover.outputs.python-projects != '[]' && needs.discover.outputs.python-projects != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJSON(needs.discover.outputs.python-projects) }}
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: '3.x'
+
+      - run: pip install ruff==0.15.15
+
+      - name: Run ruff on changed .py files in this project
+        env:
+          PROJECT: ${{ matrix.project }}
+        run: |
+          set -euo pipefail
+          PREV_REF=$(git rev-parse HEAD~1)
+          files=$(git diff --name-only --diff-filter=ACMR "$PREV_REF" HEAD -- '*.py' | grep "^${PROJECT}/" || true)
+          if [ -z "$files" ]; then
+            echo "::notice::No .py files changed in ${PROJECT} — nothing to lint"
+            exit 0
+          fi
+          echo "Linting changed files in ${PROJECT}:"
+          echo "$files"
+          ruff check $files
+
+  pip-audit:
+    needs: discover
+    if: needs.discover.outputs.python-dep-projects != '[]' && needs.discover.outputs.python-dep-projects != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJSON(needs.discover.outputs.python-dep-projects) }}
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: '3.x'
+
+      - run: pip install pip-audit==2.10.0
+
+      - name: Run pip-audit (informational — does not gate merge)
+        continue-on-error: true
+        working-directory: ${{ matrix.project }}
+        run: |
+          set -euo pipefail
+          if [ -f pyproject.toml ]; then
+            pip-audit
+          elif [ -f requirements.txt ]; then
+            pip-audit --requirement requirements.txt
+          elif [ -f setup.py ] || [ -f Pipfile ]; then
+            echo "::warning::pip-audit on setup.py/Pipfile not handled — skipping"
+          fi
+
+  js-lint:
+    needs: discover
+    if: needs.discover.outputs.node-projects != '[]' && needs.discover.outputs.node-projects != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJSON(needs.discover.outputs.node-projects) }}
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Run ESLint on changed JS/TS files in this project (if configured)
+        env:
+          PROJECT: ${{ matrix.project }}
+        run: |
+          set -euo pipefail
+          PREV_REF=$(git rev-parse HEAD~1)
+          changed=$(git diff --name-only --diff-filter=ACMR "$PREV_REF" HEAD -- '*.js' '*.jsx' '*.mjs' '*.cjs' '*.ts' '*.tsx' '*.vue' | grep "^${PROJECT}/" || true)
+          if [ -z "$changed" ]; then
+            echo "::notice::No JS/TS files changed in ${PROJECT} — nothing to lint"
+            exit 0
+          fi
+          cd "${PROJECT}"
+          if ! { [ -f .eslintrc.json ] || [ -f .eslintrc.js ] || [ -f .eslintrc.cjs ] || [ -f .eslintrc.yml ] || [ -f .eslintrc.yaml ] || [ -f eslint.config.js ] || [ -f eslint.config.mjs ] || [ -f eslint.config.cjs ]; }; then
+            echo "::notice::No ESLint config found in ${PROJECT} — skipping"
+            exit 0
+          fi
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+          # Convert workspace-relative paths to project-relative
+          relative=$(echo "$changed" | sed "s|^${PROJECT}/||")
+          echo "Linting changed files in ${PROJECT}:"
+          echo "$relative"
+          npx --no-install eslint $relative
+
+  npm-audit:
+    needs: discover
+    if: needs.discover.outputs.node-dep-projects != '[]' && needs.discover.outputs.node-dep-projects != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJSON(needs.discover.outputs.node-dep-projects) }}
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 'lts/*'
+
+      - name: npm audit (informational — does not gate merge)
+        continue-on-error: true
+        working-directory: ${{ matrix.project }}
+        run: npm audit --audit-level=high
+
+  helm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          persist-credentials: false
+
+      - uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
+        with:
+          version: v3.16.2
+
+      - name: helm dependency update
+        run: helm dependency update control-plane/control-plane-chart
+
+      - name: helm lint
+        run: helm lint control-plane/control-plane-chart
+
+      - name: helm template smoke render
+        run: helm template control-plane/control-plane-chart > /dev/null

@@ -1,0 +1,13 @@
+# Tenants
+Tenant:
+  $ref: "./Tenants/Tenant.yaml"
+Tenants:
+  $ref: "./Tenants/Tenants.yaml"
+TenantCreationRequest:
+  $ref: "./Tenants/TenantCreationRequest.yaml"
+TenantCreationResponse:
+  $ref: "./Tenants/TenantCreationResponse.yaml"
+TenantUpdateRequest:
+  $ref: "./Tenants/TenantUpdateRequest.yaml"
+LogoCreationRequest:
+  $ref: "./Tenants/LogoCreationRequest.yaml"

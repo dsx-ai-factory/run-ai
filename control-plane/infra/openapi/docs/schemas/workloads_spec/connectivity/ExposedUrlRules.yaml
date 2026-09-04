@@ -1,0 +1,18 @@
+description: Rules for the attributed of exposedUrls
+properties:
+  container:
+    $ref: "../../policy_rules/IntegerRules.yaml"
+  customUrl:
+    $ref: "../../policy_rules/BooleanRules.yaml"
+  url:
+    $ref: "../../policy_rules/StringRules.yaml"
+  authorizedUsers:
+    $ref: "../../policy_rules/ArrayRules.yaml"
+  authorizedGroups:
+    $ref: "../../policy_rules/ArrayRules.yaml"
+  toolType:
+    $ref: "../../policy_rules/StringRules.yaml"
+  toolName:
+    $ref: "../../policy_rules/StringRules.yaml"
+nullable: true
+type: object

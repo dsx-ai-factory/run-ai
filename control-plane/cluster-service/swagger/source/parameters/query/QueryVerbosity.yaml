@@ -1,0 +1,10 @@
+name: verbosity
+in: query
+required: false
+description: |
+  response verbosity level.
+example: full
+schema:
+  type: string
+  enum: [metadata, full]
+  default: full

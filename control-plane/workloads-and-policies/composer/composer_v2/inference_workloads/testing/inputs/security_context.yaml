@@ -1,0 +1,15 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+security:
+  runAsUid: 501
+  runAsGid: 20
+  runAsNonRoot: true
+  readOnlyRootFilesystem: true
+  uidGidSource: custom
+  supplementalGroups: "20,12,61,79"
+  seccompProfileType: RuntimeDefault
+  capabilities:
+    - AUDIT_CONTROL
+    - IPC_LOCK

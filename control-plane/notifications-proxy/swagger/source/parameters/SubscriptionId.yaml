@@ -1,0 +1,8 @@
+name: id
+in: path
+description: Subscription id
+required: true
+schema:
+  type: string
+  minLength: 1
+  maxLength: 100

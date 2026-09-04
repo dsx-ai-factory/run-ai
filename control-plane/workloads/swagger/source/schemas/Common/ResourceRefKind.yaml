@@ -1,0 +1,6 @@
+type: string
+description: The Kubernetes resource type of the referenced object.
+enum:
+  - PersistentVolumeClaim
+  - Secret
+  - ConfigMap

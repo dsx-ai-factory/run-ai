@@ -1,0 +1,7 @@
+description: Specifies the number of retries before marking a workload as failed (not applicable to Inference workloads).
+  The default value is 6.
+format: int64
+type: integer
+example: 3
+nullable: true
+deprecated: true

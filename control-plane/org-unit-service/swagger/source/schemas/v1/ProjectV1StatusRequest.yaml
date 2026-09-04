@@ -1,0 +1,15 @@
+properties:
+  status:
+    type: string
+    description: A json representing the project's status
+    example: "{\"namespace\":\"runai-team-a\"}"
+  name:
+    type: string
+    description: Project Name
+    example: team-a
+  departmentName:
+    type: string
+    description: name of the department owning the project
+    example: default
+  quotaStatuses:
+    $ref: './QuotaStatusV1.yaml'

@@ -1,0 +1,37 @@
+post:
+  summary: Delete multiple reports in batch.
+  operationId: batch_delete_reports
+  x-internal: true
+  x-service: org-unit-service
+  description: Deletes multiple reports in a single request. Returns per-report outcomes; deletion is processed asynchronously on the metrics side.
+  x-authorize:
+    resource-type: project
+    action: delete
+  x-audit: true
+  x-test-coverage: not-applicable
+  tags:
+    - Reports
+  requestBody:
+    description: Batch of report IDs to delete.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/batch/BatchDeleteReportsRequest.yaml"
+  responses:
+    202:
+      description: Batch delete accepted. Check accepted and failed lists for per-report outcomes.
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/batch/BatchDeleteReportsResponse.yaml"
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

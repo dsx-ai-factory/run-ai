@@ -1,0 +1,155 @@
+BatchJobTarget:
+  Config:
+    networking:
+    - externalAccess:
+        ingress:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: job-urls_authenticated_users-url
+          spec:
+            rules:
+            - host: test.run.ai
+              http:
+                paths:
+                - backend:
+                    service:
+                      name: job-urls_authenticated_users-url
+                      port:
+                        number: 80
+                  path: /test/urls_authenticated_users
+                  pathType: Prefix
+      services:
+      - spec:
+          name: job-urls_authenticated_users-url
+          ports:
+          - name: port-4180
+            port: 80
+            protocol: TCP
+            targetPort: 4180
+          selector:
+            release: urls_authenticated_users
+          type: ClusterIP
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: urls_authenticated_users
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: urls_authenticated_users
+      name: urls_authenticated_users
+      namespace: runai-test
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: urls_authenticated_users
+            workloadKind: Workspace
+            workloadName: urls_authenticated_users
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: urls_authenticated_users
+            image: ubuntu
+            name: urls_authenticated_users
+            ports:
+            - containerPort: 8081
+              name: port-8081
+              protocol: TCP
+            resources: {}
+          initContainers:
+          - args:
+            - --provider=keycloak-oidc
+            - --upstream=http://localhost:8081
+            - --redirect-url=https://test.run.ai/test/urls_authenticated_users/oauth2/callback
+            - --oidc-issuer-url=/auth/realms/runai
+            - --scope=openid
+            - --http-address=0.0.0.0:4180
+            - --proxy-prefix=/test/urls_authenticated_users/oauth2
+            - --skip-provider-button=true
+            - --whitelist-domain=test.run.ai
+            - --cookie-domain=test.run.ai
+            - --cookie-httponly=true
+            - --cookie-secure=true
+            - --code-challenge-method=S256
+            - --cookie-refresh=10m
+            - --cookie-samesite=lax
+            - --skip-jwt-bearer-tokens=true
+            - --extra-jwt-issuers=/auth/realms/runai=runai
+            - --custom-templates-dir=/usr/share/oauth2-proxy
+            - --pass-authorization-header=false
+            - --cookie-name=urls_authenticated_users-url-auth-proxy
+            - --email-domain=*
+            env:
+            - name: OAUTH2_PROXY_COOKIE_PATH
+              value: /test/urls_authenticated_users
+            envFrom:
+            - secretRef: {}
+            image: test.registry/oauth2-proxy:test
+            imagePullPolicy: IfNotPresent
+            name: runai-oauth2-proxy-0
+            ports:
+            - containerPort: 4180
+              name: port-4180
+              protocol: TCP
+            resources: {}
+            restartPolicy: Always
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+            volumeMounts:
+            - mountPath: /etc/runai/auth/users
+              name: runai-auth
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+          volumes:
+          - emptyDir: {}
+            name: runai-auth
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections:
+    - connectionType: ExternalUrl
+      containerPort: 8081
+      correlationName: url
+      exposedUrlPath: /test/urls_authenticated_users
+      exposedUrlSubDomain: test-urls_authenticated_users
+      name: url
+      serviceResourceName: job-urls_authenticated_users-url
+      toolType: tensor
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: urls_authenticated_users, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: urls_authenticated_users, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

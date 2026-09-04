@@ -1,0 +1,33 @@
+post:
+  summary: Workload batch operations.
+  operationId: batch_workloads
+  x-service: workloads-manager
+  x-test-coverage:
+    - src/test/suites/playwright/parallel/workloads/bulkSuspendResumeApi.test.ts
+    - src/test/suites/playwright/parallel/workloads/bulkDeletionApi.test.ts
+    - src/test/suites/playwright/parallel/workloads/bulkDeletionUI.test.ts
+  x-no-authorization: true
+  tags:
+    - Workloads V2
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/WorkloadsV2/WorkloadsV2Batch.yaml'
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/schemas/batch/BatchResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,5 @@
+image: ubuntu
+compute:
+  gpuMemoryRequest: 2M
+  gpuRequestType: memory
+  gpuDevicesRequest: 2

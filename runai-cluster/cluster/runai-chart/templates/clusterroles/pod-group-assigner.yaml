@@ -1,0 +1,113 @@
+{{- if .Values.operands.rbac.base.create }}
+# Run:AI Pod Grouper
+# Responsible to watch pods in the cluster and group them to podgroups according to their job type
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pod-group-assigner
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+      - patch
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - scheduling.run.ai
+    resources:
+      - podgroups
+    verbs:
+      - get
+      - list
+      - watch
+      - update
+      - patch
+  - apiGroups:
+      - scheduling.run.ai
+    resources:
+      - podgroups/status
+    verbs:
+      - get
+      - list
+      - watch
+      - update
+      - patch
+  - apiGroups:
+      - scheduling.run.ai
+    resources:
+      - queues
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - run.ai
+    resources:
+      - projects
+      - nodepools
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - kai.resources
+    resources:
+      - projects
+      - nodepools
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - kai.scheduler
+    resources:
+      - topologies
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - create
+      - get
+      - list
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+      - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: pod-group-assigner
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: pod-group-assigner
+subjects:
+  - kind: ServiceAccount
+    name: pod-group-assigner
+    namespace: runai
+{{- end }}

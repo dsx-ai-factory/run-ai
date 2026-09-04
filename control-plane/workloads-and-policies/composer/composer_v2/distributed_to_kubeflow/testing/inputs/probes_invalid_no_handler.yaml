@@ -1,0 +1,5 @@
+image: ubuntu
+
+probes:
+  readiness:
+    initialDelaySeconds: 2

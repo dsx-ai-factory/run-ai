@@ -1,0 +1,19 @@
+type: object
+properties:
+  id:
+    type: number
+    description: The NodeType ID.
+    example: 1
+    readOnly: true
+  tenantId:
+    type: number
+    description: The tenant ID.
+    example: 1
+  clusterUuid:
+    type: string
+    description: The cluster UUID.
+    example: "aa889d0b-4752-450c-82a6-1e451e488970"
+  name:
+    type: string
+    description: The NodeType name.
+    example: "gpu-workers"

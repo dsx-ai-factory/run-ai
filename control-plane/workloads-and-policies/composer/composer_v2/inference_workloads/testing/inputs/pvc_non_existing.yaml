@@ -1,0 +1,12 @@
+image: my-llm:latest
+servingPort:
+  container: 8080
+  authorizationType: public
+storage:
+  pvc:
+    - name: models
+      path: /models
+      existingPvc: false
+      claimInfo:
+        size: 10Gi
+        storageClass: standard

@@ -1,0 +1,6 @@
+name: storageClassName
+in: path
+description: The storage class name.
+schema:
+  type: string
+required: true

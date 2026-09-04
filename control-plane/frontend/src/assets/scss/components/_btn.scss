@@ -1,0 +1,36 @@
+$btn-icon-spacing: 10px;
+
+.btn-link.q-btn {
+  text-transform: unset;
+  font-weight: 400;
+  @include m-link-clr;
+
+  .q-focus-helper {
+    display: none;
+  }
+
+  &:hover {
+    text-decoration: underline;
+    background-color: transparent;
+  }
+}
+
+.btn-icon-sm {
+  .q-icon {
+    // Secondary "+ add" buttons match the primary button icon size (20px).
+    font-size: var(--icon-size-default);
+    margin-right: $btn-icon-spacing;
+  }
+}
+
+.btn-icon-md {
+  .q-icon {
+    font-size: var(--icon-size-default);
+  }
+}
+
+.btn-icon-lg {
+  .q-icon {
+    font-size: 20px;
+  }
+}

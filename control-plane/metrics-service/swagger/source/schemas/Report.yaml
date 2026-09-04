@@ -1,0 +1,3 @@
+allOf:
+  - $ref: './ReportCommonFields.yaml'
+  - $ref: '../../../../infra/openapi/docs/schemas/reports/ReportCalculatedFields.yaml'

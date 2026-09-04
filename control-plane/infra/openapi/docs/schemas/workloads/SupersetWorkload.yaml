@@ -1,0 +1,17 @@
+allOf:
+  - $ref: "./WorkloadMeta.yaml"
+  - type: object
+    properties:
+      spec:
+        $ref: "../workloads_spec/SupersetSpec.yaml"
+      masterSpecSameAsWorker:
+        $ref: "../distributed/MasterSpecSameAsWorker.yaml"
+      masterSpec:
+        $ref: "../distributed/MasterSpec.yaml"
+      assetsMapping:
+        type: array
+        description: mapping of asset's name to id used for internal purposes (e.g. for user credentials)
+        items:
+          $ref: "./AssetsMapping.yaml"
+        nullable: true
+        x-internal: true

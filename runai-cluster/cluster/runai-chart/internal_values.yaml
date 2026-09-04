@@ -1,0 +1,16 @@
+# NOTE: 
+# This file is used for developers documentation only, and is not referenced in the chart - therefore default values here have no effect.
+# It contains values that should not be exposed to customers, yet may be used internally by RunAI.
+
+global:
+  nmc:
+    enabled: ""
+    remoteCluster:
+      apiServer:
+        url: ""
+    allowedServiceAccounts: []
+    mgmtPrometheusIngress: {}
+
+# A flag to disable finalizer on the RunaiConfig resource
+runai-operator:
+  disableRunaiConfigFinalizer: true

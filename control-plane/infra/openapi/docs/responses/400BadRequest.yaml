@@ -1,0 +1,8 @@
+description: Bad request.
+content:
+  application/json:
+    schema:
+      $ref: './Error.yaml'
+    example:
+      code: 400
+      message: "Required parameter is missing"

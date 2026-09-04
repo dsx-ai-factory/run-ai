@@ -1,0 +1,6 @@
+description: The description of the asset.
+type: string
+minLength: 1
+maxLength: 250
+example: description of my asset.
+nullable: true

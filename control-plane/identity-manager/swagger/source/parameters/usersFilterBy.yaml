@@ -1,0 +1,11 @@
+name: filterBy
+in: query
+required: false
+description: Filter results by a parameter. Use the format field-name operator value. Operators are <= Less than or equal, >= Greater than or equal, =@ contains. Dates are in ISO 8601 timestamp format and available for operators <=, >= and ==.
+schema:
+  type: array
+  items:
+    type: string
+    pattern: "^((username|createdBy|lastLogin|creationTime|lastUpdated|isLocal)(==|<=|>=|=@)|(firstName|lastName|fullName)(=@)).+$"
+  example: ["username=@test,lastLogin>=2024-09-24T00:00:00.00Z,isLocal==false"]
+explode: false

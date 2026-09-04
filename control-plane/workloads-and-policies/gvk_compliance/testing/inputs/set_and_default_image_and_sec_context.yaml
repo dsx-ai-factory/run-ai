@@ -1,0 +1,57 @@
+policy:
+  id: test-policy
+  effectiveRules:
+    # Default: fill in image only when not set.
+    - field: image
+      specSelector: allContainers
+      enforcements:
+        - default:
+            value: ubuntu
+    # Set: always enforce allowPrivilegeEscalation=false.
+    - field: allowPrivilegeEscalation
+      specSelector: allContainers
+      enforcements:
+        - set:
+            value: false
+  # Mirrors the seed from
+  # control-plane/policy-service/pkg/services/system_mapping_deployment.go +
+  # system_mapping_podspec_field_groups.go for apps/v1 Deployment.
+  breakdown:
+    fields:
+      image:
+        - specSelectors: [allContainers]
+          specRef: image
+          formatter:
+            builtin: KeyValue
+      allowPrivilegeEscalation:
+        - specSelectors: [allContainers]
+          specRef: securityContext.allowPrivilegeEscalation
+          formatter:
+            builtin: KeyValue
+    specSelectors:
+      allContainers:
+        query: |
+          (
+            .spec.template.spec.containers[]?,
+            .spec.template.spec.initContainers[]?
+          )
+          | select(.)
+
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: test-deployment
+  spec:
+    template:
+      spec:
+        containers:
+          # Has image (should NOT be overwritten by default) and no
+          # securityContext (should be created and set).
+          - name: container-1
+            image: redhat
+          # Has no image (default should fill it in) and
+          # allowPrivilegeEscalation=true (should be overwritten to false).
+          - name: container-2
+            securityContext:
+              allowPrivilegeEscalation: true

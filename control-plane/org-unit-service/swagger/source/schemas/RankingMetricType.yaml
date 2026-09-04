@@ -1,0 +1,3 @@
+type: string
+enum: [avgGpuAllocation24h, avgGpuUtilization24h, avgGpuMemoryUtilization24h, avgGpuAllocation7d, avgGpuUtilization7d, avgGpuMemoryUtilization7d, avgGpuAllocation30d, avgGpuUtilization30d, avgGpuMemoryUtilization30d, gpuAllocationRatio]
+

@@ -1,0 +1,5 @@
+image: ubuntu
+
+podAffinity:
+  type: Required
+  key: mykey

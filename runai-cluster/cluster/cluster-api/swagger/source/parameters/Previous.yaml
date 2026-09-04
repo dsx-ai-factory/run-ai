@@ -1,0 +1,5 @@
+in: query
+name: previous
+description: Return previous terminated container logs. Defaults to false.
+schema:
+  type: boolean

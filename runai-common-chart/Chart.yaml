@@ -1,0 +1,6 @@
+apiVersion: v2
+name: runai-common-chart
+description: Runai common chart to be re-used across other repositories charts.
+type: library
+version: 1.0.62
+appVersion: 1.0.62

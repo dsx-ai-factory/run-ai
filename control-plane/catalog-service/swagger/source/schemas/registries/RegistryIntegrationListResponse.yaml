@@ -1,0 +1,5 @@
+required:
+  - registries
+properties:
+  registries:
+    $ref: './RegistryIntegrations.yaml'

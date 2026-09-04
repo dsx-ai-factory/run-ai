@@ -1,0 +1,16 @@
+type: object
+nullable: true
+required:
+  - start
+  - end
+properties:
+  start:
+    type: string
+    format: date-time
+    description: timestamp from when to fetch data in UTC
+    example: '2023-06-07 12:09:18.211'
+  end:
+    type: string
+    format: date-time
+    description: timestamp until when to fetch data in UTC
+    example: '2023-06-07 12:09:18.211'

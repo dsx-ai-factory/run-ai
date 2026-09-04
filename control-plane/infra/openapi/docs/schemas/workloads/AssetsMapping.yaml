@@ -1,0 +1,11 @@
+type: object
+properties:
+  name:
+    type: string
+    description: The name of the asset.
+    minLength: 1
+    example: my-asset-name
+  kind:
+    $ref: "../../../../../infra/openapi/docs/schemas/assets/AssetKind.yaml"
+  id:
+    $ref: "../../../../../infra/openapi/docs/schemas/assets/AssetId.yaml"

@@ -1,0 +1,38 @@
+get:
+  summary: Get node telemetry data.
+  description: Retrieve node telemetry data for use in analysis applications.
+  operationId: get_node_telemetry
+  x-service: cluster-service
+  x-test-coverage:
+    - src/test/suites/advancedSuite/dashboardsV2/SanityTelemetryApi.test.ts
+  x-authorize:
+    resource-type: nodes
+    action: read
+  tags:
+    - Nodes
+  parameters:
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/FilterByNodepoolName.yaml'
+    - $ref: '../parameters/query/TelemetryGroupBy.yaml'
+    - $ref: '../parameters/query/TelemetryType.yaml'
+    - $ref: '../parameters/query/TenantIds.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/schemas/metrics/TelemetryResponse.yaml'
+        text/csv: { }
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

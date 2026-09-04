@@ -1,0 +1,103 @@
+suite: Test static legacy workload cleanup RBAC
+
+tests:
+  - it: renders one normal ServiceAccount
+    templates:
+      - templates/legacy-workload-cleanup-rbac.yaml
+    documentSelector:
+      path: kind
+      value: ServiceAccount
+    asserts:
+      - equal:
+          path: metadata.name
+          value: runai-legacy-workload-cleanup
+      - notExists:
+          path: metadata.annotations["helm.sh/hook"]
+
+  - it: renders only namespaced RunaiConfig access
+    templates:
+      - templates/legacy-workload-cleanup-rbac.yaml
+    documentSelector:
+      path: kind
+      value: Role
+    asserts:
+      - equal:
+          path: rules[0].resources
+          value: ["runaiconfigs"]
+      - equal:
+          path: rules[0].resourceNames
+          value: ["runai"]
+      - equal:
+          path: rules[0].verbs
+          value: ["get"]
+      - lengthEqual:
+          path: rules
+          count: 1
+
+  - it: renders static cluster access without a Helm hook
+    templates:
+      - templates/clusterroles/legacy-workload-cleanup.yaml
+    documentSelector:
+      path: kind
+      value: ClusterRole
+    asserts:
+      - equal:
+          path: metadata.name
+          value: runai-legacy-workload-cleanup
+      - notExists:
+          path: metadata.annotations["helm.sh/hook"]
+      - equal:
+          path: rules[15].resources
+          value: ["trainingworkloads", "interactiveworkloads", "distributedworkloads"]
+      - equal:
+          path: rules[15].verbs
+          value: ["get", "list", "patch"]
+      - notContains:
+          path: rules[1].resourceNames
+          content: workloadrunners.run.ai
+
+  - it: grants the cleanup transaction permissions
+    templates:
+      - templates/clusterroles/legacy-workload-cleanup.yaml
+    documentSelector:
+      path: kind
+      value: ClusterRole
+    asserts:
+      - lengthEqual:
+          path: rules
+          count: 16
+      - equal:
+          path: rules[0].verbs
+          value: ["create"]
+      - equal:
+          path: rules[1].verbs
+          value: ["get"]
+      - equal:
+          path: rules[2].verbs
+          value: ["list"]
+      - equal:
+          path: rules[3].verbs
+          value: ["delete"]
+      - equal:
+          path: rules[4].resources
+          value: ["pods"]
+      - equal:
+          path: rules[4].verbs
+          value: ["list"]
+      - equal:
+          path: rules[15].verbs
+          value: ["get", "list", "patch"]
+
+  - it: renders exactly the three namespaced RBAC resources
+    templates:
+      - templates/legacy-workload-cleanup-rbac.yaml
+    asserts:
+      - hasDocuments:
+          count: 3
+
+  - it: renders exactly the two cluster-scoped RBAC resources
+    templates:
+      - templates/clusterroles/legacy-workload-cleanup.yaml
+    asserts:
+      - hasDocuments:
+          count: 2

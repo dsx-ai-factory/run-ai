@@ -1,0 +1,5 @@
+image: ubuntu
+compute:
+  gpuRequestType: portion
+  gpuPortionRequest: 0.5
+  gpuMemoryRequest: 2M

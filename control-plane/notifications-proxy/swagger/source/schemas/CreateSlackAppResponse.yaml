@@ -1,0 +1,8 @@
+type: object
+required:
+  - slackAppUrl
+properties:
+  slackAppUrl:
+    type: string
+example:
+  slackAppUrl: https://api.slack.com/apps/A089PHD5S0Q

@@ -1,0 +1,8 @@
+name: includeGvkPolicies
+in: query
+required: false
+x-internal: true
+description: whether to include GVK-based policies in the list. Default to false.
+  See /api/v1/policies for more details.
+schema:
+  type: boolean

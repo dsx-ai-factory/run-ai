@@ -1,0 +1,36 @@
+suite: Test runai-operator leader election flag injection
+
+tests:
+  - it: should not render --leader-elect when replicas is 1
+    set:
+      runai-operator:
+        replicas: 1
+    templates:
+      - templates/deployment.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    asserts:
+      - isKind:
+          of: Deployment
+      # When no args are generated, args is absent/null
+      - equal:
+          path: spec.template.spec.containers[0].args
+          value: null
+
+  - it: should render --leader-elect when replicas is 2
+    set:
+      runai-operator:
+        replicas: 2
+    templates:
+      - templates/deployment.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    asserts:
+      - isKind:
+          of: Deployment
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: '--leader-elect'
+

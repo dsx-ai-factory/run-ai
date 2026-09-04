@@ -1,0 +1,348 @@
+openapi: "3.0.3"
+info:
+  title: WorkloadsService
+  version: '1.0'
+  description: An API for managing RunAi scheduler managed workloads.
+  contact:
+    name: 'Run.AI'
+    url: 'https://www.run.ai/'
+    email: 'support@run.ai'
+servers:
+  - url: https://app.run.ai
+  - url: https://staging.run.ai
+  - url: https://test.run.ai
+  - url: http://localhost:8080
+paths:
+  /:
+    x-internal: true
+    x-service: workloads
+    get:
+      x-service: workloads
+      summary: health check
+      x-no-authorization: true
+      operationId: health
+      tags:
+        - Health
+      responses:
+        200:
+          description: Executed successfully.
+
+  /api/v1/workloads/scrapeable-metrics:
+    $ref: './resources/WorkloadsScrapeableMetrics.yaml'
+
+  /internal/workloads:
+    $ref: './resources/InternalWorkloads.yaml'
+
+  /internal/workloads/sync:
+    $ref: './resources/InternalWorkloadsSync.yaml'
+
+  /internal/workloads/pods/sync:
+    $ref: './resources/InternalPodsSync.yaml'
+
+  /internal/workloads/clusters/{clusterId}/nodes/{nodeName}/pods:
+    $ref: './resources/InternalUpdateNodePods.yaml'
+
+  /internal/workloads/sync-report:
+    $ref: './resources/InternalSyncReport.yaml'
+
+  /internal/workloads/enrich-ranking:
+    $ref: './resources/InternalEnrichRanking.yaml'
+
+  /api/v1/workloads:
+    $ref: './resources/Workloads.yaml'
+
+  /internal/workloads/{workloadId}/ancestors:
+    $ref: './resources/WorkloadAncestors.yaml'
+
+  /api/v1/workloads/{workloadId}:
+    $ref: './resources/Workload.yaml'
+
+  /internal/workloads/{workloadId}:
+    $ref: './resources/InternalWorkloadById.yaml'
+
+  /api/v1/workloads/count:
+    $ref: './resources/WorkloadsCount.yaml'
+
+  /api/v1/workloads/telemetry:
+    $ref: './resources/WorkloadsTelemetry.yaml'
+
+  /api/v1/workloads/podgroups/sync:
+    $ref: './resources/PodGroupsSync.yaml'
+
+  /api/v1/workloads/pods:
+    $ref: './resources/Pods.yaml'
+
+  /api/v1/workloads/pods/sync:
+    $ref: './resources/PodsSync.yaml'
+
+  /api/v1/workloads/{workloadId}/pods/{podId}/metrics:
+    $ref: './resources/WorkloadPodMetrics.yaml'
+
+  /api/v1/workloads/{workloadId}/pods/{podId}:
+    $ref: './resources/WorkloadPod.yaml'
+
+  /api/v1/workloads/{workloadId}/pods:
+    $ref: './resources/WorkloadPods.yaml'
+
+  /api/v1/workloads/pods/count:
+    $ref: './resources/WorkloadPodsCount.yaml'
+
+  /api/v1/workloads/pods/{podId}:
+    $ref: './resources/Pod.yaml'
+
+  /api/v1/workloads/events:
+    $ref: './resources/Events.yaml'
+
+  /api/v1/workloads/{workloadId}/events:
+    $ref: './resources/WorkloadEvents.yaml'
+
+  /api/v1/workloads/{workloadId}/history:
+    $ref: './resources/WorkloadHistory.yaml'
+
+  /api/v1/workloads/{workloadId}/metrics:
+    $ref: './resources/WorkloadMetrics.yaml'
+
+  /api/v1/workloads/{workloadId}/endpoints:
+    $ref: './resources/WorkloadEndpoints.yaml'
+
+  ###########################################################################################
+  ##    Workloads creation and sync
+  ###########################################################################################
+
+  /api/v1/workloads/workspaces:
+    $ref: "./resources/Workspaces.yaml"
+  /api/v1/workloads/workspaces/updates:
+    $ref: "./resources/WorkspacesSync.yaml"
+  /api/v1/workloads/workspaces/{workloadId}:
+    $ref: "./resources/WorkspacesById.yaml"
+  /api/v1/workloads/workspaces/{workloadId}/suspend:
+    $ref: "./resources/WorkspacesSuspend.yaml"
+  /api/v1/workloads/workspaces/{workloadId}/resume:
+    $ref: "./resources/WorkspacesResume.yaml"
+
+  /api/v1/workloads/trainings:
+    $ref: "./resources/Trainings.yaml"
+  /api/v1/workloads/trainings/updates:
+    $ref: "./resources/TrainingsSync.yaml"
+  /api/v1/workloads/trainings/{workloadId}:
+    $ref: "./resources/TrainingsById.yaml"
+  /api/v1/workloads/trainings/{workloadId}/suspend:
+    $ref: "./resources/TrainingsSuspend.yaml"
+  /api/v1/workloads/trainings/{workloadId}/resume:
+    $ref: "./resources/TrainingsResume.yaml"
+
+  /api/v1/workloads/distributed:
+    $ref: "./resources/Distributed.yaml"
+  /api/v1/workloads/distributed/updates:
+    $ref: "./resources/DistributedSync.yaml"
+  /api/v1/workloads/distributed/{workloadId}:
+    $ref: "./resources/DistributedById.yaml"
+  /api/v1/workloads/distributed/{workloadId}/suspend:
+    $ref: "./resources/DistributedSuspend.yaml"
+  /api/v1/workloads/distributed/{workloadId}/resume:
+    $ref: "./resources/DistributedResume.yaml"
+
+  /api/v1/workloads/distributed-inferences:
+    $ref: "./resources/DistributedInferences.yaml"
+
+  /api/v1/workloads/distributed-inferences/{workloadId}:
+    $ref: "./resources/DistributedInferenceById.yaml"
+  /api/v1/workloads/distributed-inferences/updates:
+    $ref: "./resources/DistributedInferencesSync.yaml"
+
+  /api/v1/workloads/nim/catalog:
+    $ref: "./resources/NGCCatalog.yaml"
+  /api/v1/workloads/inferences:
+    $ref: "./resources/Inferences.yaml"
+  /api/v1/workloads/inferences/updates:
+    $ref: "./resources/InferencesSync.yaml"
+  /api/v1/workloads/inferences/{workloadId}:
+    $ref: "./resources/InferencesById.yaml"
+  /api/v1/workloads/inferences/{workloadId}/metrics:
+    $ref: "./resources/InferenceWorkloadMetrics.yaml"
+  /api/v1/workloads/inferences/{workloadId}/pods/{podId}/metrics:
+    $ref: './resources/InferenceWorkloadPodMetrics.yaml'
+  /api/v1/workloads/inferences/{workloadId}/revisions:
+    $ref: "./resources/InferenceWorkloadRevisions.yaml"
+  /api/v1/workloads/inferences/{workloadId}/revisions/count:
+    $ref: "./resources/InferenceWorkloadRevisionsCount.yaml"
+
+  /internal/workloads/inferences/{workloadId}/ancestors:
+    $ref: './resources/InferenceAncestors.yaml'
+
+  /api/v1/workloads/inferences/revisions/sync:
+    $ref: './resources/Revisions.yaml'
+  /api/v1/workloads/inferences/revisions/{revisionId}:
+    $ref: "./resources/RevisionsById.yaml"
+  /api/v1/workloads/inferences/revisions/{revisionId}/pods:
+    $ref: './resources/RevisionPods.yaml'
+  /api/v1/workloads/inferences/revisions/{revisionId}/events:
+    $ref: './resources/RevisionEvents.yaml'
+  /api/v1/workloads/inferences/revisions/{revisionId}/history:
+    $ref: './resources/RevisionHistory.yaml'
+
+  /api/v1/workload-templates:
+    $ref: './resources/Templates.yaml'
+  /api/v1/workload-templates/name-availability:
+    $ref: './resources/TemplatesNameAvailability.yaml'
+  /api/v1/workload-templates/{templateId}:
+    $ref: './resources/TemplatesById.yaml'
+  /api/v1/workload-templates/count:
+    $ref: './resources/TemplatesCount.yaml'
+  /api/v1/workload-templates/workspaces:
+    $ref: './resources/WorkspaceTemplates.yaml'
+  /api/v1/workload-templates/workspaces/{templateId}:
+    $ref: './resources/WorkspaceTemplatesById.yaml'
+  /api/v1/workload-templates/trainings:
+    $ref: './resources/TrainingTemplates.yaml'
+  /api/v1/workload-templates/trainings/{templateId}:
+    $ref: './resources/TrainingTemplatesById.yaml'
+  /api/v1/workload-templates/distributed:
+    $ref: './resources/DistributedTemplates.yaml'
+  /api/v1/workload-templates/distributed/{templateId}:
+    $ref: './resources/DistributedTemplatesById.yaml'
+  /api/v1/workload-templates/inferences:
+    $ref: './resources/InferenceTemplates.yaml'
+  /api/v1/workload-templates/inferences/{templateId}:
+    $ref: './resources/InferenceTemplatesById.yaml'
+  /api/v1/workload-templates/distributed-inferences:
+    $ref: './resources/DistributedInferenceTemplates.yaml'
+  /api/v1/workload-templates/distributed-inferences/{templateId}:
+    $ref: './resources/DistributedInferenceTemplatesById.yaml'
+
+  /api/v1/workloads/unified:
+    x-internal: true
+    $ref: "./resources/UnifiedWorkloads.yaml"
+
+  ###########################################################################################
+  ##    Workloads batch
+  ###########################################################################################
+
+  /api/v1/workloads/batch:
+    $ref: "./resources/Batch.yaml"
+
+    ###########################################################################################
+    ##    Workload properties
+    ###########################################################################################
+
+  /api/v1/workloads/{workloadId}/elements:
+    $ref: './resources/WorkloadElements.yaml'
+
+  /api/v1/workloads/{workloadId}/elements/{elementId}:
+    $ref: './resources/WorkloadElementById.yaml'
+
+  /api/v1/workloads/{workloadId}/elements/{elementId}/metrics:
+    $ref: './resources/WorkloadElementMetrics.yaml'
+
+  /api/v1/workloads/{workloadId}/elements/count:
+    $ref: './resources/WorkloadElementsCount.yaml'
+
+  /api/v1/workload-categories:
+    $ref: './resources/Categories.yaml'
+
+  /api/v1/workload-categories/{categoryId}:
+    $ref: './resources/CategoriesById.yaml'
+
+  /api/v1/workload-types:
+    $ref: './resources/WorkloadTypes.yaml'
+
+  /api/v1/workload-types/{workloadTypeId}:
+    $ref: './resources/WorkloadType.yaml'
+
+  /api/v1/workload-types/sync:
+    x-internal: true
+    $ref: './resources/WorkloadTypesSync.yaml'
+
+  /api/v1/workload-priorities:
+    $ref: "./resources/WorkloadPriorities.yaml"
+
+  /api/v1/workload-priorities-sync:
+    x-internal: true
+    $ref: "./resources/WorkloadPrioritiesSync.yaml"
+
+  /api/v1/workload-priorities/runai-status:
+    x-internal: true
+    $ref: "./resources/WorkloadPrioritiesStatus.yaml"
+
+  /api/v1/workload-priorities/cluster-status:
+    x-internal: true
+    $ref: "./resources/WorkloadClusterPrioritiesStatus.yaml"
+
+  /api/v1/workload-cluster-priorities:
+    x-internal: true
+    $ref: "./resources/WorkloadClusterPriorities.yaml"
+
+  ## Combination of both priorities and categories, needed for workloads-manager
+  ## and it allows us to get both information in single API call.
+  /internal/available-priorities-and-categories:
+    $ref: "./resources/WorkloadClusterPrioritiesAndCategories.yaml"
+
+  ###########################################################################################
+  ##    backwards
+  ###########################################################################################
+
+  /v1/k8s/clusters/{clusterId}/jobs:
+    x-internal: true
+    $ref: "./resources/backwards/Jobs.yaml"
+  /v1/k8s/clusters/{clusterId}/pods:
+    x-internal: true
+    $ref: "./resources/backwards/Pods.yaml"
+  /v1/k8s/clusters/{clusterId}/podGroups:
+    x-internal: true
+    $ref: "./resources/backwards/PodGroups.yaml"
+  /v1/k8s/clusters/{clusterId}/pods/sync:
+    x-internal: true
+    $ref: "./resources/backwards/PodsSync.yaml"
+  /v1/k8s/clusters/{clusterId}/podGroups/sync:
+    x-internal: true
+    $ref: "./resources/backwards/PodGroupsSync.yaml"
+
+  ###########################################################################################
+  ##    applications
+  ###########################################################################################
+
+  /api/v1/ai-applications:
+    $ref: "./resources/Applications.yaml"
+
+  /api/v1/ai-applications/charts:
+    $ref: "./resources/ApplicationCharts.yaml"
+
+  /api/v1/ai-applications/charts/{chartId}/content:
+    x-internal: true
+    $ref: "./resources/ApplicationChartContent.yaml"
+
+  /api/v1/ai-applications/count:
+    $ref: "./resources/ApplicationsCount.yaml"
+
+  /api/v1/ai-applications/{aiApplicationId}:
+    $ref: "./resources/ApplicationById.yaml"
+
+  /api/v1/ai-applications/sync:
+    x-internal: true
+    $ref: "./resources/ApplicationsSync.yaml"
+
+  /api/v1/ai-applications/sync-report:
+    x-internal: true
+    $ref: "./resources/ApplicationsSyncReport.yaml"
+
+  ###########################################################################################
+  ##    settings
+  ###########################################################################################
+
+  /api/v1/workloads/settings:
+    $ref: "./resources/WorkloadsSettings.yaml"
+
+  /api/v1/workloads/settings/{key}:
+    $ref: "./resources/WorkloadsSettingByKey.yaml"
+
+components:
+  parameters:
+    $ref: "./parameters/_index.yaml"
+  schemas:
+    $ref: "./schemas/_index.yaml"
+  responses:
+    $ref: "../../../infra/openapi/docs/responses/_index.yaml"
+  securitySchemes:
+    $ref: "./securitySchemes/_index.yaml"
+security:
+  - bearerAuth: []

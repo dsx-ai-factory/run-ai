@@ -1,0 +1,71 @@
+apiVersion: apps.nvidia.com/v1alpha1
+kind: NIMCache
+metadata:
+  annotations:
+    example.com/annotation: test-value
+  labels:
+    app: test
+  name: test
+spec:
+  certConfig:
+    mountPath: /etc/ssl/certs
+    name: my-certs
+  groupID: 2000
+  nodeSelector:
+    test: somevalue
+  proxy:
+    certConfigMap: proxy-certs
+    httpProxy: http://proxy.example.com:3128
+    httpsProxy: http://proxy.example.com:3128
+    noProxy: localhost,.cluster.local
+  runtimeClassName: gvisor
+  source:
+    dataStore:
+      authSecret: datastore-api-key
+      datasetName: my-dataset
+      endpoint: https://datastore.example.com/v1/hf
+      modelName: my-model
+      modelPuller: nvcr.io/nim/datastore-puller:v1
+      namespace: my-namespace
+      pullSecret: datastore-pull-secret
+      revision: 1.0.0
+    hf:
+      authSecret: hf-api-key
+      datasetName: hf-dataset
+      endpoint: https://huggingface.co
+      modelName: hf-model
+      modelPuller: nvcr.io/nim/hf-puller:v1
+      namespace: hf-namespace
+      pullSecret: hf-pull-secret
+      revision: main
+    ngc:
+      authSecret: ngc-api-key
+      model:
+        buildable: true
+        engine: tensorrt_llm
+        lora: false
+        precision: fp16
+        profiles:
+        - profile-a
+        - profile-b
+        qosProfile: throughput
+        tensorParallelism: "2"
+      modelPuller: nvcr.io/nim/model-puller:v1
+      pullSecret: ngc-pull-secret
+  storage:
+    hostPath: /data/nim-cache
+    pvc:
+      create: true
+      name: nim-cache-pvc
+      size: 10Gi
+      storageClass: standard
+      subPath: cache
+      volumeAccessMode: ReadWriteOnce
+    readOnly: false
+  tolerations:
+  - effect: NoSchedule
+    key: test
+    operator: Equal
+    tolerationSeconds: 60
+    value: somevalue
+  userID: 1000

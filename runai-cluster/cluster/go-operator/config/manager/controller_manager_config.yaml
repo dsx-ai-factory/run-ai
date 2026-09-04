@@ -1,0 +1,11 @@
+apiVersion: controller-runtime.sigs.k8s.io/v1alpha1
+kind: ControllerManagerConfig
+health:
+  healthProbeBindAddress: :8083
+metrics:
+  bindAddress: 127.0.0.1:8082
+webhook:
+  port: 9443
+leaderElection:
+  leaderElect: true
+  resourceName: 8b40c1bd.run.ai

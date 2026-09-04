@@ -1,0 +1,10 @@
+required:
+  - code
+  - message
+properties:
+  code:
+    type: integer
+    minimum: 100
+    maximum: 599
+  message:
+    type: string

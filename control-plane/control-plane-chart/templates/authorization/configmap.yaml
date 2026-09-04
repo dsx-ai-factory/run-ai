@@ -1,0 +1,56 @@
+{{- if .Values.authorization.enabled }}
+  {{- include "common.configMap" (list . .Values.authorization "control-plane.authorization.configmap") }}
+{{- end }}
+
+{{- define "control-plane.authorization.configmap" -}}
+{{- $top := first . }}
+data:
+  LOG_LEVEL: {{ $top.Values.authorization.config.logLevel | quote }}
+  SERVICE_PORT: {{ $top.Values.authorization.service.port | quote }}
+  SERVICE_NAME: {{ $top.Values.authorization.name | quote }}
+  SERVER_WRITE_TIMEOUT: {{ $top.Values.authorization.config.server.writeTimeout | quote }}
+  SERVER_READ_TIMEOUT: {{ $top.Values.authorization.config.server.readTimeout | quote }}
+  SERVER_IDLE_TIMEOUT: {{ $top.Values.authorization.config.server.idleTimeout | quote }}
+  TRACING_ENABLED: {{ if hasKey $top.Values.authorization.config "tracingEnabled" }}{{ $top.Values.authorization.config.tracingEnabled | quote }}{{ else }}{{ $top.Values.global.config.tracingEnabled | quote }}{{ end }}
+  AUDIT_ENABLED: {{ if hasKey $top.Values.authorization.config "auditEnabled" }}{{ $top.Values.authorization.config.auditEnabled | quote }}{{ else }}{{ $top.Values.global.config.auditEnabled | quote }}{{ end }}
+  AUDIT_ENABLE_PRINT_TO_STDOUT: {{ if hasKey $top.Values.authorization.config "auditEnablePrintToStdout" }}{{ $top.Values.authorization.config.auditEnablePrintToStdout | quote }}{{ else }}{{ $top.Values.global.config.auditEnablePrintToStdout | quote }}{{ end }}
+  AUDIT_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.auditService.name ($top.Values.auditService.service.port | toString) | quote }}
+  TEMP_BACKEND_SETTINGS_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.tempBackendSettings.name ($top.Values.tempBackendSettings.service.port | toString) | quote }}
+  WORKLOADS_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.workloads.name (toString $top.Values.workloads.service.port) }}
+  ORG_UNIT_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.orgUnitService.name (toString $top.Values.orgUnitService.service.port) }}
+  CLUSTER_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.clusterService.name (toString $top.Values.clusterService.service.port) }}
+  TENANT_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.tenantsManager.name ($top.Values.tenantsManager.service.port | toString ) }}
+  DATAVOLUMES_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.datavolumes.name (toString $top.Values.datavolumes.service.port) }}
+  {{- if $top.Values.authorization.config.isCSPEnv }}
+  IS_CSP_ENV: "true"
+  {{- end }}
+  DB_MIGRATION_FILES: {{ $top.Values.authorization.config.migrationFiles | quote }}
+  DB_NAME: {{ $top.Values.authorization.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_HOST: {{ $top.Values.authorization.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SSL_MODE: {{ $top.Values.authorization.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_PORT: {{ $top.Values.authorization.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  {{- if or ($top.Values.global.postgresql.auth.readHost) ($top.Values.authorization.config.dbReadHost) }}
+  DB_READ_HOST: {{ $top.Values.authorization.config.dbReadHost | default $top.Values.global.postgresql.auth.readHost | quote }}
+  {{- end }}
+  {{- if or ($top.Values.global.postgresql.auth.dbReadPort) ($top.Values.authorization.config.dbReadPort) }}
+  DB_READ_PORT: {{ $top.Values.authorization.config.dbReadPort | default $top.Values.global.postgresql.auth.readPort | quote }}
+  {{- end }}
+  DB_SCHEMA: {{ $top.Values.authorization.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+
+  {{- $cacheEnabled := $top.Values.authorization.config.cacheEnabled | default false }}
+  CACHE_ENABLED: {{ $cacheEnabled | quote }}
+  {{- if eq (toString $cacheEnabled) "true" }}
+  CACHE_URL: {{ $top.Values.authorization.config.cacheUrl | default $top.Values.global.cache.url | quote }}
+  CACHE_READ_URL: {{ $top.Values.authorization.config.cacheReadUrl | default $top.Values.global.cache.readUrl | quote }}
+  CACHE_TYPE: {{ $top.Values.authorization.config.cacheType | default $top.Values.global.cache.type | quote }}
+  {{- end }}
+  PUBSUB_URL: {{ $top.Values.global.pubsub.url | quote }}
+  PUBSUB_TYPE: {{ $top.Values.global.pubsub.type | quote }}
+  PUBSUB_ENABLE_ADDITIONAL_SUBSCRIBER: {{ $top.Values.global.pubsub.additionalSubscriber.enabled | quote }}
+  {{- if $top.Values.global.pubsub.additionalSubscriber.enabled }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_TYPE: {{ $top.Values.global.pubsub.additionalSubscriber.type | quote }}
+  PUBSUB_ADDITIONAL_SUBSCRIBER_URL: {{ $top.Values.global.pubsub.additionalSubscriber.url | quote }}
+  {{- end }}
+  CLUSTER_CACHE_EXPIRATION_SEC: {{ $top.Values.authorization.config.clusterCacheExpirationSeconds | quote }}
+  CLUSTER_CACHE_CLEANUP_SEC: {{ $top.Values.authorization.config.clusterCacheCleanupSeconds | quote }}
+{{- end }}

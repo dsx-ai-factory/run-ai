@@ -1,0 +1,8 @@
+# Breaking changes that are intentional and product-approved. Each line must match
+# the oasdiff message verbatim, so it only ever silences that one change - the rule
+# itself stays active everywhere else.
+
+# gpuResourceOptimization sunset: these node-pool sort/filter values were removed
+# along with the feature. No caller sorts or filters by them.
+in API GET /api/v1/node-pools removed the enum value 'swapEnabled' from the 'query' request parameter 'sortBy'
+in API GET /api/v1/node-pools removed the enum value 'nodeLevelSchedulerEnabled' from the 'query' request parameter 'sortBy'

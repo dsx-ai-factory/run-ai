@@ -1,0 +1,741 @@
+openapi: 3.0.3
+info:
+  contact:
+    email: support@run.ai
+    name: Run.AI
+    url: https://www.run.ai/
+  description: An API for querying audit logs
+  title: Audit
+  version: "1.0"
+servers:
+- url: https://app.run.ai
+- url: https://staging.run.ai
+- url: https://test.run.ai
+- url: http://localhost:8080
+security:
+- BearerAuth: []
+paths:
+  /:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: Executed successfully.
+      summary: health check
+      tags:
+      - Health
+      x-service: audit-service
+      x-no-authorization: true
+    x-internal: true
+  /internal/api/v1/audit/log:
+    post:
+      description: save audit log
+      operationId: saveAuditLog
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuditLog'
+        required: true
+      responses:
+        "200":
+          description: "Ok, Executed successfully"
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Save audit log
+      tags:
+      - InternalAuditLogs
+      x-service: audit-service
+      x-no-authorization: true
+      x-test-coverage:
+      - control-plane/audit-service/integration-tests/tests/audit_test.go
+    x-internal: true
+  /api/v1/audit/log:
+    get:
+      description: Get audit logs based on query params filter
+      operationId: getAuditLogs
+      parameters:
+      - description: Start date of time range to fetch data in ISO 8601 timestamp
+          format.
+        explode: true
+        in: query
+        name: start
+        required: true
+        schema:
+          example: 2023-06-06T12:09:18.211Z
+          format: date-time
+          type: string
+        style: form
+      - description: End date of time range to fetch data in ISO 8601 timestamp format.
+        explode: true
+        in: query
+        name: end
+        required: true
+        schema:
+          example: 2023-06-07T12:09:18.211Z
+          format: date-time
+          type: string
+        style: form
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          type: integer
+        style: form
+      - description: The number of samples to take in the specified time range.
+        explode: true
+        in: query
+        name: numberOfSamples
+        required: false
+        schema:
+          default: 20
+          example: 20
+          maximum: 1000
+          minimum: 0
+          type: integer
+        style: form
+      - description: Sort results in descending or ascending order.
+        explode: true
+        in: query
+        name: sortOrder
+        required: false
+        schema:
+          default: asc
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Sort results by a parameters.
+        explode: true
+        in: query
+        name: sortBy
+        required: false
+        schema:
+          enum:
+          - timestamp
+          - subject
+          - subject_type
+          - source_ip
+          - action
+          - http_method
+          - result
+          - url
+          - entity_type
+          - entity_name
+          - entity_id
+          type: string
+        style: form
+      - description: "Filter results by a parameter. Use the format field-name operator\
+          \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
+          \ >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts\
+          \ with and =$ Ends with. Dates are in ISO 8601 timestamp format and available\
+          \ for operators ==, !=, <= and >=."
+        explode: false
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          example:
+          - cluster_name==my-cluster_name
+          - "entity_type==cluster,entity_name==test"
+          items:
+            pattern: ^(timestamp|subject|subject_type|source_ip|action|result|url|entity_type|entity_name|cluster_name)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getAuditLogs_200_response'
+          description: Executed successfully
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get audit logs
+      tags:
+      - AuditLogs
+      x-service: audit-service
+      x-authorize:
+        resource-type: events-history
+        action: read
+      x-test-coverage:
+      - src/test/suites/defaultSuite/audit/auditApi.test.ts
+    x-scope:
+    - system
+    - tenant
+  /api/v1/audit/log/file:
+    get:
+      description: "Download audit logs as a file, based on query params filter"
+      operationId: downloadAuditLogs
+      parameters:
+      - explode: true
+        in: query
+        name: file_type
+        required: false
+        schema:
+          default: CSV
+          enum:
+          - CSV
+          - JSON
+          type: string
+        style: form
+      - description: Start date of time range to fetch data in ISO 8601 timestamp
+          format.
+        explode: true
+        in: query
+        name: start
+        required: true
+        schema:
+          example: 2023-06-06T12:09:18.211Z
+          format: date-time
+          type: string
+        style: form
+      - description: End date of time range to fetch data in ISO 8601 timestamp format.
+        explode: true
+        in: query
+        name: end
+        required: true
+        schema:
+          example: 2023-06-07T12:09:18.211Z
+          format: date-time
+          type: string
+        style: form
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          type: integer
+        style: form
+      - description: "Maximum number of records to include in the file. The hard cap\
+          \ is 100,000. Use the offset parameter to page through additional records."
+        explode: true
+        in: query
+        name: numberOfSamples
+        required: false
+        schema:
+          default: 20
+          maximum: 100000
+          minimum: 0
+          type: integer
+        style: form
+      - description: "Filter results by a parameter. Use the format field-name operator\
+          \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
+          \ >= Greater than or equal, =@ contains, !@ Does not contains, =^ Starts\
+          \ with and =$ Ends with. Dates are in ISO 8601 timestamp format and available\
+          \ for operators ==, !=, <= and >=."
+        explode: false
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          example:
+          - cluster_name==my-cluster_name
+          - "entity_type==cluster,entity_name==test"
+          items:
+            pattern: ^(timestamp|subject|subject_type|source_ip|action|result|url|entity_type|entity_name|cluster_name)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            type: string
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/octet-stream:
+              x-default: true
+          description: File downloaded
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Download audit logs
+      tags:
+      - AuditLogs
+      x-service: audit-service
+      x-authorize:
+        resource-type: events-history
+        action: read
+      x-test-coverage:
+      - src/test/suites/defaultSuite/audit/auditApi.test.ts
+    x-scope:
+    - system
+    - tenant
+components:
+  parameters:
+    AuditLogSort:
+      description: Sort results by a parameters.
+      explode: true
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        enum:
+        - timestamp
+        - subject
+        - subject_type
+        - source_ip
+        - action
+        - http_method
+        - result
+        - url
+        - entity_type
+        - entity_name
+        - entity_id
+        type: string
+      style: form
+    AuditLogFilter:
+      description: "Filter results by a parameter. Use the format field-name operator\
+        \ value. Operators are == Equals, != Not equals, <= Less than or equal, >=\
+        \ Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with\
+        \ and =$ Ends with. Dates are in ISO 8601 timestamp format and available for\
+        \ operators ==, !=, <= and >=."
+      explode: false
+      in: query
+      name: filterBy
+      required: false
+      schema:
+        example:
+        - cluster_name==my-cluster_name
+        - "entity_type==cluster,entity_name==test"
+        items:
+          pattern: ^(timestamp|subject|subject_type|source_ip|action|result|url|entity_type|entity_name|cluster_name)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+          type: string
+        type: array
+      style: form
+    StartRequired:
+      description: Start date of time range to fetch data in ISO 8601 timestamp format.
+      explode: true
+      in: query
+      name: start
+      required: true
+      schema:
+        example: 2023-06-06T12:09:18.211Z
+        format: date-time
+        type: string
+      style: form
+    EndRequired:
+      description: End date of time range to fetch data in ISO 8601 timestamp format.
+      explode: true
+      in: query
+      name: end
+      required: true
+      schema:
+        example: 2023-06-07T12:09:18.211Z
+        format: date-time
+        type: string
+      style: form
+    Offset:
+      description: The offset of the first item returned in the collection.
+      explode: true
+      in: query
+      name: offset
+      required: false
+      schema:
+        example: 100
+        format: int32
+        type: integer
+      style: form
+    NumberOfSamples:
+      description: The number of samples to take in the specified time range.
+      explode: true
+      in: query
+      name: numberOfSamples
+      required: false
+      schema:
+        default: 20
+        example: 20
+        maximum: 1000
+        minimum: 0
+        type: integer
+      style: form
+    SortOrder:
+      description: Sort results in descending or ascending order.
+      explode: true
+      in: query
+      name: sortOrder
+      required: false
+      schema:
+        default: asc
+        enum:
+        - asc
+        - desc
+        type: string
+      style: form
+    NumberOfSamplesFileDownload:
+      description: "Maximum number of records to include in the file. The hard cap\
+        \ is 100,000. Use the offset parameter to page through additional records."
+      explode: true
+      in: query
+      name: numberOfSamples
+      required: false
+      schema:
+        default: 20
+        maximum: 100000
+        minimum: 0
+        type: integer
+      style: form
+  responses:
+    "400BadRequest":
+      content:
+        application/json:
+          example:
+            code: 400
+            message: Required parameter is missing
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Bad request.
+    "401Unauthorized":
+      content:
+        application/json:
+          example:
+            code: 401
+            message: Issuer is not familiar.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Unauthorized
+    "403Forbidden":
+      content:
+        application/json:
+          example:
+            code: 403
+            message: You do not have sufficient permissions.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Forbidden
+    "500InternalServerError":
+      content:
+        application/json:
+          example:
+            code: 500
+            message: Something went wrong.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+    "503ServiceUnavailable":
+      content:
+        application/json:
+          example:
+            code: 503
+            message: Please try again in few minutes.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: unexpected error
+  schemas:
+    AuditLog:
+      example:
+        tenant_id: "12345"
+        cluster_name: my favorite cluster
+        metadata:
+          key: metadata
+        subject_type: User
+        entity_name: project-1
+        http_status_code: 200
+        subject: researcher@run.ai
+        entity_id: "1234"
+        url: https://openapi-generator.tech
+        source_ip: source_ip
+        result: Succeeded
+        cluster_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        http_method: GET
+        entity_type: project
+        action: create
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        request_id: bb0c4742-e52f-4d5e-bfee-2c4ff57c339c
+        timestamp: 2022-01-01T03:49:52.531Z
+      properties:
+        id:
+          format: uuid
+          maxLength: 40
+          type: string
+        timestamp:
+          example: 2022-01-01T03:49:52.531Z
+          format: date-time
+          type: string
+        tenant_id:
+          description: the ID of the tenant
+          example: "12345"
+          type: string
+        subject:
+          description: the user/app which triggered this API
+          example: researcher@run.ai
+          maxLength: 500
+          minLength: 1
+          type: string
+        subject_type:
+          default: User
+          enum:
+          - User
+          - App
+          type: string
+        source_ip:
+          format: ipv4
+          maxLength: 250
+          type: string
+        action:
+          enum:
+          - create
+          - update
+          - delete
+          - sign-in
+          - sign-out
+          - reset-password
+          type: string
+        http_method:
+          enum:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - CREATE
+          type: string
+        url:
+          format: uri
+          maxLength: 2000
+          type: string
+        entity_type:
+          example: project
+          maxLength: 500
+          type: string
+        entity_name:
+          example: project-1
+          type: string
+        entity_id:
+          example: "1234"
+          type: string
+        result:
+          enum:
+          - Succeeded
+          - Failed
+          type: string
+        http_status_code:
+          example: 200
+          maximum: 599
+          type: integer
+        cluster_name:
+          example: my favorite cluster
+          maxLength: 500
+          type: string
+        cluster_id:
+          format: uuid
+          maxLength: 40
+          type: string
+        request_id:
+          example: bb0c4742-e52f-4d5e-bfee-2c4ff57c339c
+          format: uuid
+          maxLength: 40
+          type: string
+        metadata:
+          additionalProperties:
+            type: string
+          maxProperties: 10
+          type: object
+      required:
+      - action
+      - result
+      - subject
+      - subject_type
+      - tenant_id
+      type: object
+    Error:
+      example:
+        code: 400
+        message: Bad request - Resource should have a name
+      properties:
+        code:
+          maximum: 599
+          minimum: 100
+          type: integer
+        message:
+          type: string
+        details:
+          type: string
+      required:
+      - code
+      - message
+    AuditLogs:
+      items:
+        $ref: '#/components/schemas/AuditLog'
+      type: array
+      x-schema-name: AuditLog
+    getAuditLogs_200_response:
+      example:
+        next: 100
+        total: 2000
+        audit_logs:
+        - tenant_id: "12345"
+          cluster_name: my favorite cluster
+          metadata:
+            key: metadata
+          subject_type: User
+          entity_name: project-1
+          http_status_code: 200
+          subject: researcher@run.ai
+          entity_id: "1234"
+          url: https://openapi-generator.tech
+          source_ip: source_ip
+          result: Succeeded
+          cluster_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          http_method: GET
+          entity_type: project
+          action: create
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          request_id: bb0c4742-e52f-4d5e-bfee-2c4ff57c339c
+          timestamp: 2022-01-01T03:49:52.531Z
+        - tenant_id: "12345"
+          cluster_name: my favorite cluster
+          metadata:
+            key: metadata
+          subject_type: User
+          entity_name: project-1
+          http_status_code: 200
+          subject: researcher@run.ai
+          entity_id: "1234"
+          url: https://openapi-generator.tech
+          source_ip: source_ip
+          result: Succeeded
+          cluster_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          http_method: GET
+          entity_type: project
+          action: create
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          request_id: bb0c4742-e52f-4d5e-bfee-2c4ff57c339c
+          timestamp: 2022-01-01T03:49:52.531Z
+      properties:
+        total:
+          example: 2000
+          type: integer
+        next:
+          example: 100
+          type: integer
+        audit_logs:
+          items:
+            $ref: '#/components/schemas/AuditLog'
+          type: array
+          x-schema-name: AuditLog
+      required:
+      - logs
+      type: object
+  securitySchemes:
+    BearerAuth:
+      bearerFormat: JWT
+      description: Bearer authentication
+      scheme: bearer
+      type: http

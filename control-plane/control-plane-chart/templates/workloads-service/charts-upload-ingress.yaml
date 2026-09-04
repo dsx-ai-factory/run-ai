@@ -1,0 +1,69 @@
+{{- /*
+Dedicated ingress for the AI application chart upload endpoint. ingress-nginx defaults
+proxy-body-size to 1m, which is far below the backend's chart upload limit, so uploads
+would be rejected at the ingress with a 413 before reaching the service. A separate
+ingress (rather than an annotation on the shared catch-all) keeps the larger body limit
+scoped to just the upload path; every other control-plane endpoint stays at the default.
+Only nginx honors proxy-body-size, so this renders only for the nginx ingress class.
+*/ -}}
+{{- if and .Values.global.ingress.enabled (eq .Values.global.config.kubernetesDistribution "kubernetes") (hasPrefix "nginx" (.Values.global.ingress.ingressClass | default "")) }}
+{{- $serviceName := printf "%s-traefik" (include "common.fullname" $) }}
+{{- $domain := .Values.global.domain }}
+{{- $tlsSecretName := .Values.global.ingress.tlsSecretName }}
+{{- $extraDomains := .Values.global.ingress.extraDomains }}
+{{- $multiTenancy := .Values.global.multiTenancy.enabled }}
+{{- $chartsPath := "/api/v1/ai-applications/charts" }}
+{{- $ingressMeta := dict "name" "charts-upload-ingress" "annotations" (dict "nginx.ingress.kubernetes.io/proxy-body-size" (printf "%dm" (int .Values.workloads.config.chartUploadMaxSizeMB))) }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  {{- include "common.metadata" (append (list $ $ingressMeta) "common.ingress.metadata") | nindent 2 }}
+  name: {{ include "common.fullname" $ }}-charts-upload-ingress
+spec:
+  ingressClassName: {{ .Values.global.ingress.ingressClass }}
+  rules:
+    - host: "{{ $domain }}"
+      http:
+        paths:
+          - backend:
+              service:
+                name: {{ $serviceName }}
+                port:
+                  name: http
+            path: "{{ $chartsPath }}"
+            pathType: Prefix
+  {{- if $multiTenancy }}
+    - host: "*.{{ $domain }}"
+      http:
+        paths:
+          - backend:
+              service:
+                name: {{ $serviceName }}
+                port:
+                  name: http
+            path: "{{ $chartsPath }}"
+            pathType: Prefix
+  {{- end }}
+  {{- range $extraDomains }}
+    - host: "{{ . }}"
+      http:
+        paths:
+          - backend:
+              service:
+                name: {{ $serviceName }}
+                port:
+                  name: http
+            path: "{{ $chartsPath }}"
+            pathType: Prefix
+  {{- end }}
+  tls:
+    - hosts:
+      {{- if $multiTenancy }}
+        - "*.{{ $domain }}"
+      {{- end }}
+      {{- with $extraDomains }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+        - "{{ $domain }}"
+      secretName: {{ $tlsSecretName }}
+{{- end }}

@@ -1,0 +1,12 @@
+control-plane*.tgz
+*.tgz
+Chart.
+manifests.yaml
+Chart.lock
+charts/
+
+# Binaries
+bin/
+
+# Helm unittest
+.debug

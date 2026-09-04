@@ -1,0 +1,83 @@
+BatchJobTarget:
+  Config: {}
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: backoffLimit
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: backoffLimit
+      name: backoffLimit
+      namespace: runai-test
+    spec:
+      backoffLimit: 12
+      template:
+        metadata:
+          annotations:
+            gpu-fraction: "0.5"
+            gpu-fraction-num-devices: "1"
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: backoffLimit
+            workloadKind: Workspace
+            workloadName: backoffLimit
+        spec:
+          containers:
+          - args:
+            - -x
+            - my-script.py
+            command:
+            - python-3.8
+            env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: backoffLimit
+            - name: HOME
+              value: /home/my-folder
+            image: ubuntu
+            name: backoffLimit
+            resources: {}
+            securityContext:
+              runAsNonRoot: true
+            workingDir: /home/my-folder
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: backoffLimit, Rules: , Type: Workspace'
+  images:
+  - ubuntu
+  name: 'Value: backoffLimit, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  requestedResources:
+    gpu:
+      request: 0.5
+    gpuRequestType: portion
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1

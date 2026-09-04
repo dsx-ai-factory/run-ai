@@ -1,0 +1,25 @@
+type: object
+description: A single access rule that failed to migrate. The old access rule remains in place (still tied to the deprecated role).
+required:
+  - oldAccessRuleId
+  - step
+  - code
+  - message
+properties:
+  oldAccessRuleId:
+    type: integer
+    format: int32
+    description: The ID of the access rule on the deprecated role that failed to migrate. This rule is still alive and should be handled separately.
+  step:
+    type: string
+    description: Which step of the migration failed. "create" means the new access rule could not be created. "delete" means the new rule was created (or already existed) but the old rule could not be deleted, so the transaction was rolled back.
+    enum:
+      - create
+      - delete
+  code:
+    type: integer
+    format: int32
+    description: A numeric code representing the error type (typically an HTTP status code).
+  message:
+    type: string
+    description: A human-readable message describing why the migration failed for this access rule.

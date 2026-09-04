@@ -1,0 +1,36 @@
+get:
+  summary: List templates. [Experimental]
+  description: Retrieve all available templates.
+  operationId: list_templates
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/templates_service_test.go
+  x-no-authorization: true
+  tags:
+    - Workload templates
+  parameters:
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+    - $ref: '../parameters/query/TemplatesSort.yaml'
+    - $ref: '../parameters/query/TemplatesFilter.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Search.yaml"
+    - $ref: "../parameters/query/IncludeTemplateAncestors.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToProject.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToWorkloadType.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToReplicaType.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/schemas/templates/TemplatesListResponse.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

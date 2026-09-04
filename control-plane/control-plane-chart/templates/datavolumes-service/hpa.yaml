@@ -1,0 +1,3 @@
+{{- if .Values.datavolumes.enabled }}
+{{- include "common.hpa" (list . .Values.datavolumes.autoscaling .Values.datavolumes) -}}
+{{- end }}

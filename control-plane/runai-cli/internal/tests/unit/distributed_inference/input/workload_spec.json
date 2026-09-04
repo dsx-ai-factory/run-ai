@@ -1,0 +1,266 @@
+{
+  "actualPhase": "Pending",
+  "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
+  "createdAt": "2025-12-15T08:58:27.277697Z",
+  "createdBy": "test@run.ai",
+  "departmentId": "4500000",
+  "desiredPhase": "Running",
+  "name": "my-dist-inference-full-123",
+  "projectId": "4500002",
+  "requestedName": "my-dist-inference-full-123",
+  "spec": {
+    "category": "Deploy",
+    "leader": {
+      "annotations": [
+        {
+          "name": "runai-submit-command",
+          "value": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai inference distributed submit my-dist-inference-full-123 --project team-b --replicas 2 --workers 2 --image vllm/vllm-openai:latest --image-pull-policy Always --working-dir /app --command 'python -m vllm.entrypoints.openai.api_server' --arguments '--model meta-llama/Llama-2-7b --port 8080' -g 1 --gpu-memory-request 20G --environment-variable MODEL_NAME=llama-2-7b --environment-variable TENSOR_PARALLEL_SIZE=1 --environment-variable MASTER_ADDR=localhost --label role=leader --label version=v1.0 --label framework=vllm --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 1000 --capability NET_BIND_SERVICE --capability SYS_NICE --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --worker-image vllm/vllm-openai:latest --worker-image-pull-policy Always --worker-working-dir /app --worker-command 'python -m vllm.entrypoints.worker' --worker-arguments '--model meta-llama/Llama-2-7b' --worker-gpu-devices-request 1 --worker-environment WORKER_ID=${POD_INDEX} --worker-environment MASTER_ADDR=leader-0 --worker-label role=worker --worker-label version=v1.0 --worker-label framework=vllm --worker-node-type gpu-nodes --worker-run-as-uid 1000 --worker-run-as-gid 1000 --worker-capability NET_BIND_SERVICE --worker-capability SYS_NICE --worker-toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --existing-pvc claimname=my-simple-pvc,path=/models --worker-existing-pvc claimname=my-simple-pvc,path=/models --serving-port=container=8080,authorization-type=authenticatedUsers,protocol=http,authorized-users=admin:developer:tester:reviewer --restart-policy RecreateGroupOnPodRestart --startup-policy LeaderCreated"
+        }
+      ],
+      "args": "--model meta-llama/Llama-2-7b --port 8080",
+      "command": "python -m vllm.entrypoints.openai.api_server",
+      "compute": {
+        "gpuDevicesRequest": 1,
+        "gpuMemoryRequest": "20G"
+      },
+      "createHomeDir": false,
+      "environmentVariables": [
+        {
+          "name": "MODEL_NAME",
+          "value": "llama-2-7b"
+        },
+        {
+          "name": "TENSOR_PARALLEL_SIZE",
+          "value": "1"
+        },
+        {
+          "name": "MASTER_ADDR",
+          "value": "localhost"
+        }
+      ],
+      "image": "vllm/vllm-openai:latest",
+      "imagePullPolicy": "Always",
+      "labels": [
+        {
+          "name": "role",
+          "value": "leader"
+        },
+        {
+          "name": "version",
+          "value": "v1.0"
+        },
+        {
+          "name": "framework",
+          "value": "vllm"
+        }
+      ],
+      "nodeType": "gpu-nodes",
+      "security": {
+        "capabilities": [
+          "NET_BIND_SERVICE",
+          "SYS_NICE"
+        ],
+        "privileged": false,
+        "runAsGid": 1000,
+        "runAsUid": 1000,
+        "uidGidSource": "custom"
+      },
+      "storage": {
+        "emptyDirVolume": [
+          {
+            "path": "/emptydir",
+            "sizeLimit": "1G"
+          }
+        ],
+        "git": [
+          {
+            "path": "/git",
+            "repository": "https://github.com/run-ai",
+            "revision": "test"
+          }
+        ],
+        "hostPath": [
+          {
+            "mountPath": "/hostpath",
+            "path": "/host/path"
+          }
+        ],
+        "pvc": [
+          {
+            "claimName": "my-simple-pvc",
+            "existingPvc": true,
+            "path": "/local/pvc",
+            "readOnly": false
+          },
+          {
+            "claimInfo": {
+              "accessModes": {
+                "readWriteOnce": true
+              },
+              "size": "1G",
+              "storageClass": "standard",
+              "volumeMode": "Filesystem"
+            },
+            "claimName": "claim-24mqhfjj7j",
+            "ephemeral": false,
+            "path": "/local/vol"
+          }
+        ],
+        "s3": [
+          {
+            "bucket": "bucket-name",
+            "path": "/s3",
+            "url": "https://bucket-name.s3.region-code.amazonaws.com/object-key"
+          }
+        ]
+      },
+      "tolerations": [
+        {
+          "effect": "NoSchedule",
+          "key": "nvidia.com/gpu",
+          "operator": "Equal",
+          "value": "true"
+        }
+      ],
+      "workingDir": "/app"
+    },
+    "nodePools": [
+      "default"
+    ],
+    "replicas": 2,
+    "restartPolicy": "RecreateGroupOnPodRestart",
+    "servingPort": {
+      "authorizationType": "authenticatedUsers",
+      "authorizedUsers": [
+        "admin",
+        "developer",
+        "tester",
+        "reviewer"
+      ],
+      "exposeExternally": true,
+      "port": 8080,
+      "protocol": "http"
+    },
+    "startupPolicy": "LeaderCreated",
+    "worker": {
+      "annotations": [
+        {
+          "name": "runai-submit-command",
+          "value": "/Users/nasbi/runai-repos/runai/control-plane/runai-cli/bin/dist/darwin/arm64/runai inference distributed submit my-dist-inference-full-123 --project team-b --replicas 2 --workers 2 --image vllm/vllm-openai:latest --image-pull-policy Always --working-dir /app --command 'python -m vllm.entrypoints.openai.api_server' --arguments '--model meta-llama/Llama-2-7b --port 8080' -g 1 --gpu-memory-request 20G --environment-variable MODEL_NAME=llama-2-7b --environment-variable TENSOR_PARALLEL_SIZE=1 --environment-variable MASTER_ADDR=localhost --label role=leader --label version=v1.0 --label framework=vllm --node-type gpu-nodes --run-as-uid 1000 --run-as-gid 1000 --capability NET_BIND_SERVICE --capability SYS_NICE --toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --worker-image vllm/vllm-openai:latest --worker-image-pull-policy Always --worker-working-dir /app --worker-command 'python -m vllm.entrypoints.worker' --worker-arguments '--model meta-llama/Llama-2-7b' --worker-gpu-devices-request 1 --worker-environment WORKER_ID=${POD_INDEX} --worker-environment MASTER_ADDR=leader-0 --worker-label role=worker --worker-label version=v1.0 --worker-label framework=vllm --worker-node-type gpu-nodes --worker-run-as-uid 1000 --worker-run-as-gid 1000 --worker-capability NET_BIND_SERVICE --worker-capability SYS_NICE --worker-toleration operator=Equal,key=nvidia.com/gpu,value=true,effect=NoSchedule --existing-pvc claimname=my-simple-pvc,path=/models --worker-existing-pvc claimname=my-simple-pvc,path=/models --serving-port=container=8080,authorization-type=authenticatedUsers,protocol=http,authorized-users=admin:developer:tester:reviewer --restart-policy RecreateGroupOnPodRestart --startup-policy LeaderCreated"
+        }
+      ],
+      "args": "--model meta-llama/Llama-2-7b",
+      "command": "python -m vllm.entrypoints.worker",
+      "compute": {
+        "gpuDevicesRequest": 1,
+        "gpuMemoryRequest": "20G"
+      },
+      "createHomeDir": false,
+      "environmentVariables": [
+        {
+          "name": "MODEL_NAME",
+          "value": "llama-2-7b"
+        },
+        {
+          "name": "TENSOR_PARALLEL_SIZE",
+          "value": "1"
+        },
+        {
+          "name": "MASTER_ADDR",
+          "value": "leader-0"
+        },
+        {
+          "name": "WORKER_ID",
+          "value": "${POD_INDEX}"
+        }
+      ],
+      "image": "vllm/vllm-openai:latest",
+      "imagePullPolicy": "Always",
+      "labels": [
+        {
+          "name": "role",
+          "value": "worker"
+        },
+        {
+          "name": "version",
+          "value": "v1.0"
+        },
+        {
+          "name": "framework",
+          "value": "vllm"
+        }
+      ],
+      "nodeType": "gpu-nodes",
+      "security": {
+        "capabilities": [
+          "NET_BIND_SERVICE",
+          "SYS_NICE"
+        ],
+        "privileged": false,
+        "runAsGid": 1000,
+        "runAsUid": 1000,
+        "uidGidSource": "custom"
+      },
+      "tolerations": [
+        {
+          "effect": "NoSchedule",
+          "key": "nvidia.com/gpu",
+          "operator": "Equal",
+          "value": "true"
+        }
+      ],
+      "workingDir": "/app",
+      "storage": {
+        "emptyDirVolume": [
+          {
+            "path": "/emptydir",
+            "sizeLimit": "1G"
+          }
+        ],
+        "git": [
+          {
+            "path": "/git",
+            "repository": "https://github.com/run-ai",
+            "revision": "test"
+          }
+        ],
+        "hostPath": [
+          {
+            "mountPath": "/hostpath",
+            "path": "/host/path"
+          }
+        ],
+        "pvc": [
+          {
+            "claimName": "my-simple-pvc",
+            "existingPvc": true,
+            "path": "/local/pvc",
+            "readOnly": false
+          },
+          {
+            "claimInfo": {
+              "accessModes": {
+                "readWriteOnce": true
+              },
+              "size": "1G",
+              "storageClass": "standard",
+              "volumeMode": "Filesystem"
+            },
+            "claimName": "claim-24mqhfjj7j",
+            "ephemeral": false,
+            "path": "/local/vol"
+          }
+        ],
+        "s3": [
+          {
+            "bucket": "bucket-name",
+            "path": "/s3",
+            "url": "https://bucket-name.s3.region-code.amazonaws.com/object-key"
+          }
+        ]
+      }
+    },
+    "workers": 2
+  },
+  "workloadId": "78c1c79e-81fa-484e-961c-b2168ec5c0a3"
+}

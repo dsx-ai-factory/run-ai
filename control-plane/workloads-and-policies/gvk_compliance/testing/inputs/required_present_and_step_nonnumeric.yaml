@@ -1,0 +1,37 @@
+policy:
+  id: test-policy
+  effectiveRules:
+    # required:true on a field that IS present in the spec — exercises the
+    # "found = true" branch of RequiredEnforcement. No error expected for this rule.
+    - field: present
+      specSelector: self
+      enforcements:
+        - required: true
+
+    # range: { step: 5 } against a string value — validation.ToFloat fails,
+    # producing a real 400 validation error (not a broken-rule log).
+    # Exercises the "validationError(fieldName, range, err)" path.
+    - field: notANumber
+      specSelector: self
+      enforcements:
+        - range: { step: 5 }
+
+  breakdown:
+    fields:
+      present:
+        - specSelectors: [self]
+          specRef: present
+          formatter: { builtin: KeyValue }
+      notANumber:
+        - specSelectors: [self]
+          specRef: notANumber
+          formatter: { builtin: KeyValue }
+    specSelectors:
+      self:
+        query: "."
+
+workload:
+  apiVersion: test/v1
+  kind: Synthetic
+  present: anything
+  notANumber: "hello"

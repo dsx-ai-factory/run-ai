@@ -1,0 +1,4 @@
+allOf:
+  - $ref: "./AssetRef.yaml"
+nullable: true
+type: object

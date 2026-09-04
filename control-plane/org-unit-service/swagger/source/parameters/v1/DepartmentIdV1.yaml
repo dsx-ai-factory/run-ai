@@ -1,0 +1,7 @@
+name: department-id
+in: path
+schema:
+  type: integer
+required: true
+description: The unique id identifying the department.
+example: 2

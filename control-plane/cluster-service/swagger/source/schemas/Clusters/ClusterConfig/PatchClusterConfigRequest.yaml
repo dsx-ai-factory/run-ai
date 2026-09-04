@@ -1,0 +1,6 @@
+x-internal: true
+type: object
+description: PATCH Cluster Configuration Request. NOTE - unset operations are not supported.
+properties:
+  config:
+    $ref: "ClusterUserConfigDataPartialUpdate.yaml"

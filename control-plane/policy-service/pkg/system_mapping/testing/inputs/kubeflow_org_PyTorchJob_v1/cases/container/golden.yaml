@@ -1,0 +1,76 @@
+apiVersion: kubeflow.org/v1
+kind: PyTorchJob
+metadata:
+  name: test
+spec:
+  pytorchReplicaSpecs:
+    Master:
+      replicas: 1
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - image: pytorch/pytorch:2.0
+            imagePullPolicy: IfNotPresent
+            name: pytorch
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 1000
+          initContainers:
+          - image: pytorch/pytorch:2.0
+            imagePullPolicy: IfNotPresent
+            name: init
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 1000
+    Worker:
+      replicas: 2
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - image: pytorch/pytorch:2.0
+            imagePullPolicy: IfNotPresent
+            name: pytorch
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 1000
+          initContainers:
+          - image: pytorch/pytorch:2.0
+            imagePullPolicy: IfNotPresent
+            name: init
+            resources:
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+                memory: 4Gi
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 1000

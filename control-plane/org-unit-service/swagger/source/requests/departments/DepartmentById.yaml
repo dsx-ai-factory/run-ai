@@ -1,0 +1,6 @@
+put:
+  $ref: "./UpdateDepartment.yaml"
+get:
+  $ref: "./GetDepartment.yaml"
+delete:
+  $ref: "./DeleteDepartment.yaml"

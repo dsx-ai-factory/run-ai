@@ -1,0 +1,38 @@
+post:
+  summary: sync the details of project pvcs to the control plane
+  operationId: sync_projects_pvcs_v2
+  tags:
+    - PVCs
+  x-internal: true
+  x-authorize:
+    resource-type: pvc-assets
+    action: sync
+  x-service: k8s-objects-tracker
+  x-test-coverage:
+    - k8s-objects-tracker/pkg/services/api_pvcs_service_test.go
+  parameters:
+    - $ref: "../../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+    - $ref: "../../parameters/path/Namespace.yaml"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/PVCs/PVCs.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/PVCs/PVCs.yaml'
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

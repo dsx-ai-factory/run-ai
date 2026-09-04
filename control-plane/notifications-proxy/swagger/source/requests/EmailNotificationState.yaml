@@ -1,0 +1,68 @@
+get:
+  x-no-authorization: true
+  x-service: notifications-proxy
+  x-test-coverage:
+    - src/test/suites/playwright/serial/regression/phoenix/notification/notification.test.ts
+  tags:
+    - Email
+  operationId: getEmailNotificationState
+  summary: Get email notification state
+  description: Get email notification state
+  responses:
+    '200':
+      description: Email Notification state
+      content:
+        application/json:
+          schema:
+              $ref: '../schemas/NotificationStateStatus.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    501:
+      $ref: '../../../../infra/openapi/docs/responses/501NotImplemented.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+patch:
+  x-authorize:
+    resource-type: notification-settings
+    action: create
+  x-service: notifications-proxy
+  x-test-coverage:
+    - src/test/suites/playwright/serial/regression/phoenix/notification/notification.test.ts
+  x-audit: true
+  tags:
+    - Email
+  operationId: updateEmailNotificationState
+  summary: Update email notification state
+  description: Update tenant email notification state
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/NotificationStateStatus.yaml'
+  responses:
+    '200':
+      description: Email Notification state
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/NotificationStateStatus.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    501:
+      $ref: '../../../../infra/openapi/docs/responses/501NotImplemented.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

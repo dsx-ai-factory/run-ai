@@ -1,0 +1,7 @@
+properties:
+  activationReplicas:
+    description: The number of replicas to run when scaling-up from zero. Defaults to minReplicas, or to 1 if minReplicas is set to 0
+    type: integer
+    format: int32
+    minimum: 1
+    nullable: true

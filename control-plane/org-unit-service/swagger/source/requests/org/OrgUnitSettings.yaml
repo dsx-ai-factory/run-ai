@@ -1,0 +1,24 @@
+post:
+  operationId: update_org_unit_settings
+  tags:
+    - Org unit
+  x-no-authorization: true
+  x-internal: true
+  x-service: org-unit-service
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/settings_test.go
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/OrgUnitSingleSetting.yaml"
+  responses:
+    200:
+      description: ok.
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

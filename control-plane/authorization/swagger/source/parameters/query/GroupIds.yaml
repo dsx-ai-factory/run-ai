@@ -1,0 +1,10 @@
+name: groupIds
+in: query
+required: false
+description: The ids of the subject's groups.
+explode: false
+schema:
+  type: array
+  maxItems: 100
+  items:
+    type: string

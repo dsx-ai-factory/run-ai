@@ -1,0 +1,13 @@
+type: string
+enum:
+  - Ready
+  - PendingUpdate
+  - Degraded
+description: |
+  The current phase of the policy. Supported values include:
+  - Ready: The policy is fully validated, and all rules are successfully applied to the workload.
+  - PendingUpdate: Configuration components (e.g., specSelector, itemSelector) have changed. 
+    The policy is awaiting validation to ensure the full rule set remains functional; 
+    this validation occurs the next time the policy is applied.
+  - Degraded: One or more policy rules cannot be applied due to recent configuration changes. 
+    While the policy remains active, some rules may be ignored during enforcement.

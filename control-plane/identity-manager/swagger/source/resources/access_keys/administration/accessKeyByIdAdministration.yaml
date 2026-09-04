@@ -1,0 +1,33 @@
+delete:
+  summary: Delete an access key by id for administrations.
+  description: Use to delete an access key by id for administrations.
+  x-service: identity-manager
+  operationId: delete_access_key_by_id_administration
+  x-audit: true
+  x-authorize:
+    resource-type: access-keys
+    action: delete
+  x-test-coverage:
+  - integration-tests/tests/api_access_keys_test.go
+  - pkg/services/api_access_keys_service_test.go
+  - e2e/src/test/suites/parallel/personalApplications/userAppAdmin.test.ts
+  tags:
+  - Access Keys
+  parameters:
+  - $ref: "../../../parameters/accessKeyId.yaml"
+  responses:
+    204:
+      description: Executed successfully.
+    400:
+      $ref: '../../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+

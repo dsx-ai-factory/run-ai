@@ -1,0 +1,28 @@
+runner:
+  name: service-ref-workload
+  namespace: runai-test
+
+networking:
+  services:
+  - ref:
+      name: existing-service
+      port: 8080
+    auth:
+      authorizationType: authorizedUsers
+      authorizedUsers: "user1@example.com,user2@example.com"
+  externalAccess:
+    ingress:
+      metadata:
+        name: service-ref-ingress
+      spec:
+        rules:
+          - host: service-ref.example.com
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: existing-service
+                      port:
+                        number: 8080

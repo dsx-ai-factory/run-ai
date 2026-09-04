@@ -1,0 +1,31 @@
+get:
+  summary: Get sync config for a given cluster.
+  operationId: get_sync_config
+  x-service: policy-service
+  x-test-coverage:
+    - control-plane/policy-service/pkg/services/service_sync_test.go
+  x-authorize:
+    resource-type: policies
+    action: update
+  x-internal: true
+  tags:
+    - Policy
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterId.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Sync/SyncConfig.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

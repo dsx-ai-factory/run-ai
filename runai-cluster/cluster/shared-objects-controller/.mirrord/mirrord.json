@@ -1,0 +1,12 @@
+{
+    "target": {
+        "path": {
+            "deployment": "shared-objects-controller"
+        },
+        "namespace": "runai"
+    },
+    "feature": {
+        "env": true,
+        "fs": "read"
+    }
+}

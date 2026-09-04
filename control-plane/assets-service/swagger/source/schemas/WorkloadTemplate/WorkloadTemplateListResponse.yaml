@@ -1,0 +1,8 @@
+type: object
+required:
+  - entries
+properties:
+  entries:
+    type: array
+    items:
+      $ref: "./WorkloadTemplate.yaml"

@@ -1,0 +1,16 @@
+{{- if .Values.helmHooksHandler.enabled }}
+{{- $runai_operator := index .Values "runai-operator" -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hooks-params
+  namespace: {{ .Release.Namespace }}
+data:
+  params.json: |
+    {
+      "affinity" : {{- include "deploymentAffinityJson" . }},
+      "tolerations" : {{- include "deploymentTolerationsJson" . }},
+      "clusterConfig" : {{- .Values.clusterConfig | toJson }},
+      "mgmtPrometheusIngress" : {{- include "mgmtPrometheusIngressJson" . }}
+    }
+{{- end }}

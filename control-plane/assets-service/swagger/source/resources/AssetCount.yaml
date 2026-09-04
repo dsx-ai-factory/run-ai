@@ -1,0 +1,32 @@
+get:
+  deprecated: true
+  summary: Count assets.
+  description: Returns the number of assets that match a given set of filters.
+  operationId: count_assets
+  x-test-coverage:
+    - src/test/suites/playwright/parallel/assets/assetsApi.test.ts
+  x-service: assets-service
+  x-no-authorization: true
+  x-internal: true
+  tags:
+    - Workspaces
+  parameters:
+    - $ref: "../parameters/query/optional/AssetKindFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetNameFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetScopeFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetProjectFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetDepartmentFilter.yaml"
+    - $ref: "../parameters/query/optional/AssetClusterFilter.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Asset/AssetCountResponse.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

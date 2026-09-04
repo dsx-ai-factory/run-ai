@@ -1,0 +1,7 @@
+type: array
+description: List of ids to perform the action on.
+items:
+  type: string
+  format: uuid
+  description: Id to perform the action on.
+minLength: 1

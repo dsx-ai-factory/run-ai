@@ -1,0 +1,21 @@
+type: object
+properties:
+  host:
+    type: string
+    description: The hostname used to access the endpoint (for example, chat.example.com). This value is typically defined by the exposing Kubernetes resource (such as an Ingress).
+  port:
+    type: integer
+    description: The network port exposed by the endpoint. This is the port used when connecting to the workload.
+  path:
+    type: string
+    description: The URL path associated with the endpoint (for example, /v1/completions). Combined with host, it forms the full HTTP route to the workload.
+  tlsEnabled:
+    type: boolean
+    nullable: true
+    description: Indicates whether TLS is enabled for the endpoint. When true, the endpoint expects encrypted connections (typically HTTPS).
+  protocol:
+    type: string
+    description: The network protocol used for communication with the endpoint (for example, HTTP or HTTPS).
+  url:
+    type: string
+    description: The fully qualified URL through which the workload is accessible. This value represents the complete access address derived from the protocol, host, and path (for example, https://chat.example.com/v1/completions).

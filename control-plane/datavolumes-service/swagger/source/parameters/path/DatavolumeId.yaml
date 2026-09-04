@@ -1,0 +1,8 @@
+name: datavolumeId
+in: path
+required: true
+description: The id of the datavolume to retrieve
+example: 71f69d83-ba66-4822-adf5-55ce55efd210
+schema:
+  type: string
+  format: uuid

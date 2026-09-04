@@ -1,0 +1,38 @@
+post:
+  summary: Request applications updates
+  description: Retrieve workspaces that were updated in the control plane, and reports about success/failures in applying previous updates at the cluster
+  operationId: request_applications_updates
+  x-internal: true
+  x-service: workloads
+  x-authorize:
+    resource-type: applications
+    action: sync
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/applications_service_test.go
+  tags:
+    - AI Applications
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/UpdatesAfter.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../../../infra/openapi/docs/schemas/sync/ClusterSyncReport.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Applications/AIApplicationSyncResponse.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

@@ -1,0 +1,256 @@
+name: PR-fast (fork-only)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-fast-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    if: github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      ok: 'true'
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+      - run: echo "fork PR detected — running Layer 1 fast-feedback"
+
+  dco:
+    needs: guard
+    uses: ./.github/workflows/dco.yaml
+
+  pr-checks:
+    needs: guard
+    uses: ./.github/workflows/pr-checks.yaml
+
+  actionlint:
+    needs: guard
+    uses: ./.github/workflows/actionlint.yaml
+
+  vuln-scan-images:
+    needs: guard
+    uses: ./.github/workflows/vuln-scan-images.yaml
+
+  # Selective make build/test/lint/validate for the services changed in this PR.
+  # Gives fork contributors the logs of the real make targets they touched.
+  #   * Selective — only services with changed files (discover job).
+  #   * Matrix    — changed-service x {build,test,lint,validate}.
+  #   * No run-ai/runai-actions are used.
+  discover:
+    needs: guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      services: ${{ steps.changed.outputs.services }}
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - id: changed
+        name: Resolve changed services (nearest Makefile, minus aggregators)
+        run: |
+          set -euo pipefail
+          PREV_REF=$(git rev-parse HEAD~1)
+          all_changed=$(git diff --name-only --diff-filter=ACMDR "$PREV_REF" HEAD)
+
+          # Walk each changed file's ancestors up to the nearest dir that has an
+          # artifact-metadata.json — the same file the OSS/v4 pipelines use to
+          # identify services. Only emit dirs whose artifact_type is buildable
+          # (container | go | cli | helm). Types like "none", "workflow", "github",
+          # or "" indicate non-buildable dirs (e2e, air-gap, build/makefile, etc.)
+          # that have no CI targets to run in a fork PR.
+          is_buildable() {
+            local meta="$1/artifact-metadata.json"
+            [ -f "$meta" ] || return 1
+            # Skip services explicitly disabled (e.g. cookiecutter templates).
+            jq -e '.enabled == false' "$meta" >/dev/null 2>&1 && return 1
+            case "$(jq -r '.artifact_type // ""' "$meta" 2>/dev/null)" in
+              container|go|cli|helm) return 0 ;;
+              *) return 1 ;;
+            esac
+          }
+
+          services=$(
+            while read -r f; do
+              [ -z "$f" ] && continue
+              dir=$(dirname "$f")
+              while :; do
+                if [ -f "$dir/artifact-metadata.json" ]; then
+                  is_buildable "$dir" && echo "$dir"
+                  break
+                fi
+                [ "$dir" = "." ] && break
+                [ "$dir" = "/" ] && break
+                dir=$(dirname "$dir")
+              done
+            done <<< "$all_changed" | sort -u | jq -R . | jq -sc .
+          )
+
+          echo "services=${services:-[]}" >> "$GITHUB_OUTPUT"
+          echo "Changed files:"
+          echo "$all_changed"
+          echo "Resolved services: ${services:-[]}"
+
+  targets:
+    needs: discover
+    if: needs.discover.outputs.services != '[]' && needs.discover.outputs.services != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.discover.outputs.services) }}
+    # One job per service — all four targets run sequentially inside it.
+    # A service×target matrix would exceed GitHub's 256-job limit when many
+    # services are discovered (e.g. 110 services × 4 targets = 440 jobs).
+    name: ${{ matrix.service }}
+    env:
+      DOCKERHUB_PROXY: ""
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6
+        with:
+          fetch-depth: 0
+          # Fork-supplied Makefiles run in this job — don't leave the token in .git/config.
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.x'
+          cache: false
+
+      - name: Init cache
+        run: |
+          mkdir -p ~/.cache
+          chmod -R 777 ~/.cache
+          touch ~/.gitconfig
+
+      - name: make build / test / lint / validate in ${{ matrix.service }}
+        env:
+          SERVICE: ${{ matrix.service }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+
+          DOCKER_TAG="pr-${PR_NUMBER}-${GITHUB_SHA:0:7}"
+
+          # Use `cd` rather than `make -C` so that $PWD inside the Makefile
+          # resolves to the service directory. Many Makefiles derive
+          # WORKSPACE_HOST_PATH from ${PWD}/../.. for docker volume mounts.
+          cd "$SERVICE"
+
+          for TARGET in build test lint validate; do
+            if ! make -n "$TARGET" >/dev/null 2>&1; then
+              echo "::notice::${SERVICE} defines no '${TARGET}' target — skipping"
+              continue
+            fi
+            if [ "$TARGET" = "lint" ]; then
+              # golangci-lint (compiled with an older Go) may trigger Go's toolchain
+              # management when go.mod requires a newer Go version (go 1.21+ feature).
+              # That verification writes to the sumdb cache; fix permissions so the
+              # golangci-lint container can update the file after earlier Docker steps
+              # may have tightened it. Services using DOCKER_COMMAND_PRIVILEGED (e.g.
+              # test-ginkgo-privileged) run as root inside Docker and create root-owned
+              # files, so sudo is required here.
+              sudo chmod -R a+rw "${HOME}/.cache/go-build-docker-gopath/pkg/sumdb" 2>/dev/null || true
+            fi
+            echo "::group::make ${TARGET} (in ${SERVICE})"
+            make "$TARGET" \
+              VERSION="0.0.0" \
+              DOCKER_TAG="${DOCKER_TAG}" \
+              ENVIRONMENT=lab \
+              CI=true
+            echo "::endgroup::"
+          done
+
+  # Validate that each changed service's Dockerfile builds cleanly (no push, no registry write).
+  # Runs `make build` to produce real artifacts, then validates the Dockerfile
+  # builds cleanly (no push). Nothing is loaded into the daemon or pushed.
+  docker-validate:
+    needs: discover
+    if: needs.discover.outputs.services != '[]' && needs.discover.outputs.services != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.discover.outputs.services) }}
+    name: docker-validate / ${{ matrix.service }}
+    env:
+      DOCKERHUB_PROXY: ""
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6
+        with:
+          fetch-depth: 0
+          # Fork-supplied Dockerfiles/Makefiles run in this job — don't leave the token in .git/config.
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Init cache
+        run: |
+          mkdir -p ~/.cache
+          chmod -R 777 ~/.cache
+          touch ~/.gitconfig
+
+      - name: make build then docker build (no push)
+        env:
+          SERVICE: ${{ matrix.service }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          DOCKER_TAG="pr-${PR_NUMBER}-${GITHUB_SHA:0:7}"
+
+          cd "$SERVICE"
+
+          # Run make build to produce the artifacts the Dockerfile needs.
+          if make -n build >/dev/null 2>&1; then
+            echo "::group::make build (in ${SERVICE})"
+            make build \
+              VERSION="0.0.0" \
+              DOCKER_TAG="${DOCKER_TAG}" \
+              ENVIRONMENT=lab \
+              CI=true
+            echo "::endgroup::"
+          else
+            echo "::notice::${SERVICE} defines no 'build' target — skipping docker validate"
+            exit 0
+          fi
+
+          if [ ! -f "Dockerfile" ]; then
+            echo "::notice::${SERVICE} has no Dockerfile — skipping docker validate"
+            exit 0
+          fi
+
+          echo "::group::docker buildx build (validate, no push) ${SERVICE}"
+          docker buildx build \
+            --build-arg SERVICE_NAME="$(basename "$SERVICE")" \
+            --output type=cacheonly \
+            --platform linux/amd64 \
+            -f "Dockerfile" \
+            .
+          echo "::endgroup::"

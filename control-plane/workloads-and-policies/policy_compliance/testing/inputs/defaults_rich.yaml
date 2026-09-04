@@ -1,0 +1,50 @@
+image: ubuntu
+imagePullPolicy: Always
+nodePools:
+  - np1-from-policy
+  - np2-from-policy
+environmentVariables:
+  instances:
+    - name: HOME
+      value: home-from-policy
+    - name: USER
+      value: user-from-policy
+    - name: GROUP
+      value: group-from-policy
+security:
+  capabilities:
+    - KILL
+    - CHOWN
+  runAsNonRoot: true
+compute:
+  extendedResources:
+    instances:
+      - resource: aaa/b1
+        quantity: 10M
+      - resource: aaa/b2
+        quantity: 20M
+      - resource: aaa/b3
+        quantity: 30M
+storage:
+  hostPath:
+    instances:
+      - name: hp1
+        path: /path/hp1
+        mountPath: /mount/path/hp1
+      - name: hp2
+        path: /path/hp2
+        mountPath: /mount/path/hp2
+      - path: /path/noname
+        mountPath: /mount/path/noname
+  s3:
+    attributes:
+      bucket: /default/bucket
+    instances:
+      - name: s3a
+        path: /path/s3a
+        url: https://s3a.amazonaws.com
+      - path: /path/noname
+        url: https://noname.amazonaws.com
+      - name: s3b
+        path: /path/s3b
+        url: https://s3b.amazonaws.com

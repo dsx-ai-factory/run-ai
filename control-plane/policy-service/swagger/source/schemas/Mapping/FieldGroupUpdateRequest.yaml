@@ -1,0 +1,34 @@
+type: object
+description: The set of field group attributes to update. Only the provided attributes are changed.
+properties:
+  description:
+    $ref: "./MappingDescriptionOptional.yaml"
+  fields:
+    $ref: "./FieldGroupFields.yaml"
+  itemSelectors:
+    $ref: "./ItemSelectors.yaml"
+
+example:
+  description: fields of a pod spec
+  fields:
+    ports:
+      formatter: podSpec
+      description: ports of a pod
+    ports-Name:
+      formatter: KeyValue
+      specRef: name
+      type: string
+      itemSelectors:
+        - allPorts
+        - portsByContainerPort
+  itemSelectors:
+    allPorts:
+      description: All the ports.
+      query: (.ports // [])[]
+    portsByContainerPort:
+      description: Ports by container port.
+      query:
+        (.ports // [])[]
+        | select(.containerPort == $ARGS.named.containerPort)
+      argsInfo:
+        containerPort: integer

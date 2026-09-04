@@ -1,0 +1,12 @@
+name: groupBy
+in: query
+description: department fields to group the data by
+explode: false
+required: false
+schema:
+  type: array
+  maxItems: 2
+  items:
+    type: string
+    enum:
+      - CLUSTER_ID

@@ -1,0 +1,39 @@
+required:
+  - id
+  - nodePool
+properties:
+  id:
+    description: The id of the assigned resources. Required in PUT when updating the assigned resources.
+    type: number
+  nodePool:
+    properties:
+      id:
+        type: number
+        description: Node pool id.
+        example: 3
+      name:
+        type: string
+        description: Node pool name.
+        example: default
+    description: The node pool which the assigned resources refer to.
+  gpu:
+    properties:
+      deserved:
+        type: number
+        description: The amount of resources guaranteed to be allocated in case the cluster has those resources.
+        example: 0
+    description: Number of GPUs assigned in the node pool.
+  cpu:
+    properties:
+      deserved:
+        type: number
+        description: The amount of resources guaranteed to be allocated in case the cluster has those resources.
+        example: 0
+    description: Number of CPU Millicores assigned in the node pool. Supported only if the 'CPU Resources Quota' feature flag is enabled.
+  memory:
+    properties:
+      deserved:
+        type: number
+        description: The amount of resources guaranteed to be allocated in case the cluster has those resources.
+        example: 0
+    description: Amount of CPU Memory Mib assigned in the node pool. Supported only if the 'CPU Resources Quota' feature flag is enabled.

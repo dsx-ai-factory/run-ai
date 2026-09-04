@@ -1,0 +1,143 @@
+DistributedTarget:
+  Config:
+    pvcs:
+    - metadata:
+        name: claim-rw
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10M
+        storageClassName: my-storage
+    pvcsConfig:
+      cleanupOnCompletion: true
+  Framework: MPI
+  JaxJob: null
+  MasterSpec: null
+  MpiJob:
+    apiVersion: kubeflow.org/v2beta1
+    kind: MPIJob
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: mpijob
+        createdBy: MPIJob
+        project: test
+        release: pvc_not_existing_ephemeral_false
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: pvc_not_existing_ephemeral_false
+      name: pvc_not_existing_ephemeral_false
+      namespace: runai-test
+    spec:
+      mpiReplicaSpecs:
+        Launcher:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: mpijob
+                createdBy: MPIJob
+                project: test
+                release: pvc_not_existing_ephemeral_false
+                workloadKind: Distributed
+                workloadName: pvc_not_existing_ephemeral_false
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: pvc_not_existing_ephemeral_false
+                - name: RUNAI_MPI_NUM_WORKERS
+                  value: "1"
+                image: ubuntu
+                name: mpi
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /path/rw
+                  name: pvc-master
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - name: pvc-master
+                persistentVolumeClaim:
+                  claimName: claim-rw
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: mpijob
+                createdBy: MPIJob
+                project: test
+                release: pvc_not_existing_ephemeral_false
+                workloadKind: Distributed
+                workloadName: pvc_not_existing_ephemeral_false
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: pvc_not_existing_ephemeral_false
+                - name: RUNAI_MPI_NUM_WORKERS
+                  value: "1"
+                image: ubuntu
+                name: mpi
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+                volumeMounts:
+                - mountPath: /path/rw
+                  name: pvc-worker
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - name: pvc-worker
+                persistentVolumeClaim:
+                  claimName: claim-rw
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: Running
+    status: {}
+  ObjectMeta: null
+  PyTorchJob: null
+  RunPolicy: null
+  TFJob: null
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: MPIJob
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-pvc_not_existing_ephemeral_false/, Framework: MPI'
+  images:
+  - ubuntu
+  name: 'pvc_not_existing_ephemeral_false/, Framework: MPI'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

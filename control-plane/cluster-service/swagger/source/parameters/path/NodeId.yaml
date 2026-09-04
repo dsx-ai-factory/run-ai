@@ -1,0 +1,9 @@
+name: nodeId
+in: path
+description: The node UUID.
+schema:
+  type: string
+  format: uuid
+  minLength: 1
+  example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+required: true

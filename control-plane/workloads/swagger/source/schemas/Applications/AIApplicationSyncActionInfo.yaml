@@ -1,0 +1,23 @@
+type: object
+nullable: true
+properties:
+  type:
+    type: string
+  status:
+    type: string
+  started:
+    type: string
+  completed:
+    type: string
+  message:
+    type: string
+  error:
+    type: string
+  helmError:
+    type: string
+  helmPhase:
+    type: string
+  chartUrl:
+    type: string
+  releaseVersion:
+    type: integer

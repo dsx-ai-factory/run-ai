@@ -1,0 +1,65 @@
+// Icon sizing tokens — derived from Figma "action/icon-button" (Components file, node 123:2855).
+//
+// Three icon-button sizes:
+//   Default  → 38×38 frame, 20px icon  (primary toolbars, nav, CTAs)
+//   Small    → 32×32 frame, 16px icon  (dropdown rows, dense toolbars)
+//   X-small  → 24×24 frame, 16px icon  (tooltip triggers, table row actions, utility close buttons)
+//
+// Standalone q-icon (no button wrapper):
+//   20px — side-nav subjects, page-level CTAs, search boxes
+//   16px — table cells, scope tree nodes, alert bars, status indicators
+
+:root {
+  --icon-size-default: 20px;
+  --icon-size-small: 16px;
+  // Empty/zero-state glyph size (grid green-circle icons + drawer "no data" icons).
+  // All empty/zero-state icons render at 44×44, ph-bold.
+  --icon-size-empty-state: 44px;
+  --icon-default: #707070;
+}
+
+// Global default for any Quasar icon — 20px unless overridden by a helper class
+// or by a Quasar component that sets its own font-size (q-btn dense, q-chip,
+// q-field affixes, q-table sort/pagination, q-checkbox, q-radio, q-toggle, etc.).
+// Quasar components that explicitly size their icons retain their own sizing.
+.q-icon {
+  font-size: var(--icon-size-default);
+}
+
+// Expansion item toggle chevron — 20px collapsed-section state icon.
+.q-expansion-item__toggle-icon {
+  color: var(--icon-default, #707070) !important;
+  font-size: var(--icon-size-default) !important;
+}
+
+.q-date__navigation .q-icon,
+.date-picker-dropdown .q-btn-dropdown__arrow {
+  color: var(--icon-default, #707070) !important;
+}
+
+// Helper classes for icon-only q-btn instances.
+// Apply to the q-btn element; the nested .q-icon picks up the correct font-size.
+.runai-icon-btn--default {
+  .q-icon {
+    font-size: var(--icon-size-default) !important;
+  }
+}
+
+// 24px icon — dialog close buttons and other large icon-only buttons.
+.runai-icon-btn--large {
+  .q-icon {
+    font-size: 24px !important;
+  }
+}
+
+.runai-icon-btn--small {
+  .q-icon {
+    font-size: var(--icon-size-small) !important;
+  }
+}
+
+.runai-icon-btn--xsmall {
+  .q-icon {
+    font-size: var(--icon-size-small) !important;
+  }
+}

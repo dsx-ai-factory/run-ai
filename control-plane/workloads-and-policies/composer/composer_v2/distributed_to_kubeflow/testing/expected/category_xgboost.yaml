@@ -1,0 +1,120 @@
+DistributedTarget:
+  Config: {}
+  Framework: XGBoost
+  JaxJob: null
+  MasterSpec: null
+  MpiJob: null
+  ObjectMeta: null
+  PyTorchJob: null
+  RunPolicy: null
+  TFJob: null
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob:
+    apiVersion: kubeflow.org/v1
+    kind: XGBoostJob
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: xgboostjob
+        createdBy: XGBoostJob
+        project: test
+        release: category
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: category
+      name: category
+      namespace: runai-test
+    spec:
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: None
+      xgbReplicaSpecs:
+        Master:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                gpu-fraction: "0.5"
+                gpu-fraction-num-devices: "1"
+                user: tester
+              labels:
+                app: xgboostjob
+                createdBy: XGBoostJob
+                project: test
+                release: category
+                run.ai/category: Train
+                workloadKind: Distributed
+                workloadName: category
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: category
+                image: ubuntu
+                name: xgboost
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              priorityClassName: low
+              schedulerName: runai-scheduler
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                gpu-fraction: "0.5"
+                gpu-fraction-num-devices: "1"
+                user: tester
+              labels:
+                app: xgboostjob
+                createdBy: XGBoostJob
+                project: test
+                release: category
+                run.ai/category: Train
+                workloadKind: Distributed
+                workloadName: category
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: category
+                image: ubuntu
+                name: xgboost
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              priorityClassName: low
+              schedulerName: runai-scheduler
+    status: {}
+Notification:
+  category: Train
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: XGBoostJob
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-category/, Framework: XGBoost'
+  images:
+  - ubuntu
+  name: 'category/, Framework: XGBoost'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

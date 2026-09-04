@@ -1,0 +1,41 @@
+#Images
+Images:
+  $ref: './images/Images.yaml'
+Image:
+  $ref: './images/Image.yaml'
+
+#Registries
+RegistryIntegration:
+  $ref: './registries/RegistryIntegration.yaml'
+RegistryIntegrationListResponse:
+  $ref: './registries/RegistryIntegrationListResponse.yaml'
+RegistryIntegrations:
+  $ref: './registries/RegistryIntegrations.yaml'
+
+#HelmRepos
+HelmRepo:
+  $ref: './helmRepos/HelmRepo.yaml'
+HelmRepoCreationRequest:
+  $ref: './helmRepos/HelmRepoCreationRequest.yaml'
+HelmRepoUpdateRequest:
+  $ref: './helmRepos/HelmRepoUpdateRequest.yaml'
+HelmRepoListResponse:
+  $ref: './helmRepos/HelmRepoListResponse.yaml'
+HelmRepos:
+  $ref: './helmRepos/HelmRepos.yaml'
+HelmChart:
+  $ref: './helmRepos/HelmChart.yaml'
+HelmChartVersion:
+  $ref: './helmRepos/HelmChartVersion.yaml'
+HelmChartListResponse:
+  $ref: './helmRepos/HelmChartListResponse.yaml'
+
+#Settings
+CatalogSettingsKeyEnum:
+  $ref: './Settings/CatalogSettingsKeyEnum.yaml'
+EnableNgcIntegrationSetting:
+  $ref: './Settings/EnableNgcIntegrationSetting.yaml'
+CatalogSettingsGetResponse:
+  $ref: './Settings/CatalogSettingsGetResponse.yaml'
+UpdateCatalogSettingByKeyRequest:
+  $ref: './Settings/UpdateCatalogSettingByKeyRequest.yaml'

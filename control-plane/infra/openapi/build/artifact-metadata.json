@@ -1,0 +1,19 @@
+{
+  "service_name": "openapi/build",
+  "artifact_type": "none",
+  "cache_artifacts": true,
+  "path_to_artifacts": "_build/",
+  "make": {
+    "validate": {
+      "continue_on_error": true
+    }
+  },
+  "notifications": {
+    "slack": {
+      "mention": "@sphinx"
+    }
+  },
+  "jira": {
+    "team_name": "Sphinx"
+  }
+}

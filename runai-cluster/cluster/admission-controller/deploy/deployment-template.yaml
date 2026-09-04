@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: runai-admission-controller
+  namespace: runai
+  labels:
+    app: runai-admission-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: runai-admission-controller
+  template:
+    metadata:
+      name: runai-admission-controller
+      labels:
+        app: runai-admission-controller
+    spec:
+      # Disabling ServiceAccount token automounting to pass sonar security check (this manifest is in use)
+      automountServiceAccountToken: false
+      serviceAccountName: runai-admission-controller
+      containers:
+        - name: runai-admission-controller
+          image: runai/runai-admission-controller:IMAGE_VERSION
+          imagePullPolicy: Never
+          volumeMounts:
+            - name: webhook-certs
+              mountPath: /etc/webhook/certs
+              readOnly: true
+      volumes:
+        - name: webhook-certs
+          secret:
+            secretName: runai-admission-secret

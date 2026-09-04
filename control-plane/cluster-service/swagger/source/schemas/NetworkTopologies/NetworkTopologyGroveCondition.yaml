@@ -1,0 +1,18 @@
+type: object
+properties:
+  type:
+    type: string
+    description: Type of the condition
+  status:
+    type: string
+    description: Status of the condition
+  reason:
+    type: string
+    description: Indicates the reason for the condition's last transition
+  message:
+    type: string
+    description: A human-readable message describing the condition
+  observedGeneration:
+    type: integer
+    format: int64
+    description: Generation of the topology observed when this condition was last updated

@@ -1,0 +1,9 @@
+{
+  "app_name": "example-controller",
+  "add_project_based_rolebinding": false,
+  "deploy_remote_instead_of_local_cluster": false,
+  "engine_instead_of_cluster": false,
+  "__app_name_camel_case_upper": "{{ cookiecutter.app_name | replace('_', '-') | title | replace('-', '') }}",
+  "__app_name_camel_case_lower": "{{ cookiecutter.app_name[0] }}{{ cookiecutter.__app_name_camel_case_upper[1:] }}",
+  "__app_name_underscore": "{{ cookiecutter.app_name|replace('-', '_') }}"
+}

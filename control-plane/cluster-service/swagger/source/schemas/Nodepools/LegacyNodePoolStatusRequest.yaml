@@ -1,0 +1,23 @@
+properties:
+  status:
+    type: string
+    enum:
+      - Creating
+      - Updating
+      - Deleting
+      - Empty
+      - Unschedulable
+      - Ready
+      - Deleted
+    description: Status of Node Pool
+    example: Creating
+  statusMessage:
+    type: string
+    description: Message for status of Node Pool
+    example: all nodes are down
+  nodes:
+    type: string
+    description: List of Nodes that are assigned to this nodepool - as json string
+    example:
+      - node-a
+      - node-b

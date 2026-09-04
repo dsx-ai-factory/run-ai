@@ -1,0 +1,18 @@
+# This file instructs Redocly's linter to ignore the rules contained for specific parts of your API.
+# See https://redoc.ly/docs/cli/ for more information.
+../_build/runaiApi.swagger.yaml:
+  no-ambiguous-paths:
+    - '#/paths/~1api~1v1~1workloads~1workspaces~1{workloadId}'
+    - '#/paths/~1api~1v1~1workloads~1trainings~1{workloadId}'
+    - '#/paths/~1api~1v1~1workloads~1distributed~1{workloadId}'
+    - '#/paths/~1api~1v1~1workloads~1inferences~1{workloadId}'
+    - '#/paths/~1api~1v1~1workloads~1inferences~1revisions~1{revisionId}'
+    - '#/paths/~1api~1v1~1workloads~1distributed-inferences'
+    - '#/paths/~1api~1v1~1workloads~1distributed-inferences~1{workloadId}'
+    - '#/paths/~1api~1v1~1workloads~1distributed-inferences~1updates'
+    - '#/paths/~1api~1v1~1workloads~1{workloadId}~1elements'
+    - '#/paths/~1api~1v1~1workloads~1{workloadId}~1elements~1count'
+    - '#/paths/~1api~1v1~1datavolumes~1settings~1{key}'
+    - '#/paths/~1api~1v1~1workloads~1settings~1{key}'
+    - '#/paths/~1api~1v1~1clusters~1settings~1{key}'
+    - '#/paths/~1api~1v1~1node-pools~1settings~1{key}'

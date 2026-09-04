@@ -1,0 +1,7 @@
+properties:
+  attributes:
+    $ref: "./GitInstance.yaml"
+  instances:
+    $ref: "./GitItems.yaml"
+nullable: true
+type: object

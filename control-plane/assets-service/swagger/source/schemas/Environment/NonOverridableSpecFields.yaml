@@ -1,0 +1,58 @@
+###########################################################
+# This file is auto-generated do not edit it!!!
+# Run 'make rebuild' in control-plane/fielder to rebuild it
+###########################################################
+allOf:
+- nullable: true
+  properties:
+    allowPrivilegeEscalation:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/AllowPrivilegeEscalation.yaml
+    capabilities:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/Capabilities.yaml
+    createHomeDir:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/CreateHomeDir.yaml
+    hostIpc:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/HostIpc.yaml
+    hostNetwork:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/HostNetwork.yaml
+    image:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/Image.yaml
+    imagePullPolicy:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/ImagePullPolicy.yaml
+    probes:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/Probes.yaml
+    readOnlyRootFilesystem:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/ReadOnlyRootFileSystem.yaml
+    runAsNonRoot:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/RunAsNonRoot.yaml
+    seccompProfileType:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/SeccompProfileType.yaml
+    stdin:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/Stdin.yaml
+    tty:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/Tty.yaml
+    uidGidSource:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/security/UidGidSource.yaml
+    workingDir:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/container/WorkingDir.yaml
+  type: object
+- properties:
+    connections:
+      description: List of connections that either expose ports from the container
+        (each port is associated with a tool that the container runs), or URL's to
+        be used for connecting to an external tool that is related to the action of
+        the container (such as Weights & Biases).
+      items:
+        $ref: ./Connection.yaml
+      type: array
+    overrideUidGidInWorkspace:
+      default: false
+      description: Allow specifying uid/gid as part of create workspace. This is relevant
+        only for custom uigGidSource.
+      type: boolean
+    routingMethod:
+      default: agnostic
+      description: Indicates the supported routing method (host-base, path-base or
+        agnostic)
+      type: string
+      x-internal: true

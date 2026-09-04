@@ -1,0 +1,33 @@
+type: object
+properties:
+  enabled:
+    type: boolean
+    nullable: true
+    description: Whether the banner is displayed at the top of the UI for all authenticated users.
+  text:
+    type: string
+    nullable: true
+    maxLength: 500
+    description: Message displayed in the banner. Required when `enabled` is `true`. Maximum 500 characters.
+  backgroundColor:
+    type: string
+    nullable: true
+    maxLength: 50
+    description: Background color of the banner. Accepts any valid CSS color value (hex, rgb, named). Maximum 50 characters.
+  fontColor:
+    type: string
+    nullable: true
+    maxLength: 50
+    description: Text color of the banner. Accepts any valid CSS color value (hex, rgb, named). Maximum 50 characters.
+  fontSize:
+    type: integer
+    nullable: true
+    minimum: 1
+    maximum: 20
+    description: Font size in pixels. Maximum 20. Defaults to 14 if omitted or null.
+example:
+  enabled: true
+  text: "PRODUCTION ENVIRONMENT"
+  backgroundColor: "#D32F2F"
+  fontColor: "#FFFFFF"
+  fontSize: 14

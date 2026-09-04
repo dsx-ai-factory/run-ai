@@ -1,0 +1,5 @@
+description: Specifies the directory where SSH keys are mounted. (applicable only for MPI)
+type: string
+nullable: true
+default: /root/.ssh
+pattern: .*

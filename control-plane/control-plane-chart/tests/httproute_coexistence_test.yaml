@@ -1,0 +1,192 @@
+suite: Test HTTPRoute coexistence with Ingress and Routes
+
+tests:
+  # --- DOD: ingress + httproute (kubernetes) ---
+
+  - it: should render both HTTPRoute and Ingress when both enabled on kubernetes
+    templates:
+      - templates/common/httproute.yaml
+      - templates/common/ingress.yaml
+    set:
+      global.gatewayAPI.enabled: true
+      global.ingress.enabled: true
+      global.config.kubernetesDistribution: kubernetes
+      global.gatewayAPI.parentRefs:
+        - name: test-gateway
+    documentSelector:
+      path: kind
+      value: HTTPRoute
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: HTTPRoute
+
+  - it: should render Ingress alongside HTTPRoute on kubernetes
+    templates:
+      - templates/common/httproute.yaml
+      - templates/common/ingress.yaml
+    set:
+      global.gatewayAPI.enabled: true
+      global.ingress.enabled: true
+      global.config.kubernetesDistribution: kubernetes
+      global.gatewayAPI.parentRefs:
+        - name: test-gateway
+    documentSelector:
+      path: kind
+      value: Ingress
+      matchMany: true
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: Ingress
+
+  # --- DOD: only httproute (kubernetes) ---
+
+  - it: should render only HTTPRoute when ingress is disabled on kubernetes
+    templates:
+      - templates/common/httproute.yaml
+      - templates/common/ingress.yaml
+    set:
+      global.gatewayAPI.enabled: true
+      global.ingress.enabled: false
+      global.config.kubernetesDistribution: kubernetes
+      global.gatewayAPI.parentRefs:
+        - name: test-gateway
+    documentSelector:
+      path: kind
+      value: HTTPRoute
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: HTTPRoute
+
+  - it: should not render Ingress when only gatewayAPI is enabled
+    templates:
+      - templates/common/httproute.yaml
+      - templates/common/ingress.yaml
+    set:
+      global.gatewayAPI.enabled: true
+      global.ingress.enabled: false
+      global.config.kubernetesDistribution: kubernetes
+      global.gatewayAPI.parentRefs:
+        - name: test-gateway
+    documentSelector:
+      path: kind
+      value: Ingress
+      skipEmptyTemplates: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # --- DOD: only ingress (kubernetes) ---
+
+  - it: should render only Ingress when gatewayAPI is disabled on kubernetes
+    templates:
+      - templates/common/httproute.yaml
+      - templates/common/ingress.yaml
+    set:
+      global.gatewayAPI.enabled: false
+      global.ingress.enabled: true
+      global.config.kubernetesDistribution: kubernetes
+    documentSelector:
+      path: kind
+      value: Ingress
+      matchMany: true
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: Ingress
+
+  - it: should not render HTTPRoute when gatewayAPI is disabled
+    templates:
+      - templates/common/httproute.yaml
+      - templates/common/ingress.yaml
+    set:
+      global.gatewayAPI.enabled: false
+      global.ingress.enabled: true
+      global.config.kubernetesDistribution: kubernetes
+    documentSelector:
+      path: kind
+      value: HTTPRoute
+      skipEmptyTemplates: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # --- DOD: route + httproute (openshift) ---
+
+  - it: should render HTTPRoute on openshift when gatewayAPI is enabled
+    templates:
+      - templates/common/httproute.yaml
+      - templates/common/routes.yaml
+    set:
+      global.gatewayAPI.enabled: true
+      global.ingress.enabled: true
+      global.config.kubernetesDistribution: openshift
+      traefik.enabled: true
+      global.gatewayAPI.parentRefs:
+        - name: test-gateway
+    documentSelector:
+      path: kind
+      value: HTTPRoute
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: HTTPRoute
+
+  - it: should render OpenShift Route alongside HTTPRoute
+    templates:
+      - templates/common/httproute.yaml
+      - templates/common/routes.yaml
+    set:
+      global.gatewayAPI.enabled: true
+      global.ingress.enabled: true
+      global.config.kubernetesDistribution: openshift
+      traefik.enabled: true
+      global.gatewayAPI.parentRefs:
+        - name: test-gateway
+    documentSelector:
+      path: kind
+      value: Route
+      matchMany: true
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: Route
+
+  # --- DOD: only route (openshift, no gateway) ---
+
+  - it: should render only Route when gatewayAPI is disabled on openshift
+    templates:
+      - templates/common/httproute.yaml
+      - templates/common/routes.yaml
+    set:
+      global.gatewayAPI.enabled: false
+      global.ingress.enabled: true
+      global.config.kubernetesDistribution: openshift
+      traefik.enabled: true
+    documentSelector:
+      path: kind
+      value: Route
+      matchMany: true
+      skipEmptyTemplates: true
+    asserts:
+      - isKind:
+          of: Route
+
+  - it: should not render HTTPRoute when gatewayAPI is disabled on openshift
+    templates:
+      - templates/common/httproute.yaml
+      - templates/common/routes.yaml
+    set:
+      global.gatewayAPI.enabled: false
+      global.ingress.enabled: true
+      global.config.kubernetesDistribution: openshift
+      traefik.enabled: true
+    documentSelector:
+      path: kind
+      value: HTTPRoute
+      skipEmptyTemplates: true
+    asserts:
+      - hasDocuments:
+          count: 0

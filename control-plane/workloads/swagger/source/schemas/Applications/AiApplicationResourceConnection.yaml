@@ -1,0 +1,6 @@
+allOf:
+  - $ref: "../Common/ResourceRef.yaml"
+  - type: object
+    properties:
+      workloadId:
+        $ref: "../../../../../infra/openapi/docs/schemas/workloads/WorkloadId.yaml"

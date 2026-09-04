@@ -1,0 +1,6 @@
+description: Defines whether the NIM service runs as a multi-node deployment. If workers is set to 1 or more, the service runs in multi-node.
+properties:
+  workers:
+    $ref: "./NimServiceWorkers.yaml"
+nullable: true
+type: object

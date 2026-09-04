@@ -1,0 +1,18 @@
+properties:
+  defaults:
+    allOf:
+      - $ref: "./NimServiceDefaults.yaml"
+    nullable: true
+    type: object
+  rules:
+    allOf:
+      - $ref: "./NimServiceRules.yaml"
+    nullable: true
+    type: object
+  status:
+    $ref: "../Policy/PolicyValidationStatus.yaml"
+  defaultFromOrder:
+    x-internal: true
+    $ref: "../Policy/DefaultFromOrder.yaml"
+nullable: true
+type: object

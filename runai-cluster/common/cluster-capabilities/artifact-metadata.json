@@ -1,0 +1,5 @@
+{
+    "service_name": "cluster-capabilities",
+    "artifact_type": "none",
+    "cache_artifacts": false
+  }

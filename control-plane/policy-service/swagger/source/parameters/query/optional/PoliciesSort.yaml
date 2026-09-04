@@ -1,0 +1,7 @@
+name: sortBy
+in: query
+required: false
+description: The field to sort the results by.
+schema:
+  type: string
+  enum: [ id, type, scope, createdAt, createdBy, updatedAt, updatedBy]

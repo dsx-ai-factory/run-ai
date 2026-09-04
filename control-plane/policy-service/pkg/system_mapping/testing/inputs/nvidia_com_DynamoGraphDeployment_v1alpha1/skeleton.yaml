@@ -1,0 +1,33 @@
+apiVersion: nvidia.com/v1alpha1
+kind: DynamoGraphDeployment
+metadata:
+  name: test-dynamo
+  namespace: default
+spec:
+  backendFramework: vllm
+  services:
+    service-a:
+      replicas: 1
+      componentType: worker
+      extraPodSpec:
+        containers:
+          - name: main
+            image: placeholder-a
+        initContainers:
+          - name: init
+            image: placeholder-a
+    service-b:
+      replicas: 2
+      componentType: router
+      extraPodSpec:
+        containers:
+          - name: main
+            image: placeholder-b
+        initContainers:
+          - name: init
+            image: placeholder-b
+    # service-c has NO extraPodSpec - used by parameterized-dependency test case
+    # to verify the dependency mechanism creates it when a policy targets servicePodSpec
+    service-c:
+      replicas: 1
+      componentType: inference

@@ -1,0 +1,4 @@
+type: array
+description: The list of registry-integrations.
+items:
+  $ref: './RegistryIntegration.yaml'

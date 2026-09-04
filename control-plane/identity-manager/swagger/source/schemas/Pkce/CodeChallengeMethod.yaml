@@ -1,0 +1,5 @@
+type: string
+description: PKCE code challenge method (RFC 7636). Defaults to "plain" if omitted.
+enum:
+  - plain
+  - S256

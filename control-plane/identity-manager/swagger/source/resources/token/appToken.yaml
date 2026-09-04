@@ -1,0 +1,32 @@
+post:
+  deprecated: true
+  tags:
+  - Tokens
+  x-no-authorization: true
+  summary: get application token
+  x-service: identity-manager
+  x-test-coverage:
+  - src/test/suites/parallel/applicationsV2/applicationsAuth.test.ts
+  description: |
+    Retrieve access token for an application.
+    The application token is retrieved from the authorization server.
+    This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to app_token instead, with AppID and appSecret set accordingly to get an application token
+  operationId: app_token
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/Tokens/AppTokenRequest.yaml'
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/Tokens/AppTokenResponse.yaml'
+    '400':
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '500':
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

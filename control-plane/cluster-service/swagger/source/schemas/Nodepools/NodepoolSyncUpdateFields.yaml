@@ -1,0 +1,38 @@
+type: object
+properties:
+  labelKey:
+    type: string
+    description: Label key for associated nodes to the Node Pool (with value as in labelValue)
+    example: node-type
+    minLength: 1
+    nullable: true
+  labelValue:
+    type: string
+    description: Label value for associated nodes to the Node Pool (with key as in labelKey)
+    example: type-x
+    minLength: 1
+    nullable: true
+  placementStrategy:
+    description: scheduling strategy per resource
+    deprecated: true
+    properties:
+      cpu:
+        $ref: "./PlacementStrategy.yaml"
+      gpu:
+        $ref: "./PlacementStrategy.yaml"
+  gpuNetworkAccelerationLabelKey:
+    description: Label key by which to determine GPUNetworkAccelerationDetection nodes
+    type: string
+  gpuNetworkAccelerationDetection:
+    $ref: "./NodepoolGPUNetworkAccelerationDetection.yaml"
+  # Accepted from pre-3.0 clusters, which still report these, and discarded. The sync
+  # endpoint rejects unknown fields, so dropping them here would 400 every status sync
+  # from an older cluster. Never stored and never returned.
+  overProvisioningRatio:
+    type: integer
+    deprecated: true
+    nullable: true
+  gpuResourceOptimization:
+    $ref: "./GPUResourceOptimization.yaml"
+  schedulingConfiguration:
+    $ref: "./SchedulingConfiguration.yaml"

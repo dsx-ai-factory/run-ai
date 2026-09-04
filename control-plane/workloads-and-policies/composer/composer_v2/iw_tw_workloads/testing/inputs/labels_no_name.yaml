@@ -1,0 +1,4 @@
+image: ubuntu
+labels:
+  - value: lbl1
+

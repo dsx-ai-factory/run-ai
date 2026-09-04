@@ -1,0 +1,7 @@
+name: HelmRepoId
+in: path
+required: true
+schema:
+  type: string
+  format: uuid
+  description: The ID of the helm repo.

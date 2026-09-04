@@ -1,0 +1,4 @@
+description: the value of an update counter of a data in the system.
+type: integer
+format: int64
+example: 12345

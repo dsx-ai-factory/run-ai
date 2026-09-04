@@ -1,0 +1,4 @@
+**/generated/** linguist-generated
+**/swagger/_build/** linguist-generated
+control-plane/infra/openapi/specs/** linguist-generated
+**/vendor/** linguist-generated

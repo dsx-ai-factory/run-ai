@@ -1,0 +1,2 @@
+bearerAuth:            # arbitrary name for the security scheme
+  $ref: './bearerAuth.yaml'

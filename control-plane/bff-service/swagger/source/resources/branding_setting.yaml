@@ -1,0 +1,76 @@
+get:
+  summary: Get branding setting by key
+  description: Returns a single branding setting identified by the path key.
+  x-service: bff-service
+  x-test-coverage:
+  - integration-tests/tests/api_branding_settings_service_test.go
+  operationId: get_branding_setting_by_key
+  x-no-authorization: true
+  parameters:
+  - $ref: '../parameters/brandingSettingsKey.yaml'
+  - $ref: "../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  tags:
+  - Settings
+  responses:
+    '200':
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/settings/GetSettingResponse.yaml'
+          examples:
+            logo:
+              value:
+                value:
+                  logo: "<base64-encoded-image>"
+                displayName: Logo
+                description: Retrieve the base64 logo file.
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '404':
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+put:
+  summary: Update branding setting by key
+  description: Updates a single branding setting identified by the path key.
+  x-service: bff-service
+  x-test-coverage:
+  - integration-tests/tests/api_branding_settings_service_test.go
+  operationId: update_branding_setting_by_key
+  x-authorize:
+    resource-type: branding-settings
+    action: update
+  tags:
+  - Settings
+  parameters:
+  - $ref: '../parameters/brandingSettingsKey.yaml'
+  - $ref: "../../../../infra/openapi/docs/parameters/query/optional/TenantId.yaml"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          anyOf:
+          - $ref: '../schemas/settings/Logo/UpdateLogo.yaml'
+  responses:
+    '200':
+      description: Setting successfully updated.
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '404':
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    '413':
+      $ref: '../../../../infra/openapi/docs/responses/413RequestEntityTooLarge.yaml'
+    '415':
+      $ref: '../../../../infra/openapi/docs/responses/415UnsupportedMediaType.yaml'
+    '500':
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,8 @@
+description: The type of Kubernetes Service to create for the endpoint.
+type: string
+default: ClusterIP
+enum:
+  - ClusterIP
+  - NodePort
+  - LoadBalancer
+nullable: true

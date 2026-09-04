@@ -1,0 +1,18 @@
+assets:
+  environment: basic
+  compute: memory
+  datasources:
+    - kind: hostPath
+      id: basic
+    - kind: nfs
+      id: basic
+    - kind: git
+      id: public
+    - kind: pvc
+      id: existing
+    - kind: pvc
+      id: non-existing
+    - kind: s3
+      id: public
+    - kind: config-map
+      id: basic

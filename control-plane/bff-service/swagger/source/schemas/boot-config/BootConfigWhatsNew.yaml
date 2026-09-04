@@ -1,0 +1,11 @@
+type: object
+required:
+  - label
+  - url
+properties:
+  label:
+    type: string
+    example: What's New in 2.25
+  url:
+    type: string
+    example: https://run-ai-docs.nvidia.com/self-hosted/getting-started/whats-new/whats-new-2-25

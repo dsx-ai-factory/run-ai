@@ -1,0 +1,12 @@
+description: A list of users and service accounts allowed to send requests to the serving endpoint.
+  `Note:` Cannot be used together with authorizedGroups.
+type: array
+items:
+  type: string
+  maxLength: 253
+  pattern: .*
+maxItems: 1000
+example:
+  - user.a@example.com
+  - user.b@example.com
+nullable: true

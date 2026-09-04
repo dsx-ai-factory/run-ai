@@ -1,0 +1,19 @@
+type: object
+required:
+  - name
+  - id
+  - workloadId
+properties:
+  name:
+    type: string
+    example: "pod-group-a"
+  id:
+    type: string
+    format: uuid
+  workloadId:
+    type: string
+    format: uuid
+  revisionId:
+    type: string
+    format: uuid
+    nullable: true

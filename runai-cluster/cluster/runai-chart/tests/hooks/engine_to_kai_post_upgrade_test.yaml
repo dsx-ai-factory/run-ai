@@ -1,0 +1,22 @@
+suite: Test Engine-to-KAI migration gate (post-upgrade)
+
+templates:
+  - templates/hooks/post-upgrade-job.yaml
+
+tests:
+  - it: should enable legacy Engine cleanup during the final cutover
+    set:
+      helmHooksHandler.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--engine-to-kai-migration-enabled=true"
+
+  - it: should allow the internal migration gate to be disabled explicitly
+    set:
+      helmHooksHandler.enabled: true
+      engineToKaiMigration.enabled: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--engine-to-kai-migration-enabled=false"

@@ -1,0 +1,8 @@
+properties:
+  name:
+    example: "password-credential-1"
+    description: The name of the resource created for the asset in the cluster.
+    type: string
+    nullable: true
+nullable: true
+type: object

@@ -1,0 +1,6 @@
+type: string
+enum:
+  - spread
+  - binpack
+example: spread
+nullable: true

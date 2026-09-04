@@ -1,0 +1,29 @@
+type: object
+required:
+  - installationStr
+  - repositoryName
+  - chartRepoURL
+  - bootstrapToken
+properties:
+  installationStr:
+    type: string
+  repositoryName:
+    type: string
+  chartRepoURL:
+    type: string
+  bootstrapToken:
+    type: string
+    description: |
+      Short-lived JWT (2h TTL) for the installer service account.
+      Pass to the Helm hook via --set cluster.bootstrapToken=<token>.
+  clientSecret:
+    type: string
+    deprecated: true
+    nullable: true
+    description: Deprecated. Omitted on CP >= 3.0. Use bootstrapToken instead.
+
+example:
+  installationStr: 'helm upgrade -i runai-cluster runai/runai-cluster -n runai --set cluster.uid=... --set cluster.bootstrapToken=<installer-bootstrap-jwt>'
+  repositoryName: 'runai'
+  chartRepoURL: 'https://charts.example.com'
+  bootstrapToken: '<installer-bootstrap-jwt>'

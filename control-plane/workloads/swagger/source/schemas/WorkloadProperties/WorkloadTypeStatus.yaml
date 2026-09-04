@@ -1,0 +1,10 @@
+allOf:
+  - $ref: "./WorkloadTypeStatusFields.yaml"
+  - type: object
+    properties:
+      clusterId:
+        $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+      updatedAt:
+        type: string
+        format: date-time
+        description: The date and time when the workload type status of this cluster was last updated.

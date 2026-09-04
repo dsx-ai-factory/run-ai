@@ -1,0 +1,286 @@
+DistributedTarget:
+  Config:
+    networking:
+    - externalAccess:
+        ingress:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: kf-urls_authenticated_users-url-worker
+          spec:
+            rules:
+            - host: test.run.ai
+              http:
+                paths:
+                - backend:
+                    service:
+                      name: kf-urls_authenticated_users-url-worker
+                      port:
+                        number: 80
+                  path: /test/urls_authenticated_users/url-worker
+                  pathType: Prefix
+      services:
+      - spec:
+          name: kf-urls_authenticated_users-url-worker
+          ports:
+          - name: port-4180
+            port: 80
+            protocol: TCP
+            targetPort: 4180
+          selector:
+            training.kubeflow.org/job-name: urls_authenticated_users
+            training.kubeflow.org/job-role: worker
+            training.kubeflow.org/replica-index: "0"
+          type: ClusterIP
+    - externalAccess:
+        ingress:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: kf-urls_authenticated_users-url-master
+          spec:
+            rules:
+            - host: test.run.ai
+              http:
+                paths:
+                - backend:
+                    service:
+                      name: kf-urls_authenticated_users-url-master
+                      port:
+                        number: 80
+                  path: /test/urls_authenticated_users
+                  pathType: Prefix
+      services:
+      - spec:
+          name: kf-urls_authenticated_users-url-master
+          ports:
+          - name: port-4180
+            port: 80
+            protocol: TCP
+            targetPort: 4180
+          selector:
+            training.kubeflow.org/job-name: urls_authenticated_users
+            training.kubeflow.org/job-role: launcher
+          type: ClusterIP
+  Framework: MPI
+  JaxJob: null
+  MasterSpec: null
+  MpiJob:
+    apiVersion: kubeflow.org/v2beta1
+    kind: MPIJob
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: mpijob
+        createdBy: MPIJob
+        project: test
+        release: urls_authenticated_users
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Distributed
+        workloadName: urls_authenticated_users
+      name: urls_authenticated_users
+      namespace: runai-test
+    spec:
+      mpiReplicaSpecs:
+        Launcher:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: mpijob
+                createdBy: MPIJob
+                project: test
+                release: urls_authenticated_users
+                workloadKind: Distributed
+                workloadName: urls_authenticated_users
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: urls_authenticated_users
+                - name: RUNAI_MPI_NUM_WORKERS
+                  value: "1"
+                image: ubuntu
+                name: mpi
+                ports:
+                - containerPort: 8081
+                  name: port-8081
+                  protocol: TCP
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              initContainers:
+              - args:
+                - --provider=keycloak-oidc
+                - --upstream=http://localhost:8081
+                - --redirect-url=https://test.run.ai/test/urls_authenticated_users/oauth2/callback
+                - --oidc-issuer-url=/auth/realms/runai
+                - --scope=openid
+                - --http-address=0.0.0.0:4180
+                - --proxy-prefix=/test/urls_authenticated_users/oauth2
+                - --skip-provider-button=true
+                - --whitelist-domain=test.run.ai
+                - --cookie-domain=test.run.ai
+                - --cookie-httponly=true
+                - --cookie-secure=true
+                - --code-challenge-method=S256
+                - --cookie-refresh=10m
+                - --cookie-samesite=lax
+                - --skip-jwt-bearer-tokens=true
+                - --extra-jwt-issuers=/auth/realms/runai=runai
+                - --custom-templates-dir=/usr/share/oauth2-proxy
+                - --pass-authorization-header=false
+                - --cookie-name=urls_authenticated_users-url-master-auth-proxy
+                - --email-domain=*
+                env:
+                - name: OAUTH2_PROXY_COOKIE_PATH
+                  value: /test/urls_authenticated_users
+                envFrom:
+                - secretRef: {}
+                image: test.registry/oauth2-proxy:test
+                imagePullPolicy: IfNotPresent
+                name: runai-oauth2-proxy-0
+                ports:
+                - containerPort: 4180
+                  name: port-4180
+                  protocol: TCP
+                resources: {}
+                restartPolicy: Always
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  runAsNonRoot: true
+                volumeMounts:
+                - mountPath: /etc/runai/auth/users
+                  name: runai-auth
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - emptyDir: {}
+                name: runai-auth
+        Worker:
+          replicas: 1
+          template:
+            metadata:
+              annotations:
+                user: tester
+              labels:
+                app: mpijob
+                createdBy: MPIJob
+                project: test
+                release: urls_authenticated_users
+                workloadKind: Distributed
+                workloadName: urls_authenticated_users
+            spec:
+              containers:
+              - env:
+                - name: RUNAI_PROJECT
+                  value: test
+                - name: RUNAI_JOB_NAME
+                  value: urls_authenticated_users
+                - name: RUNAI_MPI_NUM_WORKERS
+                  value: "1"
+                image: ubuntu
+                name: mpi
+                ports:
+                - containerPort: 8081
+                  name: port-8081
+                  protocol: TCP
+                resources: {}
+                securityContext:
+                  seccompProfile:
+                    type: RuntimeDefault
+              initContainers:
+              - args:
+                - --provider=keycloak-oidc
+                - --upstream=http://localhost:8081
+                - --redirect-url=https://test.run.ai/test/urls_authenticated_users/url-worker/oauth2/callback
+                - --oidc-issuer-url=/auth/realms/runai
+                - --scope=openid
+                - --http-address=0.0.0.0:4180
+                - --proxy-prefix=/test/urls_authenticated_users/url-worker/oauth2
+                - --skip-provider-button=true
+                - --whitelist-domain=test.run.ai
+                - --cookie-domain=test.run.ai
+                - --cookie-httponly=true
+                - --cookie-secure=true
+                - --code-challenge-method=S256
+                - --cookie-refresh=10m
+                - --cookie-samesite=lax
+                - --skip-jwt-bearer-tokens=true
+                - --extra-jwt-issuers=/auth/realms/runai=runai
+                - --custom-templates-dir=/usr/share/oauth2-proxy
+                - --pass-authorization-header=false
+                - --cookie-name=urls_authenticated_users-url-worker-auth-proxy
+                - --email-domain=*
+                env:
+                - name: OAUTH2_PROXY_COOKIE_PATH
+                  value: /test/urls_authenticated_users/url-worker
+                envFrom:
+                - secretRef: {}
+                image: test.registry/oauth2-proxy:test
+                imagePullPolicy: IfNotPresent
+                name: runai-oauth2-proxy-0
+                ports:
+                - containerPort: 4180
+                  name: port-4180
+                  protocol: TCP
+                resources: {}
+                restartPolicy: Always
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  runAsNonRoot: true
+                volumeMounts:
+                - mountPath: /etc/runai/auth/users
+                  name: runai-auth
+              priorityClassName: low
+              schedulerName: runai-scheduler
+              volumes:
+              - emptyDir: {}
+                name: runai-auth
+      runPolicy:
+        backoffLimit: 0
+        cleanPodPolicy: Running
+    status: {}
+  ObjectMeta: null
+  PyTorchJob: null
+  RunPolicy: null
+  TFJob: null
+  TypeMeta: null
+  WorkerSpec: null
+  XgboostJob: null
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  distributedFramework: MPIJob
+  environments:
+  - connections:
+    - connectionType: ExternalUrl
+      containerPort: 8081
+      correlationName: url
+      exposedUrlPath: /project/urls_authenticated_users
+      exposedUrlSubDomain: project-urls_authenticated_users
+      name: url
+      toolType: tensor
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-urls_authenticated_users/, Framework: MPI'
+  images:
+  - ubuntu
+  name: 'urls_authenticated_users/, Framework: MPI'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  submittedBy: tester
+  type: Distributed
+  version: v2alpha1

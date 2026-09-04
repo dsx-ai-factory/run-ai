@@ -1,0 +1,21 @@
+get:
+  summary: Get configuration.
+  description: Retrieve Run:ai configuration settings.
+  x-service: identity-manager
+  x-test-coverage:
+   - src/test/suites/tenantSuite/tenantUserApi/tenantSystemApi.test.ts
+  operationId: get_tenant_configuration
+  x-no-authorization: true
+  tags:
+    - Config
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Realms/AuthConfiguration.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

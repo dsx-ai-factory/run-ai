@@ -1,0 +1,6 @@
+image: ubuntu
+
+storage:
+  dataVolume:
+    - id: unknown-id-12345
+      mountPath: /data

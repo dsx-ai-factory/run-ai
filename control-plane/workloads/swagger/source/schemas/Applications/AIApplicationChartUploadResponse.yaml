@@ -1,0 +1,7 @@
+type: object
+description: Result of uploading a packaged Helm chart archive.
+required:
+  - chartId
+properties:
+  chartId:
+    $ref: "./AIApplicationChartId.yaml"

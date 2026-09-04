@@ -1,0 +1,37 @@
+post:
+  summary: sync the names of cluster-wide pvcs to the control plane.
+  description: this API is used by cluster versions < 2.17
+  deprecated: true
+  operationId: sync_cluster_wide_pvc_names_v1
+  tags:
+    - PVCs
+  x-internal: true
+  x-authorize:
+    resource-type: pvc-assets
+    action: sync
+  x-service: k8s-objects-tracker
+  x-test-coverage:
+    - k8s-objects-tracker/pkg/services/api_pvcs_service_test.go
+  parameters:
+    - $ref: "../../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../schemas/PVCs/PVCNames.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../schemas/PVCs/PVCNames.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

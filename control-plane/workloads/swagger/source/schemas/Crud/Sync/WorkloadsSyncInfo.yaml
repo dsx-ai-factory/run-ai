@@ -1,0 +1,5 @@
+properties:
+  updateCount:
+    $ref: "../../../../../../infra/openapi/docs/schemas/sync/UpdateCount.yaml"
+  workload:
+    $ref: "../../../../../../infra/openapi/docs/schemas/workloads/SupersetWorkload.yaml"

@@ -1,0 +1,6 @@
+type: string
+description: Which datavolumes to return in the GET datavolumes response. Originated - datavolumes that are originated in the permitted scopes of the caller. UsableInProject - datavolumes that can be used in a specific project; if you use this value, you must also provide the project ID in the "usableInProjectId" query param.
+example: Originated
+enum:
+  - Originated
+  - UsableInProject

@@ -1,0 +1,31 @@
+type: object
+nullable: true
+required:
+  - createdAt
+  - type
+  - clusterId
+  - message
+properties:
+  createdAt:
+    type: string
+    format: date-time
+    example: 2022-01-01T03:49:52.531Z
+  id:
+    type: string
+    format: uuid
+  type:
+    type: string
+    example: "Normal"
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  message:
+    type: string
+    example: "Started container z"
+  reason:
+    type: string
+    example: "Started"
+  source:
+    type: string
+    example: "kubelet"
+  involvedObject:
+    $ref: "./InvolvedObject.yaml"

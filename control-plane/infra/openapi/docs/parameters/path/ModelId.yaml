@@ -1,0 +1,8 @@
+name: ModelId
+in: path
+required: true
+description: Unique identifier of the asset.
+schema:
+  type: string
+  format: uuid
+  minLength: 1

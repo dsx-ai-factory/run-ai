@@ -1,0 +1,14 @@
+allOf:
+  - $ref: "../templates/TemplateUpdateMeta.yaml"
+  - type: object
+    properties:
+      spec:
+        $ref: "DistributedTemplateSpec.yaml"
+  - $ref: "../templates/TemplateAssets.yaml"
+  - type: object
+    properties:
+      masterSpecSameAsWorker:
+        $ref: "./MasterSpecSameAsWorker.yaml"
+      master:
+        $ref: "./TemplateMasterSection.yaml"
+    nullable: true

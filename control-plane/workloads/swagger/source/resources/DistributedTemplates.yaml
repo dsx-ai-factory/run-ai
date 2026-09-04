@@ -1,0 +1,69 @@
+post:
+  summary: Create a new distributed training template. [Experimental]
+  operationId: create_distributed_template
+  description: Create a new distributed training template.
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/templates_service_test.go
+  x-authorize:
+    resource-type: templates
+    action: create
+  tags:
+    - Workload templates
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: "../../../../infra/openapi/docs/schemas/distributed/DistributedTemplateCreationRequest.yaml"
+  responses:
+    202:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../../../infra/openapi/docs/schemas/distributed/DistributedTemplate.yaml"
+    400:
+      $ref: "../../../../infra/openapi/docs/responses/400BadRequest.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    500:
+      $ref: "../../../../infra/openapi/docs/responses/500InternalServerError.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+get:
+  summary: List all distributed training templates. [Experimental]
+  description: List all distributed training templates.
+  operationId: list_distributed_templates
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services_crud/templates_service_test.go
+  x-no-authorization: true
+  tags:
+    - Workload templates
+  parameters:
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+    - $ref: '../parameters/query/TemplatesSort.yaml'
+    - $ref: '../parameters/query/TemplatesFilter.yaml'
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Search.yaml"
+    - $ref: "../parameters/query/IncludeTemplateAncestors.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToProject.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ComplyToReplicaType.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/schemas/distributed/DistributedTemplatesListResponse.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

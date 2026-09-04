@@ -1,0 +1,10 @@
+type: object
+x-internal: true
+properties:
+  fullSync:
+    type: boolean
+    description: Upsert all items and delete all missing items
+  workloadTypes:
+    type: array
+    items:
+      $ref: "./WorkloadTypeForSync.yaml"

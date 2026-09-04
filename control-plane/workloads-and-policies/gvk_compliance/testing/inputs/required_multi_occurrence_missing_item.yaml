@@ -1,0 +1,38 @@
+policy:
+  id: test-policy
+  effectiveRules:
+    # required:true on a selector resolving to multiple containers. Every
+    # selected container must provide image.
+    - field: image
+      specSelector: allContainers
+      enforcements:
+        - required: true
+
+  breakdown:
+    fields:
+      image:
+        - specSelectors: [allContainers]
+          specRef: image
+          formatter:
+            builtin: KeyValue
+    specSelectors:
+      allContainers:
+        query: |
+          (
+            .spec.template.spec.containers[]?,
+            .spec.template.spec.initContainers[]?
+          )
+          | select(.)
+
+workload:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: required-multi
+  spec:
+    template:
+      spec:
+        containers:
+          - name: has-image
+            image: ubuntu
+          - name: missing-image

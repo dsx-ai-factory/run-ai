@@ -1,0 +1,9 @@
+properties:
+  sourceOfRule:
+    $ref: "./SourceOfRule.yaml"
+  canEdit:
+    description: Whether the value of the field is editable. default to true
+    type: boolean
+    nullable: true
+nullable: true
+type: object

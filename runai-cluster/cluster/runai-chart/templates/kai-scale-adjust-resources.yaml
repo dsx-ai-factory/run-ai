@@ -1,0 +1,15 @@
+{{- if (index .Values "kai-scheduler" "enabled") }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: runai-scale-adjust
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: runai-scale-adjust
+  namespace: runai-scale-adjust
+spec:
+  podSelector: {}
+  ingress: []
+{{- end }}

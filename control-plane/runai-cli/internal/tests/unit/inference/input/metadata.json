@@ -1,0 +1,14 @@
+{
+    "capturedAt": "2025-12-15T09:08:08Z",
+    "workloadType": "Inference",
+    "workloadId": "a22ecd44-f863-444d-b69d-0cc0d26bbc54",
+    "workloadName": "my-inference-full-123",
+    "apiUrl": "https://nael-env-001.runailabs.com",
+    "files": {
+        "workloadList": "workload_list.json",
+        "workloadDetailed": "workload_detailed.json",
+        "workloadSpec": "workload_spec.json",
+        "workloadPods": "workload_pods.json",
+        "workloadEvents": "workload_events.json"
+    }
+}

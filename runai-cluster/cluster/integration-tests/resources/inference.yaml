@@ -1,0 +1,21 @@
+apiVersion: run.ai/v2alpha1
+kind: InferenceWorkload
+metadata:
+  name: {{WORKLOAD_NAME}}
+  namespace: {{WORKLOAD_NAMESPACE}}
+spec:
+  name:
+    value: {{POD_NAME_PREFIX}}
+  image:
+    value: gcr.io/run-ai-lab/knative-helloworld-go
+  maxScale:
+    value: 1
+  minScale:
+    value: 1
+  ports:
+    items:
+      serving-port:
+        value:
+          container: 8080
+          protocol: http
+          serviceType: ServingPort

@@ -1,0 +1,49 @@
+post:
+  summary: Enrich org unit ranking with workload counts (Internal API).
+  description: |
+    Internal API for enriching org unit ranking items with workload counts.
+    
+    Accepts an array of org unit IDs along with global context (cluster, type, nodepool)
+    and returns workload counts for each ID.
+    
+    Phase-specific node pool filtering:
+    - RUNNING workloads: filters by currentNodepools (where workload is running)
+    - PENDING workloads: filters by requestedNodepools (only single-nodepool requests)
+    
+    Note: All IDs in a single request must be of the same orgUnitType (all projects OR all departments).
+  operationId: internal_enrich_org_unit_ranking
+  x-service: workloads
+  x-internal: true
+  x-no-authorization: true
+  x-test-coverage:
+    - pkg/services/internal_enrich_ranking_test.go
+  tags:
+    - Workloads
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Workloads/InternalEnrichOrgUnitRankingRequest.yaml'
+  responses:
+    200:
+      description: Successfully enriched ranking items with workload counts.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Workloads/InternalEnrichOrgUnitRankingResponse.yaml'
+          example:
+            items:
+              - id: "123"
+                runningWorkloadsCount: 5
+                pendingWorkloadsCount: 2
+              - id: "456"
+                runningWorkloadsCount: 12
+                pendingWorkloadsCount: 7
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+

@@ -1,0 +1,8 @@
+type: array
+description: |
+  Endpoint-array networking configuration sent to agents that support the new networking shape.
+  Supported for cluster version 2.26.0 and above.
+nullable: true
+maxItems: 1000
+items:
+  $ref: "./NetworkingEndpoint.yaml"

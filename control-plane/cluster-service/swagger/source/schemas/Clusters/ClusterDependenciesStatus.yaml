@@ -1,0 +1,13 @@
+type: object
+required:
+    - required
+    - optional
+properties:
+  required:
+    type: object
+    additionalProperties:
+      $ref: './ClusterDependencyStatus.yaml'
+  optional:
+    type: object
+    additionalProperties:
+      $ref: './ClusterDependencyStatus.yaml'

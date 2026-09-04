@@ -1,0 +1,3 @@
+{{- if .Values.datavolumes.enabled }}
+{{- include "common.service" (list . .Values.datavolumes.service .Values.datavolumes) }}
+{{- end }}

@@ -1,0 +1,21 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package pubsub
+
+import (
+	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/services"
+	events "github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub"
+)
+
+// Register registers event handlers to the pubsub
+func Register() {
+	runaipubsub.SubscribeAsync[events.ProjectDeleteRequest](services.HandleProjectDeleteRequest)
+	runaipubsub.SubscribeAsync[events.ClusterDelete](services.HandleClusterDeleteRequest)
+	runaipubsub.SubscribeAsync[events.TenantDelete](services.HandleTenantDeleteRequest)
+	runaipubsub.SubscribeAsync[events.AssetModified](services.AssetModified)
+	runaipubsub.SubscribeAsync[events.AssetDeleted](services.AssetDeleted)
+}

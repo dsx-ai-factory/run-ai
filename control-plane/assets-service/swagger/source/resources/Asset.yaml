@@ -1,0 +1,34 @@
+get:
+  summary: List assets by their ids
+  description: Returns a list of assets.
+  operationId: list_assets_by_id
+  deprecated: true
+  x-authorize:
+    resource-type: workloads
+    action: read
+  x-service: assets-service
+  x-internal: true
+  x-test-coverage: null
+  tags:
+    - Synchronization
+  parameters:
+    - name: id
+      in: query
+      description: comma seperated list of asset ids
+      required: true
+      schema:
+        type: string
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/Asset/AssetListByIdsResponse.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"
+

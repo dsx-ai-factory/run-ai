@@ -1,0 +1,112 @@
+openapi: 3.0.3
+
+info:
+  version: 1.0.0
+  title: Notifications Service Config API
+  description: API for notifications-service config endpoint
+
+paths:
+  /api/v1/events:
+    get:
+      tags:
+        - events
+      parameters:
+      - in: query
+        name: tenantId
+        required: false
+        schema:
+          type: string
+        description: Tenant that owns the events
+      - in: query
+        name: userId
+        required: false
+        schema:
+          type: string
+        description: User within the tenant whose events are returned or deleted; only supported when tenantId is provided
+      - in: query
+        name: read
+        required: false
+        schema:
+          type: boolean
+          nullable: true
+        description: When set, return or delete only events with this read status
+      operationId: getEvents
+      description: Returns the list of events for a tenant user, optionally filtered by tenantId, userId (only supported if tenantId is provided), and read status
+      responses:
+        '200':
+          $ref: "./api_objects/schemas/Events.yaml"
+        '500':
+          $ref: "../../config/advanced/http_listener/openapi/api_objects/responses/InternalServerError.yaml"
+    delete:
+      tags:
+        - events
+      parameters:
+      - in: query
+        name: tenantId
+        required: true
+        schema:
+          type: string
+        description: Tenant that owns the events
+      - in: query
+        name: userId
+        required: true
+        schema:
+          type: string
+        description: User within the tenant whose events are returned or deleted; only supported when tenantId is provided
+      - in: query
+        name: read
+        required: false
+        schema:
+          type: boolean
+          nullable: true
+        description: When set, return or delete only events with this read status
+      operationId: deleteEvents
+      description: Deletes a batch of events for a specific user in a specific tenant, optionally filtered by read status
+      responses:
+        '200':
+          $ref: "../../config/advanced/http_listener/openapi/api_objects/responses/OkRequest.yaml"
+        '500':
+          $ref: "../../config/advanced/http_listener/openapi/api_objects/responses/InternalServerError.yaml"
+  /api/v1/events/{eventId}:
+    parameters:
+      - in: path
+        name: eventId
+        required: true
+        schema:
+          type: string
+        description: Unique identifier of the event
+    delete:
+      tags:
+        - events
+      operationId: deleteEvent
+      description: Deletes a specific event by id
+      responses:
+        '200':
+          $ref: "../../config/advanced/http_listener/openapi/api_objects/responses/OkRequest.yaml"
+        '404':
+          $ref: "../../config/advanced/http_listener/openapi/api_objects/responses/NotFound.yaml"
+        '500':
+          $ref: "../../config/advanced/http_listener/openapi/api_objects/responses/InternalServerError.yaml"
+    patch:
+      tags:
+        - events
+      operationId: updateEventRead
+      description: Updates the read status of a specific event for a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./api_objects/schemas/EventReadUpdate.yaml"
+      responses:
+        '200':
+          $ref: "../../config/advanced/http_listener/openapi/api_objects/responses/OkRequest.yaml"
+        '400':
+          $ref: "../../config/advanced/http_listener/openapi/api_objects/responses/BadRequest.yaml"
+        '404':
+          $ref: "../../config/advanced/http_listener/openapi/api_objects/responses/NotFound.yaml"
+        '500':
+          $ref: "../../config/advanced/http_listener/openapi/api_objects/responses/InternalServerError.yaml"
+tags:
+  - name: events-history
+    description: Events history API

@@ -1,0 +1,22 @@
+type: object
+required:
+  - resourceType
+  - actions
+properties:
+  resourceType:
+    description: The type of resource the permission applies to.
+    $ref: './ResourceType.yaml'
+  displayName:
+    x-internal: true
+    type: string
+    example: 'Projects'
+  actions:
+    type: array
+    description: |
+      The list of allowed actions for this resource
+      - create
+      - read
+      - update
+      - delete
+    items:
+      $ref: './PermissionAction.yaml'

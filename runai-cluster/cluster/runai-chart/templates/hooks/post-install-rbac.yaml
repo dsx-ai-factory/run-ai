@@ -1,0 +1,248 @@
+{{- if and (not .Values.global.serviceAccountName) .Values.helmHooksHandler.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: runai-post-install
+  namespace: runai
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    run.ai/hook: post-install
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: runai-post-install
+  namespace: runai
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    run.ai/hook: post-install
+rules:
+  - apiGroups:
+      - run.ai
+    resources:
+      - runaiconfigs
+    verbs:
+      - get
+      - create
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - create
+      - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: runai-post-install
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    run.ai/hook: post-install
+rules:
+  - apiGroups:
+      - apiextensions.k8s.io
+    resources:
+      - customresourcedefinitions
+    verbs:
+      - get
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - list
+  - apiGroups:
+      - run.ai
+    resources:
+      - remoteconfigs
+      - remoteconfigsyncs
+      - clusters
+    verbs:
+      - get
+      - create
+      - update
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-post-install
+  namespace: runai
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    run.ai/hook: post-install
+subjects:
+  - kind: ServiceAccount
+    name: runai-post-install
+    namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: runai-post-install
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-post-install
+  namespace: runai
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    run.ai/hook: post-install
+subjects:
+  - kind: ServiceAccount
+    name: runai-post-install
+    namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: runai-post-install
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: runai-post-install
+  namespace: runai-scale-adjust
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    run.ai/hook: post-install
+rules:
+  - apiGroups:
+      - run.ai
+    resources:
+      - runaiconfigs
+    verbs:
+      - get
+      - create
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - create
+      - update
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-post-install
+  namespace: runai-scale-adjust
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    run.ai/hook: post-install
+subjects:
+  - kind: ServiceAccount
+    name: runai-post-install
+    namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: runai-post-install
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: runai-post-install
+  namespace: runai-reservation
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    run.ai/hook: post-install
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - create
+      - update
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-post-install
+  namespace: runai-reservation
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    run.ai/hook: post-install
+subjects:
+  - kind: ServiceAccount
+    name: runai-post-install
+    namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: runai-post-install
+---
+{{- if eq (include "isOpenShift" .) "true" }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: runai-post-install
+  namespace: openshift-monitoring
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    run.ai/hook: post-install
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - update
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: runai-post-install
+  namespace: openshift-monitoring
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  labels:
+    run.ai/hook: post-install
+subjects:
+  - kind: ServiceAccount
+    name: runai-post-install
+    namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: runai-post-install
+{{- end }}
+{{- end }}
+

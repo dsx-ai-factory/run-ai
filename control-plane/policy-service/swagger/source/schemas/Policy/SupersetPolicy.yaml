@@ -1,0 +1,13 @@
+properties:
+  defaults:
+    allOf:
+      - $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/SupersetDefaults.yaml"
+    nullable: true
+    type: object
+  rules:
+    allOf:
+      - $ref: "../../../../../infra/openapi/docs/schemas/workloads_spec/SupersetRules.yaml"
+    nullable: true
+    type: object
+nullable: true
+type: object

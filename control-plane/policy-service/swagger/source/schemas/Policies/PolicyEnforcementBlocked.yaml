@@ -1,0 +1,9 @@
+type: object
+properties:
+  blocked:
+    description: Prevents the field from being assigned any value. Inverse of "required".
+    type: boolean
+    default: false
+    nullable: true
+example:
+  blocked: true

@@ -1,0 +1,26 @@
+type: object
+description: A persisted notification event for a tenant user
+properties:
+  id:
+    type: string
+    description: Unique ID of the event
+  sourceListener:
+    type: string
+    description: ID of the listener that received the event
+  properties:
+    type: object
+    description: Event-specific dynamic properties
+    additionalProperties: true
+  createdAt:
+    type: string
+    format: date-time
+    description: When the event was created
+  read:
+    type: boolean
+    description: Whether the event has been read
+required:
+  - id
+  - sourceListener
+  - properties
+  - createdAt
+  - read

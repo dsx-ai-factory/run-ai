@@ -1,0 +1,8 @@
+# Exclude cookiecutter template directory
+{{cookiecutter.app_name}}/
+# Exclude other template files
+cookiecutter.json
+hooks/
+requirements.txt
+README.md
+

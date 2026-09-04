@@ -1,0 +1,11 @@
+defaults:
+  worker:
+    image: ubuntu:worker
+    nodePools:
+      - node-pool-2
+      - node-pool-5
+  master:
+    image: ubuntu:master
+    nodePools:
+      - node-pool-1
+      - node-pool-5

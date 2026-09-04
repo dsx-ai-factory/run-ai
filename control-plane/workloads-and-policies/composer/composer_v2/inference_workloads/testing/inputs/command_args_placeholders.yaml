@@ -1,0 +1,10 @@
+image: my-llm:latest
+command: serve.sh
+args: "--project=${RUNAI_PROJECT} --job=${RUNAI_JOB_NAME} --uid=${RUNAI_UID} --gid=${RUNAI_GID}"
+servingPort:
+  container: 8080
+  authorizationType: public
+security:
+  runAsUid: 501
+  runAsGid: 20
+  uidGidSource: custom

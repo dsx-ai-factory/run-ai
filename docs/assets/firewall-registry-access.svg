@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" width="720" height="520">
+  <defs>
+    <style>text { font-family: 'Segoe UI', Arial, sans-serif; }</style>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748B"/>
+    </marker>
+    <marker id="arr-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#94A3B8"/>
+    </marker>
+  </defs>
+
+  <rect width="720" height="520" fill="#FFFFFF" rx="6"/>
+
+  <!-- Users and API clients -->
+  <rect x="260" y="10" width="200" height="46" rx="8" fill="#F1F5F9" stroke="#64748B" stroke-width="1.5"/>
+  <text x="360" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="#1E293B">Users and API Clients</text>
+  <text x="360" y="46" text-anchor="middle" font-size="10" fill="#64748B">UI · CLI · API</text>
+
+  <!-- Inbound arrow -->
+  <line x1="360" y1="56" x2="360" y2="86" stroke="#64748B" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="416" y="76" text-anchor="middle" font-size="10" fill="#64748B">Inbound · 443</text>
+
+  <!-- Control Plane box -->
+  <rect x="130" y="92" width="230" height="64" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5"/>
+  <rect x="130" y="92" width="5" height="64" rx="4" fill="#3B82F6"/>
+  <text x="245" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#1E3A5F">NVIDIA Run:ai Control Plane</text>
+  <text x="245" y="136" text-anchor="middle" font-size="10" fill="#64748B">system nodes</text>
+
+  <!-- Cluster box -->
+  <rect x="360" y="92" width="230" height="64" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5"/>
+  <rect x="360" y="92" width="5" height="64" rx="4" fill="#22C55E"/>
+  <text x="475" y="118" text-anchor="middle" font-size="13" font-weight="700" fill="#14532D">NVIDIA Run:ai Cluster</text>
+  <text x="475" y="136" text-anchor="middle" font-size="10" fill="#64748B">system nodes</text>
+
+  <!-- Cluster sync arrow (dashed, curved beneath both boxes) -->
+  <path d="M 475 156 C 475 196, 245 196, 245 156" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arr-dashed)"/>
+  <rect x="285" y="180" width="160" height="30" fill="#FFFFFF"/>
+  <text x="365" y="192" text-anchor="middle" font-size="10" fill="#94A3B8">Cluster sync and metrics</text>
+  <text x="365" y="204" text-anchor="middle" font-size="9" fill="#94A3B8" font-style="italic">multi-cluster only</text>
+
+  <!-- Internal network loop (dashed, node-to-node) -->
+  <path d="M 150 156 C 110 190, 110 225, 150 245 C 110 265, 610 265, 570 245 C 610 225, 610 190, 570 156" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <rect x="270" y="252" width="180" height="16" fill="#FFFFFF"/>
+  <text x="360" y="264" text-anchor="middle" font-size="10" fill="#94A3B8">Internal network · node-to-node</text>
+
+  <!-- Outbound arrows down to registries -->
+  <line x1="245" y1="245" x2="245" y2="290" stroke="#64748B" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="475" y1="245" x2="475" y2="290" stroke="#64748B" stroke-width="1.5" marker-end="url(#arr)"/>
+  <rect x="392" y="262" width="96" height="16" fill="#FFFFFF"/>
+  <text x="440" y="274" text-anchor="middle" font-size="10" fill="#64748B">Outbound · 443</text>
+
+  <!-- Registries outer box -->
+  <rect x="60" y="296" width="600" height="200" rx="10" fill="#F8FAFC" stroke="#94A3B8" stroke-width="2" stroke-dasharray="8 4"/>
+  <rect x="72" y="288" width="140" height="20" rx="4" fill="#94A3B8"/>
+  <text x="142" y="302" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF">Image Registries</text>
+
+  <!-- NVIDIA Run:ai Registry -->
+  <rect x="82" y="316" width="536" height="50" rx="8" fill="#FFF7ED" stroke="#F97316" stroke-width="1.5"/>
+  <rect x="82" y="316" width="5" height="50" rx="4" fill="#F97316"/>
+  <text x="350" y="336" text-anchor="middle" font-size="12" font-weight="700" fill="#7C2D12">NVIDIA Run:ai Registry</text>
+  <text x="350" y="354" text-anchor="middle" font-size="10" fill="#64748B">nvcr.io · NVIDIA Run:ai images and Helm chart</text>
+
+  <!-- Third-Party Service Registries -->
+  <rect x="82" y="376" width="536" height="50" rx="8" fill="#FAF5FF" stroke="#A855F7" stroke-width="1.5"/>
+  <rect x="82" y="376" width="5" height="50" rx="4" fill="#A855F7"/>
+  <text x="350" y="396" text-anchor="middle" font-size="12" font-weight="700" fill="#3B0764">Third-Party Service Registries</text>
+  <text x="350" y="414" text-anchor="middle" font-size="10" fill="#64748B">docker.io · quay.io (most services) · registry.k8s.io (git-sync) · Chainguard (Gov-ready)</text>
+
+  <!-- Prerequisite and Feature Registries -->
+  <rect x="82" y="436" width="536" height="50" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5"/>
+  <rect x="82" y="436" width="5" height="50" rx="4" fill="#3B82F6"/>
+  <text x="350" y="456" text-anchor="middle" font-size="12" font-weight="700" fill="#1E3A5F">Prerequisite and Feature Registries</text>
+  <text x="350" y="474" text-anchor="middle" font-size="10" fill="#64748B">docker.io · gcr.io · quay.io</text>
+
+</svg>

@@ -1,0 +1,7 @@
+properties:
+  tty:
+    $ref: "../../policy_rules/BooleanRules.yaml"
+  stdin:
+    $ref: "../../policy_rules/BooleanRules.yaml"
+nullable: true
+type: object

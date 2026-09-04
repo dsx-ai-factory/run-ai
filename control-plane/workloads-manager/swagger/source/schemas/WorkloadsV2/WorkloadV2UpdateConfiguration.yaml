@@ -1,0 +1,55 @@
+type: object
+additionalProperties: false
+example:
+  mnnvl:
+    mode: Required
+    gpuNetworkAccelerationLabelKeys:
+    - nvidia.com/gpu.clique
+    - topology.kubernetes.io/rack
+  networking:
+    services:
+    - authorization:
+        forceJsonResponse: false
+        authorizationType: authenticatedUsers
+      ref:
+        port: 8000
+        name: existing-service
+    externalAccess:
+      ingress:
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        spec:
+          rules:
+          - host: my-url.com
+            http:
+              paths:
+              - path: /
+                pathType: Prefix
+properties:
+  mnnvl:
+    $ref: "./WorkloadV2UpdateConfigurationMnnvl.yaml"
+  networking:
+    x-internal: true
+    $ref: "./Networking/AgentNetworkingConfiguration.yaml"
+  networkingEndpoints:
+    x-internal: true
+    $ref: "./Networking/AgentNetworkingEndpoints.yaml"
+  networkingSubmissionProfile:
+    x-internal: true
+    nullable: true
+    $ref: "./Networking/NetworkingSubmissionProfile.yaml"
+  userCredentials:
+    $ref: "./WorkloadV2UpdateConfigurationUserCredentials.yaml"
+  pvcs:
+    x-internal: true
+    type: array
+    nullable: true
+    maxItems: 1000
+    description: PVCs to create and reconcile alongside the workload.
+    items:
+      $ref: "./WorkloadV2UpdateConfigurationPvc.yaml"
+  pvcsConfig:
+    x-internal: true
+    description: Configuration applied to PVCs that are created and reconciled alongside the workload.
+    nullable: true
+    $ref: "./WorkloadV2UpdateConfigurationPvcsConfig.yaml"

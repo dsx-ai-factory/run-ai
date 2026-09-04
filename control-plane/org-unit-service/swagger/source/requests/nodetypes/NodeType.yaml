@@ -1,0 +1,4 @@
+post:
+  $ref: "./CreateNodeType.yaml"
+get:
+  $ref: "./GetNodeTypes.yaml"

@@ -1,0 +1,23 @@
+type: object
+required:
+  - nodePool
+  - phaseReason
+  - reason
+properties:
+  nodePool:
+    type: string
+    example: "default"
+  phaseReason:
+    $ref: "./PhaseReason.yaml"
+  reason:
+    type: string
+    example: "Non-preemptible over quota"
+  orgType:
+    type: string
+    nullable: true
+    allOf:
+      - $ref: "./OrgType.yaml"
+  userMessage:
+    nullable: true
+    type: string
+    example: "You have reached the limit of non-preemptible resources"

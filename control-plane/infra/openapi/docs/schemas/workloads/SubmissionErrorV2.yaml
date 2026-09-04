@@ -1,0 +1,3 @@
+allOf:
+  - $ref: '../../responses/Error.yaml'
+  - $ref: '../../schemas/policy/ComplianceIssuesV2.yaml'

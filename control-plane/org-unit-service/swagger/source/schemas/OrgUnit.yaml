@@ -1,0 +1,18 @@
+type: object
+required:
+  - id
+  - type
+  - name
+properties:
+  id:
+    type: string
+    example: "7"
+  type:
+    $ref: "../../../../infra/openapi/docs/schemas/scopes/ScopeType.yaml"
+  name:
+    type: string
+    example: "tenant-7"
+  parentId:
+    type: string
+  parentType:
+    $ref: "../../../../infra/openapi/docs/schemas/scopes/ScopeType.yaml"

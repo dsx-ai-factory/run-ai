@@ -1,0 +1,67 @@
+put:
+  summary: Upsert the datavolume's shared scopes.
+  operationId: upsert_datavolume_shared_scopes
+  x-test-coverage: []
+  x-authorize:
+    resource-type: datavolumes/sharedscopes
+    action: update
+    resource-id: datavolumeId
+  tags:
+    - Datavolumes
+  parameters:
+    - $ref: "../parameters/path/DatavolumeId.yaml"
+  requestBody:
+    description: Requested SharedScopes of the datavolume to upsert.
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../schemas/SharedScopes/SharedScopesPutRequest.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/SharedScopes/SharedScopes.yaml"
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
+get:
+  summary: Get the datavolume's shared scopes.
+  operationId: get_datavolume_shared_scopes
+  x-test-coverage: []
+  x-authorize:
+    resource-type: datavolumes/sharedscopes
+    action: update # only entities with 'update' permiossion can use this api; other entities will 'read' using GET /datavolumes
+    resource-id: datavolumeId
+  tags:
+    - Datavolumes
+  parameters:
+    - $ref: "../parameters/path/DatavolumeId.yaml"
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/SharedScopes/SharedScopes.yaml"
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,50 @@
+post:
+  x-internal: true
+  summary: Sync pods.
+  operationId: internal_sync_pods
+  x-service: workloads
+  x-test-coverage: not-applicable ## none specifically - backward compatability of clusters in versions 2.9, will run on tests of clusters in this version
+  x-authorize:
+    resource-type: workloads
+    action: sync
+  tags:
+    - Pods
+  requestBody:
+    description: The pods to sync.
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/Pods/InternalPodsSyncRequest.yaml'
+  responses:
+    204:
+      $ref: '../../../../infra/openapi/docs/responses/204NoContent.yaml'
+    207:
+      description: Partial success.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - successfullySyncedPods
+              - failedPods
+            properties:
+              successfullySyncedPods:
+                type: array
+                items:
+                  type: string
+                  format: uuid
+              failedPods:
+                type: array
+                items:
+                  type: string
+                  format: uuid
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

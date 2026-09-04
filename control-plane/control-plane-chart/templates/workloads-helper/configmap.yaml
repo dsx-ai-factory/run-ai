@@ -1,0 +1,40 @@
+{{- include "common.configMap" (list . .Values.workloadsHelper "control-plane.workloadsHelper.configmap") }}
+
+{{- define "control-plane.workloadsHelper.configmap" -}}
+{{- $top := first . }}
+data:
+  LOG_LEVEL: {{ $top.Values.workloadsHelper.config.logLevel | quote }}
+  SERVICE_NAME: {{ $top.Values.workloadsHelper.name | quote }}
+  SERVICE_PORT: {{ $top.Values.workloadsHelper.service.port | quote }}
+  SERVER_WRITE_TIMEOUT: {{ $top.Values.workloadsHelper.config.server.writeTimeout | quote }}
+  SERVER_READ_TIMEOUT: {{ $top.Values.workloadsHelper.config.server.readTimeout | quote }}
+  SERVER_IDLE_TIMEOUT: {{ $top.Values.workloadsHelper.config.server.idleTimeout | quote }}
+  DB_NAME: {{ $top.Values.workloads.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}
+  DB_VERBOSE_LOGGING: {{ $top.Values.workloads.config.dbVerboseLogging | default $top.Values.global.postgresql.dbVerboseLogging | quote }}
+  DB_HOST: {{ $top.Values.workloads.config.dbHost | default $top.Values.global.postgresql.auth.host | quote }}
+  DB_SSL_MODE: {{ $top.Values.workloads.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
+  DB_SCHEMA: {{ $top.Values.workloads.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  DB_PORT: {{ $top.Values.workloads.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
+  DB_USE_SERVICE_SESSION: {{ $top.Values.workloads.config.dbUseServiceSession | quote }}
+  {{- if $top.Values.workloads.config.viewRefreshRateMilli }}
+  VIEW_REFRESH_RATE_MILLI_SECONDS: {{ $top.Values.workloads.config.viewRefreshRateMilli | quote }}
+  {{- end }}
+  CLEANER_INTERVAL_HOURS: "24"
+  DELETED_WORKLOADS_DAYS_TO_LIVE: "14"
+  FINISHED_WORKLOADS_DAYS_TO_LIVE: "28"
+  CREATING_WORKLOADS_MINUTES_TO_LIVE: "60"
+  CLUSTER_CACHE_EXPIRATION_SEC: {{ $top.Values.workloadsHelper.config.clusterCacheExpirationSeconds | quote }}
+  CLUSTER_CACHE_CLEANUP_SEC: {{ $top.Values.workloadsHelper.config.clusterCacheCleanupSeconds | quote }}
+
+  NOTIFY_BATCH_SIZE: {{ $top.Values.workloadsHelper.config.notifyBatchSize | quote }}
+  NOTIFY_BATCH_INTERVAL_SEC: {{ $top.Values.workloadsHelper.config.notifyBatchIntervalSeconds | quote }}
+  NOTIFY_NOTIFY_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.notificationsService.name (toString $top.Values.notificationsService.service.port) }}
+  NOTIFY_CONFIG_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.notificationsService.name (toString $top.Values.notificationsService.config.app.api_port) }}
+  NOTIFY_PHASE_CHANGE_INTERVAL_MILLIS: {{ $top.Values.workloadsHelper.config.notifyPhaseChangeIntervalMillis | quote }}
+  NOTIFY_TIMEOUT_INTERVAL_MILLIS: {{ $top.Values.workloadsHelper.config.notifyTimeoutIntervalMillis | quote }}
+  METRICS_WRITER_INTERVAL_MINUTES: {{ $top.Values.workloadsHelper.config.metricsWriterIntervalMinutes | quote }}
+  METRICS_WRITER_MIN_TENANT_INTERVAL_SECONDS: {{ $top.Values.workloadsHelper.config.metricsWriterMinTenantIntervalSeconds | quote }}
+  METRICS_WRITER_MAX_TENANTS_CHUNK_SIZE: {{ $top.Values.workloadsHelper.config.metricsWriterMaxTenantChunkSize | quote }}
+  METRICS_EXPORTER_INTERVAL_SECONDS: {{ $top.Values.workloadsHelper.config.metricsExporterIntervalSeconds | quote }}
+  METRICS_EXPORTER_MULTI_TENANCY_ENABLED: {{ $top.Values.global.multiTenancy.enabled | quote }}
+  {{- end }}

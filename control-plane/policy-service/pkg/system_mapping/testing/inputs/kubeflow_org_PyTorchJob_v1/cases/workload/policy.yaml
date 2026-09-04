@@ -1,0 +1,60 @@
+description: |
+  Layer 3 case "workload" for kubeflow.org/PyTorchJob/v1. SETs workload-level
+  fields (runPolicy, elasticPolicy) and workloadMetadata (labels, annotations
+  on the PyTorchJob resource itself).
+effectiveRules:
+  # ----- workloadMetadata (PyTorchJob labels/annotations) -----
+  - field: labels
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "app", value: "pytorch-test" } }]
+  - field: annotations
+    specSelector: workloadMetadata
+    enforcements: [{ set: { key: "example.com/annotation", value: "test-value" } }]
+
+  # ----- runPolicy fields -----
+  - field: runPolicy-CleanPodPolicy
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: Running } }]
+  - field: runPolicy-TTLSecondsAfterFinished
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 3600 } }]
+  - field: runPolicy-ActiveDeadlineSeconds
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 86400 } }]
+  - field: runPolicy-BackoffLimit
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 3 } }]
+  - field: runPolicy-Suspend
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: false } }]
+
+  # ----- elasticPolicy fields -----
+  - field: elasticPolicy-MinReplicas
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 1 } }]
+  - field: elasticPolicy-MaxReplicas
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 4 } }]
+  - field: elasticPolicy-RDZVBackend
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: c10d } }]
+  - field: elasticPolicy-NProcPerNode
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 1 } }]
+  - field: elasticPolicy-MaxRestarts
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 3 } }]
+  - field: elasticPolicy-RDZVPort
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: 29500 } }]
+  - field: elasticPolicy-RDZVHost
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "localhost" } }]
+  - field: elasticPolicy-RDZVID
+    specSelector: workloadSpec
+    enforcements: [{ set: { value: "test-job" } }]
+
+  # ----- container image (verify policy modifies skeleton) -----
+  - field: image
+    specSelector: allContainers
+    enforcements: [{ set: { value: "pytorch/pytorch:2.0" } }]

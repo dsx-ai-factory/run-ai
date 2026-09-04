@@ -1,0 +1,8 @@
+ngcAuthSecret: "ngc-secret"
+image: "nvidia/nim-llama3-8b-instruct:1.0.0"
+modelStore:
+  nimCache:
+    name: "nim-cache"
+servingPort:
+  serviceType: "ClusterIP"
+  exposeExternally: false

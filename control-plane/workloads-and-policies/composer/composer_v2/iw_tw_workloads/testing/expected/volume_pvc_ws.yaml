@@ -1,0 +1,192 @@
+BatchJobTarget:
+  Config:
+    networking:
+    - externalAccess:
+        ingress:
+          apiVersion: networking.k8s.io/v1
+          kind: Ingress
+          metadata:
+            name: job-volume_pvc-url
+          spec:
+            rules:
+            - host: test.run.ai
+              http:
+                paths:
+                - backend:
+                    service:
+                      name: job-volume_pvc-url
+                      port:
+                        number: 80
+                  path: /test/volume_pvc
+                  pathType: Prefix
+      services:
+      - spec:
+          name: job-volume_pvc-url
+          ports:
+          - name: port-4180
+            port: 80
+            protocol: TCP
+            targetPort: 4180
+          selector:
+            release: volume_pvc
+          type: ClusterIP
+    pvcs:
+    - metadata:
+        name: oferb2-pvc-874hj
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1M
+        storageClassName: standard
+        volumeMode: Filesystem
+    pvcsConfig:
+      cleanupOnCompletion: true
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: volume_pvc
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Workspace
+        workloadName: volume_pvc
+      name: volume_pvc
+      namespace: runai-test
+    spec:
+      backoffLimit: 6
+      template:
+        metadata:
+          annotations:
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: volume_pvc
+            workloadKind: Workspace
+            workloadName: volume_pvc
+        spec:
+          containers:
+          - args:
+            - --NotebookApp.base_url=/test/volume_pvc
+            - --NotebookApp.token=
+            command:
+            - start-notebook.sh
+            env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: volume_pvc
+            - name: JUPYTER_PORT
+              value: "8888"
+            image: jupyter/scipy-notebook
+            imagePullPolicy: IfNotPresent
+            name: volume_pvc
+            ports:
+            - containerPort: 8888
+              name: port-8888
+              protocol: TCP
+            resources:
+              requests:
+                cpu: 100m
+                memory: 100M
+            volumeMounts:
+            - mountPath: /tmp/ofer
+              name: pvc
+          initContainers:
+          - args:
+            - --provider=keycloak-oidc
+            - --upstream=http://localhost:8888
+            - --redirect-url=https://test.run.ai/test/volume_pvc/oauth2/callback
+            - --oidc-issuer-url=/auth/realms/runai
+            - --scope=openid
+            - --http-address=0.0.0.0:4180
+            - --proxy-prefix=/test/volume_pvc/oauth2
+            - --skip-provider-button=true
+            - --whitelist-domain=test.run.ai
+            - --cookie-domain=test.run.ai
+            - --cookie-httponly=true
+            - --cookie-secure=true
+            - --code-challenge-method=S256
+            - --cookie-refresh=10m
+            - --cookie-samesite=lax
+            - --skip-jwt-bearer-tokens=true
+            - --extra-jwt-issuers=/auth/realms/runai=runai
+            - --custom-templates-dir=/usr/share/oauth2-proxy
+            - --pass-authorization-header=false
+            - --cookie-name=volume_pvc-url-auth-proxy
+            - --email-domain=*
+            env:
+            - name: OAUTH2_PROXY_COOKIE_PATH
+              value: /test/volume_pvc
+            envFrom:
+            - secretRef: {}
+            image: test.registry/oauth2-proxy:test
+            imagePullPolicy: IfNotPresent
+            name: runai-oauth2-proxy-0
+            ports:
+            - containerPort: 4180
+              name: port-4180
+              protocol: TCP
+            resources: {}
+            restartPolicy: Always
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+            volumeMounts:
+            - mountPath: /etc/runai/auth/users
+              name: runai-auth
+          priorityClassName: high
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+          volumes:
+          - emptyDir: {}
+            name: runai-auth
+          - name: pvc
+            persistentVolumeClaim:
+              claimName: oferb2-pvc-874hj
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections:
+    - connectionType: ExternalUrl
+      containerPort: 8888
+      correlationName: url
+      exposedUrlPath: /test/volume_pvc
+      exposedUrlSubDomain: test-volume_pvc
+      name: Jupyter
+      serviceResourceName: job-volume_pvc-url
+      toolType: jupyter-notebook
+    id: volume-pvc-env-id
+    name: volume-pvc-env-name
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: volume_pvc, Rules: , Type: Workspace'
+  images:
+  - jupyter/scipy-notebook
+  name: 'Value: volume_pvc, Rules: , Type: Workspace'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  requestedResources:
+    cpu:
+      request: 0.1
+    cpuMemory:
+      request: 100M
+    gpu:
+      request: 0
+  submittedBy: test
+  type: Workspace
+  version: v2alpha1
