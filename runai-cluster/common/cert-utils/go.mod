@@ -4,9 +4,9 @@ go 1.26.3
 
 require (
 	github.com/cert-manager/cert-manager v1.20.3
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0-00010101000000-000000000000
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.39.1
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0-00010101000000-000000000000
 	k8s.io/api v0.35.2
 	k8s.io/apimachinery v0.35.2
 	k8s.io/client-go v0.35.2

@@ -4,13 +4,13 @@ go 1.26.3
 
 require (
 	github.com/NVIDIA/k8s-dra-driver-gpu v0.0.0-20260329235847-c657396bd619
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1 v0.0.0
 	github.com/go-logr/logr v1.4.3
 	github.com/google/uuid v1.6.0
 	github.com/onsi/ginkgo/v2 v2.28.3
 	github.com/onsi/gomega v1.40.0
 	github.com/rs/zerolog v1.31.0
 	github.com/run-ai/karta v0.1.0
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1 v0.0.0
 	github.com/samber/lo v1.52.0
 	github.com/spf13/viper v1.21.0
 	go.uber.org/mock v0.6.0

@@ -10,6 +10,13 @@ require (
 	github.com/blendle/zapdriver v1.3.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.2 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-20250716113405-6ec301e09307 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common v0.0.0-00010101000000-000000000000 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0-20250428095855-d1862558c98a // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
@@ -73,13 +80,6 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/procfs v0.20.1 // indirect
 	github.com/rs/zerolog v1.35.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.2 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator v0.0.0-20250716113405-6ec301e09307 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common v0.0.0-00010101000000-000000000000 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0-20250428095855-d1862558c98a // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.5 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
@@ -124,18 +124,6 @@ require (
 )
 
 require (
-	github.com/golang-jwt/jwt/v5 v5.3.0
-	github.com/iancoleman/strcase v0.3.0
-	github.com/jamiealquiza/tachymeter v2.0.0+incompatible
-	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/matoous/go-nanoid/v2 v2.1.0
-	github.com/mroth/weightedrand v1.0.0
-	github.com/phayes/freeport v0.0.0-20220201140144-74d24b5ae9f5
-	github.com/pkg/errors v0.9.1
-	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.88.0
-	github.com/prometheus/client_golang v1.23.2
-	github.com/prometheus/common v0.67.5
-	github.com/run-ai/kwok-operator v0.0.0-20240926063032-05b6364bc7c7
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.11
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1
@@ -148,6 +136,18 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13
 	github.com/dsx-ai-factory/run-ai/scale-tests/sdk v0.0.0-00010101000000-000000000000
+	github.com/golang-jwt/jwt/v5 v5.3.0
+	github.com/iancoleman/strcase v0.3.0
+	github.com/jamiealquiza/tachymeter v2.0.0+incompatible
+	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/matoous/go-nanoid/v2 v2.1.0
+	github.com/mroth/weightedrand v1.0.0
+	github.com/phayes/freeport v0.0.0-20220201140144-74d24b5ae9f5
+	github.com/pkg/errors v0.9.1
+	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.88.0
+	github.com/prometheus/client_golang v1.23.2
+	github.com/prometheus/common v0.67.5
+	github.com/run-ai/kwok-operator v0.0.0-20240926063032-05b6364bc7c7
 	github.com/samber/lo v1.51.0
 	go.uber.org/zap v1.27.1
 	golang.org/x/oauth2 v0.36.0

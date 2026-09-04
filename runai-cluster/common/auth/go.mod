@@ -4,9 +4,9 @@ go 1.26.3
 
 require (
 	github.com/coreos/go-oidc/v3 v3.11.0
-	github.com/rs/zerolog v1.34.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/auth v0.0.0-20250428075130-be7291f11588
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.3
+	github.com/rs/zerolog v1.34.0
 	golang.org/x/oauth2 v0.36.0
 )
 
@@ -18,6 +18,9 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.3 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
 	github.com/fsnotify/fsnotify v1.10.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
@@ -48,9 +51,6 @@ require (
 	github.com/prometheus/common v0.61.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/redis/go-redis/v9 v9.7.3 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.3 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.25 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect

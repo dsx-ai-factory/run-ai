@@ -3,12 +3,12 @@ module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/pod-group-assigner
 go 1.26.3
 
 require (
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20250505080723-345f0486489e // indirect
 	github.com/gin-contrib/pprof v1.5.2
 	github.com/gin-gonic/gin v1.12.0
 	github.com/onsi/ginkgo/v2 v2.28.1
 	github.com/onsi/gomega v1.39.1
 	github.com/rs/zerolog v1.31.0
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20250505080723-345f0486489e // indirect
 	go.uber.org/zap v1.27.1
 	k8s.io/api v0.35.4
 	k8s.io/apimachinery v0.35.4
@@ -19,10 +19,10 @@ require (
 )
 
 require (
-	github.com/evanphx/json-patch/v5 v5.9.11
-	github.com/kai-scheduler/KAI-scheduler v0.16.9
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/node-pool-utils v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.0
+	github.com/evanphx/json-patch/v5 v5.9.11
+	github.com/kai-scheduler/KAI-scheduler v0.16.9
 )
 
 require (
@@ -42,6 +42,8 @@ require (
 	github.com/cyphar/filepath-securejoin v0.6.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/distribution/reference v0.6.0 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/evanphx/json-patch v5.9.0+incompatible // indirect
@@ -109,8 +111,6 @@ require (
 	github.com/quic-go/qpack v0.6.0 // indirect
 	github.com/quic-go/quic-go v0.59.1 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.13 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect

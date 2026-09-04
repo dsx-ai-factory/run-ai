@@ -3,14 +3,14 @@ module github.com/dsx-ai-factory/run-ai/runai-common-packages/dao-utils
 go 1.26.3
 
 require (
-	github.com/golang-migrate/migrate/v4 v4.19.1
-	github.com/google/uuid v1.6.0
-	github.com/lib/pq v1.12.3
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.2
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.2.8
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.12
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.24
+	github.com/golang-migrate/migrate/v4 v4.19.1
+	github.com/google/uuid v1.6.0
+	github.com/lib/pq v1.12.3
 	github.com/stretchr/testify v1.12.1
 	github.com/testcontainers/testcontainers-go v0.43.0
 	gorm.io/driver/postgres v1.6.2
