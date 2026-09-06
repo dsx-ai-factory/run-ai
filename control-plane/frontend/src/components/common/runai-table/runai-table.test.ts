@@ -107,6 +107,143 @@ describe("runai-table.vue", () => {
     });
   });
 
+  describe("pinned top rows", () => {
+    const rows = tableModels.environmentModel.rows;
+    const getRowKey = (row: EnvironmentAsset) => row.meta.id;
+
+    async function setupWithPinned(pinnedProps: Record<string, unknown>): Promise<void> {
+      await runaiTableCmp.setProps({
+        columns: tableModels.environmentColumns,
+        rows,
+        filterBy: tableModels.environmentModel.filterBy,
+        getRowKey,
+        ...pinnedProps,
+      });
+      await runaiTableCmp.vm.$nextTick();
+    }
+
+    function renderedNames(): Array<string> {
+      return getCellsByColumnName("environment").map((cell: DOMWrapper<HTMLTableCellElement>) => cell.text());
+    }
+
+    test("renders every row once when nothing is pinned", async () => {
+      await setupWithPinned({});
+      expect(renderedNames()).toEqual(rows.map((row: EnvironmentAsset) => row.meta.name));
+    });
+
+    test("pins a single row to the top when 'topRow' is used", async () => {
+      await setupWithPinned({ topRow: rows[2] });
+      expect(renderedNames()[0]).toBe(rows[2].meta.name);
+    });
+
+    test("does not duplicate the 'topRow' in the table body", async () => {
+      await setupWithPinned({ topRow: rows[2] });
+      const names: Array<string> = renderedNames();
+      expect(names).toHaveLength(rows.length);
+      expect(names.filter((name: string) => name === rows[2].meta.name)).toHaveLength(1);
+    });
+
+    test("pins every row of 'topRows' to the top, in order", async () => {
+      await setupWithPinned({ topRows: [rows[3], rows[1]] });
+      expect(renderedNames().slice(0, 2)).toEqual([rows[3].meta.name, rows[1].meta.name]);
+    });
+
+    test("does not duplicate any of the 'topRows' in the table body", async () => {
+      await setupWithPinned({ topRows: [rows[0], rows[4]] });
+      const names: Array<string> = renderedNames();
+      expect(names).toHaveLength(rows.length);
+      expect(names.filter((name: string) => name === rows[0].meta.name)).toHaveLength(1);
+      expect(names.filter((name: string) => name === rows[4].meta.name)).toHaveLength(1);
+    });
+
+    test("'topRows' takes precedence over 'topRow'", async () => {
+      await setupWithPinned({ topRow: rows[0], topRows: [rows[5]] });
+      const names: Array<string> = renderedNames();
+      expect(names[0]).toBe(rows[5].meta.name);
+      expect(names).toHaveLength(rows.length);
+    });
+  });
+
+  describe("shift-range selection", () => {
+    const rows = tableModels.environmentModel.rows;
+    const getRowKey = (row: EnvironmentAsset) => row.meta.id;
+
+    type RangeSelectionVm = {
+      lastSelectedIndex: number | null;
+      handleRangeSelection: (isSelected: boolean, rowIndex: number) => void;
+    };
+
+    async function setupRange(extraProps: Record<string, unknown> = {}): Promise<RangeSelectionVm> {
+      await runaiTableCmp.setProps({
+        columns: tableModels.environmentColumns,
+        rows,
+        filterBy: tableModels.environmentModel.filterBy,
+        selection: "multiple",
+        getRowKey,
+        ...extraProps,
+      });
+      await runaiTableCmp.vm.$nextTick();
+      return runaiTableCmp.vm as unknown as RangeSelectionVm;
+    }
+
+    function lastSelectedNames(): Array<string> {
+      const emits = runaiTableCmp.emitted("update:selected");
+      const latest = (emits?.[emits.length - 1]?.[0] ?? []) as Array<EnvironmentAsset>;
+      return latest.map((row: EnvironmentAsset) => row.meta.name);
+    }
+
+    test("selects every row in a body-only range", async () => {
+      const vm: RangeSelectionVm = await setupRange();
+      vm.lastSelectedIndex = 0;
+      vm.handleRangeSelection(false, 2);
+
+      expect(lastSelectedNames()).toEqual([rows[0].meta.name, rows[1].meta.name, rows[2].meta.name]);
+    });
+
+    test("includes the pinned row when the range crosses it", async () => {
+      const vm: RangeSelectionVm = await setupRange({ topRows: [rows[4]] });
+      vm.lastSelectedIndex = -1;
+      vm.handleRangeSelection(false, 1);
+
+      expect(lastSelectedNames()).toEqual([rows[4].meta.name, rows[0].meta.name, rows[1].meta.name]);
+    });
+
+    test("includes every pinned row when the range crosses more than one", async () => {
+      const vm: RangeSelectionVm = await setupRange({ topRows: [rows[4], rows[5]] });
+      vm.lastSelectedIndex = -2;
+      vm.handleRangeSelection(false, 0);
+
+      expect(lastSelectedNames()).toEqual([rows[5].meta.name, rows[4].meta.name, rows[0].meta.name]);
+    });
+
+    test("does not re-add rows that are already selected", async () => {
+      const vm: RangeSelectionVm = await setupRange({ selected: [rows[1]] });
+      vm.lastSelectedIndex = 0;
+      vm.handleRangeSelection(false, 2);
+
+      expect(lastSelectedNames()).toEqual([rows[1].meta.name, rows[0].meta.name, rows[2].meta.name]);
+    });
+
+    test("deselecting a range that crosses a pinned row removes the pinned row too", async () => {
+      const vm: RangeSelectionVm = await setupRange({
+        topRows: [rows[4]],
+        selected: [rows[4], rows[0], rows[1]],
+      });
+      vm.lastSelectedIndex = -1;
+      vm.handleRangeSelection(true, 1);
+
+      expect(lastSelectedNames()).toEqual([]);
+    });
+
+    test("ignores indices that fall outside the rendered rows", async () => {
+      const vm: RangeSelectionVm = await setupRange();
+      vm.lastSelectedIndex = rows.length - 1;
+      vm.handleRangeSelection(false, rows.length + 3);
+
+      expect(lastSelectedNames()).toEqual([rows[rows.length - 1].meta.name]);
+    });
+  });
+
   describe("real runai table models behavior", () => {
     function getExpectedColumns(columns: Array<ITableColumn>): Array<string> {
       const expectedColumns = columns

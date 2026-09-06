@@ -45,30 +45,31 @@
     </template>
     <template v-slot:top-row="{ cols }">
       <runai-table-row
-        v-if="topRow"
+        v-for="(pinnedRow, pinnedPosition) in pinnedRows"
+        :key="getRowKey(pinnedRow)"
         :columns="cols"
-        :row="topRow"
-        :name-column-icon="getRowIcon(topRow)"
-        :is-selected="isTopRowSelected"
+        :row="pinnedRow"
+        :name-column-icon="getRowIcon(pinnedRow)"
+        :is-selected="isPinnedRowSelected(pinnedRow)"
         :is-selectable="!disableSelection"
         @checkbox-clicked="
           isSingleSelect
-            ? onSelect(getRowKey(topRow), topRow, topRowIndex)
+            ? onSelect(getRowKey(pinnedRow), pinnedRow, pinnedRowIndex(pinnedPosition))
             : onMultipleSelect($event, {
-                key: getRowKey(topRow),
-                row: topRow,
-                rowIndex: topRowIndex,
-                selected: isTopRowSelected,
+                key: getRowKey(pinnedRow),
+                row: pinnedRow,
+                rowIndex: pinnedRowIndex(pinnedPosition),
+                selected: isPinnedRowSelected(pinnedRow),
               })
         "
-        @row-clicked="onRowClicked($event, topRow, topRowIndex)"
-        @custom-cell-event="$emit($event.emitName, topRow)"
+        @row-clicked="onRowClicked($event, pinnedRow, pinnedRowIndex(pinnedPosition))"
+        @custom-cell-event="$emit($event.emitName, pinnedRow)"
       />
     </template>
 
     <template v-slot:body="props">
       <runai-table-row
-        v-if="(topRow && getRowKey(props.row) !== getRowKey(topRow)) || !topRow"
+        v-if="!isPinned(props.row)"
         :key="props.key"
         :columns="props.cols"
         :row="props.row"
@@ -84,7 +85,7 @@
     </template>
 
     <template v-slot:no-data>
-      <slot v-if="!loading && !topRow" name="no-data"></slot>
+      <slot v-if="!loading && !pinnedRows.length" name="no-data"></slot>
     </template>
   </q-table>
 </template>
@@ -102,8 +103,11 @@ import type { ITableColumn } from "@/models/table.model";
 // Utils
 import { isEqual } from "@/utils/common.util";
 
+// Rows are entity-shaped and differ per index page, so the table stays row-agnostic.
+export type TableRow = any; // eslint-disable-line @typescript-eslint/no-explicit-any
+
 export type RowProps = {
-  row: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  row: TableRow;
   key: string | number;
   rowIndex: number;
   selected: boolean;
@@ -118,7 +122,7 @@ export default defineComponent({
   },
   props: {
     rows: {
-      type: Array as PropType<any[]>, // eslint-disable-line @typescript-eslint/no-explicit-any
+      type: Array as PropType<TableRow[]>,
       required: true,
     },
     columns: {
@@ -134,7 +138,7 @@ export default defineComponent({
       required: true,
     },
     selected: {
-      type: Array as PropType<any[]>, // eslint-disable-line @typescript-eslint/no-explicit-any
+      type: Array as PropType<TableRow[]>,
       required: false,
       default: () => [],
     },
@@ -143,17 +147,22 @@ export default defineComponent({
       default: false,
     },
     topRow: {
-      type: [Object, null] as PropType<any | null>, // eslint-disable-line @typescript-eslint/no-explicit-any
+      type: [Object, null] as PropType<TableRow | null>,
       required: false,
       default: null,
     },
+    topRows: {
+      type: Array as PropType<TableRow[]>,
+      required: false,
+      default: () => [],
+    },
     getRowKey: {
-      type: Function as PropType<(row: any) => string | number>, // eslint-disable-line @typescript-eslint/no-explicit-any
+      type: Function as PropType<(row: TableRow) => string | number>,
       required: false,
       default: () => "",
     },
     getRowIcon: {
-      type: Function as PropType<(row: any) => string>, // eslint-disable-line @typescript-eslint/no-explicit-any
+      type: Function as PropType<(row: TableRow) => string>,
       required: false,
       default: () => "",
     },
@@ -217,7 +226,6 @@ export default defineComponent({
   data() {
     return {
       lastSelectedIndex: null as null | number,
-      topRowIndex,
     };
   },
   mounted() {
@@ -227,10 +235,12 @@ export default defineComponent({
     searchTerm(): string | undefined {
       return this.modalView ? this.filterBy.searchTerm : undefined;
     },
-    isTopRowSelected(): boolean {
-      const topRowKey = this.getRowKey(this.topRow);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return !!this.selected?.find((currRow: any) => this.getRowKey(currRow) === topRowKey);
+    pinnedRows(): TableRow[] {
+      if (this.topRows.length) return this.topRows;
+      return this.topRow ? [this.topRow] : [];
+    },
+    pinnedRowKeys(): Set<string | number> {
+      return new Set(this.pinnedRows.map((row) => this.getRowKey(row)));
     },
     isSingleSelect(): boolean {
       return this.selection === "single";
@@ -247,8 +257,22 @@ export default defineComponent({
     },
   },
   methods: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    headerSelectionToggle(selectedRows: readonly any[]): void {
+    isPinned(row: TableRow): boolean {
+      return this.pinnedRowKeys.has(this.getRowKey(row));
+    },
+    isPinnedRowSelected(row: TableRow): boolean {
+      const key = this.getRowKey(row);
+      return !!this.selected?.find((currRow) => this.getRowKey(currRow) === key);
+    },
+    // Pinned rows sit above the body, so they get negative indices to stay distinct
+    // from body row indices during shift-range selection.
+    pinnedRowIndex(pinnedPosition: number): number {
+      return topRowIndex - pinnedPosition;
+    },
+    rowAtIndex(index: number): TableRow {
+      return index < 0 ? this.pinnedRows[topRowIndex - index] : this.rows[index];
+    },
+    headerSelectionToggle(selectedRows: readonly TableRow[]): void {
       this.$emit("update:selected", selectedRows);
     },
     selectAllRows(): void {
@@ -258,8 +282,7 @@ export default defineComponent({
         this.$emit("update:selected", this.rows);
       }
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onRowClicked(event: MouseEvent, row: any, rowIndex: number): void {
+    onRowClicked(event: MouseEvent, row: TableRow, rowIndex: number): void {
       if (this.isSingleSelect || (!event.shiftKey && !event.metaKey && !event.ctrlKey)) {
         // Click on the row itself without any modifier keys acts as regular single selection.
         this.onSelect(this.getRowKey(row), row, rowIndex);
@@ -272,8 +295,7 @@ export default defineComponent({
         );
       }
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onSelect(key: any, row: any, rowIndex: number): void {
+    onSelect(key: string | number, row: TableRow, rowIndex: number): void {
       if (this.selected.find((currRow) => this.getRowKey(currRow) === key)) {
         this.lastSelectedIndex = null;
         this.$emit("update:selected", []);
@@ -332,27 +354,19 @@ export default defineComponent({
     },
     handleRangeSelection(isSelected: boolean, rowIndex: number) {
       if (this.lastSelectedIndex === null) return;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const rowsToAdd: Array<any> = [];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const rowKeysToRemove: Array<any> = [];
+      const rowsToAdd: Array<TableRow> = [];
+      const rowKeysToRemove: Array<string | number> = [];
 
       const start = Math.min(this.lastSelectedIndex, rowIndex);
       const end = Math.max(this.lastSelectedIndex, rowIndex);
       for (let i = start; i <= end; i++) {
+        const row = this.rowAtIndex(i);
+        if (!row) continue;
+        const key = this.getRowKey(row);
         if (isSelected) {
-          if (i === topRowIndex) {
-            rowKeysToRemove.push(this.getRowKey(this.topRow));
-          }
-          rowKeysToRemove.push(this.getRowKey(this.rows[i]));
-        } else {
-          if (i === topRowIndex) {
-            if (!this.isTopRowSelected) {
-              rowsToAdd.push(this.topRow);
-            }
-          } else if (!this.selected.find((currRow) => this.getRowKey(currRow) === this.getRowKey(this.rows[i]))) {
-            rowsToAdd.push(this.rows[i]);
-          }
+          rowKeysToRemove.push(key);
+        } else if (!this.selected.find((currRow) => this.getRowKey(currRow) === key)) {
+          rowsToAdd.push(row);
         }
       }
 

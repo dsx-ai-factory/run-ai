@@ -48,6 +48,7 @@ export function useTableDataAdvancedFilters<T>(
   const loadingError: Ref<boolean> = ref(false);
   const decelerateRefreshRateTimeoutId: Ref<null | number> = ref(null);
   const lastCreatedEntity: Ref<null | T> = ref(null);
+  const pinnedEntityIds: Ref<Set<string>> = ref(new Set());
   const isFirstLoad = ref(true);
   const clusterId = computed(() => clusterStore.selectedClusterId);
   const selectedRows: Ref<T[]> = ref([]);
@@ -237,6 +238,7 @@ export function useTableDataAdvancedFilters<T>(
   const clearLastCreated = () => {
     if ($route.query.createdEntityId) delete $route.query.createdEntityId;
     lastCreatedEntity.value = null;
+    pinnedEntityIds.value = new Set();
   };
 
   const clearRefreshInterval = () => {
@@ -281,6 +283,24 @@ export function useTableDataAdvancedFilters<T>(
     return tableDataIndex.getEntityId(entity) === tableDataIndex.getEntityId(lastCreatedEntity.value);
   };
 
+  const isPinned = (entity: T): boolean => pinnedEntityIds.value.has(tableDataIndex.getEntityId(entity));
+
+  /**
+   * Registers entities the user just acted on so they pin above the table body.
+   *
+   * Extends lastCreatedEntity from a single row to many while keeping the same
+   * contract: pin what *this user* just did, never derive the pin from entity
+   * state, or one user's action would pin rows on everyone else's screen.
+   */
+  const pinEntities = (entityIds: string[]) => {
+    pinnedEntityIds.value = new Set([...pinnedEntityIds.value, ...entityIds]);
+  };
+
+  const pinnedRows: ComputedRef<T[]> = computed(() => [
+    ...(lastCreatedEntity.value && !isPinned(lastCreatedEntity.value) ? [lastCreatedEntity.value] : []),
+    ...tableData.value.filter(isPinned),
+  ]);
+
   const saveFiltersToStorage = () => {
     filterService.saveFilters(tableDataIndex.storageFilterKey, filterBy.value);
   };
@@ -321,5 +341,7 @@ export function useTableDataAdvancedFilters<T>(
     resetSelectedRows,
     selectedRowsAmount,
     selectedRow,
+    pinnedRows,
+    pinEntities,
   };
 }

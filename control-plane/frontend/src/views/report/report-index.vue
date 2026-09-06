@@ -26,7 +26,8 @@
           :loading="loadingTableData"
           @update-filters="setFilterBy"
           @clear-filters="clearFilters"
-          :top-row="lastCreatedEntity"
+          :top-rows="pinnedRows"
+          selection="multiple"
           :get-row-key="getRowKey"
           sticky-columns
           :bordered="false"
@@ -193,6 +194,8 @@ export default defineComponent({
       refreshList,
       selectedRow,
       removeRow,
+      pinnedRows,
+      pinEntities,
     } = useTableDataAdvancedFilters<IReportTable>(listReports, columns, EAdvancedIndexPages.REPORT, getReportById);
 
     return {
@@ -210,6 +213,8 @@ export default defineComponent({
       lastCreatedEntity,
       loadingError,
       getRowKey,
+      pinnedRows,
+      pinEntities,
       isCreateReportModalOpen,
       isDeleteModalOpen,
       deleting,
