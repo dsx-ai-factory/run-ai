@@ -1656,9 +1656,15 @@ setup_git_token() {
     local ssh_key=""
     for candidate in "${HOME}/.ssh/id_ed25519" "${HOME}/.ssh/id_rsa" "${HOME}/.ssh/id_ecdsa"; do
       [[ -f "${candidate}" ]] || continue
-      if ssh -i "${candidate}" -o IdentitiesOnly=yes -o BatchMode=yes \
+      # ssh exits 1 even on a successful GitHub auth (it just denies shell access),
+      # so capture the output first rather than checking `ssh | grep` directly —
+      # under `set -o pipefail` that nonzero ssh exit fails the whole pipeline
+      # regardless of whether grep matched.
+      local _probe_out
+      _probe_out="$(ssh -i "${candidate}" -o IdentitiesOnly=yes -o BatchMode=yes \
              -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null \
-             -o ConnectTimeout=5 -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
+             -o ConnectTimeout=5 -T git@github.com 2>&1 || true)"
+      if grep -q "successfully authenticated" <<<"${_probe_out}"; then
         ssh_key="${candidate}"
         break
       fi
@@ -1679,6 +1685,13 @@ setup_git_token() {
       git config --file "${gopath_dir}/.gitconfig" --replace-all url."git@github.com:".insteadOf "https://github.com/"
       log "SSH key ($(basename "${ssh_key}")) forwarded into containers via GOPATH volume"
     else
+      # Clear any sshCommand/rewrite left by an earlier successful run — otherwise
+      # git keeps pointing at a key file that may no longer exist or authenticate.
+      git config --global --unset core.sshCommand 2>/dev/null || true
+      git config --file "${gopath_dir}/.gitconfig" --unset core.sshCommand 2>/dev/null || true
+      _purge_github_rewrites --global
+      _purge_github_rewrites --file "${gopath_dir}/.gitconfig"
+      rm -f "${gopath_dir}/.ssh_id"
       warn "GITHUB_TOKEN not set and no SSH key at ~/.ssh/{id_ed25519,id_rsa,id_ecdsa} authenticates to GitHub"
       warn "Private module downloads (github.com/run-ai/*) will fail inside containers"
     fi
