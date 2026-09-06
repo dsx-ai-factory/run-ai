@@ -29,10 +29,18 @@ GOLANGCI_LINT_VERSION=v2.9.0
 GOPRIVATE=github.com/run-ai/*
 
 # Ginkgo runner settings. Override per service if needed.
-GINKGO_VERSION?=v2.13.2
 GINKGO_TIMEOUT?=15m
 GINKGO_PROCS?=1
 GINKGO_COMPILERS?=1
+GINKGO_CONTAINER_NAME?=runai-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${SERVICE_NAME}-test
+
+ifneq ($(strip ${GITHUB_RUN_ID}),)
+GINKGO_DOCKER_RUN_ARGS=--name=${GINKGO_CONTAINER_NAME}
+GINKGO_CONTAINER_CLEANUP_COMMAND=docker rm -f ${GINKGO_CONTAINER_NAME} >/dev/null 2>&1 || true
+else
+GINKGO_DOCKER_RUN_ARGS=
+GINKGO_CONTAINER_CLEANUP_COMMAND=:
+endif
 
 # Extra flags passed to `go test` (e.g. -short, -count=1, -tags=...).
 GO_TEST_FLAGS?=-short
@@ -100,8 +108,7 @@ else
 GINKGO_CAPTURE_FLAGS?=
 endif
 
-GINKGO_COMMAND=go install github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} && \
-	go run github.com/onsi/ginkgo/v2/ginkgo -r --procs=${GINKGO_PROCS} --compilers=${GINKGO_COMPILERS} --randomize-all --randomize-suites --fail-on-pending --keep-going --timeout=${GINKGO_TIMEOUT} --trace ${GINKGO_CAPTURE_FLAGS}
+GINKGO_COMMAND=go run github.com/onsi/ginkgo/v2/ginkgo -r --procs=${GINKGO_PROCS} --compilers=${GINKGO_COMPILERS} --randomize-all --randomize-suites --fail-on-pending --keep-going --timeout=${GINKGO_TIMEOUT} --trace ${GINKGO_CAPTURE_FLAGS}
 
 GO_ACC_IGNORE?=""
 GO_ACC_COMMAND=go install github.com/ory/go-acc@v0.2.8 && \
@@ -167,10 +174,13 @@ test-ginkgo-local: git-config-command gocache go-list
 	${SUCCESS_MESSAGE_HANDLER}
 .PHONY: test-ginkgo-local
 
+test-ginkgo-privileged: DOCKER_RUN_ARGS=${GINKGO_DOCKER_RUN_ARGS}
 test-ginkgo-privileged: git-config-command gocache go-list
 	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Running gikngo unit-tests for ${SERVICE_NAME}" ${BASE_CONSOLE}
 	@ ${ECHO_COMMAND} ${YELLOW_CONSOLE} "${CONSOLE_PREFIX} Using privileged container, use with caution!" ${BASE_CONSOLE}
-	${DOCKER_GINKGO_COMMAND_PRIVILEGED} || ${FAILURE_MESSAGE_HANDLER}
+	@ ${GINKGO_CONTAINER_CLEANUP_COMMAND}
+	@ trap '${GINKGO_CONTAINER_CLEANUP_COMMAND}' EXIT INT TERM; \
+		${DOCKER_GINKGO_COMMAND_PRIVILEGED} || ${FAILURE_MESSAGE_HANDLER}
 	${SUCCESS_MESSAGE_HANDLER}
 .PHONY: test-ginkgo-privileged
 
