@@ -1054,7 +1054,7 @@ build_cli_exposer() {
         -e GOFIPS140=v1.0.0 \
         -e GOOS=linux \
         -e GOARCH=amd64 \
-        -e GOPRIVATE="github.com/run-ai/*" \
+        -e GOPRIVATE="github.com/dsx-ai-factory/run-ai/*" \
         `# Unlike the per-service builds, this one compiles a PACKAGE ("." below)` \
         `# rather than a file list, so Go runs buildvcs and shells out to git.` \
         `# Podman presents the bind-mounted repo as root-owned while the build runs` \
@@ -1549,7 +1549,7 @@ prefetch_go_modules() {
     -e GIT_CONFIG_GLOBAL=/.gitconfig \
     -e GOPATH=/go \
     -e GOCACHE=/tmp/.cache \
-    -e GOPRIVATE="github.com/run-ai/*" \
+    -e GOPRIVATE="github.com/dsx-ai-factory/run-ai/*" \
     -e CGO_ENABLED=0 \
     -e GO111MODULE=on \
     library/golang:1.26.3 \
@@ -1655,7 +1655,13 @@ setup_git_token() {
     # GIT_CONFIG_GLOBAL) to point git at that key and silence host-key prompts.
     local ssh_key=""
     for candidate in "${HOME}/.ssh/id_ed25519" "${HOME}/.ssh/id_rsa" "${HOME}/.ssh/id_ecdsa"; do
-      [[ -f "${candidate}" ]] && ssh_key="${candidate}" && break
+      [[ -f "${candidate}" ]] || continue
+      if ssh -i "${candidate}" -o IdentitiesOnly=yes -o BatchMode=yes \
+             -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null \
+             -o ConnectTimeout=5 -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
+        ssh_key="${candidate}"
+        break
+      fi
     done
 
     if [[ -n "${ssh_key}" ]]; then
@@ -1673,7 +1679,7 @@ setup_git_token() {
       git config --file "${gopath_dir}/.gitconfig" --replace-all url."git@github.com:".insteadOf "https://github.com/"
       log "SSH key ($(basename "${ssh_key}")) forwarded into containers via GOPATH volume"
     else
-      warn "GITHUB_TOKEN not set and no SSH key found at ~/.ssh/{id_ed25519,id_rsa,id_ecdsa}"
+      warn "GITHUB_TOKEN not set and no SSH key at ~/.ssh/{id_ed25519,id_rsa,id_ecdsa} authenticates to GitHub"
       warn "Private module downloads (github.com/run-ai/*) will fail inside containers"
     fi
   fi

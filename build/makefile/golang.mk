@@ -23,7 +23,7 @@ GO_VERSION?=$(GO_VERSION_BASE)
 GO_ALPINE_VERSION?=$(GO_VERSION_BASE)-alpine
 MOCKERY_VERSION=v3.2.5
 GOLANGCI_LINT_VERSION=v2.9.0
-GOPRIVATE=github.com/run-ai/*
+GOPRIVATE=github.com/dsx-ai-factory/run-ai/*
 
 # Ginkgo runner settings. Override per service if needed.
 GINKGO_VERSION?=v2.13.2
