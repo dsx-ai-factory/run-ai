@@ -1,6 +1,6 @@
 # Support
 
-## Supported versions
+## Supported Versions
 
 We maintain the latest 5 minor releases:
 
@@ -17,7 +17,7 @@ We maintain the latest 5 minor releases:
 
 When a new minor release ships, the oldest supported branch drops out of the list above and moves to EOL.
 
-## Where to get help
+## Where to Get Help
 
 | Channel | Use it for |
 |---|---|

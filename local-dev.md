@@ -41,18 +41,18 @@ First run takes a while — it compiles ~50 Go services inside Docker containers
 
 The script runs these phases in order. Each phase is independently skippable.
 
-### 1. Prerequisites check
+### 1. Prerequisites Check
 Detects OS/arch (Linux/Darwin × amd64/arm64), validates `GITHUB_TOKEN`, and auto-installs `kind`/`kubectl`/`helm` if they're not on `$PATH`.
 
-### 2. TLS certificate + `/etc/hosts`
+### 2. TLS Certificate + `/etc/hosts`
 Generates a local CA and a server cert for the configured domain (default `runai.local`) using openssl. Cert files are written to `.local-dev/certs/` and reused on subsequent runs.
 
 This runs **before** the cluster is created — the CA cert is mounted into the Kind cluster as the API server's OIDC `oidc-ca-file`, which has to exist at cluster-creation time. The script also adds the domain to `/etc/hosts` here.
 
-### 3. Kind cluster
+### 3. Kind Cluster
 Creates a 5-node Kind cluster (1 control-plane + 4 workers) named `runai-local` with host ports 80/443 mapped for ingress.
 
-### 4. Local registry
+### 4. Local Registry
 Starts a `registry:2` container named `kind-registry` on port `5001` and connects it to the Kind network, so cluster nodes can resolve it by name. All built images are pushed here; charts are pointed at `localhost:5001/runai-local`.
 
 ### 5. ingress-nginx
@@ -64,14 +64,14 @@ Installs `kube-prometheus-stack` into the `monitoring` namespace. Skip with `--s
 ### 7. fake-gpu-operator
 Installs `oci://ghcr.io/run-ai/fake-gpu-operator` into `gpu-operator`, configured for 8 × `Tesla-A10` in the default node pool, so GPU workloads can be scheduled without real hardware. Skip with `--skip-fake-gpu`.
 
-### 8. Build — control-plane (25 Go services + frontend)
+### 8. Build — control-plane (25 Go Services + Frontend)
 For each Go service: compiles an `amd64` binary inside a golang Docker container (workspace-mounted, uses the Go module cache at `~/.cache/go-build-docker-*`), builds a `linux/amd64` image, and **pushes it to the local registry**. Up to `--parallel N` services build concurrently.
 
 The frontend (React → nginx) runs `npm run build` inside a Node container, then builds and pushes the nginx image.
 
 Build logs land in `.local-dev/logs/<service>.log`.
 
-### 9. Build — runai-cluster (25 Go services + crd-upgrader)
+### 9. Build — runai-cluster (25 Go Services + crd-upgrader)
 Same pattern for the cluster-side controllers and operators. `runai-crd-upgrader` is special — no Go source, just packages `kubectl` + CRD manifests into a scratch image.
 
 ### 10. Deploy — control-plane
@@ -133,7 +133,7 @@ Names and versions are read from `Chart.yaml`, so bumping a dependency can't lea
 | `--teardown` | Delete the Kind cluster and local registry, then exit. |
 | `--help` | Print usage. |
 
-### Environment variables
+### Environment Variables
 
 | Variable | Effect |
 |---|---|
@@ -148,7 +148,7 @@ Names and versions are read from `Chart.yaml`, so bumping a dependency can't lea
 
 ## Common Workflows
 
-### Rebuild a single service
+### Rebuild a Single Service
 
 ```bash
 cd control-plane/assets-service
@@ -161,33 +161,33 @@ helm upgrade runai-cp ./control-plane/control-plane-chart \
   -n runai --reuse-values
 ```
 
-### Iterate on the cluster chart only (images already loaded)
+### Iterate on the Cluster Chart Only (Images Already Loaded)
 
 ```bash
 ./local-dev.sh --skip-build --skip-cluster --skip-deploy-cp
 ```
 
-### Rebuild images without touching the cluster
+### Rebuild Images Without Touching the Cluster
 
 ```bash
 ./local-dev.sh --skip-cluster --skip-deploy
 ```
 
-### Rebuild everything from scratch
+### Rebuild Everything from Scratch
 
 ```bash
 ./local-dev.sh --teardown
 ./local-dev.sh
 ```
 
-### Change domain
+### Change Domain
 
 ```bash
 ./local-dev.sh --domain mydev.example.com
 sudo sh -c 'echo "127.0.0.1 mydev.example.com" >> /etc/hosts'
 ```
 
-### Speed up with more parallel jobs
+### Speed Up with More Parallel Jobs
 
 ```bash
 PARALLEL_JOBS=8 ./local-dev.sh
@@ -233,13 +233,13 @@ sudo update-ca-certificates
 
 local-dev.sh uses Podman (not Docker Desktop) on macOS. The VM gets a fixed disk allocated at init time.
 
-### Check VM disk usage
+### Check VM Disk Usage
 
 ```bash
 podman machine ssh "df -h /"
 ```
 
-### Recover from a full disk
+### Recover from a Full Disk
 
 When the Podman VM disk fills up, builds fail with `no space left on device` and even `podman system prune` can't run (it needs space to write temp files). Fix:
 
@@ -251,7 +251,7 @@ podman machine ssh "sudo journalctl --vacuum-size=10M"
 podman system prune -af --volumes
 ```
 
-### Recreate the VM with a larger disk
+### Recreate the VM with a Larger Disk
 
 If disk usage after a full prune is already above ~80%, recreate the VM at a larger size. The default is 200 GB; 300 GB is a reasonable minimum for active development.
 
@@ -293,7 +293,7 @@ kubectl rollout restart deployment ingress-nginx-controller -n ingress-nginx
 
 ## Networking Troubleshooting
 
-### SSL handshake timeouts / slow responses
+### SSL Handshake Timeouts / Slow Responses
 
 If `curl https://<domain>/_version` times out at the SSL handshake stage (`time_appconnect: 0`) but TCP connects instantly, the likely cause is **Cisco AnyConnect** (or similar corporate VPN with a socket-level kernel extension). AnyConnect's `acsockext` system extension intercepts all TCP connections — including loopback — and routes them through a low-MTU inspection tunnel, which fragments TLS certificate exchanges.
 
@@ -337,7 +337,7 @@ Images are pushed to the local `kind-registry` container and referenced as `loca
 
 ## Known Issues
 
-### No kai-scheduler / karta pods after deploy
+### No kai-scheduler / karta Pods After Deploy
 
 The script fetches these subcharts automatically, but if the fetch failed it falls back to an empty placeholder and the scheduler silently deploys nothing. Look for this in the output:
 
@@ -368,7 +368,7 @@ kubectl get pods -n runai | grep -E 'kai|karta'
 
 Historically this was a hard failure rather than a fallback: the placeholder versions were hardcoded in `local-dev.sh` and drifted from `Chart.yaml` (which moved to kai-scheduler `v0.16.8` and karta `0.2.1`, and dropped `runai-engine` entirely), so every fresh clone got empty subcharts. The script now derives names and versions from `Chart.yaml`.
 
-### Go build failures after an OSS re-export
+### Go Build Failures After an OSS Re-Export
 
 **Applies only to OSS export repos** (those with a `.oss-export-id` file), not to
 the monorepo itself. Three different-looking errors share one cause:

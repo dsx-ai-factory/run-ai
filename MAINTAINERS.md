@@ -3,7 +3,7 @@
 This document lists the maintainers of the NVIDIA Run:ai project and how the
 role is granted and relinquished.
 
-## Current maintainers
+## Current Maintainers
 
 Maintainers are tracked as a GitHub team rather than a name list in this file,
 so membership changes do not require a pull request:
@@ -29,7 +29,7 @@ Maintainers are responsible for:
 - Responding to reports received through [`SECURITY.md`](SECURITY.md)
 - Upholding the [Code of Conduct](CODE_OF_CONDUCT.md)
 
-## Becoming a maintainer
+## Becoming a Maintainer
 
 Maintainers are selected on demonstrated contribution rather than affiliation or
 tenure. The criteria are:
@@ -46,7 +46,7 @@ carries on the approval of a simple majority of current maintainers. See
 [`GOVERNANCE.md`](GOVERNANCE.md#adding-and-removing-maintainers)
 for the full procedure, including how a maintainer steps down or is removed.
 
-## Emeritus maintainers
+## Emeritus Maintainers
 
 Maintainers who are no longer active. In the usual case — stepping down, or
 inactivity — emeritus status is not a judgement, and it is reversed by the

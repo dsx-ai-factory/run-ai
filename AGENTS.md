@@ -1,10 +1,11 @@
 # AGENTS.md
 
-This repository contains the NVIDIA Run:ai documentation.
+This repository is the NVIDIA Run:ai monorepo — product source code and
+documentation together. This file covers documentation-specific guidance
+only.
 
 For contribution mechanics — cloning, the pull request workflow, DCO sign-off,
-branching, and code review — see `CONTRIBUTING.md`. This file covers
-documentation-specific guidance only.
+branching, and code review — see `CONTRIBUTING.md`.
 
 ## Products in Scope
 

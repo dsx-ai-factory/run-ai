@@ -7,7 +7,7 @@ It deliberately does not restate the contribution mechanics — how to open a pu
 request, what CI runs, how review and backports work — which live in
 [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
-## Project status
+## Project Status
 
 This is an NVIDIA open-source project. The source is public and contributions
 are welcome under the terms in [`CONTRIBUTING.md`](CONTRIBUTING.md), including
@@ -27,7 +27,7 @@ This is enforced by GitHub, not by convention.
 merge pull requests, run the full CI pipeline on external contributions, cut
 releases, and change this document.
 
-## Decision-making
+## Decision-Making
 
 Most decisions are made through the ordinary review process: a change is
 proposed as a pull request and merged once it has the approvals required by
@@ -46,13 +46,13 @@ within a further ten working days, any maintainer may call the vote described
 above, and the simple majority decides. A proposal is never blocked
 indefinitely by a single objection.
 
-### Tie-breaking
+### Tie-Breaking
 
 If maintainers cannot reach agreement, the decision escalates to the NVIDIA
 engineering leadership responsible for the project. This is a fallback, not a
 routine step.
 
-## Adding and removing maintainers
+## Adding and Removing Maintainers
 
 **Adding.** Any maintainer may nominate a contributor who meets the criteria in
 [`MAINTAINERS.md`](MAINTAINERS.md#becoming-a-maintainer). The nomination is
@@ -93,7 +93,7 @@ All participants are bound by the [Code of Conduct](CODE_OF_CONDUCT.md).
 Enforcement is handled by the maintainers through the reporting channel named in
 that document.
 
-## Amending this document
+## Amending This Document
 
 Changes to this document follow the same lazy-consensus process described in
 [Decision-making](#decision-making), proposed as a pull request.

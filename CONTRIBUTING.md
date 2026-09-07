@@ -6,7 +6,7 @@ By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md
 
 ---
 
-## Ways to contribute
+## Ways to Contribute
 
 1. **Report a bug, request a feature, or flag a documentation issue.** Open a [GitHub issue](https://github.com/dsx-ai-factory/run-ai/issues/new/choose) using the appropriate template. Maintainers will triage and label it.
 2. **Discuss an idea before you build it.** For non-trivial changes, open a feature issue first so the design can be agreed on before you write code. For support and usage questions, open an issue.
@@ -14,7 +14,7 @@ By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md
 
 ---
 
-## Getting started
+## Getting Started
 
 ```bash
 # Clone
@@ -32,25 +32,25 @@ Component-specific setup lives in each component's `README.md`. For end-to-end t
 
 ---
 
-## Pull request workflow
+## Pull Request Workflow
 
 1. **Fork** the repository to your own GitHub account.
-2. **Branch** from `master` (or from the live release branch you are targeting — see branching policy below). Use a descriptive name.
+2. **Branch** from `main` (or from the live release branch you are targeting — see branching policy below). Use a descriptive name.
 3. **Make focused changes.** One concern per PR. Add tests for new behavior. Update docs if user-facing.
 4. **Sign off every commit** with `git commit -s` (see [DCO](#developer-certificate-of-origin-dco) below). This applies to **fork PRs only**; internal Run:ai contributors are not DCO-checked.
-5. **Open the PR** against `master` (preferred) or the relevant `v2.X` release branch. Fill in the PR template, reference the issue with `Fixes #123`, and add a `/kind` line.
+5. **Open the PR** against `main` (preferred) or the relevant `v2.X` release branch. Fill in the PR template, reference the issue with `Fixes #123`, and add a `/kind` line.
 6. **Wait for CI.** Layer 1 checks (lint, DCO for forks, CodeQL diff, govulncheck) run automatically. The full build pipeline and end-to-end tests run after a maintainer reviews and types `/ok-to-test` on the PR.
 7. **Address review feedback.** A maintainer approval plus a green `Validate Successful Run` status are both required for merge.
 
 ---
 
-## Branching policy
+## Branching Policy
 
-Run:ai accepts pull requests targeting `master` or any live release branch (today: `v2.22`, `v2.23`, `v2.24`, `v2.25`, `v2.26`).
+Run:ai accepts pull requests targeting `main` or any live release branch (today: `v2.22`, `v2.23`, `v2.24`, `v2.25`, `v2.26`).
 
-**Master-first is preferred.** Open your PR against `master` so the fix flows to every supported release via the `backport/v2.X` label that a maintainer applies after merge. This avoids "fixed in v2.24 but forgotten on v2.26" regressions.
+**Main-first is preferred.** Open your PR against `main` so the fix flows to every supported release via the `backport/v2.X` label that a maintainer applies after merge. This avoids "fixed in v2.24 but forgotten on v2.26" regressions.
 
-**Direct release-branch PRs are accepted** when you can only reproduce or test on the version you're running. Open the PR against that release branch (for example `v2.26`); during review, a maintainer will help you decide whether the fix should also be cherry-picked to `master` and to other live releases.
+**Direct release-branch PRs are accepted** when you can only reproduce or test on the version you're running. Open the PR against that release branch (for example `v2.26`); during review, a maintainer will help you decide whether the fix should also be cherry-picked to `main` and to other live releases.
 
 **Don't** open PRs against EOL branches (`v2.21` and earlier). They are not maintained.
 
@@ -58,7 +58,7 @@ Run:ai accepts pull requests targeting `master` or any live release branch (toda
 
 ---
 
-## CI for external contributors — what runs and when
+## CI for External Contributors — What Runs and When
 
 We split CI into two layers:
 
@@ -69,7 +69,7 @@ If a Layer 2 step fails, the workflow logs from `runai-actions` (the private rep
 
 ---
 
-## Code review
+## Code Review
 
 - Branch protection requires **at least one approval** and a green `Validate Successful Run` check before merge.
 - `CODEOWNERS` files at the root and under `.github/` and `docs/` automatically request review from the right team for each affected path.
@@ -145,7 +145,7 @@ A `dco` check runs on every fork PR and lists any unsigned commits inline.
 
 ---
 
-## Commit messages and PR titles
+## Commit Messages and PR Titles
 
 Write clear, present-tense messages explaining **why** the change is needed, not just what it does. A good PR title is a single sentence under ~70 characters.
 
@@ -153,7 +153,7 @@ We do not enforce Conventional Commits format. Release notes are generated from 
 
 ---
 
-## Getting help
+## Getting Help
 
 - [GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues) — bugs, feature requests, documentation issues, usage questions
 - [SECURITY.md](SECURITY.md) — private vulnerability reports
