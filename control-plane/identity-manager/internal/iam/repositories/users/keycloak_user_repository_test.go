@@ -666,7 +666,7 @@ func getHttpServer(respJson []byte) *httptest.Server {
 func getUsersResponse() []byte {
 	respJson, _ := json.Marshal(UsersResponse{
 		Count: 2,
-		Users: []map[string]string{{"createdAt": "1726744334", "lastLogin": "", "createdBy": "", "groups": "", "id": "56ad39cd-3ef3-46b0-bc2f-b431134535dc", "email": "runai-test@run.ai", "username": "runai-test@run.ai", "isLocal": "false", "updatedAt": "1726744334"}, {"createdAt": "1726744334", "lastLogin": "1726746236", "createdBy": "", "groups": "", "id": "adf65d15-1bc7-4884-a763-895f65c0ca58", "email": "test@run.ai", "username": "test@run.ai", "isLocal": "true", "updatedAt": "1726744334"}},
+		Users: []map[string]string{{"createdAt": "1726744334", "lastLogin": "", "createdBy": "", "groups": "", "id": "56ad39cd-3ef3-46b0-bc2f-b431134535dc", "email": "runai-test@example.com", "username": "runai-test@example.com", "isLocal": "false", "updatedAt": "1726744334"}, {"createdAt": "1726744334", "lastLogin": "1726746236", "createdBy": "", "groups": "", "id": "adf65d15-1bc7-4884-a763-895f65c0ca58", "email": "test@example.com", "username": "test@example.com", "isLocal": "true", "updatedAt": "1726744334"}},
 	})
 	return respJson
 }
@@ -675,29 +675,29 @@ func getMockKcUsers() []*gocloak.User {
 	return []*gocloak.User{
 		{
 			ID:        gocloak.StringP("1"),
-			Username:  gocloak.StringP("test1@run.ai"),
+			Username:  gocloak.StringP("test1@example.com"),
 			FirstName: gocloak.StringP("first"),
 			LastName:  gocloak.StringP("last"),
-			Email:     gocloak.StringP("test1@run.ai"),
+			Email:     gocloak.StringP("test1@example.com"),
 			Attributes: &map[string][]string{
 				utils.UpdateTime:    {TIME_UNIX},
 				utils.LastLoginTime: {TIME_UNIX},
 				utils.CreationTime:  {TIME_UNIX},
-				utils.CreatedBy:     {"admin@run.ai"},
+				utils.CreatedBy:     {"admin@example.com"},
 				utils.IsLocalUser:   {"true"},
 			},
 		},
 		{
 			ID:        gocloak.StringP("2"),
-			Username:  gocloak.StringP("test1@run.ai"),
+			Username:  gocloak.StringP("test1@example.com"),
 			FirstName: gocloak.StringP("first"),
 			LastName:  gocloak.StringP("last"),
-			Email:     gocloak.StringP("test2@run.ai"),
+			Email:     gocloak.StringP("test2@example.com"),
 			Attributes: &map[string][]string{
 				utils.UpdateTime:    {TIME_UNIX},
 				utils.LastLoginTime: {TIME_UNIX},
 				utils.CreationTime:  {TIME_UNIX},
-				utils.CreatedBy:     {"admin@run.ai"},
+				utils.CreatedBy:     {"admin@example.com"},
 				utils.IsLocalUser:   {"false"},
 			},
 		},
@@ -707,10 +707,10 @@ func getMockKcUsers() []*gocloak.User {
 func getMockUsers() []*models.User {
 	return []*models.User{
 		{
-			Username:  gocloak.StringP("test1@run.ai"),
-			Email:     gocloak.StringP("test1@run.ai"),
+			Username:  gocloak.StringP("test1@example.com"),
+			Email:     gocloak.StringP("test1@example.com"),
 			ID:        gocloak.StringP("1"),
-			CreatedBy: gocloak.StringP("admin@run.ai"),
+			CreatedBy: gocloak.StringP("admin@example.com"),
 			CreatedAt: utils.FormatDate(TIME_UNIX),
 			UpdatedAt: utils.FormatDate(TIME_UNIX),
 			LastLogin: utils.FormatDate(TIME_UNIX),
@@ -719,10 +719,10 @@ func getMockUsers() []*models.User {
 			LastName:  gocloak.StringP("last"),
 		},
 		{
-			Username:  gocloak.StringP("test2@run.ai"),
-			Email:     gocloak.StringP("test2@run.ai"),
+			Username:  gocloak.StringP("test2@example.com"),
+			Email:     gocloak.StringP("test2@example.com"),
 			ID:        gocloak.StringP("2"),
-			CreatedBy: gocloak.StringP("admin@run.ai"),
+			CreatedBy: gocloak.StringP("admin@example.com"),
 			CreatedAt: utils.FormatDate(TIME_UNIX),
 			UpdatedAt: utils.FormatDate(TIME_UNIX),
 			LastLogin: utils.FormatDate(TIME_UNIX),

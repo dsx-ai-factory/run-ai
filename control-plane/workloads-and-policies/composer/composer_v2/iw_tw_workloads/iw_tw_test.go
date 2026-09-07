@@ -131,7 +131,7 @@ var ComposerTests = append([]TableEntry{
 		workloadType:  string(workloadsApi.WORKLOADTYPE_WORKSPACE),
 		specFname:     "basic",
 		expectedFname: "basic_ws_email_requester",
-		requester:     "test@run.ai",
+		requester:     "test@example.com",
 	}),
 
 	Entry("backoffLimit", ComposerTest{

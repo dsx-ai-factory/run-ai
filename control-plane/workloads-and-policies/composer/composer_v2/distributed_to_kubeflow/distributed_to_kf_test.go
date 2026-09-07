@@ -361,7 +361,7 @@ var ComposerTests = append([]TableEntry{
 		framework:       workloadsApi.DISTRIBUTEDFRAMEWORK_PY_TORCH,
 		workerSpecFname: "basic",
 		expectedFname:   "basic_ws_email_requester_pytorch",
-		requester:       "test@run.ai",
+		requester:       "test@example.com",
 	}),
 
 	Entry("backoffLimit", ComposerTest{

@@ -155,7 +155,7 @@ var _ = Describe("AnyWorkloadSubmitterInference.Create", Serial, func() {
 			string(workloadsApi.WORKLOADTYPE_INFERENCE),
 			"inference",
 			"workload-id",
-			"test@run.ai",
+			"test@example.com",
 			clusterID,
 			"project-id",
 			"department-id",
@@ -172,7 +172,7 @@ var _ = Describe("AnyWorkloadSubmitterInference.Create", Serial, func() {
 		wc := &workloadContext{
 			workloadType:        string(workloadsApi.WORKLOADTYPE_INFERENCE),
 			workloadName:        "inference",
-			createdBy:           "test@run.ai",
+			createdBy:           "test@example.com",
 			spec:                spec,
 			inferenceSpec:       inferenceSpec,
 			clusterCapabilities: checker.NewClusterCapabilitiesChecker(clusterID),

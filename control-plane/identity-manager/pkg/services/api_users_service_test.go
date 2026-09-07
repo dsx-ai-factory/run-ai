@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	Username = "test@run.ai"
+	Username = "test@example.com"
 )
 
 func initUserServiceTest(t *testing.T) (iamServicesContainerMock *iamMock.MockServicesContainer, authzClientMock *authMock.IAuthorizationClient, testSubject *UsersApiService) {
@@ -229,7 +229,7 @@ func TestDeleteUserById_ErrorDeletingApps(t *testing.T) {
 }
 
 func ctxWithSubject() context.Context {
-	return context.WithValue(context.Background(), runaictx.CfSubjectID, "admin@run.ai")
+	return context.WithValue(context.Background(), runaictx.CfSubjectID, "admin@example.com")
 }
 
 func TestDeleteInternalUserByEmail_HappyFlow(t *testing.T) {
@@ -762,8 +762,8 @@ func TestBatchCreateUsers_HappyFlow(t *testing.T) {
 	iamMock, _, testSubject := initUserServiceTest(t)
 	ctx := context.WithValue(context.Background(), utils.AuthRealmKey, mockData.REALM_NAME)
 	withCtx := context.WithValue(ctx, runaictx.CfSubjectID, "admin")
-	userEmail1 := "user1@run.ai"
-	userEmail2 := "user2@run.ai"
+	userEmail1 := "user1@example.com"
+	userEmail2 := "user2@example.com"
 
 	iamMock.MockUserService.On("CreateUser", withCtx, mockData.REALM_NAME, mock.MatchedBy(func(user *iamModels.User) bool {
 		return *user.Email == userEmail1
@@ -807,8 +807,8 @@ func TestBatchCreateUsers_AllFailures(t *testing.T) {
 	iamMock, _, testSubject := initUserServiceTest(t)
 	ctx := context.WithValue(context.Background(), utils.AuthRealmKey, mockData.REALM_NAME)
 	withCtx := context.WithValue(ctx, runaictx.CfSubjectID, "admin")
-	userEmail1 := "existing@run.ai"
-	userEmail2 := "error@run.ai"
+	userEmail1 := "existing@example.com"
+	userEmail2 := "error@example.com"
 
 	iamMock.MockUserService.On("CreateUser", withCtx, mockData.REALM_NAME, mock.MatchedBy(func(user *iamModels.User) bool {
 		return *user.Email == userEmail1
@@ -857,24 +857,24 @@ func TestBatchCreateUsers_MixedResults(t *testing.T) {
 	withCtx := context.WithValue(ctx, runaictx.CfSubjectID, "admin")
 
 	iamMock.MockUserService.On("CreateUser", withCtx, mockData.REALM_NAME, mock.MatchedBy(func(user *iamModels.User) bool {
-		return *user.Email == "success1@run.ai"
+		return *user.Email == "success1@example.com"
 	})).Return(mockData.USER_ID+"1", nil).Once()
 	iamMock.MockUserService.On("CreateUser", withCtx, mockData.REALM_NAME, mock.MatchedBy(func(user *iamModels.User) bool {
-		return *user.Email == "conflict@run.ai"
+		return *user.Email == "conflict@example.com"
 	})).Return("", iamError.ErrConflict).Once()
 	iamMock.MockUserService.On("CreateUser", withCtx, mockData.REALM_NAME, mock.MatchedBy(func(user *iamModels.User) bool {
-		return *user.Email == "success2@run.ai"
+		return *user.Email == "success2@example.com"
 	})).Return(mockData.USER_ID+"2", nil).Once()
 	iamMock.MockUserService.On("CreateUser", withCtx, mockData.REALM_NAME, mock.MatchedBy(func(user *iamModels.User) bool {
-		return *user.Email == "badrequest@run.ai"
+		return *user.Email == "badrequest@example.com"
 	})).Return("", iamError.ErrInvalidInput).Once()
 
 	request := api.BulkUserCreationRequest{
 		Users: []api.UserCreationRequestBulk{
-			{Email: "success1@run.ai", ResetPassword: ptr.To(false)},
-			{Email: "conflict@run.ai", ResetPassword: ptr.To(false)},
-			{Email: "success2@run.ai", ResetPassword: ptr.To(true)},
-			{Email: "badrequest@run.ai", ResetPassword: ptr.To(false)},
+			{Email: "success1@example.com", ResetPassword: ptr.To(false)},
+			{Email: "conflict@example.com", ResetPassword: ptr.To(false)},
+			{Email: "success2@example.com", ResetPassword: ptr.To(true)},
+			{Email: "badrequest@example.com", ResetPassword: ptr.To(false)},
 		},
 	}
 
@@ -891,21 +891,21 @@ func TestBatchCreateUsers_MixedResults(t *testing.T) {
 
 	assert.True(t, bulkResponse.Results[0].Success)
 	assert.Equal(t, mockData.USER_ID+"1", bulkResponse.Results[0].User.Id)
-	assert.Equal(t, "success1@run.ai", bulkResponse.Results[0].User.Username)
+	assert.Equal(t, "success1@example.com", bulkResponse.Results[0].User.Username)
 
 	assert.False(t, bulkResponse.Results[1].Success)
 	assert.Empty(t, bulkResponse.Results[1].User.Id)
-	assert.Equal(t, "conflict@run.ai", bulkResponse.Results[1].User.Username)
+	assert.Equal(t, "conflict@example.com", bulkResponse.Results[1].User.Username)
 	assert.Equal(t, int32(http.StatusConflict), bulkResponse.Results[1].Error.Code)
 	assert.Equal(t, "user already exists", bulkResponse.Results[1].Error.Message)
 
 	assert.True(t, bulkResponse.Results[2].Success)
 	assert.Equal(t, mockData.USER_ID+"2", bulkResponse.Results[2].User.Id)
-	assert.Equal(t, "success2@run.ai", bulkResponse.Results[2].User.Username)
+	assert.Equal(t, "success2@example.com", bulkResponse.Results[2].User.Username)
 
 	assert.False(t, bulkResponse.Results[3].Success)
 	assert.Empty(t, bulkResponse.Results[3].User.Id)
-	assert.Equal(t, "badrequest@run.ai", bulkResponse.Results[3].User.Username)
+	assert.Equal(t, "badrequest@example.com", bulkResponse.Results[3].User.Username)
 	assert.Equal(t, int32(http.StatusBadRequest), bulkResponse.Results[3].Error.Code)
 	assert.Equal(t, "bad request", bulkResponse.Results[3].Error.Message)
 }
@@ -919,7 +919,7 @@ func TestBatchCreateUsers_SingleUser(t *testing.T) {
 
 	request := api.BulkUserCreationRequest{
 		Users: []api.UserCreationRequestBulk{
-			{Email: "single@run.ai", ResetPassword: ptr.To(true)},
+			{Email: "single@example.com", ResetPassword: ptr.To(true)},
 		},
 	}
 
@@ -936,7 +936,7 @@ func TestBatchCreateUsers_SingleUser(t *testing.T) {
 
 	assert.True(t, bulkResponse.Results[0].Success)
 	assert.Equal(t, mockData.USER_ID, bulkResponse.Results[0].User.Id)
-	assert.Equal(t, "single@run.ai", bulkResponse.Results[0].User.Username)
+	assert.Equal(t, "single@example.com", bulkResponse.Results[0].User.Username)
 	assert.NotEmpty(t, bulkResponse.Results[0].User.TempPassword)
 }
 
@@ -945,7 +945,7 @@ func TestGetUserCreationError_ConflictError(t *testing.T) {
 	ctx := context.WithValue(context.Background(), utils.AuthRealmKey, mockData.REALM_NAME)
 
 	err := iamError.ErrConflict
-	result := testSubject.getUserCreationError(ctx, "test@run.ai", err)
+	result := testSubject.getUserCreationError(ctx, "test@example.com", err)
 
 	assert.NotNil(t, result)
 	assert.Equal(t, int32(http.StatusConflict), result.Code)
@@ -957,7 +957,7 @@ func TestGetUserCreationError_BadRequestError(t *testing.T) {
 	ctx := context.WithValue(context.Background(), utils.AuthRealmKey, mockData.REALM_NAME)
 
 	err := iamError.ErrInvalidInput
-	result := testSubject.getUserCreationError(ctx, "test@run.ai", err)
+	result := testSubject.getUserCreationError(ctx, "test@example.com", err)
 
 	assert.NotNil(t, result)
 	assert.Equal(t, int32(http.StatusBadRequest), result.Code)
@@ -969,7 +969,7 @@ func TestGetUserCreationError_InternalServerError(t *testing.T) {
 	ctx := context.WithValue(context.Background(), utils.AuthRealmKey, mockData.REALM_NAME)
 
 	err := errors.New("some internal error")
-	result := testSubject.getUserCreationError(ctx, "test@run.ai", err)
+	result := testSubject.getUserCreationError(ctx, "test@example.com", err)
 
 	assert.NotNil(t, result)
 	assert.Equal(t, int32(http.StatusInternalServerError), result.Code)
@@ -1064,8 +1064,8 @@ func TestBatchCreateUsers_WithNotifyTrue(t *testing.T) {
 	iamMock, _, testSubject := initUserServiceTest(t)
 	ctx := context.WithValue(context.Background(), utils.AuthRealmKey, mockData.REALM_NAME)
 	withCtx := context.WithValue(ctx, runaictx.CfSubjectID, "admin")
-	userEmail1 := "user1@run.ai"
-	userEmail2 := "user2@run.ai"
+	userEmail1 := "user1@example.com"
+	userEmail2 := "user2@example.com"
 
 	iamMock.MockUserService.On("CreateUser", withCtx, mockData.REALM_NAME, mock.MatchedBy(func(user *iamModels.User) bool {
 		return *user.Email == userEmail1
@@ -1103,8 +1103,8 @@ func TestBatchCreateUsers_WithNotifyFalse(t *testing.T) {
 	iamMock, _, testSubject := initUserServiceTest(t)
 	ctx := context.WithValue(context.Background(), utils.AuthRealmKey, mockData.REALM_NAME)
 	withCtx := context.WithValue(ctx, runaictx.CfSubjectID, "admin")
-	userEmail1 := "user1@run.ai"
-	userEmail2 := "user2@run.ai"
+	userEmail1 := "user1@example.com"
+	userEmail2 := "user2@example.com"
 
 	iamMock.MockUserService.On("CreateUser", withCtx, mockData.REALM_NAME, mock.MatchedBy(func(user *iamModels.User) bool {
 		return *user.Email == userEmail1
@@ -1139,8 +1139,8 @@ func TestBatchCreateUsers_WithNotifyNil(t *testing.T) {
 	iamMock, _, testSubject := initUserServiceTest(t)
 	ctx := context.WithValue(context.Background(), utils.AuthRealmKey, mockData.REALM_NAME)
 	withCtx := context.WithValue(ctx, runaictx.CfSubjectID, "admin")
-	userEmail1 := "user1@run.ai"
-	userEmail2 := "user2@run.ai"
+	userEmail1 := "user1@example.com"
+	userEmail2 := "user2@example.com"
 
 	iamMock.MockUserService.On("CreateUser", withCtx, mockData.REALM_NAME, mock.MatchedBy(func(user *iamModels.User) bool {
 		return *user.Email == userEmail1
@@ -1219,7 +1219,7 @@ func TestGetUsersMinimal_WithUsernameFilter(t *testing.T) {
 	iamMock, _, testSubject := initUserServiceTest(t)
 	expectedUsers := mockData.GetUsers()
 	iamMock.MockUserService.On("GetUsers", mock.Anything, mock.Anything, mock.Anything).Return(expectedUsers, nil)
-	response, err := testSubject.GetUsersMinimal(context.Background(), []string{"username==test@run.ai"}, "", nil, 10)
+	response, err := testSubject.GetUsersMinimal(context.Background(), []string{"username==test@example.com"}, "", nil, 10)
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, response.Code)
 }
