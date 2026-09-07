@@ -44,8 +44,9 @@ Idempotent. It:
    tunnelling etcd's localhost metrics port (2381) to a scrapeable port (2382) on the control-plane
    node. etcd only listens on loopback, so without this proxy Prometheus cannot scrape it and gates
    2–4 are permanently `UNAVAILABLE`. The DaemonSet runs with `hostNetwork` to reach that loopback
-   port; the listener binds to the node's primary IP (the pod IP under `hostNetwork`) rather than
-   `0.0.0.0`, which is the address Prometheus scrapes via the headless Service.
+   port. Its listener binds to the node's primary IP, exposed to the container as `status.podIP`
+   (a `hostNetwork` pod's IP is the node IP), rather than to `0.0.0.0`. That node IP is also the
+   endpoint the headless Service publishes, so it is the address Prometheus scrapes.
 2. **Applies `manifests/runai-backend-servicemonitor.yaml`** — tells Prometheus to scrape every
    `runai-backend` service exposing a `metrics` port. Without it the workload submission and
    workload list latency histograms do not exist.
