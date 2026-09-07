@@ -394,11 +394,11 @@ func (r ReportsApiService) BatchDeleteReports(ctx context.Context, request api.B
 			batchOpId = batchDeleteResp.Id
 			accepted = batchDeleteResp.Accepted
 			failed = append(failed, metricsFailureItemsToApi(batchDeleteResp.Failed)...)
+			auditLogs := make([]*audit.AuditLog, 0, len(accepted))
 			for _, id := range accepted {
-				if auditErr := writeDeleteAudit(ctx, id, http.StatusAccepted); auditErr != nil {
-					logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to write audit log for report %s: %v", id, auditErr)
-				}
+				auditLogs = append(auditLogs, newDeleteAuditLog(ctx, id, http.StatusAccepted))
 			}
+			writeAuditLogsAsync(ctx, auditLogs)
 		}
 	}
 
@@ -454,12 +454,33 @@ func classifyReports(ctx context.Context, batchGetResp *metrics_swagger.ReportsB
 	return permittedIds, failed, nil
 }
 
-func writeDeleteAudit(ctx context.Context, id string, statusCode int) error {
+func newDeleteAuditLog(ctx context.Context, id string, statusCode int) *audit.AuditLog {
 	return audit.AuditFromAudit(audit.AuditFromCtx(ctx)).
 		WithAction("Delete").
 		WithHttpMethod(http.MethodDelete).
 		WithEntityType(auditEntityType).
 		WithEntityId(id).
-		WithStatusCode(statusCode).
-		Write()
+		WithStatusCode(statusCode)
+}
+
+func writeDeleteAudit(ctx context.Context, id string, statusCode int) error {
+	return newDeleteAuditLog(ctx, id, statusCode).Write()
+}
+
+// The logs are snapshots already detached from ctx; only the logger needs a context that
+// survives the handler returning, since the request ctx is cancelled once the 202 is sent.
+func writeAuditLogsAsync(ctx context.Context, auditLogs []*audit.AuditLog) {
+	if len(auditLogs) == 0 {
+		return
+	}
+
+	detachedCtx := context.WithoutCancel(ctx)
+	go func() {
+		for _, auditLog := range auditLogs {
+			if err := auditLog.Write(); err != nil {
+				logging.WithCtx(runaictx.LoggerHook(detachedCtx)).
+					Errorf("Failed to write audit log for report %s: %v", auditLog.Log.GetEntityId(), err)
+			}
+		}
+	}()
 }

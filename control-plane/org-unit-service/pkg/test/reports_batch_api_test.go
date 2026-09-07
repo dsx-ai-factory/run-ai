@@ -9,7 +9,12 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"sync"
+	"time"
 
+	audit "github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client"
+	audit_openapi "github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client/write"
 	authorization_api "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	authorization_utils "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/helpers"
 	metrics_swagger "github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client/generated"
@@ -21,6 +26,27 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
 )
+
+type recordingAuditWriter struct {
+	mu        sync.Mutex
+	delay     time.Duration
+	err       error
+	entityIds []string
+}
+
+func (w *recordingAuditWriter) Write(log audit_openapi.AuditLog) error {
+	time.Sleep(w.delay)
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.entityIds = append(w.entityIds, log.GetEntityId())
+	return w.err
+}
+
+func (w *recordingAuditWriter) written() []string {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return append([]string(nil), w.entityIds...)
+}
 
 var _ = Describe("BatchDeleteReports API tests", func() {
 	ctx := SetContext(TestTenant, TestUser)
@@ -260,6 +286,95 @@ var _ = Describe("BatchDeleteReports API tests", func() {
 			Expect(body.TotalAccepted).To(Equal(int32(0)))
 			Expect(body.TotalFailed).To(Equal(int32(2)))
 			mc.AssertExpectations(GinkgoT())
+		})
+	})
+
+	Context("audit logging of accepted deletions", func() {
+		const (
+			acceptedCount   = 20
+			perWriteDelay   = 50 * time.Millisecond
+			responseBudget  = 5 * perWriteDelay
+			auditWriteLimit = 3 * acceptedCount * perWriteDelay
+		)
+
+		useAuditWriter := func(writer audit.Writer) {
+			audit.SetMock(writer)
+			DeferCleanup(func() { audit.SetMock(&write.EmptyWriter{}) })
+		}
+
+		mockAcceptAll := func(ids []string) *metrics_mocks.MetricsClientContract {
+			reportsList := make([]metrics_swagger.Report, 0, len(ids))
+			for _, id := range ids {
+				reportsList = append(reportsList, makeReport(id, TestUser))
+			}
+
+			mc := &metrics_mocks.MetricsClientContract{}
+			mc.On("BatchGetReportsByIds", mock.Anything, ids).Return(
+				makeBatchGetResp(reportsList, nil), http.StatusOK, nil,
+			)
+			mc.On("BatchDeleteReports", mock.Anything, ids).Return(
+				makeBatchDeleteResp(uuid.NewString(), ids, nil), http.StatusAccepted, nil,
+			)
+			return mc
+		}
+
+		makeIds := func(n int) []string {
+			ids := make([]string, 0, n)
+			for range n {
+				ids = append(ids, uuid.NewString())
+			}
+			return ids
+		}
+
+		It("returns 202 without waiting for the audit writes, then writes them all", func() {
+			writer := &recordingAuditWriter{delay: perWriteDelay}
+			useAuditWriter(writer)
+
+			ids := makeIds(acceptedCount)
+			svc := makeSvc(mockAcceptAll(ids))
+
+			start := time.Now()
+			resp, err := svc.BatchDeleteReports(ctx, api.BatchDeleteReportsRequest{Ids: ids})
+			elapsed := time.Since(start)
+
+			Expect(err).To(BeNil())
+			Expect(resp.Code).To(Equal(http.StatusAccepted))
+			Expect(resp.Body.(api.BatchDeleteReportsResponse).Accepted).To(HaveLen(acceptedCount))
+			Expect(elapsed).To(BeNumerically("<", responseBudget))
+			Eventually(writer.written, auditWriteLimit, 10*time.Millisecond).Should(ConsistOf(ids))
+		})
+
+		It("still attempts every audit write when the writer keeps failing", func() {
+			writer := &recordingAuditWriter{err: fmt.Errorf("audit backend unavailable")}
+			useAuditWriter(writer)
+
+			ids := makeIds(acceptedCount)
+			svc := makeSvc(mockAcceptAll(ids))
+
+			resp, err := svc.BatchDeleteReports(ctx, api.BatchDeleteReportsRequest{Ids: ids})
+
+			Expect(err).To(BeNil())
+			Expect(resp.Code).To(Equal(http.StatusAccepted))
+			Eventually(writer.written, auditWriteLimit, 10*time.Millisecond).Should(ConsistOf(ids))
+		})
+
+		It("does not spawn an audit writer when nothing was accepted", func() {
+			writer := &recordingAuditWriter{}
+			useAuditWriter(writer)
+
+			othersId := uuid.NewString()
+			mc := &metrics_mocks.MetricsClientContract{}
+			mc.On("BatchGetReportsByIds", mock.Anything, []string{othersId}).Return(
+				makeBatchGetResp([]metrics_swagger.Report{makeReport(othersId, "other-user@run.ai")}, nil),
+				http.StatusOK, nil,
+			)
+
+			svc := makeSvc(mc)
+			_, err := svc.BatchDeleteReports(ctx, api.BatchDeleteReportsRequest{Ids: []string{othersId}})
+
+			Expect(err).To(BeNil())
+			// The forbidden-path audit is still written inline, so only that one is expected.
+			Consistently(writer.written, 200*time.Millisecond, 20*time.Millisecond).Should(ConsistOf(othersId))
 		})
 	})
 
