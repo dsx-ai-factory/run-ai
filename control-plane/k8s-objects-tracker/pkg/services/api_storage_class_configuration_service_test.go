@@ -38,7 +38,7 @@ var _ = Describe("storage class configuration test", func() {
 
 	Context("permissions", func() {
 		It("create storage class configuration", func() {
-			ctx := SetContext(randomScopes.TenantIdStr, "test@run.ai")
+			ctx := SetContext(randomScopes.TenantIdStr, "test@example.com")
 			storageClassConfiguration := &api.StorageClassConfigurationCreationRequest{
 				TenantId:  &randomScopes.TenantId,
 				ScopeType: string(openapi.SCOPETYPE_CLUSTER),
@@ -62,7 +62,7 @@ var _ = Describe("storage class configuration test", func() {
 		})
 
 		It("create storage class configuration and update it", func() {
-			ctx := SetContext(randomScopes.TenantIdStr, "test@run.ai")
+			ctx := SetContext(randomScopes.TenantIdStr, "test@example.com")
 
 			storageClassConfiguration := &api.StorageClassConfigurationCreationRequest{
 				ScopeType: string(openapi.SCOPETYPE_CLUSTER),
@@ -110,7 +110,7 @@ var _ = Describe("storage class configuration test", func() {
 
 	Context("General API behavior", func() {
 		It("create storage class configuration with invalid cluster id", func() {
-			ctx := SetContext(randomScopes.TenantIdStr, "test@run.ai")
+			ctx := SetContext(randomScopes.TenantIdStr, "test@example.com")
 			storageClassConfiguration := &api.StorageClassConfigurationCreationRequest{
 				TenantId:  &randomScopes.TenantId,
 				ScopeType: string(openapi.SCOPETYPE_CLUSTER),
@@ -124,7 +124,7 @@ var _ = Describe("storage class configuration test", func() {
 		})
 
 		It("create storage class configuration and delete it", func() {
-			ctx := SetContext(randomScopes.TenantIdStr, "test@run.ai")
+			ctx := SetContext(randomScopes.TenantIdStr, "test@example.com")
 			storageClassConfiguration := &api.StorageClassConfigurationCreationRequest{
 				TenantId:  &randomScopes.TenantId,
 				ScopeType: string(openapi.SCOPETYPE_CLUSTER),
@@ -149,7 +149,7 @@ var _ = Describe("storage class configuration test", func() {
 		})
 
 		It("create 2 storage class configurations and validate in list", func() {
-			ctx := SetContext(randomScopes.TenantIdStr, "test@run.ai")
+			ctx := SetContext(randomScopes.TenantIdStr, "test@example.com")
 			storageClassConfiguration1 := &api.StorageClassConfigurationCreationRequest{
 				TenantId:  &randomScopes.TenantId,
 				ScopeType: string(openapi.SCOPETYPE_CLUSTER),
@@ -194,7 +194,7 @@ var _ = Describe("storage class configuration test", func() {
 		})
 
 		It("create 2 storage class configurations and validate in list with filter", func() {
-			ctx := SetContext(randomScopes.TenantIdStr, "test@run.ai")
+			ctx := SetContext(randomScopes.TenantIdStr, "test@example.com")
 			storageClassConfiguration1 := &api.StorageClassConfigurationCreationRequest{
 				TenantId:  &randomScopes.TenantId,
 				ScopeType: string(openapi.SCOPETYPE_CLUSTER),
@@ -243,7 +243,7 @@ var _ = Describe("storage class configuration test", func() {
 		var currentId string
 
 		BeforeEach(func() {
-			ctx = SetContext(randomScopes.TenantIdStr, "test@run.ai")
+			ctx = SetContext(randomScopes.TenantIdStr, "test@example.com")
 
 			storageClassConfiguration := &api.StorageClassConfigurationCreationRequest{
 				ScopeType: string(openapi.SCOPETYPE_CLUSTER),

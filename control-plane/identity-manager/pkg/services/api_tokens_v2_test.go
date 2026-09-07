@@ -49,14 +49,14 @@ func TestGrantTokenV2_Password_HappyFlow(t *testing.T) {
 
 	clientCacheMock.On("GetClientForRealm", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(client, nil)
 	iamMock.MockAuthService.On("ExchangeUsernameAndPasswordForToken", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(tokens, nil)
-	iamMock.MockAuthService.On("GetClaimsFromToken", mock.Anything, mock.Anything).Return(map[string]interface{}{"sub": "test@run.ai"}, nil)
+	iamMock.MockAuthService.On("GetClaimsFromToken", mock.Anything, mock.Anything).Return(map[string]interface{}{"sub": "test@example.com"}, nil)
 
 	result, err := testSubject.GrantTokenV2(
 		ctx,
 		"password",
 		"",
 		"",
-		"test@run.ai",
+		"test@example.com",
 		"password123",
 		"", "", "", "", "",
 	)
@@ -75,7 +75,7 @@ func TestGrantTokenV2_RefreshToken_HappyFlow(t *testing.T) {
 	client := getBasicClient()
 	tokens := getTokens()
 	claimsResponse := map[string]interface{}{
-		"sub": "test@run.ai",
+		"sub": "test@example.com",
 	}
 
 	clientCacheMock.On("GetClientForRealm", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(client, nil)
@@ -116,7 +116,7 @@ func TestGrantTokenV2_Password_NonAllowlistedClient_Unauthorized(t *testing.T) {
 		"password",
 		*client.ClientID,
 		"wrong-secret",
-		"test@run.ai",
+		"test@example.com",
 		"password123",
 		"", "", "", "", "",
 	)
@@ -137,14 +137,14 @@ func TestGrantTokenV2_Password_NonAllowlistedClient_CorrectSecret_HappyFlow(t *t
 
 	clientCacheMock.On("GetClientForRealm", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(client, nil)
 	iamMock.MockAuthService.On("ExchangeUsernameAndPasswordForToken", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(tokens, nil)
-	iamMock.MockAuthService.On("GetClaimsFromToken", mock.Anything, mock.Anything).Return(map[string]interface{}{"sub": "test@run.ai"}, nil)
+	iamMock.MockAuthService.On("GetClaimsFromToken", mock.Anything, mock.Anything).Return(map[string]interface{}{"sub": "test@example.com"}, nil)
 
 	result, err := testSubject.GrantTokenV2(
 		ctx,
 		"password",
 		*client.ClientID,
 		*client.Secret,
-		"test@run.ai",
+		"test@example.com",
 		"password123",
 		"", "", "", "", "",
 	)
@@ -187,7 +187,7 @@ func TestGrantTokenV2_UnauthorizedClient_ReturnsOAuth2Error(t *testing.T) {
 		"password",
 		"",
 		"",
-		"test@run.ai",
+		"test@example.com",
 		"password",
 		"", "", "", "", "",
 	)
