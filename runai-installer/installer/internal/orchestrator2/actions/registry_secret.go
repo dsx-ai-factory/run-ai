@@ -12,7 +12,9 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type RegistrySecret struct {
@@ -39,11 +41,26 @@ func (a RegistrySecret) Execute(ctx context.Context, deps orchestrator2.Deps) (o
 	if err != nil {
 		return orchestrator2.ActionResult{}, fmt.Errorf("decode registry token: %w", err)
 	}
-	secret := &corev1.Secret{
+	existing := &corev1.Secret{
 		TypeMeta:   metav1.TypeMeta{Kind: "Secret", APIVersion: "v1"},
 		ObjectMeta: metav1.ObjectMeta{Name: a.SecretName, Namespace: a.Namespace},
-		Type:       corev1.SecretTypeDockerConfigJson,
-		Data:       map[string][]byte{".dockerconfigjson": dockerConfig},
 	}
-	return orchestrator2.ActionResult{}, deps.K8sExecutor.Apply(ctx, secret)
+	err = deps.K8sExecutor.Get(ctx, client.ObjectKeyFromObject(existing), existing)
+	if apierrors.IsNotFound(err) {
+		existing.Type = corev1.SecretTypeDockerConfigJson
+		existing.Data = map[string][]byte{corev1.DockerConfigJsonKey: dockerConfig}
+		return orchestrator2.ActionResult{}, deps.K8sExecutor.Create(ctx, existing)
+	}
+	if err != nil {
+		return orchestrator2.ActionResult{}, err
+	}
+
+	original := existing.DeepCopy()
+	existing.Type = corev1.SecretTypeDockerConfigJson
+	if existing.Data == nil {
+		existing.Data = map[string][]byte{}
+	}
+	existing.Data[corev1.DockerConfigJsonKey] = dockerConfig
+
+	return orchestrator2.ActionResult{}, deps.K8sExecutor.Patch(ctx, existing, client.MergeFrom(original))
 }
