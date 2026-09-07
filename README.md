@@ -14,7 +14,6 @@ Included components:
 | **Run:ai Cluster** | [`runai-cluster/`](runai-cluster) | In-cluster operator, controllers, and the cluster Helm chart |
 | **Installer** | [`runai-installer/`](runai-installer) | Installer and provisioner tooling |
 | **Clients & shared packages** | [`runai-clients/`](runai-clients), [`runai-common-packages/`](runai-common-packages), [`runai-application-packages/`](runai-application-packages) | Generated API clients and shared Go libraries |
-| **E2E** | [`e2e/`](e2e) | End-to-end test suites |
 | **MCP server** | [`runai-mcp-server/`](runai-mcp-server) | Model Context Protocol server |
 | **Local environment** | [`local-dev.sh`](local-dev.sh), [`local-dev.md`](local-dev.md) | One-command local Kubernetes (Kind) development environment |
 
