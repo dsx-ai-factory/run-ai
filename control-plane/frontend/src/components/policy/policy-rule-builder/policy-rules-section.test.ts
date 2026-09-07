@@ -109,4 +109,24 @@ describe("policy-rules-section.vue", () => {
 
     expect(wrapper.findComponent(PolicyRuleCard).props("allowOverrideEnabled")).toBe(false);
   });
+
+  test("shows the open-rule message only after saving the policy with that rule open", async () => {
+    const wrapper = mountComponent([Action.Update]);
+
+    (wrapper.vm as unknown as { revealValidation: () => void }).revealValidation();
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('[aid="rules-validation-error"]').exists()).toBe(true);
+
+    await wrapper.find('[aid="add-rule-btn"]').trigger("click");
+
+    expect(wrapper.find('[aid="rules-validation-error"]').exists()).toBe(false);
+    expect(wrapper.find('[aid="rule-footer-error"]').exists()).toBe(false);
+
+    (wrapper.vm as unknown as { revealValidation: () => void }).revealValidation();
+    await wrapper.vm.$nextTick();
+
+    const error = wrapper.find('[aid="rule-footer-error"]');
+    expect(error.exists()).toBe(true);
+    expect(error.text()).toBe(errorMessages.SAVE_OR_CANCEL_OPEN_RULE);
+  });
 });
