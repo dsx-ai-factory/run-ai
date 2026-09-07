@@ -2164,10 +2164,10 @@ paths:
               examples:
                 discovery:
                   value:
-                    issuer: https://app.run.ai
-                    authorization_endpoint: https://app.run.ai/api/v1/login
-                    token_endpoint: https://app.run.ai/api/v2/token
-                    jwks_uri: https://app.run.ai/auth/realms/runai/protocol/openid-connect/certs
+                    issuer: http://localhost:8080
+                    authorization_endpoint: http://localhost:8080/api/v1/login
+                    token_endpoint: http://localhost:8080/api/v2/token
+                    jwks_uri: http://localhost:8080/auth/realms/runai/protocol/openid-connect/certs
                     response_types_supported:
                       - code
                       - token
@@ -2217,10 +2217,10 @@ paths:
               examples:
                 metadata:
                   value:
-                    issuer: https://app.run.ai
-                    authorization_endpoint: https://app.run.ai/api/v1/login
-                    token_endpoint: https://app.run.ai/api/v2/token
-                    jwks_uri: https://app.run.ai/auth/realms/runai/protocol/openid-connect/certs
+                    issuer: http://localhost:8080
+                    authorization_endpoint: http://localhost:8080/api/v1/login
+                    token_endpoint: http://localhost:8080/api/v2/token
+                    jwks_uri: http://localhost:8080/auth/realms/runai/protocol/openid-connect/certs
                     response_types_supported:
                       - code
                       - token
@@ -2792,9 +2792,9 @@ components:
       example:
         tenantName: mytest
         authClientID: runai-admin-ui
-        authHost: https://app.run.ai
+        authHost: http://localhost:8080
         isMultiTenant: false
-        redirectUrl: https://mytest.run.ai
+        redirectUrl: http://localhost:8080
     Error:
       required:
         - code
@@ -3959,15 +3959,15 @@ components:
         issuer:
           type: string
           description: The authorization server's issuer identifier URL
-          example: https://app.run.ai
+          example: http://localhost:8080
         authorization_endpoint:
           type: string
           description: URL of the OAuth2 authorization endpoint
-          example: https://app.run.ai/api/v1/login
+          example: http://localhost:8080/api/v1/login
         token_endpoint:
           type: string
           description: URL of the OAuth2 token endpoint
-          example: https://app.run.ai/api/v2/token
+          example: http://localhost:8080/api/v2/token
         userinfo_endpoint:
           type: string
           description: URL of the UserInfo endpoint
@@ -4058,15 +4058,15 @@ components:
         issuer:
           type: string
           description: The authorization server's issuer identifier URL
-          example: https://app.run.ai
+          example: http://localhost:8080
         authorization_endpoint:
           type: string
           description: URL of the OAuth2 authorization endpoint
-          example: https://app.run.ai/api/v1/login
+          example: http://localhost:8080/api/v1/login
         token_endpoint:
           type: string
           description: URL of the OAuth2 token endpoint
-          example: https://app.run.ai/api/v2/token
+          example: http://localhost:8080/api/v2/token
         userinfo_endpoint:
           type: string
           description: URL of the UserInfo endpoint
@@ -4336,7 +4336,7 @@ components:
           type: string
       example:
         entity_id: f84d2fcf-8a61-4136-9b75-d06f496ca1f2
-        redirect_uri: app.run.ai/auth/realms/runai/broker/saml/endpoint
+        redirect_uri: localhost:8080/auth/realms/runai/broker/saml/endpoint
     IdpResourcdes:
       $ref: '#/components/schemas/IdpResources'
     UserGroups:
