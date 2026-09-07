@@ -204,6 +204,8 @@ export default defineComponent({
         if (this.createdCluster?.uuid) await this.deleteLastCreatedCluster();
         this.createdCluster = await this.clusterStore.create(this.clusterFormModel.name);
         this.createdCluster?.uuid && clusterUtil.addSessionCreatedCluster(this.createdCluster.uuid);
+        this.currentStep = 2;
+        window.scrollTo({ top: 0, behavior: "smooth" });
       } catch (error: unknown) {
         if (error instanceof HttpErrorResponse) {
           console.error(error.serialize());
@@ -214,8 +216,6 @@ export default defineComponent({
         }
       } finally {
         this.loading = false;
-        this.currentStep = 2;
-        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     },
     async deleteLastCreatedCluster(): Promise<void> {
