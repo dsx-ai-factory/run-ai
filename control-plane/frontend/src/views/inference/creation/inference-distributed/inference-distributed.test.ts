@@ -9,6 +9,7 @@ import { Quasar } from "quasar";
 import { ref } from "vue";
 import InferenceDistributed from "./inference-distributed.vue";
 import { EDistributedInferenceType } from "./inference-distributed.model";
+import { EServerType } from "@/models/inference.model";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyWrapper = VueWrapper<any>;
@@ -239,6 +240,26 @@ describe("inference-distributed.vue", () => {
           nodePools: [],
         },
       };
+    });
+
+    describe("parseServerType", () => {
+      it("accepts a valid server type", () => {
+        wrapper = createWrapper();
+
+        expect(wrapper.vm.parseServerType(EServerType.Nim)).toBe(EServerType.Nim);
+      });
+
+      it("uses the first value when the query parameter is repeated", () => {
+        wrapper = createWrapper();
+
+        expect(wrapper.vm.parseServerType([EServerType.Nim, EServerType.Custom])).toBe(EServerType.Nim);
+      });
+
+      it("rejects an unknown server type", () => {
+        wrapper = createWrapper();
+
+        expect(wrapper.vm.parseServerType("unknown")).toBeUndefined();
+      });
     });
 
     describe("when policy is null or undefined", () => {
