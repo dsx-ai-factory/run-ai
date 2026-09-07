@@ -18,6 +18,11 @@ spec:
         runAsUser: 65534
         seccompProfile:
           type: RuntimeDefault
+      # hostNetwork is required: etcd serves metrics on the node's loopback (127.0.0.1:2381),
+      # which is only reachable from the host network namespace. The proxy therefore shares the
+      # node's network stack, and its pod IP is the node's primary IP. Prometheus scrapes that IP
+      # via the headless Service below, so the listener is bound to it explicitly rather than to
+      # 0.0.0.0, keeping etcd metrics off every other interface on the control-plane node.
       hostNetwork: true
       nodeSelector:
         node-role.kubernetes.io/control-plane: ""
@@ -28,8 +33,13 @@ spec:
       containers:
         - name: socat
           image: alpine/socat:latest
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
           args:
-            - TCP-LISTEN:2382,bind=0.0.0.0,reuseaddr,fork
+            - TCP-LISTEN:2382,bind=$(POD_IP),reuseaddr,fork
             - TCP:127.0.0.1:2381
           ports:
             - name: metrics
