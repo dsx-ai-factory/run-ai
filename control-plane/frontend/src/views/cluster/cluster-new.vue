@@ -276,10 +276,6 @@ export default defineComponent({
 </style>
 
 <style scoped lang="scss">
-// The footer spans the full 820px panel-main column, but the cards above are
-// RunaiFormWrapper's medium-width (800px) — pad the right side by that 20px
-// difference so the buttons land on the card's actual right edge, not the
-// wider column's.
 .stepper-controls {
   padding-right: 20px;
 }
