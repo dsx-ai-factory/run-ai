@@ -4,7 +4,7 @@ For an overview of how these services fit together, see the [Architecture and Co
 
 ## Control Plane Services
 
-The control plane is a set of independently deployable microservices. Services communicate internally over HTTP and a pub/sub event bus (NATS or Redis Streams), grouped around five functional domains:
+The control plane is a set of independently deployable microservices. Services communicate internally over a pub/sub event bus (NATS or Redis Streams), grouped around five functional domains:
 
 - **Identity and access** - handles authentication, JWT validation, identity provider integration (OIDC, SAML, OCP), and RBAC enforcement across all services: `gateway-hub`, `identity-manager`, `authorization`, `keycloak-extensions`
 - **Organizational structure** - manages the hierarchy of tenants, departments, and projects that scopes resource quotas and access rules: `org-unit-service`, `tenants-manager`

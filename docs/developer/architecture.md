@@ -38,7 +38,7 @@ Each Kubernetes cluster connected to NVIDIA Run:ai runs a set of cluster compone
 
 A request moves through the platform in a loop: down from the control plane to the cluster, through execution, and back up as status.
 
-1. A user or external system submits a request through the web UI, CLI, or REST API.
+1. A user or external system submits a request through the web UI, CLI, REST API, or MCP server.
 2. The control plane authenticates the request and updates the desired state it owns: the workload itself, plus any organizational resources, policies, or configuration it depends on.
 3. Cluster components sync that desired state down to the relevant Kubernetes cluster and reconcile it into Kubernetes resources.
 4. The admission controller and Scheduler validate the request, apply policy, and decide where and how the workload runs.
