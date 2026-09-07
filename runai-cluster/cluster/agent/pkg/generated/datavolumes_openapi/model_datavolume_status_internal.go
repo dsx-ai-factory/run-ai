@@ -19,8 +19,8 @@ import (
 type DatavolumeStatusInternal struct {
 	Phase DatavolumePhase `json:"phase"`
 	// Message explaining the phase of the Datavolume in the cluster
-	PhaseMessage *string     `json:"phaseMessage,omitempty"`
-	Conditions   []Condition `json:"conditions,omitempty"`
+	PhaseMessage *string `json:"phaseMessage,omitempty"`
+	Conditions []Condition `json:"conditions,omitempty"`
 	// The name of the copied PVC that is created in the cluster in the project namespace
 	DatavolumePvcName *string `json:"datavolumePvcName,omitempty"`
 	// The name of the PV that is created in the cluster - copied from the one that was attached to the original pvc
@@ -231,7 +231,6 @@ func (o *DatavolumeStatusInternal) HasIsDeleted() bool {
 func (o *DatavolumeStatusInternal) SetIsDeleted(v bool) {
 	o.IsDeleted.Set(&v)
 }
-
 // SetIsDeletedNil sets the value for IsDeleted to be an explicit nil
 func (o *DatavolumeStatusInternal) SetIsDeletedNil() {
 	o.IsDeleted.Set(nil)
@@ -300,3 +299,5 @@ func (v *NullableDatavolumeStatusInternal) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

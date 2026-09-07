@@ -8,9 +8,6 @@ info:
   title: identity-manager
   version: "1.0"
 servers:
-- url: https://app.run.ai
-- url: https://staging.run.ai
-- url: https://test.run.ai
 - url: http://localhost:8080
 security:
 - bearerAuth: []

@@ -1,7 +1,7 @@
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend
+The aggregated API  of Run:AI backend 
 
 API version: 1.5.1
 */
@@ -19,7 +19,7 @@ type UpdateNodePoolRequest struct {
 	// key of node label for pool
 	LabelKey *string `json:"labelKey,omitempty"`
 	// value of node label for pool
-	LabelValue        *string            `json:"labelValue,omitempty"`
+	LabelValue *string `json:"labelValue,omitempty"`
 	PlacementStrategy *PlacementStrategy `json:"placementStrategy,omitempty"`
 }
 
@@ -185,3 +185,5 @@ func (v *NullableUpdateNodePoolRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

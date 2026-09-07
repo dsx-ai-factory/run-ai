@@ -4,7 +4,7 @@ info:
   title: ClusterService
   version: "1.0"
 servers:
-- url: https://localhost:8080
+- url: http://localhost:8080
 security:
 - bearerAuth: []
 paths:
