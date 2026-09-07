@@ -7333,7 +7333,7 @@ components:
     ConfigSamlResponse:
       example:
         entity_id: f84d2fcf-8a61-4136-9b75-d06f496ca1f2
-        redirect_uri: localhost:8080/auth/realms/runai/broker/saml/endpoint
+        redirect_uri: http://localhost:8080/auth/realms/runai/broker/saml/endpoint
       properties:
         entity_id:
           type: string
