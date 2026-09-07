@@ -62,7 +62,7 @@ spec:
     clientName: <nil>
     clientSecret: <nil>
     enabled: true
-    endpoint: https://app.run.ai.
+    endpoint: https://mock-q7z3k.example.com.
     image:
       env: prod
       name: agent
@@ -89,7 +89,7 @@ spec:
     SSLCertificateVerification: true
     debugLogLevel: 0
     enabled: true
-    endpoint: https://app.run.ai.
+    endpoint: https://mock-q7z3k.example.com.
     image:
       env: prod
       name: assets-sync
@@ -137,7 +137,7 @@ spec:
   cluster-sync:
     SSLCertificateVerification: true
     enabled: true
-    endpoint: https://app.run.ai.
+    endpoint: https://mock-q7z3k.example.com.
     existingSecretToSyncLabel: run.ai/resource
     image:
       env: prod

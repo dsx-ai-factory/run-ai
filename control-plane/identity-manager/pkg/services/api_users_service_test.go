@@ -77,7 +77,7 @@ func setNotifyConfig() config.Notify {
 
 func setTenantConfig() config.TenantRealm {
 	return config.TenantRealm{
-		AppHost:              "https://app.run.ai",
+		AppHost:              "https://mock-q7z3k.example.com",
 		TenantDomainTemplate: "https://{{.}}.run.ai",
 		Env:                  "test",
 		DefaultClientId:      "runai-admin-ui",

@@ -1084,7 +1084,7 @@ func RunComposerTest(testDetails ComposerTest, basePath string) {
 		distGPUNetworkAcceleration: testDetails.clusterGPUNetworkAcceleration,
 	}
 	distComposer.WithClusterStorageConfig(
-		testClusterStorageConfigWithOpts("https://test.run.ai", testDetails.clusterSubdomain, clusterOpts))
+		testClusterStorageConfigWithOpts("https://mock-q7z3k.example.com", testDetails.clusterSubdomain, clusterOpts))
 
 	hasMasterReplica := !testDetails.noMaster
 	actualResults.DistributedTarget = NewMinimalDistributedTarget(testDetails.framework, hasMasterReplica)

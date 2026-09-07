@@ -359,7 +359,7 @@ func TestSendPasswordResetEmail_HappyFlow(t *testing.T) {
 			*params.ClientID == testClientId
 	})).Return(nil)
 
-	err := testSubject.SendPasswordResetEmail(ctx, realm, *userID, expirationSeconds, "https://test.run.ai", testClientId)
+	err := testSubject.SendPasswordResetEmail(ctx, realm, *userID, expirationSeconds, "https://mock-q7z3k.example.com", testClientId)
 	assert.NoError(t, err)
 	authMock.AssertExpectations(t)
 	goCloakMock.AssertExpectations(t)
@@ -369,7 +369,7 @@ func TestSendPasswordResetEmail_FailToGetAdminToken(t *testing.T) {
 	authMock, _, _, testSubject := initTest(t)
 	ctx := context.Background()
 	authMock.On("GetAdminToken", ctx).Return(nil, assert.AnError)
-	err := testSubject.SendPasswordResetEmail(ctx, realm, "user-id", 3600, "https://test.run.ai", "test-client-id")
+	err := testSubject.SendPasswordResetEmail(ctx, realm, "user-id", 3600, "https://mock-q7z3k.example.com", "test-client-id")
 	assert.Error(t, err)
 	authMock.AssertExpectations(t)
 }
@@ -391,7 +391,7 @@ func TestSendPasswordResetEmail_FailToExecuteActionsEmail(t *testing.T) {
 			*params.ClientID == testClientId
 	})).Return(assert.AnError)
 
-	err := testSubject.SendPasswordResetEmail(ctx, realm, *userID, expirationSeconds, "https://test.run.ai", testClientId)
+	err := testSubject.SendPasswordResetEmail(ctx, realm, *userID, expirationSeconds, "https://mock-q7z3k.example.com", testClientId)
 	assert.Error(t, err)
 	authMock.AssertExpectations(t)
 	goCloakMock.AssertExpectations(t)
