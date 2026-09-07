@@ -33,6 +33,10 @@ spec:
       containers:
         - name: socat
           image: alpine/socat:latest
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
           env:
             - name: POD_IP
               valueFrom:
