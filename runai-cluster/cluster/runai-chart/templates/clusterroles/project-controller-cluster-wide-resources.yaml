@@ -10,14 +10,26 @@ rules:
       - projects
       - projects/finalizers
     verbs:
-      - '*'
+      - create
+      - get
+      - list
+      - watch
+      - update
+      - patch
+      - delete
   - apiGroups:
       - scheduling.run.ai
       - scheduling.incubator.k8s.io
     resources:
       - queues
     verbs:
-      - '*'
+      - create
+      - get
+      - list
+      - watch
+      - update
+      - patch
+      - delete
   - apiGroups:
       - ""
     resources:
@@ -113,14 +125,26 @@ rules:
       - projects
       - projects/finalizers
     verbs:
-      - '*'
+      - create
+      - get
+      - list
+      - watch
+      - update
+      - patch
+      - delete
   - apiGroups:
       - scheduling.run.ai
       - scheduling.incubator.k8s.io
     resources:
       - queues
     verbs:
-      - '*'
+      - create
+      - get
+      - list
+      - watch
+      - update
+      - patch
+      - delete
   - apiGroups:
       - ""
     resources:
