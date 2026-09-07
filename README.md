@@ -89,25 +89,14 @@ Choose an installation method based on how you want to manage the deployment:
 
 To build and run NVIDIA Run:ai locally for development, see [Usage](#usage).
 
-## Support
-
-- For bugs, feature requests, documentation issues, and usage questions, open a [GitHub issue](https://github.com/run-ai/runai/issues).
-- To report a security vulnerability, use [GitHub Security Advisories](https://github.com/run-ai/runai/security/advisories) and follow the instructions in [SECURITY.md](SECURITY.md). Do not open a public issue.
-- For commercial support and enterprise inquiries, contact [NVIDIA](https://www.nvidia.com/en-us/data-center/products/run-ai/).
-
 ## Contributing
 
-We welcome contributions of all sizes, from bug fixes and documentation improvements to new features. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
+Contributions are welcome. Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) for the development workflow, branch and PR policy, and CI expectations, and [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) for community guidelines.
 
-Before making a non-trivial change, open a feature issue so the design can be agreed on before you write code. You can also pick up an issue labeled `good first issue` or `help wanted` and comment to claim it.
+## Security & Support
 
-External contributors must sign off every commit using `git commit -s`. See the [Developer Certificate of Origin (DCO)](CONTRIBUTING.md#developer-certificate-of-origin-dco) for details.
-
-Before changing a component, read the component's `README.md` for its build, test, and development instructions.
-
-## Code of Conduct
-
-This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to uphold its standards.
+- **Reporting a vulnerability:** see [`SECURITY.md`](SECURITY.md) — do not open public issues for security reports.
+- **Supported versions and getting help:** see [`SUPPORT.md`](SUPPORT.md).
 
 ## License
 
