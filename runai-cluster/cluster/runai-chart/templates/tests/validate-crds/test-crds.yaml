@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: runai-crd-validator
+  namespace: {{ .Release.Namespace }}
   annotations:
     "helm.sh/hook": test
     "helm.sh/hook-delete-policy": before-hook-creation, hook-succeeded
@@ -38,6 +39,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: validate-crds
+  namespace: {{ .Release.Namespace }}
   annotations:
     "helm.sh/hook": test
     "helm.sh/hook-delete-policy": before-hook-creation, hook-succeeded
