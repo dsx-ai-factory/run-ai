@@ -38,11 +38,6 @@ import (
 type EnvironmentAPIController struct {
 	service EnvironmentAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -58,10 +53,13 @@ type EnvironmentAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *EnvironmentAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *EnvironmentAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -225,7 +223,7 @@ func (c *EnvironmentAPIController) Routes() Routes {
 func (c *EnvironmentAPIController) ListEnvironmentAssets(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var nameParam string
@@ -249,7 +247,7 @@ func (c *EnvironmentAPIController) ListEnvironmentAssets(w http.ResponseWriter, 
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "projectId", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "projectId", Err: err}, nil, nil)
 			return
 		}
 
@@ -277,7 +275,7 @@ func (c *EnvironmentAPIController) ListEnvironmentAssets(w http.ResponseWriter, 
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "usageInfo", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "usageInfo", Err: err}, nil, nil)
 			return
 		}
 
@@ -291,7 +289,7 @@ func (c *EnvironmentAPIController) ListEnvironmentAssets(w http.ResponseWriter, 
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil, nil)
 			return
 		}
 
@@ -319,7 +317,7 @@ func (c *EnvironmentAPIController) ListEnvironmentAssets(w http.ResponseWriter, 
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "isDistributed", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "isDistributed", Err: err}, nil, nil)
 			return
 		}
 
@@ -333,7 +331,7 @@ func (c *EnvironmentAPIController) ListEnvironmentAssets(w http.ResponseWriter, 
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "isTraining", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "isTraining", Err: err}, nil, nil)
 			return
 		}
 
@@ -347,7 +345,7 @@ func (c *EnvironmentAPIController) ListEnvironmentAssets(w http.ResponseWriter, 
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "isWorkspace", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "isWorkspace", Err: err}, nil, nil)
 			return
 		}
 
@@ -361,7 +359,7 @@ func (c *EnvironmentAPIController) ListEnvironmentAssets(w http.ResponseWriter, 
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "isInference", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "isInference", Err: err}, nil, nil)
 			return
 		}
 
@@ -382,7 +380,7 @@ func (c *EnvironmentAPIController) ListEnvironmentAssets(w http.ResponseWriter, 
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "statusInfo", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "statusInfo", Err: err}, nil, nil)
 			return
 		}
 
@@ -396,7 +394,7 @@ func (c *EnvironmentAPIController) ListEnvironmentAssets(w http.ResponseWriter, 
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeDescendants", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeDescendants", Err: err}, nil, nil)
 			return
 		}
 
@@ -410,7 +408,7 @@ func (c *EnvironmentAPIController) ListEnvironmentAssets(w http.ResponseWriter, 
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "isDistributedInference", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "isDistributedInference", Err: err}, nil, nil)
 			return
 		}
 
@@ -420,7 +418,7 @@ func (c *EnvironmentAPIController) ListEnvironmentAssets(w http.ResponseWriter, 
 	result, err := c.service.ListEnvironmentAssets(r.Context(), nameParam, scopeParam, projectIdParam, departmentIdParam, clusterIdParam, usageInfoParam, complyToProjectParam, complyToWorkloadTypeParam, distributedFrameworkParam, isDistributedParam, isTrainingParam, isWorkspaceParam, isInferenceParam, complyToReplicaTypeParam, statusInfoParam, includeDescendantsParam, isDistributedInferenceParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -473,34 +471,35 @@ func (c *EnvironmentAPIController) ListEnvironmentAssets(w http.ResponseWriter, 
 func (c *EnvironmentAPIController) CreateEnvironmentAsset(w http.ResponseWriter, r *http.Request) {
 	var environmentCreationRequestParam EnvironmentCreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&environmentCreationRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertEnvironmentCreationRequestRequired(environmentCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertEnvironmentCreationRequestConstraints(environmentCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateEnvironmentAsset(r.Context(), environmentCreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -553,12 +552,12 @@ func (c *EnvironmentAPIController) CreateEnvironmentAsset(w http.ResponseWriter,
 func (c *EnvironmentAPIController) GetEnvironmentAssetById(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	assetIdParam := chi.URLParam(r, "AssetId")
 	if assetIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil, nil)
 		return
 	}
 	var usageInfoParam bool
@@ -568,7 +567,7 @@ func (c *EnvironmentAPIController) GetEnvironmentAssetById(w http.ResponseWriter
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "usageInfo", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "usageInfo", Err: err}, nil, nil)
 			return
 		}
 
@@ -582,7 +581,7 @@ func (c *EnvironmentAPIController) GetEnvironmentAssetById(w http.ResponseWriter
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil, nil)
 			return
 		}
 
@@ -610,7 +609,7 @@ func (c *EnvironmentAPIController) GetEnvironmentAssetById(w http.ResponseWriter
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "statusInfo", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "statusInfo", Err: err}, nil, nil)
 			return
 		}
 
@@ -620,7 +619,7 @@ func (c *EnvironmentAPIController) GetEnvironmentAssetById(w http.ResponseWriter
 	result, err := c.service.GetEnvironmentAssetById(r.Context(), assetIdParam, usageInfoParam, complyToProjectParam, complyToWorkloadTypeParam, complyToReplicaTypeParam, statusInfoParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -673,39 +672,40 @@ func (c *EnvironmentAPIController) GetEnvironmentAssetById(w http.ResponseWriter
 func (c *EnvironmentAPIController) UpdateEnvironmentAssetById(w http.ResponseWriter, r *http.Request) {
 	assetIdParam := chi.URLParam(r, "AssetId")
 	if assetIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil, nil)
 		return
 	}
 	var environmentUpdateRequestParam EnvironmentUpdateRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&environmentUpdateRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertEnvironmentUpdateRequestRequired(environmentUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertEnvironmentUpdateRequestConstraints(environmentUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateEnvironmentAssetById(r.Context(), assetIdParam, environmentUpdateRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -758,13 +758,13 @@ func (c *EnvironmentAPIController) UpdateEnvironmentAssetById(w http.ResponseWri
 func (c *EnvironmentAPIController) DeleteEnvironmentAssetById(w http.ResponseWriter, r *http.Request) {
 	assetIdParam := chi.URLParam(r, "AssetId")
 	if assetIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteEnvironmentAssetById(r.Context(), assetIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

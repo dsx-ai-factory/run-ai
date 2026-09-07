@@ -39,11 +39,6 @@ import (
 type OrgUnitAPIController struct {
 	service OrgUnitAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -59,10 +54,13 @@ type OrgUnitAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *OrgUnitAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *OrgUnitAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -220,7 +218,7 @@ func (c *OrgUnitAPIController) Routes() Routes {
 func (c *OrgUnitAPIController) GetOrgUnitsNames(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var orgUnitTypeParam string
@@ -229,7 +227,7 @@ func (c *OrgUnitAPIController) GetOrgUnitsNames(w http.ResponseWriter, r *http.R
 
 		orgUnitTypeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "orgUnitType"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "orgUnitType"}, nil, nil)
 		return
 	}
 	var orgUnitIdsParam string
@@ -238,13 +236,13 @@ func (c *OrgUnitAPIController) GetOrgUnitsNames(w http.ResponseWriter, r *http.R
 
 		orgUnitIdsParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "orgUnitIds"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "orgUnitIds"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetOrgUnitsNames(r.Context(), orgUnitTypeParam, orgUnitIdsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -297,12 +295,12 @@ func (c *OrgUnitAPIController) GetOrgUnitsNames(w http.ResponseWriter, r *http.R
 func (c *OrgUnitAPIController) OrgsNodePoolSummary(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	nodepoolIdParam := chi.URLParam(r, "nodepoolId")
 	if nodepoolIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"nodepoolId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"nodepoolId"}, nil, nil)
 		return
 	}
 	var nodepoolSummaryTypeParam OrgUnitsNodepoolSummaryType
@@ -311,13 +309,13 @@ func (c *OrgUnitAPIController) OrgsNodePoolSummary(w http.ResponseWriter, r *htt
 
 		nodepoolSummaryTypeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "nodepoolSummaryType"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "nodepoolSummaryType"}, nil, nil)
 		return
 	}
 	result, err := c.service.OrgsNodePoolSummary(r.Context(), nodepoolIdParam, nodepoolSummaryTypeParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -370,34 +368,35 @@ func (c *OrgUnitAPIController) OrgsNodePoolSummary(w http.ResponseWriter, r *htt
 func (c *OrgUnitAPIController) NodePoolResetResources(w http.ResponseWriter, r *http.Request) {
 	var orgUnitsNodepoolResourcesResetRequestParam OrgUnitsNodepoolResourcesResetRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&orgUnitsNodepoolResourcesResetRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertOrgUnitsNodepoolResourcesResetRequestRequired(orgUnitsNodepoolResourcesResetRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertOrgUnitsNodepoolResourcesResetRequestConstraints(orgUnitsNodepoolResourcesResetRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.NodePoolResetResources(r.Context(), orgUnitsNodepoolResourcesResetRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -413,34 +412,35 @@ func (c *OrgUnitAPIController) NodePoolResetResources(w http.ResponseWriter, r *
 func (c *OrgUnitAPIController) UpdateOrgUnitSettings(w http.ResponseWriter, r *http.Request) {
 	var orgUnitSingleSettingParam OrgUnitSingleSetting
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&orgUnitSingleSettingParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertOrgUnitSingleSettingRequired(orgUnitSingleSettingParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertOrgUnitSingleSettingConstraints(orgUnitSingleSettingParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateOrgUnitSettings(r.Context(), orgUnitSingleSettingParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -457,7 +457,7 @@ func (c *OrgUnitAPIController) GetInternalOrgTree(w http.ResponseWriter, r *http
 	result, err := c.service.GetInternalOrgTree(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -510,26 +510,26 @@ func (c *OrgUnitAPIController) GetInternalOrgTree(w http.ResponseWriter, r *http
 func (c *OrgUnitAPIController) GetInternalDeletedOrgUnits(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var deletedAfterParam time.Time
 	if query.Has("deletedAfter") {
 		param, err := parseTime(query.Get("deletedAfter"))
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "deletedAfter", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "deletedAfter", Err: err}, nil, nil)
 			return
 		}
 
 		deletedAfterParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{"deletedAfter"}, nil)
+		c.errorHandler(w, r, &RequiredError{"deletedAfter"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetInternalDeletedOrgUnits(r.Context(), deletedAfterParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -583,7 +583,7 @@ func (c *OrgUnitAPIController) GetOrgTree(w http.ResponseWriter, r *http.Request
 	result, err := c.service.GetOrgTree(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -637,7 +637,7 @@ func (c *OrgUnitAPIController) GetRanks(w http.ResponseWriter, r *http.Request) 
 	result, err := c.service.GetRanks(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

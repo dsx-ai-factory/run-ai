@@ -38,11 +38,6 @@ import (
 type SettingsAPIController struct {
 	service SettingsAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -58,10 +53,13 @@ type SettingsAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *SettingsAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *SettingsAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -361,7 +359,7 @@ func (c *SettingsAPIController) Routes() Routes {
 func (c *SettingsAPIController) GetNotificationsSettings(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var tenantIdParam string
@@ -376,7 +374,7 @@ func (c *SettingsAPIController) GetNotificationsSettings(w http.ResponseWriter, 
 	result, err := c.service.GetNotificationsSettings(r.Context(), tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -429,12 +427,12 @@ func (c *SettingsAPIController) GetNotificationsSettings(w http.ResponseWriter, 
 func (c *SettingsAPIController) GetNotificationsSettingByKey(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	keyParam, err := NewNotificationsSettingsKeyEnumFromValue(chi.URLParam(r, "key"))
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil, nil)
 		return
 	}
 	var tenantIdParam string
@@ -449,7 +447,7 @@ func (c *SettingsAPIController) GetNotificationsSettingByKey(w http.ResponseWrit
 	result, err := c.service.GetNotificationsSettingByKey(r.Context(), keyParam, tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -502,38 +500,39 @@ func (c *SettingsAPIController) GetNotificationsSettingByKey(w http.ResponseWrit
 func (c *SettingsAPIController) UpdateNotificationsSettingByKey(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	keyParam, err := NewNotificationsSettingsKeyEnumFromValue(chi.URLParam(r, "key"))
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil, nil)
 		return
 	}
 	var updateAdminMessageParam UpdateAdminMessage
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&updateAdminMessageParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertUpdateAdminMessageRequired(updateAdminMessageParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertUpdateAdminMessageConstraints(updateAdminMessageParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	var tenantIdParam string
@@ -548,7 +547,7 @@ func (c *SettingsAPIController) UpdateNotificationsSettingByKey(w http.ResponseW
 	result, err := c.service.UpdateNotificationsSettingByKey(r.Context(), keyParam, updateAdminMessageParam, tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -564,7 +563,7 @@ func (c *SettingsAPIController) UpdateNotificationsSettingByKey(w http.ResponseW
 func (c *SettingsAPIController) GetWorkloadsSettings(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var tenantIdParam string
@@ -579,7 +578,7 @@ func (c *SettingsAPIController) GetWorkloadsSettings(w http.ResponseWriter, r *h
 	result, err := c.service.GetWorkloadsSettings(r.Context(), tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -632,12 +631,12 @@ func (c *SettingsAPIController) GetWorkloadsSettings(w http.ResponseWriter, r *h
 func (c *SettingsAPIController) GetWorkloadsSettingByKey(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	keyParam, err := NewWorkloadsSettingsKeyEnumFromValue(chi.URLParam(r, "key"))
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil, nil)
 		return
 	}
 	var tenantIdParam string
@@ -652,7 +651,7 @@ func (c *SettingsAPIController) GetWorkloadsSettingByKey(w http.ResponseWriter, 
 	result, err := c.service.GetWorkloadsSettingByKey(r.Context(), keyParam, tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -705,38 +704,39 @@ func (c *SettingsAPIController) GetWorkloadsSettingByKey(w http.ResponseWriter, 
 func (c *SettingsAPIController) UpdateWorkloadsSettingByKey(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	keyParam, err := NewWorkloadsSettingsKeyEnumFromValue(chi.URLParam(r, "key"))
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil, nil)
 		return
 	}
 	var updateWorkloadsSettingByKeyRequestParam UpdateWorkloadsSettingByKeyRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&updateWorkloadsSettingByKeyRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertUpdateWorkloadsSettingByKeyRequestRequired(updateWorkloadsSettingByKeyRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertUpdateWorkloadsSettingByKeyRequestConstraints(updateWorkloadsSettingByKeyRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	var tenantIdParam string
@@ -751,7 +751,7 @@ func (c *SettingsAPIController) UpdateWorkloadsSettingByKey(w http.ResponseWrite
 	result, err := c.service.UpdateWorkloadsSettingByKey(r.Context(), keyParam, updateWorkloadsSettingByKeyRequestParam, tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -767,7 +767,7 @@ func (c *SettingsAPIController) UpdateWorkloadsSettingByKey(w http.ResponseWrite
 func (c *SettingsAPIController) GetAppearanceSettings(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var tenantIdParam string
@@ -782,7 +782,7 @@ func (c *SettingsAPIController) GetAppearanceSettings(w http.ResponseWriter, r *
 	result, err := c.service.GetAppearanceSettings(r.Context(), tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -835,12 +835,12 @@ func (c *SettingsAPIController) GetAppearanceSettings(w http.ResponseWriter, r *
 func (c *SettingsAPIController) GetAppearanceSettingByKey(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	keyParam, err := NewAppearanceSettingsKeyEnumFromValue(chi.URLParam(r, "key"))
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil, nil)
 		return
 	}
 	var tenantIdParam string
@@ -855,7 +855,7 @@ func (c *SettingsAPIController) GetAppearanceSettingByKey(w http.ResponseWriter,
 	result, err := c.service.GetAppearanceSettingByKey(r.Context(), keyParam, tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -908,38 +908,39 @@ func (c *SettingsAPIController) GetAppearanceSettingByKey(w http.ResponseWriter,
 func (c *SettingsAPIController) UpdateAppearanceSettingByKey(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	keyParam, err := NewAppearanceSettingsKeyEnumFromValue(chi.URLParam(r, "key"))
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil, nil)
 		return
 	}
 	var updateBannerConfigParam UpdateBannerConfig
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&updateBannerConfigParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertUpdateBannerConfigRequired(updateBannerConfigParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertUpdateBannerConfigConstraints(updateBannerConfigParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	var tenantIdParam string
@@ -954,7 +955,7 @@ func (c *SettingsAPIController) UpdateAppearanceSettingByKey(w http.ResponseWrit
 	result, err := c.service.UpdateAppearanceSettingByKey(r.Context(), keyParam, updateBannerConfigParam, tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -970,7 +971,7 @@ func (c *SettingsAPIController) UpdateAppearanceSettingByKey(w http.ResponseWrit
 func (c *SettingsAPIController) GetBrandingSettings(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var tenantIdParam string
@@ -985,7 +986,7 @@ func (c *SettingsAPIController) GetBrandingSettings(w http.ResponseWriter, r *ht
 	result, err := c.service.GetBrandingSettings(r.Context(), tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1038,12 +1039,12 @@ func (c *SettingsAPIController) GetBrandingSettings(w http.ResponseWriter, r *ht
 func (c *SettingsAPIController) GetBrandingSettingByKey(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	keyParam, err := NewBrandingSettingsKeyEnumFromValue(chi.URLParam(r, "key"))
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil, nil)
 		return
 	}
 	var tenantIdParam string
@@ -1058,7 +1059,7 @@ func (c *SettingsAPIController) GetBrandingSettingByKey(w http.ResponseWriter, r
 	result, err := c.service.GetBrandingSettingByKey(r.Context(), keyParam, tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1111,38 +1112,39 @@ func (c *SettingsAPIController) GetBrandingSettingByKey(w http.ResponseWriter, r
 func (c *SettingsAPIController) UpdateBrandingSettingByKey(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	keyParam, err := NewBrandingSettingsKeyEnumFromValue(chi.URLParam(r, "key"))
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil, nil)
 		return
 	}
 	var updateLogoParam UpdateLogo
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&updateLogoParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertUpdateLogoRequired(updateLogoParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertUpdateLogoConstraints(updateLogoParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	var tenantIdParam string
@@ -1157,7 +1159,7 @@ func (c *SettingsAPIController) UpdateBrandingSettingByKey(w http.ResponseWriter
 	result, err := c.service.UpdateBrandingSettingByKey(r.Context(), keyParam, updateLogoParam, tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

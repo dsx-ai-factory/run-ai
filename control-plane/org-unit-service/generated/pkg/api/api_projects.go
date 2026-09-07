@@ -39,11 +39,6 @@ import (
 type ProjectsAPIController struct {
 	service ProjectsAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -59,10 +54,13 @@ type ProjectsAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *ProjectsAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *ProjectsAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -618,13 +616,13 @@ func (c *ProjectsAPIController) Routes() Routes {
 func (c *ProjectsAPIController) GetProjectAncestors(w http.ResponseWriter, r *http.Request) {
 	projectIdParam := chi.URLParam(r, "projectId")
 	if projectIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"projectId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"projectId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetProjectAncestors(r.Context(), projectIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -677,7 +675,7 @@ func (c *ProjectsAPIController) GetProjectAncestors(w http.ResponseWriter, r *ht
 func (c *ProjectsAPIController) GetInternalProjectsTelemetry(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var telemetryTypeParam OrgUnitTelemetryTypeInternal
@@ -686,7 +684,7 @@ func (c *ProjectsAPIController) GetInternalProjectsTelemetry(w http.ResponseWrit
 
 		telemetryTypeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "telemetryType"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "telemetryType"}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -738,7 +736,7 @@ func (c *ProjectsAPIController) GetInternalProjectsTelemetry(w http.ResponseWrit
 	result, err := c.service.GetInternalProjectsTelemetry(r.Context(), telemetryTypeParam, clusterIdParam, nodepoolIdParam, departmentIdParam, projectIdParam, filterByParam, groupByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -791,7 +789,7 @@ func (c *ProjectsAPIController) GetInternalProjectsTelemetry(w http.ResponseWrit
 func (c *ProjectsAPIController) GetProjects(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var filterByParam []string
@@ -826,7 +824,7 @@ func (c *ProjectsAPIController) GetProjects(w http.ResponseWriter, r *http.Reque
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -842,7 +840,7 @@ func (c *ProjectsAPIController) GetProjects(w http.ResponseWriter, r *http.Reque
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -861,7 +859,7 @@ func (c *ProjectsAPIController) GetProjects(w http.ResponseWriter, r *http.Reque
 	result, err := c.service.GetProjects(r.Context(), filterByParam, sortByParam, sortOrderParam, offsetParam, limitParam, searchParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -914,34 +912,35 @@ func (c *ProjectsAPIController) GetProjects(w http.ResponseWriter, r *http.Reque
 func (c *ProjectsAPIController) CreateProject(w http.ResponseWriter, r *http.Request) {
 	var projectCreationRequestParam ProjectCreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&projectCreationRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertProjectCreationRequestRequired(projectCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertProjectCreationRequestConstraints(projectCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateProject(r.Context(), projectCreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -994,7 +993,7 @@ func (c *ProjectsAPIController) CreateProject(w http.ResponseWriter, r *http.Req
 func (c *ProjectsAPIController) GetProjectsMetadata(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var filterByParam []string
@@ -1029,7 +1028,7 @@ func (c *ProjectsAPIController) GetProjectsMetadata(w http.ResponseWriter, r *ht
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -1045,7 +1044,7 @@ func (c *ProjectsAPIController) GetProjectsMetadata(w http.ResponseWriter, r *ht
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -1064,7 +1063,7 @@ func (c *ProjectsAPIController) GetProjectsMetadata(w http.ResponseWriter, r *ht
 	result, err := c.service.GetProjectsMetadata(r.Context(), filterByParam, sortByParam, sortOrderParam, offsetParam, limitParam, searchParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1117,13 +1116,13 @@ func (c *ProjectsAPIController) GetProjectsMetadata(w http.ResponseWriter, r *ht
 func (c *ProjectsAPIController) GetProject(w http.ResponseWriter, r *http.Request) {
 	projectIdParam := chi.URLParam(r, "projectId")
 	if projectIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"projectId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"projectId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetProject(r.Context(), projectIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1176,39 +1175,40 @@ func (c *ProjectsAPIController) GetProject(w http.ResponseWriter, r *http.Reques
 func (c *ProjectsAPIController) UpdateProject(w http.ResponseWriter, r *http.Request) {
 	projectIdParam := chi.URLParam(r, "projectId")
 	if projectIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"projectId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"projectId"}, nil, nil)
 		return
 	}
 	var projectUpdateRequestParam ProjectUpdateRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&projectUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertProjectUpdateRequestRequired(projectUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertProjectUpdateRequestConstraints(projectUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateProject(r.Context(), projectIdParam, projectUpdateRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1261,12 +1261,12 @@ func (c *ProjectsAPIController) UpdateProject(w http.ResponseWriter, r *http.Req
 func (c *ProjectsAPIController) DeleteProject(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	projectIdParam := chi.URLParam(r, "projectId")
 	if projectIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"projectId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"projectId"}, nil, nil)
 		return
 	}
 	var deleteTypeParam DeletionTypes
@@ -1283,7 +1283,7 @@ func (c *ProjectsAPIController) DeleteProject(w http.ResponseWriter, r *http.Req
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "force", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "force", Err: err}, nil, nil)
 			return
 		}
 
@@ -1293,7 +1293,7 @@ func (c *ProjectsAPIController) DeleteProject(w http.ResponseWriter, r *http.Req
 	result, err := c.service.DeleteProject(r.Context(), projectIdParam, deleteTypeParam, forceParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1309,37 +1309,38 @@ func (c *ProjectsAPIController) DeleteProject(w http.ResponseWriter, r *http.Req
 func (c *ProjectsAPIController) UpdateProjectResources(w http.ResponseWriter, r *http.Request) {
 	projectIdParam := chi.URLParam(r, "projectId")
 	if projectIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"projectId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"projectId"}, nil, nil)
 		return
 	}
 	var resourcesNullableParam []ResourcesNullable
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&resourcesNullableParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	for _, el := range resourcesNullableParam {
 		if err := AssertResourcesNullableRequired(el); err != nil {
-			c.errorHandler(w, r, err, nil)
+			c.errorHandler(w, r, err, nil, nil)
 			return
 		}
 	}
 	result, err := c.service.UpdateProjectResources(r.Context(), projectIdParam, resourcesNullableParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1392,37 +1393,38 @@ func (c *ProjectsAPIController) UpdateProjectResources(w http.ResponseWriter, r 
 func (c *ProjectsAPIController) PatchProjectResources(w http.ResponseWriter, r *http.Request) {
 	projectIdParam := chi.URLParam(r, "projectId")
 	if projectIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"projectId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"projectId"}, nil, nil)
 		return
 	}
 	var resourcesNullableParam []ResourcesNullable
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&resourcesNullableParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	for _, el := range resourcesNullableParam {
 		if err := AssertResourcesNullableRequired(el); err != nil {
-			c.errorHandler(w, r, err, nil)
+			c.errorHandler(w, r, err, nil, nil)
 			return
 		}
 	}
 	result, err := c.service.PatchProjectResources(r.Context(), projectIdParam, resourcesNullableParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1475,12 +1477,12 @@ func (c *ProjectsAPIController) PatchProjectResources(w http.ResponseWriter, r *
 func (c *ProjectsAPIController) GetProjectMetrics(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	projectIdParam := chi.URLParam(r, "projectId")
 	if projectIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"projectId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"projectId"}, nil, nil)
 		return
 	}
 	var metricTypeParam []OrgUnitMetricType
@@ -1490,7 +1492,7 @@ func (c *ProjectsAPIController) GetProjectMetrics(w http.ResponseWriter, r *http
 		for _, param := range paramSplits {
 			paramEnum, err := NewOrgUnitMetricTypeFromValue(param)
 			if err != nil {
-				c.errorHandler(w, r, &ParsingError{Param: "metricType", Err: err}, nil)
+				c.errorHandler(w, r, &ParsingError{Param: "metricType", Err: err}, nil, nil)
 				return
 			}
 			metricTypeParam = append(metricTypeParam, paramEnum)
@@ -1500,26 +1502,26 @@ func (c *ProjectsAPIController) GetProjectMetrics(w http.ResponseWriter, r *http
 	if query.Has("start") {
 		param, err := parseTime(query.Get("start"))
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "start", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "start", Err: err}, nil, nil)
 			return
 		}
 
 		startParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{"start"}, nil)
+		c.errorHandler(w, r, &RequiredError{"start"}, nil, nil)
 		return
 	}
 	var endParam time.Time
 	if query.Has("end") {
 		param, err := parseTime(query.Get("end"))
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "end", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "end", Err: err}, nil, nil)
 			return
 		}
 
 		endParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{"end"}, nil)
+		c.errorHandler(w, r, &RequiredError{"end"}, nil, nil)
 		return
 	}
 	var numberOfSamplesParam int32
@@ -1531,7 +1533,7 @@ func (c *ProjectsAPIController) GetProjectMetrics(w http.ResponseWriter, r *http
 			WithMaximum[int32](1000),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "numberOfSamples", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "numberOfSamples", Err: err}, nil, nil)
 			return
 		}
 
@@ -1557,7 +1559,7 @@ func (c *ProjectsAPIController) GetProjectMetrics(w http.ResponseWriter, r *http
 	result, err := c.service.GetProjectMetrics(r.Context(), projectIdParam, metricTypeParam, startParam, endParam, numberOfSamplesParam, nodepoolNameParam, groupByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1649,7 +1651,7 @@ func (c *ProjectsAPIController) GetProjectMetrics(w http.ResponseWriter, r *http
 func (c *ProjectsAPIController) GetProjectsTelemetry(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var telemetryTypeParam OrgUnitTelemetryType
@@ -1658,7 +1660,7 @@ func (c *ProjectsAPIController) GetProjectsTelemetry(w http.ResponseWriter, r *h
 
 		telemetryTypeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "telemetryType"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "telemetryType"}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -1701,7 +1703,7 @@ func (c *ProjectsAPIController) GetProjectsTelemetry(w http.ResponseWriter, r *h
 	result, err := c.service.GetProjectsTelemetry(r.Context(), telemetryTypeParam, clusterIdParam, nodepoolIdParam, departmentIdParam, projectIdParam, groupByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1754,34 +1756,35 @@ func (c *ProjectsAPIController) GetProjectsTelemetry(w http.ResponseWriter, r *h
 func (c *ProjectsAPIController) UpdateProjectStatus(w http.ResponseWriter, r *http.Request) {
 	var projectStatusUpdateRequestParam ProjectStatusUpdateRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&projectStatusUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertProjectStatusUpdateRequestRequired(projectStatusUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertProjectStatusUpdateRequestConstraints(projectStatusUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateProjectStatus(r.Context(), projectStatusUpdateRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1797,7 +1800,7 @@ func (c *ProjectsAPIController) UpdateProjectStatus(w http.ResponseWriter, r *ht
 func (c *ProjectsAPIController) CountProjects(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var filterByParam []string
@@ -1819,7 +1822,7 @@ func (c *ProjectsAPIController) CountProjects(w http.ResponseWriter, r *http.Req
 	result, err := c.service.CountProjects(r.Context(), filterByParam, searchParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1872,7 +1875,7 @@ func (c *ProjectsAPIController) CountProjects(w http.ResponseWriter, r *http.Req
 func (c *ProjectsAPIController) GetSyncProjects(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -1881,14 +1884,14 @@ func (c *ProjectsAPIController) GetSyncProjects(w http.ResponseWriter, r *http.R
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var updatedAfterParam time.Time
 	if query.Has("updatedAfter") {
 		param, err := parseTime(query.Get("updatedAfter"))
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "updatedAfter", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "updatedAfter", Err: err}, nil, nil)
 			return
 		}
 
@@ -1902,7 +1905,7 @@ func (c *ProjectsAPIController) GetSyncProjects(w http.ResponseWriter, r *http.R
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -1918,7 +1921,7 @@ func (c *ProjectsAPIController) GetSyncProjects(w http.ResponseWriter, r *http.R
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -1934,7 +1937,7 @@ func (c *ProjectsAPIController) GetSyncProjects(w http.ResponseWriter, r *http.R
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "excludePermissions", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "excludePermissions", Err: err}, nil, nil)
 			return
 		}
 
@@ -1944,7 +1947,7 @@ func (c *ProjectsAPIController) GetSyncProjects(w http.ResponseWriter, r *http.R
 	result, err := c.service.GetSyncProjects(r.Context(), clusterIdParam, updatedAfterParam, offsetParam, limitParam, excludePermissionsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1997,34 +2000,35 @@ func (c *ProjectsAPIController) GetSyncProjects(w http.ResponseWriter, r *http.R
 func (c *ProjectsAPIController) SyncProjects(w http.ResponseWriter, r *http.Request) {
 	var syncProjectsRequestParam SyncProjectsRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&syncProjectsRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertSyncProjectsRequestRequired(syncProjectsRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertSyncProjectsRequestConstraints(syncProjectsRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.SyncProjects(r.Context(), syncProjectsRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2040,7 +2044,7 @@ func (c *ProjectsAPIController) SyncProjects(w http.ResponseWriter, r *http.Requ
 func (c *ProjectsAPIController) GetProjectsRanking(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var metricTypeParam RankingMetricType
@@ -2049,7 +2053,7 @@ func (c *ProjectsAPIController) GetProjectsRanking(w http.ResponseWriter, r *htt
 
 		metricTypeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "metricType"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "metricType"}, nil, nil)
 		return
 	}
 	var orderParam RankingOrderType
@@ -2058,7 +2062,7 @@ func (c *ProjectsAPIController) GetProjectsRanking(w http.ResponseWriter, r *htt
 
 		orderParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "Order"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "Order"}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -2067,7 +2071,7 @@ func (c *ProjectsAPIController) GetProjectsRanking(w http.ResponseWriter, r *htt
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var nodepoolNameParam string
@@ -2087,7 +2091,7 @@ func (c *ProjectsAPIController) GetProjectsRanking(w http.ResponseWriter, r *htt
 	result, err := c.service.GetProjectsRanking(r.Context(), metricTypeParam, orderParam, clusterIdParam, nodepoolNameParam, departmentIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2140,34 +2144,35 @@ func (c *ProjectsAPIController) GetProjectsRanking(w http.ResponseWriter, r *htt
 func (c *ProjectsAPIController) ProjectsResetResources(w http.ResponseWriter, r *http.Request) {
 	var projectsResourcesResetRequestParam ProjectsResourcesResetRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&projectsResourcesResetRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertProjectsResourcesResetRequestRequired(projectsResourcesResetRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertProjectsResourcesResetRequestConstraints(projectsResourcesResetRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.ProjectsResetResources(r.Context(), projectsResourcesResetRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2183,7 +2188,7 @@ func (c *ProjectsAPIController) ProjectsResetResources(w http.ResponseWriter, r 
 func (c *ProjectsAPIController) GetProjectNodePoolResources(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var filterByParam []string
@@ -2218,7 +2223,7 @@ func (c *ProjectsAPIController) GetProjectNodePoolResources(w http.ResponseWrite
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -2234,7 +2239,7 @@ func (c *ProjectsAPIController) GetProjectNodePoolResources(w http.ResponseWrite
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -2253,7 +2258,7 @@ func (c *ProjectsAPIController) GetProjectNodePoolResources(w http.ResponseWrite
 	result, err := c.service.GetProjectNodePoolResources(r.Context(), filterByParam, sortByParam, sortOrderParam, offsetParam, limitParam, searchParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2306,7 +2311,7 @@ func (c *ProjectsAPIController) GetProjectNodePoolResources(w http.ResponseWrite
 func (c *ProjectsAPIController) CountProjectNodePoolResources(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var filterByParam []string
@@ -2328,7 +2333,7 @@ func (c *ProjectsAPIController) CountProjectNodePoolResources(w http.ResponseWri
 	result, err := c.service.CountProjectNodePoolResources(r.Context(), filterByParam, searchParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2381,34 +2386,35 @@ func (c *ProjectsAPIController) CountProjectNodePoolResources(w http.ResponseWri
 func (c *ProjectsAPIController) BatchPatchProjectNodePoolResources(w http.ResponseWriter, r *http.Request) {
 	var batchPatchNodePoolResourcesRequestParam BatchPatchNodePoolResourcesRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&batchPatchNodePoolResourcesRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertBatchPatchNodePoolResourcesRequestRequired(batchPatchNodePoolResourcesRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertBatchPatchNodePoolResourcesRequestConstraints(batchPatchNodePoolResourcesRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.BatchPatchProjectNodePoolResources(r.Context(), batchPatchNodePoolResourcesRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2461,7 +2467,7 @@ func (c *ProjectsAPIController) BatchPatchProjectNodePoolResources(w http.Respon
 func (c *ProjectsAPIController) SumProjectNodePoolResources(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var nodepoolIdParam string
@@ -2470,7 +2476,7 @@ func (c *ProjectsAPIController) SumProjectNodePoolResources(w http.ResponseWrite
 
 		nodepoolIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "nodepoolId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "nodepoolId"}, nil, nil)
 		return
 	}
 	var filterByParam []string
@@ -2485,7 +2491,7 @@ func (c *ProjectsAPIController) SumProjectNodePoolResources(w http.ResponseWrite
 	result, err := c.service.SumProjectNodePoolResources(r.Context(), nodepoolIdParam, filterByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

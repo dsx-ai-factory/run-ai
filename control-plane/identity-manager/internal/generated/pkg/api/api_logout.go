@@ -35,11 +35,6 @@ import (
 type LogoutAPIController struct {
 	service LogoutAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -55,10 +50,13 @@ type LogoutAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *LogoutAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *LogoutAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -126,7 +124,7 @@ func (c *LogoutAPIController) Logout(w http.ResponseWriter, r *http.Request) {
 	result, err := c.service.Logout(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
