@@ -2,7 +2,7 @@
 
 The NVIDIA Run:ai cluster plane pulls in components from external repositories as Helm chart dependencies. These components are not built from the Run:ai source - they are consumed as versioned OCI charts and integrated at deploy time.
 
-The chart dependencies are declared in [`runai-chart/Chart.yaml`](https://github.com/dsx-ai-factory/run-ai/blob/master/runai-cluster/cluster/runai-chart/Chart.yaml) and documented in the [Chart dependencies](https://github.com/dsx-ai-factory/run-ai/blob/master/runai-cluster/cluster/runai-chart/README.md#chart-dependencies) section of the runai-chart README.
+The chart dependencies are declared in [`runai-chart/Chart.yaml`](runai-cluster/cluster/runai-chart/Chart.yaml) and documented in the [Chart dependencies](runai-cluster/cluster/runai-chart/README.md#chart-dependencies) section of the runai-chart README.
 
 ## KAI Scheduler
 
@@ -43,6 +43,6 @@ To replace any of these dependencies with a custom build:
 
 1. Fork the relevant external repository and make your changes.
 2. Build and publish your custom chart to an OCI registry.
-3. Update the dependency entry in [`runai-chart/Chart.yaml`](https://github.com/dsx-ai-factory/run-ai/blob/master/runai-cluster/cluster/runai-chart/Chart.yaml) - change `repository` to your registry and `version` to your build.
+3. Update the dependency entry in [`runai-chart/Chart.yaml`](runai-cluster/cluster/runai-chart/Chart.yaml) - change `repository` to your registry and `version` to your build.
 4. Run `helm dep update` in `runai-cluster/cluster/runai-chart/` to pull in your version.
 5. Deploy with `helm upgrade` or via `local-dev.sh`.
