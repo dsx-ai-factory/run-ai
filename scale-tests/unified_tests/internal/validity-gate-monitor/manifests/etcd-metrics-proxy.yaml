@@ -13,6 +13,9 @@ spec:
         app: etcd-metrics-proxy
     spec:
       automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       hostNetwork: true
       nodeSelector:
         node-role.kubernetes.io/control-plane: ""
