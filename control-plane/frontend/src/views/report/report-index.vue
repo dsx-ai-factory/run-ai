@@ -60,14 +60,16 @@
       v-if="isDeleteModalOpen && selectedRow"
       entity-type="report"
       :entity-name="selectedRow.name"
+      :custom-title="isBulkDelete ? bulkDeleteTitle : undefined"
+      :delete-button-label="isBulkDelete ? bulkDeleteConfirmLabel : 'Delete'"
       :deleting="deleting"
       @cancel="isDeleteModalOpen = false"
-      @delete="deleteReport"
+      @delete="handleDeleteConfirmed"
     />
   </section>
 </template>
 <script lang="ts">
-import { computed, defineComponent, ref } from "vue";
+import { computed, defineComponent, onUnmounted, ref } from "vue";
 import { useQuasar } from "quasar";
 // store
 import { useAppStore } from "@/stores/app.store";
@@ -79,7 +81,7 @@ import { ReportPageActions } from "@/components/report/report-page-actions/";
 // model
 import { type IReportTable, reportIndexColumns } from "@/table-models/report.table-model";
 import type { IFilterBy } from "@/models/filter.model";
-import { EReportAction } from "@/models/report.model";
+import { EReportAction, reportBulkDeleteCopy } from "@/models/report.model";
 import { ReportCreationModal } from "@/components/report/report-creation-modal";
 import { RunaiDeleteModal } from "@/components/common/runai-delete-modal/";
 // service
@@ -90,6 +92,9 @@ import { ErrorAlert } from "@/utils/error-alert.util";
 // other
 import { useTableDataAdvancedFilters } from "@/composables/use-table-data-advanced-filters.composable/use-table-data-advanced-filters.composable";
 import { EAdvancedIndexPages } from "@/composables/helpers/use-table-data.mapper";
+import { EIntervalLabels } from "@/models/interval.model";
+import { intervalUtil } from "@/utils/interval.util";
+import type { BatchDeleteReportsResponse } from "@/swagger-models/org-unit-service-client";
 import CreateReportDropdown from "@/components/report/create-report-dropdown/create-report-dropdown.vue";
 import DOCS from "@/constants/docs";
 
@@ -133,28 +138,56 @@ export default defineComponent({
       }
     };
 
-    const deleteReport = async () => {
-      if (!selectedRow.value) return;
-      const reportName = selectedRow.value.name;
+    const isBulkDelete = computed<boolean>(() => selectedRowsAmount.value > 1);
+    const bulkDeleteTitle = computed<string>(() => reportBulkDeleteCopy.title(selectedRowsAmount.value));
+    const bulkDeleteConfirmLabel = computed<string>(() => reportBulkDeleteCopy.confirmLabel(selectedRowsAmount.value));
+
+    const notifyBulkFailures = (response: BatchDeleteReportsResponse, namesById: Map<string, string>) => {
+      if (!response.failed.length) return;
+      const firstFailedName = namesById.get(response.failed[0].id) || response.failed[0].id;
+      q.notify(alertUtil.getError(reportBulkDeleteCopy.failure(firstFailedName, response.failed.length)));
+    };
+
+    const pollUntilDeleted = (acceptedIds: string[]) => {
+      if (!acceptedIds.length) return;
+      intervalUtil.startInterval(EIntervalLabels.ReportIndexPostBulkDelete, async () => {
+        await refreshList();
+        const stillPresent = tableData.value.some((report: IReportTable) => acceptedIds.includes(report.id));
+        if (!stillPresent) stopBulkDeletePolling();
+      });
+    };
+
+    const stopBulkDeletePolling = () => intervalUtil.stopInterval(EIntervalLabels.ReportIndexPostBulkDelete);
+
+    const closeDeleteModal = () => {
+      deleting.value = false;
+      isDeleteModalOpen.value = false;
+      resetSelectedRows();
+    };
+
+    const bulkDeleteReports = async () => {
+      const reports = [...selectedRows.value];
+      const namesById = new Map(reports.map((report: IReportTable) => [report.id, report.name]));
       deleting.value = true;
       try {
-        await orgUnitService.deleteReport(selectedRow.value.id);
-        removeRow(selectedRow.value);
-        q.notify(alertUtil.getSuccess(`Report ${reportName} deleted`));
+        const response = await orgUnitService.batchDeleteReports(reports.map((report: IReportTable) => report.id));
+        // The batch is only queued, so close as soon as it is accepted rather than
+        // holding the dialog open for the refresh that follows.
+        closeDeleteModal();
+        notifyBulkFailures(response, namesById);
+        pinEntities(response.accepted);
         await refreshList();
+        pollUntilDeleted(response.accepted);
       } catch (error: unknown) {
-        const errorAlert = new ErrorAlert({
-          generalMessage: DOCS.SUPPORT.URL
-            ? `Report ${reportName} couldn't be deleted. Try again. If the issue persists, contact ${DOCS.SUPPORT.LABEL}.`
-            : `Report ${reportName} couldn't be deleted. Try again.`,
-        });
+        const errorAlert = new ErrorAlert({ generalMessage: "Reports couldn't be deleted. Try again." });
         q.notify(errorAlert.getNotification(error));
-      } finally {
-        deleting.value = false;
-        isDeleteModalOpen.value = false;
-        resetSelectedRows();
+        closeDeleteModal();
       }
     };
+
+    const handleDeleteConfirmed = () => bulkDeleteReports();
+
+    onUnmounted(stopBulkDeletePolling);
 
     const columns = computed(() => reportIndexColumns);
 
@@ -193,7 +226,6 @@ export default defineComponent({
       initTableFilter,
       refreshList,
       selectedRow,
-      removeRow,
       pinnedRows,
       pinEntities,
     } = useTableDataAdvancedFilters<IReportTable>(listReports, columns, EAdvancedIndexPages.REPORT, getReportById);
@@ -214,11 +246,13 @@ export default defineComponent({
       loadingError,
       getRowKey,
       pinnedRows,
-      pinEntities,
+      isBulkDelete,
+      bulkDeleteTitle,
+      bulkDeleteConfirmLabel,
+      handleDeleteConfirmed,
       isCreateReportModalOpen,
       isDeleteModalOpen,
       deleting,
-      deleteReport,
       initTableFilter,
       onReportCreated,
       handleReportAction,
