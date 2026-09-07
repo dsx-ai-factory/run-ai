@@ -12,6 +12,7 @@ spec:
       labels:
         app: etcd-metrics-proxy
     spec:
+      automountServiceAccountToken: false
       hostNetwork: true
       nodeSelector:
         node-role.kubernetes.io/control-plane: ""
