@@ -22,6 +22,7 @@ documentation-specific guidance only.
 | `fern/` | Fern navigation config (`docs.yml`, product files, components) |
 | `fern/apis/` | OpenAPI specs for REST API reference |
 | `docs/.agents/skills/` | Repository-local documentation skills |
+| `.agents/skills/` | Repository-local engineering skills, shared by Claude Code and Codex (`.claude/skills/` symlinks here) |
 
 ## Sources of Truth
 
