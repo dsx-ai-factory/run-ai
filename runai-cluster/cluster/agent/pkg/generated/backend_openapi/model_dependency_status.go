@@ -1,7 +1,7 @@
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend
+The aggregated API  of Run:AI backend 
 
 API version: 1.5.1
 */
@@ -19,7 +19,7 @@ type DependencyStatus struct {
 	// whether the dependency is available
 	Available bool `json:"available"`
 	// the reason for the dependency status
-	Reason     *string                     `json:"reason,omitempty"`
+	Reason *string `json:"reason,omitempty"`
 	Components map[string]DependencyStatus `json:"components,omitempty"`
 }
 
@@ -178,3 +178,5 @@ func (v *NullableDependencyStatus) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

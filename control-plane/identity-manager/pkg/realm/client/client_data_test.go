@@ -21,7 +21,7 @@ import (
 const (
 	testRealm        = "test-realm"
 	testTenantId     = "1001"
-	testAppHost      = "https://app.run.ai"
+	testAppHost      = "https://mock-q7z3k.example.com"
 	testHostTemplate = "http://{{.}}.run.ai"
 	testTenantUrl    = "http://test-realm.run.ai"
 )

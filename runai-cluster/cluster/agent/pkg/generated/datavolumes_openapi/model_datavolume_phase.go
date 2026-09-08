@@ -21,11 +21,11 @@ type DatavolumePhase string
 
 // List of DatavolumePhase
 const (
-	DATAVOLUMEPHASE_READY     DatavolumePhase = "Ready"
+	DATAVOLUMEPHASE_READY DatavolumePhase = "Ready"
 	DATAVOLUMEPHASE_NOT_READY DatavolumePhase = "NotReady"
-	DATAVOLUMEPHASE_CREATING  DatavolumePhase = "Creating"
-	DATAVOLUMEPHASE_DELETING  DatavolumePhase = "Deleting"
-	DATAVOLUMEPHASE_UNKNOWN   DatavolumePhase = "Unknown"
+	DATAVOLUMEPHASE_CREATING DatavolumePhase = "Creating"
+	DATAVOLUMEPHASE_DELETING DatavolumePhase = "Deleting"
+	DATAVOLUMEPHASE_UNKNOWN DatavolumePhase = "Unknown"
 )
 
 // All allowed values of DatavolumePhase enum
@@ -115,3 +115,4 @@ func (v *NullableDatavolumePhase) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+

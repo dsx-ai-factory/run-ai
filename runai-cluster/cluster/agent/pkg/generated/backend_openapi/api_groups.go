@@ -1,7 +1,7 @@
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend
+The aggregated API  of Run:AI backend 
 
 API version: 1.5.1
 */
@@ -19,13 +19,14 @@ import (
 	"strings"
 )
 
+
 // GroupsApiService GroupsApi service
 type GroupsApiService service
 
 type ApiGetClusterGroupsRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *GroupsApiService
-	uuid       string
+	uuid string
 }
 
 func (r ApiGetClusterGroupsRequest) Execute() (*Groups, *http.Response, error) {
@@ -35,26 +36,26 @@ func (r ApiGetClusterGroupsRequest) Execute() (*Groups, *http.Response, error) {
 /*
 GetClusterGroups Get all cluster groups.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param uuid Unique identifier of the cluster.
-	@return ApiGetClusterGroupsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param uuid Unique identifier of the cluster.
+ @return ApiGetClusterGroupsRequest
 */
 func (a *GroupsApiService) GetClusterGroups(ctx context.Context, uuid string) ApiGetClusterGroupsRequest {
 	return ApiGetClusterGroupsRequest{
 		ApiService: a,
-		ctx:        ctx,
-		uuid:       uuid,
+		ctx: ctx,
+		uuid: uuid,
 	}
 }
 
 // Execute executes the request
-//	@return Groups
+//  @return Groups
 func (a *GroupsApiService) GetClusterGroupsExecute(r ApiGetClusterGroupsRequest) (*Groups, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Groups
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Groups
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GroupsApiService.GetClusterGroups")
@@ -128,13 +129,13 @@ func (a *GroupsApiService) GetClusterGroupsExecute(r ApiGetClusterGroupsRequest)
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		var v Error
-		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-		if err != nil {
-			newErr.error = err.Error()
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		newErr.model = v
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 

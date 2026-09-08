@@ -221,7 +221,7 @@ LeaderWorkerSet:
             - --provider=keycloak-oidc
             - --upstream=http://localhost:8081
             - --redirect-url=https://my-distributed-inference.example.com/oauth2/callback
-            - --oidc-issuer-url=https://test.run.ai/auth/realms/runai
+            - --oidc-issuer-url=https://mock-q7z3k.example.com/auth/realms/runai
             - --scope=openid
             - --http-address=0.0.0.0:4180
             - --proxy-prefix=/oauth2
@@ -234,7 +234,7 @@ LeaderWorkerSet:
             - --cookie-refresh=10m
             - --cookie-samesite=lax
             - --skip-jwt-bearer-tokens=true
-            - --extra-jwt-issuers=https://test.run.ai/auth/realms/runai=runai
+            - --extra-jwt-issuers=https://mock-q7z3k.example.com/auth/realms/runai=runai
             - --custom-templates-dir=/usr/share/oauth2-proxy
             - --pass-authorization-header=false
             - --cookie-name=dinfw-test-lws-sp-0

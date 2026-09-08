@@ -17,7 +17,7 @@ import (
 
 // HttpResponse struct for HttpResponse
 type HttpResponse struct {
-	Code    int32  `json:"code"`
+	Code int32 `json:"code"`
 	Message string `json:"message"`
 }
 
@@ -134,3 +134,5 @@ func (v *NullableHttpResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

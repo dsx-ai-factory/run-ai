@@ -11,7 +11,7 @@
       "departmentName": "default",
       "createdAt": "2026-03-10T16:41:36Z",
       "updatedAt": "2026-03-10T16:43:17Z",
-      "submittedBy": "test@run.ai",
+      "submittedBy": "test@example.com",
       "priorityClassName": "very-high",
       "images": ["gcr.io/run-ai-lab/nim-cpu:latest"],
       "runningPods": 1,

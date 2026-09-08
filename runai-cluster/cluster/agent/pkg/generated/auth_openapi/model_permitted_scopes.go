@@ -17,9 +17,9 @@ import (
 
 // PermittedScopes struct for PermittedScopes
 type PermittedScopes struct {
-	Clusters    []string `json:"clusters,omitempty"`
+	Clusters []string `json:"clusters,omitempty"`
 	Departments []string `json:"departments,omitempty"`
-	Projects    []string `json:"projects,omitempty"`
+	Projects []string `json:"projects,omitempty"`
 }
 
 // NewPermittedScopes instantiates a new PermittedScopes object
@@ -184,3 +184,5 @@ func (v *NullablePermittedScopes) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

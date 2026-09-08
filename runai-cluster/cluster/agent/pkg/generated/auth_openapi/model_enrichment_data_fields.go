@@ -17,7 +17,7 @@ import (
 
 // EnrichmentDataFields struct for EnrichmentDataFields
 type EnrichmentDataFields struct {
-	RoleName  string `json:"roleName"`
+	RoleName string `json:"roleName"`
 	ScopeName string `json:"scopeName"`
 }
 
@@ -134,3 +134,5 @@ func (v *NullableEnrichmentDataFields) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

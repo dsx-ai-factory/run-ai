@@ -1,7 +1,7 @@
 /*
 Project and Department service API
 
-The aggregated API of Run:AI backend projects and departments
+The aggregated API of Run:AI backend projects and departments 
 
 API version: 1.5.1
 */
@@ -16,9 +16,9 @@ import (
 
 // AssignedResources struct for AssignedResources
 type AssignedResources struct {
-	Id     *float32  `json:"id,omitempty"`
-	Gpu    *Resource `json:"gpu,omitempty"`
-	Cpu    *Resource `json:"cpu,omitempty"`
+	Id *float32 `json:"id,omitempty"`
+	Gpu *Resource `json:"gpu,omitempty"`
+	Cpu *Resource `json:"cpu,omitempty"`
 	Memory *Resource `json:"memory,omitempty"`
 }
 
@@ -219,3 +219,5 @@ func (v *NullableAssignedResources) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

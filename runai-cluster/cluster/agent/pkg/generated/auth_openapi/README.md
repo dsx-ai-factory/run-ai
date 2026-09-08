@@ -75,7 +75,7 @@ ctx = context.WithValue(context.Background(), auth_openapi.ContextOperationServe
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *https://app.run.ai*
+All URIs are relative to *http://localhost:8080*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------

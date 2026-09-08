@@ -168,7 +168,23 @@ func (d *DeploymentResource) Enabled() bool {
 }
 
 func (d *DeploymentResource) buildEnvVars(config *anyworkload_controller.AnyworkloadController, internal *runv1_internal.Internal) ([]v1.EnvVar, error) {
+	isOpenShift := internal != nil &&
+		internal.Global != nil &&
+		internal.Global.Platform != nil &&
+		internal.Global.Platform.KubernetesFlavor == runv1_internal.KubernetesFlavorOpenShift
+	gatewayAPIEnabled := d.runaiConfig.Spec.Global != nil &&
+		d.runaiConfig.Spec.Global.GatewayAPI != nil &&
+		ptr.Deref(d.runaiConfig.Spec.Global.GatewayAPI.Enabled, false)
+
 	envVars := []v1.EnvVar{
+		{
+			Name:  "IS_OPENSHIFT",
+			Value: strconv.FormatBool(isOpenShift),
+		},
+		{
+			Name:  "GATEWAY_API_ENABLED",
+			Value: strconv.FormatBool(gatewayAPIEnabled),
+		},
 		{
 			Name:  "K8S_CLIENT_CONFIG_QPS",
 			Value: strconv.Itoa(*config.K8sClientConfig.QPS),

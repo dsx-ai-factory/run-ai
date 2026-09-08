@@ -37,11 +37,6 @@ import (
 type SettingsAPIController struct {
 	service SettingsAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -57,10 +52,13 @@ type SettingsAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *SettingsAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *SettingsAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -246,7 +244,7 @@ func (c *SettingsAPIController) Routes() Routes {
 func (c *SettingsAPIController) GetClusterSettings(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var tenantIdParam string
@@ -261,7 +259,7 @@ func (c *SettingsAPIController) GetClusterSettings(w http.ResponseWriter, r *htt
 	result, err := c.service.GetClusterSettings(r.Context(), tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -314,12 +312,12 @@ func (c *SettingsAPIController) GetClusterSettings(w http.ResponseWriter, r *htt
 func (c *SettingsAPIController) GetClusterSettingByKey(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	keyParam, err := NewClusterSettingsKeyEnumFromValue(chi.URLParam(r, "key"))
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil, nil)
 		return
 	}
 	var tenantIdParam string
@@ -334,7 +332,7 @@ func (c *SettingsAPIController) GetClusterSettingByKey(w http.ResponseWriter, r 
 	result, err := c.service.GetClusterSettingByKey(r.Context(), keyParam, tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -387,38 +385,39 @@ func (c *SettingsAPIController) GetClusterSettingByKey(w http.ResponseWriter, r 
 func (c *SettingsAPIController) UpdateClusterSettingByKey(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	keyParam, err := NewClusterSettingsKeyEnumFromValue(chi.URLParam(r, "key"))
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil, nil)
 		return
 	}
 	var updateClusterSettingByKeyRequestParam UpdateClusterSettingByKeyRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&updateClusterSettingByKeyRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertUpdateClusterSettingByKeyRequestRequired(updateClusterSettingByKeyRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertUpdateClusterSettingByKeyRequestConstraints(updateClusterSettingByKeyRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	var tenantIdParam string
@@ -433,7 +432,7 @@ func (c *SettingsAPIController) UpdateClusterSettingByKey(w http.ResponseWriter,
 	result, err := c.service.UpdateClusterSettingByKey(r.Context(), keyParam, updateClusterSettingByKeyRequestParam, tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -449,7 +448,7 @@ func (c *SettingsAPIController) UpdateClusterSettingByKey(w http.ResponseWriter,
 func (c *SettingsAPIController) GetNodePoolSettings(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var tenantIdParam string
@@ -464,7 +463,7 @@ func (c *SettingsAPIController) GetNodePoolSettings(w http.ResponseWriter, r *ht
 	result, err := c.service.GetNodePoolSettings(r.Context(), tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -517,12 +516,12 @@ func (c *SettingsAPIController) GetNodePoolSettings(w http.ResponseWriter, r *ht
 func (c *SettingsAPIController) GetNodePoolSettingByKey(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	keyParam, err := NewNodePoolSettingsKeyEnumFromValue(chi.URLParam(r, "key"))
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil, nil)
 		return
 	}
 	var tenantIdParam string
@@ -537,7 +536,7 @@ func (c *SettingsAPIController) GetNodePoolSettingByKey(w http.ResponseWriter, r
 	result, err := c.service.GetNodePoolSettingByKey(r.Context(), keyParam, tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -590,38 +589,39 @@ func (c *SettingsAPIController) GetNodePoolSettingByKey(w http.ResponseWriter, r
 func (c *SettingsAPIController) UpdateNodePoolSettingByKey(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	keyParam, err := NewNodePoolSettingsKeyEnumFromValue(chi.URLParam(r, "key"))
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "key", Err: err}, nil, nil)
 		return
 	}
 	var updateNodePoolSettingByKeyRequestParam UpdateNodePoolSettingByKeyRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&updateNodePoolSettingByKeyRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertUpdateNodePoolSettingByKeyRequestRequired(updateNodePoolSettingByKeyRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertUpdateNodePoolSettingByKeyRequestConstraints(updateNodePoolSettingByKeyRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	var tenantIdParam string
@@ -636,7 +636,7 @@ func (c *SettingsAPIController) UpdateNodePoolSettingByKey(w http.ResponseWriter
 	result, err := c.service.UpdateNodePoolSettingByKey(r.Context(), keyParam, updateNodePoolSettingByKeyRequestParam, tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

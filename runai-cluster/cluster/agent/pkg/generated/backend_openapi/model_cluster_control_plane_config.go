@@ -1,7 +1,7 @@
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend
+The aggregated API  of Run:AI backend 
 
 API version: 1.5.1
 */
@@ -16,9 +16,9 @@ import (
 
 // ClusterControlPlaneConfig The cluster's configuration for connecting to the control plane.
 type ClusterControlPlaneConfig struct {
-	Agent              *ClusterControlPlaneConfigAgent              `json:"agent,omitempty"`
+	Agent *ClusterControlPlaneConfigAgent `json:"agent,omitempty"`
 	MetricsRemoteWrite *ClusterControlPlaneConfigMetricsRemoteWrite `json:"metricsRemoteWrite,omitempty"`
-	ResearcherService  *ClusterControlPlaneConfigResearcherService  `json:"researcherService,omitempty"`
+	ResearcherService *ClusterControlPlaneConfigResearcherService `json:"researcherService,omitempty"`
 	// The cluster's name.
 	ClusterName *string `json:"clusterName,omitempty"`
 	// The cluster's docker config json.
@@ -257,3 +257,5 @@ func (v *NullableClusterControlPlaneConfig) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -38,11 +38,6 @@ import (
 type TrainingsAPIController struct {
 	service TrainingsAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -58,10 +53,13 @@ type TrainingsAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *TrainingsAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *TrainingsAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -322,12 +320,12 @@ func (c *TrainingsAPIController) Routes() Routes {
 func (c *TrainingsAPIController) ListTrainings(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	var nodeIdParam string
@@ -365,7 +363,7 @@ func (c *TrainingsAPIController) ListTrainings(w http.ResponseWriter, r *http.Re
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "from", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "from", Err: err}, nil, nil)
 			return
 		}
 
@@ -381,7 +379,7 @@ func (c *TrainingsAPIController) ListTrainings(w http.ResponseWriter, r *http.Re
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -393,7 +391,7 @@ func (c *TrainingsAPIController) ListTrainings(w http.ResponseWriter, r *http.Re
 	result, err := c.service.ListTrainings(r.Context(), clusterUuidParam, nodeIdParam, filterParam, sortByParam, sortDirectionParam, fromParam, limitParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -446,39 +444,40 @@ func (c *TrainingsAPIController) ListTrainings(w http.ResponseWriter, r *http.Re
 func (c *TrainingsAPIController) UpdateTrainingStatus(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	var workloadStatusUpdateParam WorkloadStatusUpdate
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&workloadStatusUpdateParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertWorkloadStatusUpdateRequired(workloadStatusUpdateParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertWorkloadStatusUpdateConstraints(workloadStatusUpdateParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateTrainingStatus(r.Context(), clusterUuidParam, workloadStatusUpdateParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -531,37 +530,38 @@ func (c *TrainingsAPIController) UpdateTrainingStatus(w http.ResponseWriter, r *
 func (c *TrainingsAPIController) SyncTrainingStatus(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	var workloadStatusUpdateParam []WorkloadStatusUpdate
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&workloadStatusUpdateParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	for _, el := range workloadStatusUpdateParam {
 		if err := AssertWorkloadStatusUpdateRequired(el); err != nil {
-			c.errorHandler(w, r, err, nil)
+			c.errorHandler(w, r, err, nil, nil)
 			return
 		}
 	}
 	result, err := c.service.SyncTrainingStatus(r.Context(), clusterUuidParam, workloadStatusUpdateParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -614,18 +614,18 @@ func (c *TrainingsAPIController) SyncTrainingStatus(w http.ResponseWriter, r *ht
 func (c *TrainingsAPIController) DeleteTrainingById(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	workloadIdParam := chi.URLParam(r, "workloadId")
 	if workloadIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"workloadId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"workloadId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteTrainingById(r.Context(), clusterUuidParam, workloadIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -641,39 +641,40 @@ func (c *TrainingsAPIController) DeleteTrainingById(w http.ResponseWriter, r *ht
 func (c *TrainingsAPIController) UpdateDistributedStatus(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	var workloadStatusUpdateParam WorkloadStatusUpdate
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&workloadStatusUpdateParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertWorkloadStatusUpdateRequired(workloadStatusUpdateParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertWorkloadStatusUpdateConstraints(workloadStatusUpdateParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateDistributedStatus(r.Context(), clusterUuidParam, workloadStatusUpdateParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -726,37 +727,38 @@ func (c *TrainingsAPIController) UpdateDistributedStatus(w http.ResponseWriter, 
 func (c *TrainingsAPIController) SyncDistributedStatus(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	var workloadStatusUpdateParam []WorkloadStatusUpdate
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&workloadStatusUpdateParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	for _, el := range workloadStatusUpdateParam {
 		if err := AssertWorkloadStatusUpdateRequired(el); err != nil {
-			c.errorHandler(w, r, err, nil)
+			c.errorHandler(w, r, err, nil, nil)
 			return
 		}
 	}
 	result, err := c.service.SyncDistributedStatus(r.Context(), clusterUuidParam, workloadStatusUpdateParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -809,18 +811,18 @@ func (c *TrainingsAPIController) SyncDistributedStatus(w http.ResponseWriter, r 
 func (c *TrainingsAPIController) DeleteDistributedById(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	workloadIdParam := chi.URLParam(r, "workloadId")
 	if workloadIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"workloadId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"workloadId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteDistributedById(r.Context(), clusterUuidParam, workloadIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -836,34 +838,35 @@ func (c *TrainingsAPIController) DeleteDistributedById(w http.ResponseWriter, r 
 func (c *TrainingsAPIController) CreateTraining(w http.ResponseWriter, r *http.Request) {
 	var workloadCreationRequestParam WorkloadCreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&workloadCreationRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertWorkloadCreationRequestRequired(workloadCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertWorkloadCreationRequestConstraints(workloadCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateTraining(r.Context(), workloadCreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -916,7 +919,7 @@ func (c *TrainingsAPIController) CreateTraining(w http.ResponseWriter, r *http.R
 func (c *TrainingsAPIController) GetTrainingMerged(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var projectIdParam string
@@ -947,7 +950,7 @@ func (c *TrainingsAPIController) GetTrainingMerged(w http.ResponseWriter, r *htt
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "isDistributed", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "isDistributed", Err: err}, nil, nil)
 			return
 		}
 
@@ -961,7 +964,7 @@ func (c *TrainingsAPIController) GetTrainingMerged(w http.ResponseWriter, r *htt
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "isDistributedInference", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "isDistributedInference", Err: err}, nil, nil)
 			return
 		}
 
@@ -971,7 +974,7 @@ func (c *TrainingsAPIController) GetTrainingMerged(w http.ResponseWriter, r *htt
 	result, err := c.service.GetTrainingMerged(r.Context(), projectIdParam, workloadIdParam, templateIdParam, isDistributedParam, isDistributedInferenceParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1024,34 +1027,35 @@ func (c *TrainingsAPIController) GetTrainingMerged(w http.ResponseWriter, r *htt
 func (c *TrainingsAPIController) CreateTrainingV2(w http.ResponseWriter, r *http.Request) {
 	var trainingCreationRequestV2Param TrainingCreationRequestV2
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&trainingCreationRequestV2Param); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertTrainingCreationRequestV2Required(trainingCreationRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertTrainingCreationRequestV2Constraints(trainingCreationRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateTrainingV2(r.Context(), trainingCreationRequestV2Param)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1104,13 +1108,13 @@ func (c *TrainingsAPIController) CreateTrainingV2(w http.ResponseWriter, r *http
 func (c *TrainingsAPIController) GetTrainingByIdV2(w http.ResponseWriter, r *http.Request) {
 	workloadIdParam := chi.URLParam(r, "workloadId")
 	if workloadIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"workloadId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"workloadId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetTrainingByIdV2(r.Context(), workloadIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

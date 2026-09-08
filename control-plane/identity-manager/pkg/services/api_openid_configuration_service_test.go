@@ -36,7 +36,7 @@ func TestGetOpenidConfiguration_HappyFlow(t *testing.T) {
 	}
 
 	tenantConfig := &config.TenantRealm{
-		AppHost:       "https://app.run.ai",
+		AppHost:       "https://mock-q7z3k.example.com",
 		IsMultiTenant: false,
 	}
 
@@ -55,11 +55,11 @@ func TestGetOpenidConfiguration_HappyFlow(t *testing.T) {
 	configMap, ok := result.Body.(map[string]interface{})
 	require.True(t, ok)
 
-	assert.Equal(t, "https://app.run.ai/api/v2/token", configMap["token_endpoint"])
+	assert.Equal(t, "https://mock-q7z3k.example.com/api/v2/token", configMap["token_endpoint"])
 
 	mtlsAliases, ok := configMap["mtls_endpoint_aliases"].(map[string]interface{})
 	require.True(t, ok)
-	assert.Equal(t, "https://app.run.ai/api/v2/token", mtlsAliases["token_endpoint"])
+	assert.Equal(t, "https://mock-q7z3k.example.com/api/v2/token", mtlsAliases["token_endpoint"])
 
 	mockClient.AssertExpectations(t)
 }
@@ -71,7 +71,7 @@ func TestGetOpenidConfiguration_MultiTenant(t *testing.T) {
 	}
 
 	tenantConfig := &config.TenantRealm{
-		AppHost:              "https://app.run.ai",
+		AppHost:              "https://mock-q7z3k.example.com",
 		TenantDomainTemplate: "https://{{.}}.run.ai",
 		IsMultiTenant:        true,
 	}
@@ -97,7 +97,7 @@ func TestGetOpenidConfiguration_MultiTenant(t *testing.T) {
 }
 
 func TestGetOpenidConfiguration_NoRealm_ReturnsBadRequest(t *testing.T) {
-	tenantConfig := &config.TenantRealm{AppHost: "https://app.run.ai"}
+	tenantConfig := &config.TenantRealm{AppHost: "https://mock-q7z3k.example.com"}
 
 	mockClient := mocks.NewRunAICloakClient(t)
 	iamServices := newTestIamServiceContainer(mockClient)
@@ -112,7 +112,7 @@ func TestGetOpenidConfiguration_NoRealm_ReturnsBadRequest(t *testing.T) {
 }
 
 func TestGetOpenidConfiguration_KeycloakError_ReturnsInternalError(t *testing.T) {
-	tenantConfig := &config.TenantRealm{AppHost: "https://app.run.ai"}
+	tenantConfig := &config.TenantRealm{AppHost: "https://mock-q7z3k.example.com"}
 
 	mockClient := mocks.NewRunAICloakClient(t)
 	mockClient.On("FetchKeycloakConfiguration", mock.Anything, "test").
@@ -148,7 +148,7 @@ func TestModifyConfiguration_MultiTenant_RendersTemplate(t *testing.T) {
 
 func TestModifyConfiguration_ReplacesTokenEndpoint(t *testing.T) {
 	tenantConfig := &config.TenantRealm{
-		AppHost:       "https://app.run.ai",
+		AppHost:       "https://mock-q7z3k.example.com",
 		IsMultiTenant: false,
 	}
 
@@ -167,10 +167,10 @@ func TestModifyConfiguration_ReplacesTokenEndpoint(t *testing.T) {
 
 	modified := service.modifyConfiguration(context.Background(), keycloakConfig, "test")
 
-	assert.Equal(t, "https://app.run.ai/api/v2/token", modified["token_endpoint"])
+	assert.Equal(t, "https://mock-q7z3k.example.com/api/v2/token", modified["token_endpoint"])
 
 	mtlsAliases, ok := modified["mtls_endpoint_aliases"].(map[string]interface{})
 	require.True(t, ok)
-	assert.Equal(t, "https://app.run.ai/api/v2/token", mtlsAliases["token_endpoint"])
+	assert.Equal(t, "https://mock-q7z3k.example.com/api/v2/token", mtlsAliases["token_endpoint"])
 	assert.Equal(t, "https://keycloak/other", mtlsAliases["other_endpoint"])
 }

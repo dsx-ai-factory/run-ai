@@ -38,11 +38,6 @@ import (
 type StorageClassesAPIController struct {
 	service StorageClassesAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -58,10 +53,13 @@ type StorageClassesAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *StorageClassesAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *StorageClassesAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -358,12 +356,12 @@ func (c *StorageClassesAPIController) Routes() Routes {
 func (c *StorageClassesAPIController) V1GetStorageClasses(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	uuidParam := chi.URLParam(r, "uuid")
 	if uuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"uuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"uuid"}, nil, nil)
 		return
 	}
 	var includeNoneParam bool
@@ -373,7 +371,7 @@ func (c *StorageClassesAPIController) V1GetStorageClasses(w http.ResponseWriter,
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeNone", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeNone", Err: err}, nil, nil)
 			return
 		}
 
@@ -383,7 +381,7 @@ func (c *StorageClassesAPIController) V1GetStorageClasses(w http.ResponseWriter,
 	result, err := c.service.V1GetStorageClasses(r.Context(), uuidParam, includeNoneParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -437,39 +435,40 @@ func (c *StorageClassesAPIController) V1GetStorageClasses(w http.ResponseWriter,
 func (c *StorageClassesAPIController) V1CreateStorageClass(w http.ResponseWriter, r *http.Request) {
 	uuidParam := chi.URLParam(r, "uuid")
 	if uuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"uuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"uuid"}, nil, nil)
 		return
 	}
 	var v1StorageClassParam V1StorageClass
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&v1StorageClassParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertV1StorageClassRequired(v1StorageClassParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertV1StorageClassConstraints(v1StorageClassParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.V1CreateStorageClass(r.Context(), uuidParam, v1StorageClassParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -523,44 +522,45 @@ func (c *StorageClassesAPIController) V1CreateStorageClass(w http.ResponseWriter
 func (c *StorageClassesAPIController) V1UpdateStorageClass(w http.ResponseWriter, r *http.Request) {
 	uuidParam := chi.URLParam(r, "uuid")
 	if uuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"uuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"uuid"}, nil, nil)
 		return
 	}
 	storageClassNameParam := chi.URLParam(r, "storage_class_name")
 	if storageClassNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"storage_class_name"}, nil)
+		c.errorHandler(w, r, &RequiredError{"storage_class_name"}, nil, nil)
 		return
 	}
 	var v1StorageClassParam V1StorageClass
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&v1StorageClassParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertV1StorageClassRequired(v1StorageClassParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertV1StorageClassConstraints(v1StorageClassParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.V1UpdateStorageClass(r.Context(), uuidParam, storageClassNameParam, v1StorageClassParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -614,18 +614,18 @@ func (c *StorageClassesAPIController) V1UpdateStorageClass(w http.ResponseWriter
 func (c *StorageClassesAPIController) V1DeleteStorageClass(w http.ResponseWriter, r *http.Request) {
 	uuidParam := chi.URLParam(r, "uuid")
 	if uuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"uuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"uuid"}, nil, nil)
 		return
 	}
 	storageClassNameParam := chi.URLParam(r, "storage_class_name")
 	if storageClassNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"storage_class_name"}, nil)
+		c.errorHandler(w, r, &RequiredError{"storage_class_name"}, nil, nil)
 		return
 	}
 	result, err := c.service.V1DeleteStorageClass(r.Context(), uuidParam, storageClassNameParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -642,37 +642,38 @@ func (c *StorageClassesAPIController) V1DeleteStorageClass(w http.ResponseWriter
 func (c *StorageClassesAPIController) V1SyncStorageClass(w http.ResponseWriter, r *http.Request) {
 	uuidParam := chi.URLParam(r, "uuid")
 	if uuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"uuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"uuid"}, nil, nil)
 		return
 	}
 	var v1StorageClassParam []V1StorageClass
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&v1StorageClassParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	for _, el := range v1StorageClassParam {
 		if err := AssertV1StorageClassRequired(el); err != nil {
-			c.errorHandler(w, r, err, nil)
+			c.errorHandler(w, r, err, nil, nil)
 			return
 		}
 	}
 	result, err := c.service.V1SyncStorageClass(r.Context(), uuidParam, v1StorageClassParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -725,7 +726,7 @@ func (c *StorageClassesAPIController) V1SyncStorageClass(w http.ResponseWriter, 
 func (c *StorageClassesAPIController) GetStorageClasses(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -734,7 +735,7 @@ func (c *StorageClassesAPIController) GetStorageClasses(w http.ResponseWriter, r
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var nameParam string
@@ -751,7 +752,7 @@ func (c *StorageClassesAPIController) GetStorageClasses(w http.ResponseWriter, r
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeNone", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeNone", Err: err}, nil, nil)
 			return
 		}
 
@@ -761,7 +762,7 @@ func (c *StorageClassesAPIController) GetStorageClasses(w http.ResponseWriter, r
 	result, err := c.service.GetStorageClasses(r.Context(), clusterIdParam, nameParam, includeNoneParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -814,34 +815,35 @@ func (c *StorageClassesAPIController) GetStorageClasses(w http.ResponseWriter, r
 func (c *StorageClassesAPIController) UpdateStorageClass(w http.ResponseWriter, r *http.Request) {
 	var storageClassParam StorageClass
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&storageClassParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertStorageClassRequired(storageClassParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertStorageClassConstraints(storageClassParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateStorageClass(r.Context(), storageClassParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -894,34 +896,35 @@ func (c *StorageClassesAPIController) UpdateStorageClass(w http.ResponseWriter, 
 func (c *StorageClassesAPIController) CreateStorageClass(w http.ResponseWriter, r *http.Request) {
 	var storageClassParam StorageClass
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&storageClassParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertStorageClassRequired(storageClassParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertStorageClassConstraints(storageClassParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateStorageClass(r.Context(), storageClassParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -974,7 +977,7 @@ func (c *StorageClassesAPIController) CreateStorageClass(w http.ResponseWriter, 
 func (c *StorageClassesAPIController) DeleteStorageClass(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -983,7 +986,7 @@ func (c *StorageClassesAPIController) DeleteStorageClass(w http.ResponseWriter, 
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var nameParam string
@@ -992,13 +995,13 @@ func (c *StorageClassesAPIController) DeleteStorageClass(w http.ResponseWriter, 
 
 		nameParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "name"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "name"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteStorageClass(r.Context(), clusterIdParam, nameParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1014,7 +1017,7 @@ func (c *StorageClassesAPIController) DeleteStorageClass(w http.ResponseWriter, 
 func (c *StorageClassesAPIController) GetStorageClassesV2(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -1023,7 +1026,7 @@ func (c *StorageClassesAPIController) GetStorageClassesV2(w http.ResponseWriter,
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var nameParam string
@@ -1040,7 +1043,7 @@ func (c *StorageClassesAPIController) GetStorageClassesV2(w http.ResponseWriter,
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeNone", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeNone", Err: err}, nil, nil)
 			return
 		}
 
@@ -1050,7 +1053,7 @@ func (c *StorageClassesAPIController) GetStorageClassesV2(w http.ResponseWriter,
 	result, err := c.service.GetStorageClassesV2(r.Context(), clusterIdParam, nameParam, includeNoneParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1103,7 +1106,7 @@ func (c *StorageClassesAPIController) GetStorageClassesV2(w http.ResponseWriter,
 func (c *StorageClassesAPIController) SyncStorageClass(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -1112,39 +1115,40 @@ func (c *StorageClassesAPIController) SyncStorageClass(w http.ResponseWriter, r 
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var storageClassesParam StorageClasses
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&storageClassesParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertStorageClassesRequired(storageClassesParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertStorageClassesConstraints(storageClassesParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.SyncStorageClass(r.Context(), clusterIdParam, storageClassesParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
