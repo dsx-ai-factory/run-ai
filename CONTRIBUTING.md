@@ -38,7 +38,7 @@ Component-specific setup lives in each component's `README.md`. For end-to-end t
 2. **Branch** from `main` (or from the live release branch you are targeting — see branching policy below). Use a descriptive name.
 3. **Make focused changes.** One concern per PR. Add tests for new behavior. Update docs if user-facing.
 4. **Sign off every commit** with `git commit -s` (see [DCO](#developer-certificate-of-origin-dco) below). This applies to **fork PRs only**; internal Run:ai contributors are not DCO-checked.
-5. **Open the PR** against `main` (preferred) or the relevant `v2.X` release branch. Fill in the PR template, reference the issue with `Fixes #123`, and add a `/kind` line.
+5. **Open the PR** against `main` (preferred) or the release branch (`release-3.0`). Fill in the PR template, reference the issue with `Fixes #123`, and add a `/kind` line.
 6. **Wait for CI.** Layer 1 checks (lint, DCO for forks, CodeQL diff, govulncheck) run automatically. The full build pipeline and end-to-end tests run after a maintainer reviews and types `/ok-to-test` on the PR.
 7. **Address review feedback.** A maintainer approval plus a green `Validate Successful Run` status are both required for merge.
 
@@ -46,15 +46,13 @@ Component-specific setup lives in each component's `README.md`. For end-to-end t
 
 ## Branching Policy
 
-Run:ai accepts pull requests targeting `main` or any live release branch (today: `v2.22`, `v2.23`, `v2.24`, `v2.25`, `v2.26`).
+Run:ai accepts pull requests targeting `main` or the live release branch (today: `release-3.0`).
 
-**Main-first is preferred.** Open your PR against `main` so the fix flows to every supported release via the `backport/v2.X` label that a maintainer applies after merge. This avoids "fixed in v2.24 but forgotten on v2.26" regressions.
+**Main-first is preferred.** Open your PR against `main` so the fix flows to the supported release via the `backport/release-3.0` label that a maintainer applies after merge. This avoids fixes landing on `main` but being forgotten on the release branch.
 
-**Direct release-branch PRs are accepted** when you can only reproduce or test on the version you're running. Open the PR against that release branch (for example `v2.26`); during review, a maintainer will help you decide whether the fix should also be cherry-picked to `main` and to other live releases.
+**Direct release-branch PRs are accepted** when you can only reproduce or test on the version you're running. Open the PR against that release branch (for example `release-3.0`); during review, a maintainer will help you decide whether the fix should also be cherry-picked to `main`.
 
-**Don't** open PRs against EOL branches (`v2.21` and earlier). They are not maintained.
-
-**How backports work:** when a maintainer applies a `backport/v2.X` label to your merged PR, an automated workflow opens a follow-up PR cherry-picking the merge commit onto each labelled release branch. If the cherry-pick conflicts, the bot leaves a `needs-manual-backport/v2.X` label and a maintainer takes it from there. You don't need to open backport PRs yourself.
+**How backports work:** when a maintainer applies the `backport/release-3.0` label to your merged PR, an automated workflow opens a follow-up PR cherry-picking the merge commit onto the release branch. If the cherry-pick conflicts, the bot leaves a `needs-manual-backport/release-3.0` label and a maintainer takes it from there. You don't need to open backport PRs yourself.
 
 ---
 
