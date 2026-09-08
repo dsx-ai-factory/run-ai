@@ -34,12 +34,12 @@ Maintainers are responsible for:
 Maintainers are selected on demonstrated contribution rather than affiliation or
 tenure. The criteria are:
 
-1. **Sustained contributions** — quality changes over a period of time, not a
+1. **Sustained contributions** - Quality changes over a period of time, not a
    single large drop
-2. **Review quality** — thoughtful, constructive reviews of others' work
-3. **Community engagement** — helping contributors, triaging issues, answering
+2. **Review quality** - Thoughtful, constructive reviews of others' work
+3. **Community engagement** - Helping contributors, triaging issues, answering
    questions
-4. **Domain knowledge** — working understanding of the area they will own
+4. **Domain knowledge** - Working understanding of the area they will own
 
 Process: an existing maintainer nominates the candidate, and the nomination
 carries on the approval of a simple majority of current maintainers. See
