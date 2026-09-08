@@ -16,16 +16,14 @@ scheduling are set by NVIDIA.
 
 ## Roles
 
-**Contributors** — anyone who opens an issue or pull request. No prior
-association with the project is required.
-
-**Code owners** — the teams listed in [`CODEOWNERS`](CODEOWNERS). Approval from
-the relevant code owners is required to merge a change to the paths they own.
-This is enforced by GitHub, not by convention.
-
-**Maintainers** — listed in [`MAINTAINERS.md`](MAINTAINERS.md). Maintainers can
-merge pull requests, run the full CI pipeline on external contributions, cut
-releases, and change this document.
+- **Contributors** - Anyone who opens an issue or pull request. No prior
+  association with the project is required.
+- **Code owners** - The teams listed in [`CODEOWNERS`](CODEOWNERS). Approval
+  from the relevant code owners is required to merge a change to the paths
+  they own. This is enforced by GitHub, not by convention.
+- **Maintainers** - Listed in [`MAINTAINERS.md`](MAINTAINERS.md). Maintainers
+  can merge pull requests, run the full CI pipeline on external
+  contributions, cut releases, and change this document.
 
 ## Decision-Making
 
@@ -59,7 +57,7 @@ routine step.
 raised in a GitHub issue and carries on the approval of a simple majority of
 maintainers. An objection must be stated with reasons and is resolved by that
 vote rather than by veto, following the same model as
-[Decision-making](#decision-making). On approval, the new maintainer is added to
+[Decision-Making](#decision-making). On approval, the new maintainer is added to
 the maintainers GitHub team and, where appropriate, to the relevant entries in
 [`CODEOWNERS`](CODEOWNERS).
 
@@ -72,10 +70,11 @@ repeatedly acts against the [Code of Conduct](CODE_OF_CONDUCT.md), may be moved
 to Emeritus by a majority vote of the other maintainers. The affected maintainer
 is notified before the vote and may respond.
 
-The two grounds for removal are reversed differently. Removal for **inactivity**
-carries no stigma and is reversed by the normal nomination process above.
-Removal for **Code of Conduct** reasons is not: renomination requires that the
-conduct matter has been reviewed and closed by the enforcement contact named in
+The two grounds for removal differ in how they can be reversed. Removal for
+**inactivity** carries no stigma and is reversed by the normal nomination
+process above. Removal for **Code of Conduct** reasons is not reversed the
+same way: renomination requires that the conduct matter has been reviewed and
+closed by the enforcement contact named in
 [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md), and that review is a precondition
 for a nomination being raised at all.
 
@@ -96,4 +95,4 @@ that document.
 ## Amending This Document
 
 Changes to this document follow the same lazy-consensus process described in
-[Decision-making](#decision-making), proposed as a pull request.
+[Decision-Making](#decision-making), proposed as a pull request.
