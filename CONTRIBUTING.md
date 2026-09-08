@@ -8,34 +8,41 @@ By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md
 
 ## Ways to Contribute
 
-1. **Report a bug, request a feature, or flag a documentation issue.** Open a [GitHub issue](https://github.com/dsx-ai-factory/run-ai/issues/new/choose) using the appropriate template. Maintainers will triage and label it.
-2. **Discuss an idea before you build it.** For non-trivial changes, open a feature issue first so the design can be agreed on before you write code. For support and usage questions, open an issue.
-3. **Implement a fix or feature.** Pick up an issue labelled `good first issue` or `help wanted`, comment to claim it, then follow the workflow below.
+- **You want to report a bug, feature idea, or documentation issue** - File a [GitHub issue](https://github.com/dsx-ai-factory/run-ai/issues/new/choose) using the appropriate template. Maintainers will triage and label it.
+- **You want to propose a new feature and implement it** - File a feature-request issue describing your intended feature, and discuss the design there. Once the plan looks good, implement it following the Pull Request Workflow below.
+- **You want to implement a feature or bug fix for an outstanding issue** - Pick up an issue labelled `good first issue` or `help wanted`, comment to claim it, then follow the Pull Request Workflow below.
 
 ---
 
 ## Getting Started
 
-```bash
-# Clone
-git clone https://github.com/dsx-ai-factory/run-ai.git
-cd runai
+1. **Clone the repository.**
 
-# Build (Go modules, no private dependencies — fork-safe)
-make build
+   ```bash
+   git clone https://github.com/dsx-ai-factory/run-ai.git
+   cd runai
+   ```
 
-# Run unit tests
-make test
-```
+2. **Build.** Uses Go modules — no private dependencies, so it's fork-safe.
 
-Component-specific setup lives in each component's `README.md`. For end-to-end testing on a real cluster, see the per-component docs.
+   ```bash
+   make build
+   ```
+
+3. **Run unit tests.**
+
+   ```bash
+   make test
+   ```
+
+Setup and end-to-end testing on a real cluster are service-specific. Each service directory under `control-plane/` and `runai-cluster/` has its own `README.md` and `Makefile` describing how to build, test, and validate it.
 
 ---
 
 ## Pull Request Workflow
 
 1. **Fork** the repository to your own GitHub account.
-2. **Branch** from `main` (or from the live release branch you are targeting — see branching policy below). Use a descriptive name.
+2. **Branch** from `main` (or from the live release branch you are targeting — see [Branching Policy](#branching-policy) below). Use a descriptive name.
 3. **Make focused changes.** One concern per PR. Add tests for new behavior. Update docs if user-facing.
 4. **Sign off every commit** with `git commit -s` (see [DCO](#developer-certificate-of-origin-dco) below). This applies to **fork PRs only**; internal Run:ai contributors are not DCO-checked.
 5. **Open the PR** against `main` (preferred) or the release branch (`release-3.0`). Fill in the PR template, reference the issue with `Fixes #123`, and add a `/kind` line.
@@ -48,11 +55,9 @@ Component-specific setup lives in each component's `README.md`. For end-to-end t
 
 Run:ai accepts pull requests targeting `main` or the live release branch (today: `release-3.0`).
 
-**Main-first is preferred.** Open your PR against `main` so the fix flows to the supported release via the `backport/release-3.0` label that a maintainer applies after merge. This avoids fixes landing on `main` but being forgotten on the release branch.
-
-**Direct release-branch PRs are accepted** when you can only reproduce or test on the version you're running. Open the PR against that release branch (for example `release-3.0`); during review, a maintainer will help you decide whether the fix should also be cherry-picked to `main`.
-
-**How backports work:** when a maintainer applies the `backport/release-3.0` label to your merged PR, an automated workflow opens a follow-up PR cherry-picking the merge commit onto the release branch. If the cherry-pick conflicts, the bot leaves a `needs-manual-backport/release-3.0` label and a maintainer takes it from there. You don't need to open backport PRs yourself.
+- **Main-first is preferred** - Open your PR against `main` so the fix flows to the supported release via the `backport/release-3.0` label that a maintainer applies after merge, rather than landing only on `main` and getting forgotten on the release branch.
+- **Direct release-branch PRs are accepted** - When you can only reproduce or test on the version you're running, open the PR against `release-3.0`; during review, a maintainer will help you decide whether the fix should also be cherry-picked to `main`.
+- **How backports work** - When a maintainer applies the `backport/release-3.0` label to your merged PR, an automated workflow opens a follow-up PR cherry-picking the merge commit onto the release branch. If the cherry-pick conflicts, the bot leaves a `needs-manual-backport/release-3.0` label and a maintainer takes it from there. You don't need to open backport PRs yourself.
 
 ---
 
@@ -60,10 +65,19 @@ Run:ai accepts pull requests targeting `main` or the live release branch (today:
 
 We split CI into two layers:
 
-- **Layer 1 — fast, automatic, no secrets.** Runs on every fork PR as soon as it is opened: DCO check, lint (Go, Helm, CODEOWNERS, workflows), CodeQL diff scan, govulncheck. These checks post results back to your PR within a few minutes. They are informational — they help you fix obvious issues before a maintainer looks at the PR, but they do not block merge by themselves.
-- **Layer 2 — full build and end-to-end tests, has secrets.** This is the pipeline that produces the required `Validate Successful Run` status check, and it only runs after a maintainer reviews your PR and types `/ok-to-test` in a comment. End-to-end tests take 30–90 minutes. A failed Layer 2 run blocks merge — for everyone, including internal contributors. If a maintainer hasn't reviewed your PR within a few business days and you'd like the full pipeline to run, feel free to ping in the PR.
-
-If a Layer 2 step fails, the workflow logs from `runai-actions` (the private repository where the full pipeline lives) are not directly visible to external contributors. Look at the PR labels (`pipeline/build-failed`, `pipeline/e2e-failed`, `pipeline/jira-failed`) for a hint about which stage broke, and a maintainer will help you triage from there.
+- **Layer 1 — fast, automatic, no secrets.**
+  - Runs on every fork PR as soon as it is opened: DCO check, lint (Go, Helm, CODEOWNERS, workflows), CodeQL diff scan, govulncheck.
+  - These checks post results back to your PR within a few minutes.
+  - They are informational — they help you fix obvious issues before a maintainer looks at the PR, but they do not block merge by themselves.
+- **Layer 2 — full build and end-to-end tests, has secrets.**
+  - This is the pipeline that produces the required `Validate Successful Run` status check, and it only runs after a maintainer reviews your PR and types `/ok-to-test` in a comment.
+  - End-to-end tests take 30–90 minutes.
+  - A failed Layer 2 run blocks merge — for everyone, including internal contributors.
+  - If a maintainer hasn't reviewed your PR within a few business days and you'd like the full pipeline to run, feel free to ping in the PR.
+- **If Layer 2 fails — logs aren't directly visible.**
+  - The workflow logs from `runai-actions` (the private repository where the full pipeline lives) are not directly visible to external contributors.
+  - Look at the PR labels (`pipeline/build-failed`, `pipeline/e2e-failed`, `pipeline/jira-failed`) for a hint about which stage broke.
+  - A maintainer will help you triage from there.
 
 ---
 
@@ -139,22 +153,22 @@ git push --force-with-lease
 
 A `dco` check runs on every fork PR and lists any unsigned commits inline.
 
-**Internal contributors:** the DCO check does not run on commits authored from `@run.ai` and `@nvidia.com` accounts. Internal contributions are governed by the existing employee IP agreement.
+**Internal contributors** - The DCO check does not run on commits authored from `@run.ai` and `@nvidia.com` accounts. Internal contributions are governed by the existing employee IP agreement.
 
 ---
 
 ## Commit Messages and PR Titles
 
-Write clear, present-tense messages explaining **why** the change is needed, not just what it does. A good PR title is a single sentence under ~70 characters.
+Write clear, present-tense messages explaining **why** the change is needed, not just what the change does. A good PR title is a single sentence under ~70 characters.
 
-We do not enforce Conventional Commits format. Release notes are generated from PR titles and labels via GitHub's auto-generated release notes — clear titles make better release notes.
+We do not enforce Conventional Commits format. Release notes are generated automatically from PR titles and labels — clear titles make better release notes.
 
 ---
 
 ## Getting Help
 
-- [GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues) — bugs, feature requests, documentation issues, usage questions
-- [SECURITY.md](SECURITY.md) — private vulnerability reports
-- [SUPPORT.md](SUPPORT.md) — which versions are supported
+- [GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues) - Bugs, feature requests, documentation issues, usage questions
+- [SECURITY.md](SECURITY.md) - Private vulnerability reports
+- [SUPPORT.md](SUPPORT.md) - Which versions are supported
 
 Thank you for contributing.
