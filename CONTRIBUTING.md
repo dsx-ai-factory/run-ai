@@ -9,8 +9,8 @@ By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md
 ## Ways to Contribute
 
 - **You want to report a bug, feature idea, or documentation issue** - File a [GitHub issue](https://github.com/dsx-ai-factory/run-ai/issues/new/choose) using the appropriate template. Maintainers will triage and label it.
-- **You want to propose a new feature and implement it** - File a feature-request issue describing your intended feature, and discuss the design there. Once the plan looks good, implement it following the Pull Request Workflow below.
-- **You want to implement a feature or bug fix for an outstanding issue** - Pick up an issue labelled `good first issue` or `help wanted`, comment to claim it, then follow the Pull Request Workflow below.
+- **You want to propose a new feature and implement it** - File a feature-request issue describing your intended feature, and discuss the design there. Once the plan looks good, implement it following the Contribution Workflow below.
+- **You want to implement a feature or bug fix for an outstanding issue** - Pick up an issue labelled `good first issue` or `help wanted`, comment to claim it, then follow the Contribution Workflow below.
 
 ---
 
@@ -39,15 +39,77 @@ Setup and end-to-end testing on a real cluster are service-specific. Each servic
 
 ---
 
-## Pull Request Workflow
+## Contribution Workflow
 
-1. **Fork** the repository to your own GitHub account.
-2. **Branch** from `main` (or from the live release branch you are targeting — see [Branching Policy](#branching-policy) below). Use a descriptive name.
-3. **Make focused changes.** One concern per PR. Add tests for new behavior. Update docs if user-facing.
-4. **Sign off every commit** with `git commit -s` (see [DCO](#developer-certificate-of-origin-dco) below). This applies to **fork PRs only**; internal Run:ai contributors are not DCO-checked.
-5. **Open the PR** against `main` (preferred) or the release branch (`release-3.0`). Fill in the PR template, reference the issue with `Fixes #123`, and add a `/kind` line.
-6. **Wait for CI.** Layer 1 checks (lint, DCO for forks, CodeQL diff, govulncheck) run automatically. The full build pipeline and end-to-end tests run after a maintainer reviews and types `/ok-to-test` on the PR.
-7. **Address review feedback.** A maintainer approval plus a green `Validate Successful Run` status are both required for merge.
+Push your changes to a branch on your own fork of run-ai, then open a pull request when the code is ready. The steps below walk through the full process.
+
+### Step 1: Fork the Repository
+
+Fork the repository to your own GitHub account. If you already cloned `dsx-ai-factory/run-ai` directly in [Getting Started](#getting-started), point that same clone at your fork instead of re-cloning:
+
+```bash
+git remote rename origin upstream
+git remote add origin https://github.com/<your-username>/run-ai.git
+```
+
+### Step 2: Create a Branch
+
+Branch from `main`, or from the live release branch you are targeting — see [Branching Policy](#branching-policy). There's no enforced naming scheme, but a descriptive prefix helps. A few real examples from this repo:
+
+```
+docs/onboarding-fixes
+fix/airgap-registry-secret-upgrade
+```
+
+### Step 3: Make Your Changes
+
+- **One concern per PR.** Don't bundle unrelated fixes or refactors together — reviewers can approve a focused change much faster than a mixed one.
+- **Add tests for new behavior.** Tests live alongside the code they cover, inside the service you're changing.
+- **Update docs if user-facing.** Documentation source lives under [`docs/`](docs/) — see [Documentation Contributions](#documentation-contributions) below.
+
+### Step 4: Test Locally
+
+Run the changed service's own Makefile targets before opening the PR — this mirrors what CI's `pr-fast.yaml` runs against your diff:
+
+```bash
+cd control-plane/assets-service   # whichever service(s) you touched
+make build test lint
+```
+
+### Step 5: Sign Off Your Commits
+
+Every commit needs a DCO sign-off (fork PRs only; internal Run:ai contributors are not DCO-checked — see [DCO](#developer-certificate-of-origin-dco)):
+
+```bash
+git commit -s -m "Fix node-pool selector when foo is bar"
+```
+
+### Step 6: Open a Pull Request
+
+```bash
+git push origin your-branch-name
+```
+
+- Open the PR against `main` (preferred) or the release branch (`release-3.0`).
+- Fill in the PR template.
+- Reference the issue with `Fixes #123`.
+- Add a `/kind` line.
+
+### Step 7: Wait for CI
+
+CI runs automatically once your PR is open — Layer 1 runs immediately, Layer 2 (the full build and end-to-end pipeline) starts once a maintainer types `/ok-to-test`. See [CI for External Contributors](#ci-for-external-contributors--what-runs-and-when) below for what each layer covers.
+
+### Step 8: Address Review Feedback
+
+A maintainer approval plus a green `Validate Successful Run` status are both required for merge — see [Code Review](#code-review) for how reviewers get assigned.
+
+---
+
+## Documentation Contributions
+
+- Documentation source lives under [`docs/`](docs/), published via the Fern navigation config in [`fern/`](fern/).
+- Read [`docs/AGENTS.md`](docs/AGENTS.md) before editing, creating, or reviewing any page.
+- Run `fern docs dev` before opening the PR, and `fern check` too if you changed an OpenAPI spec.
 
 ---
 
