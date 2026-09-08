@@ -151,7 +151,7 @@ To create a new node pool:
            * Drag labels to adjust their order if needed
          * Click **SAVE NETWORK TOPOLOGY**
 
-         See [Accelerating workloads with network topology-aware scheduling](../../aiinitiatives/resources/topology-aware-scheduling.md) for more details.
+         See [Accelerating workloads with network topology-aware scheduling](../../aiinitiatives/resources/topology-aware-scheduling/README.md) for more details.
    * Define whether MNNVL is present on this node pool. For more details, see [Using GB200 NVL72 and Multi-Node NVLink domains](../../aiinitiatives/resources/using-gb200.md):
      * **Auto-detect** - Automatically detect whether the node pool contains any MNNVL nodes. MNNVL nodes that share the same ID are part of the same NVL rack.
      * **MNNVL is present** - Explicitly indicate that the node pool contains MNNVL nodes
