@@ -22,7 +22,7 @@ import (
 
 var _ = Describe("Initialize static roles and permission sets tests", Ordered, func() {
 	Context("init roles and permission set on upgrade", func() {
-		// this is a test for permission sets - if UsePermissionSets = true, for running init roles twice
+		// this is a test for permission sets, for running init roles twice
 		BeforeAll(func() {
 			newLegacyRoles := []models.Role{}
 			for i := range LegacyRoles {
@@ -183,7 +183,7 @@ var _ = Describe("Initialize static roles and permission sets tests", Ordered, f
 	})
 
 	Context("init roles and permission set on upgrade from no permission set", func() {
-		// this is a test for permission sets - if UsePermissionSets = true, for running init roles first time after permissionSet change added
+		// this is a test for permission sets, for running init roles first time after permissionSet change added
 		BeforeAll(func() {
 			var legacyForUpdate models.Role
 			var migratedForUpdate models.Role

@@ -121,7 +121,7 @@ var _ = Describe("HandleAdditionalResources", func() {
 					Create: newTestService("my-svc", 8080),
 					Auth: &dromosv1alpha1.NetworkingAuthConfig{
 						AuthorizationType: dromosv1alpha1.AuthorizationTypeAuthorizedUsers,
-						AuthorizedUsers:   "test@run.ai",
+						AuthorizedUsers:   "test@example.com",
 					},
 				}},
 				ExternalAccess: &dromosv1alpha1.NetworkingExternalAccessConfig{

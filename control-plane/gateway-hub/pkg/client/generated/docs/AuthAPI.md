@@ -1,6 +1,6 @@
 # \AuthAPI
 
-All URIs are relative to *http://localhost:8181*
+All URIs are relative to *http://localhost:8080*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------

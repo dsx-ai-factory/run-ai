@@ -34,12 +34,12 @@ func (s *SmtpClientMock) Verify(from string, to []string) error {
 }
 
 var (
-	validUser         = "test@run.ai"
-	from              = "user@run.ai"
+	validUser         = "test@example.com"
+	from              = "user@example.com"
 	fromDisplayName   = "NVIDIA Run:ai"
 	logoUrl           = "https://s3.amazonaws.com/www.run.ai/runai-logo.png"
 	recipientsDefault = []string{
-		"user@run.ai",
+		"user@example.com",
 	}
 
 	eventExample = events.Event{
@@ -114,7 +114,7 @@ func TestNewEmailSink(t *testing.T) {
 			event: eventExample,
 
 			expectedErr:   nil,
-			expectedInMsg: "From: NVIDIA Run:ai  <user@run.ai>\r\nTo: user@run.ai <user@run.ai>\r\nSubject:  \r\n",
+			expectedInMsg: "From: NVIDIA Run:ai  <user@example.com>\r\nTo: user@example.com <user@example.com>\r\nSubject:  \r\n",
 		},
 		{
 			desc: "test subject from event",

@@ -105,9 +105,9 @@ func TestAuthorizeSlackApp_InvalidState(t *testing.T) {
 
 func TestConnectSlackWorkspace(t *testing.T) {
 	ctx := context.WithValue(context.Background(), runaictx.CfTenantId, "1")
-	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@run.ai")
+	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@example.com")
 	slackManager := mocks.NewSlackManager(t)
-	slackManager.On("ConnectWorkspace", ctx, "1", "test@run.ai").Return("redirect_url", nil)
+	slackManager.On("ConnectWorkspace", ctx, "1", "test@example.com").Return("redirect_url", nil)
 
 	slackService := &SlackAPIService{
 		manager: slackManager,
@@ -122,9 +122,9 @@ func TestConnectSlackWorkspace(t *testing.T) {
 
 func TestConnectSlackWorkspace_Failed(t *testing.T) {
 	ctx := context.WithValue(context.Background(), runaictx.CfTenantId, "1")
-	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@run.ai")
+	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@example.com")
 	slackManager := mocks.NewSlackManager(t)
-	slackManager.On("ConnectWorkspace", ctx, "1", "test@run.ai").Return("", errors.New("failed to add slack app"))
+	slackManager.On("ConnectWorkspace", ctx, "1", "test@example.com").Return("", errors.New("failed to add slack app"))
 	slackService := &SlackAPIService{
 		manager: slackManager,
 	}
@@ -136,9 +136,9 @@ func TestConnectSlackWorkspace_Failed(t *testing.T) {
 
 func TestConnectSlackWorkspace_MissingAppCredentials(t *testing.T) {
 	ctx := context.WithValue(context.Background(), runaictx.CfTenantId, "1")
-	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@run.ai")
+	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@example.com")
 	slackManager := mocks.NewSlackManager(t)
-	slackManager.On("ConnectWorkspace", ctx, "1", "test@run.ai").Return("", slack.ErrMissingAppCredentials)
+	slackManager.On("ConnectWorkspace", ctx, "1", "test@example.com").Return("", slack.ErrMissingAppCredentials)
 	slackService := &SlackAPIService{
 		manager: slackManager,
 	}
@@ -149,7 +149,7 @@ func TestConnectSlackWorkspace_MissingAppCredentials(t *testing.T) {
 }
 
 func TestConnectSlackWorkspace_MissingTenantId(t *testing.T) {
-	ctx := context.WithValue(context.Background(), runaictx.CfSubjectID, "test@run.ai")
+	ctx := context.WithValue(context.Background(), runaictx.CfSubjectID, "test@example.com")
 	slackService := &SlackAPIService{}
 	res, err := slackService.ConnectSlackWorkspace(ctx)
 	require.Error(t, err)

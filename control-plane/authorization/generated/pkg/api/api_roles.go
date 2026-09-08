@@ -38,11 +38,6 @@ import (
 type RolesAPIController struct {
 	service RolesAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -58,10 +53,13 @@ type RolesAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *RolesAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *RolesAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -336,7 +334,7 @@ func (c *RolesAPIController) Routes() Routes {
 func (c *RolesAPIController) GetRolesV1(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var includeInternalParam bool
@@ -346,7 +344,7 @@ func (c *RolesAPIController) GetRolesV1(w http.ResponseWriter, r *http.Request) 
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeInternal", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeInternal", Err: err}, nil, nil)
 			return
 		}
 
@@ -358,7 +356,7 @@ func (c *RolesAPIController) GetRolesV1(w http.ResponseWriter, r *http.Request) 
 	result, err := c.service.GetRolesV1(r.Context(), includeInternalParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -416,13 +414,13 @@ func (c *RolesAPIController) GetRoleV1(w http.ResponseWriter, r *http.Request) {
 		WithMinimum[int32](0),
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "roleIdPath", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "roleIdPath", Err: err}, nil, nil)
 		return
 	}
 	result, err := c.service.GetRoleV1(r.Context(), roleIdPathParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -475,7 +473,7 @@ func (c *RolesAPIController) GetRoleV1(w http.ResponseWriter, r *http.Request) {
 func (c *RolesAPIController) GetRoles(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var limitParam int32
@@ -487,7 +485,7 @@ func (c *RolesAPIController) GetRoles(w http.ResponseWriter, r *http.Request) {
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -503,7 +501,7 @@ func (c *RolesAPIController) GetRoles(w http.ResponseWriter, r *http.Request) {
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -549,7 +547,7 @@ func (c *RolesAPIController) GetRoles(w http.ResponseWriter, r *http.Request) {
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeInternal", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeInternal", Err: err}, nil, nil)
 			return
 		}
 
@@ -561,7 +559,7 @@ func (c *RolesAPIController) GetRoles(w http.ResponseWriter, r *http.Request) {
 	result, err := c.service.GetRoles(r.Context(), limitParam, offsetParam, sortOrderParam, sortByParam, filterByParam, searchParam, includeInternalParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -614,34 +612,35 @@ func (c *RolesAPIController) GetRoles(w http.ResponseWriter, r *http.Request) {
 func (c *RolesAPIController) CreateRole(w http.ResponseWriter, r *http.Request) {
 	var roleCreationFieldsInternalParam RoleCreationFieldsInternal
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&roleCreationFieldsInternalParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertRoleCreationFieldsInternalRequired(roleCreationFieldsInternalParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertRoleCreationFieldsInternalConstraints(roleCreationFieldsInternalParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateRole(r.Context(), roleCreationFieldsInternalParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -698,13 +697,13 @@ func (c *RolesAPIController) GetRole(w http.ResponseWriter, r *http.Request) {
 		WithMinimum[int32](0),
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "roleIdPath", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "roleIdPath", Err: err}, nil, nil)
 		return
 	}
 	result, err := c.service.GetRole(r.Context(), roleIdPathParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -761,39 +760,40 @@ func (c *RolesAPIController) UpdateRole(w http.ResponseWriter, r *http.Request) 
 		WithMinimum[int32](0),
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "roleIdPath", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "roleIdPath", Err: err}, nil, nil)
 		return
 	}
 	var roleCreationFieldsInternalParam RoleCreationFieldsInternal
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&roleCreationFieldsInternalParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertRoleCreationFieldsInternalRequired(roleCreationFieldsInternalParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertRoleCreationFieldsInternalConstraints(roleCreationFieldsInternalParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateRole(r.Context(), roleIdPathParam, roleCreationFieldsInternalParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -850,13 +850,13 @@ func (c *RolesAPIController) DeleteRole(w http.ResponseWriter, r *http.Request) 
 		WithMinimum[int32](0),
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "roleIdPath", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "roleIdPath", Err: err}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteRole(r.Context(), roleIdPathParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -876,39 +876,40 @@ func (c *RolesAPIController) RoleActive(w http.ResponseWriter, r *http.Request) 
 		WithMinimum[int32](0),
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "roleIdPath", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "roleIdPath", Err: err}, nil, nil)
 		return
 	}
 	var roleActiveFieldsParam RoleActiveFields
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&roleActiveFieldsParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertRoleActiveFieldsRequired(roleActiveFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertRoleActiveFieldsConstraints(roleActiveFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.RoleActive(r.Context(), roleIdPathParam, roleActiveFieldsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -928,39 +929,40 @@ func (c *RolesAPIController) RoleEnable(w http.ResponseWriter, r *http.Request) 
 		WithMinimum[int32](0),
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "roleIdPath", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "roleIdPath", Err: err}, nil, nil)
 		return
 	}
 	var roleEnabledDisabledFieldsParam RoleEnabledDisabledFields
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&roleEnabledDisabledFieldsParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertRoleEnabledDisabledFieldsRequired(roleEnabledDisabledFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertRoleEnabledDisabledFieldsConstraints(roleEnabledDisabledFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.RoleEnable(r.Context(), roleIdPathParam, roleEnabledDisabledFieldsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -980,39 +982,40 @@ func (c *RolesAPIController) RoleDisable(w http.ResponseWriter, r *http.Request)
 		WithMinimum[int32](0),
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "roleIdPath", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "roleIdPath", Err: err}, nil, nil)
 		return
 	}
 	var roleEnabledDisabledFieldsParam RoleEnabledDisabledFields
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&roleEnabledDisabledFieldsParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertRoleEnabledDisabledFieldsRequired(roleEnabledDisabledFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertRoleEnabledDisabledFieldsConstraints(roleEnabledDisabledFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.RoleDisable(r.Context(), roleIdPathParam, roleEnabledDisabledFieldsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

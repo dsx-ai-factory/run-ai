@@ -34,7 +34,7 @@ BatchJobTarget:
           metadata:
             name: job-urls-url-1
           spec:
-            host: test-urls.test.run.ai
+            host: test-urls.mock-q7z3k.example.com
             path: /
             tls:
               insecureEdgeTerminationPolicy: Redirect
@@ -60,7 +60,7 @@ BatchJobTarget:
           metadata:
             name: job-urls-url-2
           spec:
-            host: test-urls-url-2.test.run.ai
+            host: test-urls-url-2.mock-q7z3k.example.com
             path: /
             tls:
               insecureEdgeTerminationPolicy: Redirect
@@ -86,7 +86,7 @@ BatchJobTarget:
           metadata:
             name: job-urls-url-3
           spec:
-            host: test-urls-url-3.test.run.ai
+            host: test-urls-url-3.mock-q7z3k.example.com
             path: /
             tls:
               insecureEdgeTerminationPolicy: Redirect
@@ -112,7 +112,7 @@ BatchJobTarget:
           metadata:
             name: job-urls-url-4
           spec:
-            host: test-urls-url-4.test.run.ai
+            host: test-urls-url-4.mock-q7z3k.example.com
             path: /
             tls:
               insecureEdgeTerminationPolicy: Redirect
@@ -254,14 +254,14 @@ BatchJobTarget:
           - args:
             - --provider=keycloak-oidc
             - --upstream=http://localhost:8081
-            - --redirect-url=https://test-urls.test.run.ai/oauth2/callback
+            - --redirect-url=https://test-urls.mock-q7z3k.example.com/oauth2/callback
             - --oidc-issuer-url=/auth/realms/runai
             - --scope=openid
             - --http-address=0.0.0.0:4181
             - --proxy-prefix=/oauth2
             - --skip-provider-button=true
-            - --whitelist-domain=test-urls.test.run.ai
-            - --cookie-domain=test-urls.test.run.ai
+            - --whitelist-domain=test-urls.mock-q7z3k.example.com
+            - --cookie-domain=test-urls.mock-q7z3k.example.com
             - --cookie-httponly=true
             - --cookie-secure=true
             - --code-challenge-method=S256
@@ -298,14 +298,14 @@ BatchJobTarget:
           - args:
             - --provider=keycloak-oidc
             - --upstream=http://localhost:8082
-            - --redirect-url=https://test-urls-url-2.test.run.ai/oauth2/callback
+            - --redirect-url=https://test-urls-url-2.mock-q7z3k.example.com/oauth2/callback
             - --oidc-issuer-url=/auth/realms/runai
             - --scope=openid
             - --http-address=0.0.0.0:4182
             - --proxy-prefix=/oauth2
             - --skip-provider-button=true
-            - --whitelist-domain=test-urls-url-2.test.run.ai
-            - --cookie-domain=test-urls-url-2.test.run.ai
+            - --whitelist-domain=test-urls-url-2.mock-q7z3k.example.com
+            - --cookie-domain=test-urls-url-2.mock-q7z3k.example.com
             - --cookie-httponly=true
             - --cookie-secure=true
             - --code-challenge-method=S256
@@ -340,14 +340,14 @@ BatchJobTarget:
           - args:
             - --provider=keycloak-oidc
             - --upstream=http://localhost:8083
-            - --redirect-url=https://test-urls-url-3.test.run.ai/oauth2/callback
+            - --redirect-url=https://test-urls-url-3.mock-q7z3k.example.com/oauth2/callback
             - --oidc-issuer-url=/auth/realms/runai
             - --scope=openid
             - --http-address=0.0.0.0:4183
             - --proxy-prefix=/oauth2
             - --skip-provider-button=true
-            - --whitelist-domain=test-urls-url-3.test.run.ai
-            - --cookie-domain=test-urls-url-3.test.run.ai
+            - --whitelist-domain=test-urls-url-3.mock-q7z3k.example.com
+            - --cookie-domain=test-urls-url-3.mock-q7z3k.example.com
             - --cookie-httponly=true
             - --cookie-secure=true
             - --code-challenge-method=S256
@@ -382,14 +382,14 @@ BatchJobTarget:
           - args:
             - --provider=keycloak-oidc
             - --upstream=http://localhost:8084
-            - --redirect-url=https://test-urls-url-4.test.run.ai/oauth2/callback
+            - --redirect-url=https://test-urls-url-4.mock-q7z3k.example.com/oauth2/callback
             - --oidc-issuer-url=/auth/realms/runai
             - --scope=openid
             - --http-address=0.0.0.0:4184
             - --proxy-prefix=/oauth2
             - --skip-provider-button=true
-            - --whitelist-domain=test-urls-url-4.test.run.ai
-            - --cookie-domain=test-urls-url-4.test.run.ai
+            - --whitelist-domain=test-urls-url-4.mock-q7z3k.example.com
+            - --cookie-domain=test-urls-url-4.mock-q7z3k.example.com
             - --cookie-httponly=true
             - --cookie-secure=true
             - --code-challenge-method=S256

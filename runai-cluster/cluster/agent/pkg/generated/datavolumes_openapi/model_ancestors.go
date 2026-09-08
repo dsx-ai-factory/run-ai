@@ -22,7 +22,7 @@ type Ancestors struct {
 	ClusterUuid NullableString `json:"cluster_uuid,omitempty"`
 	// The id of the department.
 	DepartmentId NullableString `json:"department_id,omitempty"`
-	ProjectId    NullableString `json:"project_id,omitempty"`
+	ProjectId NullableString `json:"project_id,omitempty"`
 }
 
 // NewAncestors instantiates a new Ancestors object
@@ -99,7 +99,6 @@ func (o *Ancestors) HasClusterUuid() bool {
 func (o *Ancestors) SetClusterUuid(v string) {
 	o.ClusterUuid.Set(&v)
 }
-
 // SetClusterUuidNil sets the value for ClusterUuid to be an explicit nil
 func (o *Ancestors) SetClusterUuidNil() {
 	o.ClusterUuid.Set(nil)
@@ -142,7 +141,6 @@ func (o *Ancestors) HasDepartmentId() bool {
 func (o *Ancestors) SetDepartmentId(v string) {
 	o.DepartmentId.Set(&v)
 }
-
 // SetDepartmentIdNil sets the value for DepartmentId to be an explicit nil
 func (o *Ancestors) SetDepartmentIdNil() {
 	o.DepartmentId.Set(nil)
@@ -185,7 +183,6 @@ func (o *Ancestors) HasProjectId() bool {
 func (o *Ancestors) SetProjectId(v string) {
 	o.ProjectId.Set(&v)
 }
-
 // SetProjectIdNil sets the value for ProjectId to be an explicit nil
 func (o *Ancestors) SetProjectIdNil() {
 	o.ProjectId.Set(nil)
@@ -248,3 +245,5 @@ func (v *NullableAncestors) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

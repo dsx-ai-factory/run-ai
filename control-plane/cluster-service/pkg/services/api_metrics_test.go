@@ -57,7 +57,7 @@ var _ = Describe("ApiClustersService", Ordered, func() {
 
 	const (
 		tenantId            = 1
-		fullUrl             = "tenant.test.run.ai"
+		fullUrl             = "tenant.mock-q7z3k.example.com"
 		testSuite           = "cluster-service"
 		baseTimestampUnix   = 1708958503653
 		numOfSamples        = 10

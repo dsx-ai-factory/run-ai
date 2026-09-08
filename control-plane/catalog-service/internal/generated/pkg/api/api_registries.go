@@ -38,11 +38,6 @@ import (
 type RegistriesAPIController struct {
 	service RegistriesAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -58,10 +53,13 @@ type RegistriesAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *RegistriesAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *RegistriesAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -226,7 +224,7 @@ func (c *RegistriesAPIController) ListRegistryIntegrations(w http.ResponseWriter
 	result, err := c.service.ListRegistryIntegrations(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -279,34 +277,35 @@ func (c *RegistriesAPIController) ListRegistryIntegrations(w http.ResponseWriter
 func (c *RegistriesAPIController) CreateRegistryIntegration(w http.ResponseWriter, r *http.Request) {
 	var registryIntegrationCreationRequestParam RegistryIntegrationCreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&registryIntegrationCreationRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertRegistryIntegrationCreationRequestRequired(registryIntegrationCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertRegistryIntegrationCreationRequestConstraints(registryIntegrationCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateRegistryIntegration(r.Context(), registryIntegrationCreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -359,13 +358,13 @@ func (c *RegistriesAPIController) CreateRegistryIntegration(w http.ResponseWrite
 func (c *RegistriesAPIController) GetRegistryIntegrationById(w http.ResponseWriter, r *http.Request) {
 	registryIntegrationIdParam := chi.URLParam(r, "RegistryIntegrationId")
 	if registryIntegrationIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"RegistryIntegrationId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"RegistryIntegrationId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetRegistryIntegrationById(r.Context(), registryIntegrationIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -418,39 +417,40 @@ func (c *RegistriesAPIController) GetRegistryIntegrationById(w http.ResponseWrit
 func (c *RegistriesAPIController) UpdateRegistryIntegration(w http.ResponseWriter, r *http.Request) {
 	registryIntegrationIdParam := chi.URLParam(r, "RegistryIntegrationId")
 	if registryIntegrationIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"RegistryIntegrationId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"RegistryIntegrationId"}, nil, nil)
 		return
 	}
 	var registryIntegrationUpdateRequestParam RegistryIntegrationUpdateRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&registryIntegrationUpdateRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertRegistryIntegrationUpdateRequestRequired(registryIntegrationUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertRegistryIntegrationUpdateRequestConstraints(registryIntegrationUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateRegistryIntegration(r.Context(), registryIntegrationIdParam, registryIntegrationUpdateRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -503,13 +503,13 @@ func (c *RegistriesAPIController) UpdateRegistryIntegration(w http.ResponseWrite
 func (c *RegistriesAPIController) DeleteRegistryIntegration(w http.ResponseWriter, r *http.Request) {
 	registryIntegrationIdParam := chi.URLParam(r, "RegistryIntegrationId")
 	if registryIntegrationIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"RegistryIntegrationId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"RegistryIntegrationId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteRegistryIntegration(r.Context(), registryIntegrationIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

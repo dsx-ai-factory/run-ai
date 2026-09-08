@@ -38,11 +38,6 @@ import (
 type AccessKeysAPIController struct {
 	service AccessKeysAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -58,10 +53,13 @@ type AccessKeysAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *AccessKeysAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *AccessKeysAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -249,7 +247,7 @@ func (c *AccessKeysAPIController) GetAccessKeys(w http.ResponseWriter, r *http.R
 	result, err := c.service.GetAccessKeys(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -302,34 +300,35 @@ func (c *AccessKeysAPIController) GetAccessKeys(w http.ResponseWriter, r *http.R
 func (c *AccessKeysAPIController) CreateAccessKey(w http.ResponseWriter, r *http.Request) {
 	var accessKeyCreationRequestParam AccessKeyCreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&accessKeyCreationRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertAccessKeyCreationRequestRequired(accessKeyCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertAccessKeyCreationRequestConstraints(accessKeyCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateAccessKey(r.Context(), accessKeyCreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -382,13 +381,13 @@ func (c *AccessKeysAPIController) CreateAccessKey(w http.ResponseWriter, r *http
 func (c *AccessKeysAPIController) GetAccessKeyById(w http.ResponseWriter, r *http.Request) {
 	accessKeyIdParam := chi.URLParam(r, "accessKeyId")
 	if accessKeyIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"accessKeyId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"accessKeyId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetAccessKeyById(r.Context(), accessKeyIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -441,13 +440,13 @@ func (c *AccessKeysAPIController) GetAccessKeyById(w http.ResponseWriter, r *htt
 func (c *AccessKeysAPIController) DeleteAccessKeyById(w http.ResponseWriter, r *http.Request) {
 	accessKeyIdParam := chi.URLParam(r, "accessKeyId")
 	if accessKeyIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"accessKeyId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"accessKeyId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteAccessKeyById(r.Context(), accessKeyIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -463,13 +462,13 @@ func (c *AccessKeysAPIController) DeleteAccessKeyById(w http.ResponseWriter, r *
 func (c *AccessKeysAPIController) RegenerateAccessKeySecret(w http.ResponseWriter, r *http.Request) {
 	accessKeyIdParam := chi.URLParam(r, "accessKeyId")
 	if accessKeyIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"accessKeyId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"accessKeyId"}, nil, nil)
 		return
 	}
 	result, err := c.service.RegenerateAccessKeySecret(r.Context(), accessKeyIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -522,7 +521,7 @@ func (c *AccessKeysAPIController) RegenerateAccessKeySecret(w http.ResponseWrite
 func (c *AccessKeysAPIController) GetAccessKeysAdministration(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clientIdParam string
@@ -542,7 +541,7 @@ func (c *AccessKeysAPIController) GetAccessKeysAdministration(w http.ResponseWri
 	result, err := c.service.GetAccessKeysAdministration(r.Context(), clientIdParam, createdByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -595,13 +594,13 @@ func (c *AccessKeysAPIController) GetAccessKeysAdministration(w http.ResponseWri
 func (c *AccessKeysAPIController) DeleteAccessKeyByIdAdministration(w http.ResponseWriter, r *http.Request) {
 	accessKeyIdParam := chi.URLParam(r, "accessKeyId")
 	if accessKeyIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"accessKeyId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"accessKeyId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteAccessKeyByIdAdministration(r.Context(), accessKeyIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

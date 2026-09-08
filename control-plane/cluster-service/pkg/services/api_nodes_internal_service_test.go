@@ -41,7 +41,7 @@ var _ = Describe("NodeService GetNodeInternal tests", Ordered, func() {
 		testInternalCluster, err = dao.CreateCluster(ctxInternal, &models.Cluster{
 			Name:     "test-cluster-internal",
 			TenantId: 1,
-			Domain:   "test.run.ai",
+			Domain:   "mock-q7z3k.example.com",
 			Version:  "v2.24",
 		})
 		Expect(err).To(BeNil())

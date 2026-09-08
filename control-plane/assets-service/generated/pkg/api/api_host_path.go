@@ -38,11 +38,6 @@ import (
 type HostPathAPIController struct {
 	service HostPathAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -58,10 +53,13 @@ type HostPathAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *HostPathAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *HostPathAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -225,7 +223,7 @@ func (c *HostPathAPIController) Routes() Routes {
 func (c *HostPathAPIController) ListHostPathAssets(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var nameParam string
@@ -249,7 +247,7 @@ func (c *HostPathAPIController) ListHostPathAssets(w http.ResponseWriter, r *htt
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "projectId", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "projectId", Err: err}, nil, nil)
 			return
 		}
 
@@ -277,7 +275,7 @@ func (c *HostPathAPIController) ListHostPathAssets(w http.ResponseWriter, r *htt
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "usageInfo", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "usageInfo", Err: err}, nil, nil)
 			return
 		}
 
@@ -291,7 +289,7 @@ func (c *HostPathAPIController) ListHostPathAssets(w http.ResponseWriter, r *htt
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil, nil)
 			return
 		}
 
@@ -322,7 +320,7 @@ func (c *HostPathAPIController) ListHostPathAssets(w http.ResponseWriter, r *htt
 	result, err := c.service.ListHostPathAssets(r.Context(), nameParam, scopeParam, projectIdParam, departmentIdParam, clusterIdParam, usageInfoParam, complyToProjectParam, complyToWorkloadTypeParam, assetIdsParam, complyToReplicaTypeParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -375,34 +373,35 @@ func (c *HostPathAPIController) ListHostPathAssets(w http.ResponseWriter, r *htt
 func (c *HostPathAPIController) CreateHostPath(w http.ResponseWriter, r *http.Request) {
 	var hostPathCreationRequestParam HostPathCreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&hostPathCreationRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertHostPathCreationRequestRequired(hostPathCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertHostPathCreationRequestConstraints(hostPathCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateHostPath(r.Context(), hostPathCreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -455,12 +454,12 @@ func (c *HostPathAPIController) CreateHostPath(w http.ResponseWriter, r *http.Re
 func (c *HostPathAPIController) GetHostPathById(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	assetIdParam := chi.URLParam(r, "AssetId")
 	if assetIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil, nil)
 		return
 	}
 	var usageInfoParam bool
@@ -470,7 +469,7 @@ func (c *HostPathAPIController) GetHostPathById(w http.ResponseWriter, r *http.R
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "usageInfo", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "usageInfo", Err: err}, nil, nil)
 			return
 		}
 
@@ -484,7 +483,7 @@ func (c *HostPathAPIController) GetHostPathById(w http.ResponseWriter, r *http.R
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil, nil)
 			return
 		}
 
@@ -508,7 +507,7 @@ func (c *HostPathAPIController) GetHostPathById(w http.ResponseWriter, r *http.R
 	result, err := c.service.GetHostPathById(r.Context(), assetIdParam, usageInfoParam, complyToProjectParam, complyToWorkloadTypeParam, complyToReplicaTypeParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -561,39 +560,40 @@ func (c *HostPathAPIController) GetHostPathById(w http.ResponseWriter, r *http.R
 func (c *HostPathAPIController) UpdateHostPathById(w http.ResponseWriter, r *http.Request) {
 	assetIdParam := chi.URLParam(r, "AssetId")
 	if assetIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil, nil)
 		return
 	}
 	var hostPathUpdateRequestParam HostPathUpdateRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&hostPathUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertHostPathUpdateRequestRequired(hostPathUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertHostPathUpdateRequestConstraints(hostPathUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateHostPathById(r.Context(), assetIdParam, hostPathUpdateRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -646,13 +646,13 @@ func (c *HostPathAPIController) UpdateHostPathById(w http.ResponseWriter, r *htt
 func (c *HostPathAPIController) DeleteHostPathById(w http.ResponseWriter, r *http.Request) {
 	assetIdParam := chi.URLParam(r, "AssetId")
 	if assetIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteHostPathById(r.Context(), assetIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

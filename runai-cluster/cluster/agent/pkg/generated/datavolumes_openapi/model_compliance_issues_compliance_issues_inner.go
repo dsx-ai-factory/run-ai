@@ -17,7 +17,7 @@ import (
 
 // ComplianceIssuesComplianceIssuesInner struct for ComplianceIssuesComplianceIssuesInner
 type ComplianceIssuesComplianceIssuesInner struct {
-	Field   string `json:"field"`
+	Field string `json:"field"`
 	Details string `json:"details"`
 }
 
@@ -134,3 +134,5 @@ func (v *NullableComplianceIssuesComplianceIssuesInner) UnmarshalJSON(src []byte
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+
