@@ -77,6 +77,26 @@ If a Layer 2 step fails, the workflow logs from `runai-actions` (the private rep
 
 ---
 
+## AI-assisted contributions
+
+Using AI coding assistants (e.g. Claude Code, GitHub Copilot) to help write a
+contribution is fine — the same review bar applies regardless of how the
+change was produced:
+
+- You are responsible for every line you submit. Read and understand the
+  diff before opening a PR; don't submit AI output you haven't verified.
+- The DCO sign-off (below) still certifies that you have the right to submit
+  the change under this project's license, exactly as it would for
+  hand-written code.
+- Don't paste proprietary, confidential, or export-controlled material into
+  third-party AI tools as part of preparing a contribution.
+- PRs that are largely unreviewed AI output — inconsistent with the
+  surrounding code, containing invented APIs, or with commit messages that
+  don't reflect the actual change — will be asked to be revised or closed,
+  same as any other low-quality submission.
+
+---
+
 ## Developer Certificate of Origin (DCO)
 
 External contributions to this repository require a Developer Certificate of Origin sign-off on every commit. Signing off certifies that the contribution is your own work, or that you have the right to submit it under the project's license. The full text of the DCO follows:
