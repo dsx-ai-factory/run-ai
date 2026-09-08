@@ -15,14 +15,10 @@ spec:
       automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
-        runAsUser: 65534
+        runAsUser: 65534  # alpine/socat sets no USER, so runAsNonRoot alone would fail to start
         seccompProfile:
           type: RuntimeDefault
-      # hostNetwork is required: etcd serves metrics on the node's loopback (127.0.0.1:2381),
-      # which is only reachable from the host network namespace. The proxy therefore shares the
-      # node's network stack, and its pod IP is the node's primary IP. Prometheus scrapes that IP
-      # via the headless Service below, so the listener is bound to it explicitly rather than to
-      # 0.0.0.0, keeping etcd metrics off every other interface on the control-plane node.
+      # hostNetwork is required: etcd's metrics port (127.0.0.1:2381) is loopback-only. See README.
       hostNetwork: true
       nodeSelector:
         node-role.kubernetes.io/control-plane: ""
