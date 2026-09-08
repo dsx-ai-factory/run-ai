@@ -3205,6 +3205,49 @@ describe("inference-workload.util", () => {
     });
   });
 
+  describe("setDistributedUIDefaults", () => {
+    const baseModel: IUISuperWorkloadCreationRequest = {
+      name: "distributed-nim",
+      projectId: "p1",
+      clusterId: "c1",
+      spec: {
+        leader: {},
+        worker: {},
+      },
+    };
+
+    it("adds the NIM identity label to the leader spec for NIM workloads", () => {
+      const result = inferenceWorkloadUtil.setDistributedUIDefaults(
+        JSON.parse(JSON.stringify(baseModel)),
+        false,
+        undefined,
+        EServerType.Nim,
+      );
+
+      expect(result.spec.leader?.labels).toContainEqual({ name: NIM_WORKLOAD_LABEL, value: "true" });
+    });
+
+    it("does not duplicate an existing NIM identity label", () => {
+      const model = JSON.parse(JSON.stringify(baseModel));
+      model.spec.leader.labels = [{ name: NIM_WORKLOAD_LABEL, value: "true" }];
+
+      const result = inferenceWorkloadUtil.setDistributedUIDefaults(model, false, undefined, EServerType.Nim);
+
+      expect(result.spec.leader?.labels).toEqual([{ name: NIM_WORKLOAD_LABEL, value: "true" }]);
+    });
+
+    it("does not add the NIM identity label to custom workloads", () => {
+      const result = inferenceWorkloadUtil.setDistributedUIDefaults(
+        JSON.parse(JSON.stringify(baseModel)),
+        false,
+        undefined,
+        EServerType.Custom,
+      );
+
+      expect(result.spec.leader?.labels).toBeUndefined();
+    });
+  });
+
   describe("_ensureStoragePathEnvVar", () => {
     const ENV_NAME = "MY_PATH_VAR";
 
