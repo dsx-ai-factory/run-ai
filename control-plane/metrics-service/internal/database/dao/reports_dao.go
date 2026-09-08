@@ -127,8 +127,6 @@ func (p PostgresReportsDao) GetReports(
 		Where("tenant_id = ?", tenantId).
 		WithEnricher(querydbenrich.Filters(filterBy))
 
-	// Both orderings must be chained directly: WithEnricher defers to GORM Scopes, which
-	// are applied after directly-chained clauses, so an enriched sort would land behind "id".
 	if sortBy != "" {
 		query = query.Order(querydbenrich.FormatSortClause(sortBy, sortOrder))
 	}
