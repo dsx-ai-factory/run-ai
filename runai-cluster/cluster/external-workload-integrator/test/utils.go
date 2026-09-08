@@ -137,6 +137,10 @@ func ValidateExternalWorkloadInnerSpec(g Gomega, offset int, actual, expected *v
 	if expected.Spec.Topology.Name != "" || expected.Spec.Topology.PreferredPlacement != "" || expected.Spec.Topology.RequiredPlacement != "" {
 		g.ExpectWithOffset(offset, actual.Spec.Topology).To(Equal(expected.Spec.Topology), "Topology")
 	}
+	if len(expected.Spec.ComponentTopologies) > 0 {
+		g.ExpectWithOffset(offset, actual.Spec.ComponentTopologies).To(Equal(expected.Spec.ComponentTopologies),
+			"ComponentTopologies")
+	}
 
 	g.ExpectWithOffset(offset, actual.Status.ObservedStatus.Phase).To(Equal(expected.Status.ObservedStatus.Phase),
 		"ObservedStatus.Phase")

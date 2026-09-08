@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
@@ -224,7 +225,7 @@ func (p *WorkloadParser) ParseExternalWorkloadToServerScheme(
 	}
 
 	if se := externalWorkload.Status.StructureElements; se != nil {
-		workloadSyncFields.StructureElements = parseStructureElements(se)
+		workloadSyncFields.StructureElements = parseStructureElements(se, externalWorkload.Spec.ComponentTopologies)
 		workloadSyncFields.SetStructureElementsTotalCount(int32(len(se.Elements))) //nolint:gosec
 	}
 	if len(externalWorkload.Status.NetworkStatus.ExternalEndpoints) > 0 {
@@ -264,7 +265,24 @@ func (p *WorkloadParser) ParseExternalWorkloadToServerScheme(
 	return &workloadSyncFields, podsOfWorkload, podGroupsOfWorkload, nil
 }
 
-func parseStructureElements(se *v1alpha1.StructureElements) []openapi.WorkloadElement {
+// componentTopologiesBySpecName indexes per-component topology constraints for lookup by
+// element instance key. Keys are lowercased because a component's name in the workload spec
+// and the pod label the element's instance key is derived from may differ in case.
+func componentTopologiesBySpecName(entries []v1alpha1.ComponentTopologyEntry) map[string]v1alpha1.Topology {
+	if len(entries) == 0 {
+		return nil
+	}
+	byName := make(map[string]v1alpha1.Topology, len(entries))
+	for _, entry := range entries {
+		byName[strings.ToLower(entry.SpecName)] = entry.Topology
+	}
+	return byName
+}
+
+func parseStructureElements(se *v1alpha1.StructureElements,
+	componentTopologies []v1alpha1.ComponentTopologyEntry,
+) []openapi.WorkloadElement {
+	topologyByComponent := componentTopologiesBySpecName(componentTopologies)
 	numElementsToSync := len(se.Elements)
 	if numElementsToSync > maxStructureElementsPerWorkload {
 		// design decision - if there are too many structure elements, we will only sync the first
@@ -287,6 +305,9 @@ func parseStructureElements(se *v1alpha1.StructureElements) []openapi.WorkloadEl
 		}
 		if e.InstanceKey != nil {
 			apiElem.SetInstanceKey(*e.InstanceKey)
+			if topology, found := topologyByComponent[strings.ToLower(*e.InstanceKey)]; found {
+				apiElem.SetTopology(elementTopologyToApi(topology))
+			}
 		}
 		if e.ReplicaKey != nil {
 			apiElem.SetReplicaKey(*e.ReplicaKey)
@@ -306,6 +327,20 @@ func parseStructureElements(se *v1alpha1.StructureElements) []openapi.WorkloadEl
 		result = append(result, apiElem)
 	}
 	return result
+}
+
+func elementTopologyToApi(topology v1alpha1.Topology) openapi.WorkloadElementTopology {
+	apiTopology := openapi.WorkloadElementTopology{}
+	if topology.Name != "" {
+		apiTopology.SetName(topology.Name)
+	}
+	if topology.PreferredPlacement != "" {
+		apiTopology.SetPreferredPlacement(topology.PreferredPlacement)
+	}
+	if topology.RequiredPlacement != "" {
+		apiTopology.SetRequiredPlacement(topology.RequiredPlacement)
+	}
+	return apiTopology
 }
 
 func parseExternalEndpoints(endpoints []v1alpha1.ExternalEndpoint) ([]openapi.EndpointSync, error) {

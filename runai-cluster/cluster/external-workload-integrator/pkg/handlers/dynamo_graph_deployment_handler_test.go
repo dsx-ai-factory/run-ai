@@ -165,9 +165,8 @@ var _ = Describe("TestDynamoGraphDeploymentHandler", Ordered, func() {
 
 		test.ValidateExternalWorkloadInnerSpec(Default, 1, ew, expectedEw)
 
-		// Only the topology name is surfaced; packDomain is intentionally not mapped.
+		// packDomain is a hard requirement, so it maps to RequiredPlacement only.
 		Expect(ew.Spec.Topology.PreferredPlacement).To(BeEmpty())
-		Expect(ew.Spec.Topology.RequiredPlacement).To(BeEmpty())
 	})
 
 	It("Parse topology from service spec annotations", func() {
@@ -252,10 +251,17 @@ var _ = Describe("TestDynamoGraphDeploymentHandler", Ordered, func() {
 		err = dgdfTopOwnerHandler.Parse(ctx, dgd, ew)
 		Expect(err).To(BeNil())
 
-		// Topology name comes from v1beta1 clusterTopologyName; packDomain not mapped.
+		// Topology name comes from v1beta1 clusterTopologyName, placement from packDomain.
 		Expect(ew.Spec.Topology.Name).To(Equal("grove-topology"))
 		Expect(ew.Spec.Topology.PreferredPlacement).To(BeEmpty())
-		Expect(ew.Spec.Topology.RequiredPlacement).To(BeEmpty())
+		Expect(ew.Spec.Topology.RequiredPlacement).To(Equal("rack"))
+		// The component has no constraint of its own, so it inherits the deployment-level one.
+		Expect(ew.Spec.ComponentTopologies).To(Equal([]v1alpha1.ComponentTopologyEntry{
+			{
+				SpecName: "VllmWorker",
+				Topology: v1alpha1.Topology{Name: "grove-topology", RequiredPlacement: "rack"},
+			},
+		}))
 
 		// 2 replicas, image and resources aggregated from the component pod template.
 		Expect(ew.Spec.RequestedPods.Replicas).ToNot(BeNil())
@@ -299,7 +305,83 @@ var _ = Describe("TestDynamoGraphDeploymentHandler", Ordered, func() {
 		// clusterTopologyName wins; the legacy annotations are not consulted.
 		Expect(ew.Spec.Topology.Name).To(Equal("grove-topology"))
 		Expect(ew.Spec.Topology.PreferredPlacement).To(BeEmpty())
+		// No pack domain anywhere, so there is nothing to constrain placement to.
 		Expect(ew.Spec.Topology.RequiredPlacement).To(BeEmpty())
+		Expect(ew.Spec.ComponentTopologies).To(BeEmpty())
+	})
+
+	It("Parse v1beta1 DGD: each component's packDomain overrides the deployment-level one", func() {
+		prefill := newV1beta1Component("PrefillWorker", dynamov1beta1.ComponentTypeWorker, 1, 1, dgdImage, nil, nil)
+		prefill.TopologyConstraint = &dynamov1beta1.TopologyConstraint{PackDomain: "rack"}
+		decode := newV1beta1Component("DecodeWorker", dynamov1beta1.ComponentTypeWorker, 1, 1, dgdImage, nil, nil)
+		decode.TopologyConstraint = &dynamov1beta1.TopologyConstraint{PackDomain: "host"}
+		// No constraint of its own, so it inherits the deployment-level zone.
+		frontend := newV1beta1Component("Frontend", dynamov1beta1.ComponentTypeFrontend, 1, 1, dgdImage, nil, nil)
+
+		dgd := newV1beta1DGD("dgd-v1beta1-component-topology", "grove-topology", prefill, decode, frontend)
+		dgd.Spec.TopologyConstraint.PackDomain = "zone"
+
+		Expect(cachedClient.Create(ctx, dgd)).To(BeNil())
+		ew := &v1alpha1.ExternalWorkload{}
+		Expect(dgdfTopOwnerHandler.Parse(ctx, dgd, ew)).To(BeNil())
+
+		Expect(ew.Spec.Topology).To(Equal(v1alpha1.Topology{Name: "grove-topology", RequiredPlacement: "zone"}))
+		// Sorted by component name, so the spec is stable across re-parses.
+		Expect(ew.Spec.ComponentTopologies).To(Equal([]v1alpha1.ComponentTopologyEntry{
+			{SpecName: "DecodeWorker", Topology: v1alpha1.Topology{Name: "grove-topology", RequiredPlacement: "host"}},
+			{SpecName: "Frontend", Topology: v1alpha1.Topology{Name: "grove-topology", RequiredPlacement: "zone"}},
+			{SpecName: "PrefillWorker", Topology: v1alpha1.Topology{Name: "grove-topology", RequiredPlacement: "rack"}},
+		}))
+	})
+
+	It("Parse v1beta1 DGD: a component keeps its packDomain when the deployment has none", func() {
+		prefill := newV1beta1Component("PrefillWorker", dynamov1beta1.ComponentTypeWorker, 1, 1, dgdImage, nil, nil)
+		prefill.TopologyConstraint = &dynamov1beta1.TopologyConstraint{PackDomain: "rack"}
+		frontend := newV1beta1Component("Frontend", dynamov1beta1.ComponentTypeFrontend, 1, 1, dgdImage, nil, nil)
+
+		dgd := newV1beta1DGD("dgd-v1beta1-component-only-topology", "grove-topology", prefill, frontend)
+
+		Expect(cachedClient.Create(ctx, dgd)).To(BeNil())
+		ew := &v1alpha1.ExternalWorkload{}
+		Expect(dgdfTopOwnerHandler.Parse(ctx, dgd, ew)).To(BeNil())
+
+		// Nothing constrains the workload as a whole.
+		Expect(ew.Spec.Topology).To(Equal(v1alpha1.Topology{Name: "grove-topology"}))
+		// Frontend has no pack domain to inherit, so it gets no entry.
+		Expect(ew.Spec.ComponentTopologies).To(Equal([]v1alpha1.ComponentTopologyEntry{
+			{SpecName: "PrefillWorker", Topology: v1alpha1.Topology{Name: "grove-topology", RequiredPlacement: "rack"}},
+		}))
+	})
+
+	It("Parse v1alpha1 DGD: each service's packDomain overrides the deployment-level one", func() {
+		dgd := test.DynamoGraphDeploymentBasic.DeepCopy()
+		dgd.Name = fmt.Sprintf("%s-service-topology", dgd.Name)
+		dgd.Spec.TopologyConstraint = &dynamov1alpha1.SpecTopologyConstraint{
+			TopologyProfile: "grove-topology",
+			PackDomain:      "zone",
+		}
+		dgd.Spec.Services = map[string]*dynamov1alpha1.DynamoComponentDeploymentSharedSpec{
+			"PrefillWorker": {
+				ComponentType:      "worker",
+				Replicas:           ptr.To(int32(1)),
+				TopologyConstraint: &dynamov1alpha1.TopologyConstraint{PackDomain: "rack"},
+			},
+			// Inherits the deployment-level zone.
+			"Frontend": {
+				ComponentType: "frontend",
+				Replicas:      ptr.To(int32(1)),
+			},
+		}
+
+		Expect(cachedClient.Create(ctx, dgd)).To(BeNil())
+		ew := &v1alpha1.ExternalWorkload{}
+		Expect(dgdfTopOwnerHandler.Parse(ctx, dgd, ew)).To(BeNil())
+
+		Expect(ew.Spec.Topology).To(Equal(v1alpha1.Topology{Name: "grove-topology", RequiredPlacement: "zone"}))
+		Expect(ew.Spec.ComponentTopologies).To(Equal([]v1alpha1.ComponentTopologyEntry{
+			{SpecName: "Frontend", Topology: v1alpha1.Topology{Name: "grove-topology", RequiredPlacement: "zone"}},
+			{SpecName: "PrefillWorker", Topology: v1alpha1.Topology{Name: "grove-topology", RequiredPlacement: "rack"}},
+		}))
 	})
 
 	It("Parse v1beta1 DGD: aggregates replicas, requests and limits across components", func() {

@@ -25,6 +25,10 @@ const (
 const (
 	topologyName           = "my-topology"
 	topologyPreferredLevel = "rack"
+	// Deployment-level pack domain, and the narrower one a component overrides it with.
+	topologyPackDomain          = "zone"
+	topologyComponentPackDomain = "rack"
+	topologyComponentName       = "Worker"
 )
 
 var (
@@ -200,14 +204,14 @@ var (
 		Spec: dynamov1alpha1.DynamoGraphDeploymentSpec{
 			TopologyConstraint: &dynamov1alpha1.SpecTopologyConstraint{
 				TopologyProfile: topologyName,
-				PackDomain:      dynamov1alpha1.TopologyDomain(topologyPreferredLevel),
+				PackDomain:      dynamov1alpha1.TopologyDomain(topologyPackDomain),
 			},
 			Services: map[string]*dynamov1alpha1.DynamoComponentDeploymentSharedSpec{
-				"Worker": {
+				topologyComponentName: {
 					ComponentType: "worker",
 					Replicas:      ptr.To(int32(1)),
 					TopologyConstraint: &dynamov1alpha1.TopologyConstraint{
-						PackDomain: dynamov1alpha1.TopologyDomain(topologyPreferredLevel),
+						PackDomain: dynamov1alpha1.TopologyDomain(topologyComponentPackDomain),
 					},
 				},
 			},
@@ -232,7 +236,17 @@ var (
 				Replicas: ptr.To(int32(1)),
 			},
 			Topology: v1alpha1.Topology{
-				Name: topologyName,
+				Name:              topologyName,
+				RequiredPlacement: topologyPackDomain,
+			},
+			ComponentTopologies: []v1alpha1.ComponentTopologyEntry{
+				{
+					SpecName: topologyComponentName,
+					Topology: v1alpha1.Topology{
+						Name:              topologyName,
+						RequiredPlacement: topologyComponentPackDomain,
+					},
+				},
 			},
 		},
 		Status: v1alpha1.ExternalWorkloadStatus{

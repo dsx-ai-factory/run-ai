@@ -506,7 +506,7 @@ var _ = Describe("parseStructureElements", func() {
 			},
 		}
 
-		result := parseStructureElements(se)
+		result := parseStructureElements(se, nil)
 		Expect(result).To(HaveLen(2))
 
 		// First element: level 1, no parent, no k8sRef
@@ -536,8 +536,64 @@ var _ = Describe("parseStructureElements", func() {
 		se := &v1alpha1.StructureElements{
 			Elements: []v1alpha1.StructureElement{},
 		}
-		result := parseStructureElements(se)
+		result := parseStructureElements(se, nil)
 		Expect(result).To(BeEmpty())
+	})
+
+	Context("with per-component topology constraints", func() {
+		var se *v1alpha1.StructureElements
+
+		BeforeEach(func() {
+			prefill := "PrefillWorker"
+			frontend := "Frontend"
+			se = &v1alpha1.StructureElements{
+				Elements: []v1alpha1.StructureElement{
+					{ID: "elem-1", Name: "prefill", Level: 1, InstanceKey: &prefill},
+					{ID: "elem-2", Name: "frontend", Level: 1, InstanceKey: &frontend},
+					// Logical element with no instance key to match on.
+					{ID: "elem-3", Name: "group", Level: 2},
+				},
+			}
+		})
+
+		It("attaches each component's constraint to the element with the matching instance key", func() {
+			result := parseStructureElements(se, []v1alpha1.ComponentTopologyEntry{
+				{
+					SpecName: "PrefillWorker",
+					Topology: v1alpha1.Topology{Name: "grove-topology", RequiredPlacement: "rack"},
+				},
+			})
+			Expect(result).To(HaveLen(3))
+
+			Expect(result[0].HasTopology()).To(BeTrue())
+			topology := result[0].GetTopology()
+			Expect(topology.GetName()).To(Equal("grove-topology"))
+			Expect(topology.GetRequiredPlacement()).To(Equal("rack"))
+			Expect(topology.HasPreferredPlacement()).To(BeFalse())
+
+			// No entry for Frontend, and elem-3 has no instance key at all.
+			Expect(result[1].HasTopology()).To(BeFalse())
+			Expect(result[2].HasTopology()).To(BeFalse())
+		})
+
+		It("matches instance keys case-insensitively", func() {
+			result := parseStructureElements(se, []v1alpha1.ComponentTopologyEntry{
+				{
+					SpecName: "prefillworker",
+					Topology: v1alpha1.Topology{Name: "grove-topology", RequiredPlacement: "zone"},
+				},
+			})
+			Expect(result[0].HasTopology()).To(BeTrue())
+			topology := result[0].GetTopology()
+			Expect(topology.GetRequiredPlacement()).To(Equal("zone"))
+		})
+
+		It("leaves every element without topology when there are no constraints", func() {
+			result := parseStructureElements(se, nil)
+			for _, element := range result {
+				Expect(element.HasTopology()).To(BeFalse())
+			}
+		})
 	})
 
 	It("truncates to maxStructureElementsPerWorkload", func() {
@@ -551,7 +607,7 @@ var _ = Describe("parseStructureElements", func() {
 		}
 		se := &v1alpha1.StructureElements{Elements: elements}
 
-		result := parseStructureElements(se)
+		result := parseStructureElements(se, nil)
 		Expect(result).To(HaveLen(maxStructureElementsPerWorkload))
 		Expect(result[0].Id).To(Equal("elem-0"))
 		Expect(result[maxStructureElementsPerWorkload-1].Id).To(Equal(fmt.Sprintf("elem-%d", maxStructureElementsPerWorkload-1)))
@@ -563,7 +619,7 @@ var _ = Describe("parseStructureElements", func() {
 				{ID: "elem-1", Name: "simple", Level: 1},
 			},
 		}
-		result := parseStructureElements(se)
+		result := parseStructureElements(se, nil)
 		Expect(result).To(HaveLen(1))
 		Expect(result[0].Id).To(Equal("elem-1"))
 		Expect(result[0].HasParentId()).To(BeFalse())
