@@ -37,11 +37,6 @@ import (
 type NetworkTopologiesAPIController struct {
 	service NetworkTopologiesAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -57,10 +52,13 @@ type NetworkTopologiesAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *NetworkTopologiesAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *NetworkTopologiesAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -258,39 +256,40 @@ func (c *NetworkTopologiesAPIController) Routes() Routes {
 func (c *NetworkTopologiesAPIController) SyncNetworkTopologies(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	var networkTopologySyncRequestParam NetworkTopologySyncRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&networkTopologySyncRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertNetworkTopologySyncRequestRequired(networkTopologySyncRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertNetworkTopologySyncRequestConstraints(networkTopologySyncRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.SyncNetworkTopologies(r.Context(), clusterUuidParam, networkTopologySyncRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -306,7 +305,7 @@ func (c *NetworkTopologiesAPIController) SyncNetworkTopologies(w http.ResponseWr
 func (c *NetworkTopologiesAPIController) GetNetworkTopologies(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var filterByParam []string
@@ -321,7 +320,7 @@ func (c *NetworkTopologiesAPIController) GetNetworkTopologies(w http.ResponseWri
 	result, err := c.service.GetNetworkTopologies(r.Context(), filterByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -374,34 +373,35 @@ func (c *NetworkTopologiesAPIController) GetNetworkTopologies(w http.ResponseWri
 func (c *NetworkTopologiesAPIController) CreateNetworkTopology(w http.ResponseWriter, r *http.Request) {
 	var networkTopologyCreateRequestParam NetworkTopologyCreateRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&networkTopologyCreateRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertNetworkTopologyCreateRequestRequired(networkTopologyCreateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertNetworkTopologyCreateRequestConstraints(networkTopologyCreateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateNetworkTopology(r.Context(), networkTopologyCreateRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -454,7 +454,7 @@ func (c *NetworkTopologiesAPIController) CreateNetworkTopology(w http.ResponseWr
 func (c *NetworkTopologiesAPIController) GetNetworkTopologiesCount(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var filterByParam []string
@@ -469,7 +469,7 @@ func (c *NetworkTopologiesAPIController) GetNetworkTopologiesCount(w http.Respon
 	result, err := c.service.GetNetworkTopologiesCount(r.Context(), filterByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -522,13 +522,13 @@ func (c *NetworkTopologiesAPIController) GetNetworkTopologiesCount(w http.Respon
 func (c *NetworkTopologiesAPIController) GetNetworkTopologyById(w http.ResponseWriter, r *http.Request) {
 	networkTopologyIdParam := chi.URLParam(r, "networkTopologyId")
 	if networkTopologyIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"networkTopologyId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"networkTopologyId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetNetworkTopologyById(r.Context(), networkTopologyIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -581,13 +581,13 @@ func (c *NetworkTopologiesAPIController) GetNetworkTopologyById(w http.ResponseW
 func (c *NetworkTopologiesAPIController) DeleteNetworkTopology(w http.ResponseWriter, r *http.Request) {
 	networkTopologyIdParam := chi.URLParam(r, "networkTopologyId")
 	if networkTopologyIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"networkTopologyId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"networkTopologyId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteNetworkTopology(r.Context(), networkTopologyIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

@@ -18,12 +18,12 @@ import (
 
 // MetadataFields struct for MetadataFields
 type MetadataFields struct {
-	Id        int32        `json:"id"`
-	CreatedAt time.Time    `json:"createdAt"`
-	UpdatedAt time.Time    `json:"updatedAt"`
+	Id int32 `json:"id"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 	DeletedAt NullableTime `json:"deletedAt,omitempty"`
-	TenantId  *int32       `json:"tenantId,omitempty"`
-	CreatedBy string       `json:"createdBy"`
+	TenantId *int32 `json:"tenantId,omitempty"`
+	CreatedBy string `json:"createdBy"`
 }
 
 // NewMetadataFields instantiates a new MetadataFields object
@@ -151,7 +151,6 @@ func (o *MetadataFields) HasDeletedAt() bool {
 func (o *MetadataFields) SetDeletedAt(v time.Time) {
 	o.DeletedAt.Set(&v)
 }
-
 // SetDeletedAtNil sets the value for DeletedAt to be an explicit nil
 func (o *MetadataFields) SetDeletedAtNil() {
 	o.DeletedAt.Set(nil)
@@ -276,3 +275,5 @@ func (v *NullableMetadataFields) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

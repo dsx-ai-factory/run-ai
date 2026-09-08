@@ -8,7 +8,7 @@ Config:
           name: infw-my-llm-url-authenticated-external-url
         spec:
           rules:
-          - host: team-a-my-llm-url-authenticated-external-url.test.run.ai
+          - host: team-a-my-llm-url-authenticated-external-url.mock-q7z3k.example.com
             http:
               paths:
               - backend:
@@ -64,21 +64,21 @@ Service:
         - args:
           - --provider=keycloak-oidc
           - --upstream=http://localhost:8080
-          - --redirect-url=https://team-a-my-llm.test.run.ai/oauth2/callback
-          - --oidc-issuer-url=https://test.run.ai/auth/realms/runai
+          - --redirect-url=https://team-a-my-llm.mock-q7z3k.example.com/oauth2/callback
+          - --oidc-issuer-url=https://mock-q7z3k.example.com/auth/realms/runai
           - --scope=openid
           - --http-address=0.0.0.0:4180
           - --proxy-prefix=/oauth2
           - --skip-provider-button=true
-          - --whitelist-domain=team-a-my-llm.test.run.ai
-          - --cookie-domain=team-a-my-llm.test.run.ai
+          - --whitelist-domain=team-a-my-llm.mock-q7z3k.example.com
+          - --cookie-domain=team-a-my-llm.mock-q7z3k.example.com
           - --cookie-httponly=true
           - --cookie-secure=true
           - --code-challenge-method=S256
           - --cookie-refresh=10m
           - --cookie-samesite=lax
           - --skip-jwt-bearer-tokens=true
-          - --extra-jwt-issuers=https://test.run.ai/auth/realms/runai=runai
+          - --extra-jwt-issuers=https://mock-q7z3k.example.com/auth/realms/runai=runai
           - --custom-templates-dir=/usr/share/oauth2-proxy
           - --pass-authorization-header=false
           - --cookie-name=InferenceWorkload-runai-team-a-my-llm-0
@@ -111,21 +111,21 @@ Service:
         - args:
           - --provider=keycloak-oidc
           - --upstream=http://localhost:9090
-          - --redirect-url=https://team-a-my-llm-url-authenticated-external-url.test.run.ai/oauth2/callback
-          - --oidc-issuer-url=https://test.run.ai/auth/realms/runai
+          - --redirect-url=https://team-a-my-llm-url-authenticated-external-url.mock-q7z3k.example.com/oauth2/callback
+          - --oidc-issuer-url=https://mock-q7z3k.example.com/auth/realms/runai
           - --scope=openid
           - --http-address=0.0.0.0:4181
           - --proxy-prefix=/oauth2
           - --skip-provider-button=true
-          - --whitelist-domain=team-a-my-llm-url-authenticated-external-url.test.run.ai
-          - --cookie-domain=team-a-my-llm-url-authenticated-external-url.test.run.ai
+          - --whitelist-domain=team-a-my-llm-url-authenticated-external-url.mock-q7z3k.example.com
+          - --cookie-domain=team-a-my-llm-url-authenticated-external-url.mock-q7z3k.example.com
           - --cookie-httponly=true
           - --cookie-secure=true
           - --code-challenge-method=S256
           - --cookie-refresh=10m
           - --cookie-samesite=lax
           - --skip-jwt-bearer-tokens=true
-          - --extra-jwt-issuers=https://test.run.ai/auth/realms/runai=runai
+          - --extra-jwt-issuers=https://mock-q7z3k.example.com/auth/realms/runai=runai
           - --custom-templates-dir=/usr/share/oauth2-proxy
           - --pass-authorization-header=false
           - --cookie-name=my-llm-url-authenticated-external-url-auth-proxy

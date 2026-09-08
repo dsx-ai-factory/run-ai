@@ -79,7 +79,7 @@ func (suite *MetricStoreTestSuite) TestCreateMetricStore() {
 	tenantId := random.Int31()
 	fmt.Printf("running TestCreateMetricStore, tenant [%d]\n", tenantId)
 	ctx := context.WithValue(context.Background(), runaictx.CfTenantId, fmt.Sprintf("%d", tenantId))
-	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@run.ai")
+	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@example.com")
 	tenantMetricStore := getMetricStore(tenantId, datasourceId)
 
 	res, err := metrics_client.GetMetricStoresClient().CreateMetricStore(ctx, tenantMetricStore)
@@ -104,7 +104,7 @@ func (suite *MetricStoreTestSuite) TestCreateMetricStore_TenantMetricStoreAlread
 	tenantId := random.Int31()
 	fmt.Printf("running TestCreateMetricStore_TenantMetricStoreAlreadyExist, tenant [%d]\n", tenantId)
 	ctx := context.WithValue(context.Background(), runaictx.CfTenantId, fmt.Sprintf("%d", tenantId))
-	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@run.ai")
+	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@example.com")
 
 	res, err := metrics_client.GetMetricStoresClient().CreateMetricStore(ctx, getMetricStore(tenantId, datasourceId))
 	require.NoError(suite.T(), err)
@@ -185,7 +185,7 @@ func (suite *MetricStoreTestSuite) TestCreateMetricStore_WithoutDatasourceId() {
 	tenantId := random.Int31()
 	fmt.Printf("running TestCreateMetricStore_WithoutDatasourceId, tenant [%d]\n", tenantId)
 	ctx := context.WithValue(context.Background(), runaictx.CfTenantId, fmt.Sprintf("%d", tenantId))
-	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@run.ai")
+	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@example.com")
 	tenantMetricStore := getMetricStore(tenantId, "")
 
 	created, err := metrics_client.GetMetricStoresClient().CreateMetricStore(ctx, tenantMetricStore)
@@ -199,7 +199,7 @@ func (suite *MetricStoreTestSuite) TestCreateMetricStore_WithoutDatasourceAndDet
 	tenantId := random.Int31()
 	fmt.Printf("running TestCreateMetricStore_WithoutDatasourceAndDetails, tenant [%d]\n", tenantId)
 	ctx := context.WithValue(context.Background(), runaictx.CfTenantId, fmt.Sprintf("%d", tenantId))
-	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@run.ai")
+	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@example.com")
 
 	ms := &openapi.MetricStore{TenantId: tenantId}
 
@@ -217,7 +217,7 @@ func (suite *MetricStoreTestSuite) TestDeleteMetricStore() {
 	tenantId := random.Int31()
 	fmt.Printf("running TestDeleteMetricStore, tenant [%d]\n", tenantId)
 	ctx := context.WithValue(context.Background(), runaictx.CfTenantId, fmt.Sprintf("%d", tenantId))
-	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@run.ai")
+	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@example.com")
 	tenantMetricStore := getMetricStore(tenantId, datasourceId)
 
 	metricStore, err := metrics_client.GetMetricStoresClient().CreateMetricStore(ctx, tenantMetricStore)
@@ -244,7 +244,7 @@ func (suite *MetricStoreTestSuite) TestTenantDeletePubsubEvent_MetricStoreDelete
 	tenantId := random.Int31()
 	fmt.Printf("running TestTenantDeletePubsubEvent_MetricStoreDeleted, tenant [%d]\n", tenantId)
 	ctx := context.WithValue(context.Background(), runaictx.CfTenantId, fmt.Sprintf("%d", tenantId))
-	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@run.ai")
+	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@example.com")
 	tenantMetricStore := getMetricStore(tenantId, datasourceId)
 
 	res, err := metrics_client.GetMetricStoresClient().CreateMetricStore(ctx, tenantMetricStore)

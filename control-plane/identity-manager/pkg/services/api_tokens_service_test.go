@@ -167,7 +167,7 @@ func TestGetTokens_InvalidGrantType(t *testing.T) {
 func TestGrantUserToken_HappyFlow(t *testing.T) {
 	iamMock, clientCacheMock, testSubject, _ := initTokenServiceTests(t)
 	claimsResponse := map[string]interface{}{
-		"sub": "test@run.ai",
+		"sub": "test@example.com",
 	}
 	iamMock.MockAuthService.On("GetClaimsFromToken", mock.Anything, mock.Anything).Return(claimsResponse, nil)
 	client := mockUtils.GetBasicClientArray()[0]

@@ -37,11 +37,6 @@ import (
 type K8sObjectAPIController struct {
 	service K8sObjectAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -57,10 +52,13 @@ type K8sObjectAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *K8sObjectAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *K8sObjectAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -153,18 +151,18 @@ func (c *K8sObjectAPIController) Routes() Routes {
 func (c *K8sObjectAPIController) GetElementObject(w http.ResponseWriter, r *http.Request) {
 	workloadIdParam := chi.URLParam(r, "workloadId")
 	if workloadIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"workloadId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"workloadId"}, nil, nil)
 		return
 	}
 	elementIdParam := chi.URLParam(r, "elementId")
 	if elementIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"elementId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"elementId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetElementObject(r.Context(), workloadIdParam, elementIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -217,18 +215,18 @@ func (c *K8sObjectAPIController) GetElementObject(w http.ResponseWriter, r *http
 func (c *K8sObjectAPIController) GetPodObject(w http.ResponseWriter, r *http.Request) {
 	workloadIdParam := chi.URLParam(r, "workloadId")
 	if workloadIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"workloadId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"workloadId"}, nil, nil)
 		return
 	}
 	podIdParam := chi.URLParam(r, "podId")
 	if podIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"podId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"podId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetPodObject(r.Context(), workloadIdParam, podIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -281,13 +279,13 @@ func (c *K8sObjectAPIController) GetPodObject(w http.ResponseWriter, r *http.Req
 func (c *K8sObjectAPIController) GetWorkloadObject(w http.ResponseWriter, r *http.Request) {
 	workloadIdParam := chi.URLParam(r, "workloadId")
 	if workloadIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"workloadId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"workloadId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetWorkloadObject(r.Context(), workloadIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

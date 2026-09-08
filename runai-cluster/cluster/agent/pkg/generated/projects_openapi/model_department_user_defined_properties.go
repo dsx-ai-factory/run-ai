@@ -1,7 +1,7 @@
 /*
 Project and Department service API
 
-The aggregated API of Run:AI backend projects and departments
+The aggregated API of Run:AI backend projects and departments 
 
 API version: 1.5.1
 */
@@ -23,8 +23,8 @@ type DepartmentUserDefinedProperties struct {
 	// Is over quota allowed for the department.
 	AllowOverQuota *bool `json:"allowOverQuota,omitempty"`
 	// Max allowed GPUs for the department.
-	MaxAllowedGpus *float32           `json:"maxAllowedGpus,omitempty"`
-	Resources      *AssignedResources `json:"resources,omitempty"`
+	MaxAllowedGpus *float32 `json:"maxAllowedGpus,omitempty"`
+	Resources *AssignedResources `json:"resources,omitempty"`
 	// Resources assigned to the Department per node pool
 	NodePoolsResources []NodePoolAssignedResources `json:"nodePoolsResources,omitempty"`
 }
@@ -296,3 +296,5 @@ func (v *NullableDepartmentUserDefinedProperties) UnmarshalJSON(src []byte) erro
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

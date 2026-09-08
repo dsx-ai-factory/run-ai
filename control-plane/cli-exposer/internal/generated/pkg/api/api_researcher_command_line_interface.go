@@ -37,11 +37,6 @@ import (
 type ResearcherCommandLineInterfaceAPIController struct {
 	service ResearcherCommandLineInterfaceAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -57,10 +52,13 @@ type ResearcherCommandLineInterfaceAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *ResearcherCommandLineInterfaceAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *ResearcherCommandLineInterfaceAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -244,18 +242,18 @@ func (c *ResearcherCommandLineInterfaceAPIController) Routes() Routes {
 func (c *ResearcherCommandLineInterfaceAPIController) GetBinary(w http.ResponseWriter, r *http.Request) {
 	operatingSystemParam := chi.URLParam(r, "operatingSystem")
 	if operatingSystemParam == "" {
-		c.errorHandler(w, r, &RequiredError{"operatingSystem"}, nil)
+		c.errorHandler(w, r, &RequiredError{"operatingSystem"}, nil, nil)
 		return
 	}
 	architectureParam := chi.URLParam(r, "architecture")
 	if architectureParam == "" {
-		c.errorHandler(w, r, &RequiredError{"architecture"}, nil)
+		c.errorHandler(w, r, &RequiredError{"architecture"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetBinary(r.Context(), operatingSystemParam, architectureParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -310,7 +308,7 @@ func (c *ResearcherCommandLineInterfaceAPIController) GetInstallerLinux(w http.R
 	result, err := c.service.GetInstallerLinux(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -365,7 +363,7 @@ func (c *ResearcherCommandLineInterfaceAPIController) GetInstallerLinuxCommands(
 	result, err := c.service.GetInstallerLinuxCommands(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -419,7 +417,7 @@ func (c *ResearcherCommandLineInterfaceAPIController) GetInstallerMac(w http.Res
 	result, err := c.service.GetInstallerMac(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -474,7 +472,7 @@ func (c *ResearcherCommandLineInterfaceAPIController) GetInstallerMacCommands(w 
 	result, err := c.service.GetInstallerMacCommands(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -528,7 +526,7 @@ func (c *ResearcherCommandLineInterfaceAPIController) GetInstallerUnix(w http.Re
 	result, err := c.service.GetInstallerUnix(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -583,7 +581,7 @@ func (c *ResearcherCommandLineInterfaceAPIController) GetInstallerUnixCommands(w
 	result, err := c.service.GetInstallerUnixCommands(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -637,7 +635,7 @@ func (c *ResearcherCommandLineInterfaceAPIController) GetInstallerWindowsCommand
 	result, err := c.service.GetInstallerWindowsCommands(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -690,13 +688,13 @@ func (c *ResearcherCommandLineInterfaceAPIController) GetInstallerWindowsCommand
 func (c *ResearcherCommandLineInterfaceAPIController) GetManualDocument(w http.ResponseWriter, r *http.Request) {
 	documentNameParam := chi.URLParam(r, "documentName")
 	if documentNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"documentName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"documentName"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetManualDocument(r.Context(), documentNameParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -751,7 +749,7 @@ func (c *ResearcherCommandLineInterfaceAPIController) GetVersion(w http.Response
 	result, err := c.service.GetVersion(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

@@ -90,7 +90,7 @@ func TestGetBrandingSettings_NonManagementTenantParam_Returns403(t *testing.T) {
 	req, err := http.NewRequest(http.MethodGet,
 		fmt.Sprintf("%s/api/v1/branding/settings?tenantId=%s", hostUrl, BaseTenantId), nil)
 	require.NoError(t, err)
-	req.Header.Set("X-Runai-Subject-Id", "test@run.ai")
+	req.Header.Set("X-Runai-Subject-Id", "test@example.com")
 	// no X-Runai-Is-Management-Tenant header → not a management tenant
 
 	resp, err := http.DefaultClient.Do(req)

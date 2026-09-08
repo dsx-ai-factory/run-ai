@@ -369,7 +369,7 @@ func TestDeleteApp(t *testing.T) {
 
 func getInitializedContext() context.Context {
 	ctx := context.WithValue(context.Background(), runaictx.CfTenantId, tenantIdWithoutSystemScope)
-	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@run.ai")
+	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@example.com")
 	return ctx
 }
 

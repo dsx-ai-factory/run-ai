@@ -2,7 +2,7 @@
   "actualPhase": "Pending",
   "clusterId": "d4f17ff0-8ea3-4790-829f-a839122e2095",
   "createdAt": "2025-12-15T08:58:28.691571Z",
-  "createdBy": "test@run.ai",
+  "createdBy": "test@example.com",
   "departmentId": "4500000",
   "desiredPhase": "Running",
   "name": "my-workspace-demo-123",

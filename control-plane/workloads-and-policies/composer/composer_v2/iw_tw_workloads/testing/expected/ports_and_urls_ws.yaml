@@ -9,7 +9,7 @@ BatchJobTarget:
             name: job-ports_and_urls-url-1
           spec:
             rules:
-            - host: test.run.ai
+            - host: mock-q7z3k.example.com
               http:
                 paths:
                 - backend:
@@ -38,7 +38,7 @@ BatchJobTarget:
             name: job-ports_and_urls-url-my-tool-name
           spec:
             rules:
-            - host: test.run.ai
+            - host: mock-q7z3k.example.com
               http:
                 paths:
                 - backend:
@@ -121,14 +121,14 @@ BatchJobTarget:
           - args:
             - --provider=keycloak-oidc
             - --upstream=http://localhost:8082
-            - --redirect-url=https://test.run.ai/test/ports_and_urls/oauth2/callback
+            - --redirect-url=https://mock-q7z3k.example.com/test/ports_and_urls/oauth2/callback
             - --oidc-issuer-url=/auth/realms/runai
             - --scope=openid
             - --http-address=0.0.0.0:4181
             - --proxy-prefix=/test/ports_and_urls/oauth2
             - --skip-provider-button=true
-            - --whitelist-domain=test.run.ai
-            - --cookie-domain=test.run.ai
+            - --whitelist-domain=mock-q7z3k.example.com
+            - --cookie-domain=mock-q7z3k.example.com
             - --cookie-httponly=true
             - --cookie-secure=true
             - --code-challenge-method=S256
@@ -163,14 +163,14 @@ BatchJobTarget:
           - args:
             - --provider=keycloak-oidc
             - --upstream=http://localhost:8081
-            - --redirect-url=https://test.run.ai/test/ports_and_urls/url-my-tool-name/oauth2/callback
+            - --redirect-url=https://mock-q7z3k.example.com/test/ports_and_urls/url-my-tool-name/oauth2/callback
             - --oidc-issuer-url=/auth/realms/runai
             - --scope=openid
             - --http-address=0.0.0.0:4180
             - --proxy-prefix=/test/ports_and_urls/url-my-tool-name/oauth2
             - --skip-provider-button=true
-            - --whitelist-domain=test.run.ai
-            - --cookie-domain=test.run.ai
+            - --whitelist-domain=mock-q7z3k.example.com
+            - --cookie-domain=mock-q7z3k.example.com
             - --cookie-httponly=true
             - --cookie-secure=true
             - --code-challenge-method=S256
