@@ -202,18 +202,37 @@ describe("runai-table.vue", () => {
 
     test("includes the pinned row when the range crosses it", async () => {
       const vm: RangeSelectionVm = await setupRange({ topRows: [rows[4]] });
-      vm.lastSelectedIndex = -1;
-      vm.handleRangeSelection(false, 1);
+      vm.lastSelectedIndex = 0;
+      vm.handleRangeSelection(false, 2);
 
       expect(lastSelectedNames()).toEqual([rows[4].meta.name, rows[0].meta.name, rows[1].meta.name]);
     });
 
-    test("includes every pinned row when the range crosses more than one", async () => {
+    test("includes every pinned row when the range crosses more than one, in displayed order", async () => {
       const vm: RangeSelectionVm = await setupRange({ topRows: [rows[4], rows[5]] });
-      vm.lastSelectedIndex = -2;
-      vm.handleRangeSelection(false, 0);
+      vm.lastSelectedIndex = 0;
+      vm.handleRangeSelection(false, 2);
 
-      expect(lastSelectedNames()).toEqual([rows[5].meta.name, rows[4].meta.name, rows[0].meta.name]);
+      expect(lastSelectedNames()).toEqual([rows[4].meta.name, rows[5].meta.name, rows[0].meta.name]);
+    });
+
+    test("skips a pinned row that the range passes over in the body", async () => {
+      const vm: RangeSelectionVm = await setupRange({ topRows: [rows[1]] });
+      vm.lastSelectedIndex = 1;
+      vm.handleRangeSelection(false, 2);
+
+      expect(lastSelectedNames()).toEqual([rows[0].meta.name, rows[2].meta.name]);
+      expect(lastSelectedNames()).not.toContain(rows[1].meta.name);
+    });
+
+    test("selects a row pinned from the body only once", async () => {
+      const vm: RangeSelectionVm = await setupRange({ topRows: [rows[0]] });
+      vm.lastSelectedIndex = 0;
+      vm.handleRangeSelection(false, 2);
+
+      const names: Array<string> = lastSelectedNames();
+      expect(names).toEqual([rows[0].meta.name, rows[1].meta.name, rows[2].meta.name]);
+      expect(new Set(names).size).toBe(names.length);
     });
 
     test("does not re-add rows that are already selected", async () => {
@@ -229,10 +248,42 @@ describe("runai-table.vue", () => {
         topRows: [rows[4]],
         selected: [rows[4], rows[0], rows[1]],
       });
-      vm.lastSelectedIndex = -1;
-      vm.handleRangeSelection(true, 1);
+      vm.lastSelectedIndex = 0;
+      vm.handleRangeSelection(true, 2);
 
       expect(lastSelectedNames()).toEqual([]);
+    });
+
+    test("maps body rows to distinct indices on a table that never passes 'getRowKey'", async () => {
+      await runaiTableCmp.setProps({
+        columns: tableModels.environmentColumns,
+        rows,
+        filterBy: tableModels.environmentModel.filterBy,
+        selection: "multiple",
+        getRowKey: undefined,
+      });
+      await runaiTableCmp.vm.$nextTick();
+      const vm = runaiTableCmp.vm as unknown as { visibleIndex: (rowIndex: number) => number };
+
+      // getRowKey defaults to "": a keyed mapping would collapse these onto one index.
+      expect([0, 1, 2].map((rowIndex: number) => vm.visibleIndex(rowIndex))).toEqual([0, 1, 2]);
+    });
+
+    test("offsets body row indices by the pinned rows above them", async () => {
+      await runaiTableCmp.setProps({
+        columns: tableModels.environmentColumns,
+        rows,
+        filterBy: tableModels.environmentModel.filterBy,
+        selection: "multiple",
+        getRowKey,
+        topRows: [rows[1]],
+      });
+      await runaiTableCmp.vm.$nextTick();
+      const vm = runaiTableCmp.vm as unknown as { visibleIndex: (rowIndex: number) => number };
+
+      expect(vm.visibleIndex(0)).toBe(1);
+      expect(vm.visibleIndex(1)).toBe(-1);
+      expect(vm.visibleIndex(2)).toBe(2);
     });
 
     test("ignores indices that fall outside the rendered rows", async () => {

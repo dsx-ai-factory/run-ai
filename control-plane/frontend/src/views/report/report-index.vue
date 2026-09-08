@@ -81,7 +81,7 @@ import { ReportPageActions } from "@/components/report/report-page-actions/";
 // model
 import { type IReportTable, reportIndexColumns } from "@/table-models/report.table-model";
 import type { IFilterBy } from "@/models/filter.model";
-import { EReportAction, reportBulkDeleteCopy } from "@/models/report.model";
+import { EReportAction, isReportDeletionInProgress, reportBulkDeleteCopy } from "@/models/report.model";
 import { ReportCreationModal } from "@/components/report/report-creation-modal";
 import { RunaiDeleteModal } from "@/components/common/runai-delete-modal/";
 // service
@@ -97,6 +97,8 @@ import { intervalUtil } from "@/utils/interval.util";
 import type { BatchDeleteReportsResponse } from "@/swagger-models/org-unit-service-client";
 import CreateReportDropdown from "@/components/report/create-report-dropdown/create-report-dropdown.vue";
 import DOCS from "@/constants/docs";
+
+const maxBulkDeletePollAttempts = 24;
 
 export default defineComponent({
   name: "report-index",
@@ -148,12 +150,22 @@ export default defineComponent({
       q.notify(alertUtil.getError(reportBulkDeleteCopy.failure(firstFailedName, response.failed.length)));
     };
 
+    // DeletionFailed keeps the row in the grid, so waiting for it to disappear would
+    // poll forever. The cap bounds a report wedged in Deleting server-side.
     const pollUntilDeleted = (acceptedIds: string[]) => {
       if (!acceptedIds.length) return;
+      let attemptsLeft = maxBulkDeletePollAttempts;
       intervalUtil.startInterval(EIntervalLabels.ReportIndexPostBulkDelete, async () => {
-        await refreshList();
-        const stillPresent = tableData.value.some((report: IReportTable) => acceptedIds.includes(report.id));
-        if (!stillPresent) stopBulkDeletePolling();
+        try {
+          await refreshList();
+        } catch {
+          stopBulkDeletePolling();
+          return;
+        }
+        const stillDeleting = tableData.value.some(
+          (report: IReportTable) => acceptedIds.includes(report.id) && isReportDeletionInProgress(report.status),
+        );
+        if (!stillDeleting || --attemptsLeft <= 0) stopBulkDeletePolling();
       });
     };
 

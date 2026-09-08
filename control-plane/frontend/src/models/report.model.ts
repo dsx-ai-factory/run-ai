@@ -88,6 +88,10 @@ export enum EReportAction {
   Create = "Create",
 }
 
+export function isReportDeletionInProgress(status: ReportStatus): boolean {
+  return status === ReportStatus.PendingDelete || status === ReportStatus.Deleting;
+}
+
 export const reportBulkDeleteCopy = {
   title: (amount: number): string => `Permanently delete ${amount} reports?`,
   confirmLabel: (amount: number): string => `Delete ${amount} reports`,

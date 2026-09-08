@@ -4,7 +4,8 @@
  */
 
 import { describe, expect, test } from "vitest";
-import { reportBulkDeleteCopy } from "./report.model";
+import { isReportDeletionInProgress, reportBulkDeleteCopy } from "./report.model";
+import { ReportStatus } from "@/swagger-models/org-unit-service-client";
 
 describe("reportBulkDeleteCopy", () => {
   describe("confirmation dialog", () => {
@@ -29,5 +30,22 @@ describe("reportBulkDeleteCopy", () => {
     test("counts the named report itself, so two failures render as +1", () => {
       expect(reportBulkDeleteCopy.failure("my-report", 2)).toBe("Report my-report +1 couldn't be deleted");
     });
+  });
+});
+
+describe("isReportDeletionInProgress", () => {
+  test("is true only while the deletion is still running", () => {
+    expect(isReportDeletionInProgress(ReportStatus.PendingDelete)).toBe(true);
+    expect(isReportDeletionInProgress(ReportStatus.Deleting)).toBe(true);
+  });
+
+  test("is false for DeletionFailed, whose row stays in the grid", () => {
+    expect(isReportDeletionInProgress(ReportStatus.DeletionFailed)).toBe(false);
+  });
+
+  test("is false for every non-deletion status", () => {
+    [ReportStatus.Pending, ReportStatus.Processing, ReportStatus.Ready, ReportStatus.Failed].forEach(
+      (status: ReportStatus) => expect(isReportDeletionInProgress(status)).toBe(false),
+    );
   });
 });

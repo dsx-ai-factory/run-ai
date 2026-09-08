@@ -54,15 +54,15 @@
         :is-selectable="!disableSelection"
         @checkbox-clicked="
           isSingleSelect
-            ? onSelect(getRowKey(pinnedRow), pinnedRow, pinnedRowIndex(pinnedPosition))
+            ? onSelect(getRowKey(pinnedRow), pinnedRow, pinnedPosition)
             : onMultipleSelect($event, {
                 key: getRowKey(pinnedRow),
                 row: pinnedRow,
-                rowIndex: pinnedRowIndex(pinnedPosition),
+                rowIndex: pinnedPosition,
                 selected: isPinnedRowSelected(pinnedRow),
               })
         "
-        @row-clicked="onRowClicked($event, pinnedRow, pinnedRowIndex(pinnedPosition))"
+        @row-clicked="onRowClicked($event, pinnedRow, pinnedPosition)"
         @custom-cell-event="$emit($event.emitName, pinnedRow)"
       />
     </template>
@@ -77,9 +77,11 @@
         :is-selectable="!disableSelection"
         @custom-cell-event="$emit($event.emitName, props.row)"
         @checkbox-clicked="
-          isSingleSelect ? onSelect(props.key, props.row, props.rowIndex) : onMultipleSelect($event, props)
+          isSingleSelect
+            ? onSelect(props.key, props.row, visibleIndex(props.rowIndex))
+            : onMultipleSelect($event, { ...props, rowIndex: visibleIndex(props.rowIndex) })
         "
-        @row-clicked="onRowClicked($event, props.row, props.rowIndex)"
+        @row-clicked="onRowClicked($event, props.row, visibleIndex(props.rowIndex))"
         :is-selected="props.selected"
       />
     </template>
@@ -112,8 +114,6 @@ export type RowProps = {
   rowIndex: number;
   selected: boolean;
 };
-
-const topRowIndex = -1;
 
 export default defineComponent({
   components: {
@@ -242,6 +242,17 @@ export default defineComponent({
     pinnedRowKeys(): Set<string | number> {
       return new Set(this.pinnedRows.map((row) => this.getRowKey(row)));
     },
+    // Pinned rows render above the body and are skipped by it, so the raw rows order
+    // is not what the user sees. Shift-range selection has to walk this order instead.
+    visibleRows(): TableRow[] {
+      return [...this.pinnedRows, ...this.rows.filter((row: TableRow) => !this.isPinned(row))];
+    },
+    // Positional rather than keyed: getRowKey defaults to "" on the pages that never
+    // pass it, which would collapse every row onto one index.
+    bodyVisibleIndexes(): number[] {
+      let nextIndex = this.pinnedRows.length;
+      return this.rows.map((row: TableRow) => (this.isPinned(row) ? -1 : nextIndex++));
+    },
     isSingleSelect(): boolean {
       return this.selection === "single";
     },
@@ -264,13 +275,11 @@ export default defineComponent({
       const key = this.getRowKey(row);
       return !!this.selected?.find((currRow) => this.getRowKey(currRow) === key);
     },
-    // Pinned rows sit above the body, so they get negative indices to stay distinct
-    // from body row indices during shift-range selection.
-    pinnedRowIndex(pinnedPosition: number): number {
-      return topRowIndex - pinnedPosition;
+    visibleIndex(rowIndex: number): number {
+      return this.bodyVisibleIndexes[rowIndex] ?? rowIndex;
     },
     rowAtIndex(index: number): TableRow {
-      return index < 0 ? this.pinnedRows[topRowIndex - index] : this.rows[index];
+      return this.visibleRows[index];
     },
     headerSelectionToggle(selectedRows: readonly TableRow[]): void {
       this.$emit("update:selected", selectedRows);
