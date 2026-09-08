@@ -36,11 +36,6 @@ import (
 type SynchronizationAPIController struct {
 	service SynchronizationAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -56,10 +51,13 @@ type SynchronizationAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *SynchronizationAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *SynchronizationAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -443,7 +441,7 @@ func (c *SynchronizationAPIController) Routes() Routes {
 func (c *SynchronizationAPIController) SyncTrainingPolicies(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -452,7 +450,7 @@ func (c *SynchronizationAPIController) SyncTrainingPolicies(w http.ResponseWrite
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var afterParam int64
@@ -462,7 +460,7 @@ func (c *SynchronizationAPIController) SyncTrainingPolicies(w http.ResponseWrite
 			WithParse[int64](parseInt64),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil, nil)
 			return
 		}
 
@@ -472,7 +470,7 @@ func (c *SynchronizationAPIController) SyncTrainingPolicies(w http.ResponseWrite
 	result, err := c.service.SyncTrainingPolicies(r.Context(), clusterIdParam, afterParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -525,7 +523,7 @@ func (c *SynchronizationAPIController) SyncTrainingPolicies(w http.ResponseWrite
 func (c *SynchronizationAPIController) SyncRequestTrainingPolicies(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -534,7 +532,7 @@ func (c *SynchronizationAPIController) SyncRequestTrainingPolicies(w http.Respon
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var afterParam int64
@@ -544,7 +542,7 @@ func (c *SynchronizationAPIController) SyncRequestTrainingPolicies(w http.Respon
 			WithParse[int64](parseInt64),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil, nil)
 			return
 		}
 
@@ -553,34 +551,35 @@ func (c *SynchronizationAPIController) SyncRequestTrainingPolicies(w http.Respon
 	}
 	var clusterSyncReportParam ClusterSyncReport
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&clusterSyncReportParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertClusterSyncReportRequired(clusterSyncReportParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertClusterSyncReportConstraints(clusterSyncReportParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.SyncRequestTrainingPolicies(r.Context(), clusterIdParam, afterParam, clusterSyncReportParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -633,34 +632,35 @@ func (c *SynchronizationAPIController) SyncRequestTrainingPolicies(w http.Respon
 func (c *SynchronizationAPIController) UpdateSyncStatusTraining(w http.ResponseWriter, r *http.Request) {
 	var syncStatusUpdateParam SyncStatusUpdate
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&syncStatusUpdateParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertSyncStatusUpdateRequired(syncStatusUpdateParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertSyncStatusUpdateConstraints(syncStatusUpdateParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateSyncStatusTraining(r.Context(), syncStatusUpdateParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -676,7 +676,7 @@ func (c *SynchronizationAPIController) UpdateSyncStatusTraining(w http.ResponseW
 func (c *SynchronizationAPIController) SyncWorkspacePolicies(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -685,7 +685,7 @@ func (c *SynchronizationAPIController) SyncWorkspacePolicies(w http.ResponseWrit
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var afterParam int64
@@ -695,7 +695,7 @@ func (c *SynchronizationAPIController) SyncWorkspacePolicies(w http.ResponseWrit
 			WithParse[int64](parseInt64),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil, nil)
 			return
 		}
 
@@ -705,7 +705,7 @@ func (c *SynchronizationAPIController) SyncWorkspacePolicies(w http.ResponseWrit
 	result, err := c.service.SyncWorkspacePolicies(r.Context(), clusterIdParam, afterParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -758,7 +758,7 @@ func (c *SynchronizationAPIController) SyncWorkspacePolicies(w http.ResponseWrit
 func (c *SynchronizationAPIController) SyncRequestWorkspacePolicies(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -767,7 +767,7 @@ func (c *SynchronizationAPIController) SyncRequestWorkspacePolicies(w http.Respo
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var afterParam int64
@@ -777,7 +777,7 @@ func (c *SynchronizationAPIController) SyncRequestWorkspacePolicies(w http.Respo
 			WithParse[int64](parseInt64),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil, nil)
 			return
 		}
 
@@ -786,34 +786,35 @@ func (c *SynchronizationAPIController) SyncRequestWorkspacePolicies(w http.Respo
 	}
 	var clusterSyncReportParam ClusterSyncReport
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&clusterSyncReportParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertClusterSyncReportRequired(clusterSyncReportParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertClusterSyncReportConstraints(clusterSyncReportParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.SyncRequestWorkspacePolicies(r.Context(), clusterIdParam, afterParam, clusterSyncReportParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -866,34 +867,35 @@ func (c *SynchronizationAPIController) SyncRequestWorkspacePolicies(w http.Respo
 func (c *SynchronizationAPIController) UpdateSyncStatusWorkspace(w http.ResponseWriter, r *http.Request) {
 	var syncStatusUpdateParam SyncStatusUpdate
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&syncStatusUpdateParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertSyncStatusUpdateRequired(syncStatusUpdateParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertSyncStatusUpdateConstraints(syncStatusUpdateParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateSyncStatusWorkspace(r.Context(), syncStatusUpdateParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -909,7 +911,7 @@ func (c *SynchronizationAPIController) UpdateSyncStatusWorkspace(w http.Response
 func (c *SynchronizationAPIController) SyncDistributedPolicies(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -918,7 +920,7 @@ func (c *SynchronizationAPIController) SyncDistributedPolicies(w http.ResponseWr
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var afterParam int64
@@ -928,7 +930,7 @@ func (c *SynchronizationAPIController) SyncDistributedPolicies(w http.ResponseWr
 			WithParse[int64](parseInt64),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil, nil)
 			return
 		}
 
@@ -938,7 +940,7 @@ func (c *SynchronizationAPIController) SyncDistributedPolicies(w http.ResponseWr
 	result, err := c.service.SyncDistributedPolicies(r.Context(), clusterIdParam, afterParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -991,7 +993,7 @@ func (c *SynchronizationAPIController) SyncDistributedPolicies(w http.ResponseWr
 func (c *SynchronizationAPIController) SyncRequestDistributedPolicies(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -1000,7 +1002,7 @@ func (c *SynchronizationAPIController) SyncRequestDistributedPolicies(w http.Res
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var afterParam int64
@@ -1010,7 +1012,7 @@ func (c *SynchronizationAPIController) SyncRequestDistributedPolicies(w http.Res
 			WithParse[int64](parseInt64),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil, nil)
 			return
 		}
 
@@ -1019,34 +1021,35 @@ func (c *SynchronizationAPIController) SyncRequestDistributedPolicies(w http.Res
 	}
 	var clusterSyncReportParam ClusterSyncReport
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&clusterSyncReportParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertClusterSyncReportRequired(clusterSyncReportParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertClusterSyncReportConstraints(clusterSyncReportParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.SyncRequestDistributedPolicies(r.Context(), clusterIdParam, afterParam, clusterSyncReportParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1099,34 +1102,35 @@ func (c *SynchronizationAPIController) SyncRequestDistributedPolicies(w http.Res
 func (c *SynchronizationAPIController) UpdateSyncStatusDistributed(w http.ResponseWriter, r *http.Request) {
 	var syncStatusUpdateParam SyncStatusUpdate
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&syncStatusUpdateParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertSyncStatusUpdateRequired(syncStatusUpdateParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertSyncStatusUpdateConstraints(syncStatusUpdateParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateSyncStatusDistributed(r.Context(), syncStatusUpdateParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1142,7 +1146,7 @@ func (c *SynchronizationAPIController) UpdateSyncStatusDistributed(w http.Respon
 func (c *SynchronizationAPIController) SyncInferencePolicies(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -1151,7 +1155,7 @@ func (c *SynchronizationAPIController) SyncInferencePolicies(w http.ResponseWrit
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var afterParam int64
@@ -1161,7 +1165,7 @@ func (c *SynchronizationAPIController) SyncInferencePolicies(w http.ResponseWrit
 			WithParse[int64](parseInt64),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil, nil)
 			return
 		}
 
@@ -1171,7 +1175,7 @@ func (c *SynchronizationAPIController) SyncInferencePolicies(w http.ResponseWrit
 	result, err := c.service.SyncInferencePolicies(r.Context(), clusterIdParam, afterParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1224,7 +1228,7 @@ func (c *SynchronizationAPIController) SyncInferencePolicies(w http.ResponseWrit
 func (c *SynchronizationAPIController) SyncRequestInferencePolicies(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -1233,7 +1237,7 @@ func (c *SynchronizationAPIController) SyncRequestInferencePolicies(w http.Respo
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var afterParam int64
@@ -1243,7 +1247,7 @@ func (c *SynchronizationAPIController) SyncRequestInferencePolicies(w http.Respo
 			WithParse[int64](parseInt64),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil, nil)
 			return
 		}
 
@@ -1252,34 +1256,35 @@ func (c *SynchronizationAPIController) SyncRequestInferencePolicies(w http.Respo
 	}
 	var clusterSyncReportParam ClusterSyncReport
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&clusterSyncReportParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertClusterSyncReportRequired(clusterSyncReportParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertClusterSyncReportConstraints(clusterSyncReportParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.SyncRequestInferencePolicies(r.Context(), clusterIdParam, afterParam, clusterSyncReportParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1332,34 +1337,35 @@ func (c *SynchronizationAPIController) SyncRequestInferencePolicies(w http.Respo
 func (c *SynchronizationAPIController) UpdateSyncStatusInference(w http.ResponseWriter, r *http.Request) {
 	var syncStatusUpdateParam SyncStatusUpdate
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&syncStatusUpdateParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertSyncStatusUpdateRequired(syncStatusUpdateParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertSyncStatusUpdateConstraints(syncStatusUpdateParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateSyncStatusInference(r.Context(), syncStatusUpdateParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1375,7 +1381,7 @@ func (c *SynchronizationAPIController) UpdateSyncStatusInference(w http.Response
 func (c *SynchronizationAPIController) SyncDistributedInferencePolicies(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -1384,7 +1390,7 @@ func (c *SynchronizationAPIController) SyncDistributedInferencePolicies(w http.R
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var afterParam int64
@@ -1394,7 +1400,7 @@ func (c *SynchronizationAPIController) SyncDistributedInferencePolicies(w http.R
 			WithParse[int64](parseInt64),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil, nil)
 			return
 		}
 
@@ -1404,7 +1410,7 @@ func (c *SynchronizationAPIController) SyncDistributedInferencePolicies(w http.R
 	result, err := c.service.SyncDistributedInferencePolicies(r.Context(), clusterIdParam, afterParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1457,7 +1463,7 @@ func (c *SynchronizationAPIController) SyncDistributedInferencePolicies(w http.R
 func (c *SynchronizationAPIController) SyncRequestDistributedInferencePolicies(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -1466,7 +1472,7 @@ func (c *SynchronizationAPIController) SyncRequestDistributedInferencePolicies(w
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var afterParam int64
@@ -1476,7 +1482,7 @@ func (c *SynchronizationAPIController) SyncRequestDistributedInferencePolicies(w
 			WithParse[int64](parseInt64),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "after", Err: err}, nil, nil)
 			return
 		}
 
@@ -1485,34 +1491,35 @@ func (c *SynchronizationAPIController) SyncRequestDistributedInferencePolicies(w
 	}
 	var clusterSyncReportParam ClusterSyncReport
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&clusterSyncReportParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertClusterSyncReportRequired(clusterSyncReportParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertClusterSyncReportConstraints(clusterSyncReportParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.SyncRequestDistributedInferencePolicies(r.Context(), clusterIdParam, afterParam, clusterSyncReportParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1565,34 +1572,35 @@ func (c *SynchronizationAPIController) SyncRequestDistributedInferencePolicies(w
 func (c *SynchronizationAPIController) UpdateSyncStatusDistributedInference(w http.ResponseWriter, r *http.Request) {
 	var syncStatusUpdateParam SyncStatusUpdate
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&syncStatusUpdateParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertSyncStatusUpdateRequired(syncStatusUpdateParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertSyncStatusUpdateConstraints(syncStatusUpdateParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateSyncStatusDistributedInference(r.Context(), syncStatusUpdateParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

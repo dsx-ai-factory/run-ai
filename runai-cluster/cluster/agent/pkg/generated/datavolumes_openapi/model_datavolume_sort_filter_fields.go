@@ -21,14 +21,14 @@ type DatavolumeSortFilterFields string
 
 // List of DatavolumeSortFilterFields
 const (
-	DATAVOLUMESORTFILTERFIELDS_NAME          DatavolumeSortFilterFields = "name"
-	DATAVOLUMESORTFILTERFIELDS_PROJECT_ID    DatavolumeSortFilterFields = "projectId"
-	DATAVOLUMESORTFILTERFIELDS_CLUSTER_ID    DatavolumeSortFilterFields = "clusterId"
+	DATAVOLUMESORTFILTERFIELDS_NAME DatavolumeSortFilterFields = "name"
+	DATAVOLUMESORTFILTERFIELDS_PROJECT_ID DatavolumeSortFilterFields = "projectId"
+	DATAVOLUMESORTFILTERFIELDS_CLUSTER_ID DatavolumeSortFilterFields = "clusterId"
 	DATAVOLUMESORTFILTERFIELDS_DEPARTMENT_ID DatavolumeSortFilterFields = "departmentId"
-	DATAVOLUMESORTFILTERFIELDS_PROJECT_NAME  DatavolumeSortFilterFields = "projectName"
-	DATAVOLUMESORTFILTERFIELDS_CREATED_AT    DatavolumeSortFilterFields = "createdAt"
-	DATAVOLUMESORTFILTERFIELDS_CREATED_BY    DatavolumeSortFilterFields = "createdBy"
-	DATAVOLUMESORTFILTERFIELDS_PHASE         DatavolumeSortFilterFields = "phase"
+	DATAVOLUMESORTFILTERFIELDS_PROJECT_NAME DatavolumeSortFilterFields = "projectName"
+	DATAVOLUMESORTFILTERFIELDS_CREATED_AT DatavolumeSortFilterFields = "createdAt"
+	DATAVOLUMESORTFILTERFIELDS_CREATED_BY DatavolumeSortFilterFields = "createdBy"
+	DATAVOLUMESORTFILTERFIELDS_PHASE DatavolumeSortFilterFields = "phase"
 )
 
 // All allowed values of DatavolumeSortFilterFields enum
@@ -121,3 +121,4 @@ func (v *NullableDatavolumeSortFilterFields) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+

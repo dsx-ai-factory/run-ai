@@ -87,7 +87,7 @@ var (
 			ProjectName: ptr.To(ProjectOneName),
 			ProjectId:   ptr.To(ProjectOneID),
 			CreatedAt:   ptrTime(time.Unix(20, 0)),
-			CreatedBy:   ptr.To("test@run.ai"),
+			CreatedBy:   ptr.To("test@example.com"),
 		}
 		app.ActionStatus.Set(ptr.To("deployed"))
 		app.ActionMessage.Set(ptr.To("install completed"))

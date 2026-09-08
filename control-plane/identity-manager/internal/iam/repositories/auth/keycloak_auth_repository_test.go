@@ -233,7 +233,7 @@ func TestGetUserInfo_HappyFlow(t *testing.T) {
 	userInfo := make(map[string]interface{})
 
 	accessToken := getMockTokens().AccessToken
-	email := "test@run.ai"
+	email := "test@example.com"
 	uid := "6babbb3c-cd7c-49d9-898a-a46d04aa8fcc"
 	groups := []string{"group1", "group2", "group3"}
 	userInfo["sub"] = email
@@ -255,7 +255,7 @@ func TestGetUserInfoMissMatchOnData_HappyFlow(t *testing.T) {
 	userInfo := make(map[string]interface{})
 
 	accessToken := getMockTokens().AccessToken
-	email := "test@run.ai"
+	email := "test@example.com"
 	uid := "6babbb3c-cd7c-49d9-898a-a46d04aa8fcc"
 	groups := []string{"group1", "group2", "group3"}
 	userInfo["extra"] = email
@@ -290,7 +290,7 @@ func TestGetClaimsFromToken_HappyFlow(t *testing.T) {
 	claims, err := testSubject.GetClaimsFromToken(context.Background(), tokenString)
 	assert.NoError(t, err)
 	assert.NotNil(t, claims)
-	assert.Equal(t, claims["email"], "test@run.ai")
+	assert.Equal(t, claims["email"], "test@example.com")
 }
 
 func TestGetClaimsFromToken_Error(t *testing.T) {
@@ -335,7 +335,7 @@ func getJwt() *gocloak.JWT {
 func generateFakeToken() (string, error) {
 	secretKey := []byte("secret")
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email": "test@run.ai",
+		"email": "test@example.com",
 		"uid":   "6babbb3c-cd7c-49d9-898a-a46d04aa8fcc",
 	})
 	tokenString, err := token.SignedString(secretKey)

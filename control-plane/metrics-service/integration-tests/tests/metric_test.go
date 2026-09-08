@@ -121,7 +121,7 @@ func (suite *MetricTestSuite) TestGetMetrics_Now_InternalMetricStore() {
 	}
 
 	ctx := context.WithValue(context.Background(), runaictx.CfTenantId, fmt.Sprintf("%d", tenantId))
-	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@run.ai")
+	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@example.com")
 	res, err := metrics_client.GetMetricStoresClient().CreateMetricStore(ctx, tenantMetricStore)
 	assert.NoError(suite.T(), err)
 	assert.NotNil(suite.T(), res)

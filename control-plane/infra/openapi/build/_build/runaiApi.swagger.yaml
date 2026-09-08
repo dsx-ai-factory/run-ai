@@ -13514,7 +13514,7 @@ components:
           type: string
           nullable: true
           description: the absolute OIDC issuer URL oauth2-proxy uses to discover the OpenID provider
-          example: https://app.run.ai/auth/realms/runai
+          example: http://localhost:8080/auth/realms/runai
         customCAGit:
           $ref: '#/components/schemas/ClusterReportedCustomCA'
         customCAS3:

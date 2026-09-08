@@ -31,7 +31,7 @@ const (
 	realmNamePrefix          = "realm"
 	serviceAccountNamePrefix = "service-account"
 	accessKeyNamePrefix      = "access-key"
-	createdByUser            = "test@run.ai"
+	createdByUser            = "test@example.com"
 )
 
 type TestSteps struct {
@@ -170,7 +170,7 @@ func (t *TestSteps) NewTestContextWithRealm(prefix string) (context.Context, str
 }
 
 func (t *TestSteps) SetContextValues(ctx context.Context, tenantID string) context.Context {
-	return t.SetContextValuesWithUser(ctx, tenantID, "test@run.ai")
+	return t.SetContextValuesWithUser(ctx, tenantID, "test@example.com")
 }
 
 func (t *TestSteps) SetContextValuesWithUser(ctx context.Context, tenantID string, username string) context.Context {

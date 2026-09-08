@@ -1,7 +1,7 @@
 /*
 Project and Department service API
 
-The aggregated API of Run:AI backend projects and departments
+The aggregated API of Run:AI backend projects and departments 
 
 API version: 1.5.1
 */
@@ -16,11 +16,11 @@ import (
 
 // NodePoolAssignedResources struct for NodePoolAssignedResources
 type NodePoolAssignedResources struct {
-	Id       *float32           `json:"id,omitempty"`
+	Id *float32 `json:"id,omitempty"`
 	NodePool *NodePoolResources `json:"nodePool,omitempty"`
-	Gpu      *Resource          `json:"gpu,omitempty"`
-	Cpu      *Resource          `json:"cpu,omitempty"`
-	Memory   *Resource          `json:"memory,omitempty"`
+	Gpu *Resource `json:"gpu,omitempty"`
+	Cpu *Resource `json:"cpu,omitempty"`
+	Memory *Resource `json:"memory,omitempty"`
 }
 
 // NewNodePoolAssignedResources instantiates a new NodePoolAssignedResources object
@@ -255,3 +255,5 @@ func (v *NullableNodePoolAssignedResources) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+
