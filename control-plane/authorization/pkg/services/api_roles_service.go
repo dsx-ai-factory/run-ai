@@ -17,7 +17,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/generated/pkg/api"
 	authorization_api "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	authorization_utils "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/helpers"
-	authorization_config "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/models"
 	cluster_service_client "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
@@ -25,7 +24,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/versions"
-	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	"k8s.io/utils/ptr"
 )
@@ -282,7 +280,7 @@ func creationRequestToRoleDao(role api.RoleCreationFieldsInternal, tenantId *str
 		Enabled:                 enabled,
 		ClusterRolePredefinedId: StringToInt64Ptr(role.KubernetesPermissions.PredefinedRole),
 	}
-	if config.Get[*authorization_config.General]().UsePermissionSets && len(role.PermissionSets) > 0 {
+	if len(role.PermissionSets) > 0 {
 		modelRole.NoPermissionSet = ptr.To(false)
 		permissionSetsDao, err := PermissionSetsApiToDao(role.PermissionSets)
 		if err != nil {
@@ -493,43 +491,20 @@ func validateResourceTypeKubernetesPermissions(preDefinedPermission PermissionAc
 }
 
 func validateInputPermissions(ctx context.Context, permissions []api.PostPermission, permissionSets []api.RolePermissionSet) *api.Error {
-	if config.Get[*authorization_config.General]().UsePermissionSets {
-		hasPermissions := len(permissions) > 0
-		hasPermissionSets := len(permissionSets) > 0
+	hasPermissions := len(permissions) > 0
+	hasPermissionSets := len(permissionSets) > 0
 
-		if !hasPermissions && !hasPermissionSets {
-			return api.NewValidationError("A role must contain at least one permission or permission set")
-		}
-		if hasPermissions && hasPermissionSets {
-			return api.NewValidationError("A role must contain permission sets or permissions")
-		}
-
-		if hasPermissionSets {
-			return validatePermissionSetsExist(ctx, permissionSets)
-		}
-		// else - hasPermissions
-		nonEmptyPermissions := 0
-
-		seenResources := map[api.ResourceType]bool{}
-		for _, permission := range permissions {
-			if seenResources[permission.ResourceType] {
-				return api.NewValidationError("Got multiple definitions of permission for the same resource type")
-			}
-			seenResources[permission.ResourceType] = true
-
-			if len(permission.Actions) > 0 {
-				nonEmptyPermissions++
-			}
-		}
-		if nonEmptyPermissions == 0 {
-			return api.NewValidationError("Permissions must contain at least one action")
-		}
-		return nil
+	if !hasPermissions && !hasPermissionSets {
+		return api.NewValidationError("A role must contain at least one permission or permission set")
 	}
-	// todo: will be removed once config.Init().UsePermissionSets so duplicated code
-	if len(permissions) == 0 {
-		return api.NewValidationError("A role must contain at least one permission")
+	if hasPermissions && hasPermissionSets {
+		return api.NewValidationError("A role must contain permission sets or permissions")
 	}
+
+	if hasPermissionSets {
+		return validatePermissionSetsExist(ctx, permissionSets)
+	}
+	// else - hasPermissions
 	nonEmptyPermissions := 0
 
 	seenResources := map[api.ResourceType]bool{}

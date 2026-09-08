@@ -9,16 +9,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/generated/pkg/api"
-
-	authorization_config "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/models"
-	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/orm"
-	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/orm/clause"
 	"gorm.io/gorm"
 	"k8s.io/utils/ptr"
 )
@@ -82,99 +77,40 @@ func (r *RoleDaoInitializer) DbUpsertLegacyRole(ctx context.Context, roleRequest
 	if existingRole != nil {
 		err = runaidb.DB().WithContext(ctx).Session(&gorm.Session{FullSaveAssociations: true}).Transaction(func(tx orm.DB) error {
 			// Update existing role - preserve immutable/system fields from existing role
-			if config.Get[*authorization_config.General]().UsePermissionSets {
-				existingRole.Description = roleRequest.Description
-				existingRole.UpdatedAt = roleRequest.UpdatedAt
-				existingRole.Deprecated = roleRequest.Deprecated
-				if roleRequest.RoleType != "" {
-					existingRole.RoleType = roleRequest.RoleType
-				}
-				if err := upsertPermissionSetAndPermissions(ctx, tx, roleRequest, existingRole); err != nil {
-					return err
-				}
-				_, err := tx.Omit(fmt.Sprintf("%s.*", PermissionSetsField)).Save(existingRole)
-				if err != nil {
-					logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to save role %s. err: %+v", roleRequest.Name, err)
-				}
-				return err
-			}
-
-			existingRole.Permissions = roleRequest.Permissions
 			existingRole.Description = roleRequest.Description
-			existingRole.CreatedBy = roleRequest.CreatedBy
 			existingRole.UpdatedAt = roleRequest.UpdatedAt
+			existingRole.Deprecated = roleRequest.Deprecated
 			if roleRequest.RoleType != "" {
 				existingRole.RoleType = roleRequest.RoleType
 			}
-			if _, err := tx.
-				Table(RolesTable).
-				Where("id = ?", existingRole.ID).
-				Omit(PermissionSetsField).
-				Save(&existingRole); err != nil {
-				logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to update role %s. err: %+v", existingRole.Name, err)
+			if err := upsertPermissionSetAndPermissions(ctx, tx, roleRequest, existingRole); err != nil {
 				return err
 			}
-			// Batch upsert all permissions in one SQL statement
-			if len(existingRole.Permissions) > 0 {
-				for _, permission := range existingRole.Permissions {
-					permission.RoleID = existingRole.ID
-				}
-				if _, err := tx.
-					Clauses(clause.OnConflict{
-						Columns:   []clause.Column{{Name: "role_id"}, {Name: "resource_type"}},
-						DoUpdates: clause.AssignmentColumns([]string{"create", "read", "update", "delete", "sync"}),
-					}).
-					Create(&existingRole.Permissions); err != nil {
-					logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to save permissions for role %s. err: %+v", roleRequest.Name, err)
-					return err
-				}
+			_, err := tx.Omit(fmt.Sprintf("%s.*", PermissionSetsField)).Save(existingRole)
+			if err != nil {
+				logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to save role %s. err: %+v", roleRequest.Name, err)
 			}
-
-			// Delete permissions that are no longer needed
-			permissionsToDelete := findPermissionsToDelete(api.AllowedResourceTypeEnumValues, existingRole.Permissions)
-			for _, permission := range permissionsToDelete {
-				if _, err := tx.
-					Where("role_id = ?", permission.RoleID).
-					Where("resource_type = ?", permission.ResourceType).
-					Delete(&permission); err != nil {
-					logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to delete permission of role id %d on resource type %s. err: %+v", permission.RoleID, permission.ResourceType, err)
-					return err
-				}
-			}
-			return nil
+			return err
 		})
 		if err != nil {
 			return 0, err
 		}
 		return existingRole.ID, nil
-	} else {
-		tx := runaidb.DB().WithContext(ctx).Session(&gorm.Session{FullSaveAssociations: true})
-		var createErr error
-		if config.Get[*authorization_config.General]().UsePermissionSets {
-			// create permissionSet
-			rolePermissionsFromPermissions(roleRequest.Permissions, nil)
-			rolePermissions := rolePermissionsFromPermissions(roleRequest.Permissions, nil)
-			permissionSet := &models.PermissionSet{
-				Name:        getInternalPermissionSetNameFromRole(roleRequest.Name, nil),
-				Internal:    true,
-				Permissions: rolePermissions,
-			}
-			roleRequest.PermissionSets = &[]models.PermissionSet{*permissionSet}
-			roleRequest.Permissions = nil
-			_, createErr = tx.
-				Session(&gorm.Session{FullSaveAssociations: true}).
-				Create(&roleRequest)
-		} else {
-			// Create new role
-			_, createErr = tx.
-				Omit(PermissionSetsField).
-				Session(&gorm.Session{FullSaveAssociations: true}).
-				Create(&roleRequest)
-		}
-		if createErr != nil {
-			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to create role %s. err: %+v", roleRequest.Name, createErr)
-			return 0, createErr
-		}
+	}
+
+	// create the role together with its internal permission set
+	permissionSet := &models.PermissionSet{
+		Name:        getInternalPermissionSetNameFromRole(roleRequest.Name, nil),
+		Internal:    true,
+		Permissions: rolePermissionsFromPermissions(roleRequest.Permissions, nil),
+	}
+	roleRequest.PermissionSets = &[]models.PermissionSet{*permissionSet}
+	roleRequest.Permissions = nil
+	if _, createErr := runaidb.DB().WithContext(ctx).
+		Session(&gorm.Session{FullSaveAssociations: true}).
+		Create(&roleRequest); createErr != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to create role %s. err: %+v", roleRequest.Name, createErr)
+		return 0, createErr
 	}
 
 	return roleRequest.ID, nil
