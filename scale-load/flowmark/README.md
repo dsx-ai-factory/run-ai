@@ -20,7 +20,8 @@ The binary lands in `bin/flowmark`.
 
 Runs every `*.yaml` scenario in the scenarios directory and writes all
 sections to `out/results.json`. Exit code 0 means every scenario passed;
-1 means at least one failed (the results file is still written).
+1 means any error: a failed scenario (the results file is still written),
+invalid scenarios or scenario files, or a failure writing the results.
 
 `./bin/flowmark --help` lists all flags.
 
