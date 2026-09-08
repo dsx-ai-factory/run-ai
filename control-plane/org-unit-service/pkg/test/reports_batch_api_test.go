@@ -344,6 +344,36 @@ var _ = Describe("BatchDeleteReports API tests", func() {
 			Eventually(writer.written, auditWriteLimit, 10*time.Millisecond).Should(ConsistOf(ids))
 		})
 
+		// At capacity the caller writes inline, so the response slows down but no audit
+		// record is lost - that is the intended backpressure, not a regression.
+		It("keeps writing every audit record once the writer pool is saturated", func() {
+			writer := &recordingAuditWriter{delay: perWriteDelay}
+			useAuditWriter(writer)
+
+			const concurrentRequests = 12
+			batches := make([][]string, concurrentRequests)
+			var wg sync.WaitGroup
+			for i := range concurrentRequests {
+				batches[i] = makeIds(2)
+				wg.Add(1)
+				go func(ids []string) {
+					defer wg.Done()
+					defer GinkgoRecover()
+					svc := makeSvc(mockAcceptAll(ids))
+					resp, err := svc.BatchDeleteReports(ctx, api.BatchDeleteReportsRequest{Ids: ids})
+					Expect(err).To(BeNil())
+					Expect(resp.Code).To(Equal(http.StatusAccepted))
+				}(batches[i])
+			}
+			wg.Wait()
+
+			allIds := []string{}
+			for _, ids := range batches {
+				allIds = append(allIds, ids...)
+			}
+			Eventually(writer.written, auditWriteLimit, 10*time.Millisecond).Should(ConsistOf(allIds))
+		})
+
 		It("still attempts every audit write when the writer keeps failing", func() {
 			writer := &recordingAuditWriter{err: fmt.Errorf("audit backend unavailable")}
 			useAuditWriter(writer)
@@ -358,7 +388,7 @@ var _ = Describe("BatchDeleteReports API tests", func() {
 			Eventually(writer.written, auditWriteLimit, 10*time.Millisecond).Should(ConsistOf(ids))
 		})
 
-		It("does not spawn an audit writer when nothing was accepted", func() {
+		It("writes the forbidden-path audit without blocking the response", func() {
 			writer := &recordingAuditWriter{}
 			useAuditWriter(writer)
 
@@ -373,8 +403,7 @@ var _ = Describe("BatchDeleteReports API tests", func() {
 			_, err := svc.BatchDeleteReports(ctx, api.BatchDeleteReportsRequest{Ids: []string{othersId}})
 
 			Expect(err).To(BeNil())
-			// The forbidden-path audit is still written inline, so only that one is expected.
-			Consistently(writer.written, 200*time.Millisecond, 20*time.Millisecond).Should(ConsistOf(othersId))
+			Eventually(writer.written, auditWriteLimit, 10*time.Millisecond).Should(ConsistOf(othersId))
 		})
 	})
 

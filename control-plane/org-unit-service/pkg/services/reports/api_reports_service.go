@@ -39,7 +39,11 @@ const (
 	groupByKey      = "groupBy"
 	filterByKey     = "filterBy"
 	auditEntityType = "report"
+
+	maxConcurrentAuditWriters = 8
 )
+
+var auditWriterSlots = make(chan struct{}, maxConcurrentAuditWriters)
 
 type ReportsApiService struct {
 	MetricsClient metrics_client.MetricsClientContract
@@ -371,7 +375,7 @@ func (r ReportsApiService) BatchDeleteReports(ctx context.Context, request api.B
 		return services.HandleError(err, statusCode, "Failed to batch get reports"), nil
 	}
 
-	permittedIds, failed, errResp := classifyReports(ctx, batchGetResp)
+	permittedIds, failed, auditLogs, errResp := classifyReports(ctx, batchGetResp)
 	if errResp != nil {
 		return *errResp, nil
 	}
@@ -394,13 +398,13 @@ func (r ReportsApiService) BatchDeleteReports(ctx context.Context, request api.B
 			batchOpId = batchDeleteResp.Id
 			accepted = batchDeleteResp.Accepted
 			failed = append(failed, metricsFailureItemsToApi(batchDeleteResp.Failed)...)
-			auditLogs := make([]*audit.AuditLog, 0, len(accepted))
 			for _, id := range accepted {
 				auditLogs = append(auditLogs, newDeleteAuditLog(ctx, id, http.StatusAccepted))
 			}
-			writeAuditLogsAsync(ctx, auditLogs)
 		}
 	}
+
+	writeAuditLogsAsync(ctx, auditLogs)
 
 	if batchOpId == "" {
 		batchOpId = uuid.NewString()
@@ -428,20 +432,20 @@ func (r ReportsApiService) BatchDeleteReports(ctx context.Context, request api.B
 	}, nil
 }
 
-func classifyReports(ctx context.Context, batchGetResp *metrics_swagger.ReportsBatchGetResponse) ([]string, []api.BatchResponseFailureItem, *api.ImplResponse) {
+func classifyReports(ctx context.Context, batchGetResp *metrics_swagger.ReportsBatchGetResponse) ([]string, []api.BatchResponseFailureItem, []*audit.AuditLog, *api.ImplResponse) {
 	tenantId, subjectId, permittedScopes, errResp := parseReportAuthData(ctx)
 	if errResp != nil {
-		return nil, nil, errResp
+		return nil, nil, nil, errResp
 	}
+
+	var deniedAuditLogs []*audit.AuditLog
 
 	var permittedIds []string
 	failed := metricsFailureItemsToApi(batchGetResp.Failed)
 	for i := range batchGetResp.Succeeded {
 		report := &batchGetResp.Succeeded[i]
 		if permErr := validateReportPermissions(report, string(auth_swagger.ACTION_DELETE), tenantId, subjectId, permittedScopes); permErr != nil {
-			if auditErr := writeDeleteAudit(ctx, report.Id, http.StatusForbidden); auditErr != nil {
-				logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to write audit log for denied report %s: %v", report.Id, auditErr)
-			}
+			deniedAuditLogs = append(deniedAuditLogs, newDeleteAuditLog(ctx, report.Id, http.StatusForbidden))
 			failed = append(failed, api.BatchResponseFailureItem{
 				Id:      report.Id,
 				Code:    int32(permErr.Code),
@@ -451,7 +455,7 @@ func classifyReports(ctx context.Context, batchGetResp *metrics_swagger.ReportsB
 			permittedIds = append(permittedIds, report.Id)
 		}
 	}
-	return permittedIds, failed, nil
+	return permittedIds, failed, deniedAuditLogs, nil
 }
 
 func newDeleteAuditLog(ctx context.Context, id string, statusCode int) *audit.AuditLog {
@@ -463,24 +467,33 @@ func newDeleteAuditLog(ctx context.Context, id string, statusCode int) *audit.Au
 		WithStatusCode(statusCode)
 }
 
-func writeDeleteAudit(ctx context.Context, id string, statusCode int) error {
-	return newDeleteAuditLog(ctx, id, statusCode).Write()
-}
-
 // The logs are snapshots already detached from ctx; only the logger needs a context that
-// survives the handler returning, since the request ctx is cancelled once the 202 is sent.
+// survives the handler returning, since the request ctx is cancelled once the response is
+// sent. Concurrency is capped so a burst of batch deletes cannot spawn unbounded writers;
+// at capacity the caller writes them itself, trading latency for backpressure rather than
+// dropping audit records.
 func writeAuditLogsAsync(ctx context.Context, auditLogs []*audit.AuditLog) {
 	if len(auditLogs) == 0 {
 		return
 	}
 
 	detachedCtx := context.WithoutCancel(ctx)
-	go func() {
-		for _, auditLog := range auditLogs {
-			if err := auditLog.Write(); err != nil {
-				logging.WithCtx(runaictx.LoggerHook(detachedCtx)).
-					Errorf("Failed to write audit log for report %s: %v", auditLog.Log.GetEntityId(), err)
-			}
+	select {
+	case auditWriterSlots <- struct{}{}:
+		go func() {
+			defer func() { <-auditWriterSlots }()
+			writeAuditLogs(detachedCtx, auditLogs)
+		}()
+	default:
+		writeAuditLogs(detachedCtx, auditLogs)
+	}
+}
+
+func writeAuditLogs(ctx context.Context, auditLogs []*audit.AuditLog) {
+	for _, auditLog := range auditLogs {
+		if err := auditLog.Write(); err != nil {
+			logging.WithCtx(runaictx.LoggerHook(ctx)).
+				Errorf("Failed to write audit log for report %s: %v", auditLog.Log.GetEntityId(), err)
 		}
-	}()
+	}
 }
