@@ -381,39 +381,58 @@ func DbCreateRole(ctx context.Context, subjectId string, roleSpec models.Role) (
 func DbDeleteRole(ctx context.Context, tenantId string, roleId uint) *api.Error {
 	dbErr := api.NewError(http.StatusInternalServerError, "Failed to delete role", nil)
 
-	tx := runaidb.DB().WithContext(ctx)
-
 	role, err := DbGetRoleById(ctx, tenantId, roleId, nil)
 	if err != nil {
 		return err
 	}
 
-	clearErr := tx.Actual().Model(&role).Association(PermissionSetsField).Clear()
-	if clearErr != nil {
-		return api.NewError(http.StatusInternalServerError, "Failed to delete role", clearErr)
+	// the association clear, the role deletion and the internal permission set cleanup must
+	// either all apply or none of them, otherwise a failure leaves the role without its
+	// permission sets or leaves an orphan internal permission set behind.
+	var apiErr *api.Error
+	transactionErr := runaidb.DB().WithContext(ctx).Transaction(func(tx orm.DB) error {
+		clearErr := tx.Actual().Model(&role).Association(PermissionSetsField).Clear()
+		if clearErr != nil {
+			apiErr = api.NewError(http.StatusInternalServerError, "Failed to delete role", clearErr)
+			return apiErr
+		}
+
+		rowsAffected, deleteErr := tx.
+			Where("tenant_id = ?", tenantId).
+			Delete(&models.Role{}, roleId)
+		if deleteErr != nil || rowsAffected != 1 {
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to delete role from db: error= %v, rowsAffected= %d", deleteErr, rowsAffected)
+			if deleteErr != nil {
+				apiErr = dbErr.WithDetails(deleteErr)
+				return apiErr
+			}
+			if rowsAffected == 0 {
+				dbErr.Code = http.StatusNotFound
+				dbErr.Details = errDetailsResourceNotFound
+			}
+			apiErr = dbErr
+			return apiErr
+		}
+
+		if *role.NoPermissionSet {
+			_, err := tx.
+				Where("name = ?", getInternalPermissionSetNameFromRole(role.Name, &tenantId)).
+				Where("internal = true").
+				Delete(&models.PermissionSet{})
+			if err != nil {
+				apiErr = dbErr.WithDetails(err)
+				return apiErr
+			}
+		}
+
+		return nil
+	})
+	if apiErr != nil {
+		return apiErr
 	}
-	rowsAffected, deleteErr := tx.
-		Where("tenant_id = ?", tenantId).
-		Delete(&models.Role{}, roleId)
-	if deleteErr != nil || rowsAffected != 1 {
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to delete role from db: error= %v, rowsAffected= %d", deleteErr, rowsAffected)
-		if deleteErr != nil {
-			return dbErr.WithDetails(deleteErr)
-		}
-		if rowsAffected == 0 {
-			dbErr.Code = http.StatusNotFound
-			dbErr.Details = errDetailsResourceNotFound
-		}
-		return dbErr
-	}
-	if *role.NoPermissionSet {
-		_, err := tx.
-			Where("name = ?", getInternalPermissionSetNameFromRole(role.Name, &tenantId)).
-			Where("internal = true").
-			Delete(&models.PermissionSet{})
-		if err != nil {
-			return dbErr.WithDetails(err)
-		}
+	if transactionErr != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to delete role %d: %v", roleId, transactionErr)
+		return dbErr.WithDetails(transactionErr)
 	}
 
 	return nil

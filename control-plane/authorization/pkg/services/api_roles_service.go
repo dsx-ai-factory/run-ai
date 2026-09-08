@@ -649,6 +649,12 @@ func validatePermissionSetsExist(ctx context.Context, permissionSets []api.RoleP
 	permMap := make(map[string]string)
 
 	for _, p := range *existingPermissionSets {
+		// internal permission sets are created and owned by the service on behalf of a single
+		// role, so they are not attachable by id. Skipping them here makes them indistinguishable
+		// from a non-existing id, which also avoids leaking whether one exists.
+		if p.Internal {
+			continue
+		}
 		permMap[p.ID.String()] = p.Name
 	}
 
