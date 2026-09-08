@@ -38,11 +38,6 @@ import (
 type PVCsAPIController struct {
 	service PVCsAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -58,10 +53,13 @@ type PVCsAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *PVCsAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *PVCsAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -722,7 +720,7 @@ func (c *PVCsAPIController) Routes() Routes {
 func (c *PVCsAPIController) ListPvcs(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var scopeTypeParam string
@@ -767,7 +765,7 @@ func (c *PVCsAPIController) ListPvcs(w http.ResponseWriter, r *http.Request) {
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeAncestors", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeAncestors", Err: err}, nil, nil)
 			return
 		}
 
@@ -781,7 +779,7 @@ func (c *PVCsAPIController) ListPvcs(w http.ResponseWriter, r *http.Request) {
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeDescendants", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeDescendants", Err: err}, nil, nil)
 			return
 		}
 
@@ -791,7 +789,7 @@ func (c *PVCsAPIController) ListPvcs(w http.ResponseWriter, r *http.Request) {
 	result, err := c.service.ListPvcs(r.Context(), scopeTypeParam, scopeIdParam, nameParam, clusterIdParam, originParam, includeAncestorsParam, includeDescendantsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -845,39 +843,40 @@ func (c *PVCsAPIController) ListPvcs(w http.ResponseWriter, r *http.Request) {
 func (c *PVCsAPIController) SyncClusterWidePvcNamesV1(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	var pvcNamesParam PvcNames
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&pvcNamesParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertPvcNamesRequired(pvcNamesParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertPvcNamesConstraints(pvcNamesParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.SyncClusterWidePvcNamesV1(r.Context(), clusterUuidParam, pvcNamesParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -930,39 +929,40 @@ func (c *PVCsAPIController) SyncClusterWidePvcNamesV1(w http.ResponseWriter, r *
 func (c *PVCsAPIController) SyncClusterWidePvcsV2(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	var pvcsParam Pvcs
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&pvcsParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertPvcsRequired(pvcsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertPvcsConstraints(pvcsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.SyncClusterWidePvcsV2(r.Context(), clusterUuidParam, pvcsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1016,44 +1016,45 @@ func (c *PVCsAPIController) SyncClusterWidePvcsV2(w http.ResponseWriter, r *http
 func (c *PVCsAPIController) CreateClusterWidePvcV1(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	pvcNameParam := chi.URLParam(r, "pvcName")
 	if pvcNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil, nil)
 		return
 	}
 	var createClusterWidePvcV1RequestParam CreateClusterWidePvcV1Request
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&createClusterWidePvcV1RequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertCreateClusterWidePvcV1RequestRequired(createClusterWidePvcV1RequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertCreateClusterWidePvcV1RequestConstraints(createClusterWidePvcV1RequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateClusterWidePvcV1(r.Context(), clusterUuidParam, pvcNameParam, createClusterWidePvcV1RequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1107,18 +1108,18 @@ func (c *PVCsAPIController) CreateClusterWidePvcV1(w http.ResponseWriter, r *htt
 func (c *PVCsAPIController) DeleteClusterWidePvcV1(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	pvcNameParam := chi.URLParam(r, "pvcName")
 	if pvcNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteClusterWidePvcV1(r.Context(), clusterUuidParam, pvcNameParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1134,44 +1135,45 @@ func (c *PVCsAPIController) DeleteClusterWidePvcV1(w http.ResponseWriter, r *htt
 func (c *PVCsAPIController) CreateClusterWidePvcV2(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	pvcNameParam := chi.URLParam(r, "pvcName")
 	if pvcNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil, nil)
 		return
 	}
 	var pvcCreationRequestParam PvcCreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&pvcCreationRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertPvcCreationRequestRequired(pvcCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertPvcCreationRequestConstraints(pvcCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateClusterWidePvcV2(r.Context(), clusterUuidParam, pvcNameParam, pvcCreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1224,18 +1226,18 @@ func (c *PVCsAPIController) CreateClusterWidePvcV2(w http.ResponseWriter, r *htt
 func (c *PVCsAPIController) DeleteClusterWidePvcV2(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	pvcNameParam := chi.URLParam(r, "pvcName")
 	if pvcNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteClusterWidePvcV2(r.Context(), clusterUuidParam, pvcNameParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1252,44 +1254,45 @@ func (c *PVCsAPIController) DeleteClusterWidePvcV2(w http.ResponseWriter, r *htt
 func (c *PVCsAPIController) SyncDepartmentWidePvcNamesV1(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	departmentIdParam := chi.URLParam(r, "departmentId")
 	if departmentIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil, nil)
 		return
 	}
 	var pvcNamesParam PvcNames
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&pvcNamesParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertPvcNamesRequired(pvcNamesParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertPvcNamesConstraints(pvcNamesParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.SyncDepartmentWidePvcNamesV1(r.Context(), clusterUuidParam, departmentIdParam, pvcNamesParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1342,44 +1345,45 @@ func (c *PVCsAPIController) SyncDepartmentWidePvcNamesV1(w http.ResponseWriter, 
 func (c *PVCsAPIController) SyncDepartmentWidePvcsV2(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	departmentIdParam := chi.URLParam(r, "departmentId")
 	if departmentIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil, nil)
 		return
 	}
 	var pvcsParam Pvcs
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&pvcsParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertPvcsRequired(pvcsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertPvcsConstraints(pvcsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.SyncDepartmentWidePvcsV2(r.Context(), clusterUuidParam, departmentIdParam, pvcsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1432,44 +1436,45 @@ func (c *PVCsAPIController) SyncDepartmentWidePvcsV2(w http.ResponseWriter, r *h
 func (c *PVCsAPIController) SyncDepartmentsWidePvcsV2(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	departmentIdParam := chi.URLParam(r, "departmentId")
 	if departmentIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil, nil)
 		return
 	}
 	var pvcsParam Pvcs
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&pvcsParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertPvcsRequired(pvcsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertPvcsConstraints(pvcsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.SyncDepartmentsWidePvcsV2(r.Context(), clusterUuidParam, departmentIdParam, pvcsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1523,49 +1528,50 @@ func (c *PVCsAPIController) SyncDepartmentsWidePvcsV2(w http.ResponseWriter, r *
 func (c *PVCsAPIController) CreateDepartmentWidePvcV1(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	departmentIdParam := chi.URLParam(r, "departmentId")
 	if departmentIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil, nil)
 		return
 	}
 	pvcNameParam := chi.URLParam(r, "pvcName")
 	if pvcNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil, nil)
 		return
 	}
 	var createClusterWidePvcV1RequestParam CreateClusterWidePvcV1Request
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&createClusterWidePvcV1RequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertCreateClusterWidePvcV1RequestRequired(createClusterWidePvcV1RequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertCreateClusterWidePvcV1RequestConstraints(createClusterWidePvcV1RequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateDepartmentWidePvcV1(r.Context(), clusterUuidParam, departmentIdParam, pvcNameParam, createClusterWidePvcV1RequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1619,23 +1625,23 @@ func (c *PVCsAPIController) CreateDepartmentWidePvcV1(w http.ResponseWriter, r *
 func (c *PVCsAPIController) DeleteDepartmentWidePvcV1(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	departmentIdParam := chi.URLParam(r, "departmentId")
 	if departmentIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil, nil)
 		return
 	}
 	pvcNameParam := chi.URLParam(r, "pvcName")
 	if pvcNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteDepartmentWidePvcV1(r.Context(), clusterUuidParam, departmentIdParam, pvcNameParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1651,49 +1657,50 @@ func (c *PVCsAPIController) DeleteDepartmentWidePvcV1(w http.ResponseWriter, r *
 func (c *PVCsAPIController) CreateDepartmentWidePvcV2(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	departmentIdParam := chi.URLParam(r, "departmentId")
 	if departmentIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil, nil)
 		return
 	}
 	pvcNameParam := chi.URLParam(r, "pvcName")
 	if pvcNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil, nil)
 		return
 	}
 	var pvcCreationRequestParam PvcCreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&pvcCreationRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertPvcCreationRequestRequired(pvcCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertPvcCreationRequestConstraints(pvcCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateDepartmentWidePvcV2(r.Context(), clusterUuidParam, departmentIdParam, pvcNameParam, pvcCreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1746,23 +1753,23 @@ func (c *PVCsAPIController) CreateDepartmentWidePvcV2(w http.ResponseWriter, r *
 func (c *PVCsAPIController) DeleteDepartmentWidePvcV2(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	departmentIdParam := chi.URLParam(r, "departmentId")
 	if departmentIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil, nil)
 		return
 	}
 	pvcNameParam := chi.URLParam(r, "pvcName")
 	if pvcNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteDepartmentWidePvcV2(r.Context(), clusterUuidParam, departmentIdParam, pvcNameParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1778,49 +1785,50 @@ func (c *PVCsAPIController) DeleteDepartmentWidePvcV2(w http.ResponseWriter, r *
 func (c *PVCsAPIController) CreateDepartmentsWidePvcV2(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	departmentIdParam := chi.URLParam(r, "departmentId")
 	if departmentIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil, nil)
 		return
 	}
 	pvcNameParam := chi.URLParam(r, "pvcName")
 	if pvcNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil, nil)
 		return
 	}
 	var pvcCreationRequestParam PvcCreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&pvcCreationRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertPvcCreationRequestRequired(pvcCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertPvcCreationRequestConstraints(pvcCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateDepartmentsWidePvcV2(r.Context(), clusterUuidParam, departmentIdParam, pvcNameParam, pvcCreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1873,23 +1881,23 @@ func (c *PVCsAPIController) CreateDepartmentsWidePvcV2(w http.ResponseWriter, r 
 func (c *PVCsAPIController) DeleteDepartmentsWidePvcV2(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	departmentIdParam := chi.URLParam(r, "departmentId")
 	if departmentIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil, nil)
 		return
 	}
 	pvcNameParam := chi.URLParam(r, "pvcName")
 	if pvcNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteDepartmentsWidePvcV2(r.Context(), clusterUuidParam, departmentIdParam, pvcNameParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1906,44 +1914,45 @@ func (c *PVCsAPIController) DeleteDepartmentsWidePvcV2(w http.ResponseWriter, r 
 func (c *PVCsAPIController) SyncProjectPvcNamesV1(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	namespaceParam := chi.URLParam(r, "namespace")
 	if namespaceParam == "" {
-		c.errorHandler(w, r, &RequiredError{"namespace"}, nil)
+		c.errorHandler(w, r, &RequiredError{"namespace"}, nil, nil)
 		return
 	}
 	var pvcNamesParam PvcNames
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&pvcNamesParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertPvcNamesRequired(pvcNamesParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertPvcNamesConstraints(pvcNamesParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.SyncProjectPvcNamesV1(r.Context(), clusterUuidParam, namespaceParam, pvcNamesParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1996,44 +2005,45 @@ func (c *PVCsAPIController) SyncProjectPvcNamesV1(w http.ResponseWriter, r *http
 func (c *PVCsAPIController) SyncProjectPvcsV2(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	namespaceParam := chi.URLParam(r, "namespace")
 	if namespaceParam == "" {
-		c.errorHandler(w, r, &RequiredError{"namespace"}, nil)
+		c.errorHandler(w, r, &RequiredError{"namespace"}, nil, nil)
 		return
 	}
 	var pvcsParam Pvcs
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&pvcsParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertPvcsRequired(pvcsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertPvcsConstraints(pvcsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.SyncProjectPvcsV2(r.Context(), clusterUuidParam, namespaceParam, pvcsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2086,44 +2096,45 @@ func (c *PVCsAPIController) SyncProjectPvcsV2(w http.ResponseWriter, r *http.Req
 func (c *PVCsAPIController) SyncProjectsPvcsV2(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	namespaceParam := chi.URLParam(r, "namespace")
 	if namespaceParam == "" {
-		c.errorHandler(w, r, &RequiredError{"namespace"}, nil)
+		c.errorHandler(w, r, &RequiredError{"namespace"}, nil, nil)
 		return
 	}
 	var pvcsParam Pvcs
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&pvcsParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertPvcsRequired(pvcsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertPvcsConstraints(pvcsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.SyncProjectsPvcsV2(r.Context(), clusterUuidParam, namespaceParam, pvcsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2177,49 +2188,50 @@ func (c *PVCsAPIController) SyncProjectsPvcsV2(w http.ResponseWriter, r *http.Re
 func (c *PVCsAPIController) CreateProjectPvcV1(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	namespaceParam := chi.URLParam(r, "namespace")
 	if namespaceParam == "" {
-		c.errorHandler(w, r, &RequiredError{"namespace"}, nil)
+		c.errorHandler(w, r, &RequiredError{"namespace"}, nil, nil)
 		return
 	}
 	pvcNameParam := chi.URLParam(r, "pvcName")
 	if pvcNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil, nil)
 		return
 	}
 	var createClusterWidePvcV1RequestParam CreateClusterWidePvcV1Request
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&createClusterWidePvcV1RequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertCreateClusterWidePvcV1RequestRequired(createClusterWidePvcV1RequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertCreateClusterWidePvcV1RequestConstraints(createClusterWidePvcV1RequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateProjectPvcV1(r.Context(), clusterUuidParam, namespaceParam, pvcNameParam, createClusterWidePvcV1RequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2273,23 +2285,23 @@ func (c *PVCsAPIController) CreateProjectPvcV1(w http.ResponseWriter, r *http.Re
 func (c *PVCsAPIController) DeleteProjectPvcV1(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	namespaceParam := chi.URLParam(r, "namespace")
 	if namespaceParam == "" {
-		c.errorHandler(w, r, &RequiredError{"namespace"}, nil)
+		c.errorHandler(w, r, &RequiredError{"namespace"}, nil, nil)
 		return
 	}
 	pvcNameParam := chi.URLParam(r, "pvcName")
 	if pvcNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteProjectPvcV1(r.Context(), clusterUuidParam, namespaceParam, pvcNameParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2305,49 +2317,50 @@ func (c *PVCsAPIController) DeleteProjectPvcV1(w http.ResponseWriter, r *http.Re
 func (c *PVCsAPIController) CreateProjectPvcV2(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	namespaceParam := chi.URLParam(r, "namespace")
 	if namespaceParam == "" {
-		c.errorHandler(w, r, &RequiredError{"namespace"}, nil)
+		c.errorHandler(w, r, &RequiredError{"namespace"}, nil, nil)
 		return
 	}
 	pvcNameParam := chi.URLParam(r, "pvcName")
 	if pvcNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil, nil)
 		return
 	}
 	var pvcCreationRequestParam PvcCreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&pvcCreationRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertPvcCreationRequestRequired(pvcCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertPvcCreationRequestConstraints(pvcCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateProjectPvcV2(r.Context(), clusterUuidParam, namespaceParam, pvcNameParam, pvcCreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2400,23 +2413,23 @@ func (c *PVCsAPIController) CreateProjectPvcV2(w http.ResponseWriter, r *http.Re
 func (c *PVCsAPIController) DeleteProjectPvcV2(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	namespaceParam := chi.URLParam(r, "namespace")
 	if namespaceParam == "" {
-		c.errorHandler(w, r, &RequiredError{"namespace"}, nil)
+		c.errorHandler(w, r, &RequiredError{"namespace"}, nil, nil)
 		return
 	}
 	pvcNameParam := chi.URLParam(r, "pvcName")
 	if pvcNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteProjectPvcV2(r.Context(), clusterUuidParam, namespaceParam, pvcNameParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2432,49 +2445,50 @@ func (c *PVCsAPIController) DeleteProjectPvcV2(w http.ResponseWriter, r *http.Re
 func (c *PVCsAPIController) CreateProjectsPvcV2(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	namespaceParam := chi.URLParam(r, "namespace")
 	if namespaceParam == "" {
-		c.errorHandler(w, r, &RequiredError{"namespace"}, nil)
+		c.errorHandler(w, r, &RequiredError{"namespace"}, nil, nil)
 		return
 	}
 	pvcNameParam := chi.URLParam(r, "pvcName")
 	if pvcNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil, nil)
 		return
 	}
 	var pvcCreationRequestParam PvcCreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&pvcCreationRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertPvcCreationRequestRequired(pvcCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertPvcCreationRequestConstraints(pvcCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateProjectsPvcV2(r.Context(), clusterUuidParam, namespaceParam, pvcNameParam, pvcCreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2527,23 +2541,23 @@ func (c *PVCsAPIController) CreateProjectsPvcV2(w http.ResponseWriter, r *http.R
 func (c *PVCsAPIController) DeleteProjectsPvcV2(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	namespaceParam := chi.URLParam(r, "namespace")
 	if namespaceParam == "" {
-		c.errorHandler(w, r, &RequiredError{"namespace"}, nil)
+		c.errorHandler(w, r, &RequiredError{"namespace"}, nil, nil)
 		return
 	}
 	pvcNameParam := chi.URLParam(r, "pvcName")
 	if pvcNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteProjectsPvcV2(r.Context(), clusterUuidParam, namespaceParam, pvcNameParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2559,44 +2573,45 @@ func (c *PVCsAPIController) DeleteProjectsPvcV2(w http.ResponseWriter, r *http.R
 func (c *PVCsAPIController) ObsoleteCreatePvc(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	namespaceParam := chi.URLParam(r, "namespace")
 	if namespaceParam == "" {
-		c.errorHandler(w, r, &RequiredError{"namespace"}, nil)
+		c.errorHandler(w, r, &RequiredError{"namespace"}, nil, nil)
 		return
 	}
 	var singlePvcParam SinglePvc
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&singlePvcParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertSinglePvcRequired(singlePvcParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertSinglePvcConstraints(singlePvcParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.ObsoleteCreatePvc(r.Context(), clusterUuidParam, namespaceParam, singlePvcParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2649,42 +2664,43 @@ func (c *PVCsAPIController) ObsoleteCreatePvc(w http.ResponseWriter, r *http.Req
 func (c *PVCsAPIController) ObsoleteSyncPvc(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	namespaceParam := chi.URLParam(r, "namespace")
 	if namespaceParam == "" {
-		c.errorHandler(w, r, &RequiredError{"namespace"}, nil)
+		c.errorHandler(w, r, &RequiredError{"namespace"}, nil, nil)
 		return
 	}
 	var singlePvcParam []SinglePvc
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&singlePvcParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	for _, el := range singlePvcParam {
 		if err := AssertSinglePvcRequired(el); err != nil {
-			c.errorHandler(w, r, err, nil)
+			c.errorHandler(w, r, err, nil, nil)
 			return
 		}
 	}
 	result, err := c.service.ObsoleteSyncPvc(r.Context(), clusterUuidParam, namespaceParam, singlePvcParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2737,23 +2753,23 @@ func (c *PVCsAPIController) ObsoleteSyncPvc(w http.ResponseWriter, r *http.Reque
 func (c *PVCsAPIController) ObsoleteDeletePvc(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	namespaceParam := chi.URLParam(r, "namespace")
 	if namespaceParam == "" {
-		c.errorHandler(w, r, &RequiredError{"namespace"}, nil)
+		c.errorHandler(w, r, &RequiredError{"namespace"}, nil, nil)
 		return
 	}
 	pvcNameParam := chi.URLParam(r, "pvcName")
 	if pvcNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"pvcName"}, nil, nil)
 		return
 	}
 	result, err := c.service.ObsoleteDeletePvc(r.Context(), clusterUuidParam, namespaceParam, pvcNameParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

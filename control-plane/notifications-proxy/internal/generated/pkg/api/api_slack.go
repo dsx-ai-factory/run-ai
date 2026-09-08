@@ -36,11 +36,6 @@ import (
 type SlackAPIController struct {
 	service SlackAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -56,10 +51,13 @@ type SlackAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *SlackAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *SlackAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -443,7 +441,7 @@ func (c *SlackAPIController) GetSlack(w http.ResponseWriter, r *http.Request) {
 	result, err := c.service.GetSlack(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -496,34 +494,35 @@ func (c *SlackAPIController) GetSlack(w http.ResponseWriter, r *http.Request) {
 func (c *SlackAPIController) PatchSlack(w http.ResponseWriter, r *http.Request) {
 	var slackNotificationChannelPatchRequestParam SlackNotificationChannelPatchRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&slackNotificationChannelPatchRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertSlackNotificationChannelPatchRequestRequired(slackNotificationChannelPatchRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertSlackNotificationChannelPatchRequestConstraints(slackNotificationChannelPatchRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.PatchSlack(r.Context(), slackNotificationChannelPatchRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -577,7 +576,7 @@ func (c *SlackAPIController) GetSlackNotificationState(w http.ResponseWriter, r 
 	result, err := c.service.GetSlackNotificationState(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -630,34 +629,35 @@ func (c *SlackAPIController) GetSlackNotificationState(w http.ResponseWriter, r 
 func (c *SlackAPIController) UpdateSlackNotificationState(w http.ResponseWriter, r *http.Request) {
 	var notificationStateStatusParam NotificationStateStatus
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&notificationStateStatusParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertNotificationStateStatusRequired(notificationStateStatusParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertNotificationStateStatusConstraints(notificationStateStatusParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateSlackNotificationState(r.Context(), notificationStateStatusParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -711,7 +711,7 @@ func (c *SlackAPIController) GetDetailedSlackNotificationState(w http.ResponseWr
 	result, err := c.service.GetDetailedSlackNotificationState(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -764,34 +764,35 @@ func (c *SlackAPIController) GetDetailedSlackNotificationState(w http.ResponseWr
 func (c *SlackAPIController) CreateSlackApp(w http.ResponseWriter, r *http.Request) {
 	var createSlackAppRequestBodyParam CreateSlackAppRequestBody
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&createSlackAppRequestBodyParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertCreateSlackAppRequestBodyRequired(createSlackAppRequestBodyParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertCreateSlackAppRequestBodyConstraints(createSlackAppRequestBodyParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateSlackApp(r.Context(), createSlackAppRequestBodyParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -845,7 +846,7 @@ func (c *SlackAPIController) DeleteSlackApp(w http.ResponseWriter, r *http.Reque
 	result, err := c.service.DeleteSlackApp(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -862,7 +863,7 @@ func (c *SlackAPIController) ConnectSlackWorkspace(w http.ResponseWriter, r *htt
 	result, err := c.service.ConnectSlackWorkspace(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -916,7 +917,7 @@ func (c *SlackAPIController) DisconnectSlackWorkspace(w http.ResponseWriter, r *
 	result, err := c.service.DisconnectSlackWorkspace(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -932,7 +933,7 @@ func (c *SlackAPIController) DisconnectSlackWorkspace(w http.ResponseWriter, r *
 func (c *SlackAPIController) AuthorizeSlackApp(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var codeParam string
@@ -941,7 +942,7 @@ func (c *SlackAPIController) AuthorizeSlackApp(w http.ResponseWriter, r *http.Re
 
 		codeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "code"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "code"}, nil, nil)
 		return
 	}
 	var stateParam string
@@ -950,13 +951,13 @@ func (c *SlackAPIController) AuthorizeSlackApp(w http.ResponseWriter, r *http.Re
 
 		stateParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "state"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "state"}, nil, nil)
 		return
 	}
 	result, err := c.service.AuthorizeSlackApp(r.Context(), codeParam, stateParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -972,34 +973,35 @@ func (c *SlackAPIController) AuthorizeSlackApp(w http.ResponseWriter, r *http.Re
 func (c *SlackAPIController) ValidateSlack(w http.ResponseWriter, r *http.Request) {
 	var slackNotificationChannelConfigParam SlackNotificationChannelConfig
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&slackNotificationChannelConfigParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertSlackNotificationChannelConfigRequired(slackNotificationChannelConfigParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertSlackNotificationChannelConfigConstraints(slackNotificationChannelConfigParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.ValidateSlack(r.Context(), slackNotificationChannelConfigParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1053,7 +1055,7 @@ func (c *SlackAPIController) ValidateSlack(w http.ResponseWriter, r *http.Reques
 func (c *SlackAPIController) AuthorizeSlackAppDeprecated(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var codeParam string
@@ -1062,7 +1064,7 @@ func (c *SlackAPIController) AuthorizeSlackAppDeprecated(w http.ResponseWriter, 
 
 		codeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "code"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "code"}, nil, nil)
 		return
 	}
 	var stateParam string
@@ -1071,13 +1073,13 @@ func (c *SlackAPIController) AuthorizeSlackAppDeprecated(w http.ResponseWriter, 
 
 		stateParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "state"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "state"}, nil, nil)
 		return
 	}
 	result, err := c.service.AuthorizeSlackAppDeprecated(r.Context(), codeParam, stateParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1095,7 +1097,7 @@ func (c *SlackAPIController) AddSlackAppDeprecated(w http.ResponseWriter, r *htt
 	result, err := c.service.AddSlackAppDeprecated(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1149,34 +1151,35 @@ func (c *SlackAPIController) AddSlackAppDeprecated(w http.ResponseWriter, r *htt
 func (c *SlackAPIController) CreateSlackAppDeprecated(w http.ResponseWriter, r *http.Request) {
 	var createSlackAppRequestBodyParam CreateSlackAppRequestBody
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&createSlackAppRequestBodyParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertCreateSlackAppRequestBodyRequired(createSlackAppRequestBodyParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertCreateSlackAppRequestBodyConstraints(createSlackAppRequestBodyParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateSlackAppDeprecated(r.Context(), createSlackAppRequestBodyParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

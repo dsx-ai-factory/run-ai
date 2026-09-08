@@ -17,12 +17,12 @@ import (
 
 // InternalDatavolumeCreationFields struct for InternalDatavolumeCreationFields
 type InternalDatavolumeCreationFields struct {
-	Name  string    `json:"name"`
+	Name string `json:"name"`
 	Scope ScopeType `json:"scope"`
 	// The ID of the department that in its namespace the origin pvc is located (mandatory if scope is department)
 	DepartmentId *string `json:"departmentId,omitempty"`
 	// The ID of the cluster that in its namespace the origin pvc is located (mandatory if scope is cluster)
-	ClusterId   *string `json:"clusterId,omitempty"`
+	ClusterId *string `json:"clusterId,omitempty"`
 	Description *string `json:"description,omitempty"`
 	// The name of the PVC that the datavolume is based on
 	OriginPvcName string `json:"originPvcName"`
@@ -274,3 +274,5 @@ func (v *NullableInternalDatavolumeCreationFields) UnmarshalJSON(src []byte) err
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

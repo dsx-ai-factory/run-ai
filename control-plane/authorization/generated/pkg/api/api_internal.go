@@ -36,11 +36,6 @@ import (
 type InternalAPIController struct {
 	service InternalAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -56,10 +51,13 @@ type InternalAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *InternalAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *InternalAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -217,34 +215,35 @@ func (c *InternalAPIController) Routes() Routes {
 func (c *InternalAPIController) CreateInternalAccessRule(w http.ResponseWriter, r *http.Request) {
 	var internalCreateAccessRuleRequestParam InternalCreateAccessRuleRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&internalCreateAccessRuleRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertInternalCreateAccessRuleRequestRequired(internalCreateAccessRuleRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertInternalCreateAccessRuleRequestConstraints(internalCreateAccessRuleRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateInternalAccessRule(r.Context(), internalCreateAccessRuleRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -297,7 +296,7 @@ func (c *InternalAPIController) CreateInternalAccessRule(w http.ResponseWriter, 
 func (c *InternalAPIController) GetSubjectAccessRules(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var subjectTypeParam string
@@ -306,7 +305,7 @@ func (c *InternalAPIController) GetSubjectAccessRules(w http.ResponseWriter, r *
 
 		subjectTypeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "subjectType"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "subjectType"}, nil, nil)
 		return
 	}
 	var subjectIdsParam []string
@@ -321,7 +320,7 @@ func (c *InternalAPIController) GetSubjectAccessRules(w http.ResponseWriter, r *
 	result, err := c.service.GetSubjectAccessRules(r.Context(), subjectTypeParam, subjectIdsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -374,7 +373,7 @@ func (c *InternalAPIController) GetSubjectAccessRules(w http.ResponseWriter, r *
 func (c *InternalAPIController) DeleteSubjectAccessRules(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var subjectTypeParam string
@@ -383,7 +382,7 @@ func (c *InternalAPIController) DeleteSubjectAccessRules(w http.ResponseWriter, 
 
 		subjectTypeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "subjectType"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "subjectType"}, nil, nil)
 		return
 	}
 	var subjectIdParam string
@@ -392,7 +391,7 @@ func (c *InternalAPIController) DeleteSubjectAccessRules(w http.ResponseWriter, 
 
 		subjectIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "subjectId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "subjectId"}, nil, nil)
 		return
 	}
 	var dryRunParam bool
@@ -402,7 +401,7 @@ func (c *InternalAPIController) DeleteSubjectAccessRules(w http.ResponseWriter, 
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "dryRun", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "dryRun", Err: err}, nil, nil)
 			return
 		}
 
@@ -414,7 +413,7 @@ func (c *InternalAPIController) DeleteSubjectAccessRules(w http.ResponseWriter, 
 	result, err := c.service.DeleteSubjectAccessRules(r.Context(), subjectTypeParam, subjectIdParam, dryRunParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -430,7 +429,7 @@ func (c *InternalAPIController) DeleteSubjectAccessRules(w http.ResponseWriter, 
 func (c *InternalAPIController) GetScopeAccessRules(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -464,7 +463,7 @@ func (c *InternalAPIController) GetScopeAccessRules(w http.ResponseWriter, r *ht
 	result, err := c.service.GetScopeAccessRules(r.Context(), clusterIdParam, rolesParam, departmentIdsParam, projectIdsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -517,7 +516,7 @@ func (c *InternalAPIController) GetScopeAccessRules(w http.ResponseWriter, r *ht
 func (c *InternalAPIController) UpdateScopeAccessRules(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var scopeTypeParam string
@@ -526,7 +525,7 @@ func (c *InternalAPIController) UpdateScopeAccessRules(w http.ResponseWriter, r 
 
 		scopeTypeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scopeType"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scopeType"}, nil, nil)
 		return
 	}
 	var scopeIdParam string
@@ -535,39 +534,40 @@ func (c *InternalAPIController) UpdateScopeAccessRules(w http.ResponseWriter, r 
 
 		scopeIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scopeId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scopeId"}, nil, nil)
 		return
 	}
 	var updateScopeAccessRulesRequestParam UpdateScopeAccessRulesRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&updateScopeAccessRulesRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertUpdateScopeAccessRulesRequestRequired(updateScopeAccessRulesRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertUpdateScopeAccessRulesRequestConstraints(updateScopeAccessRulesRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateScopeAccessRules(r.Context(), scopeTypeParam, scopeIdParam, updateScopeAccessRulesRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -583,7 +583,7 @@ func (c *InternalAPIController) UpdateScopeAccessRules(w http.ResponseWriter, r 
 func (c *InternalAPIController) DeleteScopeAccessRules(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var scopeTypeParam string
@@ -592,7 +592,7 @@ func (c *InternalAPIController) DeleteScopeAccessRules(w http.ResponseWriter, r 
 
 		scopeTypeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scopeType"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scopeType"}, nil, nil)
 		return
 	}
 	var scopeIdParam string
@@ -601,7 +601,7 @@ func (c *InternalAPIController) DeleteScopeAccessRules(w http.ResponseWriter, r 
 
 		scopeIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scopeId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scopeId"}, nil, nil)
 		return
 	}
 	var lastUpdatedParam string
@@ -621,7 +621,7 @@ func (c *InternalAPIController) DeleteScopeAccessRules(w http.ResponseWriter, r 
 	result, err := c.service.DeleteScopeAccessRules(r.Context(), scopeTypeParam, scopeIdParam, lastUpdatedParam, rolesParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -638,7 +638,7 @@ func (c *InternalAPIController) GetGroups(w http.ResponseWriter, r *http.Request
 	result, err := c.service.GetGroups(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -691,7 +691,7 @@ func (c *InternalAPIController) GetGroups(w http.ResponseWriter, r *http.Request
 func (c *InternalAPIController) PrivilegeEscalationEvaluate(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var subjectIdParam string
@@ -700,7 +700,7 @@ func (c *InternalAPIController) PrivilegeEscalationEvaluate(w http.ResponseWrite
 
 		subjectIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "subjectId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "subjectId"}, nil, nil)
 		return
 	}
 	var groupIdsParam []string
@@ -715,7 +715,7 @@ func (c *InternalAPIController) PrivilegeEscalationEvaluate(w http.ResponseWrite
 	result, err := c.service.PrivilegeEscalationEvaluate(r.Context(), subjectIdParam, groupIdsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

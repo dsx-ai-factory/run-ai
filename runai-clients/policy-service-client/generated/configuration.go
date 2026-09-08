@@ -94,15 +94,7 @@ func NewConfiguration() *Configuration {
 		Debug:         false,
 		Servers: ServerConfigurations{
 			{
-				URL:         "https://app.run.ai",
-				Description: "No description provided",
-			},
-			{
-				URL:         "https://staging.run.ai",
-				Description: "No description provided",
-			},
-			{
-				URL:         "https://test.run.ai",
+				URL:         "http://localhost:8080",
 				Description: "No description provided",
 			},
 		},

@@ -9,7 +9,7 @@ BatchJobTarget:
             name: job-urls_tensor_and_jupyter-url-jupyter
           spec:
             rules:
-            - host: test.run.ai
+            - host: mock-q7z3k.example.com
               http:
                 paths:
                 - backend:
@@ -38,7 +38,7 @@ BatchJobTarget:
             name: job-urls_tensor_and_jupyter-url-tensorboard
           spec:
             rules:
-            - host: test.run.ai
+            - host: mock-q7z3k.example.com
               http:
                 paths:
                 - backend:

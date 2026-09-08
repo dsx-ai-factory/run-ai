@@ -38,11 +38,6 @@ import (
 type AccessRulesAPIController struct {
 	service AccessRulesAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -58,10 +53,13 @@ type AccessRulesAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *AccessRulesAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *AccessRulesAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -415,7 +413,7 @@ func (c *AccessRulesAPIController) Routes() Routes {
 func (c *AccessRulesAPIController) GetAccessRules(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var subjectTypeParam string
@@ -443,7 +441,7 @@ func (c *AccessRulesAPIController) GetAccessRules(w http.ResponseWriter, r *http
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -459,7 +457,7 @@ func (c *AccessRulesAPIController) GetAccessRules(w http.ResponseWriter, r *http
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -480,7 +478,7 @@ func (c *AccessRulesAPIController) GetAccessRules(w http.ResponseWriter, r *http
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeDeleted", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeDeleted", Err: err}, nil, nil)
 			return
 		}
 
@@ -538,7 +536,7 @@ func (c *AccessRulesAPIController) GetAccessRules(w http.ResponseWriter, r *http
 	result, err := c.service.GetAccessRules(r.Context(), subjectTypeParam, subjectIdsParam, limitParam, offsetParam, lastUpdatedParam, includeDeletedParam, clusterIdParam, scopeIdParam, sortOrderParam, sortByParam, filterByParam, searchParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -591,34 +589,35 @@ func (c *AccessRulesAPIController) GetAccessRules(w http.ResponseWriter, r *http
 func (c *AccessRulesAPIController) CreateAccessRule(w http.ResponseWriter, r *http.Request) {
 	var accessRuleCreationFieldsParam AccessRuleCreationFields
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&accessRuleCreationFieldsParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertAccessRuleCreationFieldsRequired(accessRuleCreationFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertAccessRuleCreationFieldsConstraints(accessRuleCreationFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateAccessRule(r.Context(), accessRuleCreationFieldsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -671,7 +670,7 @@ func (c *AccessRulesAPIController) CreateAccessRule(w http.ResponseWriter, r *ht
 func (c *AccessRulesAPIController) GetAccessRulesSync(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var limitParam int32
@@ -683,7 +682,7 @@ func (c *AccessRulesAPIController) GetAccessRulesSync(w http.ResponseWriter, r *
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -699,7 +698,7 @@ func (c *AccessRulesAPIController) GetAccessRulesSync(w http.ResponseWriter, r *
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -723,7 +722,7 @@ func (c *AccessRulesAPIController) GetAccessRulesSync(w http.ResponseWriter, r *
 	result, err := c.service.GetAccessRulesSync(r.Context(), limitParam, offsetParam, lastUpdatedParam, clusterIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -780,13 +779,13 @@ func (c *AccessRulesAPIController) GetAccessRule(w http.ResponseWriter, r *http.
 		WithMinimum[int32](0),
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "accessRuleId", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "accessRuleId", Err: err}, nil, nil)
 		return
 	}
 	result, err := c.service.GetAccessRule(r.Context(), accessRuleIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -843,13 +842,13 @@ func (c *AccessRulesAPIController) DeleteAccessRule(w http.ResponseWriter, r *ht
 		WithMinimum[int32](0),
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "accessRuleId", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "accessRuleId", Err: err}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteAccessRule(r.Context(), accessRuleIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -865,7 +864,7 @@ func (c *AccessRulesAPIController) DeleteAccessRule(w http.ResponseWriter, r *ht
 func (c *AccessRulesAPIController) CountAccessRules(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var includeDeletedParam bool
@@ -875,7 +874,7 @@ func (c *AccessRulesAPIController) CountAccessRules(w http.ResponseWriter, r *ht
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeDeleted", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeDeleted", Err: err}, nil, nil)
 			return
 		}
 
@@ -903,7 +902,7 @@ func (c *AccessRulesAPIController) CountAccessRules(w http.ResponseWriter, r *ht
 	result, err := c.service.CountAccessRules(r.Context(), includeDeletedParam, filterByParam, searchParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -960,44 +959,45 @@ func (c *AccessRulesAPIController) UpdateAccessRuleStatus(w http.ResponseWriter,
 		WithMinimum[int32](0),
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "accessRuleId", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "accessRuleId", Err: err}, nil, nil)
 		return
 	}
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	var accessRuleStatusRequestParam AccessRuleStatusRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&accessRuleStatusRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertAccessRuleStatusRequestRequired(accessRuleStatusRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertAccessRuleStatusRequestConstraints(accessRuleStatusRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateAccessRuleStatus(r.Context(), accessRuleIdParam, clusterUuidParam, accessRuleStatusRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1013,37 +1013,38 @@ func (c *AccessRulesAPIController) UpdateAccessRuleStatus(w http.ResponseWriter,
 func (c *AccessRulesAPIController) SyncAccessRules(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	var accessRuleForSyncParam []AccessRuleForSync
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&accessRuleForSyncParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	for _, el := range accessRuleForSyncParam {
 		if err := AssertAccessRuleForSyncRequired(el); err != nil {
-			c.errorHandler(w, r, err, nil)
+			c.errorHandler(w, r, err, nil, nil)
 			return
 		}
 	}
 	result, err := c.service.SyncAccessRules(r.Context(), clusterUuidParam, accessRuleForSyncParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1059,34 +1060,35 @@ func (c *AccessRulesAPIController) SyncAccessRules(w http.ResponseWriter, r *htt
 func (c *AccessRulesAPIController) AccessRulesBatch(w http.ResponseWriter, r *http.Request) {
 	var accessRulesBatchFieldsParam AccessRulesBatchFields
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&accessRulesBatchFieldsParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertAccessRulesBatchFieldsRequired(accessRulesBatchFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertAccessRulesBatchFieldsConstraints(accessRulesBatchFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.AccessRulesBatch(r.Context(), accessRulesBatchFieldsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1139,34 +1141,35 @@ func (c *AccessRulesAPIController) AccessRulesBatch(w http.ResponseWriter, r *ht
 func (c *AccessRulesAPIController) AccessRulesBatchCreate(w http.ResponseWriter, r *http.Request) {
 	var accessRulesBatchCreateFieldsParam AccessRulesBatchCreateFields
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&accessRulesBatchCreateFieldsParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertAccessRulesBatchCreateFieldsRequired(accessRulesBatchCreateFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertAccessRulesBatchCreateFieldsConstraints(accessRulesBatchCreateFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.AccessRulesBatchCreate(r.Context(), accessRulesBatchCreateFieldsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1219,34 +1222,35 @@ func (c *AccessRulesAPIController) AccessRulesBatchCreate(w http.ResponseWriter,
 func (c *AccessRulesAPIController) CreateAuthenticatedUsersAccessRule(w http.ResponseWriter, r *http.Request) {
 	var authenticatedUsersAccessRuleCreationFieldsParam AuthenticatedUsersAccessRuleCreationFields
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&authenticatedUsersAccessRuleCreationFieldsParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertAuthenticatedUsersAccessRuleCreationFieldsRequired(authenticatedUsersAccessRuleCreationFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertAuthenticatedUsersAccessRuleCreationFieldsConstraints(authenticatedUsersAccessRuleCreationFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateAuthenticatedUsersAccessRule(r.Context(), authenticatedUsersAccessRuleCreationFieldsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1299,34 +1303,35 @@ func (c *AccessRulesAPIController) CreateAuthenticatedUsersAccessRule(w http.Res
 func (c *AccessRulesAPIController) AccessRulesMigrateDeprecated(w http.ResponseWriter, r *http.Request) {
 	var accessRulesMigrateDeprecatedFieldsParam AccessRulesMigrateDeprecatedFields
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&accessRulesMigrateDeprecatedFieldsParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertAccessRulesMigrateDeprecatedFieldsRequired(accessRulesMigrateDeprecatedFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertAccessRulesMigrateDeprecatedFieldsConstraints(accessRulesMigrateDeprecatedFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.AccessRulesMigrateDeprecated(r.Context(), accessRulesMigrateDeprecatedFieldsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

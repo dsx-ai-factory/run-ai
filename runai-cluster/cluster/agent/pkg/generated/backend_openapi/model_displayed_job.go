@@ -1,7 +1,7 @@
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend
+The aggregated API  of Run:AI backend 
 
 API version: 1.5.1
 */
@@ -25,7 +25,7 @@ type DisplayedJob struct {
 	JobType *string `json:"jobType,omitempty"`
 	// Unique identifier of the cluster.
 	ClusterId *string `json:"clusterId,omitempty"`
-	Status    *string `json:"status,omitempty"`
+	Status *string `json:"status,omitempty"`
 	// The name of the image executed by the pod.
 	ImageName *string `json:"imageName,omitempty"`
 	// The owner of the job.
@@ -37,36 +37,36 @@ type DisplayedJob struct {
 	// Creation time of the job.
 	CreationTime *string `json:"creationTime,omitempty"`
 	// Completion time of the job.
-	CompletionTime                 *string  `json:"completionTime,omitempty"`
-	TotalRuntime                   *string  `json:"totalRuntime,omitempty"`
-	TotalWaitTime                  *string  `json:"totalWaitTime,omitempty"`
-	Pending                        *float32 `json:"pending,omitempty"`
-	Running                        *float32 `json:"running,omitempty"`
-	Parallelism                    *float32 `json:"parallelism,omitempty"`
-	Completions                    *float32 `json:"completions,omitempty"`
-	Failed                         *float32 `json:"failed,omitempty"`
-	Succeeded                      *float32 `json:"succeeded,omitempty"`
-	CurrentAllocatedGPUs           *float32 `json:"currentAllocatedGPUs,omitempty"`
-	CurrentAllocatedGPUsMemory     *float32 `json:"currentAllocatedGPUsMemory,omitempty"`
-	CurrentRequestedGPUs           *float32 `json:"currentRequestedGPUs,omitempty"`
-	TotalRequestedGPUs             *float32 `json:"totalRequestedGPUs,omitempty"`
-	RequestedGPUsPerPodGroup       *float32 `json:"requestedGPUsPerPodGroup,omitempty"`
+	CompletionTime *string `json:"completionTime,omitempty"`
+	TotalRuntime *string `json:"totalRuntime,omitempty"`
+	TotalWaitTime *string `json:"totalWaitTime,omitempty"`
+	Pending *float32 `json:"pending,omitempty"`
+	Running *float32 `json:"running,omitempty"`
+	Parallelism *float32 `json:"parallelism,omitempty"`
+	Completions *float32 `json:"completions,omitempty"`
+	Failed *float32 `json:"failed,omitempty"`
+	Succeeded *float32 `json:"succeeded,omitempty"`
+	CurrentAllocatedGPUs *float32 `json:"currentAllocatedGPUs,omitempty"`
+	CurrentAllocatedGPUsMemory *float32 `json:"currentAllocatedGPUsMemory,omitempty"`
+	CurrentRequestedGPUs *float32 `json:"currentRequestedGPUs,omitempty"`
+	TotalRequestedGPUs *float32 `json:"totalRequestedGPUs,omitempty"`
+	RequestedGPUsPerPodGroup *float32 `json:"requestedGPUsPerPodGroup,omitempty"`
 	RequestedGPUsMemoryPerPodGroup *float32 `json:"requestedGPUsMemoryPerPodGroup,omitempty"`
-	ParentWorkloadName             *string  `json:"parentWorkloadName,omitempty"`
-	TotalRequestedMemory           *float32 `json:"totalRequestedMemory,omitempty"`
-	TotalRequestedCPU              *float32 `json:"totalRequestedCPU,omitempty"`
-	TotalLimitCPU                  *float32 `json:"totalLimitCPU,omitempty"`
-	TotalLimitMemory               *float32 `json:"totalLimitMemory,omitempty"`
+	ParentWorkloadName *string `json:"parentWorkloadName,omitempty"`
+	TotalRequestedMemory *float32 `json:"totalRequestedMemory,omitempty"`
+	TotalRequestedCPU *float32 `json:"totalRequestedCPU,omitempty"`
+	TotalLimitCPU *float32 `json:"totalLimitCPU,omitempty"`
+	TotalLimitMemory *float32 `json:"totalLimitMemory,omitempty"`
 	// Specifies the kind of k8s resource that owns the pod group.
-	WorkloadKind        *float32               `json:"workloadKind,omitempty"`
-	LatestPod           *Pod                   `json:"latestPod,omitempty"`
-	CliCommand          *string                `json:"cliCommand,omitempty"`
-	RequestedMigDevices *string                `json:"requestedMigDevices,omitempty"`
-	DynamicData         map[string]interface{} `json:"dynamicData,omitempty"`
-	ExistsInCluster     *bool                  `json:"existsInCluster,omitempty"`
+	WorkloadKind *float32 `json:"workloadKind,omitempty"`
+	LatestPod *Pod `json:"latestPod,omitempty"`
+	CliCommand *string `json:"cliCommand,omitempty"`
+	RequestedMigDevices *string `json:"requestedMigDevices,omitempty"`
+	DynamicData map[string]interface{} `json:"dynamicData,omitempty"`
+	ExistsInCluster *bool `json:"existsInCluster,omitempty"`
 	// If true, it indicates that the pod group runs jupyter notebook.
-	IsJupyter *bool   `json:"isJupyter,omitempty"`
-	JobUrl    *string `json:"jobUrl,omitempty"`
+	IsJupyter *bool `json:"isJupyter,omitempty"`
+	JobUrl *string `json:"jobUrl,omitempty"`
 	// The node pool of the job.
 	NodePool *string `json:"nodePool,omitempty"`
 }
@@ -1532,3 +1532,5 @@ func (v *NullableDisplayedJob) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

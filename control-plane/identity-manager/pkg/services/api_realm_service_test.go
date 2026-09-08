@@ -55,8 +55,8 @@ func initRealmServiceTests(t *testing.T) (reconcilerMock *reconcilerMocks.Master
 func setConfig() config.TenantRealm {
 	conf := config.TenantRealm{
 		DefaultClientId:      "default",
-		TenantDomainTemplate: "https://{{.}}.test.run.ai",
-		AppHost:              "https://test.run.ai",
+		TenantDomainTemplate: "https://{{.}}.mock-q7z3k.example.com",
+		AppHost:              "https://mock-q7z3k.example.com",
 	}
 	runai_config.Set(&conf)
 	return conf
@@ -82,7 +82,7 @@ func TestCreateRealm_NotOcpHappyFlow(t *testing.T) {
 	reconcilerMock.AssertNumberOfCalls(t, "Reconcile", 1)
 	assert.Equal(t, http.StatusOK, response.Code)
 	assert.Equal(t, request.RealmName, response.Body.(api.RealmCreationResponse).RealmName)
-	assert.Equal(t, fmt.Sprintf("https://%v.test.run.ai", request.RealmName), response.Body.(api.RealmCreationResponse).Domain)
+	assert.Equal(t, fmt.Sprintf("https://%v.mock-q7z3k.example.com", request.RealmName), response.Body.(api.RealmCreationResponse).Domain)
 }
 
 func TestCreateRealm_StatusConflictFlow(t *testing.T) {
@@ -128,7 +128,7 @@ func TestCreateRealm_OcpHappyFlow(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, response.Code)
 	assert.Equal(t, request.RealmName, response.Body.(api.RealmCreationResponse).RealmName)
-	assert.Equal(t, fmt.Sprintf("https://%v.test.run.ai", request.RealmName), response.Body.(api.RealmCreationResponse).Domain)
+	assert.Equal(t, fmt.Sprintf("https://%v.mock-q7z3k.example.com", request.RealmName), response.Body.(api.RealmCreationResponse).Domain)
 }
 
 func TestCreateRealm_OcpNotNotFoundFlow(t *testing.T) {
@@ -151,7 +151,7 @@ func TestCreateRealm_OcpNotNotFoundFlow(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, response.Code)
 	assert.Equal(t, request.RealmName, response.Body.(api.RealmCreationResponse).RealmName)
-	assert.Equal(t, fmt.Sprintf("https://%v.test.run.ai", request.RealmName), response.Body.(api.RealmCreationResponse).Domain)
+	assert.Equal(t, fmt.Sprintf("https://%v.mock-q7z3k.example.com", request.RealmName), response.Body.(api.RealmCreationResponse).Domain)
 }
 
 func TestCreateRealm_OcpUpgradeFlow(t *testing.T) {
@@ -174,7 +174,7 @@ func TestCreateRealm_OcpUpgradeFlow(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, response.Code)
 	assert.Equal(t, request.RealmName, response.Body.(api.RealmCreationResponse).RealmName)
-	assert.Equal(t, fmt.Sprintf("https://%v.test.run.ai", request.RealmName), response.Body.(api.RealmCreationResponse).Domain)
+	assert.Equal(t, fmt.Sprintf("https://%v.mock-q7z3k.example.com", request.RealmName), response.Body.(api.RealmCreationResponse).Domain)
 }
 
 func TestCreateRealm_StatusConflictDB(t *testing.T) {
@@ -259,7 +259,7 @@ func TestGetOrCreateRealm_Created(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusCreated, response.Code)
 	assert.Equal(t, request.RealmName, response.Body.(api.RealmCreationResponse).RealmName)
-	assert.Equal(t, fmt.Sprintf("https://%v.test.run.ai", request.RealmName), response.Body.(api.RealmCreationResponse).Domain)
+	assert.Equal(t, fmt.Sprintf("https://%v.mock-q7z3k.example.com", request.RealmName), response.Body.(api.RealmCreationResponse).Domain)
 }
 
 func TestGetOrCreateRealm_Exists(t *testing.T) {
@@ -280,7 +280,7 @@ func TestGetOrCreateRealm_Exists(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusOK, response.Code)
 	assert.Equal(t, request.RealmName, response.Body.(api.RealmCreationResponse).RealmName)
-	assert.Equal(t, fmt.Sprintf("https://%v.test.run.ai", request.RealmName), response.Body.(api.RealmCreationResponse).Domain)
+	assert.Equal(t, fmt.Sprintf("https://%v.mock-q7z3k.example.com", request.RealmName), response.Body.(api.RealmCreationResponse).Domain)
 }
 
 func TestGetOrCreateRealm_TenantIdMismatch(t *testing.T) {

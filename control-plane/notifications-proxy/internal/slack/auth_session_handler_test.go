@@ -35,9 +35,9 @@ func TestCreate(t *testing.T) {
 	require.NotNil(t, handler)
 
 	mockCacher.On("Set", ctx, cache_testing.KeyFromType[SlackAuthSessionState](), mock.Anything, mock.MatchedBy(func(s SlackAuthSessionState) bool {
-		return s.Email == "test@run.ai" && s.TenantId == "1" && time.Now().Unix()-s.Timestamp < 10
+		return s.Email == "test@example.com" && s.TenantId == "1" && time.Now().Unix()-s.Timestamp < 10
 	})).Return(nil)
-	stateId, err := handler.Create(ctx, "1", "test@run.ai")
+	stateId, err := handler.Create(ctx, "1", "test@example.com")
 	require.NoError(t, err)
 	require.NotEmpty(t, stateId)
 }
@@ -52,7 +52,7 @@ func TestCreate_FailedToSetInCache(t *testing.T) {
 	require.NotNil(t, handler)
 
 	mockCacher.On("Set", ctx, cache_testing.KeyFromType[SlackAuthSessionState](), mock.Anything, mock.Anything).Return(errors.New("cache error"))
-	stateId, err := handler.Create(ctx, "1", "test@run.ai")
+	stateId, err := handler.Create(ctx, "1", "test@example.com")
 	require.EqualError(t, err, "failed to store session state: cache error")
 	require.Empty(t, stateId)
 }
@@ -68,13 +68,13 @@ func TestParse(t *testing.T) {
 
 	mockCacher.On("Get", ctx, cache_testing.KeyFromType[SlackAuthSessionState](), "stateId").Return(&SlackAuthSessionState{
 		TenantId:  "1",
-		Email:     "test@run.ai",
+		Email:     "test@example.com",
 		Timestamp: time.Now().Add(-30 * time.Second).Unix(),
 	}, nil)
 
 	state, err := handler.Parse(ctx, "stateId")
 	require.NoError(t, err)
-	require.Equal(t, "test@run.ai", state.Email)
+	require.Equal(t, "test@example.com", state.Email)
 	require.Equal(t, "1", state.TenantId)
 }
 
@@ -105,7 +105,7 @@ func TestParse_StateNotValid(t *testing.T) {
 
 	mockCacher.On("Get", ctx, cache_testing.KeyFromType[SlackAuthSessionState](), "stateId").Return(&SlackAuthSessionState{
 		TenantId:  "1",
-		Email:     "test@run.ai",
+		Email:     "test@example.com",
 		Timestamp: time.Now().Add(-2 * slackAuthExpirationSeconds * time.Second).Unix(),
 	}, nil)
 
@@ -124,7 +124,7 @@ func TestValidate_NilState(t *testing.T) {
 func TestValidate_EmptyTenantId(t *testing.T) {
 	slackState := &SlackAuthSessionState{
 		Timestamp: time.Now().Unix(),
-		Email:     "test@run.ai",
+		Email:     "test@example.com",
 	}
 
 	handler := &SlackAuthSessionHandler{}
@@ -148,7 +148,7 @@ func TestValidate_EmptyEmail(t *testing.T) {
 func TestValidate_TimestampExpired(t *testing.T) {
 	slackState := &SlackAuthSessionState{
 		TenantId:  "1",
-		Email:     "test@run.ai",
+		Email:     "test@example.com",
 		Timestamp: time.Now().Add(-3 * time.Minute).Unix(),
 	}
 

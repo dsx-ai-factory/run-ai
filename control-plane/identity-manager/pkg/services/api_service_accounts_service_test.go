@@ -50,7 +50,7 @@ func mockInstallerBootstrapLock(t *testing.T) *cache_testing.MockLocker {
 const (
 	RealmName          = "runai"
 	TenantId           = "1001"
-	CreatedBy          = "test@run.ai"
+	CreatedBy          = "test@example.com"
 	AppName            = "appName"
 	ServiceAccountName = "serviceAccountName"
 	ServiceAccountId   = "serviceAccountId"

@@ -45,7 +45,7 @@ func TestGetNotificationState_MissingTenantId(t *testing.T) {
 
 func TestPatchNotificationState_EnablesStateSuccessfully_Email(t *testing.T) {
 	ctx := context.WithValue(context.Background(), runaictx.CfTenantId, tenantIdWithSystemScope)
-	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@run.ai")
+	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@example.com")
 	response, err := client.NotificationChannelsAPI.CreateNotificationChannel(ctx).NotificationChannel(openapi.NotificationChannel{
 		Type:   "email",
 		Config: *openapi.NewNotificationChannelConfigWithDefaults(),
@@ -67,7 +67,7 @@ func TestPatchNotificationState_EnablesStateSuccessfully_Email(t *testing.T) {
 
 func TestPatchNotificationState_EnablesStateFailed_SinkDoesntExist(t *testing.T) {
 	ctx := context.WithValue(context.Background(), runaictx.CfTenantId, "345") // no slack sinks for this tenant
-	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@run.ai")
+	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@example.com")
 
 	_, response, err := client.NotificationStateAPI.UpdateNotificationState(ctx).NotificationState(openapi.NotificationState{
 		Slack: &openapi.NotificationStateStatus{
