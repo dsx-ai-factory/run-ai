@@ -1,0 +1,23 @@
+{{- $secret := lookup "v1" "Secret" "runai" "runai-reg-creds" -}}
+{{- if $secret -}}
+{{- $annotations := dig "metadata" "annotations" (dict) $secret -}}
+{{- $labels := dig "metadata" "labels" (dict) $secret -}}
+{{- $data := $secret.data | default dict -}}
+{{- if and
+    (eq (get $labels "app.kubernetes.io/managed-by") .Release.Service)
+    (eq (get $annotations "meta.helm.sh/release-name") .Release.Name)
+    (eq (get $annotations "meta.helm.sh/release-namespace") .Release.Namespace)
+    (hasKey $data ".dockerconfigjson")
+-}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: runai-reg-creds
+  namespace: runai
+  annotations:
+    helm.sh/resource-policy: keep
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: {{ index $data ".dockerconfigjson" | quote }}
+{{- end -}}
+{{- end -}}
