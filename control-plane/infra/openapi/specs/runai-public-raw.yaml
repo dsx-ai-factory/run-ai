@@ -51823,7 +51823,6 @@ components:
             element. If the requirement cannot be satisfied at this topology
             level, placement will fail.
         actualPlacement:
-          readOnly: true
           $ref: '#/components/schemas/WorkloadTopologyActualPlacement'
     WorkloadElement:
       type: object
