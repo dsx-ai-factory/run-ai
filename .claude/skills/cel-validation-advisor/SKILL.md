@@ -46,7 +46,9 @@ Walk the table top to bottom. The first matching row is the verdict.
 | caller identity, label-scoped objects | **VAP** + `objectSelector` on the binding | same file; selector goes on `Binding.Spec.MatchResources` |
 | fields of the admitted object only | **CRD-CEL** `XValidation` | `sdk/apis/run/v1alpha1/application_types.go` (`chartRef` xor `chartUrl`) |
 | old vs new value of a field | **CRD-CEL** with `oldSelf` | `sdk/apis/kai/v1alpha1/nodepool_types.go` (immutable `labelKey`) |
-| another object, `Get`/`List`, SubjectAccessReview | **webhook stays** | project-controller parent Department lookup |
+| an authorization check on the caller (SubjectAccessReview) | **VAP** with the `authorizer` CEL variable | none in repo yet; see Kubernetes VAP docs |
+| one well-known parameter object | **VAP** with `paramRef`, but prefer embedding exact usernames; never `paramRef` to `RunaiConfig` | anyworkload-controller WorkloadRunner VAP (ServiceAccount param) |
+| arbitrary other objects, `Get`/`List`, custom lookups | **webhook stays** | project-controller parent Department lookup |
 | plugin framework or arbitrary Go | **webhook stays** | dromos WorkloadRunner plugin validators |
 | mutation or defaulting | **webhook stays** | none |
 
@@ -69,9 +71,9 @@ Run:ai floor: Kubernetes **1.30** (`runai-chart/Chart.yaml`, installer `minimumK
 | CEL `semver` library | 1.34 | ✗ alert |
 | `MutatingAdmissionPolicy` | 1.36 | ✗ alert, keep the mutating webhook |
 
-Also alert when an expression can exceed the CEL cost budget: iterating a list field that has no `maxItems`, or a string field with no `maxLength`.
+Also alert when an expression can exceed the CEL cost budget: iterating a list without `maxItems`, a map without `maxProperties`, or a string without `maxLength`, including nested collections.
 
-Source: Kubernetes docs, `reference/using-api/cel`, `reference/access-authn-authz/validating-admission-policy`, `reference/command-line-tools-reference/feature-gates-removed`. Re-verify these when the chart floor changes.
+Source: Kubernetes docs, `reference/using-api/cel`, `reference/access-authn-authz/validating-admission-policy`, `reference/command-line-tools-reference/feature-gates` (active gates) and `feature-gates-removed` (graduated gates). Re-verify these when the chart floor changes.
 
 ## Patterns (when the user says `go CEL`)
 
@@ -92,7 +94,7 @@ Source: Kubernetes docs, `reference/using-api/cel`, `reference/access-authn-auth
 
 ## Rollout (VAP only)
 
-```
+```text
 1. PR A: add the Definition with validationActions [Audit]. Old webhook stays authoritative.
 2. Verify the policy's typeChecking status is clean and Audit shows only intended writers.
 3. PR B: flip the binding to [Deny]. Keep the webhook.
@@ -113,7 +115,7 @@ Source: Kubernetes docs, `reference/using-api/cel`, `reference/access-authn-auth
 
 Print exactly this shape, once:
 
-```
+```text
 💡 CEL opportunity
 What:    <the validation being written, one line>
 Move to: VAP | CRD-CEL          because: <caller identity | object shape only>
