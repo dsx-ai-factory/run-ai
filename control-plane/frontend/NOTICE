@@ -7916,6 +7916,9 @@ Copyright (c) 2016 David Frank
 node-gyp
 Licensed under the MIT License
 Copyright (c) 2012 Nathan Rajlich <nathan@tootallnate.net>
+node-forge
+Licensed under the BSD-3-Clause License
+Copyright (c) 2010, Digital Bazaar, Inc. All rights reserved.
 node-int64
 Licensed under the MIT License
 Copyright (c) 2014 Robert Kieffer
@@ -10430,6 +10433,3 @@ zwitch
 Licensed under the MIT License
 Copyright (c) 2016 Titus Wormer <tituswormer@gmail.com>
 Grand Total
-Licensed under the BSD-3-Clause License
-Copyright (c) 2010, Digital Bazaar, Inc. All rights reserved.
-node-forge
