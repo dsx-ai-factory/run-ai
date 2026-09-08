@@ -98,7 +98,6 @@ func (r *RoleDaoInitializer) DbUpsertLegacyRole(ctx context.Context, roleRequest
 		return existingRole.ID, nil
 	}
 
-	// create the role together with its internal permission set
 	permissionSet := &models.PermissionSet{
 		Name:        getInternalPermissionSetNameFromRole(roleRequest.Name, nil),
 		Internal:    true,
@@ -106,9 +105,11 @@ func (r *RoleDaoInitializer) DbUpsertLegacyRole(ctx context.Context, roleRequest
 	}
 	roleRequest.PermissionSets = &[]models.PermissionSet{*permissionSet}
 	roleRequest.Permissions = nil
-	if _, createErr := runaidb.DB().WithContext(ctx).
+
+	_, createErr := runaidb.DB().WithContext(ctx).Session(&gorm.Session{FullSaveAssociations: true}).
 		Session(&gorm.Session{FullSaveAssociations: true}).
-		Create(&roleRequest); createErr != nil {
+		Create(&roleRequest)
+	if createErr != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to create role %s. err: %+v", roleRequest.Name, createErr)
 		return 0, createErr
 	}

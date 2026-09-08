@@ -95,13 +95,23 @@ func InitStaticLegacyRoles() {
 	migrateDeprecatedRoleNames()
 	logging.Infof("Initializing static legacy roles")
 	initializerDao := RoleDaoInitializer{}
+	dgxcRoles := []models.Role{
+		static_roles.ApplicationAdmin,
+		static_roles.CloudSupport,
+	}
 
 	for _, role := range LegacyRoles {
+		var added bool
 		if config.Get[*authorization_config.Server]().IsCSP {
 			role.Permissions = updateCSPPermissions(role.Permissions)
 		}
 
-		markDGXCRoleType(&role)
+		dgxcRoles, added = addToDGXCRolesIfNeeded(dgxcRoles, &role)
+		if added {
+			role.RoleType = models.NonDGXC
+		} else {
+			role.RoleType = models.ALL
+		}
 
 		id, err := initializerDao.DbUpsertLegacyRole(context.Background(), role)
 		if err != nil {
@@ -186,16 +196,39 @@ func getCspPermissionSets(original *[]models.PermissionSet, changeMap map[string
 	return newPermissionSets
 }
 
-// markDGXCRoleType marks a role as NonDGXC when it grants write permissions on resources
-// that are read-only for DGXC-managed tenants.
-func markDGXCRoleType(role *models.Role) {
+func addToDGXCRolesIfNeeded(roles []models.Role, role *models.Role) ([]models.Role, bool) {
 	role.RoleType = models.ALL
+	dgxcRole := models.Role{
+		ScopeType: models.ROLE_SCOPE_SYSTEM,
+	}
 	for _, permission := range role.Permissions {
 		if permission.ReadOnlyForDGXCManaged && (permission.Create || permission.Update || permission.Delete) {
 			role.RoleType = models.NonDGXC
-			return
+			dgxcRole.Permissions = append(dgxcRole.Permissions, &models.Permission{
+				ResourceType: permission.ResourceType,
+				Read:         permission.Read,
+			})
+		} else {
+			dgxcRole.Permissions = append(dgxcRole.Permissions, permission)
 		}
 	}
+
+	// Marking the dgxcRole as DGXC and adding it to the roles to create since the base role had at least one permission that should be duplicated
+	if role.RoleType == models.NonDGXC {
+		dgxcRole.Name = fmt.Sprintf("%s%s", role.Name, models.DGXCManagedPostfix)
+		dgxcRole.Description = role.Description
+		dgxcRole.RoleType = models.DGXC
+		dgxcRole.InternalOnly = role.InternalOnly
+		dgxcRole.Enabled = role.Enabled
+
+		if role.ShowForDGXC {
+			dgxcRole.InternalOnly = false
+		}
+
+		roles = append(roles, dgxcRole)
+	}
+
+	return roles, role.RoleType == models.NonDGXC
 }
 
 func updateCSPPermissions(permissions []*models.Permission) []*models.Permission {
