@@ -1,7 +1,7 @@
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend
+The aggregated API  of Run:AI backend 
 
 API version: 1.5.1
 */
@@ -17,7 +17,7 @@ import (
 // WorkloadHistorySpec struct for WorkloadHistorySpec
 type WorkloadHistorySpec struct {
 	WorkloadEvent *WorkloadEvent `json:"workloadEvent,omitempty"`
-	StatusChange  *StatusChange  `json:"statusChange,omitempty"`
+	StatusChange *StatusChange `json:"statusChange,omitempty"`
 }
 
 // NewWorkloadHistorySpec instantiates a new WorkloadHistorySpec object
@@ -147,3 +147,5 @@ func (v *NullableWorkloadHistorySpec) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

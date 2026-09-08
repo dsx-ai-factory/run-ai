@@ -57,7 +57,7 @@ BatchJobTarget:
             name: job-urls-url-1
           spec:
             hostnames:
-            - test.run.ai
+            - mock-q7z3k.example.com
             parentRefs:
             - name: runai-gateway
               namespace: runai
@@ -76,7 +76,7 @@ BatchJobTarget:
             name: job-urls-url-1
           spec:
             rules:
-            - host: test.run.ai
+            - host: mock-q7z3k.example.com
               http:
                 paths:
                 - backend:
@@ -105,7 +105,7 @@ BatchJobTarget:
             name: job-urls-url-2
           spec:
             hostnames:
-            - test.run.ai
+            - mock-q7z3k.example.com
             parentRefs:
             - name: runai-gateway
               namespace: runai
@@ -124,7 +124,7 @@ BatchJobTarget:
             name: job-urls-url-2
           spec:
             rules:
-            - host: test.run.ai
+            - host: mock-q7z3k.example.com
               http:
                 paths:
                 - backend:
@@ -153,7 +153,7 @@ BatchJobTarget:
             name: job-urls-url-3
           spec:
             hostnames:
-            - test.run.ai
+            - mock-q7z3k.example.com
             parentRefs:
             - name: runai-gateway
               namespace: runai
@@ -172,7 +172,7 @@ BatchJobTarget:
             name: job-urls-url-3
           spec:
             rules:
-            - host: test.run.ai
+            - host: mock-q7z3k.example.com
               http:
                 paths:
                 - backend:
@@ -201,7 +201,7 @@ BatchJobTarget:
             name: job-urls-url-4
           spec:
             hostnames:
-            - test.run.ai
+            - mock-q7z3k.example.com
             parentRefs:
             - name: runai-gateway
               namespace: runai
@@ -220,7 +220,7 @@ BatchJobTarget:
             name: job-urls-url-4
           spec:
             rules:
-            - host: test.run.ai
+            - host: mock-q7z3k.example.com
               http:
                 paths:
                 - backend:
@@ -365,14 +365,14 @@ BatchJobTarget:
           - args:
             - --provider=keycloak-oidc
             - --upstream=http://localhost:8081
-            - --redirect-url=https://test.run.ai/test/urls/oauth2/callback
+            - --redirect-url=https://mock-q7z3k.example.com/test/urls/oauth2/callback
             - --oidc-issuer-url=/auth/realms/runai
             - --scope=openid
             - --http-address=0.0.0.0:4181
             - --proxy-prefix=/test/urls/oauth2
             - --skip-provider-button=true
-            - --whitelist-domain=test.run.ai
-            - --cookie-domain=test.run.ai
+            - --whitelist-domain=mock-q7z3k.example.com
+            - --cookie-domain=mock-q7z3k.example.com
             - --cookie-httponly=true
             - --cookie-secure=true
             - --code-challenge-method=S256
@@ -409,14 +409,14 @@ BatchJobTarget:
           - args:
             - --provider=keycloak-oidc
             - --upstream=http://localhost:8082
-            - --redirect-url=https://test.run.ai/test/urls/url-2/oauth2/callback
+            - --redirect-url=https://mock-q7z3k.example.com/test/urls/url-2/oauth2/callback
             - --oidc-issuer-url=/auth/realms/runai
             - --scope=openid
             - --http-address=0.0.0.0:4182
             - --proxy-prefix=/test/urls/url-2/oauth2
             - --skip-provider-button=true
-            - --whitelist-domain=test.run.ai
-            - --cookie-domain=test.run.ai
+            - --whitelist-domain=mock-q7z3k.example.com
+            - --cookie-domain=mock-q7z3k.example.com
             - --cookie-httponly=true
             - --cookie-secure=true
             - --code-challenge-method=S256
@@ -451,14 +451,14 @@ BatchJobTarget:
           - args:
             - --provider=keycloak-oidc
             - --upstream=http://localhost:8083
-            - --redirect-url=https://test.run.ai/test/urls/url-3/oauth2/callback
+            - --redirect-url=https://mock-q7z3k.example.com/test/urls/url-3/oauth2/callback
             - --oidc-issuer-url=/auth/realms/runai
             - --scope=openid
             - --http-address=0.0.0.0:4183
             - --proxy-prefix=/test/urls/url-3/oauth2
             - --skip-provider-button=true
-            - --whitelist-domain=test.run.ai
-            - --cookie-domain=test.run.ai
+            - --whitelist-domain=mock-q7z3k.example.com
+            - --cookie-domain=mock-q7z3k.example.com
             - --cookie-httponly=true
             - --cookie-secure=true
             - --code-challenge-method=S256
@@ -493,14 +493,14 @@ BatchJobTarget:
           - args:
             - --provider=keycloak-oidc
             - --upstream=http://localhost:8084
-            - --redirect-url=https://test.run.ai/test/urls/url-4/oauth2/callback
+            - --redirect-url=https://mock-q7z3k.example.com/test/urls/url-4/oauth2/callback
             - --oidc-issuer-url=/auth/realms/runai
             - --scope=openid
             - --http-address=0.0.0.0:4184
             - --proxy-prefix=/test/urls/url-4/oauth2
             - --skip-provider-button=true
-            - --whitelist-domain=test.run.ai
-            - --cookie-domain=test.run.ai
+            - --whitelist-domain=mock-q7z3k.example.com
+            - --cookie-domain=mock-q7z3k.example.com
             - --cookie-httponly=true
             - --cookie-secure=true
             - --code-challenge-method=S256

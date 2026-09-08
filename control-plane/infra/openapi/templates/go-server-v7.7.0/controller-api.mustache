@@ -51,11 +51,6 @@ import (
 type {{classname}}Controller struct {
 	service {{classname}}Servicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody	[]byte				// copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -71,10 +66,13 @@ type {{classname}}Controller struct {
 }
 
 ////////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *{{classname}}Controller) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *{{classname}}Controller) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
     _ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 ////////////////////////////// RUNAI END //////////////////////////////////
 
@@ -178,13 +176,13 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 	{{#hasFormParams}}
 	{{#isMultipart}}
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	{{/isMultipart}}
 	{{^isMultipart}}
 	if err := r.ParseForm(); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	{{/isMultipart}}
@@ -199,7 +197,7 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 	{{#hasQueryParams}}
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	{{/hasQueryParams}}
@@ -215,7 +213,7 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 		WithMaximum[float32]({{maximum}}),{{/maximum}}
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 		return
 	}
 	{{/isNumber}}
@@ -229,7 +227,7 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 		WithMaximum[float32]({{maximum}}),{{/maximum}}
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 		return
 	}
 	{{/isFloat}}
@@ -243,7 +241,7 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 		WithMaximum[float64]({{maximum}}),{{/maximum}}
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 		return
 	}
 	{{/isDouble}}
@@ -258,7 +256,7 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 		return
 	}
 	{{/isLong}}
@@ -272,14 +270,14 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 		WithMaximum[int32]({{maximum}}),{{/maximum}}
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 		return
 	}
 	{{/isInteger}}
 	{{#isDateTime}}
 	{{paramName}}Param, err := parseTime({{#routers}}{{#mux}}params["{{baseName}}"]{{/mux}}{{#chi}}chi.URLParam(r, "{{baseName}}"){{/chi}}{{/routers}})
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 		return
 	}
 	{{/isDateTime}}
@@ -292,14 +290,14 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 	{{^isEnumRef}}
 	{{paramName}}Param := {{#routers}}{{#mux}}params["{{baseName}}"]{{/mux}}{{#chi}}chi.URLParam(r, "{{baseName}}"){{/chi}}{{/routers}}
 	if {{paramName}}Param == "" {
-		c.errorHandler(w, r, &RequiredError{"{{baseName}}"}, nil)
+		c.errorHandler(w, r, &RequiredError{"{{baseName}}"}, nil, nil)
 		return
 	}
 	{{/isEnumRef}}
 	{{#isEnumRef}}
 	{{paramName}}Param, err := New{{dataType}}FromValue({{#routers}}{{#mux}}params["{{baseName}}"]{{/mux}}{{#chi}}chi.URLParam(r, "{{baseName}}"){{/chi}}{{/routers}})
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 		return
 	}
 	{{/isEnumRef}}
@@ -316,14 +314,14 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 	if query.Has("{{baseName}}"){
 		param, err := parseTime(query.Get("{{baseName}}"))
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 			return
 		}
 
 		{{paramName}}Param = {{#isNullable}}&{{/isNullable}}param
 	} else {
 		{{#required}}
-		c.errorHandler(w, r, &RequiredError{"{{baseName}}"}, nil)
+		c.errorHandler(w, r, &RequiredError{"{{baseName}}"}, nil, nil)
 		return
 		{{/required}}
 	}
@@ -338,14 +336,14 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 			WithMaximum[float32]({{maximum}}),{{/maximum}}
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 			return
 		}
 
 		{{paramName}}Param = {{#isNullable}}&{{/isNullable}}param
 	} else {
 		{{#required}}
-		c.errorHandler(w, r, &RequiredError{Field: "{{baseName}}"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "{{baseName}}"}, nil, nil)
 		return
 		{{/required}}
 		{{^required}}
@@ -366,14 +364,14 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 			WithMaximum[float32]({{maximum}}),{{/maximum}}
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 			return
 		}
 
 		{{paramName}}Param = {{#isNullable}}&{{/isNullable}}param
 	} else {
 		{{#required}}
-		c.errorHandler(w, r, &RequiredError{Field: "{{baseName}}"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "{{baseName}}"}, nil, nil)
 		return
 		{{/required}}
 		{{^required}}
@@ -394,14 +392,14 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 			WithMaximum[float64]({{maximum}}),{{/maximum}}
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 			return
 		}
 
 		{{paramName}}Param = {{#isNullable}}&{{/isNullable}}param
 	} else {
 		{{#required}}
-		c.errorHandler(w, r, &RequiredError{Field: "{{baseName}}"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "{{baseName}}"}, nil, nil)
 		return
 		{{/required}}
 		{{^required}}
@@ -422,14 +420,14 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 			WithMaximum[int64]({{maximum}}),{{/maximum}}
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 			return
 		}
 
 		{{paramName}}Param = {{#isNullable}}&{{/isNullable}}param
 	} else {
 		{{#required}}
-		c.errorHandler(w, r, &RequiredError{Field: "{{baseName}}"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "{{baseName}}"}, nil, nil)
 		return
 		{{/required}}
 		{{^required}}
@@ -450,14 +448,14 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 			WithMaximum[int32]({{maximum}}),{{/maximum}}
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 			return
 		}
 
 		{{paramName}}Param = {{#isNullable}}&{{/isNullable}}param
 	} else {
 		{{#required}}
-		c.errorHandler(w, r, &RequiredError{Field: "{{baseName}}"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "{{baseName}}"}, nil, nil)
 		return
 		{{/required}}
 		{{^required}}
@@ -478,14 +476,14 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 			WithMaximum[bool]({{maximum}}),{{/maximum}}
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 			return
 		}
 
 		{{paramName}}Param = {{#isNullable}}&{{/isNullable}}param
 	} else {
 		{{#required}}
-		c.errorHandler(w, r, &RequiredError{Field: "{{baseName}}"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "{{baseName}}"}, nil, nil)
 		return
 		{{/required}}
 		{{^required}}
@@ -505,7 +503,7 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 		WithMaximum[float32]({{maximum}}),{{/maximum}}
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 		return
 	}
 	{{/items.isNumber}}
@@ -517,7 +515,7 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 		WithMaximum[float32]({{maximum}}),{{/maximum}}
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 	return
 	}
 	{{/items.isFloat}}
@@ -529,7 +527,7 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 		WithMaximum[float64]({{maximum}}),{{/maximum}}
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 		return
 	}
 	{{/items.isDouble}}
@@ -541,7 +539,7 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 		WithMaximum[int64]({{maximum}}),{{/maximum}}
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 		return
 	}
 	{{/items.isLong}}
@@ -553,7 +551,7 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 		WithMaximum[int32]({{maximum}}),{{/maximum}}
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 		return
 	}
 	{{/items.isInteger}}
@@ -562,7 +560,7 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 	{{paramName}}Param, err := parseTimes(query.Get("{{baseName}}"))
 	////////////////////////// RUNAI END /////////////////////////////////
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 		return
 	}
 	{{/items.isDateTime}}
@@ -590,7 +588,7 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 		for _, param := range paramSplits {
 			paramEnum, err := New{{items.dataType}}FromValue(param)
 			if err != nil {
-				c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+				c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 				return
 			}
 			{{paramName}}Param = append({{paramName}}Param, paramEnum)
@@ -618,7 +616,7 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 		{{paramName}}Param = {{#isNullable}}&{{/isNullable}}param
 	} else {
 		{{#required}}
-		c.errorHandler(w, r, &RequiredError{Field: "{{baseName}}"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "{{baseName}}"}, nil, nil)
 		return
 		{{/required}}
 		{{^required}}
@@ -648,7 +646,7 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 		param, err := ReadFormFileToTempFile(r, "{{baseName}}")
 		{{/isArray}}
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 			return
 		}
 
@@ -663,7 +661,7 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 		WithMaximum[int64]({{maximum}}),{{/maximum}}
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 		return
 	}
 	{{/isArray}}{{/isLong}}
@@ -675,7 +673,7 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 		WithMaximum[int32]({{maximum}}),{{/maximum}}
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "{{baseName}}", Err: err}, nil, nil)
 		return
 	}
 	{{/isArray}}{{/isInteger}}
@@ -696,14 +694,15 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 	{{#isBodyParam}}
 	{{paramName}}Param := {{dataType}}{}
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
     //d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
@@ -711,14 +710,14 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 	d.DisallowUnknownFields()
 	{{/isAdditionalPropertiesTrue}}
 	if err := d.Decode(&{{paramName}}Param); err != nil {{^required}}&& !errors.Is(err, io.EOF) {{/required}}{
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	{{#isArray}}
 		{{#items.isModel}}
 	for _, el := range {{paramName}}Param {
 		if err := Assert{{baseType}}Required(el); err != nil {
-			c.errorHandler(w, r, err, nil)
+			c.errorHandler(w, r, err, nil, nil)
 			return
 		}
 	}
@@ -727,11 +726,11 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 	{{^isArray}}
 		{{#isModel}}
 	if err := Assert{{baseType}}Required({{paramName}}Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := Assert{{baseType}}Constraints({{paramName}}Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 		{{/isModel}}
@@ -741,7 +740,7 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 	result, err := c.service.{{nickname}}(r.Context(){{#allParams}}, {{paramName}}Param{{/allParams}})
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

@@ -38,11 +38,6 @@ import (
 type WorkloadTemplatesAPIController struct {
 	service WorkloadTemplatesAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -58,10 +53,13 @@ type WorkloadTemplatesAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *WorkloadTemplatesAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *WorkloadTemplatesAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -809,7 +807,7 @@ func (c *WorkloadTemplatesAPIController) Routes() Routes {
 func (c *WorkloadTemplatesAPIController) ListTemplates(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var offsetParam int32
@@ -819,7 +817,7 @@ func (c *WorkloadTemplatesAPIController) ListTemplates(w http.ResponseWriter, r 
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -835,7 +833,7 @@ func (c *WorkloadTemplatesAPIController) ListTemplates(w http.ResponseWriter, r 
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -883,7 +881,7 @@ func (c *WorkloadTemplatesAPIController) ListTemplates(w http.ResponseWriter, r 
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeAncestors", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeAncestors", Err: err}, nil, nil)
 			return
 		}
 
@@ -897,7 +895,7 @@ func (c *WorkloadTemplatesAPIController) ListTemplates(w http.ResponseWriter, r 
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil, nil)
 			return
 		}
 
@@ -921,7 +919,7 @@ func (c *WorkloadTemplatesAPIController) ListTemplates(w http.ResponseWriter, r 
 	result, err := c.service.ListTemplates(r.Context(), offsetParam, limitParam, sortOrderParam, sortByParam, filterByParam, searchParam, includeAncestorsParam, complyToProjectParam, complyToWorkloadTypeParam, complyToReplicaTypeParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -974,7 +972,7 @@ func (c *WorkloadTemplatesAPIController) ListTemplates(w http.ResponseWriter, r 
 func (c *WorkloadTemplatesAPIController) TemplateNameAvailability(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var templateNameParam string
@@ -983,7 +981,7 @@ func (c *WorkloadTemplatesAPIController) TemplateNameAvailability(w http.Respons
 
 		templateNameParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "templateName"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "templateName"}, nil, nil)
 		return
 	}
 	var scopeTypeParam string
@@ -992,7 +990,7 @@ func (c *WorkloadTemplatesAPIController) TemplateNameAvailability(w http.Respons
 
 		scopeTypeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scopeType"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scopeType"}, nil, nil)
 		return
 	}
 	var scopeIdParam string
@@ -1005,7 +1003,7 @@ func (c *WorkloadTemplatesAPIController) TemplateNameAvailability(w http.Respons
 	result, err := c.service.TemplateNameAvailability(r.Context(), templateNameParam, scopeTypeParam, scopeIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1021,13 +1019,13 @@ func (c *WorkloadTemplatesAPIController) TemplateNameAvailability(w http.Respons
 func (c *WorkloadTemplatesAPIController) GetTemplateById(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetTemplateById(r.Context(), templateIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1080,7 +1078,7 @@ func (c *WorkloadTemplatesAPIController) GetTemplateById(w http.ResponseWriter, 
 func (c *WorkloadTemplatesAPIController) CountTemplates(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var filterByParam []string
@@ -1106,7 +1104,7 @@ func (c *WorkloadTemplatesAPIController) CountTemplates(w http.ResponseWriter, r
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeAncestors", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeAncestors", Err: err}, nil, nil)
 			return
 		}
 
@@ -1116,7 +1114,7 @@ func (c *WorkloadTemplatesAPIController) CountTemplates(w http.ResponseWriter, r
 	result, err := c.service.CountTemplates(r.Context(), filterByParam, searchParam, includeAncestorsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1169,7 +1167,7 @@ func (c *WorkloadTemplatesAPIController) CountTemplates(w http.ResponseWriter, r
 func (c *WorkloadTemplatesAPIController) ListWorkspaceTemplates(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var offsetParam int32
@@ -1179,7 +1177,7 @@ func (c *WorkloadTemplatesAPIController) ListWorkspaceTemplates(w http.ResponseW
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -1195,7 +1193,7 @@ func (c *WorkloadTemplatesAPIController) ListWorkspaceTemplates(w http.ResponseW
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -1243,7 +1241,7 @@ func (c *WorkloadTemplatesAPIController) ListWorkspaceTemplates(w http.ResponseW
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeAncestors", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeAncestors", Err: err}, nil, nil)
 			return
 		}
 
@@ -1257,7 +1255,7 @@ func (c *WorkloadTemplatesAPIController) ListWorkspaceTemplates(w http.ResponseW
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil, nil)
 			return
 		}
 
@@ -1267,7 +1265,7 @@ func (c *WorkloadTemplatesAPIController) ListWorkspaceTemplates(w http.ResponseW
 	result, err := c.service.ListWorkspaceTemplates(r.Context(), offsetParam, limitParam, sortOrderParam, sortByParam, filterByParam, searchParam, includeAncestorsParam, complyToProjectParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1320,34 +1318,35 @@ func (c *WorkloadTemplatesAPIController) ListWorkspaceTemplates(w http.ResponseW
 func (c *WorkloadTemplatesAPIController) CreateWorkspaceTemplate(w http.ResponseWriter, r *http.Request) {
 	var workspaceTemplateCreationRequestParam WorkspaceTemplateCreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&workspaceTemplateCreationRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertWorkspaceTemplateCreationRequestRequired(workspaceTemplateCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertWorkspaceTemplateCreationRequestConstraints(workspaceTemplateCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateWorkspaceTemplate(r.Context(), workspaceTemplateCreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1400,13 +1399,13 @@ func (c *WorkloadTemplatesAPIController) CreateWorkspaceTemplate(w http.Response
 func (c *WorkloadTemplatesAPIController) GetWorkspaceTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetWorkspaceTemplate(r.Context(), templateIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1459,39 +1458,40 @@ func (c *WorkloadTemplatesAPIController) GetWorkspaceTemplate(w http.ResponseWri
 func (c *WorkloadTemplatesAPIController) UpdateWorkspaceTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	var workspaceTemplateUpdateRequestParam WorkspaceTemplateUpdateRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&workspaceTemplateUpdateRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertWorkspaceTemplateUpdateRequestRequired(workspaceTemplateUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertWorkspaceTemplateUpdateRequestConstraints(workspaceTemplateUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateWorkspaceTemplate(r.Context(), templateIdParam, workspaceTemplateUpdateRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1544,13 +1544,13 @@ func (c *WorkloadTemplatesAPIController) UpdateWorkspaceTemplate(w http.Response
 func (c *WorkloadTemplatesAPIController) DeleteWorkspaceTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteWorkspaceTemplate(r.Context(), templateIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1566,39 +1566,40 @@ func (c *WorkloadTemplatesAPIController) DeleteWorkspaceTemplate(w http.Response
 func (c *WorkloadTemplatesAPIController) PatchWorkspaceTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	var workspaceTemplatePatchRequestParam WorkspaceTemplatePatchRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&workspaceTemplatePatchRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertWorkspaceTemplatePatchRequestRequired(workspaceTemplatePatchRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertWorkspaceTemplatePatchRequestConstraints(workspaceTemplatePatchRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.PatchWorkspaceTemplate(r.Context(), templateIdParam, workspaceTemplatePatchRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1651,7 +1652,7 @@ func (c *WorkloadTemplatesAPIController) PatchWorkspaceTemplate(w http.ResponseW
 func (c *WorkloadTemplatesAPIController) ListTrainingTemplates(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var offsetParam int32
@@ -1661,7 +1662,7 @@ func (c *WorkloadTemplatesAPIController) ListTrainingTemplates(w http.ResponseWr
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -1677,7 +1678,7 @@ func (c *WorkloadTemplatesAPIController) ListTrainingTemplates(w http.ResponseWr
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -1725,7 +1726,7 @@ func (c *WorkloadTemplatesAPIController) ListTrainingTemplates(w http.ResponseWr
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeAncestors", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeAncestors", Err: err}, nil, nil)
 			return
 		}
 
@@ -1739,7 +1740,7 @@ func (c *WorkloadTemplatesAPIController) ListTrainingTemplates(w http.ResponseWr
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil, nil)
 			return
 		}
 
@@ -1749,7 +1750,7 @@ func (c *WorkloadTemplatesAPIController) ListTrainingTemplates(w http.ResponseWr
 	result, err := c.service.ListTrainingTemplates(r.Context(), offsetParam, limitParam, sortOrderParam, sortByParam, filterByParam, searchParam, includeAncestorsParam, complyToProjectParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1802,34 +1803,35 @@ func (c *WorkloadTemplatesAPIController) ListTrainingTemplates(w http.ResponseWr
 func (c *WorkloadTemplatesAPIController) CreateTrainingTemplate(w http.ResponseWriter, r *http.Request) {
 	var trainingTemplateCreationRequestParam TrainingTemplateCreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&trainingTemplateCreationRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertTrainingTemplateCreationRequestRequired(trainingTemplateCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertTrainingTemplateCreationRequestConstraints(trainingTemplateCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateTrainingTemplate(r.Context(), trainingTemplateCreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1882,13 +1884,13 @@ func (c *WorkloadTemplatesAPIController) CreateTrainingTemplate(w http.ResponseW
 func (c *WorkloadTemplatesAPIController) GetTrainingTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetTrainingTemplate(r.Context(), templateIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1941,39 +1943,40 @@ func (c *WorkloadTemplatesAPIController) GetTrainingTemplate(w http.ResponseWrit
 func (c *WorkloadTemplatesAPIController) UpdateTrainingTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	var trainingTemplateUpdateRequestParam TrainingTemplateUpdateRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&trainingTemplateUpdateRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertTrainingTemplateUpdateRequestRequired(trainingTemplateUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertTrainingTemplateUpdateRequestConstraints(trainingTemplateUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateTrainingTemplate(r.Context(), templateIdParam, trainingTemplateUpdateRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2026,13 +2029,13 @@ func (c *WorkloadTemplatesAPIController) UpdateTrainingTemplate(w http.ResponseW
 func (c *WorkloadTemplatesAPIController) DeleteTrainingTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteTrainingTemplate(r.Context(), templateIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2048,39 +2051,40 @@ func (c *WorkloadTemplatesAPIController) DeleteTrainingTemplate(w http.ResponseW
 func (c *WorkloadTemplatesAPIController) PatchTrainingTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	var trainingTemplatePatchRequestParam TrainingTemplatePatchRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&trainingTemplatePatchRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertTrainingTemplatePatchRequestRequired(trainingTemplatePatchRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertTrainingTemplatePatchRequestConstraints(trainingTemplatePatchRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.PatchTrainingTemplate(r.Context(), templateIdParam, trainingTemplatePatchRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2133,7 +2137,7 @@ func (c *WorkloadTemplatesAPIController) PatchTrainingTemplate(w http.ResponseWr
 func (c *WorkloadTemplatesAPIController) ListDistributedTemplates(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var offsetParam int32
@@ -2143,7 +2147,7 @@ func (c *WorkloadTemplatesAPIController) ListDistributedTemplates(w http.Respons
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -2159,7 +2163,7 @@ func (c *WorkloadTemplatesAPIController) ListDistributedTemplates(w http.Respons
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -2207,7 +2211,7 @@ func (c *WorkloadTemplatesAPIController) ListDistributedTemplates(w http.Respons
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeAncestors", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeAncestors", Err: err}, nil, nil)
 			return
 		}
 
@@ -2221,7 +2225,7 @@ func (c *WorkloadTemplatesAPIController) ListDistributedTemplates(w http.Respons
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil, nil)
 			return
 		}
 
@@ -2238,7 +2242,7 @@ func (c *WorkloadTemplatesAPIController) ListDistributedTemplates(w http.Respons
 	result, err := c.service.ListDistributedTemplates(r.Context(), offsetParam, limitParam, sortOrderParam, sortByParam, filterByParam, searchParam, includeAncestorsParam, complyToProjectParam, complyToReplicaTypeParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2291,34 +2295,35 @@ func (c *WorkloadTemplatesAPIController) ListDistributedTemplates(w http.Respons
 func (c *WorkloadTemplatesAPIController) CreateDistributedTemplate(w http.ResponseWriter, r *http.Request) {
 	var distributedTemplateCreationRequestParam DistributedTemplateCreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&distributedTemplateCreationRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertDistributedTemplateCreationRequestRequired(distributedTemplateCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertDistributedTemplateCreationRequestConstraints(distributedTemplateCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateDistributedTemplate(r.Context(), distributedTemplateCreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2371,13 +2376,13 @@ func (c *WorkloadTemplatesAPIController) CreateDistributedTemplate(w http.Respon
 func (c *WorkloadTemplatesAPIController) GetDistributedTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetDistributedTemplate(r.Context(), templateIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2430,39 +2435,40 @@ func (c *WorkloadTemplatesAPIController) GetDistributedTemplate(w http.ResponseW
 func (c *WorkloadTemplatesAPIController) UpdateDistributedTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	var distributedTemplateUpdateRequestParam DistributedTemplateUpdateRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&distributedTemplateUpdateRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertDistributedTemplateUpdateRequestRequired(distributedTemplateUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertDistributedTemplateUpdateRequestConstraints(distributedTemplateUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateDistributedTemplate(r.Context(), templateIdParam, distributedTemplateUpdateRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2515,13 +2521,13 @@ func (c *WorkloadTemplatesAPIController) UpdateDistributedTemplate(w http.Respon
 func (c *WorkloadTemplatesAPIController) DeleteDistributedTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteDistributedTemplate(r.Context(), templateIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2537,39 +2543,40 @@ func (c *WorkloadTemplatesAPIController) DeleteDistributedTemplate(w http.Respon
 func (c *WorkloadTemplatesAPIController) PatchDistributedTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	var distributedTemplatePatchRequestParam DistributedTemplatePatchRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&distributedTemplatePatchRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertDistributedTemplatePatchRequestRequired(distributedTemplatePatchRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertDistributedTemplatePatchRequestConstraints(distributedTemplatePatchRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.PatchDistributedTemplate(r.Context(), templateIdParam, distributedTemplatePatchRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2622,7 +2629,7 @@ func (c *WorkloadTemplatesAPIController) PatchDistributedTemplate(w http.Respons
 func (c *WorkloadTemplatesAPIController) ListInferenceTemplates(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var offsetParam int32
@@ -2632,7 +2639,7 @@ func (c *WorkloadTemplatesAPIController) ListInferenceTemplates(w http.ResponseW
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -2648,7 +2655,7 @@ func (c *WorkloadTemplatesAPIController) ListInferenceTemplates(w http.ResponseW
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -2696,7 +2703,7 @@ func (c *WorkloadTemplatesAPIController) ListInferenceTemplates(w http.ResponseW
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeAncestors", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeAncestors", Err: err}, nil, nil)
 			return
 		}
 
@@ -2710,7 +2717,7 @@ func (c *WorkloadTemplatesAPIController) ListInferenceTemplates(w http.ResponseW
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil, nil)
 			return
 		}
 
@@ -2720,7 +2727,7 @@ func (c *WorkloadTemplatesAPIController) ListInferenceTemplates(w http.ResponseW
 	result, err := c.service.ListInferenceTemplates(r.Context(), offsetParam, limitParam, sortOrderParam, sortByParam, filterByParam, searchParam, includeAncestorsParam, complyToProjectParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2773,34 +2780,35 @@ func (c *WorkloadTemplatesAPIController) ListInferenceTemplates(w http.ResponseW
 func (c *WorkloadTemplatesAPIController) CreateInferenceTemplate(w http.ResponseWriter, r *http.Request) {
 	var inferenceTemplateCreationRequestParam InferenceTemplateCreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&inferenceTemplateCreationRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertInferenceTemplateCreationRequestRequired(inferenceTemplateCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertInferenceTemplateCreationRequestConstraints(inferenceTemplateCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateInferenceTemplate(r.Context(), inferenceTemplateCreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2853,13 +2861,13 @@ func (c *WorkloadTemplatesAPIController) CreateInferenceTemplate(w http.Response
 func (c *WorkloadTemplatesAPIController) GetInferenceTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetInferenceTemplate(r.Context(), templateIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2912,39 +2920,40 @@ func (c *WorkloadTemplatesAPIController) GetInferenceTemplate(w http.ResponseWri
 func (c *WorkloadTemplatesAPIController) UpdateInferenceTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	var inferenceTemplateUpdateRequestParam InferenceTemplateUpdateRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&inferenceTemplateUpdateRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertInferenceTemplateUpdateRequestRequired(inferenceTemplateUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertInferenceTemplateUpdateRequestConstraints(inferenceTemplateUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateInferenceTemplate(r.Context(), templateIdParam, inferenceTemplateUpdateRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2997,13 +3006,13 @@ func (c *WorkloadTemplatesAPIController) UpdateInferenceTemplate(w http.Response
 func (c *WorkloadTemplatesAPIController) DeleteInferenceTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteInferenceTemplate(r.Context(), templateIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -3019,39 +3028,40 @@ func (c *WorkloadTemplatesAPIController) DeleteInferenceTemplate(w http.Response
 func (c *WorkloadTemplatesAPIController) PatchInferenceTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	var inferenceTemplatePatchRequestParam InferenceTemplatePatchRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&inferenceTemplatePatchRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertInferenceTemplatePatchRequestRequired(inferenceTemplatePatchRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertInferenceTemplatePatchRequestConstraints(inferenceTemplatePatchRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.PatchInferenceTemplate(r.Context(), templateIdParam, inferenceTemplatePatchRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -3104,7 +3114,7 @@ func (c *WorkloadTemplatesAPIController) PatchInferenceTemplate(w http.ResponseW
 func (c *WorkloadTemplatesAPIController) ListDistributedInferenceTemplates(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var offsetParam int32
@@ -3114,7 +3124,7 @@ func (c *WorkloadTemplatesAPIController) ListDistributedInferenceTemplates(w htt
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -3130,7 +3140,7 @@ func (c *WorkloadTemplatesAPIController) ListDistributedInferenceTemplates(w htt
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -3178,7 +3188,7 @@ func (c *WorkloadTemplatesAPIController) ListDistributedInferenceTemplates(w htt
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeAncestors", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeAncestors", Err: err}, nil, nil)
 			return
 		}
 
@@ -3192,7 +3202,7 @@ func (c *WorkloadTemplatesAPIController) ListDistributedInferenceTemplates(w htt
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil, nil)
 			return
 		}
 
@@ -3202,7 +3212,7 @@ func (c *WorkloadTemplatesAPIController) ListDistributedInferenceTemplates(w htt
 	result, err := c.service.ListDistributedInferenceTemplates(r.Context(), offsetParam, limitParam, sortOrderParam, sortByParam, filterByParam, searchParam, includeAncestorsParam, complyToProjectParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -3255,34 +3265,35 @@ func (c *WorkloadTemplatesAPIController) ListDistributedInferenceTemplates(w htt
 func (c *WorkloadTemplatesAPIController) CreateDistributedInferenceTemplate(w http.ResponseWriter, r *http.Request) {
 	var distributedInferenceTemplateCreationRequestParam DistributedInferenceTemplateCreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&distributedInferenceTemplateCreationRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertDistributedInferenceTemplateCreationRequestRequired(distributedInferenceTemplateCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertDistributedInferenceTemplateCreationRequestConstraints(distributedInferenceTemplateCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateDistributedInferenceTemplate(r.Context(), distributedInferenceTemplateCreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -3335,13 +3346,13 @@ func (c *WorkloadTemplatesAPIController) CreateDistributedInferenceTemplate(w ht
 func (c *WorkloadTemplatesAPIController) GetDistributedInferenceTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetDistributedInferenceTemplate(r.Context(), templateIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -3394,39 +3405,40 @@ func (c *WorkloadTemplatesAPIController) GetDistributedInferenceTemplate(w http.
 func (c *WorkloadTemplatesAPIController) UpdateDistributedInferenceTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	var distributedInferenceTemplateUpdateRequestParam DistributedInferenceTemplateUpdateRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&distributedInferenceTemplateUpdateRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertDistributedInferenceTemplateUpdateRequestRequired(distributedInferenceTemplateUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertDistributedInferenceTemplateUpdateRequestConstraints(distributedInferenceTemplateUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateDistributedInferenceTemplate(r.Context(), templateIdParam, distributedInferenceTemplateUpdateRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -3479,13 +3491,13 @@ func (c *WorkloadTemplatesAPIController) UpdateDistributedInferenceTemplate(w ht
 func (c *WorkloadTemplatesAPIController) DeleteDistributedInferenceTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteDistributedInferenceTemplate(r.Context(), templateIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -3501,39 +3513,40 @@ func (c *WorkloadTemplatesAPIController) DeleteDistributedInferenceTemplate(w ht
 func (c *WorkloadTemplatesAPIController) PatchDistributedInferenceTemplate(w http.ResponseWriter, r *http.Request) {
 	templateIdParam := chi.URLParam(r, "templateId")
 	if templateIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"templateId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"templateId"}, nil, nil)
 		return
 	}
 	var distributedInferenceTemplatePatchRequestParam DistributedInferenceTemplatePatchRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&distributedInferenceTemplatePatchRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertDistributedInferenceTemplatePatchRequestRequired(distributedInferenceTemplatePatchRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertDistributedInferenceTemplatePatchRequestConstraints(distributedInferenceTemplatePatchRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.PatchDistributedInferenceTemplate(r.Context(), templateIdParam, distributedInferenceTemplatePatchRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

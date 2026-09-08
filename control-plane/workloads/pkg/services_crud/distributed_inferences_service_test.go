@@ -580,7 +580,7 @@ var _ = Describe("distributed inference service validations", Ordered, func() {
 	Context("update spec", func() {
 		It("returns a populated response for an any-workload distributed inference update", func() {
 			displayedCluster := testing.BuildDisplayedClusterWithLWS(randoms.ClusterId, "3.0.0", true)
-			displayedCluster.SetDomain("https://test.run.ai")
+			displayedCluster.SetDomain("https://mock-q7z3k.example.com")
 			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
 				WithCluster(randoms.ClusterId, displayedCluster))
 			checker.InitClusterCapabilitiesChecker("", testing.GetDefaultClustersCacheConfig(), "")

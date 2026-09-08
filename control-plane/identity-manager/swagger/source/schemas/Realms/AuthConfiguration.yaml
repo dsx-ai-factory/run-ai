@@ -19,6 +19,6 @@ properties:
 example:
   tenantName: mytest
   authClientID: runai-admin-ui
-  authHost: https://app.run.ai
+  authHost: http://localhost:8080
   isMultiTenant: false
-  redirectUrl: https://mytest.run.ai
+  redirectUrl: http://localhost:8080

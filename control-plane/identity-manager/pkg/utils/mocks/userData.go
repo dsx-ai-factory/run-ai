@@ -13,8 +13,8 @@ import (
 
 const (
 	USER_ID       = "id"
-	USER_EMAIL    = "test@run.ai"
-	CREATED_BY    = "admin@run.ai"
+	USER_EMAIL    = "test@example.com"
+	CREATED_BY    = "admin@example.com"
 	USER_PASSWORD = "password"
 )
 

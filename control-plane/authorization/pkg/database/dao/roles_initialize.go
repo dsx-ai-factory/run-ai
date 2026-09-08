@@ -100,11 +100,7 @@ func InitStaticLegacyRoles() {
 		static_roles.CloudSupport,
 	}
 
-	rolesForLegacyMigrate := LegacyRoles
-	if !config.Get[*authorization_config.General]().UsePermissionSets {
-		rolesForLegacyMigrate = append(rolesForLegacyMigrate, RolesMigrated...)
-	}
-	for _, role := range rolesForLegacyMigrate {
+	for _, role := range LegacyRoles {
 		var added bool
 		if config.Get[*authorization_config.Server]().IsCSP {
 			role.Permissions = updateCSPPermissions(role.Permissions)
@@ -122,16 +118,6 @@ func InitStaticLegacyRoles() {
 			logging.Warnf("Error in initializing legacy role %s. err: %+v", role.Name, err)
 		}
 		MapStaticRoleNameToRoleId[role.Name] = id
-	}
-
-	if !config.Get[*authorization_config.General]().UsePermissionSets {
-		for _, role := range dgxcRoles {
-			id, err := initializerDao.DbUpsertLegacyRole(context.Background(), role)
-			if err != nil {
-				logging.Warnf("Error in initializing legacy role %s. err: %+v", role.Name, err)
-			}
-			MapStaticRoleNameToRoleId[role.Name] = id
-		}
 	}
 
 	logging.Infof("Initializing static legacy roles completed")
@@ -155,9 +141,6 @@ func updatePermissionSetsWithIds(role models.Role) []models.PermissionSet {
 }
 
 func InitStaticRoles() {
-	if !config.Get[*authorization_config.General]().UsePermissionSets {
-		return
-	}
 	migrateDeprecatedRoleNames()
 	dgxcRoles := []models.Role{
 		static_roles.ApplicationAdmin,

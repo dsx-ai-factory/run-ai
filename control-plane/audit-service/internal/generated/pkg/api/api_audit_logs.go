@@ -36,11 +36,6 @@ import (
 type AuditLogsAPIController struct {
 	service AuditLogsAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -56,10 +51,13 @@ type AuditLogsAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *AuditLogsAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *AuditLogsAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -157,33 +155,33 @@ func (c *AuditLogsAPIController) Routes() Routes {
 func (c *AuditLogsAPIController) GetAuditLogs(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var startParam time.Time
 	if query.Has("start") {
 		param, err := parseTime(query.Get("start"))
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "start", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "start", Err: err}, nil, nil)
 			return
 		}
 
 		startParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{"start"}, nil)
+		c.errorHandler(w, r, &RequiredError{"start"}, nil, nil)
 		return
 	}
 	var endParam time.Time
 	if query.Has("end") {
 		param, err := parseTime(query.Get("end"))
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "end", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "end", Err: err}, nil, nil)
 			return
 		}
 
 		endParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{"end"}, nil)
+		c.errorHandler(w, r, &RequiredError{"end"}, nil, nil)
 		return
 	}
 	var offsetParam int32
@@ -193,7 +191,7 @@ func (c *AuditLogsAPIController) GetAuditLogs(w http.ResponseWriter, r *http.Req
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -209,7 +207,7 @@ func (c *AuditLogsAPIController) GetAuditLogs(w http.ResponseWriter, r *http.Req
 			WithMaximum[int32](1000),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "numberOfSamples", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "numberOfSamples", Err: err}, nil, nil)
 			return
 		}
 
@@ -246,7 +244,7 @@ func (c *AuditLogsAPIController) GetAuditLogs(w http.ResponseWriter, r *http.Req
 	result, err := c.service.GetAuditLogs(r.Context(), startParam, endParam, offsetParam, numberOfSamplesParam, sortOrderParam, sortByParam, filterByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -299,33 +297,33 @@ func (c *AuditLogsAPIController) GetAuditLogs(w http.ResponseWriter, r *http.Req
 func (c *AuditLogsAPIController) DownloadAuditLogs(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var startParam time.Time
 	if query.Has("start") {
 		param, err := parseTime(query.Get("start"))
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "start", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "start", Err: err}, nil, nil)
 			return
 		}
 
 		startParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{"start"}, nil)
+		c.errorHandler(w, r, &RequiredError{"start"}, nil, nil)
 		return
 	}
 	var endParam time.Time
 	if query.Has("end") {
 		param, err := parseTime(query.Get("end"))
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "end", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "end", Err: err}, nil, nil)
 			return
 		}
 
 		endParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{"end"}, nil)
+		c.errorHandler(w, r, &RequiredError{"end"}, nil, nil)
 		return
 	}
 	var fileTypeParam string
@@ -344,7 +342,7 @@ func (c *AuditLogsAPIController) DownloadAuditLogs(w http.ResponseWriter, r *htt
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -360,7 +358,7 @@ func (c *AuditLogsAPIController) DownloadAuditLogs(w http.ResponseWriter, r *htt
 			WithMaximum[int32](100000),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "numberOfSamples", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "numberOfSamples", Err: err}, nil, nil)
 			return
 		}
 
@@ -381,7 +379,7 @@ func (c *AuditLogsAPIController) DownloadAuditLogs(w http.ResponseWriter, r *htt
 	result, err := c.service.DownloadAuditLogs(r.Context(), startParam, endParam, fileTypeParam, offsetParam, numberOfSamplesParam, filterByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

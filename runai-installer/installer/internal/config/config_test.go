@@ -210,13 +210,13 @@ var _ = Describe("MapFlags (config-values parser)", func() {
 			})
 
 			It("should parse complex configuration string", func() {
-				configStr := "runai-license-key=ABC123;enable-feature-x;control-plane.url=https://app.run.ai;control-plane.insecure=false;debug-mode"
+				configStr := "runai-license-key=ABC123;enable-feature-x;control-plane.url=https://mock-q7z3k.example.com;control-plane.insecure=false;debug-mode"
 				err := mapFlags.Set(configStr)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(mapFlags).To(HaveLen(5))
 				Expect(mapFlags["runai-license-key"]).To(Equal("ABC123"))
 				Expect(mapFlags["enable-feature-x"]).To(Equal(""))
-				Expect(mapFlags["control-plane.url"]).To(Equal("https://app.run.ai"))
+				Expect(mapFlags["control-plane.url"]).To(Equal("https://mock-q7z3k.example.com"))
 				Expect(mapFlags["control-plane.insecure"]).To(Equal("false"))
 				Expect(mapFlags["debug-mode"]).To(Equal(""))
 			})

@@ -39,11 +39,6 @@ import (
 type DepartmentsAPIController struct {
 	service DepartmentsAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -59,10 +54,13 @@ type DepartmentsAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *DepartmentsAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *DepartmentsAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -574,7 +572,7 @@ func (c *DepartmentsAPIController) Routes() Routes {
 func (c *DepartmentsAPIController) GetDepartmentsDescendants(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var orgUnitIdsParam string
@@ -583,13 +581,13 @@ func (c *DepartmentsAPIController) GetDepartmentsDescendants(w http.ResponseWrit
 
 		orgUnitIdsParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "orgUnitIds"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "orgUnitIds"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetDepartmentsDescendants(r.Context(), orgUnitIdsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -642,13 +640,13 @@ func (c *DepartmentsAPIController) GetDepartmentsDescendants(w http.ResponseWrit
 func (c *DepartmentsAPIController) GetDepartmentAncestors(w http.ResponseWriter, r *http.Request) {
 	departmentIdParam := chi.URLParam(r, "departmentId")
 	if departmentIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetDepartmentAncestors(r.Context(), departmentIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -701,7 +699,7 @@ func (c *DepartmentsAPIController) GetDepartmentAncestors(w http.ResponseWriter,
 func (c *DepartmentsAPIController) GetDepartments(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var filterByParam []string
@@ -743,7 +741,7 @@ func (c *DepartmentsAPIController) GetDepartments(w http.ResponseWriter, r *http
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -759,7 +757,7 @@ func (c *DepartmentsAPIController) GetDepartments(w http.ResponseWriter, r *http
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -771,7 +769,7 @@ func (c *DepartmentsAPIController) GetDepartments(w http.ResponseWriter, r *http
 	result, err := c.service.GetDepartments(r.Context(), filterByParam, sortByParam, verbosityParam, sortOrderParam, offsetParam, limitParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -824,34 +822,35 @@ func (c *DepartmentsAPIController) GetDepartments(w http.ResponseWriter, r *http
 func (c *DepartmentsAPIController) CreateDepartment(w http.ResponseWriter, r *http.Request) {
 	var departmentCreationRequestParam DepartmentCreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&departmentCreationRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertDepartmentCreationRequestRequired(departmentCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertDepartmentCreationRequestConstraints(departmentCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateDepartment(r.Context(), departmentCreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -904,13 +903,13 @@ func (c *DepartmentsAPIController) CreateDepartment(w http.ResponseWriter, r *ht
 func (c *DepartmentsAPIController) GetDepartment(w http.ResponseWriter, r *http.Request) {
 	departmentIdParam := chi.URLParam(r, "departmentId")
 	if departmentIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetDepartment(r.Context(), departmentIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -963,39 +962,40 @@ func (c *DepartmentsAPIController) GetDepartment(w http.ResponseWriter, r *http.
 func (c *DepartmentsAPIController) UpdateDepartment(w http.ResponseWriter, r *http.Request) {
 	departmentIdParam := chi.URLParam(r, "departmentId")
 	if departmentIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil, nil)
 		return
 	}
 	var departmentUpdateRequestParam DepartmentUpdateRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&departmentUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertDepartmentUpdateRequestRequired(departmentUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertDepartmentUpdateRequestConstraints(departmentUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateDepartment(r.Context(), departmentIdParam, departmentUpdateRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1048,13 +1048,13 @@ func (c *DepartmentsAPIController) UpdateDepartment(w http.ResponseWriter, r *ht
 func (c *DepartmentsAPIController) DeleteDepartment(w http.ResponseWriter, r *http.Request) {
 	departmentIdParam := chi.URLParam(r, "departmentId")
 	if departmentIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteDepartment(r.Context(), departmentIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1070,37 +1070,38 @@ func (c *DepartmentsAPIController) DeleteDepartment(w http.ResponseWriter, r *ht
 func (c *DepartmentsAPIController) UpdateDepartmentResources(w http.ResponseWriter, r *http.Request) {
 	departmentIdParam := chi.URLParam(r, "departmentId")
 	if departmentIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil, nil)
 		return
 	}
 	var resourcesNullableParam []ResourcesNullable
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&resourcesNullableParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	for _, el := range resourcesNullableParam {
 		if err := AssertResourcesNullableRequired(el); err != nil {
-			c.errorHandler(w, r, err, nil)
+			c.errorHandler(w, r, err, nil, nil)
 			return
 		}
 	}
 	result, err := c.service.UpdateDepartmentResources(r.Context(), departmentIdParam, resourcesNullableParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1153,37 +1154,38 @@ func (c *DepartmentsAPIController) UpdateDepartmentResources(w http.ResponseWrit
 func (c *DepartmentsAPIController) PatchDepartmentResources(w http.ResponseWriter, r *http.Request) {
 	departmentIdParam := chi.URLParam(r, "departmentId")
 	if departmentIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil, nil)
 		return
 	}
 	var resourcesNullableParam []ResourcesNullable
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&resourcesNullableParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	for _, el := range resourcesNullableParam {
 		if err := AssertResourcesNullableRequired(el); err != nil {
-			c.errorHandler(w, r, err, nil)
+			c.errorHandler(w, r, err, nil, nil)
 			return
 		}
 	}
 	result, err := c.service.PatchDepartmentResources(r.Context(), departmentIdParam, resourcesNullableParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1236,12 +1238,12 @@ func (c *DepartmentsAPIController) PatchDepartmentResources(w http.ResponseWrite
 func (c *DepartmentsAPIController) GetDepartmentMetrics(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	departmentIdParam := chi.URLParam(r, "departmentId")
 	if departmentIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil, nil)
 		return
 	}
 	var metricTypeParam []OrgUnitMetricType
@@ -1251,7 +1253,7 @@ func (c *DepartmentsAPIController) GetDepartmentMetrics(w http.ResponseWriter, r
 		for _, param := range paramSplits {
 			paramEnum, err := NewOrgUnitMetricTypeFromValue(param)
 			if err != nil {
-				c.errorHandler(w, r, &ParsingError{Param: "metricType", Err: err}, nil)
+				c.errorHandler(w, r, &ParsingError{Param: "metricType", Err: err}, nil, nil)
 				return
 			}
 			metricTypeParam = append(metricTypeParam, paramEnum)
@@ -1261,26 +1263,26 @@ func (c *DepartmentsAPIController) GetDepartmentMetrics(w http.ResponseWriter, r
 	if query.Has("start") {
 		param, err := parseTime(query.Get("start"))
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "start", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "start", Err: err}, nil, nil)
 			return
 		}
 
 		startParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{"start"}, nil)
+		c.errorHandler(w, r, &RequiredError{"start"}, nil, nil)
 		return
 	}
 	var endParam time.Time
 	if query.Has("end") {
 		param, err := parseTime(query.Get("end"))
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "end", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "end", Err: err}, nil, nil)
 			return
 		}
 
 		endParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{"end"}, nil)
+		c.errorHandler(w, r, &RequiredError{"end"}, nil, nil)
 		return
 	}
 	var numberOfSamplesParam int32
@@ -1292,7 +1294,7 @@ func (c *DepartmentsAPIController) GetDepartmentMetrics(w http.ResponseWriter, r
 			WithMaximum[int32](1000),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "numberOfSamples", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "numberOfSamples", Err: err}, nil, nil)
 			return
 		}
 
@@ -1318,7 +1320,7 @@ func (c *DepartmentsAPIController) GetDepartmentMetrics(w http.ResponseWriter, r
 	result, err := c.service.GetDepartmentMetrics(r.Context(), departmentIdParam, metricTypeParam, startParam, endParam, numberOfSamplesParam, nodepoolNameParam, groupByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1410,7 +1412,7 @@ func (c *DepartmentsAPIController) GetDepartmentMetrics(w http.ResponseWriter, r
 func (c *DepartmentsAPIController) GetDepartmentsTelemetry(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var telemetryTypeParam OrgUnitTelemetryType
@@ -1419,7 +1421,7 @@ func (c *DepartmentsAPIController) GetDepartmentsTelemetry(w http.ResponseWriter
 
 		telemetryTypeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "telemetryType"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "telemetryType"}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -1455,7 +1457,7 @@ func (c *DepartmentsAPIController) GetDepartmentsTelemetry(w http.ResponseWriter
 	result, err := c.service.GetDepartmentsTelemetry(r.Context(), telemetryTypeParam, clusterIdParam, nodepoolNameParam, departmentIdParam, groupByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1508,7 +1510,7 @@ func (c *DepartmentsAPIController) GetDepartmentsTelemetry(w http.ResponseWriter
 func (c *DepartmentsAPIController) CountDepartments(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var filterByParam []string
@@ -1523,7 +1525,7 @@ func (c *DepartmentsAPIController) CountDepartments(w http.ResponseWriter, r *ht
 	result, err := c.service.CountDepartments(r.Context(), filterByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1576,39 +1578,40 @@ func (c *DepartmentsAPIController) CountDepartments(w http.ResponseWriter, r *ht
 func (c *DepartmentsAPIController) UpdateDepartmentStatus(w http.ResponseWriter, r *http.Request) {
 	departmentIdParam := chi.URLParam(r, "departmentId")
 	if departmentIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"departmentId"}, nil, nil)
 		return
 	}
 	var departmentStatusUpdateRequestParam DepartmentStatusUpdateRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&departmentStatusUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertDepartmentStatusUpdateRequestRequired(departmentStatusUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertDepartmentStatusUpdateRequestConstraints(departmentStatusUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateDepartmentStatus(r.Context(), departmentIdParam, departmentStatusUpdateRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1624,7 +1627,7 @@ func (c *DepartmentsAPIController) UpdateDepartmentStatus(w http.ResponseWriter,
 func (c *DepartmentsAPIController) GetSyncDepartments(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -1633,14 +1636,14 @@ func (c *DepartmentsAPIController) GetSyncDepartments(w http.ResponseWriter, r *
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var updatedAfterParam time.Time
 	if query.Has("updatedAfter") {
 		param, err := parseTime(query.Get("updatedAfter"))
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "updatedAfter", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "updatedAfter", Err: err}, nil, nil)
 			return
 		}
 
@@ -1654,7 +1657,7 @@ func (c *DepartmentsAPIController) GetSyncDepartments(w http.ResponseWriter, r *
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -1670,7 +1673,7 @@ func (c *DepartmentsAPIController) GetSyncDepartments(w http.ResponseWriter, r *
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -1682,7 +1685,7 @@ func (c *DepartmentsAPIController) GetSyncDepartments(w http.ResponseWriter, r *
 	result, err := c.service.GetSyncDepartments(r.Context(), clusterIdParam, updatedAfterParam, offsetParam, limitParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1735,7 +1738,7 @@ func (c *DepartmentsAPIController) GetSyncDepartments(w http.ResponseWriter, r *
 func (c *DepartmentsAPIController) GetDepartmentsRanking(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var metricTypeParam RankingMetricType
@@ -1744,7 +1747,7 @@ func (c *DepartmentsAPIController) GetDepartmentsRanking(w http.ResponseWriter, 
 
 		metricTypeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "metricType"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "metricType"}, nil, nil)
 		return
 	}
 	var orderParam RankingOrderType
@@ -1753,7 +1756,7 @@ func (c *DepartmentsAPIController) GetDepartmentsRanking(w http.ResponseWriter, 
 
 		orderParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "Order"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "Order"}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -1762,7 +1765,7 @@ func (c *DepartmentsAPIController) GetDepartmentsRanking(w http.ResponseWriter, 
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var nodepoolNameParam string
@@ -1775,7 +1778,7 @@ func (c *DepartmentsAPIController) GetDepartmentsRanking(w http.ResponseWriter, 
 	result, err := c.service.GetDepartmentsRanking(r.Context(), metricTypeParam, orderParam, clusterIdParam, nodepoolNameParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1828,34 +1831,35 @@ func (c *DepartmentsAPIController) GetDepartmentsRanking(w http.ResponseWriter, 
 func (c *DepartmentsAPIController) DepartmentsResetResources(w http.ResponseWriter, r *http.Request) {
 	var departmentsResourcesResetRequestParam DepartmentsResourcesResetRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&departmentsResourcesResetRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertDepartmentsResourcesResetRequestRequired(departmentsResourcesResetRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertDepartmentsResourcesResetRequestConstraints(departmentsResourcesResetRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.DepartmentsResetResources(r.Context(), departmentsResourcesResetRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1871,7 +1875,7 @@ func (c *DepartmentsAPIController) DepartmentsResetResources(w http.ResponseWrit
 func (c *DepartmentsAPIController) GetDepartmentNodePoolResources(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var filterByParam []string
@@ -1906,7 +1910,7 @@ func (c *DepartmentsAPIController) GetDepartmentNodePoolResources(w http.Respons
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -1922,7 +1926,7 @@ func (c *DepartmentsAPIController) GetDepartmentNodePoolResources(w http.Respons
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -1941,7 +1945,7 @@ func (c *DepartmentsAPIController) GetDepartmentNodePoolResources(w http.Respons
 	result, err := c.service.GetDepartmentNodePoolResources(r.Context(), filterByParam, sortByParam, sortOrderParam, offsetParam, limitParam, searchParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1994,7 +1998,7 @@ func (c *DepartmentsAPIController) GetDepartmentNodePoolResources(w http.Respons
 func (c *DepartmentsAPIController) CountDepartmentNodePoolResources(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var filterByParam []string
@@ -2016,7 +2020,7 @@ func (c *DepartmentsAPIController) CountDepartmentNodePoolResources(w http.Respo
 	result, err := c.service.CountDepartmentNodePoolResources(r.Context(), filterByParam, searchParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2069,34 +2073,35 @@ func (c *DepartmentsAPIController) CountDepartmentNodePoolResources(w http.Respo
 func (c *DepartmentsAPIController) BatchPatchDepartmentNodePoolResources(w http.ResponseWriter, r *http.Request) {
 	var batchPatchNodePoolResourcesRequestParam BatchPatchNodePoolResourcesRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&batchPatchNodePoolResourcesRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertBatchPatchNodePoolResourcesRequestRequired(batchPatchNodePoolResourcesRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertBatchPatchNodePoolResourcesRequestConstraints(batchPatchNodePoolResourcesRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.BatchPatchDepartmentNodePoolResources(r.Context(), batchPatchNodePoolResourcesRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2149,7 +2154,7 @@ func (c *DepartmentsAPIController) BatchPatchDepartmentNodePoolResources(w http.
 func (c *DepartmentsAPIController) SumDepartmentNodePoolResources(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var nodepoolIdParam string
@@ -2158,7 +2163,7 @@ func (c *DepartmentsAPIController) SumDepartmentNodePoolResources(w http.Respons
 
 		nodepoolIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "nodepoolId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "nodepoolId"}, nil, nil)
 		return
 	}
 	var filterByParam []string
@@ -2173,7 +2178,7 @@ func (c *DepartmentsAPIController) SumDepartmentNodePoolResources(w http.Respons
 	result, err := c.service.SumDepartmentNodePoolResources(r.Context(), nodepoolIdParam, filterByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
