@@ -32,15 +32,15 @@ GOPRIVATE=github.com/run-ai/*
 GINKGO_TIMEOUT?=15m
 GINKGO_PROCS?=1
 GINKGO_COMPILERS?=1
-GINKGO_CONTAINER_NAME?=runai-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${SERVICE_NAME}-test
 
 ifneq ($(strip ${GITHUB_RUN_ID}),)
+GINKGO_CONTAINER_NAME?=runai-${GITHUB_RUN_ID}-${SERVICE_NAME}-test
+else
+GINKGO_LOCAL_RUN_ID:=$(shell printf '%s' $$$$)
+GINKGO_CONTAINER_NAME?=runai-local-${GINKGO_LOCAL_RUN_ID}-${SERVICE_NAME}-test
+endif
 GINKGO_DOCKER_RUN_ARGS=--name=${GINKGO_CONTAINER_NAME}
 GINKGO_CONTAINER_CLEANUP_COMMAND=docker rm -f ${GINKGO_CONTAINER_NAME} >/dev/null 2>&1 || true
-else
-GINKGO_DOCKER_RUN_ARGS=
-GINKGO_CONTAINER_CLEANUP_COMMAND=:
-endif
 
 # Extra flags passed to `go test` (e.g. -short, -count=1, -tags=...).
 GO_TEST_FLAGS?=-short
@@ -180,21 +180,23 @@ test-ginkgo-privileged: git-config-command gocache go-list
 	@ ${ECHO_COMMAND} ${YELLOW_CONSOLE} "${CONSOLE_PREFIX} Using privileged container, use with caution!" ${BASE_CONSOLE}
 	@ cleanup_ginkgo_container() { \
 		${GINKGO_CONTAINER_CLEANUP_COMMAND}; \
-		if [ -n "${GITHUB_RUN_ID}" ]; then \
-			remaining=10; \
-			while [ "$$remaining" -gt 0 ]; do \
-				if ! docker container inspect "${GINKGO_CONTAINER_NAME}" >/dev/null 2>&1; then \
-					return 0; \
-				fi; \
-				remaining=$$((remaining - 1)); \
-				sleep 1; \
-			done; \
-			! docker container inspect "${GINKGO_CONTAINER_NAME}" >/dev/null 2>&1; \
-		fi; \
+		remaining=10; \
+		while [ "$$remaining" -gt 0 ]; do \
+			if ! docker container inspect "${GINKGO_CONTAINER_NAME}" >/dev/null 2>&1; then \
+				return 0; \
+			fi; \
+			remaining=$$((remaining - 1)); \
+			sleep 1; \
+		done; \
+		! docker container inspect "${GINKGO_CONTAINER_NAME}" >/dev/null 2>&1; \
 	}; \
 	handle_signal() { \
 		trap - EXIT INT TERM; \
 		cleanup_ginkgo_container; \
+		if [ -n "$${docker_pid:-}" ]; then \
+			kill -TERM "$$docker_pid" >/dev/null 2>&1 || true; \
+			wait "$$docker_pid" >/dev/null 2>&1 || true; \
+		fi; \
 		exit "$$1"; \
 	}; \
 	cleanup_ginkgo_container; \
