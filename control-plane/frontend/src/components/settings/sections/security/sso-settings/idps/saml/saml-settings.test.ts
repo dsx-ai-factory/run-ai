@@ -76,7 +76,7 @@ describe("saml-settings.vue", () => {
 
     const emitted = wrapper.emitted("update-idp");
     expect(emitted).toBeTruthy();
-    expect(emitted![0][0].samlData.entityId).toBe(mockSamlData.entityId);
+    expect(emitted?.[0]?.[0]?.samlData?.entityId).toBe(mockSamlData.entityId);
   });
 
   it("preserves the entity ID when updating via a metadata URL instead of a file", async () => {
@@ -94,6 +94,6 @@ describe("saml-settings.vue", () => {
 
     const emitted = wrapper.emitted("update-idp");
     expect(emitted).toBeTruthy();
-    expect(emitted![0][0].samlData.entityId).toBe(mockSamlData.entityId);
+    expect(emitted?.[0]?.[0]?.samlData?.entityId).toBe(mockSamlData.entityId);
   });
 });
