@@ -56,3 +56,45 @@ While path-based routing works with applications such as Jupyter Notebooks, it m
 For existing clusters, changing the routing model affects how workload URLs are generated. Administrators should plan this transition accordingly.
 
 </Info>
+
+### OpenShift Route TLS Termination
+
+On OpenShift, NVIDIA Run:ai exposes a workload's URL through a `Route` object. By default, the `Route` uses edge termination: TLS terminates at the OpenShift Router, and traffic to the pod inside the cluster is plain HTTP.
+
+To terminate TLS inside the pod itself and preserve end-to-end encryption from the client to the workload, set the Route termination policy to `passthrough`:
+
+<Tabs>
+
+<Tab title="Helm">
+
+```yaml
+clusterConfig:
+  anyworkload-controller:
+    openshiftRouteConfiguration:
+      terminationPolicy: passthrough # edge (default) | passthrough
+```
+
+</Tab>
+
+<Tab title="runaiconfig">
+
+```yaml
+spec:
+  anyworkload-controller:
+    openshiftRouteConfiguration:
+      terminationPolicy: passthrough # edge (default) | passthrough
+```
+
+</Tab>
+
+</Tabs>
+
+This setting applies cluster-wide to every `Route` object NVIDIA Run:ai creates, across all workload types.
+
+<Warning>
+
+**Prerequisite**
+
+With `passthrough` termination, NVIDIA Run:ai does not provision or manage a TLS certificate for the pod. You must terminate TLS inside the container yourself, for example, using your own certificate mounted as a Kubernetes secret and a web server or sidecar that you own and maintain.
+
+</Warning>
