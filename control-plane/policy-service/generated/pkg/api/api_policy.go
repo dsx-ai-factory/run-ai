@@ -38,11 +38,6 @@ import (
 type PolicyAPIController struct {
 	service PolicyAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -58,10 +53,13 @@ type PolicyAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *PolicyAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *PolicyAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -975,7 +973,7 @@ func (c *PolicyAPIController) Routes() Routes {
 func (c *PolicyAPIController) ListPolicies(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var workloadTypeParam string
@@ -1020,7 +1018,7 @@ func (c *PolicyAPIController) ListPolicies(w http.ResponseWriter, r *http.Reques
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeFallbackPolicies", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeFallbackPolicies", Err: err}, nil, nil)
 			return
 		}
 
@@ -1034,7 +1032,7 @@ func (c *PolicyAPIController) ListPolicies(w http.ResponseWriter, r *http.Reques
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeGvkPolicies", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeGvkPolicies", Err: err}, nil, nil)
 			return
 		}
 
@@ -1044,7 +1042,7 @@ func (c *PolicyAPIController) ListPolicies(w http.ResponseWriter, r *http.Reques
 	result, err := c.service.ListPolicies(r.Context(), workloadTypeParam, scopeParam, departmentIdParam, projectIdParam, clusterIdParam, includeFallbackPoliciesParam, includeGvkPoliciesParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1097,7 +1095,7 @@ func (c *PolicyAPIController) ListPolicies(w http.ResponseWriter, r *http.Reques
 func (c *PolicyAPIController) GetFallbackPolicy(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var scopeParam string
@@ -1106,7 +1104,7 @@ func (c *PolicyAPIController) GetFallbackPolicy(w http.ResponseWriter, r *http.R
 
 		scopeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil, nil)
 		return
 	}
 	var departmentIdParam string
@@ -1137,7 +1135,7 @@ func (c *PolicyAPIController) GetFallbackPolicy(w http.ResponseWriter, r *http.R
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "noCreationMode", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "noCreationMode", Err: err}, nil, nil)
 			return
 		}
 
@@ -1147,7 +1145,7 @@ func (c *PolicyAPIController) GetFallbackPolicy(w http.ResponseWriter, r *http.R
 	result, err := c.service.GetFallbackPolicy(r.Context(), scopeParam, departmentIdParam, projectIdParam, clusterIdParam, noCreationModeParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1200,7 +1198,7 @@ func (c *PolicyAPIController) GetFallbackPolicy(w http.ResponseWriter, r *http.R
 func (c *PolicyAPIController) OverwriteFallbackPolicy(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var validateOnlyParam bool
@@ -1210,7 +1208,7 @@ func (c *PolicyAPIController) OverwriteFallbackPolicy(w http.ResponseWriter, r *
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil, nil)
 			return
 		}
 
@@ -1224,7 +1222,7 @@ func (c *PolicyAPIController) OverwriteFallbackPolicy(w http.ResponseWriter, r *
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil, nil)
 			return
 		}
 
@@ -1233,34 +1231,35 @@ func (c *PolicyAPIController) OverwriteFallbackPolicy(w http.ResponseWriter, r *
 	}
 	var fallbackPolicyOverwriteRequestParam FallbackPolicyOverwriteRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&fallbackPolicyOverwriteRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertFallbackPolicyOverwriteRequestRequired(fallbackPolicyOverwriteRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertFallbackPolicyOverwriteRequestConstraints(fallbackPolicyOverwriteRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.OverwriteFallbackPolicy(r.Context(), validateOnlyParam, approveClusterDeletionParam, fallbackPolicyOverwriteRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1313,7 +1312,7 @@ func (c *PolicyAPIController) OverwriteFallbackPolicy(w http.ResponseWriter, r *
 func (c *PolicyAPIController) DeleteFallbackPolicy(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var scopeParam string
@@ -1322,7 +1321,7 @@ func (c *PolicyAPIController) DeleteFallbackPolicy(w http.ResponseWriter, r *htt
 
 		scopeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil, nil)
 		return
 	}
 	var departmentIdParam string
@@ -1353,7 +1352,7 @@ func (c *PolicyAPIController) DeleteFallbackPolicy(w http.ResponseWriter, r *htt
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil, nil)
 			return
 		}
 
@@ -1363,7 +1362,7 @@ func (c *PolicyAPIController) DeleteFallbackPolicy(w http.ResponseWriter, r *htt
 	result, err := c.service.DeleteFallbackPolicy(r.Context(), scopeParam, departmentIdParam, projectIdParam, clusterIdParam, approveClusterDeletionParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1379,7 +1378,7 @@ func (c *PolicyAPIController) DeleteFallbackPolicy(w http.ResponseWriter, r *htt
 func (c *PolicyAPIController) UpdateFallbackPolicy(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var validateOnlyParam bool
@@ -1389,7 +1388,7 @@ func (c *PolicyAPIController) UpdateFallbackPolicy(w http.ResponseWriter, r *htt
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil, nil)
 			return
 		}
 
@@ -1403,7 +1402,7 @@ func (c *PolicyAPIController) UpdateFallbackPolicy(w http.ResponseWriter, r *htt
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil, nil)
 			return
 		}
 
@@ -1412,34 +1411,35 @@ func (c *PolicyAPIController) UpdateFallbackPolicy(w http.ResponseWriter, r *htt
 	}
 	var fallbackPolicyChangeRequestParam FallbackPolicyChangeRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&fallbackPolicyChangeRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertFallbackPolicyChangeRequestRequired(fallbackPolicyChangeRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertFallbackPolicyChangeRequestConstraints(fallbackPolicyChangeRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateFallbackPolicy(r.Context(), validateOnlyParam, approveClusterDeletionParam, fallbackPolicyChangeRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1492,7 +1492,7 @@ func (c *PolicyAPIController) UpdateFallbackPolicy(w http.ResponseWriter, r *htt
 func (c *PolicyAPIController) GetTrainingPolicyV2(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var scopeParam string
@@ -1501,7 +1501,7 @@ func (c *PolicyAPIController) GetTrainingPolicyV2(w http.ResponseWriter, r *http
 
 		scopeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil, nil)
 		return
 	}
 	var departmentIdParam string
@@ -1532,7 +1532,7 @@ func (c *PolicyAPIController) GetTrainingPolicyV2(w http.ResponseWriter, r *http
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "noCreationMode", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "noCreationMode", Err: err}, nil, nil)
 			return
 		}
 
@@ -1542,7 +1542,7 @@ func (c *PolicyAPIController) GetTrainingPolicyV2(w http.ResponseWriter, r *http
 	result, err := c.service.GetTrainingPolicyV2(r.Context(), scopeParam, departmentIdParam, projectIdParam, clusterIdParam, noCreationModeParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1595,7 +1595,7 @@ func (c *PolicyAPIController) GetTrainingPolicyV2(w http.ResponseWriter, r *http
 func (c *PolicyAPIController) OverwriteTrainingPolicyV2(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var validateOnlyParam bool
@@ -1605,7 +1605,7 @@ func (c *PolicyAPIController) OverwriteTrainingPolicyV2(w http.ResponseWriter, r
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil, nil)
 			return
 		}
 
@@ -1619,7 +1619,7 @@ func (c *PolicyAPIController) OverwriteTrainingPolicyV2(w http.ResponseWriter, r
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil, nil)
 			return
 		}
 
@@ -1628,34 +1628,35 @@ func (c *PolicyAPIController) OverwriteTrainingPolicyV2(w http.ResponseWriter, r
 	}
 	var trainingPolicyOverwriteRequestV2Param TrainingPolicyOverwriteRequestV2
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&trainingPolicyOverwriteRequestV2Param); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertTrainingPolicyOverwriteRequestV2Required(trainingPolicyOverwriteRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertTrainingPolicyOverwriteRequestV2Constraints(trainingPolicyOverwriteRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.OverwriteTrainingPolicyV2(r.Context(), validateOnlyParam, approveClusterDeletionParam, trainingPolicyOverwriteRequestV2Param)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1708,7 +1709,7 @@ func (c *PolicyAPIController) OverwriteTrainingPolicyV2(w http.ResponseWriter, r
 func (c *PolicyAPIController) DeleteTrainingPolicy(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var scopeParam string
@@ -1717,7 +1718,7 @@ func (c *PolicyAPIController) DeleteTrainingPolicy(w http.ResponseWriter, r *htt
 
 		scopeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil, nil)
 		return
 	}
 	var departmentIdParam string
@@ -1748,7 +1749,7 @@ func (c *PolicyAPIController) DeleteTrainingPolicy(w http.ResponseWriter, r *htt
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil, nil)
 			return
 		}
 
@@ -1758,7 +1759,7 @@ func (c *PolicyAPIController) DeleteTrainingPolicy(w http.ResponseWriter, r *htt
 	result, err := c.service.DeleteTrainingPolicy(r.Context(), scopeParam, departmentIdParam, projectIdParam, clusterIdParam, approveClusterDeletionParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1774,7 +1775,7 @@ func (c *PolicyAPIController) DeleteTrainingPolicy(w http.ResponseWriter, r *htt
 func (c *PolicyAPIController) UpdateTrainingPolicyV2(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var validateOnlyParam bool
@@ -1784,7 +1785,7 @@ func (c *PolicyAPIController) UpdateTrainingPolicyV2(w http.ResponseWriter, r *h
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil, nil)
 			return
 		}
 
@@ -1798,7 +1799,7 @@ func (c *PolicyAPIController) UpdateTrainingPolicyV2(w http.ResponseWriter, r *h
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil, nil)
 			return
 		}
 
@@ -1807,34 +1808,35 @@ func (c *PolicyAPIController) UpdateTrainingPolicyV2(w http.ResponseWriter, r *h
 	}
 	var trainingPolicyChangeRequestV2Param TrainingPolicyChangeRequestV2
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&trainingPolicyChangeRequestV2Param); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertTrainingPolicyChangeRequestV2Required(trainingPolicyChangeRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertTrainingPolicyChangeRequestV2Constraints(trainingPolicyChangeRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateTrainingPolicyV2(r.Context(), validateOnlyParam, approveClusterDeletionParam, trainingPolicyChangeRequestV2Param)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1887,7 +1889,7 @@ func (c *PolicyAPIController) UpdateTrainingPolicyV2(w http.ResponseWriter, r *h
 func (c *PolicyAPIController) GetWorkspacePolicyV2(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var scopeParam string
@@ -1896,7 +1898,7 @@ func (c *PolicyAPIController) GetWorkspacePolicyV2(w http.ResponseWriter, r *htt
 
 		scopeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil, nil)
 		return
 	}
 	var departmentIdParam string
@@ -1927,7 +1929,7 @@ func (c *PolicyAPIController) GetWorkspacePolicyV2(w http.ResponseWriter, r *htt
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "noCreationMode", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "noCreationMode", Err: err}, nil, nil)
 			return
 		}
 
@@ -1937,7 +1939,7 @@ func (c *PolicyAPIController) GetWorkspacePolicyV2(w http.ResponseWriter, r *htt
 	result, err := c.service.GetWorkspacePolicyV2(r.Context(), scopeParam, departmentIdParam, projectIdParam, clusterIdParam, noCreationModeParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1990,7 +1992,7 @@ func (c *PolicyAPIController) GetWorkspacePolicyV2(w http.ResponseWriter, r *htt
 func (c *PolicyAPIController) OverwriteWorkspacePolicyV2(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var validateOnlyParam bool
@@ -2000,7 +2002,7 @@ func (c *PolicyAPIController) OverwriteWorkspacePolicyV2(w http.ResponseWriter, 
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil, nil)
 			return
 		}
 
@@ -2014,7 +2016,7 @@ func (c *PolicyAPIController) OverwriteWorkspacePolicyV2(w http.ResponseWriter, 
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil, nil)
 			return
 		}
 
@@ -2023,34 +2025,35 @@ func (c *PolicyAPIController) OverwriteWorkspacePolicyV2(w http.ResponseWriter, 
 	}
 	var workspacePolicyOverwriteRequestV2Param WorkspacePolicyOverwriteRequestV2
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&workspacePolicyOverwriteRequestV2Param); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertWorkspacePolicyOverwriteRequestV2Required(workspacePolicyOverwriteRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertWorkspacePolicyOverwriteRequestV2Constraints(workspacePolicyOverwriteRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.OverwriteWorkspacePolicyV2(r.Context(), validateOnlyParam, approveClusterDeletionParam, workspacePolicyOverwriteRequestV2Param)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2103,7 +2106,7 @@ func (c *PolicyAPIController) OverwriteWorkspacePolicyV2(w http.ResponseWriter, 
 func (c *PolicyAPIController) DeleteWorkspacePolicy(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var scopeParam string
@@ -2112,7 +2115,7 @@ func (c *PolicyAPIController) DeleteWorkspacePolicy(w http.ResponseWriter, r *ht
 
 		scopeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil, nil)
 		return
 	}
 	var departmentIdParam string
@@ -2143,7 +2146,7 @@ func (c *PolicyAPIController) DeleteWorkspacePolicy(w http.ResponseWriter, r *ht
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil, nil)
 			return
 		}
 
@@ -2153,7 +2156,7 @@ func (c *PolicyAPIController) DeleteWorkspacePolicy(w http.ResponseWriter, r *ht
 	result, err := c.service.DeleteWorkspacePolicy(r.Context(), scopeParam, departmentIdParam, projectIdParam, clusterIdParam, approveClusterDeletionParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2169,7 +2172,7 @@ func (c *PolicyAPIController) DeleteWorkspacePolicy(w http.ResponseWriter, r *ht
 func (c *PolicyAPIController) UpdateWorkspacePolicyV2(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var validateOnlyParam bool
@@ -2179,7 +2182,7 @@ func (c *PolicyAPIController) UpdateWorkspacePolicyV2(w http.ResponseWriter, r *
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil, nil)
 			return
 		}
 
@@ -2193,7 +2196,7 @@ func (c *PolicyAPIController) UpdateWorkspacePolicyV2(w http.ResponseWriter, r *
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil, nil)
 			return
 		}
 
@@ -2202,34 +2205,35 @@ func (c *PolicyAPIController) UpdateWorkspacePolicyV2(w http.ResponseWriter, r *
 	}
 	var workspacePolicyChangeRequestV2Param WorkspacePolicyChangeRequestV2
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&workspacePolicyChangeRequestV2Param); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertWorkspacePolicyChangeRequestV2Required(workspacePolicyChangeRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertWorkspacePolicyChangeRequestV2Constraints(workspacePolicyChangeRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateWorkspacePolicyV2(r.Context(), validateOnlyParam, approveClusterDeletionParam, workspacePolicyChangeRequestV2Param)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2282,7 +2286,7 @@ func (c *PolicyAPIController) UpdateWorkspacePolicyV2(w http.ResponseWriter, r *
 func (c *PolicyAPIController) GetDistributedPolicyV2(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var scopeParam string
@@ -2291,7 +2295,7 @@ func (c *PolicyAPIController) GetDistributedPolicyV2(w http.ResponseWriter, r *h
 
 		scopeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil, nil)
 		return
 	}
 	var departmentIdParam string
@@ -2322,7 +2326,7 @@ func (c *PolicyAPIController) GetDistributedPolicyV2(w http.ResponseWriter, r *h
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "noCreationMode", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "noCreationMode", Err: err}, nil, nil)
 			return
 		}
 
@@ -2332,7 +2336,7 @@ func (c *PolicyAPIController) GetDistributedPolicyV2(w http.ResponseWriter, r *h
 	result, err := c.service.GetDistributedPolicyV2(r.Context(), scopeParam, departmentIdParam, projectIdParam, clusterIdParam, noCreationModeParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2385,7 +2389,7 @@ func (c *PolicyAPIController) GetDistributedPolicyV2(w http.ResponseWriter, r *h
 func (c *PolicyAPIController) OverwriteDistributedPolicyV2(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var validateOnlyParam bool
@@ -2395,7 +2399,7 @@ func (c *PolicyAPIController) OverwriteDistributedPolicyV2(w http.ResponseWriter
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil, nil)
 			return
 		}
 
@@ -2409,7 +2413,7 @@ func (c *PolicyAPIController) OverwriteDistributedPolicyV2(w http.ResponseWriter
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil, nil)
 			return
 		}
 
@@ -2418,34 +2422,35 @@ func (c *PolicyAPIController) OverwriteDistributedPolicyV2(w http.ResponseWriter
 	}
 	var distributedPolicyOverwriteRequestV2Param DistributedPolicyOverwriteRequestV2
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&distributedPolicyOverwriteRequestV2Param); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertDistributedPolicyOverwriteRequestV2Required(distributedPolicyOverwriteRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertDistributedPolicyOverwriteRequestV2Constraints(distributedPolicyOverwriteRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.OverwriteDistributedPolicyV2(r.Context(), validateOnlyParam, approveClusterDeletionParam, distributedPolicyOverwriteRequestV2Param)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2498,7 +2503,7 @@ func (c *PolicyAPIController) OverwriteDistributedPolicyV2(w http.ResponseWriter
 func (c *PolicyAPIController) DeleteDistributedPolicy(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var scopeParam string
@@ -2507,7 +2512,7 @@ func (c *PolicyAPIController) DeleteDistributedPolicy(w http.ResponseWriter, r *
 
 		scopeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil, nil)
 		return
 	}
 	var departmentIdParam string
@@ -2538,7 +2543,7 @@ func (c *PolicyAPIController) DeleteDistributedPolicy(w http.ResponseWriter, r *
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil, nil)
 			return
 		}
 
@@ -2548,7 +2553,7 @@ func (c *PolicyAPIController) DeleteDistributedPolicy(w http.ResponseWriter, r *
 	result, err := c.service.DeleteDistributedPolicy(r.Context(), scopeParam, departmentIdParam, projectIdParam, clusterIdParam, approveClusterDeletionParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2564,7 +2569,7 @@ func (c *PolicyAPIController) DeleteDistributedPolicy(w http.ResponseWriter, r *
 func (c *PolicyAPIController) UpdateDistributedPolicyV2(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var validateOnlyParam bool
@@ -2574,7 +2579,7 @@ func (c *PolicyAPIController) UpdateDistributedPolicyV2(w http.ResponseWriter, r
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil, nil)
 			return
 		}
 
@@ -2588,7 +2593,7 @@ func (c *PolicyAPIController) UpdateDistributedPolicyV2(w http.ResponseWriter, r
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil, nil)
 			return
 		}
 
@@ -2597,34 +2602,35 @@ func (c *PolicyAPIController) UpdateDistributedPolicyV2(w http.ResponseWriter, r
 	}
 	var distributedPolicyChangeRequestV2Param DistributedPolicyChangeRequestV2
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&distributedPolicyChangeRequestV2Param); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertDistributedPolicyChangeRequestV2Required(distributedPolicyChangeRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertDistributedPolicyChangeRequestV2Constraints(distributedPolicyChangeRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateDistributedPolicyV2(r.Context(), validateOnlyParam, approveClusterDeletionParam, distributedPolicyChangeRequestV2Param)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2677,7 +2683,7 @@ func (c *PolicyAPIController) UpdateDistributedPolicyV2(w http.ResponseWriter, r
 func (c *PolicyAPIController) GetInferencePolicyV2(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var scopeParam string
@@ -2686,7 +2692,7 @@ func (c *PolicyAPIController) GetInferencePolicyV2(w http.ResponseWriter, r *htt
 
 		scopeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil, nil)
 		return
 	}
 	var departmentIdParam string
@@ -2717,7 +2723,7 @@ func (c *PolicyAPIController) GetInferencePolicyV2(w http.ResponseWriter, r *htt
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "noCreationMode", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "noCreationMode", Err: err}, nil, nil)
 			return
 		}
 
@@ -2727,7 +2733,7 @@ func (c *PolicyAPIController) GetInferencePolicyV2(w http.ResponseWriter, r *htt
 	result, err := c.service.GetInferencePolicyV2(r.Context(), scopeParam, departmentIdParam, projectIdParam, clusterIdParam, noCreationModeParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2780,7 +2786,7 @@ func (c *PolicyAPIController) GetInferencePolicyV2(w http.ResponseWriter, r *htt
 func (c *PolicyAPIController) OverwriteInferencePolicyV2(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var validateOnlyParam bool
@@ -2790,7 +2796,7 @@ func (c *PolicyAPIController) OverwriteInferencePolicyV2(w http.ResponseWriter, 
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil, nil)
 			return
 		}
 
@@ -2804,7 +2810,7 @@ func (c *PolicyAPIController) OverwriteInferencePolicyV2(w http.ResponseWriter, 
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil, nil)
 			return
 		}
 
@@ -2813,34 +2819,35 @@ func (c *PolicyAPIController) OverwriteInferencePolicyV2(w http.ResponseWriter, 
 	}
 	var inferencePolicyOverwriteRequestV2Param InferencePolicyOverwriteRequestV2
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&inferencePolicyOverwriteRequestV2Param); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertInferencePolicyOverwriteRequestV2Required(inferencePolicyOverwriteRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertInferencePolicyOverwriteRequestV2Constraints(inferencePolicyOverwriteRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.OverwriteInferencePolicyV2(r.Context(), validateOnlyParam, approveClusterDeletionParam, inferencePolicyOverwriteRequestV2Param)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2893,7 +2900,7 @@ func (c *PolicyAPIController) OverwriteInferencePolicyV2(w http.ResponseWriter, 
 func (c *PolicyAPIController) DeleteInferencePolicy(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var scopeParam string
@@ -2902,7 +2909,7 @@ func (c *PolicyAPIController) DeleteInferencePolicy(w http.ResponseWriter, r *ht
 
 		scopeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil, nil)
 		return
 	}
 	var departmentIdParam string
@@ -2933,7 +2940,7 @@ func (c *PolicyAPIController) DeleteInferencePolicy(w http.ResponseWriter, r *ht
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil, nil)
 			return
 		}
 
@@ -2943,7 +2950,7 @@ func (c *PolicyAPIController) DeleteInferencePolicy(w http.ResponseWriter, r *ht
 	result, err := c.service.DeleteInferencePolicy(r.Context(), scopeParam, departmentIdParam, projectIdParam, clusterIdParam, approveClusterDeletionParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -2959,7 +2966,7 @@ func (c *PolicyAPIController) DeleteInferencePolicy(w http.ResponseWriter, r *ht
 func (c *PolicyAPIController) UpdateInferencePolicyV2(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var validateOnlyParam bool
@@ -2969,7 +2976,7 @@ func (c *PolicyAPIController) UpdateInferencePolicyV2(w http.ResponseWriter, r *
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil, nil)
 			return
 		}
 
@@ -2983,7 +2990,7 @@ func (c *PolicyAPIController) UpdateInferencePolicyV2(w http.ResponseWriter, r *
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil, nil)
 			return
 		}
 
@@ -2992,34 +2999,35 @@ func (c *PolicyAPIController) UpdateInferencePolicyV2(w http.ResponseWriter, r *
 	}
 	var inferencePolicyChangeRequestV2Param InferencePolicyChangeRequestV2
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&inferencePolicyChangeRequestV2Param); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertInferencePolicyChangeRequestV2Required(inferencePolicyChangeRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertInferencePolicyChangeRequestV2Constraints(inferencePolicyChangeRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateInferencePolicyV2(r.Context(), validateOnlyParam, approveClusterDeletionParam, inferencePolicyChangeRequestV2Param)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -3072,7 +3080,7 @@ func (c *PolicyAPIController) UpdateInferencePolicyV2(w http.ResponseWriter, r *
 func (c *PolicyAPIController) GetDistributedInferencePolicyV2(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var scopeParam string
@@ -3081,7 +3089,7 @@ func (c *PolicyAPIController) GetDistributedInferencePolicyV2(w http.ResponseWri
 
 		scopeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil, nil)
 		return
 	}
 	var departmentIdParam string
@@ -3112,7 +3120,7 @@ func (c *PolicyAPIController) GetDistributedInferencePolicyV2(w http.ResponseWri
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "noCreationMode", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "noCreationMode", Err: err}, nil, nil)
 			return
 		}
 
@@ -3122,7 +3130,7 @@ func (c *PolicyAPIController) GetDistributedInferencePolicyV2(w http.ResponseWri
 	result, err := c.service.GetDistributedInferencePolicyV2(r.Context(), scopeParam, departmentIdParam, projectIdParam, clusterIdParam, noCreationModeParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -3175,7 +3183,7 @@ func (c *PolicyAPIController) GetDistributedInferencePolicyV2(w http.ResponseWri
 func (c *PolicyAPIController) OverwriteDistributedInferencePolicyV2(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var validateOnlyParam bool
@@ -3185,7 +3193,7 @@ func (c *PolicyAPIController) OverwriteDistributedInferencePolicyV2(w http.Respo
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil, nil)
 			return
 		}
 
@@ -3199,7 +3207,7 @@ func (c *PolicyAPIController) OverwriteDistributedInferencePolicyV2(w http.Respo
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil, nil)
 			return
 		}
 
@@ -3208,34 +3216,35 @@ func (c *PolicyAPIController) OverwriteDistributedInferencePolicyV2(w http.Respo
 	}
 	var distributedInferencePolicyOverwriteRequestV2Param DistributedInferencePolicyOverwriteRequestV2
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&distributedInferencePolicyOverwriteRequestV2Param); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertDistributedInferencePolicyOverwriteRequestV2Required(distributedInferencePolicyOverwriteRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertDistributedInferencePolicyOverwriteRequestV2Constraints(distributedInferencePolicyOverwriteRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.OverwriteDistributedInferencePolicyV2(r.Context(), validateOnlyParam, approveClusterDeletionParam, distributedInferencePolicyOverwriteRequestV2Param)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -3288,7 +3297,7 @@ func (c *PolicyAPIController) OverwriteDistributedInferencePolicyV2(w http.Respo
 func (c *PolicyAPIController) DeleteDistributedInferencePolicy(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var scopeParam string
@@ -3297,7 +3306,7 @@ func (c *PolicyAPIController) DeleteDistributedInferencePolicy(w http.ResponseWr
 
 		scopeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil, nil)
 		return
 	}
 	var departmentIdParam string
@@ -3328,7 +3337,7 @@ func (c *PolicyAPIController) DeleteDistributedInferencePolicy(w http.ResponseWr
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil, nil)
 			return
 		}
 
@@ -3338,7 +3347,7 @@ func (c *PolicyAPIController) DeleteDistributedInferencePolicy(w http.ResponseWr
 	result, err := c.service.DeleteDistributedInferencePolicy(r.Context(), scopeParam, departmentIdParam, projectIdParam, clusterIdParam, approveClusterDeletionParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -3354,7 +3363,7 @@ func (c *PolicyAPIController) DeleteDistributedInferencePolicy(w http.ResponseWr
 func (c *PolicyAPIController) UpdateDistributedInferencePolicyV2(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var validateOnlyParam bool
@@ -3364,7 +3373,7 @@ func (c *PolicyAPIController) UpdateDistributedInferencePolicyV2(w http.Response
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil, nil)
 			return
 		}
 
@@ -3378,7 +3387,7 @@ func (c *PolicyAPIController) UpdateDistributedInferencePolicyV2(w http.Response
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "approveClusterDeletion", Err: err}, nil, nil)
 			return
 		}
 
@@ -3387,34 +3396,35 @@ func (c *PolicyAPIController) UpdateDistributedInferencePolicyV2(w http.Response
 	}
 	var distributedInferencePolicyChangeRequestV2Param DistributedInferencePolicyChangeRequestV2
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&distributedInferencePolicyChangeRequestV2Param); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertDistributedInferencePolicyChangeRequestV2Required(distributedInferencePolicyChangeRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertDistributedInferencePolicyChangeRequestV2Constraints(distributedInferencePolicyChangeRequestV2Param); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateDistributedInferencePolicyV2(r.Context(), validateOnlyParam, approveClusterDeletionParam, distributedInferencePolicyChangeRequestV2Param)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -3467,34 +3477,35 @@ func (c *PolicyAPIController) UpdateDistributedInferencePolicyV2(w http.Response
 func (c *PolicyAPIController) UpdateSyncConfig(w http.ResponseWriter, r *http.Request) {
 	var syncConfigParam SyncConfig
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&syncConfigParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertSyncConfigRequired(syncConfigParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertSyncConfigConstraints(syncConfigParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateSyncConfig(r.Context(), syncConfigParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -3547,13 +3558,13 @@ func (c *PolicyAPIController) UpdateSyncConfig(w http.ResponseWriter, r *http.Re
 func (c *PolicyAPIController) GetSyncConfig(w http.ResponseWriter, r *http.Request) {
 	clusterIdParam := chi.URLParam(r, "clusterId")
 	if clusterIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetSyncConfig(r.Context(), clusterIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -3606,7 +3617,7 @@ func (c *PolicyAPIController) GetSyncConfig(w http.ResponseWriter, r *http.Reque
 func (c *PolicyAPIController) GetNimServicePolicy(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var scopeParam string
@@ -3615,7 +3626,7 @@ func (c *PolicyAPIController) GetNimServicePolicy(w http.ResponseWriter, r *http
 
 		scopeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil, nil)
 		return
 	}
 	var departmentIdParam string
@@ -3646,7 +3657,7 @@ func (c *PolicyAPIController) GetNimServicePolicy(w http.ResponseWriter, r *http
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "noCreationMode", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "noCreationMode", Err: err}, nil, nil)
 			return
 		}
 
@@ -3656,7 +3667,7 @@ func (c *PolicyAPIController) GetNimServicePolicy(w http.ResponseWriter, r *http
 	result, err := c.service.GetNimServicePolicy(r.Context(), scopeParam, departmentIdParam, projectIdParam, clusterIdParam, noCreationModeParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -3709,7 +3720,7 @@ func (c *PolicyAPIController) GetNimServicePolicy(w http.ResponseWriter, r *http
 func (c *PolicyAPIController) OverwriteNimServicePolicy(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var validateOnlyParam bool
@@ -3719,7 +3730,7 @@ func (c *PolicyAPIController) OverwriteNimServicePolicy(w http.ResponseWriter, r
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil, nil)
 			return
 		}
 
@@ -3728,34 +3739,35 @@ func (c *PolicyAPIController) OverwriteNimServicePolicy(w http.ResponseWriter, r
 	}
 	var nimServicePolicyOverwriteRequestParam NimServicePolicyOverwriteRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&nimServicePolicyOverwriteRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertNimServicePolicyOverwriteRequestRequired(nimServicePolicyOverwriteRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertNimServicePolicyOverwriteRequestConstraints(nimServicePolicyOverwriteRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.OverwriteNimServicePolicy(r.Context(), validateOnlyParam, nimServicePolicyOverwriteRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -3808,7 +3820,7 @@ func (c *PolicyAPIController) OverwriteNimServicePolicy(w http.ResponseWriter, r
 func (c *PolicyAPIController) DeleteNimServicePolicy(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var scopeParam string
@@ -3817,7 +3829,7 @@ func (c *PolicyAPIController) DeleteNimServicePolicy(w http.ResponseWriter, r *h
 
 		scopeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil, nil)
 		return
 	}
 	var departmentIdParam string
@@ -3844,7 +3856,7 @@ func (c *PolicyAPIController) DeleteNimServicePolicy(w http.ResponseWriter, r *h
 	result, err := c.service.DeleteNimServicePolicy(r.Context(), scopeParam, departmentIdParam, projectIdParam, clusterIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -3860,7 +3872,7 @@ func (c *PolicyAPIController) DeleteNimServicePolicy(w http.ResponseWriter, r *h
 func (c *PolicyAPIController) UpdateNimServicePolicy(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var validateOnlyParam bool
@@ -3870,7 +3882,7 @@ func (c *PolicyAPIController) UpdateNimServicePolicy(w http.ResponseWriter, r *h
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "validateOnly", Err: err}, nil, nil)
 			return
 		}
 
@@ -3879,34 +3891,35 @@ func (c *PolicyAPIController) UpdateNimServicePolicy(w http.ResponseWriter, r *h
 	}
 	var nimServicePolicyChangeRequestParam NimServicePolicyChangeRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&nimServicePolicyChangeRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertNimServicePolicyChangeRequestRequired(nimServicePolicyChangeRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertNimServicePolicyChangeRequestConstraints(nimServicePolicyChangeRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateNimServicePolicy(r.Context(), validateOnlyParam, nimServicePolicyChangeRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -3959,7 +3972,7 @@ func (c *PolicyAPIController) UpdateNimServicePolicy(w http.ResponseWriter, r *h
 func (c *PolicyAPIController) GetPolicyCrossType(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var scopeParam string
@@ -3968,7 +3981,7 @@ func (c *PolicyAPIController) GetPolicyCrossType(w http.ResponseWriter, r *http.
 
 		scopeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "scope"}, nil, nil)
 		return
 	}
 	var departmentIdParam string
@@ -3999,7 +4012,7 @@ func (c *PolicyAPIController) GetPolicyCrossType(w http.ResponseWriter, r *http.
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "noCreationMode", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "noCreationMode", Err: err}, nil, nil)
 			return
 		}
 
@@ -4009,7 +4022,7 @@ func (c *PolicyAPIController) GetPolicyCrossType(w http.ResponseWriter, r *http.
 	result, err := c.service.GetPolicyCrossType(r.Context(), scopeParam, departmentIdParam, projectIdParam, clusterIdParam, noCreationModeParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -4062,39 +4075,40 @@ func (c *PolicyAPIController) GetPolicyCrossType(w http.ResponseWriter, r *http.
 func (c *PolicyAPIController) AssetChangedHook(w http.ResponseWriter, r *http.Request) {
 	assetIdParam := chi.URLParam(r, "AssetId")
 	if assetIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil, nil)
 		return
 	}
 	var assetChangeNotificationParam AssetChangeNotification
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&assetChangeNotificationParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertAssetChangeNotificationRequired(assetChangeNotificationParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertAssetChangeNotificationConstraints(assetChangeNotificationParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.AssetChangedHook(r.Context(), assetIdParam, assetChangeNotificationParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -4110,34 +4124,35 @@ func (c *PolicyAPIController) AssetChangedHook(w http.ResponseWriter, r *http.Re
 func (c *PolicyAPIController) GetMappingMinimal(w http.ResponseWriter, r *http.Request) {
 	var getMappingMinimalInfoReqParam GetMappingMinimalInfoReq
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&getMappingMinimalInfoReqParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertGetMappingMinimalInfoReqRequired(getMappingMinimalInfoReqParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertGetMappingMinimalInfoReqConstraints(getMappingMinimalInfoReqParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.GetMappingMinimal(r.Context(), getMappingMinimalInfoReqParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -4190,34 +4205,35 @@ func (c *PolicyAPIController) GetMappingMinimal(w http.ResponseWriter, r *http.R
 func (c *PolicyAPIController) GetMappingFieldInfo(w http.ResponseWriter, r *http.Request) {
 	var getMappingFieldInfoReqParam GetMappingFieldInfoReq
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&getMappingFieldInfoReqParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertGetMappingFieldInfoReqRequired(getMappingFieldInfoReqParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertGetMappingFieldInfoReqConstraints(getMappingFieldInfoReqParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.GetMappingFieldInfo(r.Context(), getMappingFieldInfoReqParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -4270,7 +4286,7 @@ func (c *PolicyAPIController) GetMappingFieldInfo(w http.ResponseWriter, r *http
 func (c *PolicyAPIController) ListGvkPolicies(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var filterByParam []string
@@ -4296,7 +4312,7 @@ func (c *PolicyAPIController) ListGvkPolicies(w http.ResponseWriter, r *http.Req
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -4312,7 +4328,7 @@ func (c *PolicyAPIController) ListGvkPolicies(w http.ResponseWriter, r *http.Req
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -4333,7 +4349,7 @@ func (c *PolicyAPIController) ListGvkPolicies(w http.ResponseWriter, r *http.Req
 	result, err := c.service.ListGvkPolicies(r.Context(), filterByParam, sortByParam, offsetParam, limitParam, sortOrderParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -4386,34 +4402,35 @@ func (c *PolicyAPIController) ListGvkPolicies(w http.ResponseWriter, r *http.Req
 func (c *PolicyAPIController) CreateGvkPolicy(w http.ResponseWriter, r *http.Request) {
 	var createGvkPolicyReqParam CreateGvkPolicyReq
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&createGvkPolicyReqParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertCreateGvkPolicyReqRequired(createGvkPolicyReqParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertCreateGvkPolicyReqConstraints(createGvkPolicyReqParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateGvkPolicy(r.Context(), createGvkPolicyReqParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -4466,34 +4483,35 @@ func (c *PolicyAPIController) CreateGvkPolicy(w http.ResponseWriter, r *http.Req
 func (c *PolicyAPIController) GetEffectivePolicy(w http.ResponseWriter, r *http.Request) {
 	var workloadTypeAndScopeParam WorkloadTypeAndScope
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&workloadTypeAndScopeParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertWorkloadTypeAndScopeRequired(workloadTypeAndScopeParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertWorkloadTypeAndScopeConstraints(workloadTypeAndScopeParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.GetEffectivePolicy(r.Context(), workloadTypeAndScopeParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -4546,12 +4564,12 @@ func (c *PolicyAPIController) GetEffectivePolicy(w http.ResponseWriter, r *http.
 func (c *PolicyAPIController) GetGvkPolicy(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	policyIdParam := chi.URLParam(r, "PolicyId")
 	if policyIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"PolicyId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"PolicyId"}, nil, nil)
 		return
 	}
 	var breakdownParam bool
@@ -4561,7 +4579,7 @@ func (c *PolicyAPIController) GetGvkPolicy(w http.ResponseWriter, r *http.Reques
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "breakdown", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "breakdown", Err: err}, nil, nil)
 			return
 		}
 
@@ -4571,7 +4589,7 @@ func (c *PolicyAPIController) GetGvkPolicy(w http.ResponseWriter, r *http.Reques
 	result, err := c.service.GetGvkPolicy(r.Context(), policyIdParam, breakdownParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -4624,39 +4642,40 @@ func (c *PolicyAPIController) GetGvkPolicy(w http.ResponseWriter, r *http.Reques
 func (c *PolicyAPIController) ApplyGvkPolicy(w http.ResponseWriter, r *http.Request) {
 	policyIdParam := chi.URLParam(r, "PolicyId")
 	if policyIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"PolicyId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"PolicyId"}, nil, nil)
 		return
 	}
 	var updateGvkPolicyReqParam UpdateGvkPolicyReq
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&updateGvkPolicyReqParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertUpdateGvkPolicyReqRequired(updateGvkPolicyReqParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertUpdateGvkPolicyReqConstraints(updateGvkPolicyReqParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.ApplyGvkPolicy(r.Context(), policyIdParam, updateGvkPolicyReqParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -4709,13 +4728,13 @@ func (c *PolicyAPIController) ApplyGvkPolicy(w http.ResponseWriter, r *http.Requ
 func (c *PolicyAPIController) DeleteGvkPolicy(w http.ResponseWriter, r *http.Request) {
 	policyIdParam := chi.URLParam(r, "PolicyId")
 	if policyIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"PolicyId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"PolicyId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteGvkPolicy(r.Context(), policyIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -4731,39 +4750,40 @@ func (c *PolicyAPIController) DeleteGvkPolicy(w http.ResponseWriter, r *http.Req
 func (c *PolicyAPIController) PatchGvkPolicy(w http.ResponseWriter, r *http.Request) {
 	policyIdParam := chi.URLParam(r, "PolicyId")
 	if policyIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"PolicyId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"PolicyId"}, nil, nil)
 		return
 	}
 	var updateGvkPolicyReqParam UpdateGvkPolicyReq
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&updateGvkPolicyReqParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertUpdateGvkPolicyReqRequired(updateGvkPolicyReqParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertUpdateGvkPolicyReqConstraints(updateGvkPolicyReqParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.PatchGvkPolicy(r.Context(), policyIdParam, updateGvkPolicyReqParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -4816,39 +4836,40 @@ func (c *PolicyAPIController) PatchGvkPolicy(w http.ResponseWriter, r *http.Requ
 func (c *PolicyAPIController) DeleteGvkPolicyRules(w http.ResponseWriter, r *http.Request) {
 	policyIdParam := chi.URLParam(r, "PolicyId")
 	if policyIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"PolicyId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"PolicyId"}, nil, nil)
 		return
 	}
 	var deleteGvkPolicyRulesReqParam DeleteGvkPolicyRulesReq
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&deleteGvkPolicyRulesReqParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertDeleteGvkPolicyRulesReqRequired(deleteGvkPolicyRulesReqParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertDeleteGvkPolicyRulesReqConstraints(deleteGvkPolicyRulesReqParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteGvkPolicyRules(r.Context(), policyIdParam, deleteGvkPolicyRulesReqParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -4901,34 +4922,35 @@ func (c *PolicyAPIController) DeleteGvkPolicyRules(w http.ResponseWriter, r *htt
 func (c *PolicyAPIController) GetGvkPolicyByTypeAndScope(w http.ResponseWriter, r *http.Request) {
 	var workloadTypeAndScopeParam WorkloadTypeAndScope
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&workloadTypeAndScopeParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertWorkloadTypeAndScopeRequired(workloadTypeAndScopeParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertWorkloadTypeAndScopeConstraints(workloadTypeAndScopeParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.GetGvkPolicyByTypeAndScope(r.Context(), workloadTypeAndScopeParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

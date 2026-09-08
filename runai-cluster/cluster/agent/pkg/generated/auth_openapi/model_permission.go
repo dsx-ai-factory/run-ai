@@ -18,7 +18,7 @@ import (
 // Permission struct for Permission
 type Permission struct {
 	ResourceType ResourceType `json:"resourceType"`
-	Actions      []Action     `json:"actions"`
+	Actions []Action `json:"actions"`
 }
 
 // NewPermission instantiates a new Permission object
@@ -134,3 +134,5 @@ func (v *NullablePermission) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

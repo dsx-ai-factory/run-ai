@@ -18,20 +18,20 @@ import (
 
 // AccessRule struct for AccessRule
 type AccessRule struct {
-	SubjectId   string       `json:"subjectId"`
-	SubjectType SubjectType  `json:"subjectType"`
-	RoleId      int32        `json:"roleId"`
-	ScopeId     string       `json:"scopeId"`
-	ScopeType   ScopeType    `json:"scopeType"`
-	ClusterId   *string      `json:"clusterId,omitempty"`
-	RoleName    string       `json:"roleName"`
-	ScopeName   string       `json:"scopeName"`
-	Id          int32        `json:"id"`
-	CreatedAt   time.Time    `json:"createdAt"`
-	UpdatedAt   time.Time    `json:"updatedAt"`
-	DeletedAt   NullableTime `json:"deletedAt,omitempty"`
-	TenantId    int32        `json:"tenantId"`
-	CreatedBy   string       `json:"createdBy"`
+	SubjectId string `json:"subjectId"`
+	SubjectType SubjectType `json:"subjectType"`
+	RoleId int32 `json:"roleId"`
+	ScopeId string `json:"scopeId"`
+	ScopeType ScopeType `json:"scopeType"`
+	ClusterId *string `json:"clusterId,omitempty"`
+	RoleName string `json:"roleName"`
+	ScopeName string `json:"scopeName"`
+	Id int32 `json:"id"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	DeletedAt NullableTime `json:"deletedAt,omitempty"`
+	TenantId int32 `json:"tenantId"`
+	CreatedBy string `json:"createdBy"`
 }
 
 // NewAccessRule instantiates a new AccessRule object
@@ -367,7 +367,6 @@ func (o *AccessRule) HasDeletedAt() bool {
 func (o *AccessRule) SetDeletedAt(v time.Time) {
 	o.DeletedAt.Set(&v)
 }
-
 // SetDeletedAtNil sets the value for DeletedAt to be an explicit nil
 func (o *AccessRule) SetDeletedAtNil() {
 	o.DeletedAt.Set(nil)
@@ -508,3 +507,5 @@ func (v *NullableAccessRule) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

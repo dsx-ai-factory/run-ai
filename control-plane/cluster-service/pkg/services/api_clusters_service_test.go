@@ -84,7 +84,7 @@ type Mocks struct {
 const (
 	tenantId        = 1
 	anotherTenantId = "619"
-	fullUrl         = "tenant.test.run.ai"
+	fullUrl         = "tenant.mock-q7z3k.example.com"
 	testSuite       = "cluster-service"
 )
 
@@ -888,7 +888,7 @@ helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 
 			It("should return correct installation information for latest env", func() {
 				mocks.idmClient.On("MintInstallerBootstrapToken", mock.Anything, mock.Anything, mock.Anything).Return("Any_Secret", nil)
-				fullUrl := "tenant.test.run.ai"
+				fullUrl := "tenant.mock-q7z3k.example.com"
 				curCtx := context.WithValue(ctx, utils.FullHostKey, fullUrl)
 				resp, err := clustersApiService.GetClusterInstallInfoByUuid(curCtx, clusters[0].Uuid, ">0.0.0-0", "")
 				Expect(err).ShouldNot(HaveOccurred())

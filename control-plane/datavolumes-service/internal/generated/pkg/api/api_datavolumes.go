@@ -38,11 +38,6 @@ import (
 type DatavolumesAPIController struct {
 	service DatavolumesAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -58,10 +53,13 @@ type DatavolumesAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *DatavolumesAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *DatavolumesAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -466,7 +464,7 @@ func (c *DatavolumesAPIController) Routes() Routes {
 func (c *DatavolumesAPIController) GetDatavolumes(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var requestTypeParam DatavolumeRequestType
@@ -475,7 +473,7 @@ func (c *DatavolumesAPIController) GetDatavolumes(w http.ResponseWriter, r *http
 
 		requestTypeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "requestType"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "requestType"}, nil, nil)
 		return
 	}
 	var usableInProjectIdParam string
@@ -492,7 +490,7 @@ func (c *DatavolumesAPIController) GetDatavolumes(w http.ResponseWriter, r *http
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -508,7 +506,7 @@ func (c *DatavolumesAPIController) GetDatavolumes(w http.ResponseWriter, r *http
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -556,7 +554,7 @@ func (c *DatavolumesAPIController) GetDatavolumes(w http.ResponseWriter, r *http
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeInternal", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeInternal", Err: err}, nil, nil)
 			return
 		}
 
@@ -568,7 +566,7 @@ func (c *DatavolumesAPIController) GetDatavolumes(w http.ResponseWriter, r *http
 	result, err := c.service.GetDatavolumes(r.Context(), requestTypeParam, usableInProjectIdParam, offsetParam, limitParam, sortByParam, sortOrderParam, filterByParam, searchParam, includeInternalParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -621,34 +619,35 @@ func (c *DatavolumesAPIController) GetDatavolumes(w http.ResponseWriter, r *http
 func (c *DatavolumesAPIController) CreateDatavolume(w http.ResponseWriter, r *http.Request) {
 	var datavolumeCreationFieldsParam DatavolumeCreationFields
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&datavolumeCreationFieldsParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertDatavolumeCreationFieldsRequired(datavolumeCreationFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertDatavolumeCreationFieldsConstraints(datavolumeCreationFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateDatavolume(r.Context(), datavolumeCreationFieldsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -701,13 +700,13 @@ func (c *DatavolumesAPIController) CreateDatavolume(w http.ResponseWriter, r *ht
 func (c *DatavolumesAPIController) GetDatavolume(w http.ResponseWriter, r *http.Request) {
 	datavolumeIdParam := chi.URLParam(r, "datavolumeId")
 	if datavolumeIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"datavolumeId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"datavolumeId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetDatavolume(r.Context(), datavolumeIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -760,13 +759,13 @@ func (c *DatavolumesAPIController) GetDatavolume(w http.ResponseWriter, r *http.
 func (c *DatavolumesAPIController) DeleteDatavolume(w http.ResponseWriter, r *http.Request) {
 	datavolumeIdParam := chi.URLParam(r, "datavolumeId")
 	if datavolumeIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"datavolumeId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"datavolumeId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteDatavolume(r.Context(), datavolumeIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -819,39 +818,40 @@ func (c *DatavolumesAPIController) DeleteDatavolume(w http.ResponseWriter, r *ht
 func (c *DatavolumesAPIController) PatchDatavolume(w http.ResponseWriter, r *http.Request) {
 	datavolumeIdParam := chi.URLParam(r, "datavolumeId")
 	if datavolumeIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"datavolumeId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"datavolumeId"}, nil, nil)
 		return
 	}
 	var datavolumePatchFieldsParam DatavolumePatchFields
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&datavolumePatchFieldsParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertDatavolumePatchFieldsRequired(datavolumePatchFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertDatavolumePatchFieldsConstraints(datavolumePatchFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.PatchDatavolume(r.Context(), datavolumeIdParam, datavolumePatchFieldsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -904,7 +904,7 @@ func (c *DatavolumesAPIController) PatchDatavolume(w http.ResponseWriter, r *htt
 func (c *DatavolumesAPIController) DatavolumeNameAvailability(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var dataNameParam string
@@ -913,7 +913,7 @@ func (c *DatavolumesAPIController) DatavolumeNameAvailability(w http.ResponseWri
 
 		dataNameParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "dataName"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "dataName"}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -922,13 +922,13 @@ func (c *DatavolumesAPIController) DatavolumeNameAvailability(w http.ResponseWri
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DatavolumeNameAvailability(r.Context(), dataNameParam, clusterIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -944,7 +944,7 @@ func (c *DatavolumesAPIController) DatavolumeNameAvailability(w http.ResponseWri
 func (c *DatavolumesAPIController) GetUsedPvcsFromDatavolumes(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var projectIdParam string
@@ -953,13 +953,13 @@ func (c *DatavolumesAPIController) GetUsedPvcsFromDatavolumes(w http.ResponseWri
 
 		projectIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "projectId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "projectId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetUsedPvcsFromDatavolumes(r.Context(), projectIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1012,7 +1012,7 @@ func (c *DatavolumesAPIController) GetUsedPvcsFromDatavolumes(w http.ResponseWri
 func (c *DatavolumesAPIController) CountDatavolumes(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var requestTypeParam DatavolumeRequestType
@@ -1021,7 +1021,7 @@ func (c *DatavolumesAPIController) CountDatavolumes(w http.ResponseWriter, r *ht
 
 		requestTypeParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "requestType"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "requestType"}, nil, nil)
 		return
 	}
 	var usableInProjectIdParam string
@@ -1050,7 +1050,7 @@ func (c *DatavolumesAPIController) CountDatavolumes(w http.ResponseWriter, r *ht
 	result, err := c.service.CountDatavolumes(r.Context(), requestTypeParam, usableInProjectIdParam, filterByParam, searchParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1103,13 +1103,13 @@ func (c *DatavolumesAPIController) CountDatavolumes(w http.ResponseWriter, r *ht
 func (c *DatavolumesAPIController) GetDatavolumeSharedScopes(w http.ResponseWriter, r *http.Request) {
 	datavolumeIdParam := chi.URLParam(r, "datavolumeId")
 	if datavolumeIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"datavolumeId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"datavolumeId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetDatavolumeSharedScopes(r.Context(), datavolumeIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1162,39 +1162,40 @@ func (c *DatavolumesAPIController) GetDatavolumeSharedScopes(w http.ResponseWrit
 func (c *DatavolumesAPIController) PatchDatavolumeSharedScopes(w http.ResponseWriter, r *http.Request) {
 	datavolumeIdParam := chi.URLParam(r, "datavolumeId")
 	if datavolumeIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"datavolumeId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"datavolumeId"}, nil, nil)
 		return
 	}
 	var sharedScopesPatchRequestParam SharedScopesPatchRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&sharedScopesPatchRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertSharedScopesPatchRequestRequired(sharedScopesPatchRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertSharedScopesPatchRequestConstraints(sharedScopesPatchRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.PatchDatavolumeSharedScopes(r.Context(), datavolumeIdParam, sharedScopesPatchRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1247,39 +1248,40 @@ func (c *DatavolumesAPIController) PatchDatavolumeSharedScopes(w http.ResponseWr
 func (c *DatavolumesAPIController) UpdateDatavolumeStatus(w http.ResponseWriter, r *http.Request) {
 	datavolumeIdParam := chi.URLParam(r, "datavolumeId")
 	if datavolumeIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"datavolumeId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"datavolumeId"}, nil, nil)
 		return
 	}
 	var datavolumeStatusInternalParam DatavolumeStatusInternal
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&datavolumeStatusInternalParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertDatavolumeStatusInternalRequired(datavolumeStatusInternalParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertDatavolumeStatusInternalConstraints(datavolumeStatusInternalParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateDatavolumeStatus(r.Context(), datavolumeIdParam, datavolumeStatusInternalParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1295,7 +1297,7 @@ func (c *DatavolumesAPIController) UpdateDatavolumeStatus(w http.ResponseWriter,
 func (c *DatavolumesAPIController) GetDatavolumesInternal(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -1304,7 +1306,7 @@ func (c *DatavolumesAPIController) GetDatavolumesInternal(w http.ResponseWriter,
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var offsetParam int32
@@ -1314,7 +1316,7 @@ func (c *DatavolumesAPIController) GetDatavolumesInternal(w http.ResponseWriter,
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -1330,7 +1332,7 @@ func (c *DatavolumesAPIController) GetDatavolumesInternal(w http.ResponseWriter,
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -1342,7 +1344,7 @@ func (c *DatavolumesAPIController) GetDatavolumesInternal(w http.ResponseWriter,
 	result, err := c.service.GetDatavolumesInternal(r.Context(), clusterIdParam, offsetParam, limitParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1395,34 +1397,35 @@ func (c *DatavolumesAPIController) GetDatavolumesInternal(w http.ResponseWriter,
 func (c *DatavolumesAPIController) SyncDatavolumes(w http.ResponseWriter, r *http.Request) {
 	var datavolumesSyncRequestParam DatavolumesSyncRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&datavolumesSyncRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertDatavolumesSyncRequestRequired(datavolumesSyncRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertDatavolumesSyncRequestConstraints(datavolumesSyncRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.SyncDatavolumes(r.Context(), datavolumesSyncRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1438,13 +1441,13 @@ func (c *DatavolumesAPIController) SyncDatavolumes(w http.ResponseWriter, r *htt
 func (c *DatavolumesAPIController) GetDatavolumeAncestors(w http.ResponseWriter, r *http.Request) {
 	datavolumeIdParam := chi.URLParam(r, "datavolumeId")
 	if datavolumeIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"datavolumeId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"datavolumeId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetDatavolumeAncestors(r.Context(), datavolumeIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1497,34 +1500,35 @@ func (c *DatavolumesAPIController) GetDatavolumeAncestors(w http.ResponseWriter,
 func (c *DatavolumesAPIController) InternalCreateDatavolume(w http.ResponseWriter, r *http.Request) {
 	var internalDatavolumeCreationFieldsParam InternalDatavolumeCreationFields
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&internalDatavolumeCreationFieldsParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertInternalDatavolumeCreationFieldsRequired(internalDatavolumeCreationFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertInternalDatavolumeCreationFieldsConstraints(internalDatavolumeCreationFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.InternalCreateDatavolume(r.Context(), internalDatavolumeCreationFieldsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

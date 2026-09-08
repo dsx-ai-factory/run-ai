@@ -24,10 +24,6 @@ func Init() error {
 }
 
 func registerConfigs() error {
-	if err := config.Register[*General](); err != nil {
-		return fmt.Errorf("failed to register general config: %w", err)
-	}
-
 	if err := config.Register[*Server](); err != nil {
 		return fmt.Errorf("failed to register server config: %w", err)
 	}

@@ -11,7 +11,7 @@ spec:
   jupyter:
     value: true
   ingressUrl:
-    value: https://app.run.ai/_PROJECT_NAME_/_JOB_NAME_
+    value: https://mock-q7z3k.example.com/_PROJECT_NAME_/_JOB_NAME_
   runAsUser:
     value: true
   runAsGid:

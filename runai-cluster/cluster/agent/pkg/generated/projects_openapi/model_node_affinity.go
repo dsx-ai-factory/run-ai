@@ -1,7 +1,7 @@
 /*
 Project and Department service API
 
-The aggregated API of Run:AI backend projects and departments
+The aggregated API of Run:AI backend projects and departments 
 
 API version: 1.5.1
 */
@@ -17,7 +17,7 @@ import (
 // NodeAffinity struct for NodeAffinity
 type NodeAffinity struct {
 	// The type of affinity of the jobs to the nodes
-	AffinityType  *string              `json:"affinityType,omitempty"`
+	AffinityType *string `json:"affinityType,omitempty"`
 	SelectedTypes []NodeTypeForProject `json:"selectedTypes,omitempty"`
 }
 
@@ -148,3 +148,5 @@ func (v *NullableNodeAffinity) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

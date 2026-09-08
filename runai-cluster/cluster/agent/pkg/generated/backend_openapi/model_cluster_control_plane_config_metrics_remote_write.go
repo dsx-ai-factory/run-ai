@@ -1,7 +1,7 @@
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend
+The aggregated API  of Run:AI backend 
 
 API version: 1.5.1
 */
@@ -19,7 +19,7 @@ type ClusterControlPlaneConfigMetricsRemoteWrite struct {
 	// Remote write url.
 	Url *string `json:"url,omitempty"`
 	// Remote write org ID.
-	OrgID       *string                                                 `json:"orgID,omitempty"`
+	OrgID *string `json:"orgID,omitempty"`
 	Credentials *ClusterControlPlaneConfigMetricsRemoteWriteCredentials `json:"credentials,omitempty"`
 }
 
@@ -185,3 +185,5 @@ func (v *NullableClusterControlPlaneConfigMetricsRemoteWrite) UnmarshalJSON(src 
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

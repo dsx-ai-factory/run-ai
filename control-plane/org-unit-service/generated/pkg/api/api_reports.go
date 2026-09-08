@@ -38,11 +38,6 @@ import (
 type ReportsAPIController struct {
 	service ReportsAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -58,10 +53,13 @@ type ReportsAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *ReportsAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *ReportsAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -300,7 +298,7 @@ func (c *ReportsAPIController) Routes() Routes {
 func (c *ReportsAPIController) ListReports(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var filterByParam []string
@@ -335,7 +333,7 @@ func (c *ReportsAPIController) ListReports(w http.ResponseWriter, r *http.Reques
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -351,7 +349,7 @@ func (c *ReportsAPIController) ListReports(w http.ResponseWriter, r *http.Reques
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -370,7 +368,7 @@ func (c *ReportsAPIController) ListReports(w http.ResponseWriter, r *http.Reques
 	result, err := c.service.ListReports(r.Context(), filterByParam, sortByParam, sortOrderParam, offsetParam, limitParam, searchParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -423,34 +421,35 @@ func (c *ReportsAPIController) ListReports(w http.ResponseWriter, r *http.Reques
 func (c *ReportsAPIController) CreateReport(w http.ResponseWriter, r *http.Request) {
 	var reportRequestFieldsParam ReportRequestFields
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&reportRequestFieldsParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertReportRequestFieldsRequired(reportRequestFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertReportRequestFieldsConstraints(reportRequestFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateReport(r.Context(), reportRequestFieldsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -503,7 +502,7 @@ func (c *ReportsAPIController) CreateReport(w http.ResponseWriter, r *http.Reque
 func (c *ReportsAPIController) CountReports(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var filterByParam []string
@@ -525,7 +524,7 @@ func (c *ReportsAPIController) CountReports(w http.ResponseWriter, r *http.Reque
 	result, err := c.service.CountReports(r.Context(), filterByParam, searchParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -579,7 +578,7 @@ func (c *ReportsAPIController) AreReportsAvailable(w http.ResponseWriter, r *htt
 	result, err := c.service.AreReportsAvailable(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -632,34 +631,35 @@ func (c *ReportsAPIController) AreReportsAvailable(w http.ResponseWriter, r *htt
 func (c *ReportsAPIController) BatchDeleteReports(w http.ResponseWriter, r *http.Request) {
 	var batchDeleteReportsRequestParam BatchDeleteReportsRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&batchDeleteReportsRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertBatchDeleteReportsRequestRequired(batchDeleteReportsRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertBatchDeleteReportsRequestConstraints(batchDeleteReportsRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.BatchDeleteReports(r.Context(), batchDeleteReportsRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -712,13 +712,13 @@ func (c *ReportsAPIController) BatchDeleteReports(w http.ResponseWriter, r *http
 func (c *ReportsAPIController) GetReportById(w http.ResponseWriter, r *http.Request) {
 	reportIdParam := chi.URLParam(r, "reportId")
 	if reportIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"reportId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"reportId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetReportById(r.Context(), reportIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -771,13 +771,13 @@ func (c *ReportsAPIController) GetReportById(w http.ResponseWriter, r *http.Requ
 func (c *ReportsAPIController) DeleteReportById(w http.ResponseWriter, r *http.Request) {
 	reportIdParam := chi.URLParam(r, "reportId")
 	if reportIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"reportId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"reportId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteReportById(r.Context(), reportIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -793,13 +793,13 @@ func (c *ReportsAPIController) DeleteReportById(w http.ResponseWriter, r *http.R
 func (c *ReportsAPIController) DownloadReportById(w http.ResponseWriter, r *http.Request) {
 	reportIdParam := chi.URLParam(r, "reportId")
 	if reportIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"reportId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"reportId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DownloadReportById(r.Context(), reportIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

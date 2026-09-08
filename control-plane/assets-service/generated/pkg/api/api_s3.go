@@ -38,11 +38,6 @@ import (
 type S3APIController struct {
 	service S3APIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -58,10 +53,13 @@ type S3APIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *S3APIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *S3APIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -225,7 +223,7 @@ func (c *S3APIController) Routes() Routes {
 func (c *S3APIController) ListS3Assets(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var nameParam string
@@ -249,7 +247,7 @@ func (c *S3APIController) ListS3Assets(w http.ResponseWriter, r *http.Request) {
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "projectId", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "projectId", Err: err}, nil, nil)
 			return
 		}
 
@@ -277,7 +275,7 @@ func (c *S3APIController) ListS3Assets(w http.ResponseWriter, r *http.Request) {
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "usageInfo", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "usageInfo", Err: err}, nil, nil)
 			return
 		}
 
@@ -291,7 +289,7 @@ func (c *S3APIController) ListS3Assets(w http.ResponseWriter, r *http.Request) {
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil, nil)
 			return
 		}
 
@@ -312,7 +310,7 @@ func (c *S3APIController) ListS3Assets(w http.ResponseWriter, r *http.Request) {
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "statusInfo", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "statusInfo", Err: err}, nil, nil)
 			return
 		}
 
@@ -336,7 +334,7 @@ func (c *S3APIController) ListS3Assets(w http.ResponseWriter, r *http.Request) {
 	result, err := c.service.ListS3Assets(r.Context(), nameParam, scopeParam, projectIdParam, departmentIdParam, clusterIdParam, usageInfoParam, complyToProjectParam, complyToWorkloadTypeParam, statusInfoParam, assetIdsParam, complyToReplicaTypeParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -389,34 +387,35 @@ func (c *S3APIController) ListS3Assets(w http.ResponseWriter, r *http.Request) {
 func (c *S3APIController) CreateS3Asset(w http.ResponseWriter, r *http.Request) {
 	var s3CreationRequestParam S3CreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&s3CreationRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertS3CreationRequestRequired(s3CreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertS3CreationRequestConstraints(s3CreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateS3Asset(r.Context(), s3CreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -469,12 +468,12 @@ func (c *S3APIController) CreateS3Asset(w http.ResponseWriter, r *http.Request) 
 func (c *S3APIController) GetS3AssetById(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	assetIdParam := chi.URLParam(r, "AssetId")
 	if assetIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil, nil)
 		return
 	}
 	var usageInfoParam bool
@@ -484,7 +483,7 @@ func (c *S3APIController) GetS3AssetById(w http.ResponseWriter, r *http.Request)
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "usageInfo", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "usageInfo", Err: err}, nil, nil)
 			return
 		}
 
@@ -498,7 +497,7 @@ func (c *S3APIController) GetS3AssetById(w http.ResponseWriter, r *http.Request)
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil, nil)
 			return
 		}
 
@@ -519,7 +518,7 @@ func (c *S3APIController) GetS3AssetById(w http.ResponseWriter, r *http.Request)
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "statusInfo", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "statusInfo", Err: err}, nil, nil)
 			return
 		}
 
@@ -536,7 +535,7 @@ func (c *S3APIController) GetS3AssetById(w http.ResponseWriter, r *http.Request)
 	result, err := c.service.GetS3AssetById(r.Context(), assetIdParam, usageInfoParam, complyToProjectParam, complyToWorkloadTypeParam, statusInfoParam, complyToReplicaTypeParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -589,39 +588,40 @@ func (c *S3APIController) GetS3AssetById(w http.ResponseWriter, r *http.Request)
 func (c *S3APIController) UpdateS3AssetById(w http.ResponseWriter, r *http.Request) {
 	assetIdParam := chi.URLParam(r, "AssetId")
 	if assetIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil, nil)
 		return
 	}
 	var s3UpdateRequestParam S3UpdateRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&s3UpdateRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertS3UpdateRequestRequired(s3UpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertS3UpdateRequestConstraints(s3UpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateS3AssetById(r.Context(), assetIdParam, s3UpdateRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -674,13 +674,13 @@ func (c *S3APIController) UpdateS3AssetById(w http.ResponseWriter, r *http.Reque
 func (c *S3APIController) DeleteS3AssetById(w http.ResponseWriter, r *http.Request) {
 	assetIdParam := chi.URLParam(r, "AssetId")
 	if assetIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"AssetId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteS3AssetById(r.Context(), assetIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

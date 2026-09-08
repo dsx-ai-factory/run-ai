@@ -21,11 +21,11 @@ func TestParseTenantId(t *testing.T) {
 	}
 }
 func TestParseSubjectId(t *testing.T) {
-	ctx := context.WithValue(context.Background(), CfSubjectID, "test@run.ai")
+	ctx := context.WithValue(context.Background(), CfSubjectID, "test@example.com")
 	value, err := ParseSubjectId(ctx)
 	assert.Nil(t, err)
-	if value != "test@run.ai" {
-		t.Errorf("expected 'test@run.ai', got %v", value)
+	if value != "test@example.com" {
+		t.Errorf("expected 'test@example.com', got %v", value)
 	}
 }
 func TestParseGroups(t *testing.T) {
@@ -38,7 +38,7 @@ func TestParseGroups(t *testing.T) {
 }
 func TestParseAuthData(t *testing.T) {
 	ctx := context.WithValue(context.Background(), CfTenantId, "12345")
-	ctx = context.WithValue(ctx, CfSubjectID, "test@run.ai")
+	ctx = context.WithValue(ctx, CfSubjectID, "test@example.com")
 	ctx = context.WithValue(ctx, CfGroups, []string{"group-a"})
 	tenantId, subjectId, groups, err := ParseAuthData(ctx)
 	assert.Nil(t, err)
@@ -46,8 +46,8 @@ func TestParseAuthData(t *testing.T) {
 	if tenantId != "12345" {
 		t.Errorf("expected '12345', got %v", tenantId)
 	}
-	if subjectId != "test@run.ai" {
-		t.Errorf("expected 'test@run.ai', got %v", subjectId)
+	if subjectId != "test@example.com" {
+		t.Errorf("expected 'test@example.com', got %v", subjectId)
 	}
 	assert.Equal(t, len(groups), 1)
 	if groups[0] != "group-a" {

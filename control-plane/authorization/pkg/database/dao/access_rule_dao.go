@@ -19,10 +19,8 @@ import (
 	querydbenrich "github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi/dbenrich"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/generated/pkg/api"
-	authorization_config "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2"
-	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
@@ -271,24 +269,13 @@ func DbGetAccessRulesByIds(
 	dbErr := api.NewError(http.StatusInternalServerError, "Failed to get access rules", nil)
 
 	accessRules := &[]models.AccessRule{}
-	var resultErr error
-	if config.Get[*authorization_config.General]().UsePermissionSets {
-		resultErr = runaidb.DB().WithContext(ctx).
-			Preload("Role.PermissionSets").
-			Preload("Role.PermissionSets.Permissions").
-			Joins("LEFT JOIN roles ON roles.id = access_rules.role_id").
-			Where("access_rules.tenant_id = ?", tenantId).
-			Where("access_rules.id IN ?", accessRulesIds).
-			Find(accessRules)
-	} else {
-		resultErr = runaidb.DB().WithContext(ctx).
-			Preload(clause.Associations).
-			Preload("Role.Permissions").
-			Joins("LEFT JOIN roles ON roles.id = access_rules.role_id").
-			Where("access_rules.tenant_id = ?", tenantId).
-			Where("access_rules.id IN ?", accessRulesIds).
-			Find(accessRules)
-	}
+	resultErr := runaidb.DB().WithContext(ctx).
+		Preload("Role.PermissionSets").
+		Preload("Role.PermissionSets.Permissions").
+		Joins("LEFT JOIN roles ON roles.id = access_rules.role_id").
+		Where("access_rules.tenant_id = ?", tenantId).
+		Where("access_rules.id IN ?", accessRulesIds).
+		Find(accessRules)
 	if resultErr != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get access rules from db: %v", resultErr)
 		return nil, dbErr.WithDetails(resultErr)
@@ -427,19 +414,11 @@ func DbGetSubjectPermissions(ctx context.Context, tenantId uint, subjectId strin
 
 	accessRules := &[]models.AccessRule{}
 	db := runaidb.DB().WithContext(ctx)
-	var resultErr error
-	if config.Get[*authorization_config.General]().UsePermissionSets {
-		resultErr = db.Preload("Role.PermissionSets").
-			Preload("Role.PermissionSets.Permissions").
-			Where("tenant_id = ?", tenantId).
-			Where(getSubjectClause(db, groups, subjectId)).
-			Find(accessRules)
-	} else {
-		resultErr = db.Preload("Role.Permissions").
-			Where("tenant_id = ?", tenantId).
-			Where(getSubjectClause(db, groups, subjectId)).
-			Find(accessRules)
-	}
+	resultErr := db.Preload("Role.PermissionSets").
+		Preload("Role.PermissionSets.Permissions").
+		Where("tenant_id = ?", tenantId).
+		Where(getSubjectClause(db, groups, subjectId)).
+		Find(accessRules)
 	if resultErr != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get subject %s access rules from db: %v", subjectId, resultErr)
 		return nil, dbErr.WithDetails(resultErr)
@@ -568,20 +547,11 @@ func DbGetAccessRuleById(ctx context.Context, accessRuleId uint, tenantId uint,
 	if includeDeleted {
 		db = db.Unscoped()
 	}
-	var query orm.DB
-	if config.Get[*authorization_config.General]().UsePermissionSets {
-		query = db.Preload("Role.PermissionSets").
-			Preload("Role.PermissionSets.Permissions").
-			Joins("LEFT JOIN roles ON roles.id = access_rules.role_id").
-			Where("roles.internal_only IN (false, ?)", includeInternal).
-			Where("access_rules.tenant_id = ?", tenantId)
-	} else {
-		query = db.Preload(clause.Associations).
-			Preload("Role.Permissions").
-			Joins("LEFT JOIN roles ON roles.id = access_rules.role_id").
-			Where("roles.internal_only IN (false, ?)", includeInternal).
-			Where("access_rules.tenant_id = ?", tenantId)
-	}
+	query := db.Preload("Role.PermissionSets").
+		Preload("Role.PermissionSets.Permissions").
+		Joins("LEFT JOIN roles ON roles.id = access_rules.role_id").
+		Where("roles.internal_only IN (false, ?)", includeInternal).
+		Where("access_rules.tenant_id = ?", tenantId)
 	if permittedScopes != nil && (permittedScopes.System == nil || !*permittedScopes.System) {
 		permittedScopesQuery := updateQueryByPermittedScopes(db, *permittedScopes)
 		query = query.Where(permittedScopesQuery)

@@ -56,7 +56,7 @@ func typedInferenceServer(desiredPhase string) *httptest.Server {
 			"workloadId": "1ca2089d-7c38-4295-bd2c-702d33cb434c",
 			"projectId": "4500009",
 			"clusterId": "4cc1a01d-64c9-49f4-ad1a-b8959a4e46ea",
-			"createdBy": "test@run.ai",
+			"createdBy": "test@example.com",
 			"createdAt": "2026-08-17T10:13:48Z",
 			"desiredPhase": %q,
 			"spec": {

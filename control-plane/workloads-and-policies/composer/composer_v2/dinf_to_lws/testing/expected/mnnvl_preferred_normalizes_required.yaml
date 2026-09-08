@@ -9,7 +9,7 @@ Config:
           name: dinfw-test-lws-sp-0
         spec:
           rules:
-          - host: test.run.ai
+          - host: mock-q7z3k.example.com
             http:
               paths:
               - backend:

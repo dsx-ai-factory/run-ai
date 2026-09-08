@@ -69,7 +69,7 @@ var _ = Describe("NodeService excluded-node filtering", Ordered, func() {
 		testCluster, apiErr = dao.CreateCluster(ctx, &models.Cluster{
 			Name:     "test-cluster-excluded-nodes",
 			TenantId: tenantId,
-			Domain:   "test.run.ai",
+			Domain:   "mock-q7z3k.example.com",
 			Version:  "v2.24",
 		})
 		Expect(apiErr).To(BeNil())

@@ -2,7 +2,7 @@
   kind: RunaiJob
   metadata:
     annotations:
-      JobUrl: https://test.run.ai:8443/my/url, https://cluster-domain.mock/team-a/job-4,
+      JobUrl: https://mock-q7z3k.example.com:8443/my/url, https://cluster-domain.mock/team-a/job-4,
         http://this.is.port:8080/to/port/80
       template: job-4
       workloadApiVersion: run.ai/v2alpha1
@@ -61,14 +61,14 @@
         - args:
           - --provider=keycloak-oidc
           - --upstream=http://localhost:443
-          - --redirect-url=https://test.run.ai:8443/my/url/oauth2/callback
+          - --redirect-url=https://mock-q7z3k.example.com:8443/my/url/oauth2/callback
           - --oidc-issuer-url=/auth/realms/runai
           - --scope=openid
           - --http-address=0.0.0.0:4180
           - --proxy-prefix=/my/url/oauth2
           - --skip-provider-button=true
-          - --whitelist-domain=test.run.ai:8443
-          - --cookie-domain=test.run.ai
+          - --whitelist-domain=mock-q7z3k.example.com:8443
+          - --cookie-domain=mock-q7z3k.example.com
           - --cookie-httponly=true
           - --cookie-secure=true
           - --code-challenge-method=S256
@@ -313,7 +313,7 @@ metadata:
   namespace: runai-team-a
 spec:
   rules:
-  - host: test.run.ai
+  - host: mock-q7z3k.example.com
     http:
       paths:
       - backend:

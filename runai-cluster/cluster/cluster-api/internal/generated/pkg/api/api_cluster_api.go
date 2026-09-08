@@ -37,11 +37,6 @@ import (
 type ClusterAPIAPIController struct {
 	service ClusterAPIAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -57,10 +52,13 @@ type ClusterAPIAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *ClusterAPIAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *ClusterAPIAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -127,28 +125,28 @@ func (c *ClusterAPIAPIController) Routes() Routes {
 func (c *ClusterAPIAPIController) GetWorkloadStatus(w http.ResponseWriter, r *http.Request) {
 	projectNameParam := chi.URLParam(r, "projectName")
 	if projectNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"projectName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"projectName"}, nil, nil)
 		return
 	}
 	workloadTypeParam := chi.URLParam(r, "workloadType")
 	if workloadTypeParam == "" {
-		c.errorHandler(w, r, &RequiredError{"workloadType"}, nil)
+		c.errorHandler(w, r, &RequiredError{"workloadType"}, nil, nil)
 		return
 	}
 	workloadNameParam := chi.URLParam(r, "workloadName")
 	if workloadNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"workloadName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"workloadName"}, nil, nil)
 		return
 	}
 	workloadFrameworkParam := chi.URLParam(r, "workloadFramework")
 	if workloadFrameworkParam == "" {
-		c.errorHandler(w, r, &RequiredError{"workloadFramework"}, nil)
+		c.errorHandler(w, r, &RequiredError{"workloadFramework"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetWorkloadStatus(r.Context(), projectNameParam, workloadTypeParam, workloadNameParam, workloadFrameworkParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
