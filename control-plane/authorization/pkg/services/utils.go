@@ -15,12 +15,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	"k8s.io/utils/ptr"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/generated/pkg/api"
 	org_cache "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/cache"
-	authorization_config "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
@@ -131,30 +129,12 @@ func RoleDaoToApi(role *models.Role) api.Role {
 	if role.EffectiveEnabled != nil {
 		effectiveEnable = *role.EffectiveEnabled
 	}
-	if config.Get[*authorization_config.General]().UsePermissionSets {
-		permissionSets, permissions := PermissionsSetDaoToRolePermApi(role.PermissionSets)
-		return api.Role{
-			Name:                  role.Name,
-			Description:           role.Description,
-			PermissionSets:        permissionSets,
-			Permissions:           permissions,
-			ScopeType:             string(role.ScopeType),
-			ScopeId:               role.ScopeId,
-			Enabled:               ptr.To(role.Enabled),
-			KubernetesPermissions: k8sPermissions,
-			Id:                    int32(role.ID),
-			CreatedAt:             role.CreatedAt,
-			UpdatedAt:             role.UpdatedAt,
-			CreatedBy:             role.CreatedBy,
-			Custom:                role.Custom,
-			EffectiveEnabled:      effectiveEnable,
-			Deprecated:            role.Deprecated,
-		}
-	}
+	permissionSets, permissions := PermissionsSetDaoToRolePermApi(role.PermissionSets)
 	return api.Role{
 		Name:                  role.Name,
 		Description:           role.Description,
-		Permissions:           PermissionsDaoToRolePermApi(role.Permissions),
+		PermissionSets:        permissionSets,
+		Permissions:           permissions,
 		ScopeType:             string(role.ScopeType),
 		ScopeId:               role.ScopeId,
 		Enabled:               ptr.To(role.Enabled),
@@ -165,6 +145,7 @@ func RoleDaoToApi(role *models.Role) api.Role {
 		CreatedBy:             role.CreatedBy,
 		Custom:                role.Custom,
 		EffectiveEnabled:      effectiveEnable,
+		Deprecated:            role.Deprecated,
 	}
 }
 
@@ -177,12 +158,7 @@ func RoleDaoToV1Api(role *models.Role) api.RoleV1 {
 	if role.EffectiveEnabled != nil {
 		effectiveEnable = *role.EffectiveEnabled
 	}
-	var permissions []api.Permission
-	if config.Get[*authorization_config.General]().UsePermissionSets {
-		permissions = PermissionsSetDaoToPermissionApi(role.PermissionSets)
-	} else {
-		permissions = PermissionsDaoToApi(role.Permissions)
-	}
+	permissions := PermissionsSetDaoToPermissionApi(role.PermissionSets)
 	return api.RoleV1{
 		Name:                  role.Name,
 		Description:           role.Description,
@@ -418,31 +394,6 @@ func PermissionsSetDaoToPermissionApi(permissionSets *[]models.PermissionSet) []
 	apiPermissions = addMissingResourceTypesV1(apiPermissions)
 
 	return apiPermissions
-}
-
-func PermissionsDaoToRolePermApi(permissions []*models.Permission) []api.RolePermission {
-	result := []api.RolePermission{}
-	for _, permission := range permissions {
-		// Filtering out unknown resource types.
-		// This case could happen when running in gradual rollout and the new code adds a new resource type but the old services are getting it from the DB but cant parse it into the enum
-		if !api.ResourceType.IsValid(permission.ResourceType) {
-			continue
-		}
-
-		actions := []api.PermissionAction{}
-		actions = AppendPermissionAction(actions, permission.Create, api.PERMISSIONACTION_CREATE)
-		actions = AppendPermissionAction(actions, permission.Read, api.PERMISSIONACTION_READ)
-		actions = AppendPermissionAction(actions, permission.Update, api.PERMISSIONACTION_UPDATE)
-		actions = AppendPermissionAction(actions, permission.Delete, api.PERMISSIONACTION_DELETE)
-
-		result = append(result, api.RolePermission{
-			ResourceType: permission.ResourceType,
-			DisplayName:  GetResourceTypeDisplayName(permission.ResourceType),
-			Actions:      actions,
-		})
-	}
-
-	return result
 }
 
 func PermissionsSetDaoToRolePermApi(permissionSets *[]models.PermissionSet) ([]api.RolePermissionSet, []api.RolePermission) {

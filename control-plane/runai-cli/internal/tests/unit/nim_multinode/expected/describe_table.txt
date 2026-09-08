@@ -7,7 +7,7 @@ Created At:                         2026-03-10T16:49:32Z
 Updated At:                         2026-03-10T21:40:58Z
 Project:                            testnim
 Department:                         default
-Submitted By:                       test@run.ai
+Submitted By:                       test@example.com
 Priority:                           very-high (150)
 Category:                           Deploy
 Current Node Pool:                  default

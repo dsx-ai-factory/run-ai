@@ -1,7 +1,7 @@
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend
+The aggregated API  of Run:AI backend 
 
 API version: 1.5.1
 */
@@ -19,14 +19,15 @@ import (
 	"strings"
 )
 
+
 // WorkspacesApiService WorkspacesApi service
 type WorkspacesApiService service
 
 type ApiDeleteWorkspaceRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *WorkspacesApiService
-	clusterId  string
-	id         string
+	clusterId string
+	id string
 }
 
 func (r ApiDeleteWorkspaceRequest) Execute() (*http.Response, error) {
@@ -36,26 +37,26 @@ func (r ApiDeleteWorkspaceRequest) Execute() (*http.Response, error) {
 /*
 DeleteWorkspace Delete a workspace
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterId Unique identifier of the cluster
-	@param id
-	@return ApiDeleteWorkspaceRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param clusterId Unique identifier of the cluster
+ @param id
+ @return ApiDeleteWorkspaceRequest
 */
 func (a *WorkspacesApiService) DeleteWorkspace(ctx context.Context, clusterId string, id string) ApiDeleteWorkspaceRequest {
 	return ApiDeleteWorkspaceRequest{
 		ApiService: a,
-		ctx:        ctx,
-		clusterId:  clusterId,
-		id:         id,
+		ctx: ctx,
+		clusterId: clusterId,
+		id: id,
 	}
 }
 
 // Execute executes the request
 func (a *WorkspacesApiService) DeleteWorkspaceExecute(r ApiDeleteWorkspaceRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodDelete
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspacesApiService.DeleteWorkspace")
@@ -156,9 +157,9 @@ func (a *WorkspacesApiService) DeleteWorkspaceExecute(r ApiDeleteWorkspaceReques
 }
 
 type ApiSyncWorkspacesStatusRequest struct {
-	ctx            context.Context
-	ApiService     *WorkspacesApiService
-	clusterId      string
+	ctx context.Context
+	ApiService *WorkspacesApiService
+	clusterId string
 	workloadStatus *[]WorkloadStatus
 }
 
@@ -176,24 +177,25 @@ SyncWorkspacesStatus Sync workspaces status
 
 Sync the status of all workspaces from k8s cluster to Run:AI control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterId Unique identifier of the cluster
-	@return ApiSyncWorkspacesStatusRequest
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param clusterId Unique identifier of the cluster
+ @return ApiSyncWorkspacesStatusRequest
 */
 func (a *WorkspacesApiService) SyncWorkspacesStatus(ctx context.Context, clusterId string) ApiSyncWorkspacesStatusRequest {
 	return ApiSyncWorkspacesStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		clusterId:  clusterId,
+		ctx: ctx,
+		clusterId: clusterId,
 	}
 }
 
 // Execute executes the request
 func (a *WorkspacesApiService) SyncWorkspacesStatusExecute(r ApiSyncWorkspacesStatusRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspacesApiService.SyncWorkspacesStatus")
@@ -259,13 +261,13 @@ func (a *WorkspacesApiService) SyncWorkspacesStatusExecute(r ApiSyncWorkspacesSt
 			newErr.model = v
 			return localVarHTTPResponse, newErr
 		}
-		var v Error
-		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-		if err != nil {
-			newErr.error = err.Error()
-			return localVarHTTPResponse, newErr
-		}
-		newErr.model = v
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.model = v
 		return localVarHTTPResponse, newErr
 	}
 
@@ -273,9 +275,9 @@ func (a *WorkspacesApiService) SyncWorkspacesStatusExecute(r ApiSyncWorkspacesSt
 }
 
 type ApiUpdateWorkspaceStatusRequest struct {
-	ctx            context.Context
-	ApiService     *WorkspacesApiService
-	clusterId      string
+	ctx context.Context
+	ApiService *WorkspacesApiService
+	clusterId string
 	workloadStatus *WorkloadStatus
 }
 
@@ -291,24 +293,24 @@ func (r ApiUpdateWorkspaceStatusRequest) Execute() (*http.Response, error) {
 /*
 UpdateWorkspaceStatus Update workspace status
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterId Unique identifier of the cluster
-	@return ApiUpdateWorkspaceStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param clusterId Unique identifier of the cluster
+ @return ApiUpdateWorkspaceStatusRequest
 */
 func (a *WorkspacesApiService) UpdateWorkspaceStatus(ctx context.Context, clusterId string) ApiUpdateWorkspaceStatusRequest {
 	return ApiUpdateWorkspaceStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		clusterId:  clusterId,
+		ctx: ctx,
+		clusterId: clusterId,
 	}
 }
 
 // Execute executes the request
 func (a *WorkspacesApiService) UpdateWorkspaceStatusExecute(r ApiUpdateWorkspaceStatusRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPut
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspacesApiService.UpdateWorkspaceStatus")

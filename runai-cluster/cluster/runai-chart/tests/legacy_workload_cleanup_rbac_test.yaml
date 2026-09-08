@@ -65,7 +65,7 @@ tests:
     asserts:
       - lengthEqual:
           path: rules
-          count: 16
+          count: 17
       - equal:
           path: rules[0].verbs
           value: ["create"]
@@ -87,6 +87,15 @@ tests:
       - equal:
           path: rules[15].verbs
           value: ["get", "list", "patch"]
+      - equal:
+          path: rules[16].resources
+          value: ["mutatingwebhookconfigurations"]
+      - equal:
+          path: rules[16].resourceNames
+          value: ["runai-pod-controller-mutation"]
+      - equal:
+          path: rules[16].verbs
+          value: ["get", "update"]
 
   - it: renders exactly the three namespaced RBAC resources
     templates:

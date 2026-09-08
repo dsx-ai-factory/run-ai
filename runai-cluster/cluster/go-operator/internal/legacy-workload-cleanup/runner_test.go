@@ -75,6 +75,19 @@ var _ = Describe("Legacy workload cleanup transaction", func() {
 		Expect(apierrors.IsNotFound(err)).To(BeTrue())
 	})
 
+	It("strips retired resources from the current pod-controller mutation webhook before validating", func() {
+		webhook := currentPodControllerMutatorWithRetiredResource()
+		k8sClient := runnerClient(webhook)
+
+		Expect(testRunner(k8sClient, allowAllReviewer{}).Run(context.Background())).To(Succeed())
+		stored := &admissionv1.MutatingWebhookConfiguration{}
+		Expect(k8sClient.Get(context.Background(), client.ObjectKey{Name: webhook.Name}, stored)).To(Succeed())
+		Expect(stored.Webhooks).To(HaveLen(1))
+		Expect(stored.Webhooks[0].Rules).To(HaveLen(1))
+		Expect(stored.Webhooks[0].Rules[0].Resources).To(Equal([]string{"statefulsets", "jobs", "deployments"}))
+		Expect(stored.Webhooks[0].ClientConfig.Service.Name).To(Equal("runai-admission-controller"))
+	})
+
 	It("still rejects an unknown webhook configuration that targets a retired API", func() {
 		k8sClient := runnerClient(legacyRetiredWebhookValidator("custom-retired-workload-validation"))
 
@@ -199,5 +212,24 @@ func legacyRetiredWebhookMutator(name string) *admissionv1.MutatingWebhookConfig
 		Webhooks: []admissionv1.MutatingWebhook{{Rules: []admissionv1.RuleWithOperations{{
 			Rule: admissionv1.Rule{APIGroups: []string{"run.ai"}, APIVersions: []string{"v1alpha1"}, Resources: []string{"distributedinferenceworkloads"}},
 		}}}},
+	}
+}
+
+func currentPodControllerMutatorWithRetiredResource() *admissionv1.MutatingWebhookConfiguration {
+	return &admissionv1.MutatingWebhookConfiguration{
+		ObjectMeta: metav1.ObjectMeta{Name: "runai-pod-controller-mutation"},
+		Webhooks: []admissionv1.MutatingWebhook{{
+			Name: "runai-admission-controller.runai.svc.cluster.local",
+			ClientConfig: admissionv1.WebhookClientConfig{Service: &admissionv1.ServiceReference{
+				Namespace: "runai", Name: "runai-admission-controller", Path: ptr.To("/mutate-pod-controller"),
+			}},
+			Rules: []admissionv1.RuleWithOperations{{
+				Operations: []admissionv1.OperationType{admissionv1.Create, admissionv1.Update},
+				Rule: admissionv1.Rule{
+					APIGroups: []string{"*"}, APIVersions: []string{"*"},
+					Resources: []string{"statefulsets", "jobs", "runaijobs", "deployments"},
+				},
+			}},
+		}},
 	}
 }

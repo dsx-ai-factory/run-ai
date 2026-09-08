@@ -278,9 +278,6 @@ var _ = Describe("Roles API tests", Ordered, func() {
 	})
 
 	It("Post tenant role with permission set", func() {
-		if !config.Get[*authorization_config.General]().UsePermissionSets {
-			Skip("no permission sets")
-		}
 		body := api.RoleCreationFieldsInternal{
 			Name:        "tenant role ps",
 			Description: "first tenant test role, can read workloads",
@@ -327,9 +324,6 @@ var _ = Describe("Roles API tests", Ordered, func() {
 	})
 
 	It("Post tenant role with permission set - invalid permission sets", func() {
-		if !config.Get[*authorization_config.General]().UsePermissionSets {
-			Skip("no permission sets")
-		}
 		body := api.RoleCreationFieldsInternal{
 			Name:        "tenant role ps invalid",
 			Description: "first tenant test role, can read workloads",
@@ -395,9 +389,6 @@ var _ = Describe("Roles API tests", Ordered, func() {
 	})
 
 	It("Post system role with permission set", func() {
-		if !config.Get[*authorization_config.General]().UsePermissionSets {
-			Skip("no permission sets")
-		}
 		body := api.RoleCreationFieldsInternal{
 			Name:        "system role ps",
 			Description: "first system test role, can read workloads",
@@ -584,9 +575,6 @@ var _ = Describe("Roles API tests", Ordered, func() {
 	})
 
 	It("Post tenant role with permission set and KubernetesPermissions", func() {
-		if !config.Get[*authorization_config.General]().UsePermissionSets {
-			Skip("no permission sets")
-		}
 		body := api.RoleCreationFieldsInternal{
 			Name:        "tenant role ps kubernetes permissions",
 			Description: "first tenant test role, can fully manage projects",
@@ -762,9 +750,6 @@ var _ = Describe("Roles API tests", Ordered, func() {
 			roles := getRolesResponse.Body.(api.GetRoles200Response).Roles
 
 			expectedRoles := 4
-			if !config.Get[*authorization_config.General]().UsePermissionSets {
-				expectedRoles = 2
-			}
 			Expect(len(roles)).To(Equal(expectedRoles))
 			for i := range roles {
 				Expect(roles[i].Name[:11]).To(Equal("tenant role"))
@@ -779,9 +764,6 @@ var _ = Describe("Roles API tests", Ordered, func() {
 			roles := getRolesResponse.Body.(api.GetRoles200Response).Roles
 
 			expectedRoles := 7
-			if !config.Get[*authorization_config.General]().UsePermissionSets {
-				expectedRoles = 4
-			}
 			Expect(len(roles)).To(Equal(expectedRoles))
 			for i := range roles {
 				Expect(roles[i].Name[7:11]).To(Equal("role"))
@@ -1265,9 +1247,6 @@ var _ = Describe("Roles API tests", Ordered, func() {
 		})
 
 		It("Update tenant role PS", func() {
-			if !config.Get[*authorization_config.General]().UsePermissionSets {
-				Skip("no permission sets")
-			}
 			body := api.RoleCreationFieldsInternal{
 				Name:        tenantScopedRolePS.Name,
 				Description: tenantScopedRolePS.Description,
@@ -1315,9 +1294,6 @@ var _ = Describe("Roles API tests", Ordered, func() {
 		})
 
 		It("Update tenant permission set role with permissions", func() {
-			if !config.Get[*authorization_config.General]().UsePermissionSets {
-				Skip("no permission sets")
-			}
 			body := api.RoleCreationFieldsInternal{
 				Name:        "tenant role ps",
 				Description: "first tenant test role, can fully manage projects",
@@ -1426,9 +1402,6 @@ var _ = Describe("Roles API tests", Ordered, func() {
 		})
 
 		It("Update should fail, pre-defined role PS", func() {
-			if !config.Get[*authorization_config.General]().UsePermissionSets {
-				Skip("no permission sets")
-			}
 			body := api.RoleCreationFieldsInternal{
 				Name:                  tenantScopedRolePS.Name,
 				Description:           tenantScopedRolePS.Description,

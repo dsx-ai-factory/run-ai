@@ -111,7 +111,7 @@ func TestGetNotificationsSettings_NonManagementTenantParam_Returns403(t *testing
 	req, err := http.NewRequest(http.MethodGet,
 		fmt.Sprintf("%s/api/v1/notifications/settings?tenantId=%s", hostUrl, BaseTenantId), nil)
 	require.NoError(t, err)
-	req.Header.Set("X-Runai-Subject-Id", "test@run.ai")
+	req.Header.Set("X-Runai-Subject-Id", "test@example.com")
 	// no X-Runai-Is-Management-Tenant header → not a management tenant
 
 	resp, err := http.DefaultClient.Do(req)
@@ -128,7 +128,7 @@ func TestGetNotificationsSettingByKey_UnknownKey_Returns400(t *testing.T) {
 		fmt.Sprintf("%s/api/v1/notifications/settings/unknownKey", hostUrl), nil)
 	require.NoError(t, err)
 	req.Header.Set("X-Runai-Tenant-Id", tenantID)
-	req.Header.Set("X-Runai-Subject-Id", "test@run.ai")
+	req.Header.Set("X-Runai-Subject-Id", "test@example.com")
 
 	resp, err := http.DefaultClient.Do(req)
 	require.NoError(t, err)

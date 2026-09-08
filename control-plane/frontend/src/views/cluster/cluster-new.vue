@@ -4,28 +4,7 @@
 -->
 
 <template>
-  <div class="runai-stepper-form q-pa-md row no-wrap justify-center">
-    <div class="steps-map q-mt-sm">
-      <q-stepper
-        v-model="currentStep"
-        active-icon="ph-fill ph-pencil-simple"
-        vertical
-        ref="stepper"
-        color="primary"
-        animated
-        flat
-        style="background-color: transparent"
-      >
-        <q-step
-          v-for="(step, idx) in steps"
-          :key="step.name"
-          :name="step.name"
-          :done="currentStep > idx + 1"
-          :title="step.title"
-          :icon="step.icon"
-        />
-      </q-stepper>
-    </div>
+  <runai-wizard-layout :steps="steps" :active-step="activeStepName" disable-navigation>
     <div class="main-content cluster-creation" v-if="currentStep === 1">
       <div class="justify-center">
         <runai-form-wrapper class="cluster-form" :form-state="clusterFormModel" ref="elClusterForm">
@@ -40,12 +19,6 @@
           ></cluster-creation-step>
         </runai-form-wrapper>
       </div>
-      <div class="stepper-controls row justify-between q-mt-md">
-        <q-field class="col-4 form-hint no-padding" :model-value="displayFormHint" :rules="[isFormIncomplete]"></q-field>
-        <q-stepper-navigation class="q-pt-none">
-          <runai-btn aid="continue-btn" @click="goNext" :loading="loading" color="primary" label="Continue" />
-        </q-stepper-navigation>
-      </div>
     </div>
     <div class="main-content cluster-installation" v-else>
       <div class="row justify-center">
@@ -58,14 +31,19 @@
           :is-higher-cluster-version="isHigherClusterVersion"
         ></cluster-installation-step>
       </div>
-      <div class="stepper-controls row justify-end">
-        <q-stepper-navigation>
-          <runai-btn flat @click="goBack" aid="back-btn" color="primary" label="Back" class="q-mr-md" />
-          <runai-btn aid="leave-btn" @click="leave" color="primary" label="Done" />
-        </q-stepper-navigation>
-      </div>
     </div>
-  </div>
+
+    <template #content-footer>
+      <div v-if="currentStep === 1" class="stepper-controls row justify-between full-width">
+        <q-field class="col-4 form-hint no-padding" :model-value="displayFormHint" :rules="[isFormIncomplete]"></q-field>
+        <runai-btn aid="continue-btn" @click="goNext" :loading="loading" color="primary" label="Continue" />
+      </div>
+      <div v-else class="stepper-controls row justify-end full-width">
+        <runai-btn flat @click="goBack" aid="back-btn" color="primary" label="Back" class="q-mr-md" />
+        <runai-btn aid="leave-btn" @click="leave" color="primary" label="Done" />
+      </div>
+    </template>
+  </runai-wizard-layout>
 </template>
 
 <script lang="ts">
@@ -73,12 +51,13 @@ import { clusterNewInstallerThreshold, EClusterLocations, type IClusterInstallti
 // stores
 import { useAppStore } from "@/stores/app.store";
 import { useClusterStore } from "@/stores/cluster.store";
-import type { QStepper } from "quasar";
 // cmps
 import { ClusterCreationStep } from "@/components/cluster/cluster-creation-step";
 import { ClusterInstallationStep } from "@/components/cluster/cluster-installation-step";
 import { RunaiFormWrapper } from "@/components/common/runai-form-wrapper";
+import { RunaiWizardLayout } from "@/components/common/runai-wizard-layout";
 import { RunaiBtn } from "@/components/common/runai-btn";
+import type { IRunaiWizardLayoutStep } from "@/models/runai-wizard-layout.model";
 // services
 import { isNewerVersion } from "@/utils/version.util";
 import { alertUtil } from "@/utils/alert.util";
@@ -94,7 +73,7 @@ import type { ClustersMinimalData } from "@/swagger-models/cluster-service-clien
 import DOCS from "@/constants/docs";
 
 export default defineComponent({
-  components: { ClusterCreationStep, ClusterInstallationStep, RunaiFormWrapper, RunaiBtn },
+  components: { ClusterCreationStep, ClusterInstallationStep, RunaiFormWrapper, RunaiWizardLayout, RunaiBtn },
   data() {
     return {
       loading: false,
@@ -102,10 +81,6 @@ export default defineComponent({
       appStore: useAppStore(),
       clusterStore: useClusterStore(),
       currentStep: 1,
-      steps: [
-        { title: "Setup", name: 1, icon: "ph-bold ph-clipboard-text" },
-        { title: "Installation instructions", name: 2, icon: "ph-fill ph-download" },
-      ],
       timeOutId: null as number | null,
       displayFormHint: false,
       createdCluster: null as null | ClustersMinimalData,
@@ -134,6 +109,15 @@ export default defineComponent({
     this.clusterCreationStepLoading = true;
   },
   computed: {
+    activeStepName(): string {
+      return String(this.currentStep);
+    },
+    steps(): IRunaiWizardLayoutStep[] {
+      return [
+        { name: "1", title: "Setup", done: this.currentStep > 1 },
+        { name: "2", title: "Installation instructions", done: this.currentStep > 2 },
+      ];
+    },
     versions(): string[] {
       if (!this.operatorVersionsMap) return [];
       return Object.keys(this.operatorVersionsMap);
@@ -220,6 +204,8 @@ export default defineComponent({
         if (this.createdCluster?.uuid) await this.deleteLastCreatedCluster();
         this.createdCluster = await this.clusterStore.create(this.clusterFormModel.name);
         this.createdCluster?.uuid && clusterUtil.addSessionCreatedCluster(this.createdCluster.uuid);
+        this.currentStep = 2;
+        window.scrollTo({ top: 0, behavior: "smooth" });
       } catch (error: unknown) {
         if (error instanceof HttpErrorResponse) {
           console.error(error.serialize());
@@ -230,8 +216,6 @@ export default defineComponent({
         }
       } finally {
         this.loading = false;
-        (this.$refs.stepper as QStepper).next();
-        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     },
     async deleteLastCreatedCluster(): Promise<void> {
@@ -256,13 +240,13 @@ export default defineComponent({
       if (this.isClusterEditMode) {
         const isValid: boolean = await this.validateAndNotify();
         if (!isValid) return;
-        (this.$refs.stepper as QStepper).next();
+        this.currentStep = 2;
         return;
       }
       await this.createCluster();
     },
     goBack(): void {
-      (this.$refs.stepper as QStepper).previous();
+      this.currentStep = 1;
       window.scrollTo({ top: 0, behavior: "smooth" });
     },
     leave(): void {
@@ -286,25 +270,13 @@ export default defineComponent({
 });
 </script>
 <style lang="scss">
-.runai-stepper-form {
-  position: relative;
-  .steps-map {
-    top: 80px;
-    left: 0;
-    position: fixed;
+.main-content a:hover {
+  text-decoration: underline;
+}
+</style>
 
-    .q-stepper__dot .q-icon {
-      font-size: 16px;
-    }
-  }
-  a:hover {
-    text-decoration: underline;
-  }
-  .stepper-controls {
-    .q-stepper__nav {
-      margin-top: 0;
-      padding-top: 0;
-    }
-  }
+<style scoped lang="scss">
+.stepper-controls {
+  padding-right: 20px;
 }
 </style>

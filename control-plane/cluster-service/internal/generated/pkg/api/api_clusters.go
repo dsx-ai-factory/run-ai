@@ -38,11 +38,6 @@ import (
 type ClustersAPIController struct {
 	service ClustersAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -58,10 +53,13 @@ type ClustersAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *ClustersAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *ClustersAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -484,13 +482,13 @@ func (c *ClustersAPIController) Routes() Routes {
 func (c *ClustersAPIController) GetClusterAncestors(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetClusterAncestors(r.Context(), clusterUuidParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -543,13 +541,13 @@ func (c *ClustersAPIController) GetClusterAncestors(w http.ResponseWriter, r *ht
 func (c *ClustersAPIController) GetClusterName(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetClusterName(r.Context(), clusterUuidParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -602,13 +600,13 @@ func (c *ClustersAPIController) GetClusterName(w http.ResponseWriter, r *http.Re
 func (c *ClustersAPIController) GetClusterUrl(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetClusterUrl(r.Context(), clusterUuidParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -661,13 +659,13 @@ func (c *ClustersAPIController) GetClusterUrl(w http.ResponseWriter, r *http.Req
 func (c *ClustersAPIController) GetClusterInternal(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetClusterInternal(r.Context(), clusterUuidParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -720,7 +718,7 @@ func (c *ClustersAPIController) GetClusterInternal(w http.ResponseWriter, r *htt
 func (c *ClustersAPIController) GetInternalClusters(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var includeDeletedParam bool
@@ -730,7 +728,7 @@ func (c *ClustersAPIController) GetInternalClusters(w http.ResponseWriter, r *ht
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeDeleted", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeDeleted", Err: err}, nil, nil)
 			return
 		}
 
@@ -740,7 +738,7 @@ func (c *ClustersAPIController) GetInternalClusters(w http.ResponseWriter, r *ht
 	result, err := c.service.GetInternalClusters(r.Context(), includeDeletedParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -793,7 +791,7 @@ func (c *ClustersAPIController) GetInternalClusters(w http.ResponseWriter, r *ht
 func (c *ClustersAPIController) GetClusters(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var verbosityParam string
@@ -821,7 +819,7 @@ func (c *ClustersAPIController) GetClusters(w http.ResponseWriter, r *http.Reque
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "includeRequestedForDelete", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "includeRequestedForDelete", Err: err}, nil, nil)
 			return
 		}
 
@@ -831,7 +829,7 @@ func (c *ClustersAPIController) GetClusters(w http.ResponseWriter, r *http.Reque
 	result, err := c.service.GetClusters(r.Context(), verbosityParam, tenantIdParam, includeRequestedForDeleteParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -884,34 +882,35 @@ func (c *ClustersAPIController) GetClusters(w http.ResponseWriter, r *http.Reque
 func (c *ClustersAPIController) CreateCluster(w http.ResponseWriter, r *http.Request) {
 	var clusterCreationRequestParam ClusterCreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&clusterCreationRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertClusterCreationRequestRequired(clusterCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertClusterCreationRequestConstraints(clusterCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateCluster(r.Context(), clusterCreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -964,7 +963,7 @@ func (c *ClustersAPIController) CreateCluster(w http.ResponseWriter, r *http.Req
 func (c *ClustersAPIController) GetClustersMinimalData(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var filterByParam []string
@@ -983,7 +982,7 @@ func (c *ClustersAPIController) GetClustersMinimalData(w http.ResponseWriter, r 
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -999,7 +998,7 @@ func (c *ClustersAPIController) GetClustersMinimalData(w http.ResponseWriter, r 
 			WithMaximum[int32](500),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -1011,7 +1010,7 @@ func (c *ClustersAPIController) GetClustersMinimalData(w http.ResponseWriter, r 
 	result, err := c.service.GetClustersMinimalData(r.Context(), filterByParam, offsetParam, limitParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1064,13 +1063,13 @@ func (c *ClustersAPIController) GetClustersMinimalData(w http.ResponseWriter, r 
 func (c *ClustersAPIController) GetClusterMinimalDataById(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetClusterMinimalDataById(r.Context(), clusterUuidParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1123,12 +1122,12 @@ func (c *ClustersAPIController) GetClusterMinimalDataById(w http.ResponseWriter,
 func (c *ClustersAPIController) GetClusterByUuid(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	var verbosityParam string
@@ -1143,7 +1142,7 @@ func (c *ClustersAPIController) GetClusterByUuid(w http.ResponseWriter, r *http.
 	result, err := c.service.GetClusterByUuid(r.Context(), clusterUuidParam, verbosityParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1196,39 +1195,40 @@ func (c *ClustersAPIController) GetClusterByUuid(w http.ResponseWriter, r *http.
 func (c *ClustersAPIController) UpdateCluster(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	var clusterUpdateRequestParam ClusterUpdateRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&clusterUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertClusterUpdateRequestRequired(clusterUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertClusterUpdateRequestConstraints(clusterUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateCluster(r.Context(), clusterUuidParam, clusterUpdateRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1244,12 +1244,12 @@ func (c *ClustersAPIController) UpdateCluster(w http.ResponseWriter, r *http.Req
 func (c *ClustersAPIController) DeleteCluster(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	var forceParam bool
@@ -1259,7 +1259,7 @@ func (c *ClustersAPIController) DeleteCluster(w http.ResponseWriter, r *http.Req
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "force", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "force", Err: err}, nil, nil)
 			return
 		}
 
@@ -1271,7 +1271,7 @@ func (c *ClustersAPIController) DeleteCluster(w http.ResponseWriter, r *http.Req
 	result, err := c.service.DeleteCluster(r.Context(), clusterUuidParam, forceParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1324,7 +1324,7 @@ func (c *ClustersAPIController) DeleteCluster(w http.ResponseWriter, r *http.Req
 func (c *ClustersAPIController) GetClustersCount(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var groupByParam string
@@ -1337,7 +1337,7 @@ func (c *ClustersAPIController) GetClustersCount(w http.ResponseWriter, r *http.
 	result, err := c.service.GetClustersCount(r.Context(), groupByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1391,7 +1391,7 @@ func (c *ClustersAPIController) GetClusterVersions(w http.ResponseWriter, r *htt
 	result, err := c.service.GetClusterVersions(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1444,38 +1444,38 @@ func (c *ClustersAPIController) GetClusterVersions(w http.ResponseWriter, r *htt
 func (c *ClustersAPIController) GetClusterMetrics(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	var startParam time.Time
 	if query.Has("start") {
 		param, err := parseTime(query.Get("start"))
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "start", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "start", Err: err}, nil, nil)
 			return
 		}
 
 		startParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{"start"}, nil)
+		c.errorHandler(w, r, &RequiredError{"start"}, nil, nil)
 		return
 	}
 	var endParam time.Time
 	if query.Has("end") {
 		param, err := parseTime(query.Get("end"))
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "end", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "end", Err: err}, nil, nil)
 			return
 		}
 
 		endParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{"end"}, nil)
+		c.errorHandler(w, r, &RequiredError{"end"}, nil, nil)
 		return
 	}
 	var metricTypeParam []MetricsType
@@ -1485,7 +1485,7 @@ func (c *ClustersAPIController) GetClusterMetrics(w http.ResponseWriter, r *http
 		for _, param := range paramSplits {
 			paramEnum, err := NewMetricsTypeFromValue(param)
 			if err != nil {
-				c.errorHandler(w, r, &ParsingError{Param: "metricType", Err: err}, nil)
+				c.errorHandler(w, r, &ParsingError{Param: "metricType", Err: err}, nil, nil)
 				return
 			}
 			metricTypeParam = append(metricTypeParam, paramEnum)
@@ -1500,7 +1500,7 @@ func (c *ClustersAPIController) GetClusterMetrics(w http.ResponseWriter, r *http
 			WithMaximum[int32](1000),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "numberOfSamples", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "numberOfSamples", Err: err}, nil, nil)
 			return
 		}
 
@@ -1526,7 +1526,7 @@ func (c *ClustersAPIController) GetClusterMetrics(w http.ResponseWriter, r *http
 	result, err := c.service.GetClusterMetrics(r.Context(), clusterUuidParam, startParam, endParam, metricTypeParam, numberOfSamplesParam, groupByParam, nodepoolNameParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1618,39 +1618,40 @@ func (c *ClustersAPIController) GetClusterMetrics(w http.ResponseWriter, r *http
 func (c *ClustersAPIController) UpdateClusterLiveness(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	var clusterLivenessSyncRequestParam ClusterLivenessSyncRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&clusterLivenessSyncRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertClusterLivenessSyncRequestRequired(clusterLivenessSyncRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertClusterLivenessSyncRequestConstraints(clusterLivenessSyncRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateClusterLiveness(r.Context(), clusterUuidParam, clusterLivenessSyncRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1666,39 +1667,40 @@ func (c *ClustersAPIController) UpdateClusterLiveness(w http.ResponseWriter, r *
 func (c *ClustersAPIController) UpdateClusterInfo(w http.ResponseWriter, r *http.Request) {
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	var clusterInfoSyncRequestParam ClusterInfoSyncRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&clusterInfoSyncRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertClusterInfoSyncRequestRequired(clusterInfoSyncRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertClusterInfoSyncRequestConstraints(clusterInfoSyncRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateClusterInfo(r.Context(), clusterUuidParam, clusterInfoSyncRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1714,12 +1716,12 @@ func (c *ClustersAPIController) UpdateClusterInfo(w http.ResponseWriter, r *http
 func (c *ClustersAPIController) GetClusterInstallInfoByUuid(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	clusterUuidParam := chi.URLParam(r, "clusterUuid")
 	if clusterUuidParam == "" {
-		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil)
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
 	var versionParam string
@@ -1728,7 +1730,7 @@ func (c *ClustersAPIController) GetClusterInstallInfoByUuid(w http.ResponseWrite
 
 		versionParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "version"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "version"}, nil, nil)
 		return
 	}
 	var remoteClusterUrlParam string
@@ -1741,7 +1743,7 @@ func (c *ClustersAPIController) GetClusterInstallInfoByUuid(w http.ResponseWrite
 	result, err := c.service.GetClusterInstallInfoByUuid(r.Context(), clusterUuidParam, versionParam, remoteClusterUrlParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

@@ -29,11 +29,11 @@ func TestNotify(t *testing.T) {
 		deleteWelcomeUserRouteDelay: 0,
 	}
 
-	userRoutesClientMock.On("CreateRoute", ctx, "1", "test@run.ai", mock.Anything).Return(nil)
-	userRoutesClientMock.On("DeleteRoute", mock.Anything, "1", "test@run.ai", mock.Anything).Return(nil)
+	userRoutesClientMock.On("CreateRoute", ctx, "1", "test@example.com", mock.Anything).Return(nil)
+	userRoutesClientMock.On("DeleteRoute", mock.Anything, "1", "test@example.com", mock.Anything).Return(nil)
 	notifyClientMock.On("Notify", mock.Anything).Return()
 
-	err := notifier.Welcome(ctx, "1", "test@run.ai", "sink-id")
+	err := notifier.Welcome(ctx, "1", "test@example.com", "sink-id")
 	assert.NoError(t, err)
 	time.Sleep(100 * time.Millisecond) // Ensure that the welcome user route deletion is processed
 }
@@ -46,7 +46,7 @@ func TestNotify_FailedToCreateRoute(t *testing.T) {
 		userRoutesClient: userRoutesClientMock,
 	}
 
-	userRoutesClientMock.On("CreateRoute", ctx, "1", "test@run.ai", mock.Anything).Return(fmt.Errorf("failed to create route"))
-	err := notifier.Welcome(ctx, "1", "test@run.ai", "sink-id")
+	userRoutesClientMock.On("CreateRoute", ctx, "1", "test@example.com", mock.Anything).Return(fmt.Errorf("failed to create route"))
+	err := notifier.Welcome(ctx, "1", "test@example.com", "sink-id")
 	assert.EqualError(t, err, "failed to create route")
 }

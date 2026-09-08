@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	CREATED_BY_USER = "test@run.ai"
-	EMAIL           = "test@run.ai"
+	CREATED_BY_USER = "test@example.com"
+	EMAIL           = "test@example.com"
 	USERNAME        = "tese"
 	ID              = "id"
 	TIME_UNIX       = "1687774767"

@@ -15,6 +15,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	workloadsManagerApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	lwsv1 "sigs.k8s.io/lws/api/leaderworkerset/v1"
@@ -67,6 +68,14 @@ func servingPortToLWS(src *composer.ServingPortInfo, target any, rawCookie any) 
 		},
 		[]workloadsManagerApi.ServicePort{*servicePort},
 	)
+	if lwsTarget.LeaderWorkerSet.Labels[constants.LabelNIMWorkload] == constants.BoolTrueAsString {
+		serviceLabels := make(map[string]string, len(lwsTarget.LeaderWorkerSet.Labels))
+		for key, value := range lwsTarget.LeaderWorkerSet.Labels {
+			serviceLabels[key] = value
+		}
+		serviceLabels[constants.LabelWorkloadKind] = constants.KindDistributedInferenceWorkload
+		serviceSpec.SetLabels(serviceLabels)
+	}
 	service := workloadsManagerApi.NewNetworkingService()
 	service.SetSpec(*serviceSpec)
 

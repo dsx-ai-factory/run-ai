@@ -8,7 +8,7 @@ info:
     url: https://www.run.ai/
     email: support@run.ai
 servers:
-  - url: http://localhost:8181
+  - url: http://localhost:8080
 security:
   - bearerAuth: []
 paths:

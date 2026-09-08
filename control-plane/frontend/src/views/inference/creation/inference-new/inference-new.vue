@@ -448,10 +448,9 @@ export default defineComponent({
       }
     },
     async continueToDistributed(): Promise<void> {
-      const query: Record<string, string> = {
-        clusterId: this.inferenceNewModel.clusterId,
-        projectId: this.inferenceNewModel.projectId.toString(),
-        inferenceName: this.inferenceNewModel.name,
+      const query = {
+        ...this.getQuery(),
+        serverType: this.inferenceNewModel.serverType,
       };
       await this.$router.push({ name: INFERENCE_ROUTE_NAMES.INFERENCE_DISTRIBUTED_EDIT, query });
     },

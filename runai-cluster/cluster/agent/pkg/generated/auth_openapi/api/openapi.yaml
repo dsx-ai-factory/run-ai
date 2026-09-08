@@ -9,9 +9,6 @@ info:
   title: Authorization
   version: "1.0"
 servers:
-- url: https://app.run.ai
-- url: https://staging.run.ai
-- url: https://test.run.ai
 - url: http://localhost:8080
 security:
 - bearerAuth: []
@@ -1951,14 +1948,10 @@ components:
         departments:
         - "7"
         - "7"
-        tenant: "1"
         clusters:
         - a418ed33-9399-48c0-a890-122cadd13bfd
         - a418ed33-9399-48c0-a890-122cadd13bfd
       properties:
-        tenant:
-          example: "1"
-          type: string
         clusters:
           items:
             example: a418ed33-9399-48c0-a890-122cadd13bfd
@@ -1983,7 +1976,6 @@ components:
           departments:
           - "7"
           - "7"
-          tenant: "1"
           clusters:
           - a418ed33-9399-48c0-a890-122cadd13bfd
           - a418ed33-9399-48c0-a890-122cadd13bfd
@@ -1994,7 +1986,6 @@ components:
           departments:
           - "7"
           - "7"
-          tenant: "1"
           clusters:
           - a418ed33-9399-48c0-a890-122cadd13bfd
           - a418ed33-9399-48c0-a890-122cadd13bfd
@@ -2005,7 +1996,6 @@ components:
           departments:
           - "7"
           - "7"
-          tenant: "1"
           clusters:
           - a418ed33-9399-48c0-a890-122cadd13bfd
           - a418ed33-9399-48c0-a890-122cadd13bfd
@@ -2016,7 +2006,6 @@ components:
           departments:
           - "7"
           - "7"
-          tenant: "1"
           clusters:
           - a418ed33-9399-48c0-a890-122cadd13bfd
           - a418ed33-9399-48c0-a890-122cadd13bfd
