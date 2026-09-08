@@ -23159,6 +23159,12 @@ export interface WorkloadElement {
     'createdAt'?: string;
     /**
      * 
+     * @type {WorkloadElementTopology}
+     * @memberof WorkloadElement
+     */
+    'topology'?: WorkloadElementTopology | null;
+    /**
+     * 
      * @type {WorkloadElementKubernetesRef}
      * @memberof WorkloadElement
      */
@@ -23264,6 +23270,12 @@ export interface WorkloadElementResponse {
     'createdAt'?: string;
     /**
      * 
+     * @type {WorkloadElementTopology}
+     * @memberof WorkloadElementResponse
+     */
+    'topology'?: WorkloadElementTopology | null;
+    /**
+     * 
      * @type {WorkloadElementKubernetesRef}
      * @memberof WorkloadElementResponse
      */
@@ -23280,12 +23292,6 @@ export interface WorkloadElementResponse {
      * @memberof WorkloadElementResponse
      */
     'allocatedResources': WorkloadAllocatedResources | null;
-    /**
-     * 
-     * @type {WorkloadElementTopology}
-     * @memberof WorkloadElementResponse
-     */
-    'topology'?: WorkloadElementTopology | null;
 }
 /**
  * 
@@ -23305,25 +23311,31 @@ export interface WorkloadElementResponseAllOf {
      * @memberof WorkloadElementResponseAllOf
      */
     'allocatedResources': WorkloadAllocatedResources | null;
-    /**
-     * 
-     * @type {WorkloadElementTopology}
-     * @memberof WorkloadElementResponseAllOf
-     */
-    'topology'?: WorkloadElementTopology | null;
 }
 /**
- * The element\'s network topology. Returned only when the element\'s running pods resolve to an actual placement in the topology hierarchy; omitted otherwise (e.g. when the workload has no topology, the cluster doesn\'t support topology, or there are no running pods to place yet). 
+ * The element\'s network topology. Populated whenever the element requested topology constraints, or its running pods resolve to an actual placement in the topology hierarchy. 
  * @export
  * @interface WorkloadElementTopology
  */
 export interface WorkloadElementTopology {
     /**
-     * The name of the network topology associated with the element — either inherited from the workload\'s topology constraints, or inferred from the nodepools the element\'s running pods are scheduled on.
+     * The name of the network topology associated with the element — either as requested via constraints, or inherited from the workload\'s topology constraints, or inferred from the nodepools the element\'s running pods are scheduled on.
      * @type {string}
      * @memberof WorkloadElementTopology
      */
     'name'?: string;
+    /**
+     * The topology level to use as a preferred placement constraint for the element.
+     * @type {string}
+     * @memberof WorkloadElementTopology
+     */
+    'preferredPlacement'?: string;
+    /**
+     * The topology level to use as a required placement constraint for the element. If the requirement cannot be satisfied at this topology level, placement will fail.
+     * @type {string}
+     * @memberof WorkloadElementTopology
+     */
+    'requiredPlacement'?: string;
     /**
      * 
      * @type {WorkloadTopologyActualPlacement}

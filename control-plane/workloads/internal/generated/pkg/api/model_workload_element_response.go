@@ -68,6 +68,11 @@ type WorkloadElementResponse struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Topology *WorkloadElementTopology `json:"topology,omitempty"`
+	Topology *WorkloadElementTopology `json:"topology,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//KubernetesRef *WorkloadElementKubernetesRef `json:"kubernetesRef,omitempty"`
 	KubernetesRef *WorkloadElementKubernetesRef `json:"kubernetesRef,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
@@ -80,11 +85,6 @@ type WorkloadElementResponse struct {
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//AllocatedResources *WorkloadAllocatedResources `json:"allocatedResources"`
 	AllocatedResources *WorkloadAllocatedResources `json:"allocatedResources" gorm:"serializer:json; type:jsonb;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Topology *WorkloadElementTopology `json:"topology,omitempty"`
-	Topology *WorkloadElementTopology `json:"topology,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
@@ -103,6 +103,11 @@ func AssertWorkloadElementResponseRequired(obj WorkloadElementResponse) error {
 		}
 	}
 
+	if obj.Topology != nil {
+		if err := AssertWorkloadElementTopologyRequired(*obj.Topology); err != nil {
+			return err
+		}
+	}
 	if obj.KubernetesRef != nil {
 		if err := AssertWorkloadElementKubernetesRefRequired(*obj.KubernetesRef); err != nil {
 			return err
@@ -115,11 +120,6 @@ func AssertWorkloadElementResponseRequired(obj WorkloadElementResponse) error {
 	}
 	if obj.AllocatedResources != nil {
 		if err := AssertWorkloadAllocatedResourcesRequired(*obj.AllocatedResources); err != nil {
-			return err
-		}
-	}
-	if obj.Topology != nil {
-		if err := AssertWorkloadElementTopologyRequired(*obj.Topology); err != nil {
 			return err
 		}
 	}
@@ -177,6 +177,16 @@ func AssertWorkloadElementResponseConstraints(obj WorkloadElementResponse) error
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
+	if obj.Topology != nil {
+		if err := AssertWorkloadElementTopologyConstraints(*obj.Topology); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	if obj.KubernetesRef != nil {
 		if err := AssertWorkloadElementKubernetesRefConstraints(*obj.KubernetesRef); err != nil {
 			return err
@@ -199,16 +209,6 @@ func AssertWorkloadElementResponseConstraints(obj WorkloadElementResponse) error
 	//////////////////////// RUNAI END //////////////////////////
 	if obj.AllocatedResources != nil {
 		if err := AssertWorkloadAllocatedResourcesConstraints(*obj.AllocatedResources); err != nil {
-			return err
-		}
-	}
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	if obj.Topology != nil {
-		if err := AssertWorkloadElementTopologyConstraints(*obj.Topology); err != nil {
 			return err
 		}
 	}

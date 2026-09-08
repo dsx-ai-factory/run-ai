@@ -37,10 +37,10 @@ type WorkloadElementResponse struct {
 	ReplicaKey NullableString `json:"replicaKey,omitempty"`
 	// The timestamp when the structure element was created.
 	CreatedAt              *time.Time                           `json:"createdAt,omitempty"`
+	Topology               NullableWorkloadElementTopology      `json:"topology,omitempty"`
 	KubernetesRef          NullableWorkloadElementKubernetesRef `json:"kubernetesRef,omitempty"`
 	PodsRequestedResources NullableWorkloadRequestResources     `json:"podsRequestedResources"`
 	AllocatedResources     NullableWorkloadAllocatedResources   `json:"allocatedResources"`
-	Topology               NullableWorkloadElementTopology      `json:"topology,omitempty"`
 }
 
 type _WorkloadElementResponse WorkloadElementResponse
@@ -300,6 +300,49 @@ func (o *WorkloadElementResponse) SetCreatedAt(v time.Time) {
 	o.CreatedAt = &v
 }
 
+// GetTopology returns the Topology field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *WorkloadElementResponse) GetTopology() WorkloadElementTopology {
+	if o == nil || IsNil(o.Topology.Get()) {
+		var ret WorkloadElementTopology
+		return ret
+	}
+	return *o.Topology.Get()
+}
+
+// GetTopologyOk returns a tuple with the Topology field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *WorkloadElementResponse) GetTopologyOk() (*WorkloadElementTopology, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Topology.Get(), o.Topology.IsSet()
+}
+
+// HasTopology returns a boolean if a field has been set.
+func (o *WorkloadElementResponse) HasTopology() bool {
+	if o != nil && o.Topology.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetTopology gets a reference to the given NullableWorkloadElementTopology and assigns it to the Topology field.
+func (o *WorkloadElementResponse) SetTopology(v WorkloadElementTopology) {
+	o.Topology.Set(&v)
+}
+
+// SetTopologyNil sets the value for Topology to be an explicit nil
+func (o *WorkloadElementResponse) SetTopologyNil() {
+	o.Topology.Set(nil)
+}
+
+// UnsetTopology ensures that no value is present for Topology, not even an explicit nil
+func (o *WorkloadElementResponse) UnsetTopology() {
+	o.Topology.Unset()
+}
+
 // GetKubernetesRef returns the KubernetesRef field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *WorkloadElementResponse) GetKubernetesRef() WorkloadElementKubernetesRef {
 	if o == nil || IsNil(o.KubernetesRef.Get()) {
@@ -395,49 +438,6 @@ func (o *WorkloadElementResponse) SetAllocatedResources(v WorkloadAllocatedResou
 	o.AllocatedResources.Set(&v)
 }
 
-// GetTopology returns the Topology field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *WorkloadElementResponse) GetTopology() WorkloadElementTopology {
-	if o == nil || IsNil(o.Topology.Get()) {
-		var ret WorkloadElementTopology
-		return ret
-	}
-	return *o.Topology.Get()
-}
-
-// GetTopologyOk returns a tuple with the Topology field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *WorkloadElementResponse) GetTopologyOk() (*WorkloadElementTopology, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.Topology.Get(), o.Topology.IsSet()
-}
-
-// HasTopology returns a boolean if a field has been set.
-func (o *WorkloadElementResponse) HasTopology() bool {
-	if o != nil && o.Topology.IsSet() {
-		return true
-	}
-
-	return false
-}
-
-// SetTopology gets a reference to the given NullableWorkloadElementTopology and assigns it to the Topology field.
-func (o *WorkloadElementResponse) SetTopology(v WorkloadElementTopology) {
-	o.Topology.Set(&v)
-}
-
-// SetTopologyNil sets the value for Topology to be an explicit nil
-func (o *WorkloadElementResponse) SetTopologyNil() {
-	o.Topology.Set(nil)
-}
-
-// UnsetTopology ensures that no value is present for Topology, not even an explicit nil
-func (o *WorkloadElementResponse) UnsetTopology() {
-	o.Topology.Unset()
-}
-
 func (o WorkloadElementResponse) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -463,14 +463,14 @@ func (o WorkloadElementResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.CreatedAt) {
 		toSerialize["createdAt"] = o.CreatedAt
 	}
+	if o.Topology.IsSet() {
+		toSerialize["topology"] = o.Topology.Get()
+	}
 	if o.KubernetesRef.IsSet() {
 		toSerialize["kubernetesRef"] = o.KubernetesRef.Get()
 	}
 	toSerialize["podsRequestedResources"] = o.PodsRequestedResources.Get()
 	toSerialize["allocatedResources"] = o.AllocatedResources.Get()
-	if o.Topology.IsSet() {
-		toSerialize["topology"] = o.Topology.Get()
-	}
 	return toSerialize, nil
 }
 

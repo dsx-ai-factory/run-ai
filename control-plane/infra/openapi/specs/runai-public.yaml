@@ -29655,6 +29655,24 @@ components:
       enum:
         - PROJECT
         - DEPARTMENT
+    WorkloadElementTopology:
+      type: object
+      description: |
+        The element's network topology. Populated whenever the element requested topology constraints, or its running pods resolve to an actual placement in the topology hierarchy.
+      nullable: true
+      properties:
+        name:
+          type: string
+          description: The name of the network topology associated with the element — either as requested via constraints, or inherited from the workload's topology constraints, or inferred from the nodepools the element's running pods are scheduled on.
+        preferredPlacement:
+          type: string
+          description: The topology level to use as a preferred placement constraint for the element.
+        requiredPlacement:
+          type: string
+          description: The topology level to use as a required placement constraint for the element. If the requirement cannot be satisfied at this topology level, placement will fail.
+        actualPlacement:
+          readOnly: true
+          $ref: '#/components/schemas/WorkloadTopologyActualPlacement'
     WorkloadElement:
       type: object
       required:
@@ -29686,6 +29704,8 @@ components:
           format: date-time
           example: '2022-01-01T03:49:52.531Z'
           description: The timestamp when the structure element was created.
+        topology:
+          $ref: '#/components/schemas/WorkloadElementTopology'
         kubernetesRef:
           type: object
           nullable: true
@@ -32569,17 +32589,6 @@ components:
             A flat list of structure elements for this workload, ordered by hierarchy level. This page may contain fewer elements than are stored in the database — use the "next" field to retrieve additional pages. Use the /elements/count endpoint to retrieve total and stored counts.
           items:
             $ref: '#/components/schemas/WorkloadElement'
-    WorkloadElementTopology:
-      type: object
-      description: |
-        The element's network topology. Returned only when the element's running pods resolve to an actual placement in the topology hierarchy; omitted otherwise (e.g. when the workload has no topology, the cluster doesn't support topology, or there are no running pods to place yet).
-      nullable: true
-      properties:
-        name:
-          type: string
-          description: The name of the network topology associated with the element — either inherited from the workload's topology constraints, or inferred from the nodepools the element's running pods are scheduled on.
-        actualPlacement:
-          $ref: '#/components/schemas/WorkloadTopologyActualPlacement'
     WorkloadElementResponse:
       allOf:
         - $ref: '#/components/schemas/WorkloadElement'
@@ -32592,8 +32601,6 @@ components:
               $ref: '#/components/schemas/WorkloadRequestResources'
             allocatedResources:
               $ref: '#/components/schemas/WorkloadAllocatedResources'
-            topology:
-              $ref: '#/components/schemas/WorkloadElementTopology'
     ElementMetricType:
       type: string
       description: Specify which metric data to request for an element.
