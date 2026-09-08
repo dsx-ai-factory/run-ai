@@ -33,8 +33,8 @@ const (
 )
 
 type Section struct {
-	Category Category
-	Metrics  map[string]any
-	Failed   bool
-	Error    string
+	Category Category       `json:"category"`
+	Metrics  map[string]any `json:"metrics"`
+	Failed   bool           `json:"failed"`
+	Error    string         `json:"error,omitempty"`
 }
