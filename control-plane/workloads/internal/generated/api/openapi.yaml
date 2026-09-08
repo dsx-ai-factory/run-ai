@@ -16578,11 +16578,13 @@ components:
           description: The topology level to use as a preferred placement constraint
             for the element.
           type: string
+          x-internal: true
         requiredPlacement:
           description: "The topology level to use as a required placement constraint\
             \ for the element. If the requirement cannot be satisfied at this topology\
             \ level, placement will fail."
           type: string
+          x-internal: true
         actualPlacement:
           $ref: '#/components/schemas/WorkloadTopologyActualPlacement'
       type: object

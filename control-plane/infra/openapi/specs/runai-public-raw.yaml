@@ -51812,11 +51812,13 @@ components:
             workload's topology constraints, or inferred from the nodepools the
             element's running pods are scheduled on.
         preferredPlacement:
+          x-internal: true
           type: string
           description: >-
             The topology level to use as a preferred placement constraint for
             the element.
         requiredPlacement:
+          x-internal: true
           type: string
           description: >-
             The topology level to use as a required placement constraint for the
