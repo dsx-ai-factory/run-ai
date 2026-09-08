@@ -22307,6 +22307,12 @@ export interface Workload {
     'preemptible'?: boolean | null;
     /**
      * 
+     * @type {string}
+     * @memberof Workload
+     */
+    'preemptibility'?: string | null;
+    /**
+     * 
      * @type {boolean}
      * @memberof Workload
      */
@@ -22981,6 +22987,12 @@ export interface WorkloadDetailed {
      * @memberof WorkloadDetailed
      */
     'preemptible'?: boolean | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof WorkloadDetailed
+     */
+    'preemptibility'?: string | null;
     /**
      * 
      * @type {boolean}
@@ -23881,6 +23893,7 @@ export const WorkloadSortFilterFields = {
     Category: 'category',
     Priority: 'priority',
     PriorityClassName: 'priorityClassName',
+    Preemptibility: 'preemptibility',
     GuaranteedRuntimeEndsAt: 'guaranteedRuntimeEndsAt',
     AiApplicationId: 'aiApplicationId',
     AiApplicationName: 'aiApplicationName'
@@ -37213,13 +37226,13 @@ export const WorkloadsApiAxiosParamCreator = function (configuration?: Configura
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
          * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
-         * @param {'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName'} [sortBy] Sort results by a parameter.
+         * @param {'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'preemptibility' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName'} [sortBy] Sort results by a parameter.
          * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x60;&#x3D;&#x3D;&#x60;, &#x60;!&#x3D;&#x60;, &#x60;&lt;&#x3D;&#x60; and &#x60;&gt;&#x3D;&#x60;.
          * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getWorkloads: async (deleted?: boolean, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName', filterBy?: Array<string>, search?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getWorkloads: async (deleted?: boolean, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'preemptibility' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName', filterBy?: Array<string>, search?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/v1/workloads`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -38001,13 +38014,13 @@ export const WorkloadsApiFp = function(configuration?: Configuration) {
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
          * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
-         * @param {'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName'} [sortBy] Sort results by a parameter.
+         * @param {'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'preemptibility' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName'} [sortBy] Sort results by a parameter.
          * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x60;&#x3D;&#x3D;&#x60;, &#x60;!&#x3D;&#x60;, &#x60;&lt;&#x3D;&#x60; and &#x60;&gt;&#x3D;&#x60;.
          * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getWorkloads(deleted?: boolean, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName', filterBy?: Array<string>, search?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetWorkloads200Response>> {
+        async getWorkloads(deleted?: boolean, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'preemptibility' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName', filterBy?: Array<string>, search?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetWorkloads200Response>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkloads(deleted, offset, limit, sortOrder, sortBy, filterBy, search, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
@@ -38303,13 +38316,13 @@ export const WorkloadsApiFactory = function (configuration?: Configuration, base
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
          * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
-         * @param {'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName'} [sortBy] Sort results by a parameter.
+         * @param {'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'preemptibility' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName'} [sortBy] Sort results by a parameter.
          * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x60;&#x3D;&#x3D;&#x60;, &#x60;!&#x3D;&#x60;, &#x60;&lt;&#x3D;&#x60; and &#x60;&gt;&#x3D;&#x60;.
          * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getWorkloads(deleted?: boolean, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName', filterBy?: Array<string>, search?: string, options?: any): AxiosPromise<GetWorkloads200Response> {
+        getWorkloads(deleted?: boolean, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'preemptibility' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName', filterBy?: Array<string>, search?: string, options?: any): AxiosPromise<GetWorkloads200Response> {
             return localVarFp.getWorkloads(deleted, offset, limit, sortOrder, sortBy, filterBy, search, options).then((request) => request(axios, basePath));
         },
         /**
@@ -38611,14 +38624,14 @@ export class WorkloadsApi extends BaseAPI {
      * @param {number} [offset] The offset of the first item returned in the collection.
      * @param {number} [limit] The maximum number of entries to return.
      * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
-     * @param {'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName'} [sortBy] Sort results by a parameter.
+     * @param {'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'preemptibility' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName'} [sortBy] Sort results by a parameter.
      * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x60;&#x3D;&#x3D;&#x60;, &#x60;!&#x3D;&#x60;, &#x60;&lt;&#x3D;&#x60; and &#x60;&gt;&#x3D;&#x60;.
      * @param {string} [search] Filter results by a free text search.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof WorkloadsApi
      */
-    public getWorkloads(deleted?: boolean, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName', filterBy?: Array<string>, search?: string, options?: AxiosRequestConfig) {
+    public getWorkloads(deleted?: boolean, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'preemptibility' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName', filterBy?: Array<string>, search?: string, options?: AxiosRequestConfig) {
         return WorkloadsApiFp(this.configuration).getWorkloads(deleted, offset, limit, sortOrder, sortBy, filterBy, search, options).then((request) => request(this.axios, this.basePath));
     }
 

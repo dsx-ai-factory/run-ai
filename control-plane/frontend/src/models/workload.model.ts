@@ -102,6 +102,7 @@ export const workloadPriorityNameByWorkloadType = {
 
 export const workloadPreemptibilityOptions = [
   { label: "Preemptible", value: Preemptibility.Preemptible },
+  { label: "Semi-preemptible", value: Preemptibility.SemiPreemptible },
   { label: "Non-preemptible", value: Preemptibility.NonPreemptible },
 ];
 

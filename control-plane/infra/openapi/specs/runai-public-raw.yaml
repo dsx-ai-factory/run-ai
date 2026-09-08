@@ -51546,6 +51546,10 @@ components:
         preemptible:
           type: boolean
           nullable: true
+        preemptibility:
+          type: string
+          example: non-preemptible
+          nullable: true
         fullySaasWorkload:
           x-internal: true
           type: boolean
@@ -56855,6 +56859,7 @@ components:
         - category
         - priority
         - priorityClassName
+        - preemptibility
         - guaranteedRuntimeEndsAt
         - aiApplicationId
         - aiApplicationName
@@ -62618,7 +62623,7 @@ components:
         items:
           type: string
           pattern: >-
-            ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
         example:
           - name!=some-workload-name
           - allocatedGPU>=2
@@ -62677,6 +62682,7 @@ components:
           - totalPendingTimeSeconds
           - totalRunningTimeSeconds
           - priorityClassName
+          - preemptibility
           - guaranteedRuntimeEndsAt
           - aiApplicationId
           - aiApplicationName

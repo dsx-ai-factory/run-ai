@@ -172,7 +172,7 @@ paths:
           - allocatedGPU>=2
           - createdAt>=2021-01-01T00:00:00Z
           items:
-            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
             type: string
           maxItems: 10
           type: array
@@ -637,6 +637,7 @@ paths:
           - totalPendingTimeSeconds
           - totalRunningTimeSeconds
           - priorityClassName
+          - preemptibility
           - guaranteedRuntimeEndsAt
           - aiApplicationId
           - aiApplicationName
@@ -657,7 +658,7 @@ paths:
           - allocatedGPU>=2
           - createdAt>=2021-01-01T00:00:00Z
           items:
-            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
             type: string
           maxItems: 10
           type: array
@@ -742,7 +743,7 @@ paths:
           - allocatedGPU>=2
           - createdAt>=2021-01-01T00:00:00Z
           items:
-            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
             type: string
           maxItems: 10
           type: array
@@ -1282,7 +1283,7 @@ paths:
           - allocatedGPU>=2
           - createdAt>=2021-01-01T00:00:00Z
           items:
-            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
             type: string
           maxItems: 10
           type: array
@@ -13165,7 +13166,7 @@ components:
         - allocatedGPU>=2
         - createdAt>=2021-01-01T00:00:00Z
         items:
-          pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+          pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
           type: string
         maxItems: 10
         type: array
@@ -13278,6 +13279,7 @@ components:
         - totalPendingTimeSeconds
         - totalRunningTimeSeconds
         - priorityClassName
+        - preemptibility
         - guaranteedRuntimeEndsAt
         - aiApplicationId
         - aiApplicationName
@@ -15617,6 +15619,7 @@ components:
         priorityClassName: high-priority
         source: CLI
         type: runai-job
+        preemptibility: non-preemptible
         createdAt: 2022-01-01T03:49:52.531Z
         nodeAffinities:
         - specName: worker
@@ -16312,6 +16315,10 @@ components:
         preemptible:
           nullable: true
           type: boolean
+        preemptibility:
+          example: non-preemptible
+          nullable: true
+          type: string
         fullySaasWorkload:
           type: boolean
           x-internal: true
@@ -21388,6 +21395,7 @@ components:
         priorityClassName: high-priority
         source: CLI
         type: runai-job
+        preemptibility: non-preemptible
         createdAt: 2022-01-01T03:49:52.531Z
         nodeAffinities:
         - specName: worker
@@ -127102,6 +127110,7 @@ components:
       - category
       - priority
       - priorityClassName
+      - preemptibility
       - guaranteedRuntimeEndsAt
       - aiApplicationId
       - aiApplicationName
@@ -127303,6 +127312,7 @@ components:
           priorityClassName: high-priority
           source: CLI
           type: runai-job
+          preemptibility: non-preemptible
           createdAt: 2022-01-01T03:49:52.531Z
           nodeAffinities:
           - specName: worker
@@ -127929,6 +127939,7 @@ components:
           priorityClassName: high-priority
           source: CLI
           type: runai-job
+          preemptibility: non-preemptible
           createdAt: 2022-01-01T03:49:52.531Z
           nodeAffinities:
           - specName: worker

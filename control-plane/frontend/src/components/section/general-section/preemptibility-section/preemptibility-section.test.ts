@@ -48,8 +48,9 @@ describe("preemptibility-section.vue", () => {
     test("Should compute preemptibilityOptions correctly", () => {
       const options = preemptibilitySection.vm.preemptibilityOptions;
 
-      expect(options.length).toBe(2);
+      expect(options.length).toBe(3);
       expect(options.some((opt) => opt.value === Preemptibility.Preemptible)).toBe(true);
+      expect(options.some((opt) => opt.value === Preemptibility.SemiPreemptible)).toBe(true);
       expect(options.some((opt) => opt.value === Preemptibility.NonPreemptible)).toBe(true);
     });
 
@@ -123,6 +124,19 @@ describe("preemptibility-section.vue", () => {
       expect(preemptibilitySection.emitted("update:model-value")).toBeTruthy();
       const emittedValues = preemptibilitySection.emitted("update:model-value") as (Preemptibility | null)[][];
       expect(emittedValues[0][0]).toBe(Preemptibility.NonPreemptible);
+    });
+
+    test("Should emit semi-preemptible when selected", async () => {
+      const runaiSelect = preemptibilitySection.findComponent(RunaiSelect);
+      const semiPreemptibleOption = preemptibilitySection.vm.preemptibilityOptions.find(
+        (option) => option.value === Preemptibility.SemiPreemptible,
+      );
+
+      await runaiSelect.vm.$emit("update:model-value", semiPreemptibleOption);
+      await preemptibilitySection.vm.$nextTick();
+
+      const emittedValues = preemptibilitySection.emitted("update:model-value") as (Preemptibility | null)[][];
+      expect(emittedValues[0][0]).toBe(Preemptibility.SemiPreemptible);
     });
 
     test("Should emit null when selection is cleared", async () => {
@@ -237,7 +251,7 @@ describe("preemptibility-section.vue", () => {
       preemptibilitySection = factory({ policyRules: null });
       const options = preemptibilitySection.vm.preemptibilityOptions;
 
-      expect(options.length).toBe(2);
+      expect(options.length).toBe(3);
       expect(preemptibilitySection.vm.selectGenericPolicyRules).toBeUndefined();
     });
   });
