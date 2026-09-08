@@ -246,6 +246,7 @@ func TestRegistrySecret(t *testing.T) {
 	}, sec))
 	assert.Equal(t, corev1.SecretTypeDockerConfigJson, sec.Type)
 	assert.Equal(t, []byte(`{"auths":{}}`), sec.Data[corev1.DockerConfigJsonKey])
+	assert.Empty(t, sec.Annotations[helmResourcePolicyAnnotation])
 }
 
 func TestRegistrySecretUpdatesDataAndPreservesMetadata(t *testing.T) {
@@ -254,10 +255,13 @@ func TestRegistrySecretUpdatesDataAndPreservesMetadata(t *testing.T) {
 	require.NoError(t, corev1.AddToScheme(scheme))
 	k8s := fake.NewClientBuilder().WithScheme(scheme).WithObjects(&corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        "runai-reg-creds",
-			Namespace:   "runai",
-			Labels:      map[string]string{"app.kubernetes.io/managed-by": "Helm"},
-			Annotations: map[string]string{"meta.helm.sh/release-name": "runai-cluster"},
+			Name:      "runai-reg-creds",
+			Namespace: "runai",
+			Labels:    map[string]string{"app.kubernetes.io/managed-by": "Helm"},
+			Annotations: map[string]string{
+				"meta.helm.sh/release-name":      "runai-cluster",
+				"meta.helm.sh/release-namespace": "runai",
+			},
 		},
 		Type: corev1.SecretTypeDockerConfigJson,
 		Data: map[string][]byte{
@@ -278,6 +282,35 @@ func TestRegistrySecretUpdatesDataAndPreservesMetadata(t *testing.T) {
 	assert.Equal(t, []byte("preserved"), sec.Data["extra"])
 	assert.Equal(t, "Helm", sec.Labels["app.kubernetes.io/managed-by"])
 	assert.Equal(t, "runai-cluster", sec.Annotations["meta.helm.sh/release-name"])
+	assert.Equal(t, "keep", sec.Annotations[helmResourcePolicyAnnotation])
+}
+
+func TestRegistrySecretUpdatesExternalSecretWithoutKeepPolicy(t *testing.T) {
+	token := base64.StdEncoding.EncodeToString([]byte(`{"auths":{"registry.local":{}}}`))
+	scheme := runtime.NewScheme()
+	require.NoError(t, corev1.AddToScheme(scheme))
+	k8s := fake.NewClientBuilder().WithScheme(scheme).WithObjects(&corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "runai-reg-creds",
+			Namespace: "runai",
+			Labels:    map[string]string{"app.kubernetes.io/managed-by": "runai-installer"},
+		},
+		Type: corev1.SecretTypeDockerConfigJson,
+		Data: map[string][]byte{
+			corev1.DockerConfigJsonKey: []byte(`{"auths":{"old.registry":{}}}`),
+		},
+	}).Build()
+	deps := orchestrator2.Deps{K8sExecutor: orchestrator2.NewK8sExecutor(k8s)}
+
+	execOK(t, RegistrySecret{SecretName: "runai-reg-creds", Namespace: "runai", Token: token}, deps)
+
+	sec := &corev1.Secret{}
+	require.NoError(t, k8s.Get(context.Background(), client.ObjectKey{
+		Name:      "runai-reg-creds",
+		Namespace: "runai",
+	}, sec))
+	assert.Equal(t, []byte(`{"auths":{"registry.local":{}}}`), sec.Data[corev1.DockerConfigJsonKey])
+	assert.Empty(t, sec.Annotations[helmResourcePolicyAnnotation])
 }
 
 func TestExtractAirgap(t *testing.T) {

@@ -17,6 +17,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const (
+	helmManagedByLabel             = "app.kubernetes.io/managed-by"
+	helmReleaseNameAnnotation      = "meta.helm.sh/release-name"
+	helmReleaseNamespaceAnnotation = "meta.helm.sh/release-namespace"
+	helmResourcePolicyAnnotation   = "helm.sh/resource-policy"
+)
+
 type RegistrySecret struct {
 	SecretName string
 	Namespace  string
@@ -56,6 +63,7 @@ func (a RegistrySecret) Execute(ctx context.Context, deps orchestrator2.Deps) (o
 	}
 
 	original := existing.DeepCopy()
+	retainHelmManagedSecret(existing)
 	existing.Type = corev1.SecretTypeDockerConfigJson
 	if existing.Data == nil {
 		existing.Data = map[string][]byte{}
@@ -63,4 +71,13 @@ func (a RegistrySecret) Execute(ctx context.Context, deps orchestrator2.Deps) (o
 	existing.Data[corev1.DockerConfigJsonKey] = dockerConfig
 
 	return orchestrator2.ActionResult{}, deps.K8sExecutor.Patch(ctx, existing, client.MergeFrom(original))
+}
+
+func retainHelmManagedSecret(secret *corev1.Secret) {
+	if secret.Labels[helmManagedByLabel] != "Helm" ||
+		secret.Annotations[helmReleaseNameAnnotation] == "" ||
+		secret.Annotations[helmReleaseNamespaceAnnotation] == "" {
+		return
+	}
+	secret.Annotations[helmResourcePolicyAnnotation] = "keep"
 }
