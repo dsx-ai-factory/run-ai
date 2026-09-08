@@ -344,8 +344,7 @@ var _ = Describe("BatchDeleteReports API tests", func() {
 			Eventually(writer.written, auditWriteLimit, 10*time.Millisecond).Should(ConsistOf(ids))
 		})
 
-		// At capacity the caller writes inline, so the response slows down but no audit
-		// record is lost - that is the intended backpressure, not a regression.
+		// No response-time bound here: at capacity the writes are inline by design.
 		It("keeps writing every audit record once the writer pool is saturated", func() {
 			writer := &recordingAuditWriter{delay: perWriteDelay}
 			useAuditWriter(writer)

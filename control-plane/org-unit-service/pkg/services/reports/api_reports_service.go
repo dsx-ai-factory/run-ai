@@ -399,7 +399,7 @@ func (r ReportsApiService) BatchDeleteReports(ctx context.Context, request api.B
 			accepted = batchDeleteResp.Accepted
 			failed = append(failed, metricsFailureItemsToApi(batchDeleteResp.Failed)...)
 			for _, id := range accepted {
-				auditLogs = append(auditLogs, newDeleteAuditLog(ctx, id, http.StatusAccepted))
+				auditLogs = append(auditLogs, newDeletionAuditLog(ctx, id, http.StatusAccepted))
 			}
 		}
 	}
@@ -445,7 +445,7 @@ func classifyReports(ctx context.Context, batchGetResp *metrics_swagger.ReportsB
 	for i := range batchGetResp.Succeeded {
 		report := &batchGetResp.Succeeded[i]
 		if permErr := validateReportPermissions(report, string(auth_swagger.ACTION_DELETE), tenantId, subjectId, permittedScopes); permErr != nil {
-			deniedAuditLogs = append(deniedAuditLogs, newDeleteAuditLog(ctx, report.Id, http.StatusForbidden))
+			deniedAuditLogs = append(deniedAuditLogs, newDeletionAuditLog(ctx, report.Id, http.StatusForbidden))
 			failed = append(failed, api.BatchResponseFailureItem{
 				Id:      report.Id,
 				Code:    int32(permErr.Code),
@@ -458,7 +458,7 @@ func classifyReports(ctx context.Context, batchGetResp *metrics_swagger.ReportsB
 	return permittedIds, failed, deniedAuditLogs, nil
 }
 
-func newDeleteAuditLog(ctx context.Context, id string, statusCode int) *audit.AuditLog {
+func newDeletionAuditLog(ctx context.Context, id string, statusCode int) *audit.AuditLog {
 	return audit.AuditFromAudit(audit.AuditFromCtx(ctx)).
 		WithAction("Delete").
 		WithHttpMethod(http.MethodDelete).
@@ -467,11 +467,8 @@ func newDeleteAuditLog(ctx context.Context, id string, statusCode int) *audit.Au
 		WithStatusCode(statusCode)
 }
 
-// The logs are snapshots already detached from ctx; only the logger needs a context that
-// survives the handler returning, since the request ctx is cancelled once the response is
-// sent. Concurrency is capped so a burst of batch deletes cannot spawn unbounded writers;
-// at capacity the caller writes them itself, trading latency for backpressure rather than
-// dropping audit records.
+// The request ctx is cancelled once the response is sent, so the logger needs a detached one.
+// At writer capacity the caller writes inline: backpressure rather than dropped audit records.
 func writeAuditLogsAsync(ctx context.Context, auditLogs []*audit.AuditLog) {
 	if len(auditLogs) == 0 {
 		return
