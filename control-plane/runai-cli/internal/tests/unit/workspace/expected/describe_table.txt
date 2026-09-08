@@ -6,7 +6,7 @@ Created At:                         2025-12-15T08:58:28Z
 Updated At:                         2025-12-15T08:59:22Z
 Project:                            team-b
 Department:                         default
-Submitted By:                       test@run.ai
+Submitted By:                       test@example.com
 Priority:                           high (125)
 Category:                           Build
 Preemptible:                        false

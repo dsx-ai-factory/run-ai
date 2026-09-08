@@ -33,6 +33,7 @@
               :locked-rules="lockedRules"
               :org-units="authStore.orgUnits"
               :tenant-name="authStore.tenant.name"
+              :policy-save-validation-message="openRulePolicySaveMessage"
               is-edit
               embedded
               @save="onRuleSave"
@@ -59,6 +60,7 @@
         :locked-rules="lockedRules"
         :org-units="authStore.orgUnits"
         :tenant-name="authStore.tenant.name"
+        :policy-save-validation-message="openRulePolicySaveMessage"
         @save="onRuleSave"
         @cancel="cancelRule"
       />
@@ -217,11 +219,13 @@ async function attemptNewRule(): Promise<void> {
 }
 
 function openNewRule(): void {
+  validationRevealed.value = false;
   editingIndex.value = null;
   openDraft.value = gvkPolicyUtil.createEmptyRuleDraft();
 }
 
 function editRule(index: number): void {
+  validationRevealed.value = false;
   editingIndex.value = index;
   openDraft.value = deepCopy(savedEntries.value[index].draft);
 }
@@ -266,6 +270,9 @@ const rulesValidationValue = computed<string>(() => {
 
 const displayedValidation = computed<string>(() =>
   rulesValidationValue.value === errorMessages.SAVE_OR_CANCEL_OPEN_RULE ? "" : rulesValidationValue.value,
+);
+const openRulePolicySaveMessage = computed<string>(() =>
+  validationRevealed.value && openDraft.value !== null ? errorMessages.SAVE_OR_CANCEL_OPEN_RULE : "",
 );
 
 function revealValidation(): void {

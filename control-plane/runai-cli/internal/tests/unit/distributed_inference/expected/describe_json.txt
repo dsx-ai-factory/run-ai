@@ -9,7 +9,7 @@
     "department": "default",
     "createdAt": "2025-12-15T08:58:27.277697Z",
     "updatedAt": "2025-12-15T08:59:44.717168Z",
-    "submittedBy": "test@run.ai",
+    "submittedBy": "test@example.com",
     "priority": "very-high (150)",
     "category": "Deploy",
     "environmentVariables": {

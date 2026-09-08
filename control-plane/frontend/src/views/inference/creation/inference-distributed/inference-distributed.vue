@@ -147,6 +147,7 @@ import {
   MIN_CLUSTER_VERSION_FOR_INFERENCE_VOLUME,
   MIN_CLUSTER_VERSION_FOR_PREEMPTIBILITY,
 } from "@/common/version.constant";
+import { EServerType } from "@/models/inference.model";
 import { INFERENCE_ROUTE_NAMES } from "@/router/inference.routes/inference.routes.names";
 import { WORKLOAD_ROUTE_NAMES } from "@/router/workloads.routes/workloads.routes.names";
 
@@ -233,7 +234,8 @@ export default defineComponent({
     };
   },
   async created() {
-    const { fromCopyId, projectId, clusterId, inferenceName, workloadFormName } = this.$route.query;
+    const { fromCopyId, projectId, clusterId, inferenceName, workloadFormName, serverType } = this.$route.query;
+    const selectedServerType = this.parseServerType(serverType);
 
     try {
       const distributedState = this.inferenceStore.getDistributedState();
@@ -248,6 +250,7 @@ export default defineComponent({
           projectId?.toString(),
           clusterId?.toString(),
           inferenceName?.toString(),
+          selectedServerType,
         );
         this.isCopyFlow = !!fromCopyId;
       }
@@ -390,6 +393,12 @@ export default defineComponent({
     },
   },
   methods: {
+    parseServerType(value: unknown): EServerType | undefined {
+      const candidate = Array.isArray(value) ? value[0] : value;
+      return typeof candidate === "string" && Object.values(EServerType).includes(candidate as EServerType)
+        ? (candidate as EServerType)
+        : undefined;
+    },
     onStepClicked(payload: { step: IRunaiWizardLayoutStep; name: string }): void {
       this.wizardLayout.goToStep(payload.name);
     },
@@ -428,7 +437,13 @@ export default defineComponent({
       };
       return await workloadService.getUnifiedWorkload(request);
     },
-    async initModel(workloadId?: string, projectId?: string, clusterId?: string, workloadName?: string): Promise<void> {
+    async initModel(
+      workloadId?: string,
+      projectId?: string,
+      clusterId?: string,
+      workloadName?: string,
+      serverType?: EServerType,
+    ): Promise<void> {
       try {
         const unifiedWorkload: UnifiedWorkload = await this.getUnifiedHybridWorkload({
           workloadId,
@@ -448,6 +463,7 @@ export default defineComponent({
           uiModel,
           this.authStore.isSSO,
           this.policy,
+          serverType,
         );
 
         if (projectId) this.leaderContext.hybridWorkloadModel.value.projectId = projectId;
