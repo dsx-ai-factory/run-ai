@@ -106,6 +106,11 @@ export const workloadPreemptibilityOptions = [
   { label: "Non-preemptible", value: Preemptibility.NonPreemptible },
 ];
 
+export const getWorkloadPreemptibilityOptions = (supportSemiPreemptibility: boolean) =>
+  workloadPreemptibilityOptions.filter(
+    (option) => supportSemiPreemptibility || option.value !== Preemptibility.SemiPreemptible,
+  );
+
 export enum EDistributedReplicaType {
   Master = "Master",
   Worker = "Worker",

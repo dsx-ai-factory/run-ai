@@ -146,6 +146,7 @@ import {
   MIN_CLUSTER_VERSION_FOR_INFERENCE_REQUEST_TIMEOUT,
   MIN_CLUSTER_VERSION_FOR_INFERENCE_VOLUME,
   MIN_CLUSTER_VERSION_FOR_PREEMPTIBILITY,
+  MIN_CLUSTER_VERSION_FOR_SEMI_PREEMPTIBILITY,
 } from "@/common/version.constant";
 import { INFERENCE_ROUTE_NAMES } from "@/router/inference.routes/inference.routes.names";
 import { WORKLOAD_ROUTE_NAMES } from "@/router/workloads.routes/workloads.routes.names";
@@ -344,6 +345,10 @@ export default defineComponent({
         showRequestTimeout: false,
         supportPriorityClass: this.supportPriorityClass,
         supportPreemptibility: this.supportPreemptibility,
+        supportSemiPreemptibility: this.clusterStore.isClusterVersionSufficient(
+          this.leaderContext.hybridWorkloadModel.value.clusterId || "",
+          MIN_CLUSTER_VERSION_FOR_SEMI_PREEMPTIBILITY,
+        ),
       };
     },
     policyData(): IDistributedInferenceSubmitFormPolicy | undefined {

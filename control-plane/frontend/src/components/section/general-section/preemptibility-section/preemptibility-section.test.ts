@@ -54,6 +54,23 @@ describe("preemptibility-section.vue", () => {
       expect(options.some((opt) => opt.value === Preemptibility.NonPreemptible)).toBe(true);
     });
 
+    test("Should hide semi-preemptible when the cluster does not support it", () => {
+      preemptibilitySection = factory({ supportSemiPreemptibility: false });
+      const options = preemptibilitySection.vm.preemptibilityOptions;
+
+      expect(options).toHaveLength(2);
+      expect(options.some((option) => option.value === Preemptibility.SemiPreemptible)).toBe(false);
+    });
+
+    test("Should not select semi-preemptible when the cluster does not support it", () => {
+      preemptibilitySection = factory({
+        modelValue: Preemptibility.SemiPreemptible,
+        supportSemiPreemptibility: false,
+      });
+
+      expect(preemptibilitySection.vm.selectedPreemptibilityOption).toBeNull();
+    });
+
     test("Should compute selectedPreemptibilityOption correctly", () => {
       const selectedOption = preemptibilitySection.vm.selectedPreemptibilityOption;
       expect(selectedOption).toBeDefined();

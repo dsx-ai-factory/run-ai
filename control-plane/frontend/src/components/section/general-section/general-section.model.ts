@@ -38,6 +38,7 @@ export interface IWorkloadPriorityData {
   totalGpuRequest?: number;
   workloadPriorities?: ClusterPriority[];
   supportPriorityClass?: boolean;
+  supportSemiPreemptibility?: boolean;
 }
 
 export interface IOverrideHints {
