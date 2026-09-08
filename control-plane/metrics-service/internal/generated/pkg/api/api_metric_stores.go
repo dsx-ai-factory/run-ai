@@ -36,11 +36,6 @@ import (
 type MetricStoresAPIController struct {
 	service MetricStoresAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -56,10 +51,13 @@ type MetricStoresAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *MetricStoresAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *MetricStoresAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -152,7 +150,7 @@ func (c *MetricStoresAPIController) Routes() Routes {
 func (c *MetricStoresAPIController) GetMetricStores(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var overrideTenantIdParam int32
@@ -162,7 +160,7 @@ func (c *MetricStoresAPIController) GetMetricStores(w http.ResponseWriter, r *ht
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "overrideTenantId", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "overrideTenantId", Err: err}, nil, nil)
 			return
 		}
 
@@ -172,7 +170,7 @@ func (c *MetricStoresAPIController) GetMetricStores(w http.ResponseWriter, r *ht
 	result, err := c.service.GetMetricStores(r.Context(), overrideTenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -225,34 +223,35 @@ func (c *MetricStoresAPIController) GetMetricStores(w http.ResponseWriter, r *ht
 func (c *MetricStoresAPIController) CreateMetricStore(w http.ResponseWriter, r *http.Request) {
 	var metricStoreParam MetricStore
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&metricStoreParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertMetricStoreRequired(metricStoreParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertMetricStoreConstraints(metricStoreParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateMetricStore(r.Context(), metricStoreParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -305,7 +304,7 @@ func (c *MetricStoresAPIController) CreateMetricStore(w http.ResponseWriter, r *
 func (c *MetricStoresAPIController) DeleteMetricStores(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var overrideTenantIdParam int32
@@ -315,7 +314,7 @@ func (c *MetricStoresAPIController) DeleteMetricStores(w http.ResponseWriter, r 
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "overrideTenantId", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "overrideTenantId", Err: err}, nil, nil)
 			return
 		}
 
@@ -325,7 +324,7 @@ func (c *MetricStoresAPIController) DeleteMetricStores(w http.ResponseWriter, r 
 	result, err := c.service.DeleteMetricStores(r.Context(), overrideTenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

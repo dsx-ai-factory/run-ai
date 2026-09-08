@@ -49,7 +49,7 @@ func TestExtractRealmNameUnauthorized_SelfHostedHappyFlow(t *testing.T) {
 
 func TestExtractRealmNameUnauthorized_SaaSHappyFlow(t *testing.T) {
 	req, err := http.NewRequest(REQUEST_METHOD, MOCK_REQ_URL, nil)
-	req.Host = "test.run.ai"
+	req.Host = "mock-q7z3k.example.com"
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,7 +71,7 @@ func TestExtractTenantIdUnauthorized_HappyFlow(t *testing.T) {
 	req, err := http.NewRequest(REQUEST_METHOD, MOCK_REQ_URL, nil)
 	contextWithRealmName := context.WithValue(req.Context(), utils.AuthRealmKey, "test")
 	req = req.WithContext(contextWithRealmName)
-	req.Host = "test.run.ai"
+	req.Host = "mock-q7z3k.example.com"
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,7 +92,7 @@ func TestExtractTenantIdUnauthorized_HappyFlow(t *testing.T) {
 
 func TestExtractTenantIdUnauthorized_NoRealmOnCtx(t *testing.T) {
 	req, err := http.NewRequest(REQUEST_METHOD, MOCK_REQ_URL, nil)
-	req.Host = "test.run.ai"
+	req.Host = "mock-q7z3k.example.com"
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +112,7 @@ func TestExtractTenantIdUnauthorized_ErrorGetRealm(t *testing.T) {
 	req, err := http.NewRequest(REQUEST_METHOD, MOCK_REQ_URL, nil)
 	contextWithRealmName := context.WithValue(req.Context(), utils.AuthRealmKey, "test")
 	req = req.WithContext(contextWithRealmName)
-	req.Host = "test.run.ai"
+	req.Host = "mock-q7z3k.example.com"
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -133,7 +133,7 @@ func TestExtractTenantIdUnauthorized_NilRealm(t *testing.T) {
 	req, err := http.NewRequest(REQUEST_METHOD, MOCK_REQ_URL, nil)
 	contextWithRealmName := context.WithValue(req.Context(), utils.AuthRealmKey, "test")
 	req = req.WithContext(contextWithRealmName)
-	req.Host = "test.run.ai"
+	req.Host = "mock-q7z3k.example.com"
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -154,7 +154,7 @@ func TestExtractTenantIdUnauthorized_NoTenantIdOnRealm(t *testing.T) {
 	req, err := http.NewRequest(REQUEST_METHOD, MOCK_REQ_URL, nil)
 	contextWithRealmName := context.WithValue(req.Context(), utils.AuthRealmKey, "test")
 	req = req.WithContext(contextWithRealmName)
-	req.Host = "test.run.ai"
+	req.Host = "mock-q7z3k.example.com"
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -422,7 +422,7 @@ func produceAndDownloadLogs(t *testing.T, requiredSubject, tenant, fileType stri
 func getAuditLogsFromApi(tenantId string, start *time.Time, filters []string, samples int, maxRetries int, expectedTotalCount int) (*openapi.GetAuditLogs200Response, error) {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, runaictx.CfTenantId, tenantId)
-	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@run.ai")
+	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@example.com")
 	logs := client.AuditLogsAPI.GetAuditLogs(ctx).
 		Start(time.Now().UTC().Add(-24 * time.Hour)).
 		End(time.Now().UTC().Add(24 * time.Hour)).
@@ -458,7 +458,7 @@ func getAuditLogsFromApi(tenantId string, start *time.Time, filters []string, sa
 func downloadAuditLogsFromApi(tenantId string, fileType string, filters []string) (*http.Response, error) {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, runaictx.CfTenantId, tenantId)
-	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@run.ai")
+	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@example.com")
 	return client.AuditLogsAPI.DownloadAuditLogs(ctx).
 		FileType(fileType).
 		Start(time.Now().Add(-24 * time.Hour).UTC()).

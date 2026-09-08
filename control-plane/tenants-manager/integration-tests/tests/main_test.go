@@ -43,7 +43,7 @@ var (
 	natsPass   = getenv("NATS_PASSWORD", "abc123")
 	hostUrl    = fmt.Sprintf("http://%s:%s", host, port)
 
-	TestUserName = "test@run.ai"
+	TestUserName = "test@example.com"
 
 	OpenapiClient   *openapi.APIClient
 	TestStepsClient *TestSteps

@@ -448,8 +448,8 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 						Name:        "notebook-a",
 						ExternalUrl: convutils.Ref("http://url.com/"),
 						AuthorizedUsers: &[]string{
-							"test@run.ai",
-							"another-user@run.ai",
+							"test@example.com",
+							"another-user@example.com",
 						},
 					},
 				},
@@ -495,8 +495,8 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 						Name:        "notebook-a",
 						ExternalUrl: convutils.Ref("http://url.com/"),
 						AuthorizedUsers: &[]string{
-							"test@run.ai",
-							"another-user@run.ai",
+							"test@example.com",
+							"another-user@example.com",
 						},
 					},
 				},
@@ -540,8 +540,8 @@ var _ = Describe("Test Workspace, Training and Inference Services", func() {
 					{
 						Name: "notebook-a",
 						AuthorizedUsers: &[]string{
-							"test@run.ai",
-							"another-user@run.ai",
+							"test@example.com",
+							"another-user@example.com",
 						},
 					},
 				},

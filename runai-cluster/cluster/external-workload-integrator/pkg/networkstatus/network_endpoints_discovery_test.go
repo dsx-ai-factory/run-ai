@@ -2100,7 +2100,7 @@ var _ = Describe("extractEndpointsFromService", func() {
 	BeforeEach(func() {
 		ctx = context.Background()
 		scheme = testScheme()
-		os.Setenv(config.EnvVarClusterDomain, "https://app.run.ai:443")
+		os.Setenv(config.EnvVarClusterDomain, "https://mock-q7z3k.example.com:443")
 	})
 
 	AfterEach(func() {
@@ -2172,7 +2172,7 @@ var _ = Describe("extractEndpointsFromService", func() {
 					Spec: networkingv1.IngressSpec{
 						Rules: []networkingv1.IngressRule{
 							{
-								Host: "app.run.ai",
+								Host: "mock-q7z3k.example.com",
 								IngressRuleValue: networkingv1.IngressRuleValue{
 									HTTP: &networkingv1.HTTPIngressRuleValue{
 										Paths: []networkingv1.HTTPIngressPath{
@@ -2302,12 +2302,12 @@ var _ = Describe("extractEndpointsFromService", func() {
 
 		// Endpoint 2: Ingress
 		Expect(allEndpoints[2].SourceType).To(Equal(v1alpha1.ExternalEndpointIngressSource))
-		Expect(allEndpoints[2].Host).To(Equal("app.run.ai"))
+		Expect(allEndpoints[2].Host).To(Equal("mock-q7z3k.example.com"))
 		Expect(allEndpoints[2].Path).To(Equal("/"))
 		Expect(allEndpoints[2].TlsEnabled).To(HaveValue(BeFalse()))
 		Expect(allEndpoints[2].Protocol).To(Equal("http"))
 		Expect(allEndpoints[2].Port).To(Equal("443"))
-		Expect(allEndpoints[2].Url).To(Equal("http://app.run.ai:443/"))
+		Expect(allEndpoints[2].Url).To(Equal("http://mock-q7z3k.example.com:443/"))
 		Expect(allEndpoints[2].SourceRef).To(Equal(v1alpha1.ExternalEndpointSourceRef{Kind: "Ingress", Name: "ing"}))
 
 		// Endpoint 3: HTTPRoute

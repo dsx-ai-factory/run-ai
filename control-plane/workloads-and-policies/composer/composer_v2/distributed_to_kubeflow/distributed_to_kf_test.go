@@ -361,7 +361,7 @@ var ComposerTests = append([]TableEntry{
 		framework:       workloadsApi.DISTRIBUTEDFRAMEWORK_PY_TORCH,
 		workerSpecFname: "basic",
 		expectedFname:   "basic_ws_email_requester_pytorch",
-		requester:       "test@run.ai",
+		requester:       "test@example.com",
 	}),
 
 	Entry("backoffLimit", ComposerTest{
@@ -1084,7 +1084,7 @@ func RunComposerTest(testDetails ComposerTest, basePath string) {
 		distGPUNetworkAcceleration: testDetails.clusterGPUNetworkAcceleration,
 	}
 	distComposer.WithClusterStorageConfig(
-		testClusterStorageConfigWithOpts("https://test.run.ai", testDetails.clusterSubdomain, clusterOpts))
+		testClusterStorageConfigWithOpts("https://mock-q7z3k.example.com", testDetails.clusterSubdomain, clusterOpts))
 
 	hasMasterReplica := !testDetails.noMaster
 	actualResults.DistributedTarget = NewMinimalDistributedTarget(testDetails.framework, hasMasterReplica)

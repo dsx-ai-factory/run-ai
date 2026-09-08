@@ -1,7 +1,7 @@
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend
+The aggregated API  of Run:AI backend 
 
 API version: 1.5.1
 */
@@ -19,14 +19,15 @@ import (
 	"strings"
 )
 
+
 // DistributedApiService DistributedApi service
 type DistributedApiService service
 
 type ApiDeleteDistributedRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService *DistributedApiService
-	clusterId  string
-	id         string
+	clusterId string
+	id string
 }
 
 func (r ApiDeleteDistributedRequest) Execute() (*http.Response, error) {
@@ -36,26 +37,26 @@ func (r ApiDeleteDistributedRequest) Execute() (*http.Response, error) {
 /*
 DeleteDistributed Delete a distributed
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterId Unique identifier of the cluster
-	@param id
-	@return ApiDeleteDistributedRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param clusterId Unique identifier of the cluster
+ @param id
+ @return ApiDeleteDistributedRequest
 */
 func (a *DistributedApiService) DeleteDistributed(ctx context.Context, clusterId string, id string) ApiDeleteDistributedRequest {
 	return ApiDeleteDistributedRequest{
 		ApiService: a,
-		ctx:        ctx,
-		clusterId:  clusterId,
-		id:         id,
+		ctx: ctx,
+		clusterId: clusterId,
+		id: id,
 	}
 }
 
 // Execute executes the request
 func (a *DistributedApiService) DeleteDistributedExecute(r ApiDeleteDistributedRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodDelete
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DistributedApiService.DeleteDistributed")
@@ -156,9 +157,9 @@ func (a *DistributedApiService) DeleteDistributedExecute(r ApiDeleteDistributedR
 }
 
 type ApiSyncDistributedStatusRequest struct {
-	ctx            context.Context
-	ApiService     *DistributedApiService
-	clusterId      string
+	ctx context.Context
+	ApiService *DistributedApiService
+	clusterId string
 	workloadStatus *[]WorkloadStatus
 }
 
@@ -176,24 +177,25 @@ SyncDistributedStatus Sync distributed status
 
 Sync the status of all distributed from k8s cluster to Run:AI control plane
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterId Unique identifier of the cluster
-	@return ApiSyncDistributedStatusRequest
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param clusterId Unique identifier of the cluster
+ @return ApiSyncDistributedStatusRequest
 */
 func (a *DistributedApiService) SyncDistributedStatus(ctx context.Context, clusterId string) ApiSyncDistributedStatusRequest {
 	return ApiSyncDistributedStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		clusterId:  clusterId,
+		ctx: ctx,
+		clusterId: clusterId,
 	}
 }
 
 // Execute executes the request
 func (a *DistributedApiService) SyncDistributedStatusExecute(r ApiSyncDistributedStatusRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DistributedApiService.SyncDistributedStatus")
@@ -259,13 +261,13 @@ func (a *DistributedApiService) SyncDistributedStatusExecute(r ApiSyncDistribute
 			newErr.model = v
 			return localVarHTTPResponse, newErr
 		}
-		var v Error
-		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-		if err != nil {
-			newErr.error = err.Error()
-			return localVarHTTPResponse, newErr
-		}
-		newErr.model = v
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.model = v
 		return localVarHTTPResponse, newErr
 	}
 
@@ -273,9 +275,9 @@ func (a *DistributedApiService) SyncDistributedStatusExecute(r ApiSyncDistribute
 }
 
 type ApiUpdateDistributedStatusRequest struct {
-	ctx            context.Context
-	ApiService     *DistributedApiService
-	clusterId      string
+	ctx context.Context
+	ApiService *DistributedApiService
+	clusterId string
 	workloadStatus *WorkloadStatus
 }
 
@@ -291,24 +293,24 @@ func (r ApiUpdateDistributedStatusRequest) Execute() (*http.Response, error) {
 /*
 UpdateDistributedStatus Update distributed status
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterId Unique identifier of the cluster
-	@return ApiUpdateDistributedStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param clusterId Unique identifier of the cluster
+ @return ApiUpdateDistributedStatusRequest
 */
 func (a *DistributedApiService) UpdateDistributedStatus(ctx context.Context, clusterId string) ApiUpdateDistributedStatusRequest {
 	return ApiUpdateDistributedStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		clusterId:  clusterId,
+		ctx: ctx,
+		clusterId: clusterId,
 	}
 }
 
 // Execute executes the request
 func (a *DistributedApiService) UpdateDistributedStatusExecute(r ApiUpdateDistributedStatusRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPut
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DistributedApiService.UpdateDistributedStatus")

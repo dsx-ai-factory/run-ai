@@ -82,7 +82,7 @@ var _ = Describe("RBAC Rules Test", func() {
 			authMock = testing.NewRandomsBasedAuthMockClient(testParams.randoms)
 			authorization.SetMock(authMock)
 			org_unit.SetMock(org_unit.NewSimpleMock(testParams.randoms))
-			ctx = setContext(testParams.randoms.TenantIdStr, "test@run.ai")
+			ctx = setContext(testParams.randoms.TenantIdStr, "test@example.com")
 
 			assetMeta := api.AssetMeta{
 				Id:    uuid.NewString(),

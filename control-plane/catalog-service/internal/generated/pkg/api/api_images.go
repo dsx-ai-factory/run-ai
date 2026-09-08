@@ -37,11 +37,6 @@ import (
 type ImagesAPIController struct {
 	service ImagesAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -57,10 +52,13 @@ type ImagesAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *ImagesAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *ImagesAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -158,12 +156,12 @@ func (c *ImagesAPIController) Routes() Routes {
 func (c *ImagesAPIController) ListImages(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	registryIntegrationIdParam := chi.URLParam(r, "RegistryIntegrationId")
 	if registryIntegrationIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"RegistryIntegrationId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"RegistryIntegrationId"}, nil, nil)
 		return
 	}
 	var searchParam string
@@ -183,7 +181,7 @@ func (c *ImagesAPIController) ListImages(w http.ResponseWriter, r *http.Request)
 	result, err := c.service.ListImages(r.Context(), registryIntegrationIdParam, searchParam, assetIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -236,12 +234,12 @@ func (c *ImagesAPIController) ListImages(w http.ResponseWriter, r *http.Request)
 func (c *ImagesAPIController) GetImageTags(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	registryIntegrationIdParam := chi.URLParam(r, "RegistryIntegrationId")
 	if registryIntegrationIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"RegistryIntegrationId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"RegistryIntegrationId"}, nil, nil)
 		return
 	}
 	var imageNameParam string
@@ -250,7 +248,7 @@ func (c *ImagesAPIController) GetImageTags(w http.ResponseWriter, r *http.Reques
 
 		imageNameParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "ImageName"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "ImageName"}, nil, nil)
 		return
 	}
 	var assetIdParam string
@@ -263,7 +261,7 @@ func (c *ImagesAPIController) GetImageTags(w http.ResponseWriter, r *http.Reques
 	result, err := c.service.GetImageTags(r.Context(), registryIntegrationIdParam, imageNameParam, assetIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
