@@ -12,11 +12,9 @@ import (
 	"net/http"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/generated/pkg/api"
-	authorization_config "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
 	querydbenrich "github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi/dbenrich"
-	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
@@ -148,25 +146,6 @@ func rolePermissionsFromPermissions(permissions []*models.Permission, permission
 	return rolePermissions
 }
 
-func findPermissionsToDelete(requestedResourceTypes []api.ResourceType, currentPermissions []*models.Permission) []models.Permission {
-	permissionsToDelete := []models.Permission{}
-	permissionsMap := map[string]bool{}
-
-	for _, requestedResourceType := range requestedResourceTypes {
-		permissionsMap[string(requestedResourceType)] = true
-	}
-	for _, currentPermission := range currentPermissions {
-		if _, found := permissionsMap[string(currentPermission.ResourceType)]; !found {
-			permissionsToDelete = append(permissionsToDelete, models.Permission{
-				RoleID:       currentPermission.RoleID,
-				ResourceType: currentPermission.ResourceType,
-			})
-		}
-	}
-
-	return permissionsToDelete
-}
-
 func findRolePermissionsToDelete(resourceTypes []api.ResourceType, rolePermissions []models.RolePermission, permissionSetId uuid.UUID) []models.RolePermission {
 	permissionsToDelete := []models.RolePermission{}
 	permissionsMap := map[string]bool{}
@@ -186,52 +165,6 @@ func findRolePermissionsToDelete(resourceTypes []api.ResourceType, rolePermissio
 	return permissionsToDelete
 }
 
-func DbUpdateRole(ctx context.Context, tenantId string, roleId int32, roleSpec models.Role) (*models.Role, *api.Error) {
-	if config.Get[*authorization_config.General]().UsePermissionSets {
-		return DbUpdateRolePS(ctx, tenantId, roleId, roleSpec)
-	}
-	return DbUpdateRoleNoPS(ctx, tenantId, roleId, roleSpec)
-}
-
-func DbUpdateRoleNoPS(ctx context.Context, tenantId string, roleId int32, roleSpec models.Role) (*models.Role, *api.Error) {
-	dbErr := api.NewError(http.StatusInternalServerError, "Failed to update role", nil)
-
-	existingRole, err := dbGetRoleById(ctx, tenantId, uint(roleId), nil, nil)
-	if err != nil {
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to retrieve role %d. err: %+v", roleId, err)
-		return nil, err
-	}
-
-	setStaticData(&roleSpec, existingRole)
-
-	transactionErr := runaidb.DB().WithContext(ctx).Session(&gorm.Session{FullSaveAssociations: true}).Transaction(func(tx orm.DB) error {
-		if _, err := tx.
-			Where("tenant_id = ?", tenantId).
-			Where("id = ?", roleId).
-			Save(&roleSpec); err != nil {
-			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to update role %d: %v", roleId, err)
-			return err
-		}
-
-		permissionsToDelete := findPermissionsToDelete(api.AllowedResourceTypeEnumValues, existingRole.Permissions)
-		for _, permission := range permissionsToDelete {
-			if _, err := tx.
-				Where("role_id = ?", permission.RoleID).
-				Where("resource_type = ?", permission.ResourceType).
-				Delete(&permission); err != nil {
-				logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to delete permission of role id %d on resource type %s. err: %+v", permission.RoleID, permission.ResourceType, err)
-				return err
-			}
-		}
-		return nil
-	})
-	if transactionErr != nil {
-		return nil, dbErr.WithDetails(transactionErr)
-	}
-
-	return &roleSpec, nil
-}
-
 func getRoleForUpdateAndValidate(ctx context.Context, tenantId string, roleId int32, roleSpec models.Role) (*models.Role, *api.Error) {
 	existingRole, err := dbGetRoleById(ctx, tenantId, uint(roleId), nil, nil)
 	if err != nil {
@@ -246,7 +179,7 @@ func getRoleForUpdateAndValidate(ctx context.Context, tenantId string, roleId in
 	return existingRole, nil
 }
 
-func DbUpdateRolePS(ctx context.Context, tenantId string, roleId int32, roleSpec models.Role) (*models.Role, *api.Error) {
+func DbUpdateRole(ctx context.Context, tenantId string, roleId int32, roleSpec models.Role) (*models.Role, *api.Error) {
 	dbErr := api.NewError(http.StatusInternalServerError, "Failed to update role", nil)
 
 	existingRole, err := getRoleForUpdateAndValidate(ctx, tenantId, roleId, roleSpec)
@@ -388,9 +321,7 @@ func DbCreateRole(ctx context.Context, subjectId string, roleSpec models.Role) (
 
 	tx := runaidb.DB().WithContext(ctx)
 	var resultErr error
-	if config.Get[*authorization_config.General]().UsePermissionSets && len(roleSpec.Permissions) > 0 &&
-		(roleSpec.PermissionSets == nil || len(*roleSpec.PermissionSets) == 0) {
-
+	if len(roleSpec.Permissions) > 0 && (roleSpec.PermissionSets == nil || len(*roleSpec.PermissionSets) == 0) {
 		roleSpec.NoPermissionSet = ptr.To(true)
 		rolePermissions := []models.RolePermission{}
 		for _, permission := range roleSpec.Permissions {
@@ -434,7 +365,7 @@ func DbCreateRole(ctx context.Context, subjectId string, roleSpec models.Role) (
 	}
 
 	// Reload the role with permission sets and their permissions populated
-	if config.Get[*authorization_config.General]().UsePermissionSets && !*roleSpec.NoPermissionSet {
+	if !*roleSpec.NoPermissionSet {
 		reloadErr := tx.
 			Preload("PermissionSets").
 			Preload("PermissionSets.Permissions").
@@ -450,41 +381,58 @@ func DbCreateRole(ctx context.Context, subjectId string, roleSpec models.Role) (
 func DbDeleteRole(ctx context.Context, tenantId string, roleId uint) *api.Error {
 	dbErr := api.NewError(http.StatusInternalServerError, "Failed to delete role", nil)
 
-	tx := runaidb.DB().WithContext(ctx)
-
 	role, err := DbGetRoleById(ctx, tenantId, roleId, nil)
 	if err != nil {
 		return err
 	}
 
-	if config.Get[*authorization_config.General]().UsePermissionSets {
+	// the association clear, the role deletion and the internal permission set cleanup must
+	// either all apply or none of them, otherwise a failure leaves the role without its
+	// permission sets or leaves an orphan internal permission set behind.
+	var apiErr *api.Error
+	transactionErr := runaidb.DB().WithContext(ctx).Transaction(func(tx orm.DB) error {
 		clearErr := tx.Actual().Model(&role).Association(PermissionSetsField).Clear()
 		if clearErr != nil {
-			return api.NewError(http.StatusInternalServerError, "Failed to delete role", clearErr)
+			apiErr = api.NewError(http.StatusInternalServerError, "Failed to delete role", clearErr)
+			return apiErr
 		}
+
+		rowsAffected, deleteErr := tx.
+			Where("tenant_id = ?", tenantId).
+			Delete(&models.Role{}, roleId)
+		if deleteErr != nil || rowsAffected != 1 {
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to delete role from db: error= %v, rowsAffected= %d", deleteErr, rowsAffected)
+			if deleteErr != nil {
+				apiErr = dbErr.WithDetails(deleteErr)
+				return apiErr
+			}
+			if rowsAffected == 0 {
+				dbErr.Code = http.StatusNotFound
+				dbErr.Details = errDetailsResourceNotFound
+			}
+			apiErr = dbErr
+			return apiErr
+		}
+
+		if *role.NoPermissionSet {
+			_, err := tx.
+				Where("name = ?", getInternalPermissionSetNameFromRole(role.Name, &tenantId)).
+				Where("internal = true").
+				Delete(&models.PermissionSet{})
+			if err != nil {
+				apiErr = dbErr.WithDetails(err)
+				return apiErr
+			}
+		}
+
+		return nil
+	})
+	if apiErr != nil {
+		return apiErr
 	}
-	rowsAffected, deleteErr := tx.
-		Where("tenant_id = ?", tenantId).
-		Delete(&models.Role{}, roleId)
-	if deleteErr != nil || rowsAffected != 1 {
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to delete role from db: error= %v, rowsAffected= %d", deleteErr, rowsAffected)
-		if deleteErr != nil {
-			return dbErr.WithDetails(deleteErr)
-		}
-		if rowsAffected == 0 {
-			dbErr.Code = http.StatusNotFound
-			dbErr.Details = errDetailsResourceNotFound
-		}
-		return dbErr
-	}
-	if config.Get[*authorization_config.General]().UsePermissionSets && *role.NoPermissionSet {
-		_, err := tx.
-			Where("name = ?", getInternalPermissionSetNameFromRole(role.Name, &tenantId)).
-			Where("internal = true").
-			Delete(&models.PermissionSet{})
-		if err != nil {
-			return dbErr.WithDetails(err)
-		}
+	if transactionErr != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to delete role %d: %v", roleId, transactionErr)
+		return dbErr.WithDetails(transactionErr)
 	}
 
 	return nil
@@ -507,19 +455,11 @@ func DbGetRoles(
 
 	tx := runaidb.DB().WithContext(ctx)
 	roles := &[]models.Role{}
-	var query orm.DB
-	if config.Get[*authorization_config.General]().UsePermissionSets {
-		query = tx.
-			Preload("PermissionSets").
-			Preload("PermissionSets.Permissions").
-			Where("(scope_type = ?) OR (scope_type = ? AND scope_id = ?)", models.ROLE_SCOPE_SYSTEM, models.ROLE_SCOPE_TENANT, tenantId).
-			Where("role_type <> ?", roleTypeFilter)
-	} else {
-		query = tx.
-			Preload("Permissions").
-			Where("(scope_type = ?) OR (scope_type = ? AND scope_id = ?)", models.ROLE_SCOPE_SYSTEM, models.ROLE_SCOPE_TENANT, tenantId).
-			Where("role_type <> ?", roleTypeFilter)
-	}
+	query := tx.
+		Preload("PermissionSets").
+		Preload("PermissionSets.Permissions").
+		Where("(scope_type = ?) OR (scope_type = ? AND scope_id = ?)", models.ROLE_SCOPE_SYSTEM, models.ROLE_SCOPE_TENANT, tenantId).
+		Where("role_type <> ?", roleTypeFilter)
 	query = query.WithEnricher(querydbenrich.Filters(filterBy))
 	if !includeInternal {
 		query = query.Where("internal_only = false")
@@ -559,9 +499,7 @@ func DbGetRoles(
 		} else {
 			(*roles)[i].EffectiveEnabled = ptr.To((*roles)[i].Enabled)
 		}
-		if config.Get[*authorization_config.General]().UsePermissionSets {
-			(*roles)[i].Permissions = getAggregatedPermissions((*roles)[i].PermissionSets)
-		}
+		(*roles)[i].Permissions = getAggregatedPermissions((*roles)[i].PermissionSets)
 	}
 
 	return roles, nil
@@ -621,19 +559,11 @@ func dbGetRoleById(ctx context.Context, tenantId string, roleId uint, internalOn
 
 	tx := runaidb.DB().WithContext(ctx)
 	role := &models.Role{}
-	var query orm.DB
-	if config.Get[*authorization_config.General]().UsePermissionSets {
-		query = tx.
-			Preload("PermissionSets").
-			Preload("PermissionSets.Permissions").
-			Where("(scope_type = ?) OR (scope_type = ? AND scope_id = ?)", models.ROLE_SCOPE_SYSTEM, models.ROLE_SCOPE_TENANT, tenantId).
-			Where("role_type <> ?", roleTypeFilter)
-	} else {
-		query = tx.
-			Preload("Permissions").
-			Where("(scope_type = ?) OR (scope_type = ? AND scope_id = ?)", models.ROLE_SCOPE_SYSTEM, models.ROLE_SCOPE_TENANT, tenantId).
-			Where("role_type <> ?", roleTypeFilter)
-	}
+	query := tx.
+		Preload("PermissionSets").
+		Preload("PermissionSets.Permissions").
+		Where("(scope_type = ?) OR (scope_type = ? AND scope_id = ?)", models.ROLE_SCOPE_SYSTEM, models.ROLE_SCOPE_TENANT, tenantId).
+		Where("role_type <> ?", roleTypeFilter)
 	if internalOnly != nil {
 		query = query.
 			Where("internal_only = ?", *internalOnly)
@@ -655,9 +585,7 @@ func dbGetRoleById(ctx context.Context, tenantId string, roleId uint, internalOn
 	if dr.RoleId == int64(roleId) {
 		role.EffectiveEnabled = ptr.To(false)
 	}
-	if config.Get[*authorization_config.General]().UsePermissionSets {
-		role.Permissions = getAggregatedPermissions(role.PermissionSets)
-	}
+	role.Permissions = getAggregatedPermissions(role.PermissionSets)
 
 	return role, nil
 }

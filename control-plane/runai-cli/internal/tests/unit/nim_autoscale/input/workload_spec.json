@@ -6,7 +6,7 @@
     "workloadV2Id": "5fa3c7f9-1089-4225-93e2-16d7f6c4c4a6",
     "createdAt": "2026-03-10T16:41:36Z",
     "updatedAt": "2026-03-10T16:43:17Z",
-    "submittedBy": "test@run.ai",
+    "submittedBy": "test@example.com",
     "category": "Deploy",
     "priorityClass": "very-high",
     "preemptibility": "non-preemptible"

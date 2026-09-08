@@ -21,9 +21,9 @@ type ScopeType string
 
 // List of ScopeType
 const (
-	SCOPETYPE_CLUSTER    ScopeType = "cluster"
+	SCOPETYPE_CLUSTER ScopeType = "cluster"
 	SCOPETYPE_DEPARTMENT ScopeType = "department"
-	SCOPETYPE_PROJECT    ScopeType = "project"
+	SCOPETYPE_PROJECT ScopeType = "project"
 )
 
 // All allowed values of ScopeType enum
@@ -111,3 +111,4 @@ func (v *NullableScopeType) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+

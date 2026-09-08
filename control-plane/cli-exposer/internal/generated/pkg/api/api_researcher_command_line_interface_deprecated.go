@@ -37,11 +37,6 @@ import (
 type ResearcherCommandLineInterfaceDeprecatedAPIController struct {
 	service ResearcherCommandLineInterfaceDeprecatedAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -57,10 +52,13 @@ type ResearcherCommandLineInterfaceDeprecatedAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *ResearcherCommandLineInterfaceDeprecatedAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *ResearcherCommandLineInterfaceDeprecatedAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -245,18 +243,18 @@ func (c *ResearcherCommandLineInterfaceDeprecatedAPIController) Routes() Routes 
 func (c *ResearcherCommandLineInterfaceDeprecatedAPIController) GetBinaryDeprecated(w http.ResponseWriter, r *http.Request) {
 	operatingSystemParam := chi.URLParam(r, "operatingSystem")
 	if operatingSystemParam == "" {
-		c.errorHandler(w, r, &RequiredError{"operatingSystem"}, nil)
+		c.errorHandler(w, r, &RequiredError{"operatingSystem"}, nil, nil)
 		return
 	}
 	architectureParam := chi.URLParam(r, "architecture")
 	if architectureParam == "" {
-		c.errorHandler(w, r, &RequiredError{"architecture"}, nil)
+		c.errorHandler(w, r, &RequiredError{"architecture"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetBinaryDeprecated(r.Context(), operatingSystemParam, architectureParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -312,7 +310,7 @@ func (c *ResearcherCommandLineInterfaceDeprecatedAPIController) GetInstallerLinu
 	result, err := c.service.GetInstallerLinuxCommandsDeprecated(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -367,7 +365,7 @@ func (c *ResearcherCommandLineInterfaceDeprecatedAPIController) GetInstallerLinu
 	result, err := c.service.GetInstallerLinuxDeprecated(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -423,7 +421,7 @@ func (c *ResearcherCommandLineInterfaceDeprecatedAPIController) GetInstallerMacC
 	result, err := c.service.GetInstallerMacCommandsDeprecated(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -478,7 +476,7 @@ func (c *ResearcherCommandLineInterfaceDeprecatedAPIController) GetInstallerMacD
 	result, err := c.service.GetInstallerMacDeprecated(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -534,7 +532,7 @@ func (c *ResearcherCommandLineInterfaceDeprecatedAPIController) GetInstallerUnix
 	result, err := c.service.GetInstallerUnixCommandsDeprecated(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -589,7 +587,7 @@ func (c *ResearcherCommandLineInterfaceDeprecatedAPIController) GetInstallerUnix
 	result, err := c.service.GetInstallerUnixDeprecated(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -645,7 +643,7 @@ func (c *ResearcherCommandLineInterfaceDeprecatedAPIController) GetInstallerWind
 	result, err := c.service.GetInstallerWindowsCommandsDeprecated(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -699,13 +697,13 @@ func (c *ResearcherCommandLineInterfaceDeprecatedAPIController) GetInstallerWind
 func (c *ResearcherCommandLineInterfaceDeprecatedAPIController) GetManualDocumentDeprecated(w http.ResponseWriter, r *http.Request) {
 	documentNameParam := chi.URLParam(r, "documentName")
 	if documentNameParam == "" {
-		c.errorHandler(w, r, &RequiredError{"documentName"}, nil)
+		c.errorHandler(w, r, &RequiredError{"documentName"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetManualDocumentDeprecated(r.Context(), documentNameParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -761,7 +759,7 @@ func (c *ResearcherCommandLineInterfaceDeprecatedAPIController) GetVersionDeprec
 	result, err := c.service.GetVersionDeprecated(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

@@ -9,7 +9,7 @@
   "departmentName": "default",
   "createdAt": "2026-03-10T16:49:32Z",
   "updatedAt": "2026-03-10T21:40:58Z",
-  "submittedBy": "test@run.ai",
+  "submittedBy": "test@example.com",
   "priorityClassName": "very-high",
   "priority": 150,
   "images": ["gcr.io/run-ai-lab/nim-cpu:latest"],

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Org unit
 
@@ -93,18 +95,6 @@ func NewConfiguration() *Configuration {
 		UserAgent:     "OpenAPI-Generator/1.17/go",
 		Debug:         false,
 		Servers: ServerConfigurations{
-			{
-				URL:         "https://app.run.ai",
-				Description: "No description provided",
-			},
-			{
-				URL:         "https://staging.run.ai",
-				Description: "No description provided",
-			},
-			{
-				URL:         "https://test.run.ai",
-				Description: "No description provided",
-			},
 			{
 				URL:         "http://localhost:8080",
 				Description: "No description provided",

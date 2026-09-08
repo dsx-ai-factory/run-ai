@@ -8,7 +8,7 @@
     "department": "default",
     "createdAt": "2025-12-15T08:58:28.012976Z",
     "updatedAt": "2025-12-15T08:59:24.401794Z",
-    "submittedBy": "test@run.ai",
+    "submittedBy": "test@example.com",
     "priority": "low (40)",
     "category": "Train",
     "environmentVariables": {

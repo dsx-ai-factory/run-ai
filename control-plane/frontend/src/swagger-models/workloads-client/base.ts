@@ -1,5 +1,9 @@
 /* tslint:disable */
 /* eslint-disable */
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 /**
  * WorkloadsService
  * An API for managing RunAi scheduler managed workloads.
@@ -19,7 +23,7 @@ import globalAxios from 'axios';
 import type { AxiosPromise, AxiosInstance, AxiosRequestConfig } from 'axios';
 
 
-export const BASE_PATH = "https://app.run.ai".replace(/\/+$/, "");
+export const BASE_PATH = "http://localhost:8080".replace(/\/+$/, "");
 
 /**
  *

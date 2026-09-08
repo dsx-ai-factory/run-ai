@@ -1,7 +1,7 @@
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend
+The aggregated API  of Run:AI backend 
 
 API version: 1.5.1
 */
@@ -16,7 +16,7 @@ import (
 
 // Error struct for Error
 type Error struct {
-	Code    int32  `json:"code"`
+	Code int32 `json:"code"`
 	Message string `json:"message"`
 }
 
@@ -133,3 +133,5 @@ func (v *NullableError) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

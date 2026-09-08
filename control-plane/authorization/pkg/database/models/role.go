@@ -8,10 +8,7 @@ package models
 import (
 	"strings"
 
-	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/generated/pkg/api"
-	authorization_config "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
-	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 
 	"gorm.io/gorm"
 )
@@ -46,49 +43,6 @@ type Role struct {
 	TenantId                *string          `gorm:""`
 	NoPermissionSet         *bool            `gorm:"default:true"`
 	PermissionSets          *[]PermissionSet `gorm:"many2many:role_to_permission_set;"`
-}
-
-func (r *Role) BeforeUpdate(tx *gorm.DB) (err error) {
-	if !config.Get[*authorization_config.General]().UsePermissionSets {
-		r.AddMissingResourceTypes()
-	}
-	return nil
-}
-
-func (r *Role) BeforeSave(tx *gorm.DB) (err error) {
-	if !config.Get[*authorization_config.General]().UsePermissionSets {
-		r.AddMissingResourceTypes()
-	}
-	return nil
-}
-
-func (r *Role) BeforeCreate(tx *gorm.DB) (err error) {
-	if !config.Get[*authorization_config.General]().UsePermissionSets {
-		r.AddMissingResourceTypes()
-	}
-	return nil
-}
-
-func (r *Role) AddMissingResourceTypes() (err error) {
-	permissionsMap := map[api.ResourceType]bool{}
-	for _, permission := range r.Permissions {
-		permissionsMap[permission.ResourceType] = true
-	}
-
-	for _, resourceType := range api.AllowedResourceTypeEnumValues {
-		if _, found := permissionsMap[resourceType]; !found {
-			r.Permissions = append(r.Permissions, &Permission{
-				ResourceType: resourceType,
-				Create:       false,
-				Read:         false,
-				Update:       false,
-				Delete:       false,
-				Sync:         false,
-			})
-		}
-	}
-
-	return
 }
 
 func (r *Role) AfterFind(tx *gorm.DB) (err error) {

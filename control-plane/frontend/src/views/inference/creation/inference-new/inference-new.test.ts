@@ -388,5 +388,27 @@ describe("inference-new.vue", () => {
         });
       });
     });
+
+    describe("continueToDistributed", () => {
+      it("preserves the selected server type in the distributed route", async () => {
+        wrapper = createWrapper();
+        wrapper.vm.inferenceNewModel.clusterId = "cluster-1";
+        wrapper.vm.inferenceNewModel.projectId = 42;
+        wrapper.vm.inferenceNewModel.name = "distributed-nim";
+        wrapper.vm.inferenceNewModel.serverType = EServerType.Nim;
+
+        await wrapper.vm.continueToDistributed();
+
+        expect(mockRouter.push).toHaveBeenCalledWith({
+          name: INFERENCE_ROUTE_NAMES.INFERENCE_DISTRIBUTED_EDIT,
+          query: {
+            clusterId: "cluster-1",
+            projectId: "42",
+            inferenceName: "distributed-nim",
+            serverType: EServerType.Nim,
+          },
+        });
+      });
+    });
   });
 });

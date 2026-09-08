@@ -30,8 +30,7 @@ The service is responsible for:
   legacy static roles), enabling/disabling roles, and both v1 and current role
   APIs.
 - **Permission sets & permissions** — resolving the permissions granted by a
-  role, and managing permission sets when the `use_permission_sets` capability
-  is enabled.
+  role, and managing permission sets.
 - **Authorization decisions** — evaluating whether a request is authorized for a
   given resource-type / action / resource-id (the `Evaluation` and
   `PrivilegeEscalationEvaluate` surfaces), plus computing a subject's permitted
@@ -149,16 +148,13 @@ docker-compose backing stack is required for the default `make test`.
 ## Configuration
 
 Configuration is **config-object driven**: the service registers typed config
-structs (`General`, `Server`, `SyncJob`) that are populated from built-in
+structs (`Server`, `SyncJob`) that are populated from built-in
 defaults, an optional config file, and environment-variable overrides. Any
 config key can be overridden by its uppercase environment-variable equivalent
 (nested keys joined by the configured delimiter). A representative configuration,
 trimmed to the registered structs and their defaults, is:
 
 ```yaml
-general:
-  use_permission_sets: true               # enable permission-set APIs
-
 server:
   service_port: 8080                       # HTTP listen port
   workloads_url: http://runai-backend-workloads:8080
@@ -174,8 +170,6 @@ sync_job:
   sync_job_interval_tenant_seconds: 5      # per-tenant sync interval
 ```
 
-- **`general`** — feature toggles for the authorization model (currently
-  `use_permission_sets`).
 - **`server`** — the HTTP port and the URLs of every upstream control-plane
   service the authorizer calls (workloads, org-unit-service, cluster-service,
   tenants-manager, datavolumes, temp-backend-settings), plus the `is_csp` flag.

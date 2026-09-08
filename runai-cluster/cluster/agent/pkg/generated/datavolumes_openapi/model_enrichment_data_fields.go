@@ -17,7 +17,7 @@ import (
 
 // EnrichmentDataFields struct for EnrichmentDataFields
 type EnrichmentDataFields struct {
-	ProjectName  string  `json:"projectName"`
+	ProjectName string `json:"projectName"`
 	DepartmentId *string `json:"departmentId,omitempty"`
 	// The id of the cluster.
 	ClusterId *string `json:"clusterId,omitempty"`
@@ -178,3 +178,5 @@ func (v *NullableEnrichmentDataFields) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+
