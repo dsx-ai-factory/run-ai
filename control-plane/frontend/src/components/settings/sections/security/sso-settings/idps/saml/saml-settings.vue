@@ -220,6 +220,7 @@ export default defineComponent({
         this.$emit("add-idp", this.idpFields, settingsUtil.getMappersFromIdpMapperItems(this.idpMappersItems));
       } else {
         if (this.hasChanges && (this.isValidIdpFields || !this.isNewIdp)) {
+          this.idpFields.entityId = this.idp?.samlData?.entityId;
           this.$emit("update-idp", this.getIdpData);
         }
       }
