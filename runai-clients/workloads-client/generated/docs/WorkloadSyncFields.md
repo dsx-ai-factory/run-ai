@@ -45,7 +45,7 @@ Name | Type | Description | Notes
 **ApplicationId** | Pointer to **NullableString** |  | [optional] 
 **ApplicationName** | Pointer to **NullableString** |  | [optional] 
 **Topology** | Pointer to [**NullableWorkloadSyncFieldsTopology**](WorkloadSyncFieldsTopology.md) |  | [optional] 
-**Preemptibility** | Pointer to **NullableString** |  | [optional] 
+**Preemptibility** | Pointer to [**NullableWorkloadTypePreemptibility**](WorkloadTypePreemptibility.md) |  | [optional]
 **StructureElements** | Pointer to [**[]WorkloadElement**](WorkloadElement.md) | Flat list of intermediate child elements. May be truncated if too many. | [optional] 
 **StructureElementsTotalCount** | Pointer to **NullableInt32** | Total number of structure elements before truncation. Null if no structure exists. | [optional] 
 **Endpoints** | Pointer to [**[]EndpointSync**](EndpointSync.md) |  | [optional] 
@@ -1098,20 +1098,20 @@ HasTopology returns a boolean if a field has been set.
 UnsetTopology ensures that no value is present for Topology, not even an explicit nil
 ### GetPreemptibility
 
-`func (o *WorkloadSyncFields) GetPreemptibility() string`
+`func (o *WorkloadSyncFields) GetPreemptibility() WorkloadTypePreemptibility`
 
 GetPreemptibility returns the Preemptibility field if non-nil, zero value otherwise.
 
 ### GetPreemptibilityOk
 
-`func (o *WorkloadSyncFields) GetPreemptibilityOk() (*string, bool)`
+`func (o *WorkloadSyncFields) GetPreemptibilityOk() (*WorkloadTypePreemptibility, bool)`
 
 GetPreemptibilityOk returns a tuple with the Preemptibility field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetPreemptibility
 
-`func (o *WorkloadSyncFields) SetPreemptibility(v string)`
+`func (o *WorkloadSyncFields) SetPreemptibility(v WorkloadTypePreemptibility)`
 
 SetPreemptibility sets Preemptibility field to given value.
 

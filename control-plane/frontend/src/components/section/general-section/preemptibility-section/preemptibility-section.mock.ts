@@ -18,6 +18,10 @@ export const mockPolicyRules = {
         displayed: "Preemptible Workload",
       },
       {
+        value: Preemptibility.SemiPreemptible,
+        displayed: "Semi-Preemptible Workload",
+      },
+      {
         value: Preemptibility.NonPreemptible,
         displayed: "Non-Preemptible Workload",
       },

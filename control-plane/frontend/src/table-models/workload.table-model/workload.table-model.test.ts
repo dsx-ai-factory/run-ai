@@ -10,7 +10,7 @@ import {
   deletedWorkloadIndexColumns,
   workloadIndexColumns,
 } from "./workload.table-model";
-import { Preemptibility, WorkloadSortFilterFields, type Pod } from "@/swagger-models/workloads-client";
+import { Preemptibility, WorkloadSortFilterFields, type Pod, type Workload } from "@/swagger-models/workloads-client";
 import type { ITableColumn } from "@/models/table.model";
 import { EColumnFilterType } from "@/models/filter.model";
 
@@ -226,6 +226,7 @@ describe("workloadIndexColumns", () => {
 
   test("supports filtering and sorting by all preemptibility values", () => {
     const column = allWorkloadColumnsMap.preemptible;
+    const field = column.field as (workload: Workload) => string | null | undefined;
 
     expect(column.name).toBe(WorkloadSortFilterFields.Preemptibility);
     expect(column.sortable).toBe(true);
@@ -239,5 +240,11 @@ describe("workloadIndexColumns", () => {
     expect(column.format?.(Preemptibility.SemiPreemptible, {})).toBe("Semi-preemptible");
     expect(column.format?.(Preemptibility.NonPreemptible, {})).toBe("Non-preemptible");
     expect(column.format?.(null, {})).toBe("-");
+    expect(field({ preemptibility: Preemptibility.SemiPreemptible, preemptible: false } as Workload)).toBe(
+      Preemptibility.SemiPreemptible,
+    );
+    expect(field({ preemptible: true } as Workload)).toBe(Preemptibility.Preemptible);
+    expect(field({ preemptible: false } as Workload)).toBe(Preemptibility.NonPreemptible);
+    expect(field({} as Workload)).toBeUndefined();
   });
 });

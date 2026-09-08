@@ -16563,6 +16563,17 @@ components:
       - nodePool
       - reason
       type: object
+    WorkloadTypePreemptibility:
+      description: "Indicates the default preemptibility level of the workload type.\
+        \ Only available for workloads submitted to clusters of versions 2.24+. The\
+        \ default, if not specified, is if priority.value >= 100 - then 'non-preemptible',\
+        \ else 'preemptible'."
+      enum:
+      - preemptible
+      - semi-preemptible
+      - non-preemptible
+      example: non-preemptible
+      type: string
     WorkloadElement:
       example:
         createdAt: 2022-01-01T03:49:52.531Z
@@ -16740,7 +16751,7 @@ components:
         clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
         source: CLI
         type: runai-job
-        preemptibility: non-preemptible
+        preemptibility: preemptibility
         createdAt: 2022-01-01T03:49:52.531Z
         urls:
         - urls
@@ -17441,7 +17452,8 @@ components:
         topology:
           $ref: '#/components/schemas/WorkloadSyncFields_topology'
         preemptibility:
-          example: non-preemptible
+          allOf:
+          - $ref: '#/components/schemas/WorkloadTypePreemptibility'
           nullable: true
           type: string
         structureElements:
@@ -17557,7 +17569,7 @@ components:
           clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
           source: CLI
           type: runai-job
-          preemptibility: non-preemptible
+          preemptibility: preemptibility
           createdAt: 2022-01-01T03:49:52.531Z
           urls:
           - urls
@@ -18176,7 +18188,7 @@ components:
           clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
           source: CLI
           type: runai-job
-          preemptibility: non-preemptible
+          preemptibility: preemptibility
           createdAt: 2022-01-01T03:49:52.531Z
           urls:
           - urls
@@ -20007,7 +20019,7 @@ components:
           clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
           source: CLI
           type: runai-job
-          preemptibility: non-preemptible
+          preemptibility: preemptibility
           createdAt: 2022-01-01T03:49:52.531Z
           urls:
           - urls
@@ -20626,7 +20638,7 @@ components:
           clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
           source: CLI
           type: runai-job
-          preemptibility: non-preemptible
+          preemptibility: preemptibility
           createdAt: 2022-01-01T03:49:52.531Z
           urls:
           - urls
@@ -125390,17 +125402,6 @@ components:
         $ref: '#/components/schemas/WorkloadCategory'
       type: array
       x-schema-name: WorkloadCategories
-    WorkloadTypePreemptibility:
-      description: "Indicates the default preemptibility level of the workload type.\
-        \ Only available for workloads submitted to clusters of versions 2.24+. The\
-        \ default, if not specified, is if priority.value >= 100 - then 'non-preemptible',\
-        \ else 'preemptible'."
-      enum:
-      - preemptible
-      - semi-preemptible
-      - non-preemptible
-      example: non-preemptible
-      type: string
     WorkloadTypeAdditionalResponseFields:
       properties:
         categoryId:

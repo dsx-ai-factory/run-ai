@@ -147,7 +147,23 @@ export default defineComponent({
       return `This setting will cause the workload to be <span class="text-bold">pending</span> since the project doesn't have enough available GPU quota to run non-preemptible workloads. The workload will run without interruption when quota becomes available.`;
     },
   },
+  watch: {
+    modelValue: {
+      immediate: true,
+      handler(): void {
+        this.resetUnsupportedSemiPreemptibility();
+      },
+    },
+    supportSemiPreemptibility(): void {
+      this.resetUnsupportedSemiPreemptibility();
+    },
+  },
   methods: {
+    resetUnsupportedSemiPreemptibility(): void {
+      if (!this.supportSemiPreemptibility && this.modelValue === Preemptibility.SemiPreemptible) {
+        this.$emit("update:model-value", null);
+      }
+    },
     updatePreemptibility(selectedOption: ISelectOption | null): void {
       this.$emit("update:model-value", selectedOption?.value || null);
     },

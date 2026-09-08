@@ -62,13 +62,14 @@ describe("preemptibility-section.vue", () => {
       expect(options.some((option) => option.value === Preemptibility.SemiPreemptible)).toBe(false);
     });
 
-    test("Should not select semi-preemptible when the cluster does not support it", () => {
+    test("Should clear semi-preemptible when the cluster does not support it", () => {
       preemptibilitySection = factory({
         modelValue: Preemptibility.SemiPreemptible,
         supportSemiPreemptibility: false,
       });
 
       expect(preemptibilitySection.vm.selectedPreemptibilityOption).toBeNull();
+      expect(preemptibilitySection.emitted("update:model-value")).toEqual([[null]]);
     });
 
     test("Should compute selectedPreemptibilityOption correctly", () => {

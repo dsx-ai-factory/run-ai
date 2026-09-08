@@ -24169,10 +24169,10 @@ export interface WorkloadSyncFields {
     'topology'?: WorkloadSyncFieldsTopology | null;
     /**
      * 
-     * @type {string}
+     * @type {WorkloadTypePreemptibility}
      * @memberof WorkloadSyncFields
      */
-    'preemptibility'?: string | null;
+    'preemptibility'?: WorkloadTypePreemptibility | null;
     /**
      * Flat list of intermediate child elements. May be truncated if too many.
      * @type {Array<WorkloadElement>}
