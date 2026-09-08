@@ -10,7 +10,7 @@ runai pytorch submit [flags]
 
 ```
 # Submit a workload
-runai training pytorch submit <workload-name> -p <project-name> -i runai.jfrog.io/demo/quickstart-demo
+runai training pytorch submit <workload-name> -p <project-name> -i ubuntu
 
 # Submit a workload with arguments
 runai training pytorch submit <workload-name> -p <project-name> -i ubuntu -- ls -la

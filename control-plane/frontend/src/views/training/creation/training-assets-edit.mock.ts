@@ -76,7 +76,7 @@ const trainingAssetsEditMockedData = {
             value: "./",
           },
         ],
-        image: "gcr.io/run-ai-demo/jupyter-tensorboard",
+        image: "quay.io/jupyter/scipy-notebook",
         imagePullPolicy: "IfNotPresent",
         connections: [
           {
@@ -1602,7 +1602,7 @@ const loadedTrainingById: Training = {
         value: "0",
       },
       image: {
-        value: "gcr.io/run-ai-demo/jupyter-tensorboard",
+        value: "quay.io/jupyter/scipy-notebook",
       },
       imagePullPolicy: {
         value: "IfNotPresent",
