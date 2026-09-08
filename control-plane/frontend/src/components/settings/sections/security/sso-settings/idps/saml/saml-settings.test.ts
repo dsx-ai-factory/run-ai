@@ -14,7 +14,7 @@ import { IdpTypeEnum } from "@/swagger-models/identity-manager-client";
 
 describe("saml-settings.vue", () => {
   const mockSamlData: SamlData = {
-    entityId: "runai-app.run.ai/custom",
+    entityId: "runai-app.run.ai/bgu",
     singleSignOnServiceUrl: "http://test.com/sso",
     signingCertificate: "test-cert",
   };
@@ -74,9 +74,10 @@ describe("saml-settings.vue", () => {
 
     await wrapper.vm.onUpdate();
 
-    const emitted = wrapper.emitted("update-idp");
-    expect(emitted).toBeTruthy();
-    expect(emitted?.[0]?.[0]?.samlData?.entityId).toBe(mockSamlData.entityId);
+    expect(wrapper.emitted("update-idp")).toBeTruthy();
+    expect(wrapper.emitted("update-idp")?.[0]?.[0]).toMatchObject({
+      samlData: { entityId: mockSamlData.entityId },
+    });
   });
 
   it("preserves the entity ID when updating via a metadata URL instead of a file", async () => {
@@ -92,8 +93,9 @@ describe("saml-settings.vue", () => {
 
     await wrapper.vm.onUpdate();
 
-    const emitted = wrapper.emitted("update-idp");
-    expect(emitted).toBeTruthy();
-    expect(emitted?.[0]?.[0]?.samlData?.entityId).toBe(mockSamlData.entityId);
+    expect(wrapper.emitted("update-idp")).toBeTruthy();
+    expect(wrapper.emitted("update-idp")?.[0]?.[0]).toMatchObject({
+      samlData: { entityId: mockSamlData.entityId },
+    });
   });
 });
