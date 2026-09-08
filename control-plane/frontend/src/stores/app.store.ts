@@ -77,9 +77,6 @@ export const useAppStore = defineStore("App", {
     tenantDomain(): string {
       return this.config.tenantName?.concat(".", window.location.hostname).replace("app.run.ai", "run.ai");
     },
-    isProductionEnv(): boolean {
-      return !["localhost", "test.run.ai"].some((h) => window.location.hostname.startsWith(h));
-    },
     isPageLoading(): boolean {
       return this.pageLoading;
     },
