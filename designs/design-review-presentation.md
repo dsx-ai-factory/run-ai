@@ -1,4 +1,4 @@
-# RUN-41388 Design Review Presentation
+# Design Review Presentation
 
 ## Slide 0 — Final Requirements and Scope
 
