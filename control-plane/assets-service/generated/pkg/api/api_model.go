@@ -38,11 +38,6 @@ import (
 type ModelAPIController struct {
 	service ModelAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -58,10 +53,13 @@ type ModelAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *ModelAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *ModelAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -198,7 +196,7 @@ func (c *ModelAPIController) Routes() Routes {
 func (c *ModelAPIController) ListModelAssets(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var nameParam string
@@ -222,7 +220,7 @@ func (c *ModelAPIController) ListModelAssets(w http.ResponseWriter, r *http.Requ
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "projectId", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "projectId", Err: err}, nil, nil)
 			return
 		}
 
@@ -250,7 +248,7 @@ func (c *ModelAPIController) ListModelAssets(w http.ResponseWriter, r *http.Requ
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "usageInfo", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "usageInfo", Err: err}, nil, nil)
 			return
 		}
 
@@ -264,7 +262,7 @@ func (c *ModelAPIController) ListModelAssets(w http.ResponseWriter, r *http.Requ
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil, nil)
 			return
 		}
 
@@ -295,7 +293,7 @@ func (c *ModelAPIController) ListModelAssets(w http.ResponseWriter, r *http.Requ
 	result, err := c.service.ListModelAssets(r.Context(), nameParam, scopeParam, projectIdParam, departmentIdParam, clusterIdParam, usageInfoParam, complyToProjectParam, complyToWorkloadTypeParam, environmentIdParam, complyToReplicaTypeParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -348,34 +346,35 @@ func (c *ModelAPIController) ListModelAssets(w http.ResponseWriter, r *http.Requ
 func (c *ModelAPIController) CreateModelAsset(w http.ResponseWriter, r *http.Request) {
 	var modelCreationRequestParam ModelCreationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&modelCreationRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertModelCreationRequestRequired(modelCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertModelCreationRequestConstraints(modelCreationRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateModelAsset(r.Context(), modelCreationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -428,12 +427,12 @@ func (c *ModelAPIController) CreateModelAsset(w http.ResponseWriter, r *http.Req
 func (c *ModelAPIController) GetModelAssetById(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	modelIdParam := chi.URLParam(r, "ModelId")
 	if modelIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"ModelId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"ModelId"}, nil, nil)
 		return
 	}
 	var usageInfoParam bool
@@ -443,7 +442,7 @@ func (c *ModelAPIController) GetModelAssetById(w http.ResponseWriter, r *http.Re
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "usageInfo", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "usageInfo", Err: err}, nil, nil)
 			return
 		}
 
@@ -457,7 +456,7 @@ func (c *ModelAPIController) GetModelAssetById(w http.ResponseWriter, r *http.Re
 			WithParse[int32](parseInt32),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "complyToProject", Err: err}, nil, nil)
 			return
 		}
 
@@ -481,7 +480,7 @@ func (c *ModelAPIController) GetModelAssetById(w http.ResponseWriter, r *http.Re
 	result, err := c.service.GetModelAssetById(r.Context(), modelIdParam, usageInfoParam, complyToProjectParam, complyToWorkloadTypeParam, complyToReplicaTypeParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -534,39 +533,40 @@ func (c *ModelAPIController) GetModelAssetById(w http.ResponseWriter, r *http.Re
 func (c *ModelAPIController) UpdateModelAssetById(w http.ResponseWriter, r *http.Request) {
 	modelIdParam := chi.URLParam(r, "ModelId")
 	if modelIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"ModelId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"ModelId"}, nil, nil)
 		return
 	}
 	var modelUpdateRequestParam ModelUpdateRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&modelUpdateRequestParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertModelUpdateRequestRequired(modelUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertModelUpdateRequestConstraints(modelUpdateRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateModelAssetById(r.Context(), modelIdParam, modelUpdateRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -619,13 +619,13 @@ func (c *ModelAPIController) UpdateModelAssetById(w http.ResponseWriter, r *http
 func (c *ModelAPIController) DeleteModelAssetById(w http.ResponseWriter, r *http.Request) {
 	modelIdParam := chi.URLParam(r, "ModelId")
 	if modelIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"ModelId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"ModelId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteModelAssetById(r.Context(), modelIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

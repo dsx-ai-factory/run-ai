@@ -36,11 +36,6 @@ import (
 type InternalAPIController struct {
 	service InternalAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -56,10 +51,13 @@ type InternalAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *InternalAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *InternalAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -192,7 +190,7 @@ func (c *InternalAPIController) ManagementGetTenantsInternal(w http.ResponseWrit
 	result, err := c.service.ManagementGetTenantsInternal(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -245,7 +243,7 @@ func (c *InternalAPIController) ManagementGetTenantsInternal(w http.ResponseWrit
 func (c *InternalAPIController) GetTenantByNameOrAlias(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var tenantNameParam string
@@ -254,13 +252,13 @@ func (c *InternalAPIController) GetTenantByNameOrAlias(w http.ResponseWriter, r 
 
 		tenantNameParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "tenantName"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "tenantName"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetTenantByNameOrAlias(r.Context(), tenantNameParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -317,13 +315,13 @@ func (c *InternalAPIController) GetTenantDomain(w http.ResponseWriter, r *http.R
 		WithMinimum[int32](0),
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "tenantId", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "tenantId", Err: err}, nil, nil)
 		return
 	}
 	result, err := c.service.GetTenantDomain(r.Context(), tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -381,13 +379,13 @@ func (c *InternalAPIController) GetTenantMetricStore(w http.ResponseWriter, r *h
 		WithMinimum[int32](0),
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "tenantId", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "tenantId", Err: err}, nil, nil)
 		return
 	}
 	result, err := c.service.GetTenantMetricStore(r.Context(), tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -444,13 +442,13 @@ func (c *InternalAPIController) GetTenantExtendedMetricStore(w http.ResponseWrit
 		WithMinimum[int32](0),
 	)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "tenantId", Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Param: "tenantId", Err: err}, nil, nil)
 		return
 	}
 	result, err := c.service.GetTenantExtendedMetricStore(r.Context(), tenantIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -503,7 +501,7 @@ func (c *InternalAPIController) GetTenantExtendedMetricStore(w http.ResponseWrit
 func (c *InternalAPIController) GetAllLogos(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var offsetParam int32
@@ -514,7 +512,7 @@ func (c *InternalAPIController) GetAllLogos(w http.ResponseWriter, r *http.Reque
 			WithMinimum[int32](0),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
 			return
 		}
 
@@ -532,7 +530,7 @@ func (c *InternalAPIController) GetAllLogos(w http.ResponseWriter, r *http.Reque
 			WithMaximum[int32](100),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
 			return
 		}
 
@@ -544,7 +542,7 @@ func (c *InternalAPIController) GetAllLogos(w http.ResponseWriter, r *http.Reque
 	result, err := c.service.GetAllLogos(r.Context(), offsetParam, limitParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

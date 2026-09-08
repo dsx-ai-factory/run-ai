@@ -35,11 +35,6 @@ import (
 type RedirectValidationAPIController struct {
 	service RedirectValidationAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -55,10 +50,13 @@ type RedirectValidationAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *RedirectValidationAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *RedirectValidationAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -125,7 +123,7 @@ func (c *RedirectValidationAPIController) Routes() Routes {
 func (c *RedirectValidationAPIController) ValidateRedirect(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var redirectUriParam string
@@ -134,7 +132,7 @@ func (c *RedirectValidationAPIController) ValidateRedirect(w http.ResponseWriter
 
 		redirectUriParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "redirect_uri"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "redirect_uri"}, nil, nil)
 		return
 	}
 	var clientIdParam string
@@ -143,13 +141,13 @@ func (c *RedirectValidationAPIController) ValidateRedirect(w http.ResponseWriter
 
 		clientIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "client_id"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "client_id"}, nil, nil)
 		return
 	}
 	result, err := c.service.ValidateRedirect(r.Context(), redirectUriParam, clientIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

@@ -38,11 +38,6 @@ import (
 type WorkloadPropertiesAPIController struct {
 	service WorkloadPropertiesAPIServicer
 
-	////////////////////////////// RUNAI START (12.1) ///////////////////////////////
-	payloadBody []byte // copy of the payload
-	//errorHandler: DefaultErrorHandler,
-	////////////////////////////// RUNAI END //////////////////////////////////
-
 	///////////// RUNAI START (9.6) ///////////////////////////////////////////
 	dummyApiUtils runaihttp.CsvFile
 	///////////// RUNAI END ///////////////////////////////////////////
@@ -58,10 +53,13 @@ type WorkloadPropertiesAPIController struct {
 }
 
 // //////////////////////////// RUNAI START (12.2) ///////////////////////////////
-// errorHandler wrapper that injects the payload to RunaiErrorHandler
-func (c *WorkloadPropertiesAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse) {
+// errorHandler wrapper that forwards the request-scoped payload body to RunaiErrorHandler.
+// payloadBody is passed only from the JSON-body decode error site; every other
+// caller passes nil (there is no body to attribute the error to, or the body
+// has not been read yet). RunaiErrorHandler / lineOrOffset tolerate nil.
+func (c *WorkloadPropertiesAPIController) errorHandler(w http.ResponseWriter, r *http.Request, err error, result *ImplResponse, payloadBody []byte) {
 	_ = bytes.NewReader
-	RunaiErrorHandler(w, r, err, result, c.payloadBody)
+	RunaiErrorHandler(w, r, err, result, payloadBody)
 }
 
 ////////////////////////////// RUNAI END //////////////////////////////////
@@ -410,7 +408,7 @@ func (c *WorkloadPropertiesAPIController) ListCategories(w http.ResponseWriter, 
 	result, err := c.service.ListCategories(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -463,13 +461,13 @@ func (c *WorkloadPropertiesAPIController) ListCategories(w http.ResponseWriter, 
 func (c *WorkloadPropertiesAPIController) GetCategoryById(w http.ResponseWriter, r *http.Request) {
 	categoryIdParam := chi.URLParam(r, "categoryId")
 	if categoryIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"categoryId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"categoryId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetCategoryById(r.Context(), categoryIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -522,7 +520,7 @@ func (c *WorkloadPropertiesAPIController) GetCategoryById(w http.ResponseWriter,
 func (c *WorkloadPropertiesAPIController) ListWorkloadTypes(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var externalTypesOnlyParam bool
@@ -532,7 +530,7 @@ func (c *WorkloadPropertiesAPIController) ListWorkloadTypes(w http.ResponseWrite
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "externalTypesOnly", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "externalTypesOnly", Err: err}, nil, nil)
 			return
 		}
 
@@ -557,7 +555,7 @@ func (c *WorkloadPropertiesAPIController) ListWorkloadTypes(w http.ResponseWrite
 			WithParse[bool](parseBool),
 		)
 		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "noStatus", Err: err}, nil)
+			c.errorHandler(w, r, &ParsingError{Param: "noStatus", Err: err}, nil, nil)
 			return
 		}
 
@@ -569,7 +567,7 @@ func (c *WorkloadPropertiesAPIController) ListWorkloadTypes(w http.ResponseWrite
 	result, err := c.service.ListWorkloadTypes(r.Context(), externalTypesOnlyParam, filterByParam, noStatusParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -622,34 +620,35 @@ func (c *WorkloadPropertiesAPIController) ListWorkloadTypes(w http.ResponseWrite
 func (c *WorkloadPropertiesAPIController) CreateWorkloadType(w http.ResponseWriter, r *http.Request) {
 	var workloadTypeCreateFieldsParam WorkloadTypeCreateFields
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&workloadTypeCreateFieldsParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertWorkloadTypeCreateFieldsRequired(workloadTypeCreateFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertWorkloadTypeCreateFieldsConstraints(workloadTypeCreateFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateWorkloadType(r.Context(), workloadTypeCreateFieldsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -702,13 +701,13 @@ func (c *WorkloadPropertiesAPIController) CreateWorkloadType(w http.ResponseWrit
 func (c *WorkloadPropertiesAPIController) GetWorkloadType(w http.ResponseWriter, r *http.Request) {
 	workloadTypeIdParam := chi.URLParam(r, "workloadTypeId")
 	if workloadTypeIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"workloadTypeId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"workloadTypeId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetWorkloadType(r.Context(), workloadTypeIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -761,39 +760,40 @@ func (c *WorkloadPropertiesAPIController) GetWorkloadType(w http.ResponseWriter,
 func (c *WorkloadPropertiesAPIController) UpdateWorkloadType(w http.ResponseWriter, r *http.Request) {
 	workloadTypeIdParam := chi.URLParam(r, "workloadTypeId")
 	if workloadTypeIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"workloadTypeId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"workloadTypeId"}, nil, nil)
 		return
 	}
 	var workloadTypeUpdateFieldsParam WorkloadTypeUpdateFields
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&workloadTypeUpdateFieldsParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertWorkloadTypeUpdateFieldsRequired(workloadTypeUpdateFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertWorkloadTypeUpdateFieldsConstraints(workloadTypeUpdateFieldsParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.UpdateWorkloadType(r.Context(), workloadTypeIdParam, workloadTypeUpdateFieldsParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -846,13 +846,13 @@ func (c *WorkloadPropertiesAPIController) UpdateWorkloadType(w http.ResponseWrit
 func (c *WorkloadPropertiesAPIController) DeleteWorkloadType(w http.ResponseWriter, r *http.Request) {
 	workloadTypeIdParam := chi.URLParam(r, "workloadTypeId")
 	if workloadTypeIdParam == "" {
-		c.errorHandler(w, r, &RequiredError{"workloadTypeId"}, nil)
+		c.errorHandler(w, r, &RequiredError{"workloadTypeId"}, nil, nil)
 		return
 	}
 	result, err := c.service.DeleteWorkloadType(r.Context(), workloadTypeIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -868,7 +868,7 @@ func (c *WorkloadPropertiesAPIController) DeleteWorkloadType(w http.ResponseWrit
 func (c *WorkloadPropertiesAPIController) SyncWorkloadTypes(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -877,39 +877,40 @@ func (c *WorkloadPropertiesAPIController) SyncWorkloadTypes(w http.ResponseWrite
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var workloadTypesForSyncParam WorkloadTypesForSync
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&workloadTypesForSyncParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertWorkloadTypesForSyncRequired(workloadTypesForSyncParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertWorkloadTypesForSyncConstraints(workloadTypesForSyncParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.SyncWorkloadTypes(r.Context(), clusterIdParam, workloadTypesForSyncParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -925,7 +926,7 @@ func (c *WorkloadPropertiesAPIController) SyncWorkloadTypes(w http.ResponseWrite
 func (c *WorkloadPropertiesAPIController) GetWorkloadPriorities(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var sortOrderParam string
@@ -956,7 +957,7 @@ func (c *WorkloadPropertiesAPIController) GetWorkloadPriorities(w http.ResponseW
 	result, err := c.service.GetWorkloadPriorities(r.Context(), sortOrderParam, sortByParam, filterByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1009,34 +1010,35 @@ func (c *WorkloadPropertiesAPIController) GetWorkloadPriorities(w http.ResponseW
 func (c *WorkloadPropertiesAPIController) CreateWorkloadPriorities(w http.ResponseWriter, r *http.Request) {
 	var priorityForCreateParam PriorityForCreate
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&priorityForCreateParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertPriorityForCreateRequired(priorityForCreateParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertPriorityForCreateConstraints(priorityForCreateParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.CreateWorkloadPriorities(r.Context(), priorityForCreateParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1089,7 +1091,7 @@ func (c *WorkloadPropertiesAPIController) CreateWorkloadPriorities(w http.Respon
 func (c *WorkloadPropertiesAPIController) GetSyncWorkloadPriorities(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -1098,13 +1100,13 @@ func (c *WorkloadPropertiesAPIController) GetSyncWorkloadPriorities(w http.Respo
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	result, err := c.service.GetSyncWorkloadPriorities(r.Context(), clusterIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1157,7 +1159,7 @@ func (c *WorkloadPropertiesAPIController) GetSyncWorkloadPriorities(w http.Respo
 func (c *WorkloadPropertiesAPIController) WorkloadPrioritiesStatus(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -1166,39 +1168,40 @@ func (c *WorkloadPropertiesAPIController) WorkloadPrioritiesStatus(w http.Respon
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var prioritiesForStatusParam PrioritiesForStatus
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&prioritiesForStatusParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertPrioritiesForStatusRequired(prioritiesForStatusParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertPrioritiesForStatusConstraints(prioritiesForStatusParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.WorkloadPrioritiesStatus(r.Context(), clusterIdParam, prioritiesForStatusParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1214,7 +1217,7 @@ func (c *WorkloadPropertiesAPIController) WorkloadPrioritiesStatus(w http.Respon
 func (c *WorkloadPropertiesAPIController) WorkloadClusterPrioritiesStatus(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -1223,39 +1226,40 @@ func (c *WorkloadPropertiesAPIController) WorkloadClusterPrioritiesStatus(w http
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var prioritiesForStatusParam PrioritiesForStatus
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
-	var readError error
-	c.payloadBody, readError = io.ReadAll(r.Body)
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
 	if readError != nil {
 		// Handle the error
 		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
 		return
 	}
-	jsonReader := bytes.NewReader(c.payloadBody)
+	jsonReader := bytes.NewReader(payloadBody)
 	d := json.NewDecoder(jsonReader)
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
 	if err := d.Decode(&prioritiesForStatusParam); err != nil && !errors.Is(err, io.EOF) {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
 	if err := AssertPrioritiesForStatusRequired(prioritiesForStatusParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	if err := AssertPrioritiesForStatusConstraints(prioritiesForStatusParam); err != nil {
-		c.errorHandler(w, r, err, nil)
+		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
 	result, err := c.service.WorkloadClusterPrioritiesStatus(r.Context(), clusterIdParam, prioritiesForStatusParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1271,7 +1275,7 @@ func (c *WorkloadPropertiesAPIController) WorkloadClusterPrioritiesStatus(w http
 func (c *WorkloadPropertiesAPIController) GetWorkloadClusterPriorities(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -1280,7 +1284,7 @@ func (c *WorkloadPropertiesAPIController) GetWorkloadClusterPriorities(w http.Re
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var sortOrderParam string
@@ -1311,7 +1315,7 @@ func (c *WorkloadPropertiesAPIController) GetWorkloadClusterPriorities(w http.Re
 	result, err := c.service.GetWorkloadClusterPriorities(r.Context(), clusterIdParam, sortOrderParam, sortByParam, filterByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
@@ -1364,7 +1368,7 @@ func (c *WorkloadPropertiesAPIController) GetWorkloadClusterPriorities(w http.Re
 func (c *WorkloadPropertiesAPIController) GetAvailablePrioritiesAndCategories(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
 		return
 	}
 	var clusterIdParam string
@@ -1373,7 +1377,7 @@ func (c *WorkloadPropertiesAPIController) GetAvailablePrioritiesAndCategories(w 
 
 		clusterIdParam = param
 	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil)
+		c.errorHandler(w, r, &RequiredError{Field: "clusterId"}, nil, nil)
 		return
 	}
 	var sortOrderParam string
@@ -1404,7 +1408,7 @@ func (c *WorkloadPropertiesAPIController) GetAvailablePrioritiesAndCategories(w 
 	result, err := c.service.GetAvailablePrioritiesAndCategories(r.Context(), clusterIdParam, sortOrderParam, sortByParam, filterByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, err, &result, nil)
 		return
 	}
 	////////////////////////////// RUNAI START (9.3) ///////////////////////////////

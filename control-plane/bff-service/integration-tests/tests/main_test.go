@@ -65,7 +65,7 @@ func initClients() {
 
 func newTestContextWithTenant(tenantID string) context.Context {
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@run.ai")
+	ctx = context.WithValue(ctx, runaictx.CfSubjectID, "test@example.com")
 	ctx = context.WithValue(ctx, runaictx.CfTenantId, tenantID)
 	return ctx
 }

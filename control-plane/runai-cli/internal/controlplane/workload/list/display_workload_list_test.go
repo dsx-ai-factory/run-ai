@@ -992,7 +992,7 @@ func generateWorkloadFullSpec(id, name string, createdAt time.Time) openapi.Work
   },
   "runningPods": 1,
   "source": "Control-plane",
-  "submittedBy": "test@run.ai",
+  "submittedBy": "test@example.com",
   "tenantId": 1001,
   "totalPendingTimeSeconds": 5,
   "type": "Workspace",

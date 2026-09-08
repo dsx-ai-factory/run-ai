@@ -4,7 +4,6 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Tenant** | Pointer to **string** |  | [optional] 
 **Clusters** | Pointer to **[]string** |  | [optional] 
 **Departments** | Pointer to **[]string** |  | [optional] 
 **Projects** | Pointer to **[]string** |  | [optional] 
@@ -27,31 +26,6 @@ will change when the set of required properties is changed
 NewPermittedScopesWithDefaults instantiates a new PermittedScopes object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
-
-### GetTenant
-
-`func (o *PermittedScopes) GetTenant() string`
-
-GetTenant returns the Tenant field if non-nil, zero value otherwise.
-
-### GetTenantOk
-
-`func (o *PermittedScopes) GetTenantOk() (*string, bool)`
-
-GetTenantOk returns a tuple with the Tenant field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetTenant
-
-`func (o *PermittedScopes) SetTenant(v string)`
-
-SetTenant sets Tenant field to given value.
-
-### HasTenant
-
-`func (o *PermittedScopes) HasTenant() bool`
-
-HasTenant returns a boolean if a field has been set.
 
 ### GetClusters
 

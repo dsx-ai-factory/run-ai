@@ -128,7 +128,7 @@ func (p PostgresReportsDao) GetReports(
 		WithEnricher(querydbenrich.Filters(filterBy))
 
 	if sortBy != "" {
-		query = query.WithEnricher(querydbenrich.SortBy(sortBy, sortOrder))
+		query = query.Order(querydbenrich.FormatSortClause(sortBy, sortOrder))
 	}
 	query = query.Order("id")
 

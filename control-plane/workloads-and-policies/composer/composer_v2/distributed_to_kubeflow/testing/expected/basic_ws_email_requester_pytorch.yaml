@@ -11,7 +11,7 @@ DistributedTarget:
     metadata:
       annotations:
         run.ai/auto-delete-after-completion-sec: "864000"
-        run.ai/submitted-by: test@run.ai
+        run.ai/submitted-by: test@example.com
       labels:
         app: pytorchjob
         createdBy: PyTorchJob
@@ -33,7 +33,7 @@ DistributedTarget:
               annotations:
                 gpu-fraction: "0.5"
                 gpu-fraction-num-devices: "1"
-                user: test@run.ai
+                user: test@example.com
               labels:
                 app: pytorchjob
                 createdBy: PyTorchJob
@@ -87,7 +87,7 @@ DistributedTarget:
               annotations:
                 gpu-fraction: "0.5"
                 gpu-fraction-num-devices: "1"
-                user: test@run.ai
+                user: test@example.com
               labels:
                 app: pytorchjob
                 createdBy: PyTorchJob
@@ -163,6 +163,6 @@ Notification:
   projectId: project-654-321
   requestedPods:
     number: 1
-  submittedBy: test@run.ai
+  submittedBy: test@example.com
   type: Distributed
   version: v2alpha1

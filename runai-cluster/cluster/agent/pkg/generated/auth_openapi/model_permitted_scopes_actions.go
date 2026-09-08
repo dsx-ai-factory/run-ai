@@ -18,7 +18,7 @@ import (
 // PermittedScopesActions struct for PermittedScopesActions
 type PermittedScopesActions struct {
 	Create PermittedScopes `json:"create"`
-	Read   PermittedScopes `json:"read"`
+	Read PermittedScopes `json:"read"`
 	Update PermittedScopes `json:"update"`
 	Delete PermittedScopes `json:"delete"`
 }
@@ -192,3 +192,5 @@ func (v *NullablePermittedScopesActions) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

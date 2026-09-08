@@ -84,7 +84,7 @@ func TestTenantHandler_Flow(t *testing.T) {
 		},
 		{
 			name:          "forwarded host takes precedence over host",
-			forwardedHost: "consoletest1.staging.run.ai",
+			forwardedHost: "consoletest1.mock-q7z3k.example.com",
 			host:          "my-tenant.example.com",
 			wantTenantId:  "7",
 			wantCalls:     1,

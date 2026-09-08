@@ -11,9 +11,6 @@ import (
 	"net/http"
 	"strings"
 
-	authorization_config "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/config"
-	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
-
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/cache"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/dao"
@@ -398,88 +395,6 @@ func validateScopesContains(ctx context.Context, requesterScopes, targetScopes a
 	return nil
 }
 
-func constructPermissionMap(ctx context.Context, accessRules []models.AccessRule) (map[api.ResourceType]map[api.Action]api.PermittedScopes, *api.Error) {
-	permissionsMap := map[api.ResourceType]map[api.Action]api.PermittedScopes{}
-	if config.Get[*authorization_config.General]().UsePermissionSets {
-		for _, accessRule := range accessRules {
-			permissionSets, err := getAccessRulePermissionSets(ctx, accessRule)
-			if err != nil {
-				return permissionsMap, err
-			}
-			for _, permissionSet := range *permissionSets {
-				for _, permission := range permissionSet.Permissions {
-					actionToPermittedScopes, found := permissionsMap[permission.ResourceType]
-					if !found {
-						actionToPermittedScopes = map[api.Action]api.PermittedScopes{}
-						permissionsMap[permission.ResourceType] = actionToPermittedScopes
-					}
-					if permission.Create {
-						actionToPermittedScopes[api.ACTION_CREATE] = appendPermittedScope(accessRule.ScopeId, accessRule.ScopeType, actionToPermittedScopes[api.ACTION_CREATE])
-					}
-					if permission.Read {
-						actionToPermittedScopes[api.ACTION_READ] = appendPermittedScope(accessRule.ScopeId, accessRule.ScopeType, actionToPermittedScopes[api.ACTION_READ])
-					}
-					if permission.Update {
-						actionToPermittedScopes[api.ACTION_UPDATE] = appendPermittedScope(accessRule.ScopeId, accessRule.ScopeType, actionToPermittedScopes[api.ACTION_UPDATE])
-					}
-					if permission.Delete {
-						actionToPermittedScopes[api.ACTION_DELETE] = appendPermittedScope(accessRule.ScopeId, accessRule.ScopeType, actionToPermittedScopes[api.ACTION_DELETE])
-					}
-					if permission.Sync {
-						actionToPermittedScopes[api.ACTION_SYNC] = appendPermittedScope(accessRule.ScopeId, accessRule.ScopeType, actionToPermittedScopes[api.ACTION_SYNC])
-					}
-
-					permissionsMap[permission.ResourceType] = actionToPermittedScopes
-				}
-			}
-		}
-		// remove duplicates
-		for resourceType, actionMap := range permissionsMap {
-			for action, permittedScopes := range actionMap {
-				newPermittedScopes := api.PermittedScopes{
-					System:      permittedScopes.System,
-					Tenants:     dao.RemoveDuplicates(permittedScopes.Tenants),
-					Clusters:    dao.RemoveDuplicates(permittedScopes.Clusters),
-					Departments: dao.RemoveDuplicates(permittedScopes.Departments),
-					Projects:    dao.RemoveDuplicates(permittedScopes.Projects),
-				}
-				permissionsMap[resourceType][action] = newPermittedScopes
-			}
-		}
-		return permissionsMap, nil
-	}
-	for _, accessRule := range accessRules {
-		for _, permission := range accessRule.Role.Permissions {
-			var ok bool
-			var actionToPermittedScopes map[api.Action]api.PermittedScopes
-			if actionToPermittedScopes, ok = permissionsMap[permission.ResourceType]; !ok {
-				actionToPermittedScopes = map[api.Action]api.PermittedScopes{
-					api.ACTION_CREATE: emptyPermittedScopes(),
-				}
-			}
-			if permission.Create {
-				actionToPermittedScopes[api.ACTION_CREATE] = appendPermittedScopeLegacy(accessRule.ScopeId, accessRule.ScopeType, actionToPermittedScopes[api.ACTION_CREATE])
-			}
-			if permission.Read {
-				actionToPermittedScopes[api.ACTION_READ] = appendPermittedScopeLegacy(accessRule.ScopeId, accessRule.ScopeType, actionToPermittedScopes[api.ACTION_READ])
-			}
-			if permission.Update {
-				actionToPermittedScopes[api.ACTION_UPDATE] = appendPermittedScopeLegacy(accessRule.ScopeId, accessRule.ScopeType, actionToPermittedScopes[api.ACTION_UPDATE])
-			}
-			if permission.Delete {
-				actionToPermittedScopes[api.ACTION_DELETE] = appendPermittedScopeLegacy(accessRule.ScopeId, accessRule.ScopeType, actionToPermittedScopes[api.ACTION_DELETE])
-			}
-			if permission.Sync {
-				actionToPermittedScopes[api.ACTION_SYNC] = appendPermittedScopeLegacy(accessRule.ScopeId, accessRule.ScopeType, actionToPermittedScopes[api.ACTION_SYNC])
-			}
-
-			permissionsMap[permission.ResourceType] = actionToPermittedScopes
-		}
-	}
-
-	return permissionsMap, nil
-}
-
 func getAccessRulePermissionSets(ctx context.Context, accessRule models.AccessRule) (*[]models.PermissionSet, *api.Error) {
 	if accessRule.Role.PermissionSets != nil && len(*accessRule.Role.PermissionSets) > 0 {
 		return accessRule.Role.PermissionSets, nil
@@ -488,21 +403,55 @@ func getAccessRulePermissionSets(ctx context.Context, accessRule models.AccessRu
 	return dao.DbGetPermissionSetsByRoleId(ctx, accessRule.RoleID)
 }
 
-func appendPermittedScopeLegacy(scopeId string, scopeType api.ScopeType, permittedScopes api.PermittedScopes) api.PermittedScopes {
-	switch scopeType {
-	case api.SCOPETYPE_SYSTEM:
-		permittedScopes.System = true
-	case api.SCOPETYPE_TENANT:
-		permittedScopes.Tenants = append(permittedScopes.Tenants, scopeId)
-	case api.SCOPETYPE_CLUSTER:
-		permittedScopes.Clusters = append(permittedScopes.Clusters, scopeId)
-	case api.SCOPETYPE_DEPARTMENT:
-		permittedScopes.Departments = append(permittedScopes.Departments, scopeId)
-	case api.SCOPETYPE_PROJECT:
-		permittedScopes.Projects = append(permittedScopes.Projects, scopeId)
+func constructPermissionMap(ctx context.Context, accessRules []models.AccessRule) (map[api.ResourceType]map[api.Action]api.PermittedScopes, *api.Error) {
+	permissionsMap := map[api.ResourceType]map[api.Action]api.PermittedScopes{}
+	for _, accessRule := range accessRules {
+		permissionSets, err := getAccessRulePermissionSets(ctx, accessRule)
+		if err != nil {
+			return permissionsMap, err
+		}
+		for _, permissionSet := range *permissionSets {
+			for _, permission := range permissionSet.Permissions {
+				actionToPermittedScopes, found := permissionsMap[permission.ResourceType]
+				if !found {
+					actionToPermittedScopes = map[api.Action]api.PermittedScopes{}
+					permissionsMap[permission.ResourceType] = actionToPermittedScopes
+				}
+				if permission.Create {
+					actionToPermittedScopes[api.ACTION_CREATE] = appendPermittedScope(accessRule.ScopeId, accessRule.ScopeType, actionToPermittedScopes[api.ACTION_CREATE])
+				}
+				if permission.Read {
+					actionToPermittedScopes[api.ACTION_READ] = appendPermittedScope(accessRule.ScopeId, accessRule.ScopeType, actionToPermittedScopes[api.ACTION_READ])
+				}
+				if permission.Update {
+					actionToPermittedScopes[api.ACTION_UPDATE] = appendPermittedScope(accessRule.ScopeId, accessRule.ScopeType, actionToPermittedScopes[api.ACTION_UPDATE])
+				}
+				if permission.Delete {
+					actionToPermittedScopes[api.ACTION_DELETE] = appendPermittedScope(accessRule.ScopeId, accessRule.ScopeType, actionToPermittedScopes[api.ACTION_DELETE])
+				}
+				if permission.Sync {
+					actionToPermittedScopes[api.ACTION_SYNC] = appendPermittedScope(accessRule.ScopeId, accessRule.ScopeType, actionToPermittedScopes[api.ACTION_SYNC])
+				}
+
+				permissionsMap[permission.ResourceType] = actionToPermittedScopes
+			}
+		}
+	}
+	// remove duplicates
+	for resourceType, actionMap := range permissionsMap {
+		for action, permittedScopes := range actionMap {
+			newPermittedScopes := api.PermittedScopes{
+				System:      permittedScopes.System,
+				Tenants:     dao.RemoveDuplicates(permittedScopes.Tenants),
+				Clusters:    dao.RemoveDuplicates(permittedScopes.Clusters),
+				Departments: dao.RemoveDuplicates(permittedScopes.Departments),
+				Projects:    dao.RemoveDuplicates(permittedScopes.Projects),
+			}
+			permissionsMap[resourceType][action] = newPermittedScopes
+		}
 	}
 
-	return permittedScopes
+	return permissionsMap, nil
 }
 
 func appendPermittedScope(scopeId string, scopeType api.ScopeType, permittedScopes api.PermittedScopes) api.PermittedScopes {

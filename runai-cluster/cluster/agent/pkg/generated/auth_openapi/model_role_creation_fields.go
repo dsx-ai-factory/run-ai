@@ -17,8 +17,8 @@ import (
 
 // RoleCreationFields May contain additional creation fields that are not updatable
 type RoleCreationFields struct {
-	Name        string       `json:"name"`
-	Description string       `json:"description"`
+	Name string `json:"name"`
+	Description string `json:"description"`
 	Permissions []Permission `json:"permissions"`
 }
 
@@ -163,3 +163,5 @@ func (v *NullableRoleCreationFields) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

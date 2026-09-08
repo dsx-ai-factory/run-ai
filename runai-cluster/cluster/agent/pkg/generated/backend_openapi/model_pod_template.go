@@ -1,7 +1,7 @@
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend
+The aggregated API  of Run:AI backend 
 
 API version: 1.5.1
 */
@@ -16,7 +16,7 @@ import (
 
 // PodTemplate struct for PodTemplate
 type PodTemplate struct {
-	Containers      []Container        `json:"containers"`
+	Containers []Container `json:"containers"`
 	ResourceRequest map[string]float32 `json:"resourceRequest"`
 }
 
@@ -133,3 +133,5 @@ func (v *NullablePodTemplate) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

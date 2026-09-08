@@ -12,9 +12,7 @@ info:
   license:
     name: Run:AI
 servers:
-  - url: https://app.run.ai
-  - url: https://staging.run.ai
-  - url: https://test.run.ai
+  - url: http://localhost:8080
 security:
   - bearerAuth: []
 paths:

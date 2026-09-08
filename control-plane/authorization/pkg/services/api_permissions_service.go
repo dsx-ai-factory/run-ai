@@ -10,10 +10,8 @@ import (
 	"net/http"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/generated/pkg/api"
-	authorization_config "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/models"
-	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	"github.com/google/uuid"
 )
 
@@ -32,20 +30,12 @@ func (p PermissionsApiService) GetPermissions(ctx context.Context) (api.ImplResp
 		return NewErrorResponse(err), nil
 	}
 
-	if config.Get[*authorization_config.General]().UsePermissionSets {
-		permissionSets, err := dao.GetPermissionSets(ctx, tenantIdUint, subjectId, groups)
-		if err != nil {
-			return NewErrorResponse(err), nil
-		}
-		resultPermissions := RolePermissionsDaoToApi(permissionSets)
-		return api.Response(http.StatusOK, resultPermissions), nil
-	}
-	permissions, err := dao.GetPermissions(ctx, tenantIdUint, subjectId, groups)
+	permissionSets, err := dao.GetPermissionSets(ctx, tenantIdUint, subjectId, groups)
 	if err != nil {
 		return NewErrorResponse(err), nil
 	}
 
-	resultPermissions := PermissionsDaoToApi(permissions)
+	resultPermissions := RolePermissionsDaoToApi(permissionSets)
 
 	return api.Response(http.StatusOK, resultPermissions), nil
 }

@@ -21,10 +21,10 @@ get:
           examples:
             discovery:
               value:
-                issuer: "https://app.run.ai"
-                authorization_endpoint: "https://app.run.ai/api/v1/login"
-                token_endpoint: "https://app.run.ai/api/v2/token"
-                jwks_uri: "https://app.run.ai/auth/realms/runai/protocol/openid-connect/certs"
+                issuer: "http://localhost:8080"
+                authorization_endpoint: "http://localhost:8080/api/v1/login"
+                token_endpoint: "http://localhost:8080/api/v2/token"
+                jwks_uri: "http://localhost:8080/auth/realms/runai/protocol/openid-connect/certs"
                 response_types_supported: ["code", "token", "id_token"]
                 subject_types_supported: ["public"]
                 id_token_signing_alg_values_supported: ["RS256"]
