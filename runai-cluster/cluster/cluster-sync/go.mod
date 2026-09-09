@@ -335,7 +335,6 @@ replace github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-clien
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client => ../../../runai-clients/org-unit-service-client
 
-replace github.com/dsx-ai-factory/run-ai/runai-clients/backend-api-client => ../../../runai-clients/backend-api-client
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client => ../../../runai-clients/workloads-manager-client
 
