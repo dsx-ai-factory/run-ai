@@ -23,8 +23,9 @@ const (
 )
 
 const (
-	topologyName           = "my-topology"
-	topologyPreferredLevel = "rack"
+	topologyName = "my-topology"
+	// Legacy KAI-annotation path, independent of the pack domains below.
+	topologyPreferredLevel = "host"
 	// Deployment-level pack domain, and the narrower one a component overrides it with.
 	topologyPackDomain          = "zone"
 	topologyComponentPackDomain = "rack"

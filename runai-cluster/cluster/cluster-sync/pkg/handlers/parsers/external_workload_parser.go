@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
-	"strings"
 
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
@@ -265,20 +264,6 @@ func (p *WorkloadParser) ParseExternalWorkloadToServerScheme(
 	return &workloadSyncFields, podsOfWorkload, podGroupsOfWorkload, nil
 }
 
-// componentTopologiesBySpecName indexes per-component topology constraints for lookup by
-// element instance key. Keys are lowercased because a component's name in the workload spec
-// and the pod label the element's instance key is derived from may differ in case.
-func componentTopologiesBySpecName(entries []v1alpha1.ComponentTopologyEntry) map[string]v1alpha1.Topology {
-	if len(entries) == 0 {
-		return nil
-	}
-	byName := make(map[string]v1alpha1.Topology, len(entries))
-	for _, entry := range entries {
-		byName[strings.ToLower(entry.SpecName)] = entry.Topology
-	}
-	return byName
-}
-
 func parseStructureElements(se *v1alpha1.StructureElements,
 	componentTopologies []v1alpha1.ComponentTopologyEntry,
 ) []openapi.WorkloadElement {
@@ -305,7 +290,7 @@ func parseStructureElements(se *v1alpha1.StructureElements,
 		}
 		if e.InstanceKey != nil {
 			apiElem.SetInstanceKey(*e.InstanceKey)
-			if topology, found := topologyByComponent[strings.ToLower(*e.InstanceKey)]; found {
+			if topology, found := topologyByComponent[*e.InstanceKey]; found {
 				apiElem.SetTopology(elementTopologyToApi(topology))
 			}
 		}
@@ -327,6 +312,17 @@ func parseStructureElements(se *v1alpha1.StructureElements,
 		result = append(result, apiElem)
 	}
 	return result
+}
+
+func componentTopologiesBySpecName(entries []v1alpha1.ComponentTopologyEntry) map[string]v1alpha1.Topology {
+	if len(entries) == 0 {
+		return nil
+	}
+	byName := make(map[string]v1alpha1.Topology, len(entries))
+	for _, entry := range entries {
+		byName[entry.SpecName] = entry.Topology
+	}
+	return byName
 }
 
 func elementTopologyToApi(topology v1alpha1.Topology) openapi.WorkloadElementTopology {

@@ -298,16 +298,8 @@ func (h *DynamoGraphDeploymentTopOwnerHandler) parseSpecResources(ctx context.Co
 	}
 }
 
-// parseTopology surfaces the Dynamo topology constraints at both levels: the
-// deployment-level constraint onto the workload, and each component's constraint
-// onto Spec.ComponentTopologies, keyed by the component name so the control plane
-// can attach it to the matching workload element.
-//
-// The field names are version-specific (v1alpha1 topologyProfile + a services map
-// vs v1beta1 clusterTopologyName + a components list), so each version is read
-// separately. A component without its own packDomain inherits the deployment-level
-// one. packDomain maps to RequiredPlacement: Grove treats it as the deprecated
-// spelling of pack.required, a hard placement requirement.
+// packDomain maps to RequiredPlacement: Grove treats it as the deprecated
+// spelling of pack.required, a hard requirement.
 func (h *DynamoGraphDeploymentTopOwnerHandler) parseTopology(
 	object client.Object,
 	externalWorkload *v1alpha1.ExternalWorkload,
@@ -315,11 +307,7 @@ func (h *DynamoGraphDeploymentTopOwnerHandler) parseTopology(
 	switch dgd := object.(type) {
 	case *dynamov1alpha1.DynamoGraphDeployment:
 		if dgd.Spec.TopologyConstraint != nil && dgd.Spec.TopologyConstraint.TopologyProfile != "" {
-			topologyName := dgd.Spec.TopologyConstraint.TopologyProfile
 			defaultPackDomain := string(dgd.Spec.TopologyConstraint.PackDomain)
-			externalWorkload.Spec.Topology.Name = topologyName
-			externalWorkload.Spec.Topology.RequiredPlacement = defaultPackDomain
-
 			packDomainByComponent := make(map[string]string, len(dgd.Spec.Services))
 			for serviceName, serviceSpec := range dgd.Spec.Services {
 				packDomain := defaultPackDomain
@@ -328,7 +316,8 @@ func (h *DynamoGraphDeploymentTopOwnerHandler) parseTopology(
 				}
 				packDomainByComponent[serviceName] = packDomain
 			}
-			externalWorkload.Spec.ComponentTopologies = buildComponentTopologies(topologyName, packDomainByComponent)
+			applyTopology(externalWorkload, dgd.Spec.TopologyConstraint.TopologyProfile,
+				defaultPackDomain, packDomainByComponent)
 			return
 		}
 		// Legacy path: KAI topology annotations on the per-service specs
@@ -341,11 +330,7 @@ func (h *DynamoGraphDeploymentTopOwnerHandler) parseTopology(
 		parseTopologyFromServiceAnnotations(serviceAnnotations, externalWorkload)
 	case *dynamov1beta1.DynamoGraphDeployment:
 		if dgd.Spec.TopologyConstraint != nil && dgd.Spec.TopologyConstraint.ClusterTopologyName != "" {
-			topologyName := dgd.Spec.TopologyConstraint.ClusterTopologyName
 			defaultPackDomain := string(dgd.Spec.TopologyConstraint.PackDomain)
-			externalWorkload.Spec.Topology.Name = topologyName
-			externalWorkload.Spec.Topology.RequiredPlacement = defaultPackDomain
-
 			packDomainByComponent := make(map[string]string, len(dgd.Spec.Components))
 			for _, component := range dgd.Spec.Components {
 				packDomain := defaultPackDomain
@@ -354,7 +339,8 @@ func (h *DynamoGraphDeploymentTopOwnerHandler) parseTopology(
 				}
 				packDomainByComponent[component.ComponentName] = packDomain
 			}
-			externalWorkload.Spec.ComponentTopologies = buildComponentTopologies(topologyName, packDomainByComponent)
+			applyTopology(externalWorkload, dgd.Spec.TopologyConstraint.ClusterTopologyName,
+				defaultPackDomain, packDomainByComponent)
 			return
 		}
 		// Legacy path: KAI topology annotations. v1beta1 has no per-component
@@ -363,10 +349,15 @@ func (h *DynamoGraphDeploymentTopOwnerHandler) parseTopology(
 	}
 }
 
-// buildComponentTopologies turns a component name to pack domain mapping into
-// ComponentTopologyEntry values, skipping components that resolved to no pack
-// domain. Entries are sorted by name so that a re-parse of an unchanged
-// DynamoGraphDeployment produces an identical spec.
+func applyTopology(externalWorkload *v1alpha1.ExternalWorkload, topologyName, defaultPackDomain string,
+	packDomainByComponent map[string]string,
+) {
+	externalWorkload.Spec.Topology.Name = topologyName
+	externalWorkload.Spec.Topology.RequiredPlacement = defaultPackDomain
+	externalWorkload.Spec.ComponentTopologies = buildComponentTopologies(topologyName, packDomainByComponent)
+}
+
+// Entries are sorted by name so a re-parse of an unchanged DGD yields an identical spec.
 func buildComponentTopologies(topologyName string, packDomainByComponent map[string]string) []v1alpha1.ComponentTopologyEntry {
 	componentNames := make([]string, 0, len(packDomainByComponent))
 	for componentName, packDomain := range packDomainByComponent {

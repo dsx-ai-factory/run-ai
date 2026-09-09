@@ -576,16 +576,16 @@ var _ = Describe("parseStructureElements", func() {
 			Expect(result[2].HasTopology()).To(BeFalse())
 		})
 
-		It("matches instance keys case-insensitively", func() {
+		It("keeps components that differ only in case apart", func() {
+			// v1alpha1 spec.services is a plain map, so Worker and worker can both exist
+			// and must not be conflated.
 			result := parseStructureElements(se, []v1alpha1.ComponentTopologyEntry{
 				{
 					SpecName: "prefillworker",
 					Topology: v1alpha1.Topology{Name: "grove-topology", RequiredPlacement: "zone"},
 				},
 			})
-			Expect(result[0].HasTopology()).To(BeTrue())
-			topology := result[0].GetTopology()
-			Expect(topology.GetRequiredPlacement()).To(Equal("zone"))
+			Expect(result[0].HasTopology()).To(BeFalse())
 		})
 
 		It("leaves every element without topology when there are no constraints", func() {
