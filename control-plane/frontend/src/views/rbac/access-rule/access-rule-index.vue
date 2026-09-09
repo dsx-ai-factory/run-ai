@@ -145,6 +145,7 @@ import { AccessRuleDeletionModal } from "@/components/access-rules/access-rule-d
 import { useClusterStore } from "@/stores/cluster.store";
 import { accessRuleUtil } from "@/utils/rbac.util/access-rule.util";
 import { BadRequestError } from "@/models/http-response.model";
+import { ErrorAlert } from "@/utils/error-alert.util";
 import NewAccessRuleModal from "@/components/rbac/access-rule/new-access-rule-modal/new-access-rule-modal.vue";
 import { LegacyAccessRuleTransitionModal } from "@/components/rbac/access-rule/legacy-access-rule-transition-modal";
 import { LegacyAccessRuleBanner } from "@/components/rbac/access-rule/legacy-access-rule-banner";
@@ -360,17 +361,21 @@ export default defineComponent({
     },
     notifyCreatedAccessRules(createdAccessRules: AccessRulesBatchCreateResponse): void {
       const succeeded = createdAccessRules.succeeded || [];
-      const totalCount = succeeded.length + (createdAccessRules.failed?.length || 0);
+      const failed = createdAccessRules.failed || [];
 
-      let message: string;
-      if (succeeded.length === 1 && totalCount === 1) {
-        message = `Access rule for ${succeeded[0].subjectId} created`;
-      } else if (succeeded.length === totalCount) {
-        message = `${succeeded.length} access rule(s) created`;
-      } else {
-        message = `${succeeded.length}/${totalCount} access rule(s) created`;
+      if (failed.length > 0) {
+        const message =
+          failed.length === 1
+            ? ErrorAlert.failedCreateMessage("access rule")
+            : `${failed.length} access rule(s) couldn't be created`;
+        this.$q.notify(alertUtil.getError(message));
+        return;
       }
 
+      const message =
+        succeeded.length === 1
+          ? `Access rule for ${succeeded[0].subjectId} created`
+          : `${succeeded.length} access rule(s) created`;
       this.$q.notify(alertUtil.getSuccess(message));
     },
     async validateDeletableAccessRulesIds() {

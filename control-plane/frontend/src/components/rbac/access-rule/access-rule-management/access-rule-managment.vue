@@ -367,11 +367,18 @@ function onAccessRulesSaved(createdAccessRules: AccessRulesBatchCreateResponse):
 }
 
 function notifyCreatedAccessRules(succeededCount: number, totalCount: number): void {
-  const message =
-    succeededCount === totalCount
-      ? `${succeededCount} access rule(s) created`
-      : `${succeededCount}/${totalCount} access rule(s) created`;
+  const failedCount = totalCount - succeededCount;
 
+  if (failedCount > 0) {
+    const message =
+      failedCount === 1
+        ? ErrorAlert.failedCreateMessage("access rule")
+        : `${failedCount} access rule(s) couldn't be created`;
+    $q.notify(alertUtil.getError(message));
+    return;
+  }
+
+  const message = succeededCount === 1 ? "Access rule created" : `${succeededCount} access rule(s) created`;
   $q.notify(alertUtil.getSuccess(message));
 }
 
