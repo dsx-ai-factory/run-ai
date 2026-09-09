@@ -12,6 +12,33 @@ By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md
 2. **Discuss an idea before you build it.** For non-trivial changes, open a feature issue first so the design can be agreed on before you write code. For support and usage questions, open an issue.
 3. **Implement a fix or feature.** Pick up an issue labelled `good first issue` or `help wanted`, comment to claim it, then follow the workflow below.
 
+### How issue priority is decided
+
+Maintainers communicate priority through the **Priority field** on the issue,
+not through a custom label — so the field is the single place to look, and it
+stays accurate when an issue moves between projects and milestones.
+
+Priority is set during triage (a maintainer responsibility, see
+[`MAINTAINERS.md`](MAINTAINERS.md)) and weighs:
+
+- **Severity and blast radius** — does it break a supported release, cause data
+  loss, or degrade scheduling for every tenant, versus affecting one optional
+  path?
+- **Whether a workaround exists**, and how costly that workaround is.
+- **Affected versions** — regressions on a currently supported release
+  (see [`SUPPORT.md`](SUPPORT.md)) outrank issues on end-of-life branches,
+  which are not accepted at all except for critical security issues.
+- **Breadth of impact** — how many users or clusters hit it.
+- **Cost and risk of the fix**, weighed against the above.
+
+**If you think an issue is mis-prioritised, say so in a comment on that issue.**
+Context that changes the calculus is the most useful thing you can add: your
+NVIDIA Run:ai and Kubernetes versions, how many clusters or users are affected,
+whether you have a workaround and what it costs you, and a reproduction if the
+issue lacks one. Maintainers re-triage on new information — a clear impact
+report is far more effective than a "+1". Priority is a maintainer decision and
+is not guaranteed to change, but the reasoning will be stated on the issue.
+
 ---
 
 ## Getting started
