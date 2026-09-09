@@ -67,6 +67,24 @@ We split CI into two layers:
 
 If a Layer 2 step fails, the workflow logs from `runai-actions` (the private repository where the full pipeline lives) are not directly visible to external contributors. Look at the PR labels (`pipeline/build-failed`, `pipeline/e2e-failed`, `pipeline/jira-failed`) for a hint about which stage broke, and a maintainer will help you triage from there.
 
+### Running the checks locally
+
+Layer 1 is the part you can fully reproduce on your machine, and doing so before you push is the fastest way to a green PR. There is deliberately **no single repo-wide gate command**: this is a monorepo of independent modules, the root `Makefile` targets are placeholders, and Layer 2 (full build and end-to-end tests) needs secrets and a cluster, so it cannot run locally at all.
+
+Run the checks matching what you changed — these mirror the corresponding jobs in [`.github/workflows/pr-checks.yaml`](.github/workflows/pr-checks.yaml), at the versions CI pins:
+
+| You changed | Run | Mirrors CI job |
+|---|---|---|
+| Go code | `cd <module> && go build ./... && go test ./... && gofmt -l .`<br>`golangci-lint run` (v2.9.0) | `go-lint`, `govulncheck` |
+| Python | `ruff check <files>` (0.15.15) | `py-lint` |
+| JS/TS | `npx eslint <files>` | `js-lint` |
+| Helm charts | `helm dependency update control-plane/control-plane-chart`<br>`helm lint control-plane/control-plane-chart`<br>`helm template control-plane/control-plane-chart > /dev/null` | `helm` |
+| GitHub Actions workflows | `actionlint` | `actionlint.yaml` |
+| `CODEOWNERS` | `make validate` | `validate-codeowners` |
+| `docs/` or `fern/` | `fern docs dev` | `fern-docs-ci.yaml` |
+
+Each service directory also has its own Makefile with `build`, `test`, `lint`, and `validate` targets scoped to that service — use those when working inside a single component.
+
 ---
 
 ## Code review
