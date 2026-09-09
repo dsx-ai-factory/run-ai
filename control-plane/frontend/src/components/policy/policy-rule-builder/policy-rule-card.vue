@@ -174,6 +174,7 @@ export interface Props {
   lockedRules?: EffectiveRulesEffectiveRulesInner[];
   orgUnits?: OrgUnit[];
   tenantName?: string;
+  policySaveValidationMessage?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -184,6 +185,7 @@ const props = withDefaults(defineProps<Props>(), {
   lockedRules: () => [],
   orgUnits: () => [],
   tenantName: "",
+  policySaveValidationMessage: "",
 });
 
 const emit = defineEmits<{
@@ -204,7 +206,9 @@ const footerError = computed<string>(() => {
   return lastValidationPassed.value ? errorMessages.UNSAVED_RULE_CHANGES : errorMessages.FORM_INCOMPLETE;
 });
 const duplicateError = ref<string>("");
-const footerMessage = computed<string>(() => duplicateError.value || footerError.value);
+const footerMessage = computed<string>(
+  () => duplicateError.value || props.policySaveValidationMessage || footerError.value,
+);
 const lockedRule = computed<EffectiveRulesEffectiveRulesInner | undefined>(() =>
   gvkPolicyUtil.lockedParentRuleForDraft(draft.value, props.lockedRules),
 );

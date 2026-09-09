@@ -54,6 +54,7 @@ func (s *UpgradeAirgapClusterChart) Execute(ctx context.Context, _ *model.RunAII
 		step.ClusterAuthValue(s.installInfo.InstallInfo),
 		"cluster.uid="+s.upgradeCfg.ClusterUUID,
 		"cluster.url="+fqdn,
+		clusterImagePullSecretValue,
 	)
 
 	logging.Infof("[Upgrade] Upgrading cluster chart from local path %s", chartPath)

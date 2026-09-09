@@ -22,6 +22,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/pkg/artifactlock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func newBaseCfg() *config.UpgradeConfig {
@@ -339,13 +340,39 @@ func TestAirgapUpgrade_FromLoadedBundle(t *testing.T) {
 	assert.True(t, harness.ContainsValue(clusterCall.Values, "controlPlane.clientSecret=s3cr3t"))
 	assert.True(t, harness.ContainsValue(clusterCall.Values, "cluster.uid=uuid-abc"))
 	assert.True(t, harness.ContainsValue(clusterCall.Values, "cluster.url=test.run.ai"))
+	assert.True(t, harness.ContainsValue(clusterCall.Values, "global.additionalImagePullSecrets[0]=runai-reg-creds"))
 
-	secretCalls := fakeK8s.CallsByVerb("apply")
+	secretCalls := fakeK8s.CallsByVerb("create")
 	require.Len(t, secretCalls, 2)
 	assert.Equal(t, step.CPNamespace, secretCalls[0].Namespace)
 	assert.Equal(t, "runai-reg-creds", secretCalls[0].Name)
 	assert.Equal(t, step.ClusterNamespace, secretCalls[1].Namespace)
 	assert.Equal(t, "runai-reg-creds", secretCalls[1].Name)
+}
+
+func TestAirgapUpgrade_FromLoadedBundleUpdatesExistingRegistrySecrets(t *testing.T) {
+	harness.UseFastPollInterval(t)
+	workingDir := harness.CreateLoadedBundle(t, bothChartsLock())
+	fakeK8s := &harness.FakeK8sExecutor{
+		Existing: map[client.ObjectKey]bool{
+			{Namespace: step.CPNamespace, Name: "runai-reg-creds"}:      true,
+			{Namespace: step.ClusterNamespace, Name: "runai-reg-creds"}: true,
+		},
+	}
+	cfg := newLoadedBundleUpgradeCfg(workingDir)
+	deps := upgrade.Deps{
+		HelmInstaller:    &harness.FakeHelmInstaller{},
+		ClusterLookup:    harness.NewFakeClusterLookup(),
+		HelmValuesReader: harness.HelmValues,
+		K8sExecutor:      fakeK8s,
+	}
+
+	require.NoError(t, orchestrator.RunUpgrade(cfg, deps))
+
+	secretCalls := fakeK8s.CallsByVerb("patch")
+	require.Len(t, secretCalls, 2)
+	assert.Equal(t, step.CPNamespace, secretCalls[0].Namespace)
+	assert.Equal(t, step.ClusterNamespace, secretCalls[1].Namespace)
 }
 
 // A values directory kept apart from the working directory is honored, which is
@@ -400,12 +427,14 @@ func TestAirgapUpgrade_FromLoadedBundleMissingChart(t *testing.T) {
 func TestAirgapUpgrade_BothCPAndCluster(t *testing.T) {
 	harness.UseFastPollInterval(t)
 	fakeHelm := &harness.FakeHelmInstaller{}
+	fakeK8s := &harness.FakeK8sExecutor{}
 	tarball := harness.CreateTestTarball(t)
 	cfg := newAirgapUpgradeCfg(tarball)
 	deps := upgrade.Deps{
 		HelmInstaller:    fakeHelm,
 		ClusterLookup:    harness.NewFakeClusterLookup(),
 		HelmValuesReader: harness.HelmValues,
+		K8sExecutor:      fakeK8s,
 	}
 
 	err := orchestrator.RunUpgrade(cfg, deps)
@@ -432,14 +461,21 @@ func TestAirgapUpgrade_BothCPAndCluster(t *testing.T) {
 	assert.True(t, harness.ContainsValue(clusterCall.Values, "controlPlane.clientSecret=s3cr3t"))
 	assert.True(t, harness.ContainsValue(clusterCall.Values, "cluster.uid=uuid-abc"))
 	assert.True(t, harness.ContainsValue(clusterCall.Values, "cluster.url=test.run.ai"))
+	assert.True(t, harness.ContainsValue(clusterCall.Values, "global.additionalImagePullSecrets[0]=runai-reg-creds"))
 	assert.True(t, strings.HasSuffix(clusterCall.ChartName, "runai-cluster-2.20.0.tgz"))
 	require.Len(t, clusterCall.ValueFiles, 1)
 	assert.True(t, strings.HasSuffix(clusterCall.ValueFiles[0], "custom-env.yaml"))
+
+	secretCalls := fakeK8s.CallsByVerb("create")
+	require.Len(t, secretCalls, 2)
+	assert.Equal(t, step.CPNamespace, secretCalls[0].Namespace)
+	assert.Equal(t, step.ClusterNamespace, secretCalls[1].Namespace)
 }
 
 func TestAirgapUpgrade_CPOnly(t *testing.T) {
 	harness.UseFastPollInterval(t)
 	fakeHelm := &harness.FakeHelmInstaller{}
+	fakeK8s := &harness.FakeK8sExecutor{}
 	tarball := harness.CreateTestTarball(t)
 	cfg := newAirgapUpgradeCfg(tarball)
 	cfg.UpgradeCluster = false
@@ -448,6 +484,7 @@ func TestAirgapUpgrade_CPOnly(t *testing.T) {
 		HelmInstaller:    fakeHelm,
 		ClusterLookup:    harness.NewFakeClusterLookup(),
 		HelmValuesReader: harness.HelmValues,
+		K8sExecutor:      fakeK8s,
 	}
 
 	err := orchestrator.RunUpgrade(cfg, deps)
@@ -464,6 +501,7 @@ func TestAirgapUpgrade_CPOnly(t *testing.T) {
 func TestAirgapUpgrade_ClusterOnly(t *testing.T) {
 	harness.UseFastPollInterval(t)
 	fakeHelm := &harness.FakeHelmInstaller{}
+	fakeK8s := &harness.FakeK8sExecutor{}
 	tarball := harness.CreateTestTarball(t)
 	cfg := newAirgapUpgradeCfg(tarball)
 	cfg.UpgradeControlPlane = false
@@ -473,6 +511,7 @@ func TestAirgapUpgrade_ClusterOnly(t *testing.T) {
 		HelmInstaller:    fakeHelm,
 		ClusterLookup:    harness.NewFakeClusterLookup(),
 		HelmValuesReader: harness.HelmValues,
+		K8sExecutor:      fakeK8s,
 	}
 
 	err := orchestrator.RunUpgrade(cfg, deps)
@@ -483,18 +522,21 @@ func TestAirgapUpgrade_ClusterOnly(t *testing.T) {
 	assert.Equal(t, step.ClusterReleaseName, clusterCall.ReleaseName)
 	assert.True(t, harness.ContainsValue(clusterCall.Values, "cluster.uid=uuid-abc"))
 	assert.True(t, harness.ContainsValue(clusterCall.Values, "controlPlane.clientSecret=s3cr3t"))
+	assert.True(t, harness.ContainsValue(clusterCall.Values, "global.additionalImagePullSecrets[0]=runai-reg-creds"))
 	assert.True(t, strings.HasSuffix(clusterCall.ChartName, "runai-cluster-2.20.0.tgz"))
 }
 
 func TestAirgapUpgrade_CustomCACarriedForward(t *testing.T) {
 	harness.UseFastPollInterval(t)
 	fakeHelm := &harness.FakeHelmInstaller{}
+	fakeK8s := &harness.FakeK8sExecutor{}
 	tarball := harness.CreateTestTarball(t)
 	cfg := newAirgapUpgradeCfg(tarball)
 	deps := upgrade.Deps{
 		HelmInstaller:    fakeHelm,
 		ClusterLookup:    harness.NewFakeClusterLookup(),
 		HelmValuesReader: harness.HelmValuesWithCustomCA,
+		K8sExecutor:      fakeK8s,
 	}
 
 	err := orchestrator.RunUpgrade(cfg, deps)

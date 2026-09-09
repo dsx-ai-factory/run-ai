@@ -34,9 +34,11 @@ public class MapperUtils {
     public static final String GROUPS_USER_ATTRIBUTE = "groups.user.attribute";
     public static final String MULTIVALUED_ATTRIBUTE = "multivalued";
     public static final String RUNAI_ATTRIBUTE_IMPORTER_CATEGORY = "Runai Attribute Importer";
-    public static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
-        .connectTimeout(Duration.ofMillis(TIMEOUT_MILLIS))
-        .build();
+    private static final class HttpClientHolder {
+        static final HttpClient INSTANCE = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofMillis(TIMEOUT_MILLIS))
+            .build();
+    }
 
     public static List<String> getUserAttribute(ProtocolMapperModel mappingModel, UserSessionModel userSession, String attributeKey) {
         var listAttr = mappingModel.getConfig().get(attributeKey);
@@ -78,7 +80,7 @@ public class MapperUtils {
                 requestBuilder.header(TENANT_HEADER, tenantId);
             }
             var request = requestBuilder.build();
-            var response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+            var response = HttpClientHolder.INSTANCE.send(request, HttpResponse.BodyHandlers.ofString());
             int status = response.statusCode();
             if (status == HttpURLConnection.HTTP_OK) {
                 var json = response.body();
