@@ -199,6 +199,33 @@ func TestInstallClusterChart_BuildsResolvedValues(t *testing.T) {
 	})
 }
 
+func TestInstallClusterChart_UsesSuppliedConnection(t *testing.T) {
+	fakeHelm := &harness.FakeHelmInstaller{}
+	act := InstallClusterChart{
+		ClusterName:     "c1",
+		Domain:          "cluster.example.com",
+		ControlPlaneURL: "https://cp.example.com",
+		ClusterUID:      "cluster-uid",
+		BootstrapToken:  "bootstrap-token",
+		Repo:            "https://repo",
+		Version:         "2.26.0",
+		ReleaseName:     "runai-cluster",
+		ChartName:       "runai-cluster",
+		Namespace:       "runai",
+	}
+
+	execOK(t, act, orchestrator2.Deps{HelmInstaller: fakeHelm})
+
+	calls := fakeHelm.CallsByRelease("runai-cluster")
+	require.Len(t, calls, 1)
+	assert.Subset(t, calls[0].Values, []string{
+		"controlPlane.url=https://cp.example.com",
+		"controlPlane.bootstrapToken=bootstrap-token",
+		"cluster.uid=cluster-uid",
+		"cluster.url=cluster.example.com",
+	})
+}
+
 func TestInstallClusterChart_ClusterNotFound(t *testing.T) {
 	api := &fakeAPI{}
 	deps := orchestrator2.Deps{RunAIClientProvider: providerFor(api), HelmInstaller: &harness.FakeHelmInstaller{}}
@@ -374,6 +401,31 @@ func TestInstallClusterChartLocal_BuildsResolvedValues(t *testing.T) {
 		"global.customCA.enabled=true",
 		"clusterConfig.global.subdomainSupport=true",
 		"foo.bar=baz",
+	})
+}
+
+func TestInstallClusterChartLocal_UsesSuppliedConnection(t *testing.T) {
+	fakeHelm := &harness.FakeHelmInstaller{}
+	act := InstallClusterChartLocal{
+		ClusterName:     "c1",
+		Domain:          "cluster.example.com",
+		ControlPlaneURL: "https://cp.example.com",
+		ClusterUID:      "cluster-uid",
+		ClientSecret:    "client-secret",
+		ChartPath:       "/pkg/charts/runai-cluster-2.20.0.tgz",
+		ReleaseName:     "runai-cluster",
+		Namespace:       "runai",
+	}
+
+	execOK(t, act, orchestrator2.Deps{HelmInstaller: fakeHelm})
+
+	calls := fakeHelm.CallsByRelease("runai-cluster")
+	require.Len(t, calls, 1)
+	assert.Subset(t, calls[0].Values, []string{
+		"controlPlane.url=https://cp.example.com",
+		"controlPlane.clientSecret=client-secret",
+		"cluster.uid=cluster-uid",
+		"cluster.url=cluster.example.com",
 	})
 }
 

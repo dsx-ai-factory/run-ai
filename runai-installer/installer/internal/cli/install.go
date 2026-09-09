@@ -50,6 +50,10 @@ func newInstallCmd() *cobra.Command {
 				return err
 			}
 
+			if err := installconfig.ResolveClusterCredentials(cfg); err != nil {
+				return err
+			}
+
 			registry, err := installconfig.ResolveRegistry(cfg, jfrogTokenPath, ngcTokenPath)
 			if err != nil {
 				return err

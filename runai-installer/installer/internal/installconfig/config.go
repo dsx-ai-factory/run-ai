@@ -135,11 +135,16 @@ type Cluster struct {
 	// WorkloadRouting selects how workloads are exposed: "host" (subdomain
 	// routing, the default) or "path". It maps to the cluster chart's
 	// clusterConfig.global.subdomainSupport value.
-	WorkloadRouting  string         `yaml:"workloadRouting,omitempty"`
-	TLS              *TLS           `yaml:"tls,omitempty"`
-	Inference        *Inference     `yaml:"inference,omitempty"`
-	ControlPlaneURL  string         `yaml:"controlPlaneUrl,omitempty"`
-	CustomHelmValues map[string]any `yaml:"customHelmValues,omitempty"`
+	WorkloadRouting    string         `yaml:"workloadRouting,omitempty"`
+	TLS                *TLS           `yaml:"tls,omitempty"`
+	Inference          *Inference     `yaml:"inference,omitempty"`
+	ControlPlaneURL    string         `yaml:"controlPlaneUrl,omitempty"`
+	UID                string         `yaml:"uid,omitempty"`
+	BootstrapTokenPath string         `yaml:"bootstrapTokenPath,omitempty"`
+	ClientSecretPath   string         `yaml:"clientSecretPath,omitempty"`
+	CustomHelmValues   map[string]any `yaml:"customHelmValues,omitempty"`
+	bootstrapToken     string
+	clientSecret       string
 }
 
 type Inference struct {

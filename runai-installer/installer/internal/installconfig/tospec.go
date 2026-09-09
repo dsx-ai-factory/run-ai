@@ -83,6 +83,10 @@ func (c *Config) ToSpec(opts RunOptions) *spec.Spec {
 			WorkloadRouting:  c.Cluster.WorkloadRouting,
 			TLS:              toSpecTLS(c.Cluster.TLS),
 			Inference:        toSpecInference(c.Cluster.Inference),
+			ControlPlaneURL:  c.Cluster.ControlPlaneURL,
+			UID:              c.Cluster.UID,
+			BootstrapToken:   c.Cluster.bootstrapToken,
+			ClientSecret:     c.Cluster.clientSecret,
 			CustomHelmValues: toStringMap(c.Cluster.CustomHelmValues),
 		}
 	}

@@ -241,11 +241,13 @@ func buildClusterFlow(s *spec.Spec, deps orchestrator2.Deps) *orchestrator2.Flow
 		flowSteps = append(flowSteps, steps.NewCASecret("install-cluster-ca", clusterCASecret, step.ClusterNamespace, step.ClusterReleaseName, caPath, clusterCASecretLabels, deps))
 	}
 
-	flowSteps = append(flowSteps, steps.NewEnsureCluster("register-cluster", actions.EnsureCluster{
-		ClusterName: c.Name,
-		Domain:      domain,
-		CACertPath:  caPath,
-	}, deps))
+	if !c.UsesExternalControlPlane() {
+		flowSteps = append(flowSteps, steps.NewEnsureCluster("register-cluster", actions.EnsureCluster{
+			ClusterName: c.Name,
+			Domain:      domain,
+			CACertPath:  caPath,
+		}, deps))
+	}
 
 	flowSteps = append(flowSteps, newClusterChartStep(s, domain, version, caPath, deps))
 
@@ -259,47 +261,59 @@ func newClusterChartStep(s *spec.Spec, domain, version, caPath string, deps orch
 		workingDir := s.Airgap.WorkingDir
 		if s.UsesAirgapLoad() {
 			return steps.Titled(steps.NewClusterChart("install-cluster-chart", actions.InstallClusterChartLocal{
-				ClusterName: c.Name,
-				Domain:      domain,
-				CACertPath:  caPath,
-				WorkingDir:  workingDir,
-				LockChart:   step.ClusterChartName,
-				Version:     version,
-				ReleaseName: step.ClusterReleaseName,
-				Namespace:   step.ClusterNamespace,
-				HostRouting: c.HostRouting(),
-				ValueFiles:  []string{filepath.Join(s.Airgap.ValuesDir, airgapvalues.ClusterValuesFile)},
-				ExtraValues: clusterExtraValues(s, c),
+				ClusterName:     c.Name,
+				Domain:          domain,
+				ControlPlaneURL: c.ControlPlaneURL,
+				ClusterUID:      c.UID,
+				BootstrapToken:  c.BootstrapToken,
+				ClientSecret:    c.ClientSecret,
+				CACertPath:      caPath,
+				WorkingDir:      workingDir,
+				LockChart:       step.ClusterChartName,
+				Version:         version,
+				ReleaseName:     step.ClusterReleaseName,
+				Namespace:       step.ClusterNamespace,
+				HostRouting:     c.HostRouting(),
+				ValueFiles:      []string{filepath.Join(s.Airgap.ValuesDir, airgapvalues.ClusterValuesFile)},
+				ExtraValues:     clusterExtraValues(s, c),
 			}, deps), title)
 		}
 		return steps.Titled(steps.NewClusterChart("install-cluster-chart", actions.InstallClusterChartLocal{
-			ClusterName: c.Name,
-			Domain:      domain,
-			CACertPath:  caPath,
-			WorkingDir:  workingDir,
-			ChartPrefix: step.ClusterChartName,
-			Version:     version,
-			ReleaseName: step.ClusterReleaseName,
-			Namespace:   step.ClusterNamespace,
-			HostRouting: c.HostRouting(),
-			ValueFiles:  []string{filepath.Join(workingDir, airgap.CustomEnvFile)},
-			ExtraValues: clusterExtraValues(s, c),
+			ClusterName:     c.Name,
+			Domain:          domain,
+			ControlPlaneURL: c.ControlPlaneURL,
+			ClusterUID:      c.UID,
+			BootstrapToken:  c.BootstrapToken,
+			ClientSecret:    c.ClientSecret,
+			CACertPath:      caPath,
+			WorkingDir:      workingDir,
+			ChartPrefix:     step.ClusterChartName,
+			Version:         version,
+			ReleaseName:     step.ClusterReleaseName,
+			Namespace:       step.ClusterNamespace,
+			HostRouting:     c.HostRouting(),
+			ValueFiles:      []string{filepath.Join(workingDir, airgap.CustomEnvFile)},
+			ExtraValues:     clusterExtraValues(s, c),
 		}, deps), title)
 	}
 	repo, isOCI := clusterChartSource(s)
 	return steps.Titled(steps.NewClusterChart("install-cluster-chart", actions.InstallClusterChart{
-		ClusterName: c.Name,
-		Domain:      domain,
-		CACertPath:  caPath,
-		Repo:        repo,
-		IsOCI:       isOCI,
-		Auth:        chartAuth(s.Registry),
-		Version:     version,
-		ReleaseName: step.ClusterReleaseName,
-		ChartName:   step.ClusterChartName,
-		Namespace:   step.ClusterNamespace,
-		HostRouting: c.HostRouting(),
-		ExtraValues: clusterExtraValues(s, c),
+		ClusterName:     c.Name,
+		Domain:          domain,
+		ControlPlaneURL: c.ControlPlaneURL,
+		ClusterUID:      c.UID,
+		BootstrapToken:  c.BootstrapToken,
+		ClientSecret:    c.ClientSecret,
+		CACertPath:      caPath,
+		Repo:            repo,
+		IsOCI:           isOCI,
+		Auth:            chartAuth(s.Registry),
+		Version:         version,
+		ReleaseName:     step.ClusterReleaseName,
+		ChartName:       step.ClusterChartName,
+		Namespace:       step.ClusterNamespace,
+		HostRouting:     c.HostRouting(),
+		ExtraValues:     clusterExtraValues(s, c),
 	}, deps), title)
 }
 
