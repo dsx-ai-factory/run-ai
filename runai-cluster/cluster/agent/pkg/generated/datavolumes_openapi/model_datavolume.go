@@ -18,11 +18,11 @@ import (
 
 // Datavolume struct for Datavolume
 type Datavolume struct {
-	Id        string     `json:"id"`
+	Id string `json:"id"`
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
-	CreatedBy *string    `json:"createdBy,omitempty"`
-	UpdatedBy *string    `json:"updatedBy,omitempty"`
+	CreatedBy *string `json:"createdBy,omitempty"`
+	UpdatedBy *string `json:"updatedBy,omitempty"`
 	// The name of the new data volume.
 	Name string `json:"name"`
 	// A brief description of the data volume and its purpose.
@@ -35,13 +35,13 @@ type Datavolume struct {
 	ShouldDeleteOriginalVolume *bool `json:"shouldDeleteOriginalVolume,omitempty"`
 	// If true, the original storage volume will be used together with the data volume. Default true as long as \"shouldDeleteOriginalVolume\" is false.
 	UseOriginalVolume NullableBool `json:"useOriginalVolume,omitempty"`
-	ProjectName       string       `json:"projectName"`
-	DepartmentId      *string      `json:"departmentId,omitempty"`
+	ProjectName string `json:"projectName"`
+	DepartmentId *string `json:"departmentId,omitempty"`
 	// The id of the cluster.
 	ClusterId *string `json:"clusterId,omitempty"`
 	// Will be returned only if the user has the required permissions to view those scopes
-	SharedScopes []SharedScope    `json:"sharedScopes,omitempty"`
-	Status       DatavolumeStatus `json:"status"`
+	SharedScopes []SharedScope `json:"sharedScopes,omitempty"`
+	Status DatavolumeStatus `json:"status"`
 }
 
 // NewDatavolume instantiates a new Datavolume object
@@ -395,7 +395,6 @@ func (o *Datavolume) HasUseOriginalVolume() bool {
 func (o *Datavolume) SetUseOriginalVolume(v bool) {
 	o.UseOriginalVolume.Set(&v)
 }
-
 // SetUseOriginalVolumeNil sets the value for UseOriginalVolume to be an explicit nil
 func (o *Datavolume) SetUseOriginalVolumeNil() {
 	o.UseOriginalVolume.Set(nil)
@@ -638,3 +637,5 @@ func (v *NullableDatavolume) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

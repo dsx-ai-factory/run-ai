@@ -1,5 +1,9 @@
 /* tslint:disable */
 /* eslint-disable */
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 /**
  * Tenant Management
  * An API for managing tenants objects and their associated resources.

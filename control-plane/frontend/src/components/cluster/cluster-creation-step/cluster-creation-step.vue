@@ -4,7 +4,7 @@
 -->
 
 <template>
-  <runai-expansion-wrapper>
+  <runai-expansion-wrapper no-first-top-padding>
     <cluster-name-section
       :model-value="clusterFormModel.name"
       @update:model-value="updateClusterName"

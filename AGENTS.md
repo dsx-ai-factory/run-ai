@@ -4,7 +4,20 @@ This repository contains the NVIDIA Run:ai documentation.
 
 For contribution mechanics — cloning, the pull request workflow, DCO sign-off,
 branching, and code review — see `CONTRIBUTING.md`. This file covers
-documentation-specific guidance only.
+documentation-specific guidance only; for coding conventions across the rest
+of the monorepo (services, Helm chart, CLI, etc.), see `CLAUDE.md` at the
+repository root and the per-service `CLAUDE.md` files it indexes.
+
+## Secrets and credentials
+
+Never commit secrets, API keys, tokens, or credentials — real or
+placeholder-looking-real — to this repository, including in `docs/` examples.
+When a doc needs to show a credential-shaped value (a token, a password, a
+connection string), use an obviously-fake placeholder (e.g. `<your-api-key>`
+or `sk-...redacted...`), not a plausible-looking fabricated one. If you
+discover a secret already committed, do not open a public PR referencing it —
+report it per [`SECURITY.md`](SECURITY.md) instead, since removing it from a
+file doesn't remove it from git history.
 
 ## Products in Scope
 

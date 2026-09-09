@@ -17,9 +17,9 @@ import (
 
 // SubmissionError struct for SubmissionError
 type SubmissionError struct {
-	Code             int32                                   `json:"code"`
-	Message          string                                  `json:"message"`
-	Details          *string                                 `json:"details,omitempty"`
+	Code int32 `json:"code"`
+	Message string `json:"message"`
+	Details *string `json:"details,omitempty"`
 	ComplianceIssues []ComplianceIssuesComplianceIssuesInner `json:"complianceIssues,omitempty"`
 }
 
@@ -206,3 +206,5 @@ func (v *NullableSubmissionError) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

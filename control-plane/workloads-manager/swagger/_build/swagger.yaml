@@ -7,9 +7,6 @@ info:
     url: https://www.run.ai/
     email: support@run.ai
 servers:
-  - url: https://app.run.ai
-  - url: https://staging.run.ai
-  - url: https://test.run.ai
   - url: http://localhost:8080
 security:
   - bearerAuth: []

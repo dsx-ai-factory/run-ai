@@ -17,9 +17,9 @@ import (
 
 // InternalCreateAccessRuleRequest struct for InternalCreateAccessRuleRequest
 type InternalCreateAccessRuleRequest struct {
-	SubjectId   string                                       `json:"subjectId"`
-	SubjectType SubjectType                                  `json:"subjectType"`
-	Scope       NullableInternalCreateAccessRuleRequestScope `json:"scope,omitempty"`
+	SubjectId string `json:"subjectId"`
+	SubjectType SubjectType `json:"subjectType"`
+	Scope NullableInternalCreateAccessRuleRequestScope `json:"scope,omitempty"`
 }
 
 // NewInternalCreateAccessRuleRequest instantiates a new InternalCreateAccessRuleRequest object
@@ -121,7 +121,6 @@ func (o *InternalCreateAccessRuleRequest) HasScope() bool {
 func (o *InternalCreateAccessRuleRequest) SetScope(v InternalCreateAccessRuleRequestScope) {
 	o.Scope.Set(&v)
 }
-
 // SetScopeNil sets the value for Scope to be an explicit nil
 func (o *InternalCreateAccessRuleRequest) SetScopeNil() {
 	o.Scope.Set(nil)
@@ -181,3 +180,5 @@ func (v *NullableInternalCreateAccessRuleRequest) UnmarshalJSON(src []byte) erro
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -24,7 +24,7 @@ const mnnvlGoldenBaseInput = "dinfw_serving_port_basic"
 // the MNNVL plugin resolution and not the ambient OAuth/proxy config.
 func mnnvlTestClusterConfig(dinfEnabled bool) composer.ClusterStorageConfig {
 	cluster := clusterApi.NewDisplayedCluster("cluster-a", 1, "cluster-a", time.Time{})
-	cluster.SetDomain("https://test.run.ai")
+	cluster.SetDomain("https://mock-q7z3k.example.com")
 	reported := clusterApi.ClusterReportedConfig{}
 	reported.SetDinfGPUNetworkAcceleration(dinfEnabled)
 	status := clusterApi.ClusterDisplayedStatus{}

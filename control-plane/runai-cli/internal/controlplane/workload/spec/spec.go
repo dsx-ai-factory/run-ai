@@ -960,8 +960,8 @@ func (gs *GeneralSpec) setDistributedProperties() error {
 		spec.SetDistributedFramework(*framework)
 	}
 
-	if distributed.Workers > 0 {
-		spec.SetNumWorkers(distributed.Workers)
+	if distributed.Workers.IsSet() && distributed.Workers.Get() != nil {
+		spec.SetNumWorkers(*distributed.Workers.Get())
 	}
 	if distributed.SegmentSize.IsSet() && distributed.SegmentSize.Get() != nil {
 		spec.SetSegmentSize(*distributed.SegmentSize.Get())
