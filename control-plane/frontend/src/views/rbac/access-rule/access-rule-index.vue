@@ -22,6 +22,7 @@
       @close="closeAccessRuleModal"
       :is-sso="isSSO"
       :roles="roles"
+      :allowed-scopes="allowedCreateScopes"
     />
     <runai-table-wrapper :filters-object="filterBy" sticky>
       <template v-slot:banner>
@@ -105,6 +106,7 @@ import {
   type AccessRule,
   AccessRulesBatchAction,
   type AccessRulesBatchCreateResponse,
+  type PermittedScopes,
   type RoleV1,
 } from "@/swagger-models/authorization-client";
 import { ECustomCell } from "@/models/table.model";
@@ -117,6 +119,7 @@ import { useRoleStore } from "@/stores/role.store";
 
 // services
 import { rolesService } from "@/services/control-plane/rbac/roles.service/roles.service";
+import { permissionService } from "@/services/authorization/permission.service/permission.service";
 
 // utils
 import { alertUtil } from "@/utils/alert.util";
@@ -175,6 +178,7 @@ export default defineComponent({
       roles: [] as Array<RoleV1>,
       deletableAccessRulesIds: [] as number[],
       lastSysAdminDeletionError: false,
+      allowedCreateScopes: {} as PermittedScopes,
     };
   },
   setup() {
@@ -274,6 +278,11 @@ export default defineComponent({
     }
 
     this.roles = this.getPermittedRoles();
+
+    if (this.canCreateAccessRules) {
+      const permittedScopesByAction = await permissionService.getPermittedScopesForAction(ResourceType.AccessRules);
+      this.allowedCreateScopes = permittedScopesByAction?.[Action.Create] || {};
+    }
   },
   computed: {
     hasAccessRulesWithLegacyRoles(): boolean {
