@@ -232,8 +232,8 @@ type WorkloadSyncFields struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Preemptibility *WorkloadTypePreemptibility `json:"preemptibility,omitempty"`
-	Preemptibility *WorkloadTypePreemptibility `json:"preemptibility,omitempty" gorm:""`
+	//Preemptibility *string `json:"preemptibility,omitempty"`
+	Preemptibility *string `json:"preemptibility,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// Flat list of intermediate child elements. May be truncated if too many.
@@ -605,12 +605,6 @@ func AssertWorkloadSyncFieldsConstraints(obj WorkloadSyncFields) error {
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	if obj.Preemptibility != nil {
-		if okValue := obj.Preemptibility.IsValid(); !okValue {
-			return &UnsupportedValueError{Field: "Preemptibility", Value: string(*obj.Preemptibility)}
-		}
-	}
 
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////

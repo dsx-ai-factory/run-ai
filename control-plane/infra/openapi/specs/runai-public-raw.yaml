@@ -51800,18 +51800,6 @@ components:
               $ref: '#/components/schemas/QueueResources'
             podGroupRequestedNonPreemptibleResources:
               $ref: '#/components/schemas/QueueResources'
-    WorkloadTypePreemptibility:
-      type: string
-      description: >-
-        Indicates the default preemptibility level of the workload type. Only
-        available for workloads submitted to clusters of versions 2.24+. The
-        default, if not specified, is if priority.value >= 100 - then
-        'non-preemptible', else 'preemptible'.
-      example: non-preemptible
-      enum:
-        - preemptible
-        - semi-preemptible
-        - non-preemptible
     WorkloadElement:
       type: object
       required:
@@ -52115,9 +52103,8 @@ components:
               type: string
         preemptibility:
           type: string
+          example: non-preemptible
           nullable: true
-          allOf:
-            - $ref: '#/components/schemas/WorkloadTypePreemptibility'
         structureElements:
           type: array
           nullable: true
@@ -55794,6 +55781,18 @@ components:
       items:
         $ref: '#/components/schemas/WorkloadCategory'
       x-schema-name: WorkloadCategories
+    WorkloadTypePreemptibility:
+      type: string
+      description: >-
+        Indicates the default preemptibility level of the workload type. Only
+        available for workloads submitted to clusters of versions 2.24+. The
+        default, if not specified, is if priority.value >= 100 - then
+        'non-preemptible', else 'preemptible'.
+      example: non-preemptible
+      enum:
+        - preemptible
+        - semi-preemptible
+        - non-preemptible
     WorkloadTypeAdditionalResponseFields:
       type: object
       properties:

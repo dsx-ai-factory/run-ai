@@ -165,9 +165,8 @@ properties:
         type: string
   preemptibility:
     type: string
+    example: "non-preemptible"
     nullable: true
-    allOf:
-      - $ref: "../WorkloadProperties/WorkloadTypePreemptibility.yaml"
   structureElements:
     type: array
     nullable: true

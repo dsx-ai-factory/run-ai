@@ -66,7 +66,7 @@ type WorkloadSyncFields struct {
 	ApplicationId           NullableString                     `json:"applicationId,omitempty"`
 	ApplicationName         NullableString                     `json:"applicationName,omitempty"`
 	Topology                NullableWorkloadSyncFieldsTopology `json:"topology,omitempty"`
-	Preemptibility          NullableWorkloadTypePreemptibility `json:"preemptibility,omitempty"`
+	Preemptibility          NullableString                     `json:"preemptibility,omitempty"`
 	// Flat list of intermediate child elements. May be truncated if too many.
 	StructureElements []WorkloadElement `json:"structureElements,omitempty"`
 	// Total number of structure elements before truncation. Null if no structure exists.
@@ -1379,9 +1379,9 @@ func (o *WorkloadSyncFields) UnsetTopology() {
 }
 
 // GetPreemptibility returns the Preemptibility field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *WorkloadSyncFields) GetPreemptibility() WorkloadTypePreemptibility {
+func (o *WorkloadSyncFields) GetPreemptibility() string {
 	if o == nil || IsNil(o.Preemptibility.Get()) {
-		var ret WorkloadTypePreemptibility
+		var ret string
 		return ret
 	}
 	return *o.Preemptibility.Get()
@@ -1390,7 +1390,7 @@ func (o *WorkloadSyncFields) GetPreemptibility() WorkloadTypePreemptibility {
 // GetPreemptibilityOk returns a tuple with the Preemptibility field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *WorkloadSyncFields) GetPreemptibilityOk() (*WorkloadTypePreemptibility, bool) {
+func (o *WorkloadSyncFields) GetPreemptibilityOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -1406,8 +1406,8 @@ func (o *WorkloadSyncFields) HasPreemptibility() bool {
 	return false
 }
 
-// SetPreemptibility gets a reference to the given NullableWorkloadTypePreemptibility and assigns it to the Preemptibility field.
-func (o *WorkloadSyncFields) SetPreemptibility(v WorkloadTypePreemptibility) {
+// SetPreemptibility gets a reference to the given NullableString and assigns it to the Preemptibility field.
+func (o *WorkloadSyncFields) SetPreemptibility(v string) {
 	o.Preemptibility.Set(&v)
 }
 

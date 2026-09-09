@@ -12,7 +12,6 @@ import {
 } from "@/models/table.model";
 import {
   EWorkloadNodeArchitecture,
-  Preemptibility,
   workloadPhaseFilterOptions,
   workloadPreemptibilityOptions,
   type WorkloadServicePod,
@@ -410,11 +409,7 @@ export const allWorkloadColumnsMap: Record<string, ITableColumn> = {
   preemptible: {
     name: WorkloadSortFilterFields.Preemptibility,
     label: "Preemptibility",
-    field: (workload: Workload): string | null | undefined => {
-      if (workload.preemptibility != null) return workload.preemptibility;
-      if (typeof workload.preemptible !== "boolean") return workload.preemptibility;
-      return workload.preemptible ? Preemptibility.Preemptible : Preemptibility.NonPreemptible;
-    },
+    field: (workload: Workload): string | null | undefined => workload.preemptibility,
     format: (preemptibility: string | null | undefined) =>
       workloadPreemptibilityOptions.find((option) => option.value === preemptibility)?.label ?? "-",
     sortable: true,
