@@ -32,7 +32,7 @@ var workloadSortFields = map[string]struct{}{
 	"phaseUpdatedAt": {}, "category": {}, "priority": {}, "totalPendingTimeSeconds": {},
 	"totalRunningTimeSeconds": {}, "priorityClassName": {}, "preemptibility": {},
 	"guaranteedRuntimeEndsAt": {},
-	"aiApplicationId": {}, "aiApplicationName": {},
+	"aiApplicationId":         {}, "aiApplicationName": {},
 	// MCP-facing aliases for API spellings that differ from returned/input field names.
 	"nodePoolName": {}, "allocatedGpu": {},
 }
