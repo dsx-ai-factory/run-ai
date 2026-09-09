@@ -47,8 +47,10 @@ func connectedConfig(t *testing.T, path string, dryRun bool) (*installconfig.Con
 
 func appliedNames(k8s *harness.FakeK8sExecutor) map[string]bool {
 	out := map[string]bool{}
-	for _, c := range k8s.CallsByVerb("apply") {
-		out[c.Name] = true
+	for _, verb := range []string{"apply", "create", "patch"} {
+		for _, c := range k8s.CallsByVerb(verb) {
+			out[c.Name] = true
+		}
 	}
 	return out
 }

@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **InstanceKey** | Pointer to **NullableString** | Instance identifier from ComponentInstanceSelector (e.g., Frontend, PrefillWorker) | [optional] 
 **ReplicaKey** | Pointer to **NullableString** | Replica identifier if applicable | [optional] 
 **CreatedAt** | Pointer to **time.Time** | The timestamp when the structure element was created. | [optional] 
+**Topology** | Pointer to [**NullableWorkloadElementTopology**](WorkloadElementTopology.md) |  | [optional] 
 **KubernetesRef** | Pointer to [**NullableWorkloadElementKubernetesRef**](WorkloadElementKubernetesRef.md) |  | [optional] 
 
 ## Methods
@@ -222,6 +223,41 @@ SetCreatedAt sets CreatedAt field to given value.
 
 HasCreatedAt returns a boolean if a field has been set.
 
+### GetTopology
+
+`func (o *WorkloadElement) GetTopology() WorkloadElementTopology`
+
+GetTopology returns the Topology field if non-nil, zero value otherwise.
+
+### GetTopologyOk
+
+`func (o *WorkloadElement) GetTopologyOk() (*WorkloadElementTopology, bool)`
+
+GetTopologyOk returns a tuple with the Topology field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTopology
+
+`func (o *WorkloadElement) SetTopology(v WorkloadElementTopology)`
+
+SetTopology sets Topology field to given value.
+
+### HasTopology
+
+`func (o *WorkloadElement) HasTopology() bool`
+
+HasTopology returns a boolean if a field has been set.
+
+### SetTopologyNil
+
+`func (o *WorkloadElement) SetTopologyNil(b bool)`
+
+ SetTopologyNil sets the value for Topology to be an explicit nil
+
+### UnsetTopology
+`func (o *WorkloadElement) UnsetTopology()`
+
+UnsetTopology ensures that no value is present for Topology, not even an explicit nil
 ### GetKubernetesRef
 
 `func (o *WorkloadElement) GetKubernetesRef() WorkloadElementKubernetesRef`

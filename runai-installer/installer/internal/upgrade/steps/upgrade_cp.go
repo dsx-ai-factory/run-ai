@@ -14,7 +14,10 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
 )
 
-const cpImagePullSecretValue = "global.imagePullSecrets[0].name=runai-reg-creds"
+const (
+	cpImagePullSecretValue      = "global.imagePullSecrets[0].name=runai-reg-creds"
+	clusterImagePullSecretValue = "global.additionalImagePullSecrets[0]=runai-reg-creds"
+)
 
 type UpgradeCPChart struct {
 	*step.RunAIInstallStepImpl
