@@ -10,6 +10,7 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
+	"github.com/google/cel-go/cel"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	admissionv1 "k8s.io/api/admissionregistration/v1"
@@ -27,6 +28,7 @@ func TestAssetIdentityAdmissionPolicyDefinitions(t *testing.T) {
 		policyName             string
 		resource               string
 		allowedServiceAccounts string
+		allowedKubernetesUsers string
 		deniedMessage          string
 	}{
 		{
@@ -39,7 +41,8 @@ func TestAssetIdentityAdmissionPolicyDefinitions(t *testing.T) {
 				`"system:serviceaccount:custom-runai:shared-objects-controller", ` +
 				`"system:serviceaccount:custom-runai:anyworkload-controller"` +
 				`]`,
-			deniedMessage: "only Run:ai-managed service accounts may modify asset Secrets",
+			allowedKubernetesUsers: `["system:kube-controller-manager"]`,
+			deniedMessage:          "only approved identities may modify Run:ai asset Secrets",
 		},
 		{
 			name:            "PersistentVolumeClaim",
@@ -50,7 +53,11 @@ func TestAssetIdentityAdmissionPolicyDefinitions(t *testing.T) {
 				`"system:serviceaccount:custom-runai:runai-agent", ` +
 				`"system:serviceaccount:custom-runai:shared-objects-controller"` +
 				`]`,
-			deniedMessage: "only Run:ai-managed service accounts may modify asset PersistentVolumeClaims",
+			allowedKubernetesUsers: `[` +
+				`"system:kube-controller-manager", ` +
+				`"system:kube-scheduler"` +
+				`]`,
+			deniedMessage: "only approved identities may modify Run:ai asset PersistentVolumeClaims",
 		},
 	}
 
@@ -82,18 +89,26 @@ func TestAssetIdentityAdmissionPolicyDefinitions(t *testing.T) {
 				admissionv1.Update,
 				admissionv1.Delete,
 			}, rule.Operations)
-			assert.Equal(t, []string{"*"}, rule.APIGroups)
-			assert.Equal(t, []string{"*"}, rule.APIVersions)
+			assert.Equal(t, []string{""}, rule.APIGroups)
+			assert.Equal(t, []string{"v1"}, rule.APIVersions)
 			assert.Equal(t, []string{tt.resource}, rule.Resources)
 			require.NotNil(t, rule.Scope)
 			assert.Equal(t, admissionv1.NamespacedScope, *rule.Scope)
 
-			require.Len(t, policy.Spec.Variables, 1)
+			require.Len(t, policy.Spec.Variables, 3)
 			assert.Equal(t, allowedServiceAccountsVariable, policy.Spec.Variables[0].Name)
 			assert.Equal(t, tt.allowedServiceAccounts, policy.Spec.Variables[0].Expression)
+			assert.Equal(t, allowedKubernetesUsersVariable, policy.Spec.Variables[1].Name)
+			assert.Equal(t, tt.allowedKubernetesUsers, policy.Spec.Variables[1].Expression)
+			assert.Equal(t, allowedUsernamePatternsVariable, policy.Spec.Variables[2].Name)
+			assert.Equal(t, `[]`, policy.Spec.Variables[2].Expression)
 			require.Len(t, policy.Spec.Validations, 1)
 			assert.Equal(t,
-				"request.userInfo.username in variables.allowedServiceAccounts",
+				"request.userInfo.username in variables.allowedServiceAccounts || "+
+					"request.userInfo.username in variables.allowedKubernetesUsers || "+
+					`request.userInfo.username.startsWith("system:serviceaccount:kube-system:") || `+
+					"variables.allowedUsernamePatterns.exists(pattern, "+
+					"request.userInfo.username.contains(pattern))",
 				policy.Spec.Validations[0].Expression)
 			assert.Equal(t, tt.deniedMessage, policy.Spec.Validations[0].Message)
 
@@ -112,6 +127,11 @@ func TestAssetIdentityAdmissionPolicyDefinitions(t *testing.T) {
 func TestAssetIdentityAdmissionPolicyDefinitionsUseEffectiveNMCServiceAccount(t *testing.T) {
 	runaiConfig := newAssetIdentityRunaiConfig("nmc-runai")
 	runaiConfig.Spec.Internal.Global.NMC.ServiceAccountName = "nmc-service-account"
+	runaiConfig.Spec.Internal.Global.NMC.AllowedServiceAccounts = []string{
+		" nmc-ops ",
+		"",
+		"nmc-ops",
+	}
 
 	definitions := AssetIdentityAdmissionPolicyDefinitions(runaiConfig)
 
@@ -122,6 +142,49 @@ func TestAssetIdentityAdmissionPolicyDefinitionsUseEffectiveNMCServiceAccount(t 
 	assert.Equal(t,
 		`["system:serviceaccount:nmc-runai:nmc-service-account"]`,
 		definitions[1].Policy.Spec.Variables[0].Expression)
+	assert.Equal(t, `["nmc-ops"]`, definitions[0].Policy.Spec.Variables[2].Expression)
+	assert.Equal(t, `["nmc-ops"]`, definitions[1].Policy.Spec.Variables[2].Expression)
+}
+
+func TestAssetIdentityValidationExpression(t *testing.T) {
+	environment, err := cel.NewEnv(
+		cel.Variable("request", cel.DynType),
+		cel.Variable("variables", cel.DynType),
+	)
+	require.NoError(t, err)
+	ast, issues := environment.Compile(assetIdentityValidationExpression())
+	require.NoError(t, issues.Err())
+	program, err := environment.Program(ast)
+	require.NoError(t, err)
+
+	tests := []struct {
+		name        string
+		username    string
+		wantAllowed bool
+	}{
+		{name: "exact Runai writer", username: "system:serviceaccount:runai:runai-agent", wantAllowed: true},
+		{name: "kube-system controller", username: "system:serviceaccount:kube-system:persistent-volume-binder", wantAllowed: true},
+		{name: "control-plane user", username: kubeControllerManagerUsername, wantAllowed: true},
+		{name: "configured pattern", username: "system:serviceaccount:nmc:nmc-ops-controller", wantAllowed: true},
+		{name: "unrelated service account", username: "system:serviceaccount:default:unrelated", wantAllowed: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, _, evaluationErr := program.Eval(map[string]any{
+				"request": map[string]any{
+					"userInfo": map[string]any{"username": tt.username},
+				},
+				"variables": map[string]any{
+					allowedServiceAccountsVariable:  []string{"system:serviceaccount:runai:runai-agent"},
+					allowedKubernetesUsersVariable:  []string{kubeControllerManagerUsername},
+					allowedUsernamePatternsVariable: []string{"nmc-ops"},
+				},
+			})
+			require.NoError(t, evaluationErr)
+			assert.Equal(t, tt.wantAllowed, result.Value())
+		})
+	}
 }
 
 func newAssetIdentityRunaiConfig(namespace string) *runv1.RunaiConfig {

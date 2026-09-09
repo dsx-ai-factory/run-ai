@@ -25,9 +25,14 @@ const (
 	pvcIdentityPolicyName    = "runai-pvc-identity"
 	identityBindingSuffix    = "-binding"
 
-	allowedServiceAccountsVariable = "allowedServiceAccounts"
-	runaiCreatedByLabelKey         = "run.ai/created-by"
-	runaiOperatorName              = "runai-operator"
+	allowedServiceAccountsVariable  = "allowedServiceAccounts"
+	allowedKubernetesUsersVariable  = "allowedKubernetesUsers"
+	allowedUsernamePatternsVariable = "allowedUsernamePatterns"
+	kubeSystemServiceAccountPrefix  = "system:serviceaccount:kube-system:"
+	kubeControllerManagerUsername   = "system:kube-controller-manager"
+	kubeSchedulerUsername           = "system:kube-scheduler"
+	runaiCreatedByLabelKey          = "run.ai/created-by"
+	runaiOperatorName               = "runai-operator"
 )
 
 // AssetIdentityAdmissionPolicyDefinitions returns independent policies for the
@@ -41,29 +46,43 @@ func AssetIdentityAdmissionPolicyDefinitions(runaiConfig *runv1.RunaiConfig) []a
 	// The agent writes source asset Secrets and PVCs. shared-objects-controller
 	// replicates both while retaining run.ai labels. Both deployments use the
 	// NMC ServiceAccount override when configured.
-	sharedAssetWriters := serviceAccountUsernames(namespace,
+	pvcWriters := serviceAccountUsernames(namespace,
 		nmcServiceAccount(operands.RunaiAgentName),
 		nmcServiceAccount(operands.RunaiSharedObjectsControllerName),
 	)
 
 	// anyworkload-controller also materializes personal-credential Secrets and
 	// retains the source asset label. Its deployment uses its fixed ServiceAccount.
-	secretWriters := append([]string{}, sharedAssetWriters...)
-	secretWriters = appendUnique(secretWriters,
-		serviceAccountUsername(namespace, operands.RunaiAnyworkloadControllerName))
+	secretWriters := serviceAccountUsernames(namespace,
+		nmcServiceAccount(operands.RunaiAgentName),
+		nmcServiceAccount(operands.RunaiSharedObjectsControllerName),
+		operands.RunaiAnyworkloadControllerName,
+	)
+
+	// Built-in controllers mutate these resources during their normal lifecycle.
+	// They either use individual kube-system ServiceAccounts or the control-plane
+	// component identity, depending on the cluster configuration.
+	secretKubernetesUsers := []string{kubeControllerManagerUsername}
+	pvcKubernetesUsers := []string{kubeControllerManagerUsername, kubeSchedulerUsername}
+	allowedUsernamePatterns := normalizedUsernamePatterns(
+		runaiConfig.Spec.Internal.Global.NMC.AllowedServiceAccounts)
 
 	return []admissionpolicy.Definition{
 		assetIdentityAdmissionPolicyDefinition(
 			secretIdentityPolicyName,
 			"secrets",
-			"only Run:ai-managed service accounts may modify asset Secrets",
+			"only approved identities may modify Run:ai asset Secrets",
 			secretWriters,
+			secretKubernetesUsers,
+			allowedUsernamePatterns,
 		),
 		assetIdentityAdmissionPolicyDefinition(
 			pvcIdentityPolicyName,
 			"persistentvolumeclaims",
-			"only Run:ai-managed service accounts may modify asset PersistentVolumeClaims",
-			sharedAssetWriters,
+			"only approved identities may modify Run:ai asset PersistentVolumeClaims",
+			pvcWriters,
+			pvcKubernetesUsers,
+			allowedUsernamePatterns,
 		),
 	}
 }
@@ -73,6 +92,8 @@ func assetIdentityAdmissionPolicyDefinition(
 	resource string,
 	deniedMessage string,
 	allowedServiceAccounts []string,
+	allowedKubernetesUsers []string,
+	allowedUsernamePatterns []string,
 ) admissionpolicy.Definition {
 	labels := map[string]string{runaiCreatedByLabelKey: runaiOperatorName}
 	return admissionpolicy.Definition{
@@ -93,8 +114,8 @@ func assetIdentityAdmissionPolicyDefinition(
 									admissionv1.Delete,
 								},
 								Rule: admissionv1.Rule{
-									APIGroups:   []string{"*"},
-									APIVersions: []string{"*"},
+									APIGroups:   []string{""},
+									APIVersions: []string{"v1"},
 									Resources:   []string{resource},
 									Scope:       ptr.To(admissionv1.NamespacedScope),
 								},
@@ -107,14 +128,19 @@ func assetIdentityAdmissionPolicyDefinition(
 						Name:       allowedServiceAccountsVariable,
 						Expression: celStringList(allowedServiceAccounts),
 					},
+					{
+						Name:       allowedKubernetesUsersVariable,
+						Expression: celStringList(allowedKubernetesUsers),
+					},
+					{
+						Name:       allowedUsernamePatternsVariable,
+						Expression: celStringList(allowedUsernamePatterns),
+					},
 				},
 				Validations: []admissionv1.Validation{
 					{
-						Expression: fmt.Sprintf(
-							"request.userInfo.username in variables.%s",
-							allowedServiceAccountsVariable,
-						),
-						Message: deniedMessage,
+						Expression: assetIdentityValidationExpression(),
+						Message:    deniedMessage,
 					},
 				},
 			},
@@ -161,6 +187,30 @@ func appendUnique(values []string, value string) []string {
 		}
 	}
 	return append(values, value)
+}
+
+func normalizedUsernamePatterns(patterns []string) []string {
+	normalized := make([]string, 0, len(patterns))
+	for _, pattern := range patterns {
+		pattern = strings.TrimSpace(pattern)
+		if pattern != "" {
+			normalized = appendUnique(normalized, pattern)
+		}
+	}
+	return normalized
+}
+
+func assetIdentityValidationExpression() string {
+	return fmt.Sprintf(
+		"request.userInfo.username in variables.%s || "+
+			"request.userInfo.username in variables.%s || "+
+			"request.userInfo.username.startsWith(%s) || "+
+			"variables.%s.exists(pattern, request.userInfo.username.contains(pattern))",
+		allowedServiceAccountsVariable,
+		allowedKubernetesUsersVariable,
+		strconv.Quote(kubeSystemServiceAccountPrefix),
+		allowedUsernamePatternsVariable,
+	)
 }
 
 func celStringList(values []string) string {

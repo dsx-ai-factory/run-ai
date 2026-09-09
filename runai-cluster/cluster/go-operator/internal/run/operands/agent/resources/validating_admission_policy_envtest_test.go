@@ -51,7 +51,9 @@ func TestAssetIdentityAdmissionPolicies(t *testing.T) {
 	const (
 		installationNamespace   = "runai-system"
 		workloadNamespace       = "workloads"
+		nmcNamespace            = "nmc"
 		unrelatedServiceAccount = "unrelated"
+		nmcServiceAccount       = "nmc-ops-controller"
 	)
 	writerServiceAccounts := []string{
 		"runai-agent",
@@ -62,6 +64,8 @@ func TestAssetIdentityAdmissionPolicies(t *testing.T) {
 		&corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: installationNamespace}}))
 	require.NoError(t, adminClient.Create(ctx,
 		&corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: workloadNamespace}}))
+	require.NoError(t, adminClient.Create(ctx,
+		&corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: nmcNamespace}}))
 	for _, serviceAccountName := range writerServiceAccounts {
 		require.NoError(t, adminClient.Create(ctx, &corev1.ServiceAccount{
 			ObjectMeta: metav1.ObjectMeta{Name: serviceAccountName, Namespace: installationNamespace},
@@ -70,11 +74,15 @@ func TestAssetIdentityAdmissionPolicies(t *testing.T) {
 	require.NoError(t, adminClient.Create(ctx, &corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{Name: unrelatedServiceAccount, Namespace: workloadNamespace},
 	}))
+	require.NoError(t, adminClient.Create(ctx, &corev1.ServiceAccount{
+		ObjectMeta: metav1.ObjectMeta{Name: nmcServiceAccount, Namespace: nmcNamespace},
+	}))
 	createAssetWriterRoleBinding(t, ctx, adminClient, workloadNamespace, installationNamespace,
-		writerServiceAccounts, unrelatedServiceAccount)
+		nmcNamespace, writerServiceAccounts, unrelatedServiceAccount, nmcServiceAccount)
 
 	runaiConfig := &runv1.RunaiConfig{ObjectMeta: metav1.ObjectMeta{Namespace: installationNamespace}}
 	runaiConfig.SetDefaultsWhereNeeded()
+	runaiConfig.Spec.Internal.Global.NMC.AllowedServiceAccounts = []string{"nmc-ops"}
 	definitions := AssetIdentityAdmissionPolicyDefinitions(runaiConfig)
 	for _, definition := range definitions {
 		require.NoError(t, adminClient.Create(ctx, definition.Policy))
@@ -98,14 +106,20 @@ func TestAssetIdentityAdmissionPolicies(t *testing.T) {
 
 	requireEventuallyDenied(t, func(attempt int) error {
 		return unrelatedClient.Create(ctx, assetSecret(fmt.Sprintf("denied-secret-%d", attempt), workloadNamespace))
-	}, "only Run:ai-managed service accounts may modify asset Secrets")
+	}, "only approved identities may modify Run:ai asset Secrets")
 	requireEventuallyDenied(t, func(attempt int) error {
 		return unrelatedClient.Create(ctx, assetPVC(fmt.Sprintf("denied-pvc-%d", attempt), workloadNamespace))
-	}, "only Run:ai-managed service accounts may modify asset PersistentVolumeClaims")
+	}, "only approved identities may modify Run:ai asset PersistentVolumeClaims")
 
-	require.Error(t, unrelatedClient.Delete(ctx, auditSecret))
+	deleteError := unrelatedClient.Delete(ctx, auditSecret)
+	require.Error(t, deleteError)
+	assert.Contains(t, deleteError.Error(),
+		"only approved identities may modify Run:ai asset Secrets")
 	auditPVC.Annotations = map[string]string{"updated": "true"}
-	require.Error(t, unrelatedClient.Update(ctx, auditPVC))
+	updateError := unrelatedClient.Update(ctx, auditPVC)
+	require.Error(t, updateError)
+	assert.Contains(t, updateError.Error(),
+		"only approved identities may modify Run:ai asset PersistentVolumeClaims")
 
 	require.NoError(t, unrelatedClient.Create(ctx, &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{Name: "unlabeled-secret", Namespace: workloadNamespace},
@@ -127,6 +141,37 @@ func TestAssetIdentityAdmissionPolicies(t *testing.T) {
 		require.NoError(t, writerClient.Create(ctx,
 			assetPVC("allowed-pvc-"+serviceAccountName, workloadNamespace)))
 	}
+
+	runaiAgentClient := impersonatedAssetClient(t, config, scheme,
+		installationNamespace, "runai-agent")
+	garbageCollectorClient := impersonatedAssetClient(t, config, scheme,
+		"kube-system", "generic-garbage-collector")
+	garbageCollectedSecret := assetSecret("garbage-collected-secret", workloadNamespace)
+	require.NoError(t, runaiAgentClient.Create(ctx, garbageCollectedSecret))
+	require.NoError(t, garbageCollectorClient.Delete(ctx, garbageCollectedSecret))
+
+	persistentVolumeBinderClient := impersonatedAssetClient(t, config, scheme,
+		"kube-system", "persistent-volume-binder")
+	binderPVC := assetPVC("binder-pvc", workloadNamespace)
+	require.NoError(t, runaiAgentClient.Create(ctx, binderPVC))
+	binderPVC.Annotations = map[string]string{"pv.kubernetes.io/bind-completed": "yes"}
+	require.NoError(t, persistentVolumeBinderClient.Update(ctx, binderPVC))
+
+	controllerManagerClient := impersonatedUsernameClient(t, config, scheme,
+		kubeControllerManagerUsername, []string{"system:authenticated"})
+	controllerManagedSecret := assetSecret("controller-managed-secret", workloadNamespace)
+	require.NoError(t, runaiAgentClient.Create(ctx, controllerManagedSecret))
+	require.NoError(t, controllerManagerClient.Delete(ctx, controllerManagedSecret))
+
+	schedulerClient := impersonatedUsernameClient(t, config, scheme,
+		kubeSchedulerUsername, []string{"system:authenticated"})
+	scheduledPVC := assetPVC("scheduled-pvc", workloadNamespace)
+	require.NoError(t, runaiAgentClient.Create(ctx, scheduledPVC))
+	scheduledPVC.Annotations = map[string]string{"volume.kubernetes.io/selected-node": "worker-1"}
+	require.NoError(t, schedulerClient.Update(ctx, scheduledPVC))
+
+	nmcClient := impersonatedAssetClient(t, config, scheme, nmcNamespace, nmcServiceAccount)
+	require.NoError(t, nmcClient.Create(ctx, assetSecret("nmc-pattern-secret", workloadNamespace)))
 }
 
 func createAssetWriterRoleBinding(
@@ -135,8 +180,10 @@ func createAssetWriterRoleBinding(
 	k8sClient client.Client,
 	workloadNamespace string,
 	installationNamespace string,
+	nmcNamespace string,
 	writerServiceAccounts []string,
 	unrelatedServiceAccount string,
+	nmcServiceAccount string,
 ) {
 	t.Helper()
 	role := &rbacv1.Role{
@@ -150,7 +197,7 @@ func createAssetWriterRoleBinding(
 		},
 	}
 	require.NoError(t, k8sClient.Create(ctx, role))
-	subjects := make([]rbacv1.Subject, 0, len(writerServiceAccounts)+1)
+	subjects := make([]rbacv1.Subject, 0, len(writerServiceAccounts)+7)
 	for _, serviceAccountName := range writerServiceAccounts {
 		subjects = append(subjects, rbacv1.Subject{
 			Kind:      rbacv1.ServiceAccountKind,
@@ -163,6 +210,33 @@ func createAssetWriterRoleBinding(
 		Name:      unrelatedServiceAccount,
 		Namespace: workloadNamespace,
 	})
+	subjects = append(subjects,
+		rbacv1.Subject{
+			Kind:      rbacv1.ServiceAccountKind,
+			Name:      "generic-garbage-collector",
+			Namespace: "kube-system",
+		},
+		rbacv1.Subject{
+			Kind:      rbacv1.ServiceAccountKind,
+			Name:      "persistent-volume-binder",
+			Namespace: "kube-system",
+		},
+		rbacv1.Subject{
+			Kind:      rbacv1.ServiceAccountKind,
+			Name:      nmcServiceAccount,
+			Namespace: nmcNamespace,
+		},
+		rbacv1.Subject{
+			APIGroup: rbacv1.GroupName,
+			Kind:     rbacv1.UserKind,
+			Name:     kubeControllerManagerUsername,
+		},
+		rbacv1.Subject{
+			APIGroup: rbacv1.GroupName,
+			Kind:     rbacv1.UserKind,
+			Name:     kubeSchedulerUsername,
+		},
+	)
 	require.NoError(t, k8sClient.Create(ctx, &rbacv1.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{Name: "asset-writers", Namespace: workloadNamespace},
 		RoleRef: rbacv1.RoleRef{
@@ -208,14 +282,27 @@ func impersonatedAssetClient(
 	serviceAccount string,
 ) client.Client {
 	t.Helper()
-	impersonatedConfig := rest.CopyConfig(config)
-	impersonatedConfig.Impersonate = rest.ImpersonationConfig{
-		UserName: serviceAccountUsername(namespace, serviceAccount),
-		Groups: []string{
+	return impersonatedUsernameClient(t, config, scheme,
+		serviceAccountUsername(namespace, serviceAccount),
+		[]string{
 			"system:serviceaccounts",
 			"system:serviceaccounts:" + namespace,
 			"system:authenticated",
-		},
+		})
+}
+
+func impersonatedUsernameClient(
+	t *testing.T,
+	config *rest.Config,
+	scheme *k8sruntime.Scheme,
+	username string,
+	groups []string,
+) client.Client {
+	t.Helper()
+	impersonatedConfig := rest.CopyConfig(config)
+	impersonatedConfig.Impersonate = rest.ImpersonationConfig{
+		UserName: username,
+		Groups:   groups,
 	}
 	k8sClient, err := client.New(impersonatedConfig, client.Options{Scheme: scheme})
 	require.NoError(t, err)
