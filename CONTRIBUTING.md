@@ -87,6 +87,46 @@ Each service directory also has its own Makefile with `build`, `test`, `lint`, a
 
 ---
 
+## Extending the project
+
+Most new capability lands through one of these extension points rather than by
+modifying core services. Follow the existing implementations in each directory
+— they are the reference for structure, naming, and tests.
+
+- **New workload type.** NVIDIA Run:ai interprets workloads declaratively
+  through Karta CRs. Adding support for a new Kubernetes workload kind means
+  adding its interpretation rather than writing a bespoke controller. See
+  [`docs/developer/crds.md`](docs/developer/crds.md) and the `karta` chart
+  dependency in [`runai-cluster/cluster/runai-chart`](runai-cluster/cluster/runai-chart).
+
+- **New anyworkload-controller plugin.** Behaviour attached to a workload's
+  lifecycle is implemented as a plugin under
+  [`runai-cluster/cluster/anyworkload-controller/plugins/`](runai-cluster/cluster/anyworkload-controller/plugins).
+  Use `networking`, `personalcreds`, or `restartrules` as templates: implement
+  the hook interfaces your feature needs, add a `New(ctx, deps)` builder, and
+  register it in `cmd/main.go`.
+
+- **New cluster service or controller.** Add a directory under
+  [`runai-cluster/cluster/`](runai-cluster/cluster) with an
+  `artifact-metadata.json`, a Makefile including the shared
+  `build/makefile/*.mk`, and a `README.md` plus `CLAUDE.md`. Wire its RBAC and
+  deployment into [`runai-cluster/cluster/runai-chart`](runai-cluster/cluster/runai-chart).
+
+- **New control-plane service.** Same shape under
+  [`control-plane/`](control-plane), wired into
+  [`control-plane/control-plane-chart`](control-plane/control-plane-chart).
+  Generated API clients live in [`runai-clients/`](runai-clients).
+
+- **New MCP tool.** Exposing an operation to AI assistants is done in
+  [`runai-mcp-server/`](runai-mcp-server).
+
+Start with an issue describing the extension point you intend to use, so
+maintainers can confirm the approach before you invest in the implementation.
+See [`docs/developer/architecture.md`](docs/developer/architecture.md) for how
+the pieces fit together.
+
+---
+
 ## Code review
 
 - Branch protection requires **at least one approval** and a green `Validate Successful Run` check before merge.
