@@ -1,6 +1,6 @@
 # Workload-Based Topology Placement
 
-This page describes topology-aware scheduling applied on a workload-based scope - the default scope, in which NVIDIA Run:ai treats the entire distributed workload as a single unit for placement. All pods in the workload are subject to the same topology constraints. To further co-locate workers in smaller, independently placed groups within the workload, see [Segment-Based Topology Placement](segment-based-topology-placement.md) - segment-based constraints can be combined with workload-based constraints on the same workload; see [Combining Workload-Based and Segment-Based Placement](segment-based-topology-placement.md#combining-workload-based-and-segment-based-placement).
+This page describes topology-aware scheduling applied on a workload-based scope - the default scope, in which NVIDIA Run:ai treats the entire distributed workload as a single unit for placement. All pods in the workload are subject to the same topology constraints. To further co-locate workers in smaller, independently placed groups within the workload (for example, tensor-parallel training jobs), see [Segment-Based Topology Placement](segment-based-topology-placement.md) - segment-based constraints can be combined with workload-based constraints on the same workload; see [Combining Workload-Based and Segment-Based Placement](segment-based-topology-placement.md#combining-workload-based-and-segment-based-placement).
 
 ## Automatic Topology-Aware Scheduling
 
@@ -10,9 +10,7 @@ By default, topology-aware scheduling in NVIDIA Run:ai is applied at the **workl
 
 NVIDIA Run:ai automatically applies a **Preferred** topology constraint at the lowest defined topology level. This co-locates pods as close as possible in the network hierarchy, reducing communication overhead. If the Scheduler cannot place pods at this level, it automatically escalates placement by moving up through the topology hierarchy (for example: from node → rack → block → zone), always seeking the closest available level to minimize latency.
 
-This behavior applies to distributed [native workloads](../../../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md) and [supported workload types](../../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md). To override the default behavior and define your own topology-related annotations when submitting a distributed workload, see [Fine-tuning Topology-Aware Scheduling per Workload](#fine-tuning-topology-aware-scheduling-per-workload) below.
-
-This automatic behavior does not apply to workloads submitted via `kubectl`. For those workloads, you must define the topology annotations yourself - see [Fine-tuning Topology-Aware Scheduling per Workload](#fine-tuning-topology-aware-scheduling-per-workload) below.
+This behavior applies to distributed [native workloads](../../../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md), [supported workload types](../../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md), and workloads submitted via `kubectl`. To override the default behavior and define your own topology-related annotations when submitting a distributed workload, see [Fine-tuning Topology-Aware Scheduling per Workload](#fine-tuning-topology-aware-scheduling-per-workload) below.
 
 ## Fine-tuning Topology-Aware Scheduling per Workload
 
@@ -21,8 +19,8 @@ You can customize how NVIDIA Run:ai applies topology labels for each distributed
 Use the following topology-aware scheduling annotations when submitting a distributed workload:
 
 * `kai.scheduler/topology` - Specifies the name of the topology to use.\
-  The value must match the name of a topology entity defined for the cluster.
-* `kai.scheduler/topology-required` and/or `kai.scheduler/topology-preferred` - Define placement constraints using a topology label key (for example, `"rack"`).
+  The value must match the name of a topology entity defined for the node pool.
+* `kai.scheduler/topology-required-placement` and/or `kai.scheduler/topology-preferred-placement` - Define placement constraints using a topology label key (for example, `"rack"`).
   * Required - Enforces strict placement. All pods must be scheduled within the specified topology level.
   * Preferred - Expresses a soft preference. The Scheduler attempts to place pods within the specified topology level when possible.
 
@@ -36,7 +34,7 @@ You can use Required, Preferred, or both together for the same topology tree. Wh
 
 * **Native distributed workloads** - Define the topology annotations in the workload’s annotations field through the NVIDIA Run:ai UI, API, or CLI.
 * **Supported workload types submitted via YAML** - Specify the topology-related annotations directly in the YAML manifest. NVIDIA Run:ai respects the user-defined annotations and does not override them.
-* **Workloads submitted via `kubectl`** - Topology-aware scheduling is not applied automatically by NVIDIA Run:ai for workloads submitted this way. Add annotations to the workload manifest by specifying the topology name and constraint type to ensure the Scheduler respects the desired topology.
+* **Workloads submitted via `kubectl`** - Add annotations to the workload manifest by specifying the topology name and constraint type to ensure the Scheduler respects the desired topology.
 
 For example:
 
@@ -46,9 +44,9 @@ kind: Job
 metadata:
   name: topology-aware-job
   annotations:
+    kai.scheduler/topology: "network"
     kai.scheduler/topology-preferred-placement: "rack"
     kai.scheduler/topology-required-placement: "zone"
-    kai.scheduler/topology: "network"
 ```
 
 ## LeaderWorkerSet (LWS) Behavior
@@ -56,7 +54,7 @@ metadata:
 LeaderWorkerSet (LWS) is a supported distributed workload type, receiving the same automatic topology-aware scheduling behavior described above. For LWS workloads, topology-aware scheduling is applied **per replica**:
 
 * Each replica of a LeaderWorkerSet (as defined by `spec.replicas`) is gang scheduled.
-* The same topology constraints are applied to each replica. This ensures that the leader and worker pods that belong to the same replica are placed according to the configured network topology (for example, within the same rack, block, or NVLink domain).
+* The same topology constraints are applied to each replica instead of the entire workload. This ensures that the leader and worker pods that belong to the same replica are placed according to the configured network topology (for example, within the same rack, block, or NVLink domain).
 
 Example:
 

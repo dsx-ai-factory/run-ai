@@ -14,9 +14,9 @@ Segment-based placement is currently supported for the PyTorch framework (native
 
 When a segment size is configured for a distributed workload, either through the `kai.scheduler/segment-size` annotation or the native workload's workers-per-segment field, NVIDIA Run:ai automatically applies topology-aware scheduling to each segment. This behavior ensures segments benefit from improved intra-group performance without additional user configuration beyond setting the segment size.
 
-By default, NVIDIA Run:ai automatically applies a **Preferred** topology constraint at the lowest defined topology level, scoped to each individual segment rather than the workload as a whole. This co-locates the pods within a segment as close as possible in the network hierarchy, reducing communication overhead between workers that belong to the same segment. If the Scheduler cannot place a segment's pods at this level, it automatically escalates placement by moving up through the topology hierarchy (for example: from node → rack → block → zone), always seeking the closest available level to minimize latency for that segment.
+By default, NVIDIA Run:ai automatically applies a **Preferred** topology constraint at the lowest defined topology level, scoped to each individual segment. This is applied in addition to the existing workload-level topology automation. This co-locates the pods within a segment as close as possible in the network hierarchy, reducing communication overhead between workers that belong to the same segment. If the Scheduler cannot place a segment's pods at this level, it automatically escalates placement by moving up through the topology hierarchy (for example: from node → rack → block → zone), always seeking the closest available level to minimize latency for that segment.
 
-This behavior applies to distributed native training workloads and supported workload types. To override the default behavior and define your own segment-based topology annotations when submitting a distributed workload, see [Fine-tuning Topology-Aware Scheduling per Segment](#fine-tuning-topology-aware-scheduling-per-segment) below.
+This automatic behavior applies to distributed native training workloads and PyTorchJob. It does not apply to LeaderWorkerSet (LWS) workloads - see [LeaderWorkerSet (LWS) Behavior](#leaderworkerset-lws-behavior) below. To override the default behavior and define your own segment-based topology annotations when submitting a distributed workload, see [Fine-tuning Topology-Aware Scheduling per Segment](#fine-tuning-topology-aware-scheduling-per-segment) below.
 
 This automatic behavior does not apply to workloads submitted via `kubectl`. For those workloads, you must define the segment-based topology annotations yourself - see [Fine-tuning Topology-Aware Scheduling per Segment](#fine-tuning-topology-aware-scheduling-per-segment) below.
 
@@ -25,7 +25,7 @@ This automatic behavior does not apply to workloads submitted via `kubectl`. For
 Use the following annotations to define segment-based topology constraints:
 
 * `kai.scheduler/topology` - Name of the topology to use. This only needs to be set once - if it is set at the workload root and omitted from the segment's annotations, the segment inherits the root's topology name. If it is set in both places, the segment-based (PodTemplate) value takes precedence.
-* `kai.scheduler/segment-size` - Number of pods per segment. Must be greater than 1 and not greater than the replica count.
+* `kai.scheduler/segment-size` - Number of pods per segment. Must be greater than 1 and not greater than the replica count. For native distributed training workloads, set this through the workers-per-segment field when submitting the workload via the UI, API, or CLI instead of this annotation.
 * `kai.scheduler/segment-topology-required-placement` - Topology level all pods in a segment must share (hard constraint).
 * `kai.scheduler/segment-topology-preferred-placement` - Topology level pods in a segment should share when possible (soft constraint).
 
@@ -141,7 +141,3 @@ spec:
           - name: worker
             image: my/image:latest
 ```
-
-## Known Limitations
-
-{/* TODO: Check with Gal/Hagay for segment-based placement known limitations */}

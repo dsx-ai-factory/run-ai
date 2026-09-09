@@ -58,12 +58,12 @@ After creating a topology, the administrator must associate it with the relevant
 * If different node pools have different topologies, each node pool must be linked to its corresponding topology.
 * If the entire cluster shares the same topology, link the same topology to all node pools.
 
-## Placement Scopes
+## Workload and Segment Based Topology Placement
 
 NVIDIA Run:ai supports topology-aware scheduling at two scopes, which can be applied independently or together on the same workload:
 
 * **Workload-based** (default) - The entire distributed workload is placed as a single group, so all of its pods are subject to the same topology constraints. See [Workload-Based Topology Placement](workload-level-topology.md).
-* **Segment-based** - Worker pods are divided into fixed-size groups, and each group is independently co-located within the same topology level. Useful for workloads where communication is more frequent within a group than across groups. See [Segment-Based Topology Placement](segment-based-topology-placement.md).
+* **Segment-based** - Worker pods are divided into fixed-size groups, and each group is independently co-located within the same topology level. This is useful for workloads where groups of workers communicate more frequently within the group than across groups - for example, tensor-parallel training jobs where intra-group communication benefits from tight locality. See [Segment-Based Topology Placement](segment-based-topology-placement.md).
 
 The two scopes are not mutually exclusive. A common pattern is to combine them: a broader workload-based constraint keeps the entire workload within one topology level (for example, a zone), while a tighter segment-based constraint co-locates each segment within a more specific level (for example, a rack) inside that zone. See [Combining Workload-Based and Segment-Based Placement](segment-based-topology-placement.md#combining-workload-based-and-segment-based-placement).
 
