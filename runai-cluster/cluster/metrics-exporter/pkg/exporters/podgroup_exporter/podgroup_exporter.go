@@ -233,18 +233,19 @@ func (pe *PodGroupExporter) GetTopOwnerMetadata() (*TopOwnerMetadata, error) {
 		pe.podGroup.Namespace, pe.podGroup.Name)
 }
 
-func (pe *PodGroupExporter) GetRequestedMigDevices() (map[string]int64, error) {
+// The MIG devices annotation is optional, so its absence is reported through the
+// returned bool rather than as an error.
+func (pe *PodGroupExporter) GetRequestedMigDevices() (map[string]int64, bool, error) {
 	valString, found := pe.podGroup.Annotations[requestedMigDevicesAnnotation]
 	if !found {
-		return nil, fmt.Errorf("could not find annotation '%s'", requestedMigDevicesAnnotation)
+		return nil, false, nil
 	}
 	var migDevices map[string]int64
-	err := json.Unmarshal([]byte(valString), &migDevices)
-	if err != nil {
-		return nil, fmt.Errorf("could not unmarshal value '%s' of annotation %s",
-			valString, requestedMigDevicesAnnotation)
+	if err := json.Unmarshal([]byte(valString), &migDevices); err != nil {
+		return nil, true, fmt.Errorf("could not unmarshal value '%s' of annotation %s: %w",
+			valString, requestedMigDevicesAnnotation, err)
 	}
-	return migDevices, nil
+	return migDevices, true, nil
 }
 
 func (pe *PodGroupExporter) getPodGroupPriority(podGroup *kaiv2alpha2.PodGroup) int32 {

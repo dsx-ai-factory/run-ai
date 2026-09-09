@@ -61,17 +61,14 @@ func (r *PodGroupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		}
 
 		log.Printf("Failed to get pod group %s/%s", req.Namespace, req.Name)
-		return ctrl.Result{
-			Requeue:      true,
-			RequeueAfter: 1,
-		}, err
+		return ctrl.Result{}, err
 	}
 
 	for _, handler := range r.eventHandlers {
 		err = handler.SetMetrics(ctx, podGroup)
 		if err != nil {
 			log.Printf("Failed to set metrics for pod group %s/%s, err: %v", req.Namespace, req.Name, err)
-			return ctrl.Result{Requeue: true, RequeueAfter: 1}, err
+			return ctrl.Result{}, err
 		}
 	}
 	return ctrl.Result{}, nil

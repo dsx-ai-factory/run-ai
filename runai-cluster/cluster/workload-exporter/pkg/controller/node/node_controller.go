@@ -47,7 +47,7 @@ func (c *NodeController) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	node := &corev1.Node{}
 	isObjectFound, err := utils.GetObjectForRequest(ctx, req, "node", node, c.client)
 	if err != nil {
-		return ctrl.Result{Requeue: true, RequeueAfter: utils.RequeueTimeout}, nil
+		return ctrl.Result{}, err
 	} else if !isObjectFound {
 		metrics.ResetNodeMetrics(req.Name)
 		return ctrl.Result{Requeue: false}, nil
@@ -56,7 +56,7 @@ func (c *NodeController) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	err = metrics.SetNodeMetrics(node)
 	if err != nil {
 		log.Error().Msgf("Failed to set metrics for node %s, error: %s", req.Name, err.Error())
-		return ctrl.Result{Requeue: true, RequeueAfter: utils.RequeueTimeout}, nil
+		return ctrl.Result{}, err
 	}
 	return ctrl.Result{}, nil
 }

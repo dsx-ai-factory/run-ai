@@ -29,6 +29,15 @@ func SetMigPodGroupMetrics(podGroupExporter *podgroup_exporter.PodGroupExporter)
 	name := podGroupExporter.GetName()
 	namespace := podGroupExporter.GetNamespace()
 
+	requestedMigDevices, found, err := podGroupExporter.GetRequestedMigDevices()
+	if err != nil {
+		return fmt.Errorf("could not get requested mig devices for pod group %s/%s, error: %w",
+			namespace, name, err)
+	}
+	if !found {
+		return nil
+	}
+
 	topOwnerMetadata, err := podGroupExporter.GetTopOwnerMetadata()
 	if err != nil {
 		return fmt.Errorf("could not find top owner for pod group %s/%s, error: %w", namespace, name, err)
@@ -41,12 +50,6 @@ func SetMigPodGroupMetrics(podGroupExporter *podgroup_exporter.PodGroupExporter)
 	workloadType := podGroupExporter.GetWorkloadType()
 	// PodGroupUID is expected to be the jobUID
 	uid := topOwnerMetadata.UID
-
-	requestedMigDevices, err := podGroupExporter.GetRequestedMigDevices()
-	if err != nil {
-		return fmt.Errorf("could not get requested mig devices for pod group %s/%s, error: %w",
-			namespace, name, err)
-	}
 
 	for deviceName, count := range requestedMigDevices {
 		podGroupRequestedMigDevices.WithLabelValues(queueName, name, uid, topOwnerMetadata.Name, workloadType,
