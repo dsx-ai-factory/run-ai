@@ -59,7 +59,7 @@ func TestExtractRealmNameUnauthorized_SaaSHappyFlow(t *testing.T) {
 		if val, ok := req.Context().Value(utils.AuthRealmKey).(string); !ok {
 			assert.Fail(t, "%s is missing from header", utils.AuthRealmKey)
 		} else {
-			assert.Equal(t, "test", val)
+			assert.Equal(t, "mock-q7z3k", val)
 		}
 	})
 	rr := httptest.NewRecorder()
