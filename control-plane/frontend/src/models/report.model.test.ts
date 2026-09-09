@@ -3,8 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, expect, it } from "vitest";
-import { isReportDeletionInProgress, reportBulkDeleteCopy } from "./report.model";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { isReportDeletionInProgress, remainingDeletingIds, reportBulkDeleteCopy } from "./report.model";
+import DOCS from "@/constants/docs";
+
+vi.mock("@/constants/docs", () => ({
+  default: { SUPPORT: { URL: "", LABEL: "Run:ai support" } },
+}));
 import { ReportStatus } from "@/swagger-models/org-unit-service-client";
 
 describe("reportBulkDeleteCopy", () => {
@@ -47,5 +52,60 @@ describe("isReportDeletionInProgress", () => {
     [ReportStatus.Pending, ReportStatus.Processing, ReportStatus.Ready, ReportStatus.Failed].forEach(
       (status: ReportStatus) => expect(isReportDeletionInProgress(status)).toBe(false),
     );
+  });
+});
+
+describe("reportBulkDeleteCopy.requestFailure", () => {
+  afterEach(() => {
+    DOCS.SUPPORT.URL = "";
+  });
+
+  it("points at support when a support URL is configured", () => {
+    DOCS.SUPPORT.URL = "https://support.example.com";
+    expect(reportBulkDeleteCopy.requestFailure()).toBe(
+      "Reports couldn't be deleted. Try again. If the issue persists, contact Run:ai support.",
+    );
+  });
+
+  it("omits the support sentence when no URL is configured", () => {
+    DOCS.SUPPORT.URL = "";
+    expect(reportBulkDeleteCopy.requestFailure()).toBe("Reports couldn't be deleted. Try again.");
+  });
+});
+
+describe("remainingDeletingIds", () => {
+  const statuses = (entries: Record<string, ReportStatus>) => {
+    const byId = new Map<string, ReportStatus>(Object.entries(entries));
+    return async (id: string) => byId.get(id) ?? null;
+  };
+
+  it("keeps only the ids whose deletion is still running", async () => {
+    const remaining = await remainingDeletingIds(
+      ["a", "b", "c"],
+      statuses({ a: ReportStatus.Deleting, b: ReportStatus.PendingDelete, c: ReportStatus.Ready }),
+    );
+    expect(remaining).toEqual(["a", "b"]);
+  });
+
+  it("drops ids that no longer exist, which is deletion having completed", async () => {
+    const remaining = await remainingDeletingIds(["a", "gone"], statuses({ a: ReportStatus.Deleting }));
+    expect(remaining).toEqual(["a"]);
+  });
+
+  it("drops ids that ended in DeletionFailed so polling can stop", async () => {
+    const remaining = await remainingDeletingIds(["a"], statuses({ a: ReportStatus.DeletionFailed }));
+    expect(remaining).toEqual([]);
+  });
+
+  it("drops ids whose lookup rejects rather than polling forever", async () => {
+    const remaining = await remainingDeletingIds(["a"], () => Promise.reject(new Error("boom")));
+    expect(remaining).toEqual([]);
+  });
+
+  // The grid is filtered, so a report being deleted can vanish from it while the
+  // deletion is still running. The status lookup must not depend on the grid.
+  it("still reports a deletion in progress when the grid no longer lists it", async () => {
+    const remaining = await remainingDeletingIds(["filtered-out"], statuses({ "filtered-out": ReportStatus.Deleting }));
+    expect(remaining).toEqual(["filtered-out"]);
   });
 });

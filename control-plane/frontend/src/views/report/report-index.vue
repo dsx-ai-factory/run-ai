@@ -81,7 +81,7 @@ import { ReportPageActions } from "@/components/report/report-page-actions/";
 // model
 import { type IReportTable, reportIndexColumns } from "@/table-models/report.table-model";
 import type { IFilterBy } from "@/models/filter.model";
-import { EReportAction, isReportDeletionInProgress, reportBulkDeleteCopy } from "@/models/report.model";
+import { EReportAction, remainingDeletingIds, reportBulkDeleteCopy } from "@/models/report.model";
 import { EIntervalLabels } from "@/models/interval.model";
 import type { BatchDeleteReportsResponse } from "@/swagger-models/org-unit-service-client";
 import { ReportCreationModal } from "@/components/report/report-creation-modal";
@@ -150,11 +150,11 @@ export default defineComponent({
       q.notify(alertUtil.getError(reportBulkDeleteCopy.failure(firstFailedName, response.failed.length)));
     };
 
-    // DeletionFailed keeps the row in the grid, so waiting for it to disappear would
-    // poll forever. The cap bounds a report wedged in Deleting server-side.
+    // The cap bounds a report wedged in Deleting server-side.
     const pollUntilDeleted = (acceptedIds: string[]) => {
       if (!acceptedIds.length) return;
       let attemptsLeft = maxBulkDeletePollAttempts;
+      let remainingIds = [...acceptedIds];
       intervalUtil.startInterval(EIntervalLabels.ReportIndexPostBulkDelete, async () => {
         if (--attemptsLeft <= 0) {
           stopBulkDeletePolling();
@@ -165,10 +165,11 @@ export default defineComponent({
         } catch {
           return;
         }
-        const stillDeleting = tableData.value.some(
-          (report: IReportTable) => acceptedIds.includes(report.id) && isReportDeletionInProgress(report.status),
-        );
-        if (!stillDeleting) stopBulkDeletePolling();
+        remainingIds = await remainingDeletingIds(remainingIds, async (id: string) => {
+          const report = await getReportById(id);
+          return report?.status ?? null;
+        });
+        if (!remainingIds.length) stopBulkDeletePolling();
       });
     };
 

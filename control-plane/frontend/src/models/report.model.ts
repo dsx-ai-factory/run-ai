@@ -93,6 +93,31 @@ export function isReportDeletionInProgress(status: ReportStatus): boolean {
   return status === ReportStatus.PendingDelete || status === ReportStatus.Deleting;
 }
 
+/**
+ * Narrows ids to those whose deletion is still running.
+ *
+ * Deliberately asks per id rather than reading the grid: the grid is filtered and
+ * paginated, so a report being deleted drops out of it as soon as it stops matching
+ * the active filter, which would look identical to the deletion having finished.
+ * An id that can no longer be fetched is gone, which is the success case.
+ */
+export async function remainingDeletingIds(
+  ids: string[],
+  fetchStatus: (id: string) => Promise<ReportStatus | null>,
+): Promise<string[]> {
+  const results = await Promise.all(
+    ids.map(async (id: string) => {
+      try {
+        const status = await fetchStatus(id);
+        return status !== null && isReportDeletionInProgress(status) ? id : null;
+      } catch {
+        return null;
+      }
+    }),
+  );
+  return results.filter((id: string | null): id is string => id !== null);
+}
+
 export const reportBulkDeleteCopy = {
   title: (amount: number): string => `Permanently delete ${amount} reports?`,
   confirmLabel: (amount: number): string => `Delete ${amount} reports`,
