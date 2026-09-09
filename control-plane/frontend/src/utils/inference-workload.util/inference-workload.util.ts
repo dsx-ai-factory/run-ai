@@ -1322,6 +1322,7 @@ function setDistributedUIDefaults(
   uiModel: IUISuperWorkloadCreationRequest,
   isSSO: boolean,
   policy?: UnifiedPolicyInfo | null,
+  serverType?: EServerType,
 ): IUISuperWorkloadCreationRequest {
   const uidGidSourceDefault: UidGidSource | null = isSSO ? UidGidSource.FromIdpToken : UidGidSource.FromTheImage;
   const leaderSpec = getDistributedSpec(
@@ -1334,6 +1335,10 @@ function setDistributedUIDefaults(
     uiModel.spec.worker,
     policy?.worker?.rules?.worker || undefined,
   );
+
+  if (serverType === EServerType.Nim && !leaderSpec.labels?.some((label) => label.name === NIM_WORKLOAD_LABEL)) {
+    leaderSpec.labels = [...(leaderSpec.labels || []), { name: NIM_WORKLOAD_LABEL, value: "true" }];
+  }
 
   if (uiModel.spec.workers === undefined) {
     uiModel.spec.workers = 1;

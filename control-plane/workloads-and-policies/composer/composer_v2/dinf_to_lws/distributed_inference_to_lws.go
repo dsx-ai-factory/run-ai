@@ -122,6 +122,7 @@ func (dinfComposer *DistributedInferenceToLWSComposer) Compose(
 		}
 
 		lws := &target.LeaderWorkerSet
+		nimWorkload := isNIMLeader(src.Leader.Get())
 		runner := &composer.StepRunner{}
 		runner.Batch(
 			dinfComposer.fc.CopyString(convutils.Ref(dinfComposer.leaderWorkerSetName()), &lws.Name, composer.StringToString, nil),
@@ -140,6 +141,18 @@ func (dinfComposer *DistributedInferenceToLWSComposer) Compose(
 
 		leader := src.Leader.Get()
 		runner.Run(dinfComposer.processReplica(ctx, src, leader, lws.Spec.LeaderWorkerTemplate.LeaderTemplate, "leader", dinfComposer.LeaderAssetsMapping, target))
+		if nimWorkload {
+			// Preserve v1 behavior and expose NIM identity to both cluster-sync and generated leader pods.
+			runner.Batch(
+				dinfComposer.fc.CopyBoolean(convutils.Ref(true), &lws.Labels, composer.BoolToMapString, constants.LabelNIMWorkload),
+				dinfComposer.fc.CopyBoolean(
+					convutils.Ref(true),
+					&lws.Spec.LeaderWorkerTemplate.LeaderTemplate.Labels,
+					composer.BoolToMapString,
+					constants.LabelNIMWorkload,
+				),
+			)
+		}
 
 		workers := convutils.Deref(src.Workers.Get(), int32(0))
 		worker := src.Worker.Get()
