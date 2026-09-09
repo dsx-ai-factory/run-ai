@@ -112,7 +112,7 @@ func isValidTenantId(ctx context.Context, tmClient *tmClient.APIClient, tenantID
 }
 
 func TelemetryGroupsToApi(telemetryType string, timestamp time.Time, groups []models.TelemetryGroupValue, groupBy []string) *api.TelemetryResponse {
-	var telemetryGroups []api.TelemetryResponseValuesInner
+	telemetryGroups := make([]api.TelemetryResponseValuesInner, 0, len(groups))
 	for _, group := range groups {
 		telemetryGroupApi := TelemetryGroupToApi(group, groupBy)
 		telemetryGroups = append(telemetryGroups, *telemetryGroupApi)

@@ -1288,9 +1288,6 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 	})
 	Context("Get access rules sync", func() {
 		BeforeEach(func() {
-			if !config.Get[*authorization_config.General]().UsePermissionSets {
-				Skip("no permission sets")
-			}
 			accessRule2Body := api.AccessRuleCreationFields{
 				ScopeId:     TestScopeId,
 				ScopeType:   api.SCOPETYPE_PROJECT,

@@ -17439,11 +17439,11 @@ paths:
               examples:
                 discovery:
                   value:
-                    issuer: 'https://app.run.ai'
-                    authorization_endpoint: 'https://app.run.ai/api/v1/login'
-                    token_endpoint: 'https://app.run.ai/api/v2/token'
+                    issuer: 'http://localhost:8080'
+                    authorization_endpoint: 'http://localhost:8080/api/v1/login'
+                    token_endpoint: 'http://localhost:8080/api/v2/token'
                     jwks_uri: >-
-                      https://app.run.ai/auth/realms/runai/protocol/openid-connect/certs
+                      http://localhost:8080/auth/realms/runai/protocol/openid-connect/certs
                     response_types_supported:
                       - code
                       - token
@@ -17495,11 +17495,11 @@ paths:
               examples:
                 metadata:
                   value:
-                    issuer: 'https://app.run.ai'
-                    authorization_endpoint: 'https://app.run.ai/api/v1/login'
-                    token_endpoint: 'https://app.run.ai/api/v2/token'
+                    issuer: 'http://localhost:8080'
+                    authorization_endpoint: 'http://localhost:8080/api/v1/login'
+                    token_endpoint: 'http://localhost:8080/api/v2/token'
                     jwks_uri: >-
-                      https://app.run.ai/auth/realms/runai/protocol/openid-connect/certs
+                      http://localhost:8080/auth/realms/runai/protocol/openid-connect/certs
                     response_types_supported:
                       - code
                       - token
@@ -28149,7 +28149,7 @@ components:
           description: >-
             the absolute OIDC issuer URL oauth2-proxy uses to discover the
             OpenID provider
-          example: 'https://app.run.ai/auth/realms/runai'
+          example: 'http://localhost:8080/auth/realms/runai'
         customCAGit:
           $ref: '#/components/schemas/ClusterReportedCustomCA'
         customCAS3:
@@ -49179,9 +49179,9 @@ components:
       example:
         tenantName: mytest
         authClientID: runai-admin-ui
-        authHost: 'https://app.run.ai'
+        authHost: 'http://localhost:8080'
         isMultiTenant: false
-        redirectUrl: 'https://mytest.run.ai'
+        redirectUrl: 'http://localhost:8080'
     RealmCreationRequest:
       type: object
       x-internal: true
@@ -50375,15 +50375,15 @@ components:
         issuer:
           type: string
           description: The authorization server's issuer identifier URL
-          example: 'https://app.run.ai'
+          example: 'http://localhost:8080'
         authorization_endpoint:
           type: string
           description: URL of the OAuth2 authorization endpoint
-          example: 'https://app.run.ai/api/v1/login'
+          example: 'http://localhost:8080/api/v1/login'
         token_endpoint:
           type: string
           description: URL of the OAuth2 token endpoint
-          example: 'https://app.run.ai/api/v2/token'
+          example: 'http://localhost:8080/api/v2/token'
         userinfo_endpoint:
           type: string
           description: URL of the UserInfo endpoint
@@ -50474,15 +50474,15 @@ components:
         issuer:
           type: string
           description: The authorization server's issuer identifier URL
-          example: 'https://app.run.ai'
+          example: 'http://localhost:8080'
         authorization_endpoint:
           type: string
           description: URL of the OAuth2 authorization endpoint
-          example: 'https://app.run.ai/api/v1/login'
+          example: 'http://localhost:8080/api/v1/login'
         token_endpoint:
           type: string
           description: URL of the OAuth2 token endpoint
-          example: 'https://app.run.ai/api/v2/token'
+          example: 'http://localhost:8080/api/v2/token'
         userinfo_endpoint:
           type: string
           description: URL of the UserInfo endpoint
@@ -50767,7 +50767,7 @@ components:
           type: string
       example:
         entity_id: f84d2fcf-8a61-4136-9b75-d06f496ca1f2
-        redirect_uri: app.run.ai/auth/realms/runai/broker/saml/endpoint
+        redirect_uri: 'http://localhost:8080/auth/realms/runai/broker/saml/endpoint'
     IdpResourcdes:
       $ref: '#/components/schemas/IdpResources'
     UserGroups:
@@ -51546,6 +51546,10 @@ components:
         preemptible:
           type: boolean
           nullable: true
+        preemptibility:
+          type: string
+          example: non-preemptible
+          nullable: true
         fullySaasWorkload:
           x-internal: true
           type: boolean
@@ -51796,6 +51800,36 @@ components:
               $ref: '#/components/schemas/QueueResources'
             podGroupRequestedNonPreemptibleResources:
               $ref: '#/components/schemas/QueueResources'
+    WorkloadElementTopology:
+      type: object
+      description: >
+        The element's network topology. Populated whenever the element requested
+        topology constraints, or its running pods resolve to an actual placement
+        in the topology hierarchy.
+      nullable: true
+      properties:
+        name:
+          type: string
+          description: >-
+            The name of the network topology associated with the element —
+            either as requested via constraints, or inherited from the
+            workload's topology constraints, or inferred from the nodepools the
+            element's running pods are scheduled on.
+        preferredPlacement:
+          x-internal: true
+          type: string
+          description: >-
+            The topology level to use as a preferred placement constraint for
+            the element.
+        requiredPlacement:
+          x-internal: true
+          type: string
+          description: >-
+            The topology level to use as a required placement constraint for the
+            element. If the requirement cannot be satisfied at this topology
+            level, placement will fail.
+        actualPlacement:
+          $ref: '#/components/schemas/WorkloadTopologyActualPlacement'
     WorkloadElement:
       type: object
       required:
@@ -51843,6 +51877,8 @@ components:
           format: date-time
           example: '2022-01-01T03:49:52.531Z'
           description: The timestamp when the structure element was created.
+        topology:
+          $ref: '#/components/schemas/WorkloadElementTopology'
         kubernetesRef:
           type: object
           nullable: true
@@ -55701,24 +55737,6 @@ components:
             counts.
           items:
             $ref: '#/components/schemas/WorkloadElement'
-    WorkloadElementTopology:
-      type: object
-      description: >
-        The element's network topology. Returned only when the element's running
-        pods resolve to an actual placement in the topology hierarchy; omitted
-        otherwise (e.g. when the workload has no topology, the cluster doesn't
-        support topology, or there are no running pods to place yet).
-      nullable: true
-      properties:
-        name:
-          type: string
-          description: >-
-            The name of the network topology associated with the element —
-            either inherited from the workload's topology constraints, or
-            inferred from the nodepools the element's running pods are scheduled
-            on.
-        actualPlacement:
-          $ref: '#/components/schemas/WorkloadTopologyActualPlacement'
     WorkloadElementResponse:
       allOf:
         - $ref: '#/components/schemas/WorkloadElement'
@@ -55731,8 +55749,6 @@ components:
               $ref: '#/components/schemas/WorkloadRequestResources'
             allocatedResources:
               $ref: '#/components/schemas/WorkloadAllocatedResources'
-            topology:
-              $ref: '#/components/schemas/WorkloadElementTopology'
     ElementMetricType:
       type: string
       description: Specify which metric data to request for an element.
@@ -56855,6 +56871,7 @@ components:
         - category
         - priority
         - priorityClassName
+        - preemptibility
         - guaranteedRuntimeEndsAt
         - aiApplicationId
         - aiApplicationName
@@ -62618,7 +62635,7 @@ components:
         items:
           type: string
           pattern: >-
-            ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
         example:
           - name!=some-workload-name
           - allocatedGPU>=2
@@ -62677,6 +62694,7 @@ components:
           - totalPendingTimeSeconds
           - totalRunningTimeSeconds
           - priorityClassName
+          - preemptibility
           - guaranteedRuntimeEndsAt
           - aiApplicationId
           - aiApplicationName

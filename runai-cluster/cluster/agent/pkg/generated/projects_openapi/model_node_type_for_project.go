@@ -1,7 +1,7 @@
 /*
 Project and Department service API
 
-The aggregated API of Run:AI backend projects and departments
+The aggregated API of Run:AI backend projects and departments 
 
 API version: 1.5.1
 */
@@ -16,8 +16,8 @@ import (
 
 // NodeTypeForProject struct for NodeTypeForProject
 type NodeTypeForProject struct {
-	Id   *float32 `json:"id,omitempty"`
-	Name *string  `json:"name,omitempty"`
+	Id *float32 `json:"id,omitempty"`
+	Name *string `json:"name,omitempty"`
 }
 
 // NewNodeTypeForProject instantiates a new NodeTypeForProject object
@@ -147,3 +147,5 @@ func (v *NullableNodeTypeForProject) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

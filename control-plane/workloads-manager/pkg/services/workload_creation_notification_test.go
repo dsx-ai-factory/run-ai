@@ -87,7 +87,7 @@ func distributedQueueRecordForNotificationTest(kind, version string) *models.Wor
 	return &models.WorkloadsQueueRecord{
 		ID:               "workload-id",
 		CreatedAt:        time.Now(),
-		CreatedBy:        "test@run.ai",
+		CreatedBy:        "test@example.com",
 		ClusterId:        "cluster-id",
 		ProjectId:        "project-id",
 		ProjectName:      "project-name",

@@ -10,7 +10,12 @@ import {
   type IStatusColOptions,
   type ITableColumn,
 } from "@/models/table.model";
-import { EWorkloadNodeArchitecture, workloadPhaseFilterOptions, type WorkloadServicePod } from "@/models/workload.model";
+import {
+  EWorkloadNodeArchitecture,
+  workloadPhaseFilterOptions,
+  workloadPreemptibilityOptions,
+  type WorkloadServicePod,
+} from "@/models/workload.model";
 import {
   type Connection,
   type HistoryRecord,
@@ -402,18 +407,17 @@ export const allWorkloadColumnsMap: Record<string, ITableColumn> = {
     },
   },
   preemptible: {
-    name: "preemptible",
+    name: WorkloadSortFilterFields.Preemptibility,
     label: "Preemptibility",
-    field: (workload: Workload): boolean | null | undefined => workload.preemptible,
-    format: (preemptible: boolean | null | undefined) => {
-      if (typeof preemptible === "boolean") {
-        return preemptible ? "Preemptible" : "Non-preemptible";
-      }
-      return "-";
-    },
-    sortable: false,
+    field: (workload: Workload): string | null | undefined => workload.preemptibility,
+    format: (preemptibility: string | null | undefined) =>
+      workloadPreemptibilityOptions.find((option) => option.value === preemptibility)?.label ?? "-",
+    sortable: true,
     align: "left",
-    hideFilter: true,
+    filter: {
+      type: EColumnFilterType.EnumBased,
+      selectOptions: workloadPreemptibilityOptions,
+    },
   },
   status: {
     name: WorkloadSortFilterFields.Phase,

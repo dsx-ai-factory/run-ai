@@ -70,6 +70,8 @@ var _ = Describe("Permission preflight", func() {
 			requiredPermission{Verb: "delete", Resource: "services", Namespace: "runai", Name: "workload-controller"},
 			requiredPermission{Verb: "list", Group: "rbac.authorization.k8s.io", Resource: "rolebindings"},
 			requiredPermission{Verb: "delete", Group: "rbac.authorization.k8s.io", Resource: "rolebindings"},
+			requiredPermission{Verb: "get", Group: "admissionregistration.k8s.io", Resource: "mutatingwebhookconfigurations", Name: "runai-pod-controller-mutation"},
+			requiredPermission{Verb: "update", Group: "admissionregistration.k8s.io", Resource: "mutatingwebhookconfigurations", Name: "runai-pod-controller-mutation"},
 		))
 		for _, descriptor := range legacyWorkloadResources {
 			Expect(workload.reviewed).To(ContainElement(requiredPermission{

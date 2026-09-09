@@ -5,12 +5,14 @@
 
 import { describe, expect, test } from "vitest";
 import {
+  allWorkloadColumnsMap,
   allWorkloadPodsModalColumnsMap,
   deletedWorkloadIndexColumns,
   workloadIndexColumns,
 } from "./workload.table-model";
-import type { Pod } from "@/swagger-models/workloads-client";
+import { Preemptibility, WorkloadSortFilterFields, type Pod } from "@/swagger-models/workloads-client";
 import type { ITableColumn } from "@/models/table.model";
+import { EColumnFilterType } from "@/models/filter.model";
 
 describe("workload table model - pods modal image field", () => {
   const imageField = allWorkloadPodsModalColumnsMap.image.field as (row: Pod) => string;
@@ -220,5 +222,22 @@ describe("workloadIndexColumns", () => {
     expect(preemptible?.display).toBe(false);
     expect(connections?.display).toBe(false);
     expect(cluster?.display).toBe(false);
+  });
+
+  test("supports filtering and sorting by all preemptibility values", () => {
+    const column = allWorkloadColumnsMap.preemptible;
+
+    expect(column.name).toBe(WorkloadSortFilterFields.Preemptibility);
+    expect(column.sortable).toBe(true);
+    expect(column.filter?.type).toBe(EColumnFilterType.EnumBased);
+    expect(column.filter?.selectOptions).toEqual([
+      { label: "Preemptible", value: Preemptibility.Preemptible },
+      { label: "Semi-preemptible", value: Preemptibility.SemiPreemptible },
+      { label: "Non-preemptible", value: Preemptibility.NonPreemptible },
+    ]);
+    expect(column.format?.(Preemptibility.Preemptible, {})).toBe("Preemptible");
+    expect(column.format?.(Preemptibility.SemiPreemptible, {})).toBe("Semi-preemptible");
+    expect(column.format?.(Preemptibility.NonPreemptible, {})).toBe("Non-preemptible");
+    expect(column.format?.(null, {})).toBe("-");
   });
 });

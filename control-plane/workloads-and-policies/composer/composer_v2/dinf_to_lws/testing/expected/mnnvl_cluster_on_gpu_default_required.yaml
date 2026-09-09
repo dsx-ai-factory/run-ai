@@ -9,7 +9,7 @@ Config:
           name: dinfw-test-lws-sp-0
         spec:
           rules:
-          - host: test.run.ai
+          - host: mock-q7z3k.example.com
             http:
               paths:
               - backend:
@@ -75,7 +75,11 @@ LeaderWorkerSet:
             readinessProbe:
               tcpSocket:
                 port: 8081
-            resources: {}
+            resources:
+              limits:
+                nvidia.com/gpu: "1"
+              requests:
+                nvidia.com/gpu: "1"
           priorityClassName: very-high
           schedulerName: runai-scheduler
       restartPolicy: RecreateGroupOnPodRestart
@@ -98,7 +102,11 @@ LeaderWorkerSet:
               value: test-lws
             image: python:3.8
             name: worker
-            resources: {}
+            resources:
+              limits:
+                nvidia.com/gpu: "1"
+              requests:
+                nvidia.com/gpu: "1"
           priorityClassName: very-high
           schedulerName: runai-scheduler
     replicas: 1

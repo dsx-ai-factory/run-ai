@@ -102,8 +102,14 @@ export const workloadPriorityNameByWorkloadType = {
 
 export const workloadPreemptibilityOptions = [
   { label: "Preemptible", value: Preemptibility.Preemptible },
+  { label: "Semi-preemptible", value: Preemptibility.SemiPreemptible },
   { label: "Non-preemptible", value: Preemptibility.NonPreemptible },
 ];
+
+export const getWorkloadPreemptibilityOptions = (supportSemiPreemptibility: boolean) =>
+  workloadPreemptibilityOptions.filter(
+    (option) => supportSemiPreemptibility || option.value !== Preemptibility.SemiPreemptible,
+  );
 
 export enum EDistributedReplicaType {
   Master = "Master",

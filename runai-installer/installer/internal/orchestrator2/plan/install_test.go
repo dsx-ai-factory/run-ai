@@ -106,7 +106,7 @@ func TestResolve_Install_ControlPlaneAndCluster(t *testing.T) {
 
 	clusterAction := actionForStep(t, runai.Flows[1], "install-cluster-chart")
 	require.IsType(t, actions.InstallClusterChart{}, clusterAction)
-	assert.Contains(t, clusterAction.(actions.InstallClusterChart).ExtraValues, "global.imagePullSecrets[0].name=runai-reg-creds")
+	assert.Contains(t, clusterAction.(actions.InstallClusterChart).ExtraValues, "global.additionalImagePullSecrets[0]=runai-reg-creds")
 }
 
 func TestResolve_Install_ControlPlaneOnly_NoOptionalSecrets(t *testing.T) {

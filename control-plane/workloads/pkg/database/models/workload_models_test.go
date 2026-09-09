@@ -68,3 +68,13 @@ var _ = Describe("WorkloadResourceConnectionsArray", func() {
 		Expect(scanned).To(Equal(original))
 	})
 })
+
+var _ = Describe("Workload query fields", func() {
+	It("maps preemptibility for filtering and sorting", func() {
+		workloadView := WorkloadView{}
+
+		Expect(workloadView.FilterFieldsToColumn()).To(HaveKey("preemptibility"))
+		Expect(workloadView.SortFieldsToColumn()).To(HaveKey("preemptibility"))
+		Expect(Workload{}.AreFilterableFromTable([]string{"preemptibility"})).To(BeTrue())
+	})
+})

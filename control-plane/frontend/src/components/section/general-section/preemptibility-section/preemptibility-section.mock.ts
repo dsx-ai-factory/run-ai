@@ -62,6 +62,7 @@ export const mockPolicyRules = {
 export const mockDefaultFactoryProps = {
   modelValue: Preemptibility.Preemptible,
   disabled: false,
+  supportSemiPreemptibility: true,
   policyRules: mockPolicyRules.editable,
   showQuotaWarning: false,
 };
