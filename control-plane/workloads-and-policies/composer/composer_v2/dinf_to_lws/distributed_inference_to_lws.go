@@ -152,6 +152,8 @@ func (dinfComposer *DistributedInferenceToLWSComposer) Compose(
 
 		runner.Run(dinfComposer.processNetworkingFields(src.ServingPort.Get(), target))
 
+		// ComposeMNNVL runs after both replicas are composed so fc.GpuRequested
+		// reflects the leader and worker compute sections.
 		runner.Run(dinfComposer.fc.ComposeMNNVL(leader.Labels, dinfComposer.defaultMNNVLMode(), &target.Config, composer.MNNVLToWorkloadRunner, nil))
 
 		return runner.Error()
@@ -161,8 +163,12 @@ func (dinfComposer *DistributedInferenceToLWSComposer) Compose(
 // defaultMNNVLMode derives the MNNVL default for distributed-inference workloads
 // from the cluster's inference-workload-controller GPU network acceleration flag.
 // The dinf composer preserves the pre-existing plugin contract of always emitting
-// a mode, so an unset cluster flag defaults to None (never left empty).
+// a mode, so an unset cluster flag defaults to None (never left empty). A workload
+// that requests no GPU always defaults to None regardless of the cluster flag.
 func (dinfComposer *DistributedInferenceToLWSComposer) defaultMNNVLMode() string {
+	if !dinfComposer.fc.GpuRequested {
+		return string(workloadsManagerApi.MNNVLMODE_NONE)
+	}
 	config := dinfComposer.fc.ClusterStorageConfig
 	if config == nil {
 		config = composer.DefaultClusterStorageConfig()

@@ -35,24 +35,34 @@ func mnnvlTestClusterConfig(dinfEnabled bool) composer.ClusterStorageConfig {
 
 // mnnvlTests exercises MNNVL plugin resolution: the mode is taken from the
 // leader's run.ai/MNNVL label when present, otherwise defaulted from the
-// cluster's dinfGPUNetworkAcceleration flag. Every entry uses
-// mnnvlGoldenBaseInput so the goldens differ only in the resolved mode.
+// cluster's dinfGPUNetworkAcceleration flag -- but only for workloads that
+// request GPU. Every entry uses mnnvlGoldenBaseInput so the goldens differ
+// only in the resolved mode (and the injected leader GPU request, when set).
 // These entries flow through the same `ComposerTests` DescribeTable as the
 // main golden cases.
 var mnnvlTests = []TableEntry{
 	// Cluster-driven defaults (dinfGPUNetworkAcceleration=true on the
-	// cluster): absent label -> Required; explicit None overrides the
-	// cluster default.
-	Entry("mnnvl cluster acceleration on defaults to Required", ComposerTest{
+	// cluster): a GPU-requesting workload with no label -> Required; an
+	// explicit None label overrides the cluster default.
+	Entry("mnnvl cluster acceleration on with gpu defaults to Required", ComposerTest{
+		input:            mnnvlGoldenBaseInput,
+		expected:         "mnnvl_cluster_on_gpu_default_required",
+		clusterConfig:    mnnvlTestClusterConfig(true),
+		leaderGpuDevices: 1,
+	}),
+	// A workload that requests no GPU never inherits the cluster default,
+	// even when dinfGPUNetworkAcceleration is on -> None.
+	Entry("mnnvl cluster acceleration on without gpu defaults to None", ComposerTest{
 		input:         mnnvlGoldenBaseInput,
-		expected:      "mnnvl_cluster_on_default_required",
+		expected:      "mnnvl_cluster_on_no_gpu_none",
 		clusterConfig: mnnvlTestClusterConfig(true),
 	}),
 	Entry("mnnvl explicit None label overrides cluster on", ComposerTest{
-		input:         mnnvlGoldenBaseInput,
-		expected:      "mnnvl_label_none_overrides_cluster_on",
-		clusterConfig: mnnvlTestClusterConfig(true),
-		mnnvlLabel:    "None",
+		input:            mnnvlGoldenBaseInput,
+		expected:         "mnnvl_label_none_overrides_cluster_on",
+		clusterConfig:    mnnvlTestClusterConfig(true),
+		leaderGpuDevices: 1,
+		mnnvlLabel:       "None",
 	}),
 
 	// Label-driven resolution when the cluster's MNNVL flag is off. The

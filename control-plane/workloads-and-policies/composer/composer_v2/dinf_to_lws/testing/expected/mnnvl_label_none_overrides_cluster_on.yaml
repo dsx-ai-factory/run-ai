@@ -76,7 +76,11 @@ LeaderWorkerSet:
             readinessProbe:
               tcpSocket:
                 port: 8081
-            resources: {}
+            resources:
+              limits:
+                nvidia.com/gpu: "1"
+              requests:
+                nvidia.com/gpu: "1"
           priorityClassName: very-high
           schedulerName: runai-scheduler
       restartPolicy: RecreateGroupOnPodRestart
@@ -100,7 +104,11 @@ LeaderWorkerSet:
               value: test-lws
             image: python:3.8
             name: worker
-            resources: {}
+            resources:
+              limits:
+                nvidia.com/gpu: "1"
+              requests:
+                nvidia.com/gpu: "1"
           priorityClassName: very-high
           schedulerName: runai-scheduler
     replicas: 1

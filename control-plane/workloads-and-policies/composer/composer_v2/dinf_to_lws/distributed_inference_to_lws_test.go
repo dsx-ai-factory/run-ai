@@ -48,16 +48,20 @@ import (
 //     override on update).
 //   - mnnvlLabel      : when non-empty, injects a `run.ai/MNNVL` label onto
 //     the leader spec so the composer picks it up (used by MNNVL entries).
+//   - leaderGpuDevices: when > 0, sets the leader's gpuDevicesRequest so the
+//     workload counts as GPU-requesting (used by MNNVL entries to exercise the
+//     "no GPU never defaults to a GPU-network-acceleration mode" gate).
 type ComposerTest struct {
-	input           string
-	expected        string
-	expectedError   string
-	expectedCode    int32
-	overrideOptions func(*composer.FieldsComposerOptions)
-	clusterConfig   composer.ClusterStorageConfig
-	workloadID      string
-	lwsName         string
-	mnnvlLabel      string
+	input            string
+	expected         string
+	expectedError    string
+	expectedCode     int32
+	overrideOptions  func(*composer.FieldsComposerOptions)
+	clusterConfig    composer.ClusterStorageConfig
+	workloadID       string
+	lwsName          string
+	mnnvlLabel       string
+	leaderGpuDevices int32
 }
 
 // disableGpuMemoryLimitAnnotations turns off the >= 3.0.0 CUDA/KAI
@@ -390,6 +394,17 @@ func runComposer(tc ComposerTest) {
 			Name:  *workloadsApi.NewNullableString(convutils.Ref("run.ai/MNNVL")),
 			Value: *workloadsApi.NewNullableString(convutils.Ref(tc.mnnvlLabel)),
 		})
+	}
+
+	if tc.leaderGpuDevices > 0 {
+		leader := spec.Leader.Get()
+		Expect(leader).NotTo(BeNil(), "leaderGpuDevices requires a leader spec in the fixture")
+		compute := leader.Compute.Get()
+		if compute == nil {
+			compute = workloadsApi.NewWorkspaceSpecSpecAllOfCompute()
+		}
+		compute.SetGpuDevicesRequest(tc.leaderGpuDevices)
+		leader.Compute.Set(compute)
 	}
 
 	options := composer.FieldsComposerOptions{
