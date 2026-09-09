@@ -116,6 +116,18 @@ Released NVIDIA Run:ai container images and Helm charts are published to the NVI
 
 Contributions are welcome. Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) for the development workflow, branch and PR policy, and CI expectations, and [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) for community guidelines.
 
+## Roadmap
+
+NVIDIA Run:ai does not publish a long-range feature roadmap in this repository. What is planned and in progress is tracked in the open:
+
+- **[Open issues](https://github.com/dsx-ai-factory/run-ai/issues)** - Planned work, accepted feature requests, and known gaps. Issues are triaged and labelled by maintainers.
+- **[Releases](https://github.com/dsx-ai-factory/run-ai/releases)** - What actually shipped in each version, with notes generated from the merged pull requests on that release branch.
+- **[`SUPPORT.md`](SUPPORT.md)** - Which versions are currently supported and when each moves to end of life.
+
+Release cadence, branch naming, and who cuts a release are documented in [`RELEASE.md`](RELEASE.md).
+
+**Known limitations:** the root `Makefile` targets are placeholders — real build, test, and lint targets live in each service directory (see [Building individual services](#building-individual-services)). The full CI gate runs remotely and is reported back on pull requests as the `Validate Successful Run` check.
+
 ## Community
 
 - **[GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues)** - Bug reports, feature requests, documentation issues, and usage questions. This is the project's primary discussion forum; start here.
