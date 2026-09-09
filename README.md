@@ -45,6 +45,20 @@ At a high level:
 | **Monitoring and observability**  | Provides visibility into clusters, nodes, GPUs, workloads, resource utilization, and platform activity.                                     |
 | **Multiple interfaces**           | Supports NVIDIA Run:ai operations through the web UI, CLI, and REST API.                                                                     |
 
+## How NVIDIA Run:ai relates to other tools
+
+NVIDIA Run:ai is a scheduling and orchestration layer on top of Kubernetes — it does not replace Kubernetes, a container runtime, or a CI/CD system.
+
+| Layer | Tools | How NVIDIA Run:ai relates |
+|---|---|---|
+| Cluster orchestration | Kubernetes, OpenShift | NVIDIA Run:ai runs **on** these. It extends the cluster with GPU-aware scheduling rather than replacing native scheduling. |
+| Schedulers | Default `kube-scheduler`, Volcano, Kueue | NVIDIA Run:ai ships the [KAI scheduler](https://github.com/kai-scheduler/kai-scheduler) and adds fair-share, preemption, fractional GPUs, and quota hierarchies across departments and projects. |
+| GPU enablement | NVIDIA GPU Operator, Network Operator | Complementary — these expose and configure GPUs on nodes; NVIDIA Run:ai decides which workloads get them and for how long. |
+| ML platforms and pipelines | Kubeflow, Ray, Argo Workflows, Slurm | Complementary for the Kubernetes-based ones: they submit workloads, NVIDIA Run:ai schedules and governs the GPU capacity those workloads consume. Slurm is an alternative for HPC-style batch on bare metal. |
+| Workload types | Training Operator, LeaderWorkerSet, Knative, KServe | NVIDIA Run:ai integrates with these to manage workspaces, training, distributed training, and inference as first-class workloads. |
+
+If you need GPU sharing, quota enforcement, and multi-tenant governance across teams sharing one Kubernetes GPU estate, that is the gap NVIDIA Run:ai fills. If you only need to run a single team's jobs on dedicated GPUs, native Kubernetes scheduling may be sufficient.
+
 ## Repository Map
 
 | Component                       | Path                                                                                                                                                                                                                                                                                  | Description                                                                                                       |
