@@ -98,9 +98,15 @@ To build and run NVIDIA Run:ai locally for development, see [Usage](#usage).
 
 Contributions are welcome. Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) for the development workflow, branch and PR policy, and CI expectations, and [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) for community guidelines.
 
+## Community
+
+- **[GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues)** - Bug reports, feature requests, documentation issues, and usage questions. This is the project's primary discussion forum; start here.
+- **[Documentation](docs/)** - In-repo developer and product documentation, including the [Architecture Overview](docs/developer/architecture.md) and [Service Reference](docs/developer/services.md).
+- **[SUPPORT.md](SUPPORT.md)** - Supported versions and where to get help, including commercial support.
+
 ## Security & Support
 
-- **Reporting a vulnerability:** see [`SECURITY.md`](SECURITY.md) — do not open public issues for security reports.
+- **Reporting a vulnerability:** see [`SECURITY.md`](SECURITY.md) — report through NVIDIA PSIRT, not through GitHub issues or advisories.
 - **Supported versions and getting help:** see [`SUPPORT.md`](SUPPORT.md).
 
 ## License
