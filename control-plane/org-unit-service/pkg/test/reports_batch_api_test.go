@@ -291,15 +291,21 @@ var _ = Describe("BatchDeleteReports API tests", func() {
 
 	Context("audit logging of accepted deletions", func() {
 		const (
-			acceptedCount   = 20
-			perWriteDelay   = 50 * time.Millisecond
-			responseBudget  = 5 * perWriteDelay
-			auditWriteLimit = 3 * acceptedCount * perWriteDelay
+			acceptedCount = 20
+			perWriteDelay = 50 * time.Millisecond
+			// What the writes would have cost inline. Beating it is the property under
+			// test, and unlike a fixed budget it holds however slow the machine is.
+			inlineWriteTime = acceptedCount * perWriteDelay
+			// Eventually returns as soon as the writes land, so this only bounds failure.
+			auditWriteLimit = 60 * time.Second
 		)
 
 		useAuditWriter := func(writer audit.Writer) {
 			audit.SetMock(writer)
-			DeferCleanup(func() { audit.SetMock(&write.EmptyWriter{}) })
+			DeferCleanup(func() {
+				reports.WaitForAuditWrites()
+				audit.SetMock(&write.EmptyWriter{})
+			})
 		}
 
 		mockAcceptAll := func(ids []string) *metrics_mocks.MetricsClientContract {
@@ -340,7 +346,9 @@ var _ = Describe("BatchDeleteReports API tests", func() {
 			Expect(err).To(BeNil())
 			Expect(resp.Code).To(Equal(http.StatusAccepted))
 			Expect(resp.Body.(api.BatchDeleteReportsResponse).Accepted).To(HaveLen(acceptedCount))
-			Expect(elapsed).To(BeNumerically("<", responseBudget))
+			Expect(elapsed).To(BeNumerically("<", inlineWriteTime))
+			// The response cannot have waited for writes that have not happened yet.
+			Expect(len(writer.written())).To(BeNumerically("<", acceptedCount))
 			Eventually(writer.written, auditWriteLimit, 10*time.Millisecond).Should(ConsistOf(ids))
 		})
 
@@ -359,7 +367,8 @@ var _ = Describe("BatchDeleteReports API tests", func() {
 					defer wg.Done()
 					defer GinkgoRecover()
 					svc := makeSvc(mockAcceptAll(ids))
-					resp, err := svc.BatchDeleteReports(ctx, api.BatchDeleteReportsRequest{Ids: ids})
+					// Each request owns its audit log in production; sharing one only races.
+					resp, err := svc.BatchDeleteReports(SetContext(TestTenant, TestUser), api.BatchDeleteReportsRequest{Ids: ids})
 					Expect(err).To(BeNil())
 					Expect(resp.Code).To(Equal(http.StatusAccepted))
 				}(batches[i])
