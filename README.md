@@ -136,7 +136,7 @@ Release cadence, branch naming, and who cuts a release are documented in [`RELEA
 
 ## Security & Support
 
-- **Reporting a vulnerability:** see [`SECURITY.md`](SECURITY.md) — report through NVIDIA PSIRT, not through GitHub issues or advisories.
+- **Reporting a vulnerability:** see [`SECURITY.md`](SECURITY.md) — do not open public issues for security reports.
 - **Supported versions and getting help:** see [`SUPPORT.md`](SUPPORT.md).
 
 ## License
