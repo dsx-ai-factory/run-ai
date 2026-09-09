@@ -150,6 +150,7 @@ type listWorkloadsInput struct {
 	GPUIdleOnly             bool                      `json:"gpuIdleOnly,omitempty"         jsonschema:"Return only running workloads whose idleAllocatedGpus value is non-zero."`
 	AllocatedGPU            *gpuComparison            `json:"allocatedGpu,omitempty" jsonschema:"Filter by GPUs currently assigned to each workload. Use for a per-workload predicate such as 'workloads using more than 2 GPUs', unless the user explicitly says requested GPUs or GPU utilization. Applied server-side. Workloads with a null allocated GPU value are excluded from every comparison, including == 0 and != N."`                          //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
 	RequestedGPU            *gpuComparison            `json:"requestedGpu,omitempty" jsonschema:"Filter multiple workloads by GPUs requested in their specification. Requires projectId or clusterId; ask for one before calling if absent. This cannot be filtered server-side, so at most 200 scoped workloads are fetched and filtered locally. Workloads with a null requested GPU value are excluded from every comparison, including == 0 and != N."` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+	IncludeDetails          bool                      `json:"includeDetails,omitempty" jsonschema:"Include secondary fields such as creation/deletion timestamps, node pools, priority, preemptibility, and idle GPUs. Defaults to false for a compact response."`
 	Limit                   int32                     `json:"limit,omitempty"               jsonschema:"Maximum number of workloads to return. Defaults to 50, capped at 200."`
 	Offset                  int32                     `json:"offset,omitempty"              jsonschema:"Pagination cursor from a previous response's nextOffset. Defaults to 0."`
 }
@@ -252,15 +253,15 @@ type workloadListItem struct {
 	ProjectID          string   `json:"projectId"          jsonschema:"Owning project ID."`
 	ProjectName        string   `json:"projectName"        jsonschema:"Owning project name."`
 	ClusterID          string   `json:"clusterId"          jsonschema:"Cluster UUID containing the workload."`
-	CreatedAt          string   `json:"createdAt"          jsonschema:"Workload creation timestamp in RFC3339 UTC."`
+	CreatedAt          string   `json:"createdAt,omitempty"          jsonschema:"Workload creation timestamp in RFC3339 UTC. Included when includeDetails is true."`
 	PhaseUpdatedAt     string   `json:"phaseUpdatedAt"     jsonschema:"Timestamp of the last phase change in RFC3339 UTC."`
-	DeletedAt          string   `json:"deletedAt,omitempty" jsonschema:"Workload deletion timestamp in RFC3339 UTC. Present for deleted workloads."`
-	RequestedNodePools []string `json:"requestedNodePools" jsonschema:"Node pools requested by the workload. Always present; empty when none were requested."`
-	CurrentNodePools   []string `json:"currentNodePools"   jsonschema:"Node pools currently running the workload. Always present; empty when the workload has no placement."`
-	Priority           *int32   `json:"priority"           jsonschema:"Numeric workload priority. Null when unavailable."`
-	PriorityClassName  string   `json:"priorityClassName"  jsonschema:"Workload priority class name."`
-	Preemptible        *bool    `json:"preemptible"        jsonschema:"Whether the workload can be preempted. Null when unavailable."`
-	IdleAllocatedGpus  *float32 `json:"idleAllocatedGpus"  jsonschema:"Number of currently allocated GPUs that are idle. Null when unavailable."`
+	DeletedAt          string   `json:"deletedAt,omitempty" jsonschema:"Workload deletion timestamp in RFC3339 UTC. Included for deleted workloads when includeDetails is true."`
+	RequestedNodePools []string `json:"requestedNodePools,omitempty" jsonschema:"Node pools requested by the workload. Included when includeDetails is true and non-empty."`
+	CurrentNodePools   []string `json:"currentNodePools,omitempty"   jsonschema:"Node pools currently running the workload. Included when includeDetails is true and non-empty."`
+	Priority           *int32   `json:"priority,omitempty"           jsonschema:"Numeric workload priority. Included when includeDetails is true and available."`
+	PriorityClassName  string   `json:"priorityClassName,omitempty"  jsonschema:"Workload priority class name. Included when includeDetails is true and available."`
+	Preemptible        *bool    `json:"preemptible,omitempty"        jsonschema:"Whether the workload can be preempted. Included when includeDetails is true and available."`
+	IdleAllocatedGpus  *float32 `json:"idleAllocatedGpus,omitempty"  jsonschema:"Number of currently allocated GPUs that are idle. Included when includeDetails is true and available."`
 	AllocatedGPU       *float64 `json:"allocatedGpu"       jsonschema:"GPUs currently assigned to the workload. Null when the API has no allocation value."`
 	RequestedGPU       *float64 `json:"requestedGpu"       jsonschema:"GPUs requested by the workload specification. Null when no GPU-device request value is available (including GPU-memory-only requests)."`
 }
@@ -274,11 +275,12 @@ type listWorkloadsOutput struct {
 func registerListWorkloads(r *runaimcp.Registry, client *runaiclient.Client) {
 	runaimcp.Register(r, runaimcp.Tool[listWorkloadsInput, listWorkloadsOutput]{
 		Name: "list_workloads",
-		Description: "List workloads with their ID, name, type, phase, project, cluster, timestamps, node pools, priority, and preemptibility. " +
+		Description: "List workloads with a compact default response containing identity, type, phase, project, cluster, last phase update, and requested and allocated GPUs. " +
+			"Set includeDetails when creation/deletion timestamps, node pools, priority, preemptibility, or idle-GPU values are needed. " +
 			"Optionally filter by name, project, cluster, phase, type, node pool, or recent activity. " +
 			"Supports every List Workloads API query parameter and filter field. Use filterBy for typed field/operator/value comparisons not covered by the convenience inputs; all filters are ANDed and strict numeric/timestamp comparisons are preserved. " + //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
-			"For workloads deleted in the last X hours, pass an RFC3339 cutoff (now minus X hours) as deletedAfter; it selects deleted workloads and returns deletedAt. Use deletedOnly only to list all deleted workloads. " +
-			"Use gpuIdleOnly for which workloads are GPU-idle: this returns Running workloads whose idleAllocatedGpus value is non-zero, and includes that value in each result. " +
+			"For workloads deleted in the last X hours, pass an RFC3339 cutoff (now minus X hours) as deletedAfter; it selects deleted workloads. Set includeDetails to return deletedAt. Use deletedOnly only to list all deleted workloads. " +
+			"Use gpuIdleOnly for which workloads are GPU-idle: this returns Running workloads whose idleAllocatedGpus value is non-zero; set includeDetails to return that value. " +
 			"When resolving an ID for another tool, filter by workload name and projectId when known; " +
 			"use the ID if one workload matches, or show the matching projects and phases and ask the user to select one if multiple match. " +
 			"Do NOT call when the user asks only HOW MANY workloads match, including how many are GPU-idle — use get_workloads_summary. " +
@@ -335,7 +337,7 @@ func listWorkloadsPage(ctx context.Context, client *runaiclient.Client, in listW
 	// Step 3 — map the compact workload fields returned by this tool.
 	out.Workloads = make([]workloadListItem, 0, len(resp.Workloads))
 	for _, workload := range resp.Workloads {
-		out.Workloads = append(out.Workloads, mapWorkloadListItem(workload))
+		out.Workloads = append(out.Workloads, mapWorkloadListItem(workload, in.IncludeDetails))
 	}
 
 	// Step 4 — return the upstream next offset if it advances pagination.
@@ -404,7 +406,7 @@ func listWorkloadsByRequestedGPU(ctx context.Context, client *runaiclient.Client
 	page, hasMore, next := common.Paginate(matched, in.Offset, common.EffectiveLimit(in.Limit))
 	out.Workloads = make([]workloadListItem, 0, len(page))
 	for _, workload := range page {
-		out.Workloads = append(out.Workloads, mapWorkloadListItem(workload))
+		out.Workloads = append(out.Workloads, mapWorkloadListItem(workload, in.IncludeDetails))
 	}
 	out.HasMore = hasMore
 	out.NextOffset = next
@@ -597,25 +599,28 @@ func requestedGPU(workload wlclient.Workload) *float64 {
 	return nil
 }
 
-func mapWorkloadListItem(workload wlclient.Workload) workloadListItem {
-	return workloadListItem{
-		ID:                 workload.Id,
-		Name:               workload.Name,
-		Type:               workload.Type,
-		Phase:              string(workload.Phase),
-		ProjectID:          workload.ProjectId,
-		ProjectName:        workload.ProjectName,
-		ClusterID:          workload.ClusterId,
-		CreatedAt:          common.TimestampString(common.TimePtrIfNonZero(workload.CreatedAt)),
-		PhaseUpdatedAt:     common.TimestampString(common.TimePtrIfNonZero(workload.PhaseUpdatedAt)),
-		DeletedAt:          common.TimestampString(workload.DeletedAt.Get()),
-		RequestedNodePools: append([]string{}, workload.RequestedNodePools...),
-		CurrentNodePools:   append([]string{}, workload.CurrentNodePools...),
-		Priority:           workload.Priority.Get(),
-		PriorityClassName:  workload.PriorityClassName,
-		Preemptible:        workload.Preemptible.Get(),
-		IdleAllocatedGpus:  workload.IdleAllocatedGpus.Get(),
-		AllocatedGPU:       allocatedGPU(workload),
-		RequestedGPU:       requestedGPU(workload),
+func mapWorkloadListItem(workload wlclient.Workload, includeDetails bool) workloadListItem {
+	item := workloadListItem{
+		ID:             workload.Id,
+		Name:           workload.Name,
+		Type:           workload.Type,
+		Phase:          string(workload.Phase),
+		ProjectID:      workload.ProjectId,
+		ProjectName:    workload.ProjectName,
+		ClusterID:      workload.ClusterId,
+		PhaseUpdatedAt: common.TimestampString(common.TimePtrIfNonZero(workload.PhaseUpdatedAt)),
+		AllocatedGPU:   allocatedGPU(workload),
+		RequestedGPU:   requestedGPU(workload),
 	}
+	if includeDetails {
+		item.CreatedAt = common.TimestampString(common.TimePtrIfNonZero(workload.CreatedAt))
+		item.DeletedAt = common.TimestampString(workload.DeletedAt.Get())
+		item.RequestedNodePools = append([]string{}, workload.RequestedNodePools...)
+		item.CurrentNodePools = append([]string{}, workload.CurrentNodePools...)
+		item.Priority = workload.Priority.Get()
+		item.PriorityClassName = workload.PriorityClassName
+		item.Preemptible = workload.Preemptible.Get()
+		item.IdleAllocatedGpus = workload.IdleAllocatedGpus.Get()
+	}
+	return item
 }

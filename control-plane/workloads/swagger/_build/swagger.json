@@ -24200,6 +24200,9 @@
             "type": "string",
             "description": "The actual status of the release in the cluster."
           },
+          "clusterId": {
+            "$ref": "#/components/schemas/ClusterId"
+          },
           "projectId": {
             "$ref": "#/components/schemas/ProjectId"
           },

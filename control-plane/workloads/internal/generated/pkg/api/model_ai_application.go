@@ -59,6 +59,9 @@ type AiApplication struct {
 	Phase string `json:"phase,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// The id of the cluster.
+	ClusterId string `json:"clusterId,omitempty" gorm:"not null;" validate:"regexp=.*"`
+
 	// The id of the project.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ProjectId string `json:"projectId,omitempty" validate:"regexp=.*"`

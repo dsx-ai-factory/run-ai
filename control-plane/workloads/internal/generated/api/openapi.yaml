@@ -126798,6 +126798,12 @@ components:
         phase:
           description: The actual status of the release in the cluster.
           type: string
+        clusterId:
+          description: The id of the cluster.
+          example: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          format: uuid
+          pattern: .*
+          type: string
         projectId:
           description: The id of the project.
           example: "1"

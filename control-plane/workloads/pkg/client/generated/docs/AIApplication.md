@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 **Type** | Pointer to **string** |  | [optional] 
 **DesiredPhase** | Pointer to **NullableString** | The desired phase of the application. | [optional] 
 **Phase** | Pointer to **string** | The actual status of the release in the cluster. | [optional] 
+**ClusterId** | Pointer to **string** | The id of the cluster. | [optional]
 **ProjectId** | Pointer to **string** | The id of the project. | [optional] 
 **ProjectName** | Pointer to **string** | The name of the project | [optional] 
 **DepartmentId** | Pointer to **string** | The id of the department. | [optional] 
@@ -206,6 +207,31 @@ SetPhase sets Phase field to given value.
 `func (o *AIApplication) HasPhase() bool`
 
 HasPhase returns a boolean if a field has been set.
+
+### GetClusterId
+
+`func (o *AIApplication) GetClusterId() string`
+
+GetClusterId returns the ClusterId field if non-nil, zero value otherwise.
+
+### GetClusterIdOk
+
+`func (o *AIApplication) GetClusterIdOk() (*string, bool)`
+
+GetClusterIdOk returns a tuple with the ClusterId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetClusterId
+
+`func (o *AIApplication) SetClusterId(v string)`
+
+SetClusterId sets ClusterId field to given value.
+
+### HasClusterId
+
+`func (o *AIApplication) HasClusterId() bool`
+
+HasClusterId returns a boolean if a field has been set.
 
 ### GetProjectId
 
@@ -674,5 +700,3 @@ HasSpec returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

@@ -88,14 +88,17 @@ func validateAIApplicationChartRef(ref aiApplicationChartRef) error {
 }
 
 type submitAIApplicationOutput struct {
-	ID            string `json:"id,omitempty"          jsonschema:"Created AI application ID."`
-	Name          string `json:"name"                  jsonschema:"AI application name."`
-	ClusterID     string `json:"clusterId"             jsonschema:"Cluster where the AI application is scheduled."`
-	ProjectID     string `json:"projectId"             jsonschema:"Project that owns the AI application."`
-	DesiredPhase  string `json:"desiredPhase,omitempty" jsonschema:"Desired lifecycle phase returned by the API."`
-	Phase         string `json:"phase,omitempty"       jsonschema:"Current Kubernetes or Helm release phase returned by the API."`
-	ActionStatus  string `json:"actionStatus,omitempty" jsonschema:"Current AI application action status, such as creating, deployed, or failed."`
-	ActionMessage string `json:"actionMessage,omitempty" jsonschema:"Message associated with the current AI application action status."`
+	SubmissionAccepted       bool     `json:"submissionAccepted"  jsonschema:"True when the existing submission API call returned a successful HTTP status."`
+	ResponseDetailsAvailable bool     `json:"responseDetailsAvailable" jsonschema:"True when the submission response was decoded and the returned application details are available."`
+	ID                       string   `json:"id,omitempty"          jsonschema:"Created AI application ID, when included in the submission response."`
+	Name                     string   `json:"name"                  jsonschema:"AI application name."`
+	ClusterID                string   `json:"clusterId"             jsonschema:"Cluster where the AI application is scheduled."`
+	ProjectID                string   `json:"projectId"             jsonschema:"Project that owns the AI application."`
+	DesiredPhase             string   `json:"desiredPhase,omitempty" jsonschema:"Desired lifecycle phase returned by the API."`
+	Phase                    string   `json:"phase,omitempty"       jsonschema:"Current Kubernetes or Helm release phase returned by the API."`
+	ActionStatus             string   `json:"actionStatus,omitempty" jsonschema:"Current AI application action status, such as creating, deployed, or failed."`
+	ActionMessage            string   `json:"actionMessage,omitempty" jsonschema:"Message associated with the current AI application action status."`
+	Warnings                 []string `json:"warnings,omitempty" jsonschema:"Non-fatal notes, including when the API accepted submission but its response details could not be decoded."`
 }
 
 func registerSubmitAIApplication(r *runaimcp.Registry, client *runaiclient.Client) {
@@ -106,7 +109,7 @@ func registerSubmitAIApplication(r *runaimcp.Registry, client *runaiclient.Clien
 			"chartName and chartVersion, a direct HTTPS chartURL, or a previously uploaded chartId. " +
 			"The spec can include inline or base64-encoded Helm values and shared or personal credentials for a private chart source. " +
 			"Personal runtime references must be exact whole strings using USERCREDENTIAL:<name>; NGC references require ,generic-secret or ,docker-registry. Submission requires confirmation. " +
-			"Returns the created application ID and its desired, action, and release phases. " +
+			"Returns whether the submission was accepted, plus the created application ID and phase fields when the same API response includes them. " +
 			"Do not use this tool to inspect existing applications; use list_ai_applications. " +
 			"Do not use it to submit an individual workload; use submit_workload.",
 		ReadOnly:    false,
@@ -129,7 +132,11 @@ func submitAIApplicationRun(ctx context.Context, client *runaiclient.Client, in 
 	created, httpResp, err := client.Workloads.AIApplicationsAPI.CreateApplication(ctx).
 		AIApplicationCreationRequest(toAIApplicationCreationRequest(in)).Execute()
 	if err != nil {
-		if httpResp != nil && httpResp.StatusCode == http.StatusNoContent {
+		if isSuccessfulHTTPResponse(httpResp) {
+			out.SubmissionAccepted = true
+			if httpResp.StatusCode != http.StatusNoContent {
+				out.Warnings = append(out.Warnings, "submission was accepted, but response details are unavailable because the response body could not be decoded")
+			}
 			return out, nil
 		}
 		mapped := runaimcp.MapHTTPError(httpResp, err)
@@ -140,8 +147,12 @@ func submitAIApplicationRun(ctx context.Context, client *runaiclient.Client, in 
 		}
 		return submitAIApplicationOutput{}, fmt.Errorf("create AI application %q: %w", in.Name, mapped)
 	}
+	out.SubmissionAccepted = isSuccessfulHTTPResponse(httpResp)
 	if created == nil {
-		if httpResp != nil && httpResp.StatusCode == http.StatusNoContent {
+		if isSuccessfulHTTPResponse(httpResp) {
+			if httpResp.StatusCode != http.StatusNoContent {
+				out.Warnings = append(out.Warnings, "submission was accepted, but the response did not include application details")
+			}
 			return out, nil
 		}
 		return submitAIApplicationOutput{}, fmt.Errorf("create AI application %q: nil response; creation outcome is unknown, use list_ai_applications before retrying: %w", in.Name, runaimcp.ErrUpstream)
@@ -157,7 +168,16 @@ func submitAIApplicationRun(ctx context.Context, client *runaiclient.Client, in 
 	out.Phase = created.GetPhase()
 	out.ActionStatus = created.GetActionStatus()
 	out.ActionMessage = created.GetActionMessage()
+	out.ResponseDetailsAvailable = out.ID != "" || out.DesiredPhase != "" || out.Phase != "" ||
+		out.ActionStatus != "" || out.ActionMessage != ""
+	if !out.ResponseDetailsAvailable {
+		out.Warnings = append(out.Warnings, "submission was accepted, but the response did not include application details")
+	}
 	return out, nil
+}
+
+func isSuccessfulHTTPResponse(response *http.Response) bool {
+	return response != nil && response.StatusCode >= http.StatusOK && response.StatusCode < http.StatusMultipleChoices
 }
 
 func toAIApplicationCreationRequest(in submitAIApplicationInput) workloads.AIApplicationCreationRequest {
