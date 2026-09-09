@@ -13,10 +13,14 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 )
 
-// mnnvlGoldenBaseInput is a minimal valid distributed-inference spec reused
-// by every MNNVL entry so the goldens differ only in the resolved MNNVL
-// plugin mode.
-const mnnvlGoldenBaseInput = "dinfw_serving_port_basic"
+// mnnvlGoldenBaseInput is a minimal valid distributed-inference spec that
+// requests no GPU. mnnvlGoldenGpuInput is the same spec with a leader GPU
+// request. MNNVL entries pick the fixture matching the scenario so the
+// GPU request lives in the spec rather than being injected by the harness.
+const (
+	mnnvlGoldenBaseInput = "dinfw_serving_port_basic"
+	mnnvlGoldenGpuInput  = "dinfw_serving_port_gpu"
+)
 
 // mnnvlTestClusterConfig returns a cluster storage config that carries only
 // the `dinfGPUNetworkAcceleration` flag. MNNVL entries use this instead of
@@ -45,10 +49,9 @@ var mnnvlTests = []TableEntry{
 	// cluster): a GPU-requesting workload with no label -> Required; an
 	// explicit None label overrides the cluster default.
 	Entry("mnnvl cluster acceleration on with gpu defaults to Required", ComposerTest{
-		input:            mnnvlGoldenBaseInput,
-		expected:         "mnnvl_cluster_on_gpu_default_required",
-		clusterConfig:    mnnvlTestClusterConfig(true),
-		leaderGpuDevices: 1,
+		input:         mnnvlGoldenGpuInput,
+		expected:      "mnnvl_cluster_on_gpu_default_required",
+		clusterConfig: mnnvlTestClusterConfig(true),
 	}),
 	// A workload that requests no GPU never inherits the cluster default,
 	// even when dinfGPUNetworkAcceleration is on -> None.
@@ -58,11 +61,10 @@ var mnnvlTests = []TableEntry{
 		clusterConfig: mnnvlTestClusterConfig(true),
 	}),
 	Entry("mnnvl explicit None label overrides cluster on", ComposerTest{
-		input:            mnnvlGoldenBaseInput,
-		expected:         "mnnvl_label_none_overrides_cluster_on",
-		clusterConfig:    mnnvlTestClusterConfig(true),
-		leaderGpuDevices: 1,
-		mnnvlLabel:       "None",
+		input:         mnnvlGoldenGpuInput,
+		expected:      "mnnvl_label_none_overrides_cluster_on",
+		clusterConfig: mnnvlTestClusterConfig(true),
+		mnnvlLabel:    "None",
 	}),
 
 	// Label-driven resolution when the cluster's MNNVL flag is off. The
