@@ -7,7 +7,8 @@ import { computed, defineComponent } from "vue";
 import { mount } from "@vue/test-utils";
 import { createTestingPinia } from "@pinia/testing";
 import { setActivePinia } from "pinia";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type * as QuasarModule from "quasar";
 
 import { useTableDataAdvancedFilters } from "./use-table-data-advanced-filters.composable";
 import { EAdvancedIndexPages } from "../helpers/use-table-data.mapper";
@@ -19,7 +20,7 @@ vi.mock("vue-router", () => ({
 }));
 
 vi.mock("quasar", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("quasar")>()),
+  ...(await importOriginal<typeof QuasarModule>()),
   useQuasar: vi.fn().mockReturnValue({ notify: vi.fn() }),
 }));
 
@@ -67,14 +68,14 @@ describe("useTableDataAdvancedFilters - pinned rows", () => {
     setActivePinia(createTestingPinia({ createSpy: vi.fn }));
   });
 
-  test("pins nothing before any action is registered", async () => {
+  it("pins nothing before any action is registered", async () => {
     const api = mountComposable();
     await api.refreshList();
 
     expect(api.pinnedRows.value).toEqual([]);
   });
 
-  test("pins the entities registered via pinEntities", async () => {
+  it("pins the entities registered via pinEntities", async () => {
     const api = mountComposable();
     await api.refreshList();
 
@@ -83,7 +84,7 @@ describe("useTableDataAdvancedFilters - pinned rows", () => {
     expect(api.pinnedRows.value.map((row: IReportTable) => row.id)).toEqual(["id-2", "id-4"]);
   });
 
-  test("keeps pinned rows in table order regardless of the order they were registered", async () => {
+  it("keeps pinned rows in table order regardless of the order they were registered", async () => {
     const api = mountComposable();
     await api.refreshList();
 
@@ -92,7 +93,7 @@ describe("useTableDataAdvancedFilters - pinned rows", () => {
     expect(api.pinnedRows.value.map((row: IReportTable) => row.id)).toEqual(["id-1", "id-4"]);
   });
 
-  test("accumulates across separate pinEntities calls", async () => {
+  it("accumulates across separate pinEntities calls", async () => {
     const api = mountComposable();
     await api.refreshList();
 
@@ -102,7 +103,7 @@ describe("useTableDataAdvancedFilters - pinned rows", () => {
     expect(api.pinnedRows.value.map((row: IReportTable) => row.id)).toEqual(["id-1", "id-3"]);
   });
 
-  test("ignores ids that are not in the loaded table data", async () => {
+  it("ignores ids that are not in the loaded table data", async () => {
     const api = mountComposable();
     await api.refreshList();
 
@@ -111,7 +112,7 @@ describe("useTableDataAdvancedFilters - pinned rows", () => {
     expect(api.pinnedRows.value.map((row: IReportTable) => row.id)).toEqual(["id-2"]);
   });
 
-  test("does not pin rows just because of their state - only registered ids pin", async () => {
+  it("does not pin rows just because of their state - only registered ids pin", async () => {
     const api = mountComposable();
     await api.refreshList();
 
@@ -119,7 +120,7 @@ describe("useTableDataAdvancedFilters - pinned rows", () => {
     expect(api.pinnedRows.value).toEqual([]);
   });
 
-  test("clearing the last created entity also drops the pins", async () => {
+  it("clearing the last created entity also drops the pins", async () => {
     const api = mountComposable();
     await api.refreshList();
     api.pinEntities(["id-1", "id-2"]);
@@ -129,7 +130,7 @@ describe("useTableDataAdvancedFilters - pinned rows", () => {
     expect(api.pinnedRows.value).toEqual([]);
   });
 
-  test("changing filters drops the pins", async () => {
+  it("changing filters drops the pins", async () => {
     const api = mountComposable();
     await api.refreshList();
     api.pinEntities(["id-1"]);

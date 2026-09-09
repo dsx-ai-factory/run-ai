@@ -6,6 +6,7 @@
 import { ReportGroupByOptions, ReportStatus } from "@/swagger-models/org-unit-service-client";
 import type { IStatusColOptions } from "@/models/table.model";
 import type { IEnumBasedFilterSelectOption } from "@/models/filter.model";
+import DOCS from "@/constants/docs";
 
 export const ReportStatusMap: Record<ReportStatus, IStatusColOptions> = {
   [ReportStatus.Pending]: {
@@ -95,6 +96,10 @@ export function isReportDeletionInProgress(status: ReportStatus): boolean {
 export const reportBulkDeleteCopy = {
   title: (amount: number): string => `Permanently delete ${amount} reports?`,
   confirmLabel: (amount: number): string => `Delete ${amount} reports`,
+  requestFailure: (): string =>
+    DOCS.SUPPORT.URL
+      ? `Reports couldn't be deleted. Try again. If the issue persists, contact ${DOCS.SUPPORT.LABEL}.`
+      : "Reports couldn't be deleted. Try again.",
   failure: (firstFailedName: string, failedAmount: number): string =>
     failedAmount > 1
       ? `Report ${firstFailedName} +${failedAmount - 1} couldn't be deleted`

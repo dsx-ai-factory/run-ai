@@ -82,6 +82,8 @@ import { ReportPageActions } from "@/components/report/report-page-actions/";
 import { type IReportTable, reportIndexColumns } from "@/table-models/report.table-model";
 import type { IFilterBy } from "@/models/filter.model";
 import { EReportAction, isReportDeletionInProgress, reportBulkDeleteCopy } from "@/models/report.model";
+import { EIntervalLabels } from "@/models/interval.model";
+import type { BatchDeleteReportsResponse } from "@/swagger-models/org-unit-service-client";
 import { ReportCreationModal } from "@/components/report/report-creation-modal";
 import { RunaiDeleteModal } from "@/components/common/runai-delete-modal/";
 // service
@@ -89,12 +91,10 @@ import { orgUnitService } from "@/services/control-plane/org-unit.service/org-un
 //util
 import { alertUtil } from "@/utils/alert.util";
 import { ErrorAlert } from "@/utils/error-alert.util";
+import { intervalUtil } from "@/utils/interval.util";
 // other
 import { useTableDataAdvancedFilters } from "@/composables/use-table-data-advanced-filters.composable/use-table-data-advanced-filters.composable";
 import { EAdvancedIndexPages } from "@/composables/helpers/use-table-data.mapper";
-import { EIntervalLabels } from "@/models/interval.model";
-import { intervalUtil } from "@/utils/interval.util";
-import type { BatchDeleteReportsResponse } from "@/swagger-models/org-unit-service-client";
 import CreateReportDropdown from "@/components/report/create-report-dropdown/create-report-dropdown.vue";
 import DOCS from "@/constants/docs";
 
@@ -156,16 +156,19 @@ export default defineComponent({
       if (!acceptedIds.length) return;
       let attemptsLeft = maxBulkDeletePollAttempts;
       intervalUtil.startInterval(EIntervalLabels.ReportIndexPostBulkDelete, async () => {
+        if (--attemptsLeft <= 0) {
+          stopBulkDeletePolling();
+          return;
+        }
         try {
           await refreshList();
         } catch {
-          stopBulkDeletePolling();
           return;
         }
         const stillDeleting = tableData.value.some(
           (report: IReportTable) => acceptedIds.includes(report.id) && isReportDeletionInProgress(report.status),
         );
-        if (!stillDeleting || --attemptsLeft <= 0) stopBulkDeletePolling();
+        if (!stillDeleting) stopBulkDeletePolling();
       });
     };
 
@@ -181,20 +184,26 @@ export default defineComponent({
       const reports = [...selectedRows.value];
       const namesById = new Map(reports.map((report: IReportTable) => [report.id, report.name]));
       deleting.value = true;
+
+      let response: BatchDeleteReportsResponse;
       try {
-        const response = await orgUnitService.batchDeleteReports(reports.map((report: IReportTable) => report.id));
-        // The batch is only queued, so close as soon as it is accepted rather than
-        // holding the dialog open for the refresh that follows.
-        closeDeleteModal();
-        notifyBulkFailures(response, namesById);
-        pinEntities(response.accepted);
-        await refreshList();
-        pollUntilDeleted(response.accepted);
+        response = await orgUnitService.batchDeleteReports(reports.map((report: IReportTable) => report.id));
       } catch (error: unknown) {
-        const errorAlert = new ErrorAlert({ generalMessage: "Reports couldn't be deleted. Try again." });
+        const errorAlert = new ErrorAlert({ generalMessage: reportBulkDeleteCopy.requestFailure() });
         q.notify(errorAlert.getNotification(error));
         closeDeleteModal();
+        return;
       }
+
+      // The batch is only queued, so close as soon as it is accepted rather than
+      // holding the dialog open for the refresh that follows.
+      closeDeleteModal();
+      notifyBulkFailures(response, namesById);
+      pinEntities(response.accepted);
+      // The deletion is already accepted past this point, so a failed refresh must not
+      // read as a failed delete. Polling refreshes again anyway.
+      await refreshList().catch(() => undefined);
+      pollUntilDeleted(response.accepted);
     };
 
     const handleDeleteConfirmed = () => bulkDeleteReports();

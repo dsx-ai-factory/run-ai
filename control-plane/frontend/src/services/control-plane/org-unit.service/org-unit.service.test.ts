@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const batchDeleteReportsMock = vi.fn();
 
@@ -29,19 +29,19 @@ describe("orgUnitService.batchDeleteReports", () => {
 
   // A Set serializes to {} rather than a JSON array, so the payload has to be a
   // real array or the backend receives no ids at all.
-  test("sends ids as a JSON array, not a Set", async () => {
+  it("sends ids as a JSON array, not a Set", async () => {
     await orgUnitService.batchDeleteReports(["id-1", "id-2"]);
 
     expect(JSON.parse(JSON.stringify(sentPayload()))).toEqual({ ids: ["id-1", "id-2"] });
   });
 
-  test("drops duplicate ids", async () => {
+  it("drops duplicate ids", async () => {
     await orgUnitService.batchDeleteReports(["id-1", "id-2", "id-1"]);
 
     expect(JSON.parse(JSON.stringify(sentPayload()))).toEqual({ ids: ["id-1", "id-2"] });
   });
 
-  test("returns the batch response body", async () => {
+  it("returns the batch response body", async () => {
     batchDeleteReportsMock.mockResolvedValue({
       data: { id: "batch-9", accepted: ["id-1"], failed: [{ id: "id-2", code: 403, message: "nope" }] },
     });
