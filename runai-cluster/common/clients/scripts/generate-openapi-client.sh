@@ -41,3 +41,7 @@ docker run --rm \
 if [ -n "${GITHUB_ACTIONS:-}" ]; then
     sudo chown -R $(id -u):$(id -g) $GENERATED_PATH
 fi
+
+# Stamp NVIDIA SPDX headers (openapi-generator's default Go templates emit none)
+# so every regeneration reproduces the header instead of dropping it.
+sh "$(git rev-parse --show-toplevel)/build/makefile/scripts/spdx-header-openapi.sh" "$GENERATED_PATH"

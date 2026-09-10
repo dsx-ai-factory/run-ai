@@ -74,10 +74,12 @@ build: build_arm build_amd
 .PHONY: build
 
 build_arm: git-config-command generate-events-openapi-server generate-config-provider-openapi-server generate-config-provider-openapi-docs generate-events-openapi-client generate-history-openapi-server generate-history-openapi-client build-integration-tests
+	sh "$(shell git rev-parse --show-toplevel)/build/makefile/scripts/spdx-header-openapi.sh" pkg/client/generated
 	env GOOS=linux GOARCH=arm64 GOCACHE=/tmp/.cache GOLANGCI_LINT_CACHE=/tmp/.cache CGO_ENABLED=0 GO111MODULE=on \
 	   go build -o ${BIN_DIR}/notifications-service-arm64 ${MAIN_DIR}
 
 build_amd: git-config-command generate-events-openapi-server generate-config-provider-openapi-server generate-config-provider-openapi-docs generate-events-openapi-client generate-history-openapi-server generate-history-openapi-client build-integration-tests
+	sh "$(shell git rev-parse --show-toplevel)/build/makefile/scripts/spdx-header-openapi.sh" pkg/client/generated
 	env GOOS=linux GOARCH=amd64 GOCACHE=/tmp/.cache GOLANGCI_LINT_CACHE=/tmp/.cache CGO_ENABLED=0 GO111MODULE=on \
 	   go build -o ${BIN_DIR}/notifications-service-amd64 ${MAIN_DIR}
 
