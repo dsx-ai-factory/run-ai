@@ -18,5 +18,3 @@ When a new release ships, this section is updated to reflect the current support
 |---|---|
 | [GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues) | Bugs, feature requests, documentation issues, usage questions |
 | [GitHub Security Advisories](https://github.com/dsx-ai-factory/run-ai/security/advisories) | Private vulnerability reports — see [Security](SECURITY.md) |
-
-For commercial support and enterprise inquiries, contact NVIDIA at <https://www.nvidia.com/en-us/data-center/products/run-ai/>.
