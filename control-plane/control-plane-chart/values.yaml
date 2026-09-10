@@ -1359,11 +1359,7 @@ keycloakx:
         capabilities:
           drop:
             - ALL
-    {{- $fipsMode := .Values.global.fipsMode | default "off" }}
-    {{- if kindIs "bool" $fipsMode }}
-    {{- $fipsMode = ternary "on" "off" $fipsMode }}
-    {{- end }}
-    {{- if ne $fipsMode "off" }}
+    {{- if ne .Values.global.fipsMode "off" }}
     # Seeds the image's bundled FIPS provider jars into the shared providers
     # volume — no-op on the default image, only matters when fipsMode is on.
     - name: keycloak-copy-fips-providers
