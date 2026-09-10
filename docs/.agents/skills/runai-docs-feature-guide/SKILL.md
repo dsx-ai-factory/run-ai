@@ -22,7 +22,7 @@ Before drafting anything:
 2. Read the source code or Helm chart for the feature to verify enabling flags,
    default values, and configuration parameters.
 3. Read these reference pages in full — they are your structural templates:
-   - `docs/platform-management/aiinitiatives/resources/topology-aware-scheduling.md`
+   - `docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/README.md`
    - `docs/platform-management/aiinitiatives/resources/numa-aware-scheduling.md`
    - `docs/platform-management/runai-scheduler/resource-optimization/memory-swap.md`
 4. Read `docs/AGENTS.md` for writing rules, Fern components, and terminology.

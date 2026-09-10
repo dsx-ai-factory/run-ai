@@ -32,7 +32,7 @@ Feature availability may vary across NVIDIA Run:ai versions and cluster deployme
 | [Multi-GPU memory swap](../../platform-management/runai-scheduler/resource-optimization/memory-swap.md) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Elastic scaling | ✗ | ✗ | ✓ | ✓ | ✓ | ✓ |
 | [Gang scheduling](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#gang-scheduling) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| [Network topology-aware scheduling](../../platform-management/aiinitiatives/resources/topology-aware-scheduling.md) | ✗ | ✗ | ✓ | ✗ | ✓ | ✓ |
+| [Network topology-aware scheduling](../../platform-management/aiinitiatives/resources/topology-aware-scheduling/README.md) | ✗ | ✗ | ✓ | ✗ | ✓ | ✓ |
 | [GB200 NVL72 and Multi-Node NVLink domains (MNNVL)](../../platform-management/aiinitiatives/resources/using-gb200.md) | ✗ | ✗ | ✓ | ✗ | ✓ | ✓ |
 | [Scheduling rules](../../platform-management/policies/scheduling-rules.md) | ✓ | ✓ | ✓ | ✓ | ✗ | ✗ |
 

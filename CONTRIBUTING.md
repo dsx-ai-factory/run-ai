@@ -258,6 +258,42 @@ We do not enforce Conventional Commits format. Release notes are generated from 
 
 ---
 
+## Community standards
+
+Participation in this project is governed by our [Code of Conduct](CODE_OF_CONDUCT.md).
+
+### Reporting a Code of Conduct concern
+
+Report unacceptable behaviour to **<GitHub_Conduct@nvidia.com>**. Reports are handled privately, and community leaders are obligated to respect the privacy and security of the reporter.
+
+### What to expect after you report
+
+- **Acknowledgement:** within 3 business days of your report
+- **Initial assessment:** within 10 business days, including whether the report falls within the scope of this Code of Conduct
+- **Status updates:** at least every 14 days while the report is open
+- **Outcome:** communicated to the reporter once the review concludes
+
+Where a report is escalated to NVIDIA internal processes, resolution may take longer than the timelines above. You will be told if that happens.
+
+Actions taken follow the four-tier Enforcement Guidelines in [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md#enforcement-guidelines) — correction, warning, temporary ban, permanent ban.
+
+### What is out of scope
+
+The Code of Conduct governs conduct in this project's community spaces (see [Scope](CODE_OF_CONDUCT.md#scope)). The following are **not** handled through the Code of Conduct process — please use the route listed instead:
+
+| Out of scope | Use instead |
+|---|---|
+| Software defects, crashes, or unexpected behaviour | [GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues) |
+| Security vulnerabilities | [`SECURITY.md`](SECURITY.md) — do not open a public issue |
+| Disagreement with a technical or design decision, or with a maintainer's review | Discuss on the issue or pull request; see [Code review](#code-review) |
+| A maintainer declining, deprioritising, or closing your contribution | Not misconduct on its own — see [How issue priority is decided](#how-issue-priority-is-decided) |
+| Commercial, licensing, or support-contract disputes | Contact NVIDIA via [SUPPORT.md](SUPPORT.md) |
+| Conduct in venues unrelated to this project, where no one is representing the project | Outside this project's remit |
+
+Reports made in bad faith — for example to retaliate against, harass, or silence another participant — are themselves a Code of Conduct violation.
+
+---
+
 ## Getting help
 
 - [GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues) — bugs, feature requests, documentation issues, usage questions
