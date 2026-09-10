@@ -1,5 +1,4 @@
 type: object
-x-internal: true
 required:
   - nodes
 properties:

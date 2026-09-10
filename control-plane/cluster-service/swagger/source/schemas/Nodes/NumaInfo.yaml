@@ -1,6 +1,6 @@
 type: object
-x-internal: true
 nullable: true
+description: NUMA configuration and per-NUMA-node resource data for the node.
 properties:
   topologyManagerPolicy:
     $ref: './TopologyManagerPolicy.yaml'

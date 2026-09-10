@@ -6,8 +6,8 @@ allOf:
     properties:
       nodes:
         type: array
-        description: NUMA nodes reported in the node's NodeResourceTopology object.
+        description: The list of NUMA nodes on the physical machine and their resource availability.
         items:
           $ref: './NumaNodeDetails.yaml'
-x-internal: true
+description: NUMA configuration and per-NUMA-node resource data for the node.
 x-schema-name: NumaInfoExtended
