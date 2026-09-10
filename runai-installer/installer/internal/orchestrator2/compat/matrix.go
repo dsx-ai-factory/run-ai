@@ -60,11 +60,28 @@ const (
 type Locks map[Component]string
 
 // latest must always point at the newest key in matrix.
-const latest = "2.26"
+const latest = "3.0"
 
 // matrix is keyed by Run:ai major.minor. Only the newest row is fully
 // populated; older rows are filled in as their real locks are confirmed.
 var matrix = map[string]Locks{
+	"3.0": {
+		Prometheus:        "76.2.0",
+		GPUOperator:       "v26.7.0",
+		GPUOperatorFake:   "0.0.62",
+		NetworkOperator:   "v26.7.0",
+		Knative:           "1.23.0",
+		Kubeflow:          "v1.9.4",
+		MPIOperator:       "v0.8.2",
+		LWS:               "0.10.0",
+		NIMOperator:       "3.1.2",
+		Grove:             "v0.1.0-alpha.10-rc1",
+		Dynamo:            "1.4.2",
+		NFD:               "stable",
+		SRIOVOperator:     "stable",
+		Serverless:        "stable",
+		ServerlessVersion: "v1.36.1",
+	},
 	"2.26": {
 		Prometheus:        "76.2.0",
 		GPUOperator:       "v25.3.0",
