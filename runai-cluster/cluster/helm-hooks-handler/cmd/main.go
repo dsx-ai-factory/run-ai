@@ -9,7 +9,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/helm-hooks-handler/internal/clients"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/helm-hooks-handler/internal/hooks/factory"
@@ -32,22 +31,11 @@ var (
 	setupLog = ctrl.Log.WithName("setup")
 )
 
-const customCAPath = "/etc/ssl/certs/runai-ca.pem"
-
 func main() {
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&zap.Options{
 		Level: zapcore.InfoLevel,
 	})))
 	opts := util.SetOptions()
-	if opts.CustomCaEnabled {
-		ca, err := os.ReadFile(customCAPath)
-		if err != nil {
-			log.Fatalf("failed to read custom CA: %v", err)
-		}
-		if err := clients.ConfigureDefaultHTTPTransport(ca); err != nil {
-			log.Fatalf("failed to configure custom CA: %v", err)
-		}
-	}
 
 	var k8sClients *clients.Clients
 	var err error

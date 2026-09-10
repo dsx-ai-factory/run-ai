@@ -28,6 +28,11 @@ spec:
         - name: pre-install
           image: {{ include "helmHooksHandler.image" . }}
           imagePullPolicy: {{ .Values.helmHooksHandler.image.pullPolicy }}
+{{- if .Values.global.customCA.enabled }}
+          env:
+            - name: SSL_CERT_DIR
+              value: /etc/ssl/certs/runai-ca
+{{- end }}
           args:
             - --pre-install
             - --control-plane-url={{ include "controlPlane.url" . }}
@@ -67,9 +72,8 @@ spec:
             - name: config
               mountPath: /runai/config
 {{- if .Values.global.customCA.enabled }}
-            - mountPath: /etc/ssl/certs/runai-ca.pem
+            - mountPath: /etc/ssl/certs/runai-ca
               name: runai-ca-cert
-              subPath: runai-ca.pem
 {{- end }}
       imagePullSecrets:{{ include "imagePullSecretList" .| nindent 8 }}
       volumes:

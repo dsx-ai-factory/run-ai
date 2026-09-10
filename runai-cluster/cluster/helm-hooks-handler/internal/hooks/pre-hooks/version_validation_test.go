@@ -6,8 +6,53 @@
 package pre_hooks
 
 import (
+	"encoding/pem"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
 	"testing"
 )
+
+func TestGetControlPlaneVersionUsesSSLCAPath(t *testing.T) {
+	if runtime.GOOS == "darwin" {
+		t.Skip()
+	}
+	if os.Getenv("RUNAI_TEST_SSL_CERT_DIR") == "true" {
+		version, err := getControlPlaneVersion(os.Getenv("RUNAI_TEST_CONTROL_PLANE_URL"), "")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if version != "3.0.0" {
+			t.Fatalf("unexpected version %q", version)
+		}
+		return
+	}
+
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		fmt.Fprint(w, `{"version":"3.0.0"}`)
+	}))
+	defer server.Close()
+
+	caDir := t.TempDir()
+	ca := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: server.Certificate().Raw})
+	if err := os.WriteFile(filepath.Join(caDir, "runai-ca.pem"), ca, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	cmd := exec.Command(os.Args[0], "-test.run=^TestGetControlPlaneVersionUsesSSLCAPath$")
+	cmd.Env = append(os.Environ(),
+		"RUNAI_TEST_SSL_CERT_DIR=true",
+		"RUNAI_TEST_CONTROL_PLANE_URL="+server.URL,
+		"SSL_CERT_DIR="+caDir,
+	)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("%v: %s", err, output)
+	}
+}
 
 // test function to for compareVersions
 func TestCompareVersions(t *testing.T) {
