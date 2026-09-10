@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1650" height="1200" viewBox="0 0 1650 1200" font-family="Arial, Helvetica, sans-serif">
-  <rect width="1650" height="1200" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1720" height="1180" viewBox="0 0 1720 1180" font-family="Arial, Helvetica, sans-serif">
+  <rect width="1720" height="1180" fill="#ffffff"/>
 
   <!-- Title -->
   <text x="40" y="46" font-size="26" font-weight="bold" fill="#1a1a1a">How Open Source Enables the Run:ai Platform</text>
@@ -13,7 +13,7 @@
   <text x="50" y="386" font-size="12" fill="#25417a">(CRDs + operator)</text>
 
   <!-- ================= Cluster container ================= -->
-  <rect x="300" y="150" width="980" height="480" rx="16" fill="#eafaec" stroke="#2f8f4e" stroke-width="2"/>
+  <rect x="300" y="150" width="980" height="350" rx="16" fill="#eafaec" stroke="#2f8f4e" stroke-width="2"/>
   <text x="330" y="188" font-size="17" font-weight="bold" fill="#1f6b1f">RUN:AI OSS CLUSTER</text>
 
   <!-- anyworkload-controller -->
@@ -32,41 +32,80 @@
   <text x="760" y="415" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">Kubernetes Pod</text>
   <text x="760" y="435" text-anchor="middle" font-size="11.5" fill="#666666">(AI workload)</text>
 
-  <!-- nodepool / project-controller -->
-  <rect x="400" y="530" width="360" height="95" rx="8" fill="#eaf6ea" stroke="#3a9d3a" stroke-width="2"/>
-  <text x="580" y="563" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#1f6b1f">nodepool / project-controller</text>
-  <text x="580" y="584" text-anchor="middle" font-size="11" fill="#3a7d3a">Reconciles node pools and projects</text>
+  <!-- ================= Helm chart structure (mini panel) ================= -->
+  <rect x="1330" y="150" width="340" height="450" rx="12" fill="#f7f7f9" stroke="#999999" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="1350" y="180" font-size="14" font-weight="bold" fill="#333333">Helm chart structure</text>
+
+  <rect x="1400" y="205" width="210" height="65" rx="8" fill="#eeeeee" stroke="#888888" stroke-width="2"/>
+  <text x="1505" y="233" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#333333">runai</text>
+  <text x="1505" y="252" text-anchor="middle" font-size="10.5" fill="#666666">(parent Helm chart)</text>
+
+  <rect x="1350" y="310" width="140" height="65" rx="8" fill="#eaf0fb" stroke="#3a5fa9" stroke-width="2"/>
+  <text x="1420" y="338" text-anchor="middle" font-size="13" font-weight="bold" fill="#25417a">Karta</text>
+  <text x="1420" y="356" text-anchor="middle" font-size="10.5" fill="#4a6fa5">(sub-chart)</text>
+
+  <rect x="1510" y="310" width="140" height="65" rx="8" fill="#eaf0fb" stroke="#3a5fa9" stroke-width="2"/>
+  <text x="1580" y="338" text-anchor="middle" font-size="13" font-weight="bold" fill="#25417a">KRM</text>
+  <text x="1580" y="356" text-anchor="middle" font-size="10.5" fill="#4a6fa5">(sub-chart)</text>
+
+  <rect x="1510" y="405" width="140" height="65" rx="8" fill="#eaf0fb" stroke="#3a5fa9" stroke-width="2"/>
+  <text x="1580" y="428" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#25417a">KAI Scheduler</text>
+  <text x="1580" y="446" text-anchor="middle" font-size="10.5" fill="#4a6fa5">(sub-chart)</text>
+
+  <rect x="1500" y="500" width="160" height="65" rx="8" fill="#eaf0fb" stroke="#3a5fa9" stroke-width="2"/>
+  <text x="1580" y="522" text-anchor="middle" font-size="12" font-weight="bold" fill="#25417a">kai-gpu-fractioning</text>
+  <text x="1580" y="540" text-anchor="middle" font-size="10.5" fill="#4a6fa5">(sub-chart)</text>
+
+  <!-- helm panel arrows -->
+  <path d="M1505,270 L1505,290 L1420,290 L1420,306" fill="none" stroke="#999999" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrowGray)"/>
+  <path d="M1505,270 L1505,290 L1580,290 L1580,306" fill="none" stroke="#999999" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrowGray)"/>
+  <line x1="1580" y1="375" x2="1580" y2="401" stroke="#999999" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrowGray)"/>
+  <line x1="1580" y1="470" x2="1580" y2="496" stroke="#999999" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrowGray)"/>
+
+  <!-- ================= kai-resource-management-api (shared schema) ================= -->
+  <rect x="30" y="560" width="280" height="190" rx="10" fill="#f5f9ff" stroke="#3a5fa9" stroke-width="2" stroke-dasharray="6,4"/>
+  <text x="50" y="592" font-size="13.5" font-weight="bold" fill="#25417a">kai-resource-management-api</text>
+  <text x="50" y="612" font-size="11" fill="#4a6fa5">External OSS</text>
+  <text x="50" y="638" font-size="12" fill="#25417a">CRD definitions only</text>
+  <text x="50" y="658" font-size="11" fill="#25417a">(Project, Department, NodePool,</text>
+  <text x="50" y="676" font-size="11" fill="#25417a">ManagedNodesConfig, KRMConfig)</text>
+  <text x="50" y="702" font-size="10.5" fill="#a05a00">Also consumed across Run:ai's</text>
+  <text x="50" y="720" font-size="10.5" fill="#a05a00">own cluster services (go.mod)</text>
 
   <!-- ================= KRM ================= -->
-  <rect x="400" y="660" width="400" height="150" rx="10" fill="#f5f9ff" stroke="#3a5fa9" stroke-width="2" stroke-dasharray="6,4"/>
-  <text x="600" y="692" text-anchor="middle" font-size="14" font-weight="bold" fill="#25417a">KAI Resource Management (KRM)</text>
-  <text x="600" y="712" text-anchor="middle" font-size="11" font-style="italic" fill="#a05a00">Shared CRD schema (not a running service)</text>
-  <text x="600" y="738" text-anchor="middle" font-size="12" fill="#25417a">NodePool + quota CRDs</text>
-  <text x="600" y="758" text-anchor="middle" font-size="11" fill="#4a6fa5">Reconciled by nodepool/project-controller</text>
+  <rect x="340" y="560" width="340" height="190" rx="10" fill="#eaf0fb" stroke="#3a5fa9" stroke-width="2"/>
+  <text x="360" y="592" font-size="14" font-weight="bold" fill="#25417a">KAI Resource Management (KRM)</text>
+  <text x="360" y="612" font-size="11" fill="#4a6fa5">External OSS</text>
+  <text x="360" y="638" font-size="11.5" fill="#25417a">• nodepool-controller</text>
+  <text x="360" y="658" font-size="11.5" fill="#25417a">• project-controller</text>
+  <text x="360" y="678" font-size="11.5" fill="#25417a">• pod-group-assigner</text>
+  <text x="360" y="698" font-size="11.5" fill="#25417a">• krm-operator</text>
+  <text x="360" y="724" font-size="10.5" fill="#a05a00">Replaces controllers previously built</text>
+  <text x="360" y="742" font-size="10.5" fill="#a05a00">from Run:ai's own cluster source</text>
 
   <!-- ================= KAI Scheduler ================= -->
-  <rect x="980" y="630" width="300" height="230" rx="10" fill="#eaf0fb" stroke="#3a5fa9" stroke-width="2"/>
-  <text x="1130" y="662" text-anchor="middle" font-size="15" font-weight="bold" fill="#25417a">KAI Scheduler</text>
-  <text x="1130" y="682" text-anchor="middle" font-size="11" fill="#4a6fa5">External OSS</text>
-  <text x="1000" y="706" font-size="12" fill="#25417a">AI-aware scheduling engine</text>
-  <text x="1005" y="730" font-size="11.5" fill="#25417a">• Fair-share, preemption,</text>
-  <text x="1017" y="748" font-size="11.5" fill="#25417a">bin-packing</text>
-  <text x="1005" y="770" font-size="11.5" fill="#25417a">• Priorities, gang &amp; topology-</text>
-  <text x="1017" y="788" font-size="11.5" fill="#25417a">aware scheduling</text>
-  <text x="1005" y="810" font-size="11.5" fill="#25417a">• Quota &amp; fairness</text>
+  <rect x="720" y="560" width="280" height="230" rx="10" fill="#eaf0fb" stroke="#3a5fa9" stroke-width="2"/>
+  <text x="860" y="592" text-anchor="middle" font-size="15" font-weight="bold" fill="#25417a">KAI Scheduler</text>
+  <text x="860" y="612" text-anchor="middle" font-size="11" fill="#4a6fa5">External OSS</text>
+  <text x="740" y="636" font-size="12" fill="#25417a">AI-aware scheduling engine</text>
+  <text x="745" y="660" font-size="11.5" fill="#25417a">• Fair-share, preemption,</text>
+  <text x="757" y="678" font-size="11.5" fill="#25417a">bin-packing</text>
+  <text x="745" y="700" font-size="11.5" fill="#25417a">• Priorities, gang &amp; topology-</text>
+  <text x="757" y="718" font-size="11.5" fill="#25417a">aware scheduling</text>
+  <text x="745" y="740" font-size="11.5" fill="#25417a">• Quota &amp; fairness</text>
 
   <!-- ================= kai-gpu-fractioning ================= -->
-  <rect x="1330" y="630" width="270" height="150" rx="10" fill="#eaf0fb" stroke="#3a5fa9" stroke-width="2"/>
-  <text x="1465" y="662" text-anchor="middle" font-size="14" font-weight="bold" fill="#25417a">kai-gpu-fractioning</text>
-  <text x="1465" y="682" text-anchor="middle" font-size="11" fill="#4a6fa5">External OSS</text>
-  <text x="1350" y="708" font-size="11.5" fill="#25417a">GPU fractions and dynamic</text>
-  <text x="1350" y="726" font-size="11.5" fill="#25417a">fractions</text>
-  <text x="1350" y="752" font-size="10.5" fill="#4a6fa5">Sub-dependency of KAI Scheduler</text>
+  <rect x="1030" y="560" width="270" height="150" rx="10" fill="#eaf0fb" stroke="#3a5fa9" stroke-width="2"/>
+  <text x="1165" y="592" text-anchor="middle" font-size="14" font-weight="bold" fill="#25417a">kai-gpu-fractioning</text>
+  <text x="1165" y="612" text-anchor="middle" font-size="11" fill="#4a6fa5">External OSS</text>
+  <text x="1050" y="636" font-size="11.5" fill="#25417a">GPU fractions and dynamic</text>
+  <text x="1050" y="654" font-size="11.5" fill="#25417a">fractions</text>
+  <text x="1050" y="680" font-size="10.5" fill="#4a6fa5">Sub-chart dependency of KAI Scheduler</text>
 
   <!-- ================= Kubernetes Node ================= -->
-  <rect x="1020" y="900" width="220" height="140" rx="10" fill="#eeeeee" stroke="#888888" stroke-width="2"/>
-  <text x="1130" y="940" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">Kubernetes Node</text>
-  <text x="1130" y="962" text-anchor="middle" font-size="11.5" fill="#666666">Workload runs</text>
+  <rect x="870" y="860" width="220" height="140" rx="10" fill="#eeeeee" stroke="#888888" stroke-width="2"/>
+  <text x="980" y="900" text-anchor="middle" font-size="14" font-weight="bold" fill="#333333">Kubernetes Node</text>
+  <text x="980" y="922" text-anchor="middle" font-size="11.5" fill="#666666">Workload runs</text>
 
   <!-- ================= Arrows ================= -->
 
@@ -82,47 +121,50 @@
   <path d="M1070,310 L1070,350 L884,350 L884,395" fill="none" stroke="#666666" stroke-width="2" marker-end="url(#arrow)"/>
   <text x="905" y="343" font-size="11" fill="#666666">adds Run:ai + KAI attributes</text>
 
-  <!-- nodepool/project-controller -> Pod -->
-  <path d="M600,530 L600,460 L756,460 L756,479" fill="none" stroke="#666666" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="618" y="450" font-size="11" fill="#666666">namespace / queue</text>
+  <!-- Cluster (Pod) -> KRM -->
+  <path d="M700,475 L700,520 L510,520 L510,556" fill="none" stroke="#666666" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="560" y="513" font-size="11" fill="#666666">resource requests</text>
 
-  <!-- nodepool/project-controller -> KRM -->
-  <line x1="580" y1="625" x2="580" y2="656" stroke="#666666" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="598" y="646" font-size="11" fill="#666666">reconciles</text>
+  <!-- kai-resource-management-api -> KRM -->
+  <line x1="310" y1="655" x2="336" y2="655" stroke="#666666" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrow)"/>
+  <text x="308" y="643" font-size="10.5" fill="#666666">CRD types</text>
 
   <!-- KRM -> KAI Scheduler -->
-  <line x1="800" y1="735" x2="976" y2="735" stroke="#666666" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="850" y="723" font-size="11" fill="#666666">resource state</text>
+  <line x1="680" y1="655" x2="716" y2="655" stroke="#666666" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="686" y="643" font-size="11" fill="#666666">resource state</text>
 
   <!-- Pod -> KAI Scheduler -->
-  <path d="M820,475 L820,545 L1130,545 L1130,626" fill="none" stroke="#666666" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="900" y="538" font-size="11" fill="#666666">scheduled by</text>
+  <line x1="860" y1="475" x2="860" y2="556" stroke="#666666" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="878" y="520" font-size="11" fill="#666666">scheduled by</text>
 
   <!-- KAI Scheduler -> kai-gpu-fractioning -->
-  <line x1="1280" y1="720" x2="1326" y2="720" stroke="#666666" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrow)"/>
-  <text x="1282" y="708" font-size="11" fill="#666666">depends on</text>
+  <line x1="1000" y1="635" x2="1026" y2="635" stroke="#666666" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrow)"/>
+  <text x="1000" y="623" font-size="11" fill="#666666">depends on</text>
 
   <!-- KAI Scheduler -> Kubernetes Node -->
-  <line x1="1130" y1="860" x2="1130" y2="896" stroke="#666666" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="1148" y="883" font-size="11" fill="#666666">places on</text>
+  <path d="M860,790 L860,825 L980,825 L980,856" fill="none" stroke="#666666" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="898" y="818" font-size="11" fill="#666666">places on</text>
 
   <!-- ================= Legend ================= -->
-  <rect x="40" y="1060" width="20" height="20" fill="#eaf6ea" stroke="#3a9d3a" stroke-width="2"/>
-  <text x="70" y="1076" font-size="12" fill="#333333">Run:ai OSS component</text>
-  <rect x="270" y="1060" width="20" height="20" fill="#eaf0fb" stroke="#3a5fa9" stroke-width="2"/>
-  <text x="300" y="1076" font-size="12" fill="#333333">External OSS dependency</text>
-  <rect x="530" y="1060" width="20" height="20" fill="#f5f9ff" stroke="#3a5fa9" stroke-width="2" stroke-dasharray="6,4"/>
-  <text x="560" y="1076" font-size="12" fill="#333333">Shared API/schema (not a running service)</text>
-  <line x1="900" y1="1070" x2="940" y2="1070" stroke="#666666" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="950" y="1075" font-size="12" fill="#333333">Runtime interaction</text>
-  <line x1="1150" y1="1070" x2="1190" y2="1070" stroke="#666666" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrow)"/>
-  <text x="1200" y="1075" font-size="12" fill="#333333">Helm chart dependency</text>
+  <rect x="40" y="1040" width="20" height="20" fill="#eaf6ea" stroke="#3a9d3a" stroke-width="2"/>
+  <text x="70" y="1056" font-size="12" fill="#333333">Run:ai OSS component</text>
+  <rect x="270" y="1040" width="20" height="20" fill="#eaf0fb" stroke="#3a5fa9" stroke-width="2"/>
+  <text x="300" y="1056" font-size="12" fill="#333333">External OSS dependency</text>
+  <rect x="530" y="1040" width="20" height="20" fill="#f5f9ff" stroke="#3a5fa9" stroke-width="2" stroke-dasharray="6,4"/>
+  <text x="560" y="1056" font-size="12" fill="#333333">Shared API/schema (not a running service)</text>
+  <line x1="900" y1="1050" x2="940" y2="1050" stroke="#666666" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="950" y="1055" font-size="12" fill="#333333">Runtime interaction</text>
+  <line x1="1150" y1="1050" x2="1190" y2="1050" stroke="#666666" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrow)"/>
+  <text x="1200" y="1055" font-size="12" fill="#333333">Declared dependency (Chart.yaml / go.mod)</text>
 
-  <text x="40" y="1130" font-size="11" fill="#999999">Source: runai-chart/Chart.yaml (kai-scheduler v0.16.9, karta v0.2.3), kai-resource-management-api go.mod imports, eng verification 2026-09-09</text>
+  <text x="40" y="1110" font-size="11" fill="#999999">Source: runai-chart/Chart.yaml, kai-resource-management/deployments/kai-resource-management-chart/Chart.yaml, kai-resource-management-api go.mod imports, eng confirmation 2026-09-10</text>
 
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L0,6 L9,3 z" fill="#666666"/>
+    </marker>
+    <marker id="arrowGray" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#999999"/>
     </marker>
   </defs>
 </svg>
