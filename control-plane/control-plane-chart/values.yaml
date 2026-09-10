@@ -1364,6 +1364,8 @@ keycloakx:
     {{- $fipsMode = ternary "on" "off" $fipsMode }}
     {{- end }}
     {{- if ne $fipsMode "off" }}
+    # Seeds the image's bundled FIPS provider jars into the shared providers
+    # volume — no-op on the default image, only matters when fipsMode is on.
     - name: keycloak-copy-fips-providers
       image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
       imagePullPolicy: IfNotPresent
