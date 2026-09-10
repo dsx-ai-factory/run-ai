@@ -25,43 +25,43 @@ var dummyNumaNodeDetails = runaihttp.AssertPattern
 
 type NumaNodeDetails struct {
 
-	// The NUMA node zone name reported by NodeResourceTopology.
+	// The identifier of the NUMA node (for example, node-0).
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Name string `json:"name"`
 	Name string `json:"name" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Total CPU in cores available for allocation, taken from the allocatable value reported by NodeResourceTopology.
+	// Total CPU cores on this NUMA node that are available for allocation.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//TotalCpuCores float64 `json:"totalCpuCores"`
 	TotalCpuCores float64 `json:"totalCpuCores" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Allocated CPU in cores, calculated as allocatable minus available.
+	// CPU cores currently allocated to workloads on this NUMA node.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//AllocatedCpuCores float64 `json:"allocatedCpuCores"`
 	AllocatedCpuCores float64 `json:"allocatedCpuCores" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Total CPU memory in bytes available for allocation, taken from the allocatable value reported by NodeResourceTopology.
+	// Total CPU memory on this NUMA node that is available for allocation.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//TotalCpuMemoryBytes int64 `json:"totalCpuMemoryBytes"`
 	TotalCpuMemoryBytes int64 `json:"totalCpuMemoryBytes" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Allocated memory in bytes, calculated as allocatable minus available.
+	// CPU memory currently allocated to workloads on this NUMA node, in bytes.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//AllocatedCpuMemoryBytes int64 `json:"allocatedCpuMemoryBytes"`
 	AllocatedCpuMemoryBytes int64 `json:"allocatedCpuMemoryBytes" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Total GPUs available for allocation, taken from the allocatable value reported by NodeResourceTopology.
+	// Total GPU devices on this NUMA node that are available for allocation.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//TotalGpus int32 `json:"totalGpus"`
 	TotalGpus int32 `json:"totalGpus" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Allocated GPUs, calculated as allocatable minus available.
+	// GPU devices currently allocated to workloads on this NUMA node.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//AllocatedGpus int32 `json:"allocatedGpus"`
 	AllocatedGpus int32 `json:"allocatedGpus" gorm:"not null;"`

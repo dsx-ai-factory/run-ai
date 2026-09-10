@@ -19,6 +19,7 @@ var dummyNumaInfo = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
+// NumaInfo - NUMA configuration and per-NUMA-node resource data for the node.
 type NumaInfo struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////

@@ -21,10 +21,10 @@ import (
 // checks if the NumaInfoExtended type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &NumaInfoExtended{}
 
-// NumaInfoExtended struct for NumaInfoExtended
+// NumaInfoExtended NUMA configuration and per-NUMA-node resource data for the node.
 type NumaInfoExtended struct {
 	TopologyManagerPolicy NullableTopologyManagerPolicy `json:"topologyManagerPolicy,omitempty"`
-	// NUMA nodes reported in the node's NodeResourceTopology object.
+	// The list of NUMA nodes on the physical machine and their resource availability.
 	Nodes []NumaNodeDetails `json:"nodes"`
 }
 

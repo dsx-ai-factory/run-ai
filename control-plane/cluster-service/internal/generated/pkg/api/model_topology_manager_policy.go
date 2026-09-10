@@ -23,7 +23,7 @@ var dummyTopologyManagerPolicy = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// TopologyManagerPolicy : The node's Kubelet Topology Manager policy; null when NUMA-aware scheduling is disabled.
+// TopologyManagerPolicy : The Kubernetes topology manager policy configured on the node, controlling how NUMA-aligned resource allocation is enforced. For more details, see [Kubernetes topology manager policies](https://kubernetes.io/docs/tasks/administer-cluster/topology-manager/#topology-manager-policies).
 type TopologyManagerPolicy string
 
 // List of TopologyManagerPolicy
