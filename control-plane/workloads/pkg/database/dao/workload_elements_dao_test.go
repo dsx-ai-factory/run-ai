@@ -21,7 +21,7 @@ const (
 	elementsDeleteScoped     = "DELETE FROM workload_elements WHERE tenant_id = ? AND workload_id = ? AND cluster_id = ? AND id NOT IN (?)"
 	elementsDeleteNoCluster  = "DELETE FROM workload_elements WHERE tenant_id = ? AND workload_id = ? AND id NOT IN (?)"
 	elementsDeleteNoElements = "DELETE FROM workload_elements WHERE tenant_id = ? AND workload_id = ? AND cluster_id = ?"
-	elementsInsert           = "INSERT INTO workload_elements (id,workload_id,tenant_id,cluster_id,name,level,parent_id,instance_key,replica_key,k8s_ref_uid,k8s_ref_name,gvk_group,gvk_version,gvk_kind,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT DO NOTHING"
+	elementsInsert           = "INSERT INTO workload_elements (id,workload_id,tenant_id,cluster_id,name,level,parent_id,instance_key,replica_key,k8s_ref_uid,k8s_ref_name,gvk_group,gvk_version,gvk_kind,created_at,topology) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT (workload_id,id) DO UPDATE SET topology=excluded.topology WHERE workload_elements.topology IS DISTINCT FROM excluded.topology"
 	elementsSelect           = "SELECT * FROM workload_elements WHERE tenant_id = ? AND workload_id = ? ORDER BY level, name"
 	elementsSelectPaged      = "SELECT * FROM workload_elements WHERE tenant_id = ? AND workload_id = ? ORDER BY level, name LIMIT ? OFFSET ?"
 	elementsCount            = "SELECT count(*) FROM workload_elements WHERE tenant_id = ? AND workload_id = ?"
@@ -61,7 +61,7 @@ func elementsFixture() []models.WorkloadElement {
 func elementsInsertArgs() []any {
 	return []any{
 		"elem-1", elementsWorkloadID, 1, elementsClusterID, "worker", 0,
-		nil, nil, nil, nil, nil, nil, nil, nil, dbtesting.AnyTime(),
+		nil, nil, nil, nil, nil, nil, nil, nil, dbtesting.AnyTime(), nil,
 	}
 }
 

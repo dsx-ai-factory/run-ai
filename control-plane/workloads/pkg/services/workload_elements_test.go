@@ -1585,3 +1585,94 @@ var _ = Describe("GetWorkloadElementMetrics", Ordered, func() {
 		Expect(resp.Code).To(Equal(http.StatusNotFound))
 	})
 })
+
+var _ = Describe("Workload element topology constraints", Ordered, func() {
+	ctx := testing.SetContext(testing.TestTenant, testing.TestUser, []string{})
+	workloadsService := NewWorkloadsService()
+
+	const topologyName = "test-net-topology"
+	var workloadId, prefillElemId, frontendElemId string
+
+	BeforeAll(func() {
+		checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
+			WithCluster(testing.ClusterUuid1, testing.BuildDisplayedCluster(testing.ClusterUuid1, testing.TestDefaultClusterVersion, nil)))
+		checker.InitClusterCapabilitiesChecker("", testing.GetDefaultClustersCacheConfig(), "")
+		clusterservice.SetMock(clientsclusterservice.NewSimpleMock().
+			WithTopology(topologyName, &clusterApi.NetworkTopology{Name: topologyName, Levels: []string{"zone", "rack", "host"}}))
+
+		workloadId = uuid.NewString()
+		prefillElemId = uuid.NewString()
+		frontendElemId = uuid.NewString()
+
+		w := SetupBaseWorkload(workloadId, DefaultProjectId, testing.ClusterUuid1)
+		w.Topology = &api.WorkloadSyncFieldsTopology{
+			Name:              topologyName,
+			RequiredPlacement: "zone",
+		}
+		prefill := makeElement(prefillElemId, "prefill", 1)
+		prefill.InstanceKey = ptr.To("PrefillWorker")
+		prefill.Topology = &api.WorkloadElementTopology{Name: topologyName, RequiredPlacement: "rack"}
+		frontend := makeElement(frontendElemId, "frontend", 1)
+		frontend.InstanceKey = ptr.To("Frontend")
+
+		w.StructureElements = elemSlice(prefill, frontend)
+		upsertWorkloadHelper(ctx, workloadsService, workloadId, w)
+	})
+
+	It("returns the element's requested constraints even though it has no running pods", func() {
+		resp, err := workloadsService.GetWorkloadElement(ctx, workloadId, prefillElemId)
+		Expect(err).To(BeNil())
+		Expect(resp.Code).To(Equal(http.StatusOK))
+
+		body := resp.Body.(api.WorkloadElementResponse)
+		Expect(body.Topology).ToNot(BeNil())
+		Expect(body.Topology.Name).To(Equal(topologyName))
+		Expect(body.Topology.RequiredPlacement).To(Equal("rack"))
+		Expect(body.Topology.PreferredPlacement).To(BeEmpty())
+		Expect(body.Topology.ActualPlacement).To(BeNil())
+	})
+
+	It("omits topology for an element that requested no constraints and has no pods", func() {
+		resp, err := workloadsService.GetWorkloadElement(ctx, workloadId, frontendElemId)
+		Expect(err).To(BeNil())
+
+		body := resp.Body.(api.WorkloadElementResponse)
+		Expect(body.Topology).To(BeNil())
+	})
+
+	It("returns the constraints on the elements list too", func() {
+		resp, err := workloadsService.GetWorkloadElements(ctx, workloadId, 0, 10)
+		Expect(err).To(BeNil())
+
+		elements := resp.Body.(api.WorkloadElementsResponse).Elements
+		byId := map[string]api.WorkloadElement{}
+		for _, element := range elements {
+			byId[element.Id] = element
+		}
+		Expect(byId[prefillElemId].Topology).ToNot(BeNil())
+		Expect(byId[prefillElemId].Topology.RequiredPlacement).To(Equal("rack"))
+		Expect(byId[frontendElemId].Topology).To(BeNil())
+	})
+
+	It("refreshes stored constraints on a resync of an existing element", func() {
+		w := SetupBaseWorkload(workloadId, DefaultProjectId, testing.ClusterUuid1)
+		w.Topology = &api.WorkloadSyncFieldsTopology{
+			Name:              topologyName,
+			RequiredPlacement: "zone",
+		}
+		prefill := makeElement(prefillElemId, "prefill", 1)
+		prefill.InstanceKey = ptr.To("PrefillWorker")
+		prefill.Topology = &api.WorkloadElementTopology{Name: topologyName, RequiredPlacement: "host"}
+		frontend := makeElement(frontendElemId, "frontend", 1)
+		frontend.InstanceKey = ptr.To("Frontend")
+
+		w.StructureElements = elemSlice(prefill, frontend)
+		upsertWorkloadHelper(ctx, workloadsService, workloadId, w)
+
+		resp, err := workloadsService.GetWorkloadElement(ctx, workloadId, prefillElemId)
+		Expect(err).To(BeNil())
+		body := resp.Body.(api.WorkloadElementResponse)
+		Expect(body.Topology).ToNot(BeNil())
+		Expect(body.Topology.RequiredPlacement).To(Equal("host"))
+	})
+})

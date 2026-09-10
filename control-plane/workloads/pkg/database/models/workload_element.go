@@ -29,6 +29,7 @@ type WorkloadElement struct {
 	GVKVersion  *string   `gorm:"column:gvk_version"`
 	GVKKind     *string   `gorm:"column:gvk_kind"`
 	CreatedAt   time.Time `gorm:"column:created_at;autoCreateTime"`
+	Topology    *Topology `gorm:"column:topology;serializer:json;type:jsonb"`
 }
 
 func (WorkloadElement) TableName() string {
