@@ -600,6 +600,72 @@ var _ = Describe("Node DB tests", Ordered, func() {
 		})
 	})
 
+	Context("GetNode NUMA details", func() {
+		const numaNodeName = "numa-test-node"
+
+		var clusterUuid string
+
+		BeforeEach(func() {
+			// node_numa is FK-constrained to clusters, so this context needs a real
+			// cluster row rather than the suite's hardcoded testClusterUuids.
+			createdCluster, apiErr := dao.CreateCluster(ctx, &models.Cluster{
+				Name:     "test-numa-cluster",
+				TenantId: TestTenantInt,
+				Version:  "2.25",
+			})
+			Expect(apiErr).To(BeNil())
+			clusterUuid = createdCluster.ID.String()
+			testClusterUuids = append(testClusterUuids, clusterUuid)
+			ctx = context.WithValue(ctx, authorization_utils.PermittedScopesKey, &authorization_api.PermittedScopes{Clusters: testClusterUuids})
+
+			result, err := nodeService.UpsertNode(ctx, clusterUuid, numaNodeName, *TestNodeInfo0)
+			Expect(err).To(BeNil())
+			Expect(result.Code).To(BeNumerically("<", http.StatusBadRequest))
+		})
+
+		AfterEach(func() {
+			dao.DeleteClusterNodes(ctx, TestTenantInt, clusterUuid)
+			dao.DeleteCluster(ctx, clusterUuid, TestTenantInt)
+		})
+
+		getNumaTestNodeId := func() string {
+			node, apiErr := dao.GetNodeInternal(
+				ctx, TestTenantInt, clusterUuid, numaNodeName, []string{"id", "name", "tenant_id", "cluster_uuid"})
+			Expect(apiErr).To(BeNil())
+			return node.ID.String()
+		}
+
+		It("returns the node's synced NUMA nodes alongside its topology manager policy", func() {
+			syncNumaNodes(nodeService, clusterUuid, numaNodeName, []api.NumaNodeDetails{
+				numaNodeDetails("node-0", 24.5, 64*1024*1024*1024, 4),
+				numaNodeDetails("node-1", 24.5, 64*1024*1024*1024, 2),
+			})
+
+			result, err := nodeService.GetNode(ctx, getNumaTestNodeId())
+
+			Expect(err).To(BeNil())
+			Expect(result.Code).To(Equal(http.StatusOK))
+			actualNode := httpResponseBodyToNodeExtended(result)
+			Expect(actualNode.Numa.TopologyManagerPolicy).To(Equal(TestNodeInfo0.Numa.TopologyManagerPolicy))
+			Expect(actualNode.Numa.Nodes).To(HaveLen(2))
+			Expect(actualNode.Numa.Nodes[0].Name).To(Equal("node-0"))
+			Expect(actualNode.Numa.Nodes[0].TotalCpuCores).To(Equal(24.5))
+			Expect(actualNode.Numa.Nodes[0].TotalGpus).To(Equal(int32(4)))
+			Expect(actualNode.Numa.Nodes[1].Name).To(Equal("node-1"))
+			Expect(actualNode.Numa.Nodes[1].TotalGpus).To(Equal(int32(2)))
+		})
+
+		It("returns no NUMA nodes for a node whose NUMA details were never synced", func() {
+			result, err := nodeService.GetNode(ctx, getNumaTestNodeId())
+
+			Expect(err).To(BeNil())
+			Expect(result.Code).To(Equal(http.StatusOK))
+			actualNode := httpResponseBodyToNodeExtended(result)
+			Expect(actualNode.Numa.TopologyManagerPolicy).To(Equal(TestNodeInfo0.Numa.TopologyManagerPolicy))
+			Expect(actualNode.Numa.Nodes).To(BeEmpty())
+		})
+	})
+
 	Context("networkTopologyLabelValuesChanged triggers workloads client call", func() {
 		var clusterUuid string
 		BeforeEach(func() {
@@ -977,6 +1043,30 @@ func fillNodeNilValuesIfNeeded(node *api.Node) {
 	}
 	if node.Taints == nil {
 		node.Taints = []api.NodeTaint{}
+	}
+}
+
+func numaNodeDetails(name string, cpuCores float64, cpuMemoryBytes int64, gpus int32) api.NumaNodeDetails {
+	return api.NumaNodeDetails{
+		Name:                    name,
+		TotalCpuCores:           cpuCores,
+		AllocatedCpuCores:       1,
+		TotalCpuMemoryBytes:     cpuMemoryBytes,
+		AllocatedCpuMemoryBytes: 1024,
+		TotalGpus:               gpus,
+		AllocatedGpus:           0,
+	}
+}
+
+func syncNumaNodes(nodeService *services.NodeService, clusterUuid, nodeName string,
+	numaNodes []api.NumaNodeDetails,
+) {
+	result, err := nodeService.SyncNumaNodes(ctx, clusterUuid, api.NumaNodesSyncRequest{
+		Nodes: []api.NodeNumaForSync{{Name: nodeName, NumaNodes: numaNodes}},
+	})
+	if err != nil || result.Code >= http.StatusBadRequest {
+		Fail(fmt.Sprintf("Failed syncing NUMA nodes for node <%s> in cluster <%s>, return code: %d",
+			nodeName, clusterUuid, result.Code))
 	}
 }
 
