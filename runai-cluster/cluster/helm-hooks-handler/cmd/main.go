@@ -31,11 +31,18 @@ var (
 	setupLog = ctrl.Log.WithName("setup")
 )
 
+const customCAPath = "/etc/ssl/certs/runai-ca.pem"
+
 func main() {
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&zap.Options{
 		Level: zapcore.InfoLevel,
 	})))
 	opts := util.SetOptions()
+	if opts.CustomCaEnabled {
+		if err := clients.ConfigureDefaultHTTPTransport(customCAPath); err != nil {
+			log.Fatalf("failed to configure custom CA: %v", err)
+		}
+	}
 
 	var k8sClients *clients.Clients
 	var err error
