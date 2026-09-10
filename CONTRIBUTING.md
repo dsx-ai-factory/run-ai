@@ -154,7 +154,7 @@ We split CI into two layers:
 
 ### Running the Checks Locally
 
-Layer 1 is the part you can reproduce on your machine, and doing so before you push is the fastest way to a green PR. There is deliberately **no single repo-wide gate command**: this is a monorepo of independently buildable services, and Layer 2 (full build and end-to-end tests) needs secrets and a cluster, so it cannot run locally at all.
+Layer 1 is fully reproducible locally, and running it before you push is the fastest way to a green PR. There is deliberately **no single repo-wide gate command**, since this is a monorepo of independently buildable services. Layer 2 (full build and end-to-end tests) needs secrets and a cluster, so it cannot run locally at all.
 
 **Start with the service you changed.** The closest thing to a local gate is each service's own Makefile:
 
@@ -178,9 +178,9 @@ Then run whichever language-level checks apply. These mirror the corresponding j
 | `docs/` or `fern/` | `fern check`<br>`python3 ./tools/check-fern-nav.py fern` | `fern-docs-ci.yaml` |
 | `CODEOWNERS` | `make validate` (from the repo root) | — not run in CI; local check only |
 
-Two things worth knowing about the root `Makefile`: `validate` is real — it runs [`validate-codeowners.py`](.github/scripts/validate-codeowners.py) against `CODEOWNERS` — but `build`, `test`, and `lint` are placeholders that only echo `NA`. Run those per-service, as above, not from the root.
+The root `Makefile`'s `validate` target is real: it runs [`validate-codeowners.py`](.github/scripts/validate-codeowners.py) against `CODEOWNERS`. Its `build`, `test`, and `lint` targets are placeholders that only echo `NA`; run those per-service instead, as shown above.
 
-Note that `fern docs dev` starts a local preview server; it does **not** validate anything. Use `fern check` to reproduce the CI check.
+`fern docs dev` starts a local preview server and does **not** validate anything. Use `fern check` to reproduce the CI check.
 
 ---
 
