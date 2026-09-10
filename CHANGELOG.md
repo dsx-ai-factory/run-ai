@@ -16,4 +16,4 @@ include new features or breaking changes (documented in its release notes);
 `3.0.1` is a patch cut from that same `3.0` branch containing fixes only, with
 no new features and no breaking changes relative to `3.0.0`.
 
-See [Support, Lifecycle, and Deprecation Policy](docs/getting-started/product-support-policy.md) for how long each `Ma.Mi` version receives patches.
+See [Support, Lifecycle, and Deprecation Policy](docs/about-enterprise/product-support-policy.md) for how long each `Ma.Mi` version receives patches.
