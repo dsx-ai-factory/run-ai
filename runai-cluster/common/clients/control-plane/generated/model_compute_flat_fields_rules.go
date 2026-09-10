@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,18 +18,18 @@ import (
 
 // ComputeFlatFieldsRules struct for ComputeFlatFieldsRules
 type ComputeFlatFieldsRules struct {
-	CpuCoreRequest NullableNumberRules `json:"cpuCoreRequest,omitempty"`
-	CpuCoreLimit NullableNumberRules `json:"cpuCoreLimit,omitempty"`
-	CpuMemoryRequest NullableQuantityRules `json:"cpuMemoryRequest,omitempty"`
-	CpuMemoryLimit NullableQuantityRules `json:"cpuMemoryLimit,omitempty"`
-	LargeShmRequest NullableBooleanRules `json:"largeShmRequest,omitempty"`
-	GpuRequestType NullableGpuRequestRules `json:"gpuRequestType,omitempty"`
-	MigProfile NullableMigProfileRules `json:"migProfile,omitempty"`
-	GpuDevicesRequest NullableIntegerRules `json:"gpuDevicesRequest,omitempty"`
-	GpuPortionRequest NullableNumberRules `json:"gpuPortionRequest,omitempty"`
-	GpuPortionLimit NullableNumberRules `json:"gpuPortionLimit,omitempty"`
-	GpuMemoryRequest NullableQuantityRules `json:"gpuMemoryRequest,omitempty"`
-	GpuMemoryLimit NullableQuantityRules `json:"gpuMemoryLimit,omitempty"`
+	CpuCoreRequest    NullableNumberRules     `json:"cpuCoreRequest,omitempty"`
+	CpuCoreLimit      NullableNumberRules     `json:"cpuCoreLimit,omitempty"`
+	CpuMemoryRequest  NullableQuantityRules   `json:"cpuMemoryRequest,omitempty"`
+	CpuMemoryLimit    NullableQuantityRules   `json:"cpuMemoryLimit,omitempty"`
+	LargeShmRequest   NullableBooleanRules    `json:"largeShmRequest,omitempty"`
+	GpuRequestType    NullableGpuRequestRules `json:"gpuRequestType,omitempty"`
+	MigProfile        NullableMigProfileRules `json:"migProfile,omitempty"`
+	GpuDevicesRequest NullableIntegerRules    `json:"gpuDevicesRequest,omitempty"`
+	GpuPortionRequest NullableNumberRules     `json:"gpuPortionRequest,omitempty"`
+	GpuPortionLimit   NullableNumberRules     `json:"gpuPortionLimit,omitempty"`
+	GpuMemoryRequest  NullableQuantityRules   `json:"gpuMemoryRequest,omitempty"`
+	GpuMemoryLimit    NullableQuantityRules   `json:"gpuMemoryLimit,omitempty"`
 }
 
 // NewComputeFlatFieldsRules instantiates a new ComputeFlatFieldsRules object
@@ -79,6 +81,7 @@ func (o *ComputeFlatFieldsRules) HasCpuCoreRequest() bool {
 func (o *ComputeFlatFieldsRules) SetCpuCoreRequest(v NumberRules) {
 	o.CpuCoreRequest.Set(&v)
 }
+
 // SetCpuCoreRequestNil sets the value for CpuCoreRequest to be an explicit nil
 func (o *ComputeFlatFieldsRules) SetCpuCoreRequestNil() {
 	o.CpuCoreRequest.Set(nil)
@@ -121,6 +124,7 @@ func (o *ComputeFlatFieldsRules) HasCpuCoreLimit() bool {
 func (o *ComputeFlatFieldsRules) SetCpuCoreLimit(v NumberRules) {
 	o.CpuCoreLimit.Set(&v)
 }
+
 // SetCpuCoreLimitNil sets the value for CpuCoreLimit to be an explicit nil
 func (o *ComputeFlatFieldsRules) SetCpuCoreLimitNil() {
 	o.CpuCoreLimit.Set(nil)
@@ -163,6 +167,7 @@ func (o *ComputeFlatFieldsRules) HasCpuMemoryRequest() bool {
 func (o *ComputeFlatFieldsRules) SetCpuMemoryRequest(v QuantityRules) {
 	o.CpuMemoryRequest.Set(&v)
 }
+
 // SetCpuMemoryRequestNil sets the value for CpuMemoryRequest to be an explicit nil
 func (o *ComputeFlatFieldsRules) SetCpuMemoryRequestNil() {
 	o.CpuMemoryRequest.Set(nil)
@@ -205,6 +210,7 @@ func (o *ComputeFlatFieldsRules) HasCpuMemoryLimit() bool {
 func (o *ComputeFlatFieldsRules) SetCpuMemoryLimit(v QuantityRules) {
 	o.CpuMemoryLimit.Set(&v)
 }
+
 // SetCpuMemoryLimitNil sets the value for CpuMemoryLimit to be an explicit nil
 func (o *ComputeFlatFieldsRules) SetCpuMemoryLimitNil() {
 	o.CpuMemoryLimit.Set(nil)
@@ -247,6 +253,7 @@ func (o *ComputeFlatFieldsRules) HasLargeShmRequest() bool {
 func (o *ComputeFlatFieldsRules) SetLargeShmRequest(v BooleanRules) {
 	o.LargeShmRequest.Set(&v)
 }
+
 // SetLargeShmRequestNil sets the value for LargeShmRequest to be an explicit nil
 func (o *ComputeFlatFieldsRules) SetLargeShmRequestNil() {
 	o.LargeShmRequest.Set(nil)
@@ -289,6 +296,7 @@ func (o *ComputeFlatFieldsRules) HasGpuRequestType() bool {
 func (o *ComputeFlatFieldsRules) SetGpuRequestType(v GpuRequestRules) {
 	o.GpuRequestType.Set(&v)
 }
+
 // SetGpuRequestTypeNil sets the value for GpuRequestType to be an explicit nil
 func (o *ComputeFlatFieldsRules) SetGpuRequestTypeNil() {
 	o.GpuRequestType.Set(nil)
@@ -331,6 +339,7 @@ func (o *ComputeFlatFieldsRules) HasMigProfile() bool {
 func (o *ComputeFlatFieldsRules) SetMigProfile(v MigProfileRules) {
 	o.MigProfile.Set(&v)
 }
+
 // SetMigProfileNil sets the value for MigProfile to be an explicit nil
 func (o *ComputeFlatFieldsRules) SetMigProfileNil() {
 	o.MigProfile.Set(nil)
@@ -373,6 +382,7 @@ func (o *ComputeFlatFieldsRules) HasGpuDevicesRequest() bool {
 func (o *ComputeFlatFieldsRules) SetGpuDevicesRequest(v IntegerRules) {
 	o.GpuDevicesRequest.Set(&v)
 }
+
 // SetGpuDevicesRequestNil sets the value for GpuDevicesRequest to be an explicit nil
 func (o *ComputeFlatFieldsRules) SetGpuDevicesRequestNil() {
 	o.GpuDevicesRequest.Set(nil)
@@ -415,6 +425,7 @@ func (o *ComputeFlatFieldsRules) HasGpuPortionRequest() bool {
 func (o *ComputeFlatFieldsRules) SetGpuPortionRequest(v NumberRules) {
 	o.GpuPortionRequest.Set(&v)
 }
+
 // SetGpuPortionRequestNil sets the value for GpuPortionRequest to be an explicit nil
 func (o *ComputeFlatFieldsRules) SetGpuPortionRequestNil() {
 	o.GpuPortionRequest.Set(nil)
@@ -457,6 +468,7 @@ func (o *ComputeFlatFieldsRules) HasGpuPortionLimit() bool {
 func (o *ComputeFlatFieldsRules) SetGpuPortionLimit(v NumberRules) {
 	o.GpuPortionLimit.Set(&v)
 }
+
 // SetGpuPortionLimitNil sets the value for GpuPortionLimit to be an explicit nil
 func (o *ComputeFlatFieldsRules) SetGpuPortionLimitNil() {
 	o.GpuPortionLimit.Set(nil)
@@ -499,6 +511,7 @@ func (o *ComputeFlatFieldsRules) HasGpuMemoryRequest() bool {
 func (o *ComputeFlatFieldsRules) SetGpuMemoryRequest(v QuantityRules) {
 	o.GpuMemoryRequest.Set(&v)
 }
+
 // SetGpuMemoryRequestNil sets the value for GpuMemoryRequest to be an explicit nil
 func (o *ComputeFlatFieldsRules) SetGpuMemoryRequestNil() {
 	o.GpuMemoryRequest.Set(nil)
@@ -541,6 +554,7 @@ func (o *ComputeFlatFieldsRules) HasGpuMemoryLimit() bool {
 func (o *ComputeFlatFieldsRules) SetGpuMemoryLimit(v QuantityRules) {
 	o.GpuMemoryLimit.Set(&v)
 }
+
 // SetGpuMemoryLimitNil sets the value for GpuMemoryLimit to be an explicit nil
 func (o *ComputeFlatFieldsRules) SetGpuMemoryLimitNil() {
 	o.GpuMemoryLimit.Set(nil)
@@ -627,5 +641,3 @@ func (v *NullableComputeFlatFieldsRules) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

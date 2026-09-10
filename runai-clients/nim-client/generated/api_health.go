@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Workloads V2 Service
 
@@ -63,7 +65,7 @@ func (a *HealthAPIService) Health(ctx context.Context) ApiHealthRequest {
 }
 
 // Execute executes the request
-///////// RUNAI (remove isResponseFile filter on pointer)//////////
+// /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *HealthAPIService) HealthExecute(r ApiHealthRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod = http.MethodGet

@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -21,30 +23,30 @@ type InferencePolicyDefaultsAndRulesV2Defaults struct {
 	// Arguments to the command that the container running the workspace executes.
 	Args NullableString `json:"args,omitempty"`
 	// Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workspace.
-	Image NullableString `json:"image,omitempty"`
+	Image           NullableString          `json:"image,omitempty"`
 	ImagePullPolicy NullableImagePullPolicy `json:"imagePullPolicy,omitempty"`
 	// Container's working directory. If not specified, the container runtime default will be used. This may be configured in the container image.
 	WorkingDir NullableString `json:"workingDir,omitempty"`
 	// When set to `true`, creates a home directory for the container.
-	CreateHomeDir NullableBool `json:"createHomeDir,omitempty"`
-	Probes NullableProbes `json:"probes,omitempty"`
+	CreateHomeDir NullableBool   `json:"createHomeDir,omitempty"`
+	Probes        NullableProbes `json:"probes,omitempty"`
 	// Nodes (machines), or a group of nodes on which the workload will run. To use this feature, your Administrator will need to label nodes. For more information, see [Group Nodes](https://docs.run.ai/latest/admin/researcher-setup/limit-to-node-group). When using this flag with with Project-based affinity, it refines the list of allowable node groups set in the Project. For more information, see [Projects](https://docs.run.ai/admin/admin-ui-setup/project-setup).
 	NodeType NullableString `json:"nodeType,omitempty"`
 	// A prioritized list of node pools for the scheduler to run the workspace on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
-	NodePools []string `json:"nodePools,omitempty"`
-	PodAffinity NullablePodAffinity `json:"podAffinity,omitempty"`
+	NodePools            []string                             `json:"nodePools,omitempty"`
+	PodAffinity          NullablePodAffinity                  `json:"podAffinity,omitempty"`
 	EnvironmentVariables NullableEnvironmentVariablesDefaults `json:"environmentVariables,omitempty"`
-	Annotations NullableAnnotationsDefaults `json:"annotations,omitempty"`
-	Labels NullableLabelsDefaults `json:"labels,omitempty"`
-	Tolerations NullableTolerationsDefaults `json:"tolerations,omitempty"`
-	Ports NullablePortsDefaults `json:"ports,omitempty"`
-	ExposedUrls NullableExposedUrlsDefaults `json:"exposedUrls,omitempty"`
-	RelatedUrls NullableRelatedUrlsDefaults `json:"relatedUrls,omitempty"`
-	Compute NullableComputeFieldsDefaults `json:"compute,omitempty"`
-	Storage NullableCommonStorageFieldsDefaults `json:"storage,omitempty"`
-	Security NullableCommonSecurityFlatFields `json:"security,omitempty"`
-	ServingPort NullableServingPort `json:"servingPort,omitempty"`
-	Autoscaling NullableAutoScaling `json:"autoscaling,omitempty"`
+	Annotations          NullableAnnotationsDefaults          `json:"annotations,omitempty"`
+	Labels               NullableLabelsDefaults               `json:"labels,omitempty"`
+	Tolerations          NullableTolerationsDefaults          `json:"tolerations,omitempty"`
+	Ports                NullablePortsDefaults                `json:"ports,omitempty"`
+	ExposedUrls          NullableExposedUrlsDefaults          `json:"exposedUrls,omitempty"`
+	RelatedUrls          NullableRelatedUrlsDefaults          `json:"relatedUrls,omitempty"`
+	Compute              NullableComputeFieldsDefaults        `json:"compute,omitempty"`
+	Storage              NullableCommonStorageFieldsDefaults  `json:"storage,omitempty"`
+	Security             NullableCommonSecurityFlatFields     `json:"security,omitempty"`
+	ServingPort          NullableServingPort                  `json:"servingPort,omitempty"`
+	Autoscaling          NullableAutoScaling                  `json:"autoscaling,omitempty"`
 }
 
 // NewInferencePolicyDefaultsAndRulesV2Defaults instantiates a new InferencePolicyDefaultsAndRulesV2Defaults object
@@ -96,6 +98,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasCommand() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetCommand(v string) {
 	o.Command.Set(&v)
 }
+
 // SetCommandNil sets the value for Command to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetCommandNil() {
 	o.Command.Set(nil)
@@ -138,6 +141,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasArgs() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetArgs(v string) {
 	o.Args.Set(&v)
 }
+
 // SetArgsNil sets the value for Args to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetArgsNil() {
 	o.Args.Set(nil)
@@ -180,6 +184,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasImage() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetImage(v string) {
 	o.Image.Set(&v)
 }
+
 // SetImageNil sets the value for Image to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetImageNil() {
 	o.Image.Set(nil)
@@ -222,6 +227,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasImagePullPolicy() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetImagePullPolicy(v ImagePullPolicy) {
 	o.ImagePullPolicy.Set(&v)
 }
+
 // SetImagePullPolicyNil sets the value for ImagePullPolicy to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetImagePullPolicyNil() {
 	o.ImagePullPolicy.Set(nil)
@@ -264,6 +270,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasWorkingDir() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetWorkingDir(v string) {
 	o.WorkingDir.Set(&v)
 }
+
 // SetWorkingDirNil sets the value for WorkingDir to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetWorkingDirNil() {
 	o.WorkingDir.Set(nil)
@@ -306,6 +313,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasCreateHomeDir() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetCreateHomeDir(v bool) {
 	o.CreateHomeDir.Set(&v)
 }
+
 // SetCreateHomeDirNil sets the value for CreateHomeDir to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetCreateHomeDirNil() {
 	o.CreateHomeDir.Set(nil)
@@ -348,6 +356,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasProbes() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetProbes(v Probes) {
 	o.Probes.Set(&v)
 }
+
 // SetProbesNil sets the value for Probes to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetProbesNil() {
 	o.Probes.Set(nil)
@@ -390,6 +399,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasNodeType() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetNodeType(v string) {
 	o.NodeType.Set(&v)
 }
+
 // SetNodeTypeNil sets the value for NodeType to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetNodeTypeNil() {
 	o.NodeType.Set(nil)
@@ -465,6 +475,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasPodAffinity() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetPodAffinity(v PodAffinity) {
 	o.PodAffinity.Set(&v)
 }
+
 // SetPodAffinityNil sets the value for PodAffinity to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetPodAffinityNil() {
 	o.PodAffinity.Set(nil)
@@ -507,6 +518,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasEnvironmentVariables() bo
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetEnvironmentVariables(v EnvironmentVariablesDefaults) {
 	o.EnvironmentVariables.Set(&v)
 }
+
 // SetEnvironmentVariablesNil sets the value for EnvironmentVariables to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetEnvironmentVariablesNil() {
 	o.EnvironmentVariables.Set(nil)
@@ -549,6 +561,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasAnnotations() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetAnnotations(v AnnotationsDefaults) {
 	o.Annotations.Set(&v)
 }
+
 // SetAnnotationsNil sets the value for Annotations to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetAnnotationsNil() {
 	o.Annotations.Set(nil)
@@ -591,6 +604,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasLabels() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetLabels(v LabelsDefaults) {
 	o.Labels.Set(&v)
 }
+
 // SetLabelsNil sets the value for Labels to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetLabelsNil() {
 	o.Labels.Set(nil)
@@ -633,6 +647,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasTolerations() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetTolerations(v TolerationsDefaults) {
 	o.Tolerations.Set(&v)
 }
+
 // SetTolerationsNil sets the value for Tolerations to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetTolerationsNil() {
 	o.Tolerations.Set(nil)
@@ -675,6 +690,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasPorts() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetPorts(v PortsDefaults) {
 	o.Ports.Set(&v)
 }
+
 // SetPortsNil sets the value for Ports to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetPortsNil() {
 	o.Ports.Set(nil)
@@ -717,6 +733,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasExposedUrls() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetExposedUrls(v ExposedUrlsDefaults) {
 	o.ExposedUrls.Set(&v)
 }
+
 // SetExposedUrlsNil sets the value for ExposedUrls to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetExposedUrlsNil() {
 	o.ExposedUrls.Set(nil)
@@ -759,6 +776,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasRelatedUrls() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetRelatedUrls(v RelatedUrlsDefaults) {
 	o.RelatedUrls.Set(&v)
 }
+
 // SetRelatedUrlsNil sets the value for RelatedUrls to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetRelatedUrlsNil() {
 	o.RelatedUrls.Set(nil)
@@ -801,6 +819,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasCompute() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetCompute(v ComputeFieldsDefaults) {
 	o.Compute.Set(&v)
 }
+
 // SetComputeNil sets the value for Compute to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetComputeNil() {
 	o.Compute.Set(nil)
@@ -843,6 +862,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasStorage() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetStorage(v CommonStorageFieldsDefaults) {
 	o.Storage.Set(&v)
 }
+
 // SetStorageNil sets the value for Storage to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetStorageNil() {
 	o.Storage.Set(nil)
@@ -885,6 +905,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasSecurity() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetSecurity(v CommonSecurityFlatFields) {
 	o.Security.Set(&v)
 }
+
 // SetSecurityNil sets the value for Security to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetSecurityNil() {
 	o.Security.Set(nil)
@@ -927,6 +948,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasServingPort() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetServingPort(v ServingPort) {
 	o.ServingPort.Set(&v)
 }
+
 // SetServingPortNil sets the value for ServingPort to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetServingPortNil() {
 	o.ServingPort.Set(nil)
@@ -969,6 +991,7 @@ func (o *InferencePolicyDefaultsAndRulesV2Defaults) HasAutoscaling() bool {
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetAutoscaling(v AutoScaling) {
 	o.Autoscaling.Set(&v)
 }
+
 // SetAutoscalingNil sets the value for Autoscaling to be an explicit nil
 func (o *InferencePolicyDefaultsAndRulesV2Defaults) SetAutoscalingNil() {
 	o.Autoscaling.Set(nil)
@@ -1085,5 +1108,3 @@ func (v *NullableInferencePolicyDefaultsAndRulesV2Defaults) UnmarshalJSON(src []
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

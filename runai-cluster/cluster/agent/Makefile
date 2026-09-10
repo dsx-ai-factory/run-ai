@@ -92,3 +92,4 @@ generate-datavolumes:
 	    rm pkg/generated/datavolumes_openapi/go.*
 
 generate: generate-projects generate-backend generate-authorization generate-datavolumes
+	sh "$(shell git rev-parse --show-toplevel)/build/makefile/scripts/spdx-header-openapi.sh" pkg/generated

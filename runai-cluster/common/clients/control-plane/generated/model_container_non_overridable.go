@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -17,13 +19,13 @@ import (
 // ContainerNonOverridable Container non overrideable fields. In the context of assets,these are environment asset fields that cannot be overriden in the submit workload request.
 type ContainerNonOverridable struct {
 	// Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workspace.
-	Image NullableString `json:"image,omitempty"`
+	Image           NullableString          `json:"image,omitempty"`
 	ImagePullPolicy NullableImagePullPolicy `json:"imagePullPolicy,omitempty"`
 	// Container's working directory. If not specified, the container runtime default will be used. This may be configured in the container image.
 	WorkingDir NullableString `json:"workingDir,omitempty"`
 	// When set to `true`, creates a home directory for the container.
-	CreateHomeDir NullableBool `json:"createHomeDir,omitempty"`
-	Probes NullableProbes `json:"probes,omitempty"`
+	CreateHomeDir NullableBool   `json:"createHomeDir,omitempty"`
+	Probes        NullableProbes `json:"probes,omitempty"`
 }
 
 // NewContainerNonOverridable instantiates a new ContainerNonOverridable object
@@ -75,6 +77,7 @@ func (o *ContainerNonOverridable) HasImage() bool {
 func (o *ContainerNonOverridable) SetImage(v string) {
 	o.Image.Set(&v)
 }
+
 // SetImageNil sets the value for Image to be an explicit nil
 func (o *ContainerNonOverridable) SetImageNil() {
 	o.Image.Set(nil)
@@ -117,6 +120,7 @@ func (o *ContainerNonOverridable) HasImagePullPolicy() bool {
 func (o *ContainerNonOverridable) SetImagePullPolicy(v ImagePullPolicy) {
 	o.ImagePullPolicy.Set(&v)
 }
+
 // SetImagePullPolicyNil sets the value for ImagePullPolicy to be an explicit nil
 func (o *ContainerNonOverridable) SetImagePullPolicyNil() {
 	o.ImagePullPolicy.Set(nil)
@@ -159,6 +163,7 @@ func (o *ContainerNonOverridable) HasWorkingDir() bool {
 func (o *ContainerNonOverridable) SetWorkingDir(v string) {
 	o.WorkingDir.Set(&v)
 }
+
 // SetWorkingDirNil sets the value for WorkingDir to be an explicit nil
 func (o *ContainerNonOverridable) SetWorkingDirNil() {
 	o.WorkingDir.Set(nil)
@@ -201,6 +206,7 @@ func (o *ContainerNonOverridable) HasCreateHomeDir() bool {
 func (o *ContainerNonOverridable) SetCreateHomeDir(v bool) {
 	o.CreateHomeDir.Set(&v)
 }
+
 // SetCreateHomeDirNil sets the value for CreateHomeDir to be an explicit nil
 func (o *ContainerNonOverridable) SetCreateHomeDirNil() {
 	o.CreateHomeDir.Set(nil)
@@ -243,6 +249,7 @@ func (o *ContainerNonOverridable) HasProbes() bool {
 func (o *ContainerNonOverridable) SetProbes(v Probes) {
 	o.Probes.Set(&v)
 }
+
 // SetProbesNil sets the value for Probes to be an explicit nil
 func (o *ContainerNonOverridable) SetProbesNil() {
 	o.Probes.Set(nil)
@@ -308,5 +315,3 @@ func (v *NullableContainerNonOverridable) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

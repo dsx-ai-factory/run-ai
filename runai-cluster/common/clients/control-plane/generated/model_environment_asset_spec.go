@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -29,16 +31,16 @@ type EnvironmentAssetSpec struct {
 	// Set of environment variables to populate into the container running the workspace.
 	EnvironmentVariables []EnvironmentVariable `json:"environmentVariables,omitempty"`
 	// Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workspace.
-	Image NullableString `json:"image,omitempty"`
+	Image           NullableString          `json:"image,omitempty"`
 	ImagePullPolicy NullableImagePullPolicy `json:"imagePullPolicy,omitempty"`
 	// Container's working directory. If not specified, the container runtime default will be used. This may be configured in the container image.
 	WorkingDir NullableString `json:"workingDir,omitempty"`
 	// When set to `true`, creates a home directory for the container.
-	CreateHomeDir NullableBool `json:"createHomeDir,omitempty"`
-	Probes NullableProbes `json:"probes,omitempty"`
-	UidGidSource NullableUidGidSource `json:"uidGidSource,omitempty"`
+	CreateHomeDir NullableBool         `json:"createHomeDir,omitempty"`
+	Probes        NullableProbes       `json:"probes,omitempty"`
+	UidGidSource  NullableUidGidSource `json:"uidGidSource,omitempty"`
 	// Add POSIX capabilities to running containers. Defaults to the default set of capabilities granted by the container runtime.
-	Capabilities []Capability `json:"capabilities,omitempty"`
+	Capabilities       []Capability               `json:"capabilities,omitempty"`
 	SeccompProfileType NullableSeccompProfileType `json:"seccompProfileType,omitempty"`
 	// Force the container to run as a non-root user.
 	RunAsNonRoot NullableBool `json:"runAsNonRoot,omitempty"`
@@ -109,6 +111,7 @@ func (o *EnvironmentAssetSpec) HasCommand() bool {
 func (o *EnvironmentAssetSpec) SetCommand(v string) {
 	o.Command.Set(&v)
 }
+
 // SetCommandNil sets the value for Command to be an explicit nil
 func (o *EnvironmentAssetSpec) SetCommandNil() {
 	o.Command.Set(nil)
@@ -151,6 +154,7 @@ func (o *EnvironmentAssetSpec) HasArgs() bool {
 func (o *EnvironmentAssetSpec) SetArgs(v string) {
 	o.Args.Set(&v)
 }
+
 // SetArgsNil sets the value for Args to be an explicit nil
 func (o *EnvironmentAssetSpec) SetArgsNil() {
 	o.Args.Set(nil)
@@ -193,6 +197,7 @@ func (o *EnvironmentAssetSpec) HasRunAsUid() bool {
 func (o *EnvironmentAssetSpec) SetRunAsUid(v int64) {
 	o.RunAsUid.Set(&v)
 }
+
 // SetRunAsUidNil sets the value for RunAsUid to be an explicit nil
 func (o *EnvironmentAssetSpec) SetRunAsUidNil() {
 	o.RunAsUid.Set(nil)
@@ -235,6 +240,7 @@ func (o *EnvironmentAssetSpec) HasRunAsGid() bool {
 func (o *EnvironmentAssetSpec) SetRunAsGid(v int64) {
 	o.RunAsGid.Set(&v)
 }
+
 // SetRunAsGidNil sets the value for RunAsGid to be an explicit nil
 func (o *EnvironmentAssetSpec) SetRunAsGidNil() {
 	o.RunAsGid.Set(nil)
@@ -277,6 +283,7 @@ func (o *EnvironmentAssetSpec) HasSupplementalGroups() bool {
 func (o *EnvironmentAssetSpec) SetSupplementalGroups(v string) {
 	o.SupplementalGroups.Set(&v)
 }
+
 // SetSupplementalGroupsNil sets the value for SupplementalGroups to be an explicit nil
 func (o *EnvironmentAssetSpec) SetSupplementalGroupsNil() {
 	o.SupplementalGroups.Set(nil)
@@ -352,6 +359,7 @@ func (o *EnvironmentAssetSpec) HasImage() bool {
 func (o *EnvironmentAssetSpec) SetImage(v string) {
 	o.Image.Set(&v)
 }
+
 // SetImageNil sets the value for Image to be an explicit nil
 func (o *EnvironmentAssetSpec) SetImageNil() {
 	o.Image.Set(nil)
@@ -394,6 +402,7 @@ func (o *EnvironmentAssetSpec) HasImagePullPolicy() bool {
 func (o *EnvironmentAssetSpec) SetImagePullPolicy(v ImagePullPolicy) {
 	o.ImagePullPolicy.Set(&v)
 }
+
 // SetImagePullPolicyNil sets the value for ImagePullPolicy to be an explicit nil
 func (o *EnvironmentAssetSpec) SetImagePullPolicyNil() {
 	o.ImagePullPolicy.Set(nil)
@@ -436,6 +445,7 @@ func (o *EnvironmentAssetSpec) HasWorkingDir() bool {
 func (o *EnvironmentAssetSpec) SetWorkingDir(v string) {
 	o.WorkingDir.Set(&v)
 }
+
 // SetWorkingDirNil sets the value for WorkingDir to be an explicit nil
 func (o *EnvironmentAssetSpec) SetWorkingDirNil() {
 	o.WorkingDir.Set(nil)
@@ -478,6 +488,7 @@ func (o *EnvironmentAssetSpec) HasCreateHomeDir() bool {
 func (o *EnvironmentAssetSpec) SetCreateHomeDir(v bool) {
 	o.CreateHomeDir.Set(&v)
 }
+
 // SetCreateHomeDirNil sets the value for CreateHomeDir to be an explicit nil
 func (o *EnvironmentAssetSpec) SetCreateHomeDirNil() {
 	o.CreateHomeDir.Set(nil)
@@ -520,6 +531,7 @@ func (o *EnvironmentAssetSpec) HasProbes() bool {
 func (o *EnvironmentAssetSpec) SetProbes(v Probes) {
 	o.Probes.Set(&v)
 }
+
 // SetProbesNil sets the value for Probes to be an explicit nil
 func (o *EnvironmentAssetSpec) SetProbesNil() {
 	o.Probes.Set(nil)
@@ -562,6 +574,7 @@ func (o *EnvironmentAssetSpec) HasUidGidSource() bool {
 func (o *EnvironmentAssetSpec) SetUidGidSource(v UidGidSource) {
 	o.UidGidSource.Set(&v)
 }
+
 // SetUidGidSourceNil sets the value for UidGidSource to be an explicit nil
 func (o *EnvironmentAssetSpec) SetUidGidSourceNil() {
 	o.UidGidSource.Set(nil)
@@ -637,6 +650,7 @@ func (o *EnvironmentAssetSpec) HasSeccompProfileType() bool {
 func (o *EnvironmentAssetSpec) SetSeccompProfileType(v SeccompProfileType) {
 	o.SeccompProfileType.Set(&v)
 }
+
 // SetSeccompProfileTypeNil sets the value for SeccompProfileType to be an explicit nil
 func (o *EnvironmentAssetSpec) SetSeccompProfileTypeNil() {
 	o.SeccompProfileType.Set(nil)
@@ -679,6 +693,7 @@ func (o *EnvironmentAssetSpec) HasRunAsNonRoot() bool {
 func (o *EnvironmentAssetSpec) SetRunAsNonRoot(v bool) {
 	o.RunAsNonRoot.Set(&v)
 }
+
 // SetRunAsNonRootNil sets the value for RunAsNonRoot to be an explicit nil
 func (o *EnvironmentAssetSpec) SetRunAsNonRootNil() {
 	o.RunAsNonRoot.Set(nil)
@@ -721,6 +736,7 @@ func (o *EnvironmentAssetSpec) HasReadOnlyRootFilesystem() bool {
 func (o *EnvironmentAssetSpec) SetReadOnlyRootFilesystem(v bool) {
 	o.ReadOnlyRootFilesystem.Set(&v)
 }
+
 // SetReadOnlyRootFilesystemNil sets the value for ReadOnlyRootFilesystem to be an explicit nil
 func (o *EnvironmentAssetSpec) SetReadOnlyRootFilesystemNil() {
 	o.ReadOnlyRootFilesystem.Set(nil)
@@ -763,6 +779,7 @@ func (o *EnvironmentAssetSpec) HasAllowPrivilegeEscalation() bool {
 func (o *EnvironmentAssetSpec) SetAllowPrivilegeEscalation(v bool) {
 	o.AllowPrivilegeEscalation.Set(&v)
 }
+
 // SetAllowPrivilegeEscalationNil sets the value for AllowPrivilegeEscalation to be an explicit nil
 func (o *EnvironmentAssetSpec) SetAllowPrivilegeEscalationNil() {
 	o.AllowPrivilegeEscalation.Set(nil)
@@ -805,6 +822,7 @@ func (o *EnvironmentAssetSpec) HasHostIpc() bool {
 func (o *EnvironmentAssetSpec) SetHostIpc(v bool) {
 	o.HostIpc.Set(&v)
 }
+
 // SetHostIpcNil sets the value for HostIpc to be an explicit nil
 func (o *EnvironmentAssetSpec) SetHostIpcNil() {
 	o.HostIpc.Set(nil)
@@ -847,6 +865,7 @@ func (o *EnvironmentAssetSpec) HasHostNetwork() bool {
 func (o *EnvironmentAssetSpec) SetHostNetwork(v bool) {
 	o.HostNetwork.Set(&v)
 }
+
 // SetHostNetworkNil sets the value for HostNetwork to be an explicit nil
 func (o *EnvironmentAssetSpec) SetHostNetworkNil() {
 	o.HostNetwork.Set(nil)
@@ -1024,5 +1043,3 @@ func (v *NullableEnvironmentAssetSpec) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

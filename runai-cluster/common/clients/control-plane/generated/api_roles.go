@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,16 +21,15 @@ import (
 	"strings"
 )
 
-
 type RolesApi interface {
 
 	/*
-	CreateRole Create a role.
+		CreateRole Create a role.
 
-	Use to create a role.
+		Use to create a role.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return RolesApiCreateRoleRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return RolesApiCreateRoleRequest
 	*/
 	CreateRole(ctx context.Context) RolesApiCreateRoleRequest
 
@@ -37,13 +38,13 @@ type RolesApi interface {
 	CreateRoleExecute(r RolesApiCreateRoleRequest) (*Role1, *http.Response, error)
 
 	/*
-	DeleteRole Delete a role by id.
+		DeleteRole Delete a role by id.
 
-	Use to delete a role by id.
+		Use to delete a role by id.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param roleIdPath The id of the role to retrieve
-	@return RolesApiDeleteRoleRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param roleIdPath The id of the role to retrieve
+		@return RolesApiDeleteRoleRequest
 	*/
 	DeleteRole(ctx context.Context, roleIdPath int32) RolesApiDeleteRoleRequest
 
@@ -51,13 +52,13 @@ type RolesApi interface {
 	DeleteRoleExecute(r RolesApiDeleteRoleRequest) (*http.Response, error)
 
 	/*
-	GetRole Get a role by id.
+		GetRole Get a role by id.
 
-	Retrieve the details of a role by id.
+		Retrieve the details of a role by id.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param roleIdPath The id of the role to retrieve
-	@return RolesApiGetRoleRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param roleIdPath The id of the role to retrieve
+		@return RolesApiGetRoleRequest
 	*/
 	GetRole(ctx context.Context, roleIdPath int32) RolesApiGetRoleRequest
 
@@ -66,12 +67,12 @@ type RolesApi interface {
 	GetRoleExecute(r RolesApiGetRoleRequest) (*Role1, *http.Response, error)
 
 	/*
-	GetRoles Get a list of roles.
+		GetRoles Get a list of roles.
 
-	Use to retrieve a list of roles.
+		Use to retrieve a list of roles.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return RolesApiGetRolesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return RolesApiGetRolesRequest
 	*/
 	GetRoles(ctx context.Context) RolesApiGetRolesRequest
 
@@ -84,8 +85,8 @@ type RolesApi interface {
 type RolesApiService service
 
 type RolesApiCreateRoleRequest struct {
-	ctx context.Context
-	ApiService RolesApi
+	ctx                context.Context
+	ApiService         RolesApi
 	roleCreationFields *RoleCreationFields
 }
 
@@ -104,24 +105,25 @@ CreateRole Create a role.
 
 Use to create a role.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return RolesApiCreateRoleRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return RolesApiCreateRoleRequest
 */
 func (a *RolesApiService) CreateRole(ctx context.Context) RolesApiCreateRoleRequest {
 	return RolesApiCreateRoleRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return Role1
+//
+//	@return Role1
 func (a *RolesApiService) CreateRoleExecute(r RolesApiCreateRoleRequest) (*Role1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Role1
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Role1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RolesApiService.CreateRole")
@@ -244,7 +246,7 @@ func (a *RolesApiService) CreateRoleExecute(r RolesApiCreateRoleRequest) (*Role1
 }
 
 type RolesApiDeleteRoleRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService RolesApi
 	roleIdPath int32
 }
@@ -258,14 +260,14 @@ DeleteRole Delete a role by id.
 
 Use to delete a role by id.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param roleIdPath The id of the role to retrieve
- @return RolesApiDeleteRoleRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param roleIdPath The id of the role to retrieve
+	@return RolesApiDeleteRoleRequest
 */
 func (a *RolesApiService) DeleteRole(ctx context.Context, roleIdPath int32) RolesApiDeleteRoleRequest {
 	return RolesApiDeleteRoleRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		roleIdPath: roleIdPath,
 	}
 }
@@ -273,9 +275,9 @@ func (a *RolesApiService) DeleteRole(ctx context.Context, roleIdPath int32) Role
 // Execute executes the request
 func (a *RolesApiService) DeleteRoleExecute(r RolesApiDeleteRoleRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RolesApiService.DeleteRole")
@@ -388,7 +390,7 @@ func (a *RolesApiService) DeleteRoleExecute(r RolesApiDeleteRoleRequest) (*http.
 }
 
 type RolesApiGetRoleRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService RolesApi
 	roleIdPath int32
 }
@@ -402,26 +404,27 @@ GetRole Get a role by id.
 
 Retrieve the details of a role by id.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param roleIdPath The id of the role to retrieve
- @return RolesApiGetRoleRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param roleIdPath The id of the role to retrieve
+	@return RolesApiGetRoleRequest
 */
 func (a *RolesApiService) GetRole(ctx context.Context, roleIdPath int32) RolesApiGetRoleRequest {
 	return RolesApiGetRoleRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		roleIdPath: roleIdPath,
 	}
 }
 
 // Execute executes the request
-//  @return Role1
+//
+//	@return Role1
 func (a *RolesApiService) GetRoleExecute(r RolesApiGetRoleRequest) (*Role1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Role1
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Role1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RolesApiService.GetRole")
@@ -543,7 +546,7 @@ func (a *RolesApiService) GetRoleExecute(r RolesApiGetRoleRequest) (*Role1, *htt
 }
 
 type RolesApiGetRolesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService RolesApi
 }
 
@@ -556,24 +559,25 @@ GetRoles Get a list of roles.
 
 Use to retrieve a list of roles.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return RolesApiGetRolesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return RolesApiGetRolesRequest
 */
 func (a *RolesApiService) GetRoles(ctx context.Context) RolesApiGetRolesRequest {
 	return RolesApiGetRolesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []Role1
+//
+//	@return []Role1
 func (a *RolesApiService) GetRolesExecute(r RolesApiGetRolesRequest) ([]Role1, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Role1
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Role1
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RolesApiService.GetRoles")

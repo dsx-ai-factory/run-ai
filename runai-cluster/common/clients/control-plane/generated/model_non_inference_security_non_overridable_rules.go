@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -17,8 +19,8 @@ import (
 // NonInferenceSecurityNonOverridableRules struct for NonInferenceSecurityNonOverridableRules
 type NonInferenceSecurityNonOverridableRules struct {
 	AllowPrivilegeEscalation NullableBooleanRules `json:"allowPrivilegeEscalation,omitempty"`
-	HostIpc NullableBooleanRules `json:"hostIpc,omitempty"`
-	HostNetwork NullableBooleanRules `json:"hostNetwork,omitempty"`
+	HostIpc                  NullableBooleanRules `json:"hostIpc,omitempty"`
+	HostNetwork              NullableBooleanRules `json:"hostNetwork,omitempty"`
 }
 
 // NewNonInferenceSecurityNonOverridableRules instantiates a new NonInferenceSecurityNonOverridableRules object
@@ -70,6 +72,7 @@ func (o *NonInferenceSecurityNonOverridableRules) HasAllowPrivilegeEscalation() 
 func (o *NonInferenceSecurityNonOverridableRules) SetAllowPrivilegeEscalation(v BooleanRules) {
 	o.AllowPrivilegeEscalation.Set(&v)
 }
+
 // SetAllowPrivilegeEscalationNil sets the value for AllowPrivilegeEscalation to be an explicit nil
 func (o *NonInferenceSecurityNonOverridableRules) SetAllowPrivilegeEscalationNil() {
 	o.AllowPrivilegeEscalation.Set(nil)
@@ -112,6 +115,7 @@ func (o *NonInferenceSecurityNonOverridableRules) HasHostIpc() bool {
 func (o *NonInferenceSecurityNonOverridableRules) SetHostIpc(v BooleanRules) {
 	o.HostIpc.Set(&v)
 }
+
 // SetHostIpcNil sets the value for HostIpc to be an explicit nil
 func (o *NonInferenceSecurityNonOverridableRules) SetHostIpcNil() {
 	o.HostIpc.Set(nil)
@@ -154,6 +158,7 @@ func (o *NonInferenceSecurityNonOverridableRules) HasHostNetwork() bool {
 func (o *NonInferenceSecurityNonOverridableRules) SetHostNetwork(v BooleanRules) {
 	o.HostNetwork.Set(&v)
 }
+
 // SetHostNetworkNil sets the value for HostNetwork to be an explicit nil
 func (o *NonInferenceSecurityNonOverridableRules) SetHostNetworkNil() {
 	o.HostNetwork.Set(nil)
@@ -213,5 +218,3 @@ func (v *NullableNonInferenceSecurityNonOverridableRules) UnmarshalJSON(src []by
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

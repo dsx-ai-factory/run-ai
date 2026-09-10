@@ -10,22 +10,12 @@ Security fixes are only issued for currently supported releases. See [Support](S
 
 ## Reporting a Vulnerability
 
-We accept private reports through the channels below. Any of them is acceptable; use whichever you prefer.
+**Please do not report security vulnerabilities through GitHub** — neither public issues nor GitHub Security Advisories. Report them to NVIDIA PSIRT (Product Security Incident Response Team), which owns coordinated disclosure and CVE assignment across NVIDIA products:
 
-### 1. GitHub Security Advisory (Recommended for Repository-Specific Issues)
-
-Open a private advisory from the **Security** tab of this repository, then **Report a vulnerability**. The advisory is only visible to repository maintainers and the reporter.
-
-This is the preferred channel for vulnerabilities specific to the code in this repository.
-
-### 2. NVIDIA PSIRT (for Cross-Product Issues or if You Prefer Email)
-
-For vulnerabilities that may affect multiple NVIDIA products, or if you prefer to use NVIDIA's coordinated disclosure process:
-
-- Vulnerability Disclosure Program: <https://www.nvidia.com/en-us/security/>
 - Web: [NVIDIA Security Vulnerability Submission Form](https://www.nvidia.com/object/submit-security-vulnerability.html)
 - Email: <psirt@nvidia.com>
-  - PGP key: <https://www.nvidia.com/en-us/security/pgp-key>
+  - PGP key: [NVIDIA public PGP key for secure email communication](https://www.nvidia.com/en-us/security/pgp-key)
+- Vulnerability Disclosure Program: <https://www.nvidia.com/en-us/security/>
 
 Please include in your report:
 

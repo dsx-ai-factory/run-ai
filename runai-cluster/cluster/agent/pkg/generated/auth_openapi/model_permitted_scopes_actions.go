@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Authorization
 
@@ -18,7 +20,7 @@ import (
 // PermittedScopesActions struct for PermittedScopesActions
 type PermittedScopesActions struct {
 	Create PermittedScopes `json:"create"`
-	Read PermittedScopes `json:"read"`
+	Read   PermittedScopes `json:"read"`
 	Update PermittedScopes `json:"update"`
 	Delete PermittedScopes `json:"delete"`
 }
@@ -192,5 +194,3 @@ func (v *NullablePermittedScopesActions) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

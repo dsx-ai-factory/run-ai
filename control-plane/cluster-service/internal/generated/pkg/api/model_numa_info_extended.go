@@ -19,6 +19,7 @@ var dummyNumaInfoExtended = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
+// NumaInfoExtended - NUMA configuration and per-NUMA-node resource data for the node.
 type NumaInfoExtended struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
@@ -26,7 +27,7 @@ type NumaInfoExtended struct {
 	TopologyManagerPolicy *TopologyManagerPolicy `json:"topologyManagerPolicy,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// NUMA nodes reported in the node's NodeResourceTopology object.
+	// The list of NUMA nodes on the physical machine and their resource availability.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Nodes []NumaNodeDetails `json:"nodes"`
 	Nodes []NumaNodeDetails `json:"nodes" gorm:"serializer:json; type:jsonb;not null;"`

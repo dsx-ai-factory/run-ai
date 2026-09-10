@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -19,14 +21,13 @@ import (
 	"strings"
 )
 
-
 // EventsApiService EventsApi service
 type EventsApiService service
 
 type ApiSyncEventsRequest struct {
-	ctx context.Context
-	ApiService *EventsApiService
-	uuid string
+	ctx            context.Context
+	ApiService     *EventsApiService
+	uuid           string
 	eventsSyncData *EventsSyncData
 }
 
@@ -44,25 +45,24 @@ SyncEvents Sync events
 
 Sync all events from k8s cluster to Run:AI backend
 
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return ApiSyncEventsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return ApiSyncEventsRequest
 */
 func (a *EventsApiService) SyncEvents(ctx context.Context, uuid string) ApiSyncEventsRequest {
 	return ApiSyncEventsRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
 func (a *EventsApiService) SyncEventsExecute(r ApiSyncEventsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "EventsApiService.SyncEvents")
@@ -128,13 +128,13 @@ func (a *EventsApiService) SyncEventsExecute(r ApiSyncEventsRequest) (*http.Resp
 			newErr.model = v
 			return localVarHTTPResponse, newErr
 		}
-			var v Error
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v Error
+		err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarHTTPResponse, newErr
 	}
 

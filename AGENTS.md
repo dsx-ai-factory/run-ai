@@ -25,15 +25,28 @@ file doesn't remove it from git history.
 
 ## Verify Before Opening a PR
 
-Run these from the repository root before submitting. There is no single
-repo-wide gate command: the root `Makefile` targets are placeholders, and the
-full pipeline runs remotely and reports back on the PR as the
-`Validate Successful Run` check. Run the checks that match what you changed:
+There is no single repo-wide gate command: the root `Makefile`'s `build`,
+`test`, and `lint` targets only echo `NA` (its `validate` target is real), and
+the full pipeline runs remotely, reporting back on the PR as the
+`Validate Successful Run` check.
+
+Start with the service you changed. This is what CI runs for you: the
+`targets` job in `.github/workflows/pr-fast.yaml` discovers the services a PR
+touches and runs all four targets in each, using that service's own Makefile:
 
 ```bash
-# Go: per module you touched (each service directory is its own module)
-cd <service-dir> && go build ./... && go test ./... && gofmt -l .
+cd <service-dir>            # e.g. runai-cluster/cluster/anyworkload-controller
+make build test lint validate
+```
+
+Then run whichever language-level checks apply, matching the jobs in
+`.github/workflows/pr-checks.yaml` at the versions CI pins:
+
+```bash
+# Go
 golangci-lint run            # CI pins v2.9.0; matches the go-lint job
+govulncheck ./...            # matches the govulncheck job
+gofmt -l .                   # formatting is not optional in this repo
 
 # Python
 ruff check <changed-files>   # CI pins ruff 0.15.15
@@ -49,11 +62,13 @@ helm template control-plane/control-plane-chart > /dev/null
 # GitHub Actions workflow changes
 actionlint
 
-# CODEOWNERS changes
-make validate
+# Docs (docs/ or fern/) — `fern docs dev` only starts a preview server
+# and validates nothing; `fern check` is the actual CI check.
+fern check
+python3 ./tools/check-fern-nav.py fern
 
-# Docs (docs/ or fern/)
-fern docs dev
+# CODEOWNERS changes — real target, but no CI job runs it; local check only
+make validate                # from the repository root
 ```
 
 Every commit must be signed off (`git commit -s`): the DCO check gates fork

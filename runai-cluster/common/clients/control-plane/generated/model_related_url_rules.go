@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,7 +18,7 @@ import (
 
 // RelatedUrlRules Rules for the attributes of relatedUrls
 type RelatedUrlRules struct {
-	Url NullableStringRules `json:"url,omitempty"`
+	Url  NullableStringRules `json:"url,omitempty"`
 	Type NullableStringRules `json:"type,omitempty"`
 	Name NullableStringRules `json:"name,omitempty"`
 }
@@ -70,6 +72,7 @@ func (o *RelatedUrlRules) HasUrl() bool {
 func (o *RelatedUrlRules) SetUrl(v StringRules) {
 	o.Url.Set(&v)
 }
+
 // SetUrlNil sets the value for Url to be an explicit nil
 func (o *RelatedUrlRules) SetUrlNil() {
 	o.Url.Set(nil)
@@ -112,6 +115,7 @@ func (o *RelatedUrlRules) HasType() bool {
 func (o *RelatedUrlRules) SetType(v StringRules) {
 	o.Type.Set(&v)
 }
+
 // SetTypeNil sets the value for Type to be an explicit nil
 func (o *RelatedUrlRules) SetTypeNil() {
 	o.Type.Set(nil)
@@ -154,6 +158,7 @@ func (o *RelatedUrlRules) HasName() bool {
 func (o *RelatedUrlRules) SetName(v StringRules) {
 	o.Name.Set(&v)
 }
+
 // SetNameNil sets the value for Name to be an explicit nil
 func (o *RelatedUrlRules) SetNameNil() {
 	o.Name.Set(nil)
@@ -213,5 +218,3 @@ func (v *NullableRelatedUrlRules) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

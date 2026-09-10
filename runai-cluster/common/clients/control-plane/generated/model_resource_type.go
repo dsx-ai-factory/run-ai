@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -20,42 +22,42 @@ type ResourceType string
 
 // List of ResourceType
 const (
-	RESOURCETYPE_DEPARTMENT ResourceType = "department"
-	RESOURCETYPE_TENANT ResourceType = "tenant"
-	RESOURCETYPE_PROJECT ResourceType = "project"
-	RESOURCETYPE_CLUSTER ResourceType = "cluster"
-	RESOURCETYPE_CLUSTER_CONFIG ResourceType = "cluster-config"
-	RESOURCETYPE_NODEPOOLS ResourceType = "nodepools"
-	RESOURCETYPE_NODES ResourceType = "nodes"
-	RESOURCETYPE_SETTINGS ResourceType = "settings"
-	RESOURCETYPE_USERS ResourceType = "users"
-	RESOURCETYPE_GROUPS ResourceType = "groups"
-	RESOURCETYPE_APPS ResourceType = "apps"
-	RESOURCETYPE_DASHBOARDS_OVERVIEW ResourceType = "dashboards-overview"
-	RESOURCETYPE_DASHBOARDS_ANALYTICS ResourceType = "dashboards-analytics"
-	RESOURCETYPE_DASHBOARDS_CONSUMPTION ResourceType = "dashboards-consumption"
-	RESOURCETYPE_ROLES ResourceType = "roles"
-	RESOURCETYPE_ACCESS_RULES ResourceType = "access_rules"
-	RESOURCETYPE_JOBS ResourceType = "jobs"
-	RESOURCETYPE_WORKLOADS ResourceType = "workloads"
-	RESOURCETYPE_WORKSPACES ResourceType = "workspaces"
-	RESOURCETYPE_TRAININGS ResourceType = "trainings"
-	RESOURCETYPE_INFERENCES ResourceType = "inferences"
-	RESOURCETYPE_ENVIRONMENTS ResourceType = "environments"
-	RESOURCETYPE_PVC_ASSETS ResourceType = "pvc-assets"
-	RESOURCETYPE_GIT_ASSETS ResourceType = "git-assets"
-	RESOURCETYPE_HOST_PATH_ASSETS ResourceType = "host-path-assets"
-	RESOURCETYPE_NFS_ASSETS ResourceType = "nfs-assets"
-	RESOURCETYPE_S3_ASSETS ResourceType = "s3-assets"
-	RESOURCETYPE_COMPUTE_RESOURCES ResourceType = "compute-resources"
-	RESOURCETYPE_TEMPLATES ResourceType = "templates"
-	RESOURCETYPE_CREDENTIALS ResourceType = "credentials"
-	RESOURCETYPE_EVENTS_HISTORY ResourceType = "events-history"
-	RESOURCETYPE_POLICIES ResourceType = "policies"
-	RESOURCETYPE_CM_VOLUME_ASSETS ResourceType = "cm-volume-assets"
-	RESOURCETYPE_DATAVOLUMES ResourceType = "datavolumes"
+	RESOURCETYPE_DEPARTMENT               ResourceType = "department"
+	RESOURCETYPE_TENANT                   ResourceType = "tenant"
+	RESOURCETYPE_PROJECT                  ResourceType = "project"
+	RESOURCETYPE_CLUSTER                  ResourceType = "cluster"
+	RESOURCETYPE_CLUSTER_CONFIG           ResourceType = "cluster-config"
+	RESOURCETYPE_NODEPOOLS                ResourceType = "nodepools"
+	RESOURCETYPE_NODES                    ResourceType = "nodes"
+	RESOURCETYPE_SETTINGS                 ResourceType = "settings"
+	RESOURCETYPE_USERS                    ResourceType = "users"
+	RESOURCETYPE_GROUPS                   ResourceType = "groups"
+	RESOURCETYPE_APPS                     ResourceType = "apps"
+	RESOURCETYPE_DASHBOARDS_OVERVIEW      ResourceType = "dashboards-overview"
+	RESOURCETYPE_DASHBOARDS_ANALYTICS     ResourceType = "dashboards-analytics"
+	RESOURCETYPE_DASHBOARDS_CONSUMPTION   ResourceType = "dashboards-consumption"
+	RESOURCETYPE_ROLES                    ResourceType = "roles"
+	RESOURCETYPE_ACCESS_RULES             ResourceType = "access_rules"
+	RESOURCETYPE_JOBS                     ResourceType = "jobs"
+	RESOURCETYPE_WORKLOADS                ResourceType = "workloads"
+	RESOURCETYPE_WORKSPACES               ResourceType = "workspaces"
+	RESOURCETYPE_TRAININGS                ResourceType = "trainings"
+	RESOURCETYPE_INFERENCES               ResourceType = "inferences"
+	RESOURCETYPE_ENVIRONMENTS             ResourceType = "environments"
+	RESOURCETYPE_PVC_ASSETS               ResourceType = "pvc-assets"
+	RESOURCETYPE_GIT_ASSETS               ResourceType = "git-assets"
+	RESOURCETYPE_HOST_PATH_ASSETS         ResourceType = "host-path-assets"
+	RESOURCETYPE_NFS_ASSETS               ResourceType = "nfs-assets"
+	RESOURCETYPE_S3_ASSETS                ResourceType = "s3-assets"
+	RESOURCETYPE_COMPUTE_RESOURCES        ResourceType = "compute-resources"
+	RESOURCETYPE_TEMPLATES                ResourceType = "templates"
+	RESOURCETYPE_CREDENTIALS              ResourceType = "credentials"
+	RESOURCETYPE_EVENTS_HISTORY           ResourceType = "events-history"
+	RESOURCETYPE_POLICIES                 ResourceType = "policies"
+	RESOURCETYPE_CM_VOLUME_ASSETS         ResourceType = "cm-volume-assets"
+	RESOURCETYPE_DATAVOLUMES              ResourceType = "datavolumes"
 	RESOURCETYPE_DATAVOLUMES_SHAREDSCOPES ResourceType = "datavolumes/sharedscopes"
-	RESOURCETYPE_SECRET_VOLUME_ASSETS ResourceType = "secret-volume-assets"
+	RESOURCETYPE_SECRET_VOLUME_ASSETS     ResourceType = "secret-volume-assets"
 )
 
 // All allowed values of ResourceType enum
@@ -176,4 +178,3 @@ func (v *NullableResourceType) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-

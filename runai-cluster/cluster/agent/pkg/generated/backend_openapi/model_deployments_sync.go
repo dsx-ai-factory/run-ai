@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -17,7 +19,7 @@ import (
 // DeploymentsSync struct for DeploymentsSync
 type DeploymentsSync struct {
 	// The project name we are syncing objects in
-	ProjectName string `json:"projectName"`
+	ProjectName string       `json:"projectName"`
 	Deployments []Deployment `json:"deployments"`
 }
 
@@ -134,5 +136,3 @@ func (v *NullableDeploymentsSync) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 K8sObjectTracker
 
@@ -203,7 +205,9 @@ func (a *ConfigMapsAPIService) CreateClusterWideConfigmapV1(ctx context.Context,
 }
 
 // Execute executes the request
+//
 //	@return ConfigMap
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ConfigMapsAPIService) CreateClusterWideConfigmapV1Execute(r ApiCreateClusterWideConfigmapV1Request) (*ConfigMap, *http.Response, error) {
 	var (
@@ -381,7 +385,9 @@ func (a *ConfigMapsAPIService) CreateDepartmentsWideConfigmapV1(ctx context.Cont
 }
 
 // Execute executes the request
+//
 //	@return ConfigMap
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ConfigMapsAPIService) CreateDepartmentsWideConfigmapV1Execute(r ApiCreateDepartmentsWideConfigmapV1Request) (*ConfigMap, *http.Response, error) {
 	var (
@@ -560,7 +566,9 @@ func (a *ConfigMapsAPIService) CreateProjectsConfigmapV1(ctx context.Context, cl
 }
 
 // Execute executes the request
+//
 //	@return ConfigMap
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ConfigMapsAPIService) CreateProjectsConfigmapV1Execute(r ApiCreateProjectsConfigmapV1Request) (*ConfigMap, *http.Response, error) {
 	var (
@@ -1241,7 +1249,9 @@ func (a *ConfigMapsAPIService) ListConfigMaps(ctx context.Context) ApiListConfig
 }
 
 // Execute executes the request
+//
 //	@return ConfigMapsListResponse
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ConfigMapsAPIService) ListConfigMapsExecute(r ApiListConfigMapsRequest) (*ConfigMapsListResponse, *http.Response, error) {
 	var (
@@ -1426,7 +1436,9 @@ func (a *ConfigMapsAPIService) SyncClusterWideConfigmapsV1(ctx context.Context, 
 }
 
 // Execute executes the request
+//
 //	@return ConfigMaps
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ConfigMapsAPIService) SyncClusterWideConfigmapsV1Execute(r ApiSyncClusterWideConfigmapsV1Request) (*ConfigMaps, *http.Response, error) {
 	var (
@@ -1600,7 +1612,9 @@ func (a *ConfigMapsAPIService) SyncDepartmentsWideConfigmapV1(ctx context.Contex
 }
 
 // Execute executes the request
+//
 //	@return ConfigMaps
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ConfigMapsAPIService) SyncDepartmentsWideConfigmapV1Execute(r ApiSyncDepartmentsWideConfigmapV1Request) (*ConfigMaps, *http.Response, error) {
 	var (
@@ -1775,7 +1789,9 @@ func (a *ConfigMapsAPIService) SyncProjectsConfigmapsV1(ctx context.Context, clu
 }
 
 // Execute executes the request
+//
 //	@return ConfigMaps
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *ConfigMapsAPIService) SyncProjectsConfigmapsV1Execute(r ApiSyncProjectsConfigmapsV1Request) (*ConfigMaps, *http.Response, error) {
 	var (

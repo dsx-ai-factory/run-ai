@@ -19,19 +19,23 @@ import (
 )
 
 type InstallClusterChartLocal struct {
-	ClusterName string
-	Domain      string
-	CACertPath  string
-	ChartPath   string
-	WorkingDir  string
-	ChartPrefix string
-	LockChart   string
-	Version     string
-	ReleaseName string
-	Namespace   string
-	HostRouting bool
-	ValueFiles  []string
-	ExtraValues []string
+	ClusterName     string
+	Domain          string
+	ControlPlaneURL string
+	ClusterUID      string
+	BootstrapToken  string
+	ClientSecret    string
+	CACertPath      string
+	ChartPath       string
+	WorkingDir      string
+	ChartPrefix     string
+	LockChart       string
+	Version         string
+	ReleaseName     string
+	Namespace       string
+	HostRouting     bool
+	ValueFiles      []string
+	ExtraValues     []string
 }
 
 func (a InstallClusterChartLocal) chartPath() string {
@@ -61,6 +65,10 @@ func (a InstallClusterChartLocal) ClusterRef() (clusterName, domain, caCertPath 
 	return a.ClusterName, a.Domain, a.CACertPath
 }
 
+func (a InstallClusterChartLocal) UsesSuppliedCredentials() bool {
+	return a.ClusterUID != ""
+}
+
 func (a InstallClusterChartLocal) Args() map[string]any {
 	return map[string]any{
 		"cluster":    a.ClusterName,
@@ -74,6 +82,9 @@ func (a InstallClusterChartLocal) Args() map[string]any {
 func (a InstallClusterChartLocal) Describe() string {
 	base := fmt.Sprintf("helm upgrade --install %s %s --namespace %s", a.ReleaseName, a.chartPath(), a.Namespace)
 	cmd := describeHelmCommand(base, a.ExtraValues, a.ValueFiles)
+	if a.UsesSuppliedCredentials() {
+		return cmd
+	}
 	return fmt.Sprintf("%s (resolves cluster %q uid + control-plane credential)", cmd, a.ClusterName)
 }
 
@@ -82,31 +93,40 @@ func (a InstallClusterChartLocal) Execute(ctx context.Context, deps orchestrator
 	if err != nil {
 		return orchestrator2.ActionResult{}, err
 	}
-	url := ControlPlaneURL(a.Domain)
-	apiClient, err := deps.RunAIClientProvider(url, a.CACertPath)
-	if err != nil {
-		return orchestrator2.ActionResult{}, err
-	}
-	uuid, err := FindClusterUUID(ctx, apiClient, a.ClusterName)
-	if err != nil {
-		return orchestrator2.ActionResult{}, err
-	}
-	if uuid == "" {
-		return orchestrator2.ActionResult{}, fmt.Errorf("cluster %q not found in control plane", a.ClusterName)
-	}
-	installInfo, statusCode, err := apiClient.GetClusterInstallInfoByUUID(ctx, uuid, a.Version, a.Domain)
-	if err != nil {
-		return orchestrator2.ActionResult{}, err
-	}
-	if statusCode != http.StatusOK {
-		return orchestrator2.ActionResult{}, fmt.Errorf("get cluster install info: unexpected status %d", statusCode)
-	}
-
-	values := []string{
-		"controlPlane.url=" + a.Domain,
-		step.ClusterAuthValue(installInfo),
-		"cluster.uid=" + uuid,
-		"cluster.url=" + a.Domain,
+	var values []string
+	if a.UsesSuppliedCredentials() {
+		values = []string{
+			"controlPlane.url=" + a.ControlPlaneURL,
+			step.ClusterAuthValueFromCredentials(a.BootstrapToken, a.ClientSecret),
+			"cluster.uid=" + a.ClusterUID,
+			"cluster.url=" + a.Domain,
+		}
+	} else {
+		url := ControlPlaneURL(a.Domain)
+		apiClient, err := deps.RunAIClientProvider(url, a.CACertPath)
+		if err != nil {
+			return orchestrator2.ActionResult{}, err
+		}
+		uuid, err := FindClusterUUID(ctx, apiClient, a.ClusterName)
+		if err != nil {
+			return orchestrator2.ActionResult{}, err
+		}
+		if uuid == "" {
+			return orchestrator2.ActionResult{}, fmt.Errorf("cluster %q not found in control plane", a.ClusterName)
+		}
+		installInfo, statusCode, err := apiClient.GetClusterInstallInfoByUUID(ctx, uuid, a.Version, a.Domain)
+		if err != nil {
+			return orchestrator2.ActionResult{}, err
+		}
+		if statusCode != http.StatusOK {
+			return orchestrator2.ActionResult{}, fmt.Errorf("get cluster install info: unexpected status %d", statusCode)
+		}
+		values = []string{
+			"controlPlane.url=" + a.Domain,
+			step.ClusterAuthValue(installInfo),
+			"cluster.uid=" + uuid,
+			"cluster.url=" + a.Domain,
+		}
 	}
 	if a.CACertPath != "" {
 		values = append(values, "global.customCA.enabled=true")

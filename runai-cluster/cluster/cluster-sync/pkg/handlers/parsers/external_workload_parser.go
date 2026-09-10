@@ -224,7 +224,7 @@ func (p *WorkloadParser) ParseExternalWorkloadToServerScheme(
 	}
 
 	if se := externalWorkload.Status.StructureElements; se != nil {
-		workloadSyncFields.StructureElements = parseStructureElements(se)
+		workloadSyncFields.StructureElements = parseStructureElements(se, externalWorkload.Spec.ComponentTopologies)
 		workloadSyncFields.SetStructureElementsTotalCount(int32(len(se.Elements))) //nolint:gosec
 	}
 	if len(externalWorkload.Status.NetworkStatus.ExternalEndpoints) > 0 {
@@ -264,7 +264,10 @@ func (p *WorkloadParser) ParseExternalWorkloadToServerScheme(
 	return &workloadSyncFields, podsOfWorkload, podGroupsOfWorkload, nil
 }
 
-func parseStructureElements(se *v1alpha1.StructureElements) []openapi.WorkloadElement {
+func parseStructureElements(se *v1alpha1.StructureElements,
+	componentTopologies []v1alpha1.ComponentTopologyEntry,
+) []openapi.WorkloadElement {
+	topologyByComponent := componentTopologiesBySpecName(componentTopologies)
 	numElementsToSync := len(se.Elements)
 	if numElementsToSync > maxStructureElementsPerWorkload {
 		// design decision - if there are too many structure elements, we will only sync the first
@@ -287,6 +290,9 @@ func parseStructureElements(se *v1alpha1.StructureElements) []openapi.WorkloadEl
 		}
 		if e.InstanceKey != nil {
 			apiElem.SetInstanceKey(*e.InstanceKey)
+			if topology, found := topologyByComponent[*e.InstanceKey]; found {
+				apiElem.SetTopology(elementTopologyToApi(topology))
+			}
 		}
 		if e.ReplicaKey != nil {
 			apiElem.SetReplicaKey(*e.ReplicaKey)
@@ -306,6 +312,31 @@ func parseStructureElements(se *v1alpha1.StructureElements) []openapi.WorkloadEl
 		result = append(result, apiElem)
 	}
 	return result
+}
+
+func componentTopologiesBySpecName(entries []v1alpha1.ComponentTopologyEntry) map[string]v1alpha1.Topology {
+	if len(entries) == 0 {
+		return nil
+	}
+	byName := make(map[string]v1alpha1.Topology, len(entries))
+	for _, entry := range entries {
+		byName[entry.SpecName] = entry.Topology
+	}
+	return byName
+}
+
+func elementTopologyToApi(topology v1alpha1.Topology) openapi.WorkloadElementTopology {
+	apiTopology := openapi.WorkloadElementTopology{}
+	if topology.Name != "" {
+		apiTopology.SetName(topology.Name)
+	}
+	if topology.PreferredPlacement != "" {
+		apiTopology.SetPreferredPlacement(topology.PreferredPlacement)
+	}
+	if topology.RequiredPlacement != "" {
+		apiTopology.SetRequiredPlacement(topology.RequiredPlacement)
+	}
+	return apiTopology
 }
 
 func parseExternalEndpoints(endpoints []v1alpha1.ExternalEndpoint) ([]openapi.EndpointSync, error) {

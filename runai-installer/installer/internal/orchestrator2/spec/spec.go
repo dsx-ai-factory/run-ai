@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -224,7 +225,15 @@ type Cluster struct {
 	TLS              *TLS
 	WorkloadRouting  string
 	Inference        *Inference
+	ControlPlaneURL  string
+	UID              string
+	BootstrapToken   string
+	ClientSecret     string
 	CustomHelmValues map[string]string
+}
+
+func (c *Cluster) UsesExternalControlPlane() bool {
+	return c != nil && c.ControlPlaneURL != ""
 }
 
 func (s *Spec) ControlPlaneTLS() *TLS {
@@ -489,6 +498,9 @@ func (s *Spec) validateInstall() error {
 	if s.Cluster != nil && s.Cluster.Name == "" {
 		return errors.New("cluster name is required")
 	}
+	if err := s.validateExternalControlPlane(); err != nil {
+		return err
+	}
 	if s.SelfSignedTLSEnabled() {
 		if len(s.SelfSignedTLS.ConflictingFields) > 0 {
 			return fmt.Errorf("tls.generateSelfSigned cannot be combined with %s", strings.Join(s.SelfSignedTLS.ConflictingFields, ", "))
@@ -504,6 +516,37 @@ func (s *Spec) validateInstall() error {
 		return s.Airgap.validate()
 	}
 	return s.Registry.validate()
+}
+
+func (s *Spec) validateExternalControlPlane() error {
+	if s.Cluster == nil {
+		return nil
+	}
+	c := s.Cluster
+	hasExternalFields := c.ControlPlaneURL != "" || c.UID != "" || c.BootstrapToken != "" || c.ClientSecret != ""
+	if !hasExternalFields {
+		return nil
+	}
+	if s.InstallMode != InstallModeClusterOnly {
+		return errors.New("external control plane details are only supported for runai_cluster_only")
+	}
+	if c.ControlPlaneURL == "" {
+		return errors.New("cluster.controlPlaneUrl is required")
+	}
+	if c.Domain == "" {
+		return errors.New("cluster.domain is required")
+	}
+	if c.UID == "" {
+		return errors.New("cluster.uid is required")
+	}
+	if (c.BootstrapToken == "") == (c.ClientSecret == "") {
+		return errors.New("exactly one of cluster.bootstrapTokenPath or cluster.clientSecretPath is required")
+	}
+	u, err := url.ParseRequestURI(c.ControlPlaneURL)
+	if err != nil || u.Scheme != "https" || u.Host == "" || u.Path != "" || u.RawQuery != "" || u.User != nil {
+		return errors.New("cluster.controlPlaneUrl must be an HTTPS URL without a path")
+	}
+	return nil
 }
 
 func (s *Spec) validateUpgrade() error {

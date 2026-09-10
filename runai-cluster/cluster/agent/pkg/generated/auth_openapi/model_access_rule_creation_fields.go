@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Authorization
 
@@ -17,12 +19,12 @@ import (
 
 // AccessRuleCreationFields struct for AccessRuleCreationFields
 type AccessRuleCreationFields struct {
-	SubjectId string `json:"subjectId"`
+	SubjectId   string      `json:"subjectId"`
 	SubjectType SubjectType `json:"subjectType"`
-	RoleId int32 `json:"roleId"`
-	ScopeId string `json:"scopeId"`
-	ScopeType ScopeType `json:"scopeType"`
-	ClusterId *string `json:"clusterId,omitempty"`
+	RoleId      int32       `json:"roleId"`
+	ScopeId     string      `json:"scopeId"`
+	ScopeType   ScopeType   `json:"scopeType"`
+	ClusterId   *string     `json:"clusterId,omitempty"`
 }
 
 // NewAccessRuleCreationFields instantiates a new AccessRuleCreationFields object
@@ -257,5 +259,3 @@ func (v *NullableAccessRuleCreationFields) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
@@ -117,18 +119,18 @@ type DepartmentsApi interface {
 	GetDepartmentAncestorsExecute(r DepartmentsApiGetDepartmentAncestorsRequest) (*Ancestors, *http.Response, error)
 
 	/*
-		GetDepartmentMetrics Get metrics for a specific department.
+			GetDepartmentMetrics Get metrics for a specific department.
 
-		Get metrics for a specific department in the cluster.
-	Use a time range to return historical data (optional). If you use a `start` date, an `end` date is required.
+			Get metrics for a specific department in the cluster.
+		Use a time range to return historical data (optional). If you use a `start` date, an `end` date is required.
 
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-		@param departmentId The id of the department.
-		@return DepartmentsApiGetDepartmentMetricsRequest
+			@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+			@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+			@param departmentId The id of the department.
+			@return DepartmentsApiGetDepartmentMetricsRequest
 
-		Deprecated
+			Deprecated
 	*/
 	GetDepartmentMetrics(ctx context.Context, clusterUuid string, departmentId string) DepartmentsApiGetDepartmentMetricsRequest
 
@@ -185,17 +187,17 @@ type DepartmentsApi interface {
 	GetDepartmentsExecute(r DepartmentsApiGetDepartmentsRequest) (*GetDepartments200Response, *http.Response, error)
 
 	/*
-		GetDepartmentsMetrics Get metrics for all departments.
+			GetDepartmentsMetrics Get metrics for all departments.
 
-		Get metrics for all departments in the cluster. Use a time range to return historical data (optional).
-	If you use a `start` date, an `end` date is required.
+			Get metrics for all departments in the cluster. Use a time range to return historical data (optional).
+		If you use a `start` date, an `end` date is required.
 
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-		@return DepartmentsApiGetDepartmentsMetricsRequest
+			@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+			@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+			@return DepartmentsApiGetDepartmentsMetricsRequest
 
-		Deprecated
+			Deprecated
 	*/
 	GetDepartmentsMetrics(ctx context.Context, clusterUuid string) DepartmentsApiGetDepartmentsMetricsRequest
 

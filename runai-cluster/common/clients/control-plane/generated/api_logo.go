@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -18,16 +20,15 @@ import (
 	"net/url"
 )
 
-
 type LogoApi interface {
 
 	/*
-	GetTenantLogo Get tenant logo. (base64)
+		GetTenantLogo Get tenant logo. (base64)
 
-	Retrieve the base64 logo file.
+		Retrieve the base64 logo file.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return LogoApiGetTenantLogoRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return LogoApiGetTenantLogoRequest
 	*/
 	GetTenantLogo(ctx context.Context) LogoApiGetTenantLogoRequest
 
@@ -36,12 +37,12 @@ type LogoApi interface {
 	GetTenantLogoExecute(r LogoApiGetTenantLogoRequest) (*Logo200Response, *http.Response, error)
 
 	/*
-	UploadTenantLogo1 Upload logo for tenant. (base64)
+		UploadTenantLogo1 Upload logo for tenant. (base64)
 
-	Use to upload a base64 logo file. Max size 128kb.
+		Use to upload a base64 logo file. Max size 128kb.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return LogoApiUploadTenantLogo1Request
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return LogoApiUploadTenantLogo1Request
 	*/
 	UploadTenantLogo1(ctx context.Context) LogoApiUploadTenantLogo1Request
 
@@ -53,7 +54,7 @@ type LogoApi interface {
 type LogoApiService service
 
 type LogoApiGetTenantLogoRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService LogoApi
 }
 
@@ -66,24 +67,25 @@ GetTenantLogo Get tenant logo. (base64)
 
 Retrieve the base64 logo file.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return LogoApiGetTenantLogoRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return LogoApiGetTenantLogoRequest
 */
 func (a *LogoApiService) GetTenantLogo(ctx context.Context) LogoApiGetTenantLogoRequest {
 	return LogoApiGetTenantLogoRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return Logo200Response
+//
+//	@return Logo200Response
 func (a *LogoApiService) GetTenantLogoExecute(r LogoApiGetTenantLogoRequest) (*Logo200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Logo200Response
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Logo200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "LogoApiService.GetTenantLogo")
@@ -211,8 +213,8 @@ func (a *LogoApiService) GetTenantLogoExecute(r LogoApiGetTenantLogoRequest) (*L
 }
 
 type LogoApiUploadTenantLogo1Request struct {
-	ctx context.Context
-	ApiService LogoApi
+	ctx             context.Context
+	ApiService      LogoApi
 	logo200Response *Logo200Response
 }
 
@@ -230,22 +232,22 @@ UploadTenantLogo1 Upload logo for tenant. (base64)
 
 Use to upload a base64 logo file. Max size 128kb.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return LogoApiUploadTenantLogo1Request
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return LogoApiUploadTenantLogo1Request
 */
 func (a *LogoApiService) UploadTenantLogo1(ctx context.Context) LogoApiUploadTenantLogo1Request {
 	return LogoApiUploadTenantLogo1Request{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *LogoApiService) UploadTenantLogo1Execute(r LogoApiUploadTenantLogo1Request) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "LogoApiService.UploadTenantLogo1")

@@ -4,7 +4,7 @@ post:
   operationId: sync_numa_nodes
   x-service: cluster-service
   x-test-coverage:
-    - control-plane/cluster-service/pkg/test/api_numa_nodes_service_test.go
+    - control-plane/cluster-service/pkg/services/api_nodes_numa_service_test.go
   x-authorize:
     resource-type: nodes
     action: sync

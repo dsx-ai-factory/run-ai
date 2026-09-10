@@ -1620,6 +1620,32 @@ func validateRevisionSupported(ctx context.Context, clusterId uuid.UUID) *api.Er
 	return nil
 }
 
+// ActualPlacement is deliberately not stored; it is computed per request.
+func syncElementTopologyToModel(topology *api.WorkloadElementTopology) *models.Topology {
+	if topology == nil {
+		return nil
+	}
+	if topology.Name == "" && topology.PreferredPlacement == "" && topology.RequiredPlacement == "" {
+		return nil
+	}
+	return &models.Topology{
+		Name:               topology.Name,
+		PreferredPlacement: topology.PreferredPlacement,
+		RequiredPlacement:  topology.RequiredPlacement,
+	}
+}
+
+func elementTopologyToApi(topology *models.Topology) *api.WorkloadElementTopology {
+	if topology == nil {
+		return nil
+	}
+	return &api.WorkloadElementTopology{
+		Name:               topology.Name,
+		PreferredPlacement: topology.PreferredPlacement,
+		RequiredPlacement:  topology.RequiredPlacement,
+	}
+}
+
 // SyncWorkloadElementsToModels converts API WorkloadElement objects to DB models.
 func SyncWorkloadElementsToModels(workloadID uuid.UUID, tenantID uint, clusterID uuid.UUID, elements []api.WorkloadElement) []models.WorkloadElement {
 	result := make([]models.WorkloadElement, 0, len(elements))
@@ -1634,6 +1660,7 @@ func SyncWorkloadElementsToModels(workloadID uuid.UUID, tenantID uint, clusterID
 			ParentID:    e.ParentId,
 			InstanceKey: e.InstanceKey,
 			ReplicaKey:  e.ReplicaKey,
+			Topology:    syncElementTopologyToModel(e.Topology),
 		}
 		if e.KubernetesRef != nil {
 			m.K8sRefUID = &e.KubernetesRef.Uid
@@ -1673,6 +1700,7 @@ func modelsToWorkloadElements(dbElements []models.WorkloadElement) []api.Workloa
 			InstanceKey:    m.InstanceKey,
 			ReplicaKey:     m.ReplicaKey,
 			CreatedAt:      m.CreatedAt,
+			Topology:       elementTopologyToApi(m.Topology),
 		}
 		if m.K8sRefUID != nil {
 			e.KubernetesRef = &api.WorkloadElementKubernetesRef{
@@ -1700,6 +1728,7 @@ func modelToWorkloadElementResponse(m models.WorkloadElement, pods []models.Pod)
 		InstanceKey:    m.InstanceKey,
 		ReplicaKey:     m.ReplicaKey,
 		CreatedAt:      m.CreatedAt,
+		Topology:       elementTopologyToApi(m.Topology),
 	}
 	if m.K8sRefUID != nil {
 		resp.KubernetesRef = &api.WorkloadElementKubernetesRef{

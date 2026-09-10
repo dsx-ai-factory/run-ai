@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -14,12 +16,12 @@ import (
 	"encoding/json"
 )
 
-// InfoDistributed Parameters which apply to distributed training. 
+// InfoDistributed Parameters which apply to distributed training.
 type InfoDistributed struct {
-	NumWorkers *int32 `json:"numWorkers,omitempty"`
-	NoMaster NullableBool `json:"noMaster,omitempty"`
+	NumWorkers    *int32                       `json:"numWorkers,omitempty"`
+	NoMaster      NullableBool                 `json:"noMaster,omitempty"`
 	DistFramework NullableDistributedFramework `json:"distFramework,omitempty"`
-	Master NullableInfoDistMaster `json:"master,omitempty"`
+	Master        NullableInfoDistMaster       `json:"master,omitempty"`
 }
 
 // NewInfoDistributed instantiates a new InfoDistributed object
@@ -103,6 +105,7 @@ func (o *InfoDistributed) HasNoMaster() bool {
 func (o *InfoDistributed) SetNoMaster(v bool) {
 	o.NoMaster.Set(&v)
 }
+
 // SetNoMasterNil sets the value for NoMaster to be an explicit nil
 func (o *InfoDistributed) SetNoMasterNil() {
 	o.NoMaster.Set(nil)
@@ -145,6 +148,7 @@ func (o *InfoDistributed) HasDistFramework() bool {
 func (o *InfoDistributed) SetDistFramework(v DistributedFramework) {
 	o.DistFramework.Set(&v)
 }
+
 // SetDistFrameworkNil sets the value for DistFramework to be an explicit nil
 func (o *InfoDistributed) SetDistFrameworkNil() {
 	o.DistFramework.Set(nil)
@@ -187,6 +191,7 @@ func (o *InfoDistributed) HasMaster() bool {
 func (o *InfoDistributed) SetMaster(v InfoDistMaster) {
 	o.Master.Set(&v)
 }
+
 // SetMasterNil sets the value for Master to be an explicit nil
 func (o *InfoDistributed) SetMasterNil() {
 	o.Master.Set(nil)
@@ -249,5 +254,3 @@ func (v *NullableInfoDistributed) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

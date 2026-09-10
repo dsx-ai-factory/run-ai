@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -21,7 +23,7 @@ type DatasourceListResponseAssetSpecHostPath struct {
 	// Force the volume to be mounted with read-only permissions. Defaults to false.
 	ReadOnly NullableBool `json:"readOnly,omitempty"`
 	// The path that the host volume will be mounted to when in use. (mandatory)
-	MountPath NullableString `json:"mountPath,omitempty"`
+	MountPath        NullableString                   `json:"mountPath,omitempty"`
 	MountPropagation NullableHostPathMountPropagation `json:"mountPropagation,omitempty"`
 }
 
@@ -78,6 +80,7 @@ func (o *DatasourceListResponseAssetSpecHostPath) HasPath() bool {
 func (o *DatasourceListResponseAssetSpecHostPath) SetPath(v string) {
 	o.Path.Set(&v)
 }
+
 // SetPathNil sets the value for Path to be an explicit nil
 func (o *DatasourceListResponseAssetSpecHostPath) SetPathNil() {
 	o.Path.Set(nil)
@@ -120,6 +123,7 @@ func (o *DatasourceListResponseAssetSpecHostPath) HasReadOnly() bool {
 func (o *DatasourceListResponseAssetSpecHostPath) SetReadOnly(v bool) {
 	o.ReadOnly.Set(&v)
 }
+
 // SetReadOnlyNil sets the value for ReadOnly to be an explicit nil
 func (o *DatasourceListResponseAssetSpecHostPath) SetReadOnlyNil() {
 	o.ReadOnly.Set(nil)
@@ -162,6 +166,7 @@ func (o *DatasourceListResponseAssetSpecHostPath) HasMountPath() bool {
 func (o *DatasourceListResponseAssetSpecHostPath) SetMountPath(v string) {
 	o.MountPath.Set(&v)
 }
+
 // SetMountPathNil sets the value for MountPath to be an explicit nil
 func (o *DatasourceListResponseAssetSpecHostPath) SetMountPathNil() {
 	o.MountPath.Set(nil)
@@ -204,6 +209,7 @@ func (o *DatasourceListResponseAssetSpecHostPath) HasMountPropagation() bool {
 func (o *DatasourceListResponseAssetSpecHostPath) SetMountPropagation(v HostPathMountPropagation) {
 	o.MountPropagation.Set(&v)
 }
+
 // SetMountPropagationNil sets the value for MountPropagation to be an explicit nil
 func (o *DatasourceListResponseAssetSpecHostPath) SetMountPropagationNil() {
 	o.MountPropagation.Set(nil)
@@ -266,5 +272,3 @@ func (v *NullableDatasourceListResponseAssetSpecHostPath) UnmarshalJSON(src []by
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

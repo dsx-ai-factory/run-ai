@@ -4504,7 +4504,7 @@ export type NotificationOperation = typeof NotificationOperation[keyof typeof No
 
 
 /**
- * 
+ * NUMA configuration and per-NUMA-node resource data for the node.
  * @export
  * @interface NumaInfo
  */
@@ -4517,7 +4517,7 @@ export interface NumaInfo {
     'topologyManagerPolicy'?: TopologyManagerPolicy | null;
 }
 /**
- * 
+ * NUMA configuration and per-NUMA-node resource data for the node.
  * @export
  * @interface NumaInfoExtended
  */
@@ -4529,7 +4529,7 @@ export interface NumaInfoExtended {
      */
     'topologyManagerPolicy'?: TopologyManagerPolicy | null;
     /**
-     * NUMA nodes reported in the node\'s NodeResourceTopology object.
+     * The list of NUMA nodes on the physical machine and their resource availability.
      * @type {Array<NumaNodeDetails>}
      * @memberof NumaInfoExtended
      */
@@ -4542,7 +4542,7 @@ export interface NumaInfoExtended {
  */
 export interface NumaInfoExtendedAllOf {
     /**
-     * NUMA nodes reported in the node\'s NodeResourceTopology object.
+     * The list of NUMA nodes on the physical machine and their resource availability.
      * @type {Array<NumaNodeDetails>}
      * @memberof NumaInfoExtendedAllOf
      */
@@ -4555,43 +4555,43 @@ export interface NumaInfoExtendedAllOf {
  */
 export interface NumaNodeDetails {
     /**
-     * The NUMA node zone name reported by NodeResourceTopology.
+     * The identifier of the NUMA node (for example, node-0).
      * @type {string}
      * @memberof NumaNodeDetails
      */
     'name': string;
     /**
-     * Total CPU in cores available for allocation, taken from the allocatable value reported by NodeResourceTopology.
+     * Total CPU cores on this NUMA node that are available for allocation.
      * @type {number}
      * @memberof NumaNodeDetails
      */
     'totalCpuCores': number;
     /**
-     * Allocated CPU in cores, calculated as allocatable minus available.
+     * CPU cores currently allocated to workloads on this NUMA node.
      * @type {number}
      * @memberof NumaNodeDetails
      */
     'allocatedCpuCores': number;
     /**
-     * Total CPU memory in bytes available for allocation, taken from the allocatable value reported by NodeResourceTopology.
+     * Total CPU memory on this NUMA node that is available for allocation.
      * @type {number}
      * @memberof NumaNodeDetails
      */
     'totalCpuMemoryBytes': number;
     /**
-     * Allocated memory in bytes, calculated as allocatable minus available.
+     * CPU memory currently allocated to workloads on this NUMA node, in bytes.
      * @type {number}
      * @memberof NumaNodeDetails
      */
     'allocatedCpuMemoryBytes': number;
     /**
-     * Total GPUs available for allocation, taken from the allocatable value reported by NodeResourceTopology.
+     * Total GPU devices on this NUMA node that are available for allocation.
      * @type {number}
      * @memberof NumaNodeDetails
      */
     'totalGpus': number;
     /**
-     * Allocated GPUs, calculated as allocatable minus available.
+     * GPU devices currently allocated to workloads on this NUMA node.
      * @type {number}
      * @memberof NumaNodeDetails
      */
@@ -5035,7 +5035,7 @@ export type TimeBasedFairShareWindowType = typeof TimeBasedFairShareWindowType[k
 
 
 /**
- * The node\'s Kubelet Topology Manager policy; null when NUMA-aware scheduling is disabled.
+ * The Kubernetes topology manager policy configured on the node, controlling how NUMA-aligned resource allocation is enforced. For more details, see [Kubernetes topology manager policies](https://kubernetes.io/docs/tasks/administer-cluster/topology-manager/#topology-manager-policies).
  * @export
  * @enum {string}
  */

@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -19,15 +21,14 @@ import (
 	"strings"
 )
 
-
 // PodGroupsApiService PodGroupsApi service
 type PodGroupsApiService service
 
 type ApiCreatePodGroupsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *PodGroupsApiService
-	uuid string
-	podGroup *[]PodGroup
+	uuid       string
+	podGroup   *[]PodGroup
 }
 
 func (r ApiCreatePodGroupsRequest) PodGroup(podGroup []PodGroup) ApiCreatePodGroupsRequest {
@@ -42,24 +43,24 @@ func (r ApiCreatePodGroupsRequest) Execute() (*http.Response, error) {
 /*
 CreatePodGroups Create podGroups
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return ApiCreatePodGroupsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return ApiCreatePodGroupsRequest
 */
 func (a *PodGroupsApiService) CreatePodGroups(ctx context.Context, uuid string) ApiCreatePodGroupsRequest {
 	return ApiCreatePodGroupsRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
 func (a *PodGroupsApiService) CreatePodGroupsExecute(r ApiCreatePodGroupsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PodGroupsApiService.CreatePodGroups")
@@ -154,9 +155,9 @@ func (a *PodGroupsApiService) CreatePodGroupsExecute(r ApiCreatePodGroupsRequest
 }
 
 type ApiDeletePodGroupRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *PodGroupsApiService
-	uuid string
+	uuid       string
 	podGroupId string
 }
 
@@ -167,16 +168,16 @@ func (r ApiDeletePodGroupRequest) Execute() (*http.Response, error) {
 /*
 DeletePodGroup Delete a podGroup by id
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @param podGroupId Unique identifier of the podGroup (UUID)
- @return ApiDeletePodGroupRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@param podGroupId Unique identifier of the podGroup (UUID)
+	@return ApiDeletePodGroupRequest
 */
 func (a *PodGroupsApiService) DeletePodGroup(ctx context.Context, uuid string, podGroupId string) ApiDeletePodGroupRequest {
 	return ApiDeletePodGroupRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 		podGroupId: podGroupId,
 	}
 }
@@ -184,9 +185,9 @@ func (a *PodGroupsApiService) DeletePodGroup(ctx context.Context, uuid string, p
 // Execute executes the request
 func (a *PodGroupsApiService) DeletePodGroupExecute(r ApiDeletePodGroupRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PodGroupsApiService.DeletePodGroup")
@@ -287,10 +288,10 @@ func (a *PodGroupsApiService) DeletePodGroupExecute(r ApiDeletePodGroupRequest) 
 }
 
 type ApiSyncPodGroupDataRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *PodGroupsApiService
-	uuid string
-	podGroup *[]PodGroup
+	uuid       string
+	podGroup   *[]PodGroup
 }
 
 func (r ApiSyncPodGroupDataRequest) PodGroup(podGroup []PodGroup) ApiSyncPodGroupDataRequest {
@@ -305,17 +306,17 @@ func (r ApiSyncPodGroupDataRequest) Execute() (*http.Response, error) {
 /*
 SyncPodGroupData Sync All cluster podGroup data to DB
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return ApiSyncPodGroupDataRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return ApiSyncPodGroupDataRequest
 
 Deprecated
 */
 func (a *PodGroupsApiService) SyncPodGroupData(ctx context.Context, uuid string) ApiSyncPodGroupDataRequest {
 	return ApiSyncPodGroupDataRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
@@ -323,9 +324,9 @@ func (a *PodGroupsApiService) SyncPodGroupData(ctx context.Context, uuid string)
 // Deprecated
 func (a *PodGroupsApiService) SyncPodGroupDataExecute(r ApiSyncPodGroupDataRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PodGroupsApiService.SyncPodGroupData")
@@ -430,11 +431,11 @@ func (a *PodGroupsApiService) SyncPodGroupDataExecute(r ApiSyncPodGroupDataReque
 }
 
 type ApiUpdatePodGroupRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *PodGroupsApiService
-	uuid string
+	uuid       string
 	podGroupId string
-	podGroup *PodGroup
+	podGroup   *PodGroup
 }
 
 func (r ApiUpdatePodGroupRequest) PodGroup(podGroup PodGroup) ApiUpdatePodGroupRequest {
@@ -449,16 +450,16 @@ func (r ApiUpdatePodGroupRequest) Execute() (*http.Response, error) {
 /*
 UpdatePodGroup Update a podGroup by id
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @param podGroupId Unique identifier of the podGroup (UUID)
- @return ApiUpdatePodGroupRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@param podGroupId Unique identifier of the podGroup (UUID)
+	@return ApiUpdatePodGroupRequest
 */
 func (a *PodGroupsApiService) UpdatePodGroup(ctx context.Context, uuid string, podGroupId string) ApiUpdatePodGroupRequest {
 	return ApiUpdatePodGroupRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 		podGroupId: podGroupId,
 	}
 }
@@ -466,9 +467,9 @@ func (a *PodGroupsApiService) UpdatePodGroup(ctx context.Context, uuid string, p
 // Execute executes the request
 func (a *PodGroupsApiService) UpdatePodGroupExecute(r ApiUpdatePodGroupRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PodGroupsApiService.UpdatePodGroup")
@@ -574,9 +575,9 @@ func (a *PodGroupsApiService) UpdatePodGroupExecute(r ApiUpdatePodGroupRequest) 
 }
 
 type ApiUpdatePodGroupsRequest struct {
-	ctx context.Context
-	ApiService *PodGroupsApiService
-	uuid string
+	ctx           context.Context
+	ApiService    *PodGroupsApiService
+	uuid          string
 	podGroupsSync *PodGroupsSync
 }
 
@@ -592,26 +593,27 @@ func (r ApiUpdatePodGroupsRequest) Execute() (*IdsResponse, *http.Response, erro
 /*
 UpdatePodGroups Sync all podGroups in a project to DB
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param uuid Unique identifier of the cluster
- @return ApiUpdatePodGroupsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param uuid Unique identifier of the cluster
+	@return ApiUpdatePodGroupsRequest
 */
 func (a *PodGroupsApiService) UpdatePodGroups(ctx context.Context, uuid string) ApiUpdatePodGroupsRequest {
 	return ApiUpdatePodGroupsRequest{
 		ApiService: a,
-		ctx: ctx,
-		uuid: uuid,
+		ctx:        ctx,
+		uuid:       uuid,
 	}
 }
 
 // Execute executes the request
-//  @return IdsResponse
+//
+//	@return IdsResponse
 func (a *PodGroupsApiService) UpdatePodGroupsExecute(r ApiUpdatePodGroupsRequest) (*IdsResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *IdsResponse
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *IdsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PodGroupsApiService.UpdatePodGroups")

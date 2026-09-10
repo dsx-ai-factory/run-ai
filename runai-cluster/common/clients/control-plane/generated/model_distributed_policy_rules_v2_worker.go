@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,31 +18,31 @@ import (
 
 // DistributedPolicyRulesV2Worker struct for DistributedPolicyRulesV2Worker
 type DistributedPolicyRulesV2Worker struct {
-	Command NullableStringRules `json:"command,omitempty"`
-	Args NullableStringRules `json:"args,omitempty"`
-	Image NullableStringRules `json:"image,omitempty"`
-	ImagePullPolicy NullableImagePullPolicyRules `json:"imagePullPolicy,omitempty"`
-	WorkingDir NullableStringRules `json:"workingDir,omitempty"`
-	CreateHomeDir NullableBooleanRules `json:"createHomeDir,omitempty"`
-	Probes NullableProbesRules `json:"probes,omitempty"`
-	NodeType NullableStringRules `json:"nodeType,omitempty"`
-	NodePools NullableArrayRules `json:"nodePools,omitempty"`
-	PodAffinity NullablePodAffinityRules `json:"podAffinity,omitempty"`
-	EnvironmentVariables NullableInstancesRules `json:"environmentVariables,omitempty"`
-	Annotations NullableInstancesRules `json:"annotations,omitempty"`
-	Labels NullableInstancesRules `json:"labels,omitempty"`
-	Tolerations NullableInstancesRules `json:"tolerations,omitempty"`
-	TerminateAfterPreemption NullableBooleanRules `json:"terminateAfterPreemption,omitempty"`
-	AutoDeletionTimeAfterCompletionSeconds NullableIntegerRules `json:"autoDeletionTimeAfterCompletionSeconds,omitempty"`
-	BackoffLimit NullableIntegerRules `json:"backoffLimit,omitempty"`
-	Ports NullablePortsRules `json:"ports,omitempty"`
-	ExposedUrls NullableExposedUrlsRules `json:"exposedUrls,omitempty"`
-	RelatedUrls NullableRelatedUrlsRules `json:"relatedUrls,omitempty"`
-	Security NullableSecurityFlatFieldsRules `json:"security,omitempty"`
-	Compute NullableComputeFieldsRules `json:"compute,omitempty"`
-	Storage NullableStorageFieldsRules `json:"storage,omitempty"`
-	NumWorkers NullableIntegerRules `json:"numWorkers,omitempty"`
-	DistributedFramework NullableDistributedFrameworkRules `json:"distributedFramework,omitempty"`
+	Command                                NullableStringRules               `json:"command,omitempty"`
+	Args                                   NullableStringRules               `json:"args,omitempty"`
+	Image                                  NullableStringRules               `json:"image,omitempty"`
+	ImagePullPolicy                        NullableImagePullPolicyRules      `json:"imagePullPolicy,omitempty"`
+	WorkingDir                             NullableStringRules               `json:"workingDir,omitempty"`
+	CreateHomeDir                          NullableBooleanRules              `json:"createHomeDir,omitempty"`
+	Probes                                 NullableProbesRules               `json:"probes,omitempty"`
+	NodeType                               NullableStringRules               `json:"nodeType,omitempty"`
+	NodePools                              NullableArrayRules                `json:"nodePools,omitempty"`
+	PodAffinity                            NullablePodAffinityRules          `json:"podAffinity,omitempty"`
+	EnvironmentVariables                   NullableInstancesRules            `json:"environmentVariables,omitempty"`
+	Annotations                            NullableInstancesRules            `json:"annotations,omitempty"`
+	Labels                                 NullableInstancesRules            `json:"labels,omitempty"`
+	Tolerations                            NullableInstancesRules            `json:"tolerations,omitempty"`
+	TerminateAfterPreemption               NullableBooleanRules              `json:"terminateAfterPreemption,omitempty"`
+	AutoDeletionTimeAfterCompletionSeconds NullableIntegerRules              `json:"autoDeletionTimeAfterCompletionSeconds,omitempty"`
+	BackoffLimit                           NullableIntegerRules              `json:"backoffLimit,omitempty"`
+	Ports                                  NullablePortsRules                `json:"ports,omitempty"`
+	ExposedUrls                            NullableExposedUrlsRules          `json:"exposedUrls,omitempty"`
+	RelatedUrls                            NullableRelatedUrlsRules          `json:"relatedUrls,omitempty"`
+	Security                               NullableSecurityFlatFieldsRules   `json:"security,omitempty"`
+	Compute                                NullableComputeFieldsRules        `json:"compute,omitempty"`
+	Storage                                NullableStorageFieldsRules        `json:"storage,omitempty"`
+	NumWorkers                             NullableIntegerRules              `json:"numWorkers,omitempty"`
+	DistributedFramework                   NullableDistributedFrameworkRules `json:"distributedFramework,omitempty"`
 }
 
 // NewDistributedPolicyRulesV2Worker instantiates a new DistributedPolicyRulesV2Worker object
@@ -92,6 +94,7 @@ func (o *DistributedPolicyRulesV2Worker) HasCommand() bool {
 func (o *DistributedPolicyRulesV2Worker) SetCommand(v StringRules) {
 	o.Command.Set(&v)
 }
+
 // SetCommandNil sets the value for Command to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetCommandNil() {
 	o.Command.Set(nil)
@@ -134,6 +137,7 @@ func (o *DistributedPolicyRulesV2Worker) HasArgs() bool {
 func (o *DistributedPolicyRulesV2Worker) SetArgs(v StringRules) {
 	o.Args.Set(&v)
 }
+
 // SetArgsNil sets the value for Args to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetArgsNil() {
 	o.Args.Set(nil)
@@ -176,6 +180,7 @@ func (o *DistributedPolicyRulesV2Worker) HasImage() bool {
 func (o *DistributedPolicyRulesV2Worker) SetImage(v StringRules) {
 	o.Image.Set(&v)
 }
+
 // SetImageNil sets the value for Image to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetImageNil() {
 	o.Image.Set(nil)
@@ -218,6 +223,7 @@ func (o *DistributedPolicyRulesV2Worker) HasImagePullPolicy() bool {
 func (o *DistributedPolicyRulesV2Worker) SetImagePullPolicy(v ImagePullPolicyRules) {
 	o.ImagePullPolicy.Set(&v)
 }
+
 // SetImagePullPolicyNil sets the value for ImagePullPolicy to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetImagePullPolicyNil() {
 	o.ImagePullPolicy.Set(nil)
@@ -260,6 +266,7 @@ func (o *DistributedPolicyRulesV2Worker) HasWorkingDir() bool {
 func (o *DistributedPolicyRulesV2Worker) SetWorkingDir(v StringRules) {
 	o.WorkingDir.Set(&v)
 }
+
 // SetWorkingDirNil sets the value for WorkingDir to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetWorkingDirNil() {
 	o.WorkingDir.Set(nil)
@@ -302,6 +309,7 @@ func (o *DistributedPolicyRulesV2Worker) HasCreateHomeDir() bool {
 func (o *DistributedPolicyRulesV2Worker) SetCreateHomeDir(v BooleanRules) {
 	o.CreateHomeDir.Set(&v)
 }
+
 // SetCreateHomeDirNil sets the value for CreateHomeDir to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetCreateHomeDirNil() {
 	o.CreateHomeDir.Set(nil)
@@ -344,6 +352,7 @@ func (o *DistributedPolicyRulesV2Worker) HasProbes() bool {
 func (o *DistributedPolicyRulesV2Worker) SetProbes(v ProbesRules) {
 	o.Probes.Set(&v)
 }
+
 // SetProbesNil sets the value for Probes to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetProbesNil() {
 	o.Probes.Set(nil)
@@ -386,6 +395,7 @@ func (o *DistributedPolicyRulesV2Worker) HasNodeType() bool {
 func (o *DistributedPolicyRulesV2Worker) SetNodeType(v StringRules) {
 	o.NodeType.Set(&v)
 }
+
 // SetNodeTypeNil sets the value for NodeType to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetNodeTypeNil() {
 	o.NodeType.Set(nil)
@@ -428,6 +438,7 @@ func (o *DistributedPolicyRulesV2Worker) HasNodePools() bool {
 func (o *DistributedPolicyRulesV2Worker) SetNodePools(v ArrayRules) {
 	o.NodePools.Set(&v)
 }
+
 // SetNodePoolsNil sets the value for NodePools to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetNodePoolsNil() {
 	o.NodePools.Set(nil)
@@ -470,6 +481,7 @@ func (o *DistributedPolicyRulesV2Worker) HasPodAffinity() bool {
 func (o *DistributedPolicyRulesV2Worker) SetPodAffinity(v PodAffinityRules) {
 	o.PodAffinity.Set(&v)
 }
+
 // SetPodAffinityNil sets the value for PodAffinity to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetPodAffinityNil() {
 	o.PodAffinity.Set(nil)
@@ -512,6 +524,7 @@ func (o *DistributedPolicyRulesV2Worker) HasEnvironmentVariables() bool {
 func (o *DistributedPolicyRulesV2Worker) SetEnvironmentVariables(v InstancesRules) {
 	o.EnvironmentVariables.Set(&v)
 }
+
 // SetEnvironmentVariablesNil sets the value for EnvironmentVariables to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetEnvironmentVariablesNil() {
 	o.EnvironmentVariables.Set(nil)
@@ -554,6 +567,7 @@ func (o *DistributedPolicyRulesV2Worker) HasAnnotations() bool {
 func (o *DistributedPolicyRulesV2Worker) SetAnnotations(v InstancesRules) {
 	o.Annotations.Set(&v)
 }
+
 // SetAnnotationsNil sets the value for Annotations to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetAnnotationsNil() {
 	o.Annotations.Set(nil)
@@ -596,6 +610,7 @@ func (o *DistributedPolicyRulesV2Worker) HasLabels() bool {
 func (o *DistributedPolicyRulesV2Worker) SetLabels(v InstancesRules) {
 	o.Labels.Set(&v)
 }
+
 // SetLabelsNil sets the value for Labels to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetLabelsNil() {
 	o.Labels.Set(nil)
@@ -638,6 +653,7 @@ func (o *DistributedPolicyRulesV2Worker) HasTolerations() bool {
 func (o *DistributedPolicyRulesV2Worker) SetTolerations(v InstancesRules) {
 	o.Tolerations.Set(&v)
 }
+
 // SetTolerationsNil sets the value for Tolerations to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetTolerationsNil() {
 	o.Tolerations.Set(nil)
@@ -680,6 +696,7 @@ func (o *DistributedPolicyRulesV2Worker) HasTerminateAfterPreemption() bool {
 func (o *DistributedPolicyRulesV2Worker) SetTerminateAfterPreemption(v BooleanRules) {
 	o.TerminateAfterPreemption.Set(&v)
 }
+
 // SetTerminateAfterPreemptionNil sets the value for TerminateAfterPreemption to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetTerminateAfterPreemptionNil() {
 	o.TerminateAfterPreemption.Set(nil)
@@ -722,6 +739,7 @@ func (o *DistributedPolicyRulesV2Worker) HasAutoDeletionTimeAfterCompletionSecon
 func (o *DistributedPolicyRulesV2Worker) SetAutoDeletionTimeAfterCompletionSeconds(v IntegerRules) {
 	o.AutoDeletionTimeAfterCompletionSeconds.Set(&v)
 }
+
 // SetAutoDeletionTimeAfterCompletionSecondsNil sets the value for AutoDeletionTimeAfterCompletionSeconds to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetAutoDeletionTimeAfterCompletionSecondsNil() {
 	o.AutoDeletionTimeAfterCompletionSeconds.Set(nil)
@@ -764,6 +782,7 @@ func (o *DistributedPolicyRulesV2Worker) HasBackoffLimit() bool {
 func (o *DistributedPolicyRulesV2Worker) SetBackoffLimit(v IntegerRules) {
 	o.BackoffLimit.Set(&v)
 }
+
 // SetBackoffLimitNil sets the value for BackoffLimit to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetBackoffLimitNil() {
 	o.BackoffLimit.Set(nil)
@@ -806,6 +825,7 @@ func (o *DistributedPolicyRulesV2Worker) HasPorts() bool {
 func (o *DistributedPolicyRulesV2Worker) SetPorts(v PortsRules) {
 	o.Ports.Set(&v)
 }
+
 // SetPortsNil sets the value for Ports to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetPortsNil() {
 	o.Ports.Set(nil)
@@ -848,6 +868,7 @@ func (o *DistributedPolicyRulesV2Worker) HasExposedUrls() bool {
 func (o *DistributedPolicyRulesV2Worker) SetExposedUrls(v ExposedUrlsRules) {
 	o.ExposedUrls.Set(&v)
 }
+
 // SetExposedUrlsNil sets the value for ExposedUrls to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetExposedUrlsNil() {
 	o.ExposedUrls.Set(nil)
@@ -890,6 +911,7 @@ func (o *DistributedPolicyRulesV2Worker) HasRelatedUrls() bool {
 func (o *DistributedPolicyRulesV2Worker) SetRelatedUrls(v RelatedUrlsRules) {
 	o.RelatedUrls.Set(&v)
 }
+
 // SetRelatedUrlsNil sets the value for RelatedUrls to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetRelatedUrlsNil() {
 	o.RelatedUrls.Set(nil)
@@ -932,6 +954,7 @@ func (o *DistributedPolicyRulesV2Worker) HasSecurity() bool {
 func (o *DistributedPolicyRulesV2Worker) SetSecurity(v SecurityFlatFieldsRules) {
 	o.Security.Set(&v)
 }
+
 // SetSecurityNil sets the value for Security to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetSecurityNil() {
 	o.Security.Set(nil)
@@ -974,6 +997,7 @@ func (o *DistributedPolicyRulesV2Worker) HasCompute() bool {
 func (o *DistributedPolicyRulesV2Worker) SetCompute(v ComputeFieldsRules) {
 	o.Compute.Set(&v)
 }
+
 // SetComputeNil sets the value for Compute to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetComputeNil() {
 	o.Compute.Set(nil)
@@ -1016,6 +1040,7 @@ func (o *DistributedPolicyRulesV2Worker) HasStorage() bool {
 func (o *DistributedPolicyRulesV2Worker) SetStorage(v StorageFieldsRules) {
 	o.Storage.Set(&v)
 }
+
 // SetStorageNil sets the value for Storage to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetStorageNil() {
 	o.Storage.Set(nil)
@@ -1058,6 +1083,7 @@ func (o *DistributedPolicyRulesV2Worker) HasNumWorkers() bool {
 func (o *DistributedPolicyRulesV2Worker) SetNumWorkers(v IntegerRules) {
 	o.NumWorkers.Set(&v)
 }
+
 // SetNumWorkersNil sets the value for NumWorkers to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetNumWorkersNil() {
 	o.NumWorkers.Set(nil)
@@ -1100,6 +1126,7 @@ func (o *DistributedPolicyRulesV2Worker) HasDistributedFramework() bool {
 func (o *DistributedPolicyRulesV2Worker) SetDistributedFramework(v DistributedFrameworkRules) {
 	o.DistributedFramework.Set(&v)
 }
+
 // SetDistributedFrameworkNil sets the value for DistributedFramework to be an explicit nil
 func (o *DistributedPolicyRulesV2Worker) SetDistributedFrameworkNil() {
 	o.DistributedFramework.Set(nil)
@@ -1225,5 +1252,3 @@ func (v *NullableDistributedPolicyRulesV2Worker) UnmarshalJSON(src []byte) error
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

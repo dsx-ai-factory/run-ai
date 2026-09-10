@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 datavolumes-service
 
@@ -70,6 +72,7 @@ func (o *DatavolumeStatusInternalAllOf) HasIsDeleted() bool {
 func (o *DatavolumeStatusInternalAllOf) SetIsDeleted(v bool) {
 	o.IsDeleted.Set(&v)
 }
+
 // SetIsDeletedNil sets the value for IsDeleted to be an explicit nil
 func (o *DatavolumeStatusInternalAllOf) SetIsDeletedNil() {
 	o.IsDeleted.Set(nil)
@@ -123,5 +126,3 @@ func (v *NullableDatavolumeStatusInternalAllOf) UnmarshalJSON(src []byte) error 
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

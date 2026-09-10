@@ -81,6 +81,7 @@ export enum EIntervalLabels {
   ProjectsIndex = "projects-index",
   PolicyIndex = "policy-index",
   ReportIndex = "report-index",
+  ReportIndexPostBulkDelete = "report-index-post-bulk-delete",
   TemplatesIndex = "templates-index",
   AccessRuleIndex = "access-rule-index",
   /*** Modals ***/
@@ -197,6 +198,7 @@ export const intervalLabelTimeMap: { [key in EIntervalLabels]: number } = {
   [EIntervalLabels.PodsModal]: EIntervalTime.ThirtySeconds,
   [EIntervalLabels.PolicyIndex]: EIntervalTime.ThirtySeconds,
   [EIntervalLabels.ReportIndex]: EIntervalTime.OneMinute,
+  [EIntervalLabels.ReportIndexPostBulkDelete]: EIntervalTime.FiveSeconds,
   [EIntervalLabels.ApplyPolicySync]: EIntervalTime.TwoAndHalfSeconds,
   [EIntervalLabels.CreatedPvcUpdate]: EIntervalTime.TwoSeconds,
   [EIntervalLabels.WorkloadPods]: EIntervalTime.ThirtySeconds,

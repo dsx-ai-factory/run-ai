@@ -173,6 +173,9 @@ func runaiSummary(evs []orchestrator2.Event, s *spec.Spec) orchestrator2.RunaiSu
 	cpInstalled := runaiStepDone(evs, "install-control-plane-chart")
 	clusterInstalled := runaiStepDone(evs, "install-cluster-chart")
 	clusterRegistered := runaiStepDone(evs, "register-cluster")
+	if s.Cluster != nil && s.Cluster.UsesExternalControlPlane() {
+		clusterRegistered = true
+	}
 
 	var sum orchestrator2.RunaiSummary
 	if s.ControlPlane != nil {
@@ -234,9 +237,13 @@ func runSummary(evs []orchestrator2.Event, s *spec.Spec, duration time.Duration,
 	}
 	if s.Cluster != nil {
 		_, clusterVersion := runaiVersions(s)
+		clusterRegistered := runaiStepDone(evs, "register-cluster")
+		if s.Cluster.UsesExternalControlPlane() {
+			clusterRegistered = true
+		}
 		sum.Cluster = &orchestrator2.RunaiCluster{
 			Installed:  runaiStepDone(evs, "install-cluster-chart"),
-			Registered: runaiStepDone(evs, "register-cluster"),
+			Registered: clusterRegistered,
 			Name:       s.Cluster.Name,
 			Version:    clusterVersion,
 		}

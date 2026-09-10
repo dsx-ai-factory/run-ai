@@ -109,6 +109,38 @@ func TestResolve_Install_ControlPlaneAndCluster(t *testing.T) {
 	assert.Contains(t, clusterAction.(actions.InstallClusterChart).ExtraValues, "global.additionalImagePullSecrets[0]=runai-reg-creds")
 }
 
+func TestResolve_Install_ExternalControlPlane(t *testing.T) {
+	s := &spec.Spec{
+		Command:      spec.CommandInstall,
+		InstallMode:  spec.InstallModeClusterOnly,
+		Connectivity: spec.ConnectivityConnected,
+		Registry:     &spec.Registry{Type: spec.RegistryTypeNGC},
+		Cluster: &spec.Cluster{
+			Name:            "cluster-a",
+			Domain:          "cluster.example.com",
+			Version:         "2.26.0",
+			ControlPlaneURL: "https://cp.example.com",
+			UID:             "cluster-uid",
+			BootstrapToken:  "bootstrap-token",
+		},
+	}
+
+	_, inst, err := Resolve(s, orchestrator2.Deps{})
+	require.NoError(t, err)
+	runai := inst.Pipelines[1]
+	require.Len(t, runai.Flows, 1)
+	clusterFlow := runai.Flows[0]
+	assert.NotContains(t, stepNames(clusterFlow), "register-cluster")
+
+	action := actionForStep(t, clusterFlow, "install-cluster-chart")
+	require.IsType(t, actions.InstallClusterChart{}, action)
+	clusterAction := action.(actions.InstallClusterChart)
+	assert.Equal(t, "https://cp.example.com", clusterAction.ControlPlaneURL)
+	assert.Equal(t, "cluster.example.com", clusterAction.Domain)
+	assert.Equal(t, "cluster-uid", clusterAction.ClusterUID)
+	assert.Equal(t, "bootstrap-token", clusterAction.BootstrapToken)
+}
+
 func TestResolve_Install_ControlPlaneOnly_NoOptionalSecrets(t *testing.T) {
 	s := &spec.Spec{
 		Command:      spec.CommandInstall,

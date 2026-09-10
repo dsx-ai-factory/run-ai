@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,17 +21,16 @@ import (
 	"strings"
 )
 
-
 type EventsApi interface {
 
 	/*
-	GetWorkloadEvents Get the workload events.
+		GetWorkloadEvents Get the workload events.
 
-	Retrieve all the workload events by workload id.
+		Retrieve all the workload events by workload id.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workloadId Unique identifier of the workload.
-	@return EventsApiGetWorkloadEventsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workloadId Unique identifier of the workload.
+		@return EventsApiGetWorkloadEventsRequest
 	*/
 	GetWorkloadEvents(ctx context.Context, workloadId string) EventsApiGetWorkloadEventsRequest
 
@@ -38,13 +39,13 @@ type EventsApi interface {
 	GetWorkloadEventsExecute(r EventsApiGetWorkloadEventsRequest) (*GetWorkloadEvents200Response, *http.Response, error)
 
 	/*
-	GetWorkloadHistory Get the workload history.
+		GetWorkloadHistory Get the workload history.
 
-	Retrieve the details workload history including events by workload id.
+		Retrieve the details workload history including events by workload id.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workloadId Unique identifier of the workload.
-	@return EventsApiGetWorkloadHistoryRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workloadId Unique identifier of the workload.
+		@return EventsApiGetWorkloadHistoryRequest
 	*/
 	GetWorkloadHistory(ctx context.Context, workloadId string) EventsApiGetWorkloadHistoryRequest
 
@@ -53,10 +54,10 @@ type EventsApi interface {
 	GetWorkloadHistoryExecute(r EventsApiGetWorkloadHistoryRequest) (*GetWorkloadHistory200Response, *http.Response, error)
 
 	/*
-	SyncEvents Sync events.
+		SyncEvents Sync events.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return EventsApiSyncEventsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return EventsApiSyncEventsRequest
 	*/
 	SyncEvents(ctx context.Context) EventsApiSyncEventsRequest
 
@@ -68,11 +69,11 @@ type EventsApi interface {
 type EventsApiService service
 
 type EventsApiGetWorkloadEventsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService EventsApi
 	workloadId string
-	offset *int32
-	limit *int32
+	offset     *int32
+	limit      *int32
 }
 
 // The offset of the first item returned in the collection.
@@ -96,26 +97,27 @@ GetWorkloadEvents Get the workload events.
 
 Retrieve all the workload events by workload id.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workloadId Unique identifier of the workload.
- @return EventsApiGetWorkloadEventsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workloadId Unique identifier of the workload.
+	@return EventsApiGetWorkloadEventsRequest
 */
 func (a *EventsApiService) GetWorkloadEvents(ctx context.Context, workloadId string) EventsApiGetWorkloadEventsRequest {
 	return EventsApiGetWorkloadEventsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		workloadId: workloadId,
 	}
 }
 
 // Execute executes the request
-//  @return GetWorkloadEvents200Response
+//
+//	@return GetWorkloadEvents200Response
 func (a *EventsApiService) GetWorkloadEventsExecute(r EventsApiGetWorkloadEventsRequest) (*GetWorkloadEvents200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *GetWorkloadEvents200Response
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GetWorkloadEvents200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "EventsApiService.GetWorkloadEvents")
@@ -240,11 +242,11 @@ func (a *EventsApiService) GetWorkloadEventsExecute(r EventsApiGetWorkloadEvents
 }
 
 type EventsApiGetWorkloadHistoryRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService EventsApi
 	workloadId string
-	offset *int32
-	limit *int32
+	offset     *int32
+	limit      *int32
 }
 
 // The offset of the first item returned in the collection.
@@ -268,26 +270,27 @@ GetWorkloadHistory Get the workload history.
 
 Retrieve the details workload history including events by workload id.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workloadId Unique identifier of the workload.
- @return EventsApiGetWorkloadHistoryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workloadId Unique identifier of the workload.
+	@return EventsApiGetWorkloadHistoryRequest
 */
 func (a *EventsApiService) GetWorkloadHistory(ctx context.Context, workloadId string) EventsApiGetWorkloadHistoryRequest {
 	return EventsApiGetWorkloadHistoryRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 		workloadId: workloadId,
 	}
 }
 
 // Execute executes the request
-//  @return GetWorkloadHistory200Response
+//
+//	@return GetWorkloadHistory200Response
 func (a *EventsApiService) GetWorkloadHistoryExecute(r EventsApiGetWorkloadHistoryRequest) (*GetWorkloadHistory200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *GetWorkloadHistory200Response
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GetWorkloadHistory200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "EventsApiService.GetWorkloadHistory")
@@ -412,8 +415,8 @@ func (a *EventsApiService) GetWorkloadHistoryExecute(r EventsApiGetWorkloadHisto
 }
 
 type EventsApiSyncEventsRequest struct {
-	ctx context.Context
-	ApiService EventsApi
+	ctx               context.Context
+	ApiService        EventsApi
 	eventsSyncRequest *EventsSyncRequest
 }
 
@@ -430,22 +433,22 @@ func (r EventsApiSyncEventsRequest) Execute() (*http.Response, error) {
 /*
 SyncEvents Sync events.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return EventsApiSyncEventsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return EventsApiSyncEventsRequest
 */
 func (a *EventsApiService) SyncEvents(ctx context.Context) EventsApiSyncEventsRequest {
 	return EventsApiSyncEventsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *EventsApiService) SyncEventsExecute(r EventsApiSyncEventsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "EventsApiService.SyncEvents")

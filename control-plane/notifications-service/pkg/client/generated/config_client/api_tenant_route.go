@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Notifications Service Config API
 
@@ -19,15 +21,14 @@ import (
 	"strings"
 )
 
-
 // TenantRouteAPIService TenantRouteAPI service
 type TenantRouteAPIService service
 
 type ApiCreateRouteRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *TenantRouteAPIService
-	tenantId string
-	routeData *RouteData
+	tenantId   string
+	routeData  *RouteData
 }
 
 func (r ApiCreateRouteRequest) RouteData(routeData RouteData) ApiCreateRouteRequest {
@@ -44,26 +45,27 @@ CreateRoute Method for CreateRoute
 
 Creates a tenant route
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param tenantId ID of relevant tenant
- @return ApiCreateRouteRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param tenantId ID of relevant tenant
+	@return ApiCreateRouteRequest
 */
 func (a *TenantRouteAPIService) CreateRoute(ctx context.Context, tenantId string) ApiCreateRouteRequest {
 	return ApiCreateRouteRequest{
 		ApiService: a,
-		ctx: ctx,
-		tenantId: tenantId,
+		ctx:        ctx,
+		tenantId:   tenantId,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *TenantRouteAPIService) CreateRouteExecute(r ApiCreateRouteRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TenantRouteAPIService.CreateRoute")
@@ -129,8 +131,8 @@ func (a *TenantRouteAPIService) CreateRouteExecute(r ApiCreateRouteRequest) (str
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 409 {
@@ -140,8 +142,8 @@ func (a *TenantRouteAPIService) CreateRouteExecute(r ApiCreateRouteRequest) (str
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
@@ -151,8 +153,8 @@ func (a *TenantRouteAPIService) CreateRouteExecute(r ApiCreateRouteRequest) (str
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -170,10 +172,10 @@ func (a *TenantRouteAPIService) CreateRouteExecute(r ApiCreateRouteRequest) (str
 }
 
 type ApiDeleteRouteRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *TenantRouteAPIService
-	tenantId string
-	routeId string
+	tenantId   string
+	routeId    string
 }
 
 func (r ApiDeleteRouteRequest) Execute() (string, *http.Response, error) {
@@ -185,28 +187,29 @@ DeleteRoute Method for DeleteRoute
 
 Deletes a tenant route
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param tenantId ID of relevant tenant
- @param routeId ID of relevant tenant route
- @return ApiDeleteRouteRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param tenantId ID of relevant tenant
+	@param routeId ID of relevant tenant route
+	@return ApiDeleteRouteRequest
 */
 func (a *TenantRouteAPIService) DeleteRoute(ctx context.Context, tenantId string, routeId string) ApiDeleteRouteRequest {
 	return ApiDeleteRouteRequest{
 		ApiService: a,
-		ctx: ctx,
-		tenantId: tenantId,
-		routeId: routeId,
+		ctx:        ctx,
+		tenantId:   tenantId,
+		routeId:    routeId,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *TenantRouteAPIService) DeleteRouteExecute(r ApiDeleteRouteRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TenantRouteAPIService.DeleteRoute")
@@ -268,8 +271,8 @@ func (a *TenantRouteAPIService) DeleteRouteExecute(r ApiDeleteRouteRequest) (str
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
@@ -279,8 +282,8 @@ func (a *TenantRouteAPIService) DeleteRouteExecute(r ApiDeleteRouteRequest) (str
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -298,7 +301,7 @@ func (a *TenantRouteAPIService) DeleteRouteExecute(r ApiDeleteRouteRequest) (str
 }
 
 type ApiGetAllTenantsWithRoutesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *TenantRouteAPIService
 }
 
@@ -311,24 +314,25 @@ GetAllTenantsWithRoutes Method for GetAllTenantsWithRoutes
 
 Get a list of tenants with routes in the system
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ApiGetAllTenantsWithRoutesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetAllTenantsWithRoutesRequest
 */
 func (a *TenantRouteAPIService) GetAllTenantsWithRoutes(ctx context.Context) ApiGetAllTenantsWithRoutesRequest {
 	return ApiGetAllTenantsWithRoutesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return []string
+//
+//	@return []string
 func (a *TenantRouteAPIService) GetAllTenantsWithRoutesExecute(r ApiGetAllTenantsWithRoutesRequest) ([]string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []string
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TenantRouteAPIService.GetAllTenantsWithRoutes")
@@ -388,8 +392,8 @@ func (a *TenantRouteAPIService) GetAllTenantsWithRoutesExecute(r ApiGetAllTenant
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -407,10 +411,10 @@ func (a *TenantRouteAPIService) GetAllTenantsWithRoutesExecute(r ApiGetAllTenant
 }
 
 type ApiGetRouteRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *TenantRouteAPIService
-	tenantId string
-	routeId string
+	tenantId   string
+	routeId    string
 }
 
 func (r ApiGetRouteRequest) Execute() (*RouteData, *http.Response, error) {
@@ -422,28 +426,29 @@ GetRoute Method for GetRoute
 
 Get a single tenant route config
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param tenantId ID of relevant tenant
- @param routeId ID of relevant tenant route
- @return ApiGetRouteRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param tenantId ID of relevant tenant
+	@param routeId ID of relevant tenant route
+	@return ApiGetRouteRequest
 */
 func (a *TenantRouteAPIService) GetRoute(ctx context.Context, tenantId string, routeId string) ApiGetRouteRequest {
 	return ApiGetRouteRequest{
 		ApiService: a,
-		ctx: ctx,
-		tenantId: tenantId,
-		routeId: routeId,
+		ctx:        ctx,
+		tenantId:   tenantId,
+		routeId:    routeId,
 	}
 }
 
 // Execute executes the request
-//  @return RouteData
+//
+//	@return RouteData
 func (a *TenantRouteAPIService) GetRouteExecute(r ApiGetRouteRequest) (*RouteData, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *RouteData
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *RouteData
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TenantRouteAPIService.GetRoute")
@@ -505,8 +510,8 @@ func (a *TenantRouteAPIService) GetRouteExecute(r ApiGetRouteRequest) (*RouteDat
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
@@ -516,8 +521,8 @@ func (a *TenantRouteAPIService) GetRouteExecute(r ApiGetRouteRequest) (*RouteDat
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -535,9 +540,9 @@ func (a *TenantRouteAPIService) GetRouteExecute(r ApiGetRouteRequest) (*RouteDat
 }
 
 type ApiGetRoutesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService *TenantRouteAPIService
-	tenantId string
+	tenantId   string
 }
 
 func (r ApiGetRoutesRequest) Execute() ([]RouteData, *http.Response, error) {
@@ -549,26 +554,27 @@ GetRoutes Method for GetRoutes
 
 Get list of tenant routes
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param tenantId ID of relevant tenant
- @return ApiGetRoutesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param tenantId ID of relevant tenant
+	@return ApiGetRoutesRequest
 */
 func (a *TenantRouteAPIService) GetRoutes(ctx context.Context, tenantId string) ApiGetRoutesRequest {
 	return ApiGetRoutesRequest{
 		ApiService: a,
-		ctx: ctx,
-		tenantId: tenantId,
+		ctx:        ctx,
+		tenantId:   tenantId,
 	}
 }
 
 // Execute executes the request
-//  @return []RouteData
+//
+//	@return []RouteData
 func (a *TenantRouteAPIService) GetRoutesExecute(r ApiGetRoutesRequest) ([]RouteData, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []RouteData
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []RouteData
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TenantRouteAPIService.GetRoutes")
@@ -638,10 +644,10 @@ func (a *TenantRouteAPIService) GetRoutesExecute(r ApiGetRoutesRequest) ([]Route
 }
 
 type ApiUpdateRouteRequest struct {
-	ctx context.Context
-	ApiService *TenantRouteAPIService
-	tenantId string
-	routeId string
+	ctx                context.Context
+	ApiService         *TenantRouteAPIService
+	tenantId           string
+	routeId            string
 	routeDataForUpdate *RouteDataForUpdate
 }
 
@@ -659,28 +665,29 @@ UpdateRoute Method for UpdateRoute
 
 Updates a tenant route
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param tenantId ID of relevant tenant
- @param routeId ID of relevant tenant route
- @return ApiUpdateRouteRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param tenantId ID of relevant tenant
+	@param routeId ID of relevant tenant route
+	@return ApiUpdateRouteRequest
 */
 func (a *TenantRouteAPIService) UpdateRoute(ctx context.Context, tenantId string, routeId string) ApiUpdateRouteRequest {
 	return ApiUpdateRouteRequest{
 		ApiService: a,
-		ctx: ctx,
-		tenantId: tenantId,
-		routeId: routeId,
+		ctx:        ctx,
+		tenantId:   tenantId,
+		routeId:    routeId,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *TenantRouteAPIService) UpdateRouteExecute(r ApiUpdateRouteRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPut
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodPut
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TenantRouteAPIService.UpdateRoute")
@@ -747,8 +754,8 @@ func (a *TenantRouteAPIService) UpdateRouteExecute(r ApiUpdateRouteRequest) (str
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 404 {
@@ -758,8 +765,8 @@ func (a *TenantRouteAPIService) UpdateRouteExecute(r ApiUpdateRouteRequest) (str
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}

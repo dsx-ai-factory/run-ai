@@ -1032,6 +1032,8 @@ func equalExternalWorkloadSpec(left, right *v1alpha1.ExternalWorkloadSpec) bool 
 		reflect.DeepEqual(left.PriorityClassName, right.PriorityClassName) &&
 		reflect.DeepEqual(left.Preemptibility, right.Preemptibility) &&
 		reflect.DeepEqual(left.Topology, right.Topology) &&
+		reflect.DeepEqual(left.ComponentTopologies, right.ComponentTopologies) &&
+		reflect.DeepEqual(left.NodeAffinities, right.NodeAffinities) &&
 		equalRequestedResources(left.RequestedResources, right.RequestedResources) &&
 		reflect.DeepEqual(left.AdditionalFields, right.AdditionalFields) &&
 		reflect.DeepEqual(left.StorageRefs, right.StorageRefs) &&

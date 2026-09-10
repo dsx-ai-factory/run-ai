@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,8 +21,8 @@ type ClaimInfo struct {
 	// Requested size for the PVC. Mandatory when `existingPvc` is `false` (mandatory)
 	Size NullableString `json:"size,omitempty"`
 	// Storage class name to associate with the PVC. This parameter may be omitted if there is a single storage class in the system, or you are using the default storage class. For more information, see [Storage class](https://kubernetes.io/docs/concepts/storage/storage-classes).
-	StorageClass NullableString `json:"storageClass,omitempty"`
-	AccessModes NullablePvcAccessModes `json:"accessModes,omitempty"`
+	StorageClass NullableString         `json:"storageClass,omitempty"`
+	AccessModes  NullablePvcAccessModes `json:"accessModes,omitempty"`
 	// The volume mode required by the claim. Choose Filesystem (default) or Block.
 	VolumeMode NullableString `json:"volumeMode,omitempty"`
 }
@@ -74,6 +76,7 @@ func (o *ClaimInfo) HasSize() bool {
 func (o *ClaimInfo) SetSize(v string) {
 	o.Size.Set(&v)
 }
+
 // SetSizeNil sets the value for Size to be an explicit nil
 func (o *ClaimInfo) SetSizeNil() {
 	o.Size.Set(nil)
@@ -116,6 +119,7 @@ func (o *ClaimInfo) HasStorageClass() bool {
 func (o *ClaimInfo) SetStorageClass(v string) {
 	o.StorageClass.Set(&v)
 }
+
 // SetStorageClassNil sets the value for StorageClass to be an explicit nil
 func (o *ClaimInfo) SetStorageClassNil() {
 	o.StorageClass.Set(nil)
@@ -158,6 +162,7 @@ func (o *ClaimInfo) HasAccessModes() bool {
 func (o *ClaimInfo) SetAccessModes(v PvcAccessModes) {
 	o.AccessModes.Set(&v)
 }
+
 // SetAccessModesNil sets the value for AccessModes to be an explicit nil
 func (o *ClaimInfo) SetAccessModesNil() {
 	o.AccessModes.Set(nil)
@@ -200,6 +205,7 @@ func (o *ClaimInfo) HasVolumeMode() bool {
 func (o *ClaimInfo) SetVolumeMode(v string) {
 	o.VolumeMode.Set(&v)
 }
+
 // SetVolumeModeNil sets the value for VolumeMode to be an explicit nil
 func (o *ClaimInfo) SetVolumeModeNil() {
 	o.VolumeMode.Set(nil)
@@ -262,5 +268,3 @@ func (v *NullableClaimInfo) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

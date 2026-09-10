@@ -168,6 +168,10 @@ export default defineComponent({
       type: String as PropType<string>,
       required: true,
     },
+    isDistributedInference: {
+      type: Boolean as PropType<boolean>,
+      default: false,
+    },
   },
   data() {
     return {
@@ -198,7 +202,7 @@ export default defineComponent({
       );
     },
     isExternalAccessAvailable(): boolean {
-      return this.clusterStore.isConfigDomainEnabled(this.clusterId);
+      return this.isDistributedInference || this.clusterStore.isConfigDomainEnabled(this.clusterId);
     },
     endpointTypeValue(): string {
       if (!this.isExternalAccessAvailable) {

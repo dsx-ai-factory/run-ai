@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -18,14 +20,13 @@ import (
 	"net/url"
 )
 
-
 type DatasourcesApi interface {
 
 	/*
-	CreateDatasourceAsset Placeholder.
+		CreateDatasourceAsset Placeholder.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return DatasourcesApiCreateDatasourceAssetRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return DatasourcesApiCreateDatasourceAssetRequest
 	*/
 	CreateDatasourceAsset(ctx context.Context) DatasourcesApiCreateDatasourceAssetRequest
 
@@ -33,12 +34,12 @@ type DatasourcesApi interface {
 	CreateDatasourceAssetExecute(r DatasourcesApiCreateDatasourceAssetRequest) (*http.Response, error)
 
 	/*
-	ListDatasourceAssets List datasource assets.
+		ListDatasourceAssets List datasource assets.
 
-	Returns a combined list of data-sources.
+		Returns a combined list of data-sources.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return DatasourcesApiListDatasourceAssetsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return DatasourcesApiListDatasourceAssetsRequest
 	*/
 	ListDatasourceAssets(ctx context.Context) DatasourcesApiListDatasourceAssetsRequest
 
@@ -51,9 +52,9 @@ type DatasourcesApi interface {
 type DatasourcesApiService service
 
 type DatasourcesApiCreateDatasourceAssetRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService DatasourcesApi
-	assetMeta *AssetMeta
+	assetMeta  *AssetMeta
 }
 
 func (r DatasourcesApiCreateDatasourceAssetRequest) AssetMeta(assetMeta AssetMeta) DatasourcesApiCreateDatasourceAssetRequest {
@@ -68,22 +69,22 @@ func (r DatasourcesApiCreateDatasourceAssetRequest) Execute() (*http.Response, e
 /*
 CreateDatasourceAsset Placeholder.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return DatasourcesApiCreateDatasourceAssetRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return DatasourcesApiCreateDatasourceAssetRequest
 */
 func (a *DatasourcesApiService) CreateDatasourceAsset(ctx context.Context) DatasourcesApiCreateDatasourceAssetRequest {
 	return DatasourcesApiCreateDatasourceAssetRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *DatasourcesApiService) CreateDatasourceAssetExecute(r DatasourcesApiCreateDatasourceAssetRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatasourcesApiService.CreateDatasourceAsset")
@@ -157,19 +158,19 @@ func (a *DatasourcesApiService) CreateDatasourceAssetExecute(r DatasourcesApiCre
 }
 
 type DatasourcesApiListDatasourceAssetsRequest struct {
-	ctx context.Context
-	ApiService DatasourcesApi
-	name *string
-	scope *string
-	projectId *int32
-	departmentId *string
-	clusterId *string
-	usageInfo *bool
-	complyToProject *int32
+	ctx                  context.Context
+	ApiService           DatasourcesApi
+	name                 *string
+	scope                *string
+	projectId            *int32
+	departmentId         *string
+	clusterId            *string
+	usageInfo            *bool
+	complyToProject      *int32
 	complyToWorkloadType *string
-	statusInfo *bool
-	assetIds *string
-	complyToReplicaType *string
+	statusInfo           *bool
+	assetIds             *string
+	complyToReplicaType  *string
 }
 
 // Filter results by name.
@@ -247,24 +248,25 @@ ListDatasourceAssets List datasource assets.
 
 Returns a combined list of data-sources.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return DatasourcesApiListDatasourceAssetsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return DatasourcesApiListDatasourceAssetsRequest
 */
 func (a *DatasourcesApiService) ListDatasourceAssets(ctx context.Context) DatasourcesApiListDatasourceAssetsRequest {
 	return DatasourcesApiListDatasourceAssetsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return DatasourceListResponse
+//
+//	@return DatasourceListResponse
 func (a *DatasourcesApiService) ListDatasourceAssetsExecute(r DatasourcesApiListDatasourceAssetsRequest) (*DatasourceListResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *DatasourceListResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *DatasourceListResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatasourcesApiService.ListDatasourceAssets")

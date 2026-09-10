@@ -1383,9 +1383,15 @@ function getServingPortFieldForDistributed(
   servingPort: SupersetServingPort | null | undefined,
 ): SupersetServingPort | null | undefined {
   if (!servingPort) return undefined;
+  const clusterLocalAccessOnly =
+    servingPort.exposeExternally === null || servingPort.exposeExternally === undefined
+      ? servingPort.clusterLocalAccessOnly
+      : !servingPort.exposeExternally;
+
   return {
-    ...omit(servingPort, ["port"]),
+    ...omit(servingPort, ["port", "exposeExternally"]),
     container: servingPort.port,
+    clusterLocalAccessOnly,
   };
 }
 
@@ -1554,6 +1560,10 @@ function _getDistributedLeaderWorkerSpecData(
 
 function _getDistributedSpecData(spec: IUISuperWorkloadSpec): Omit<DistributedInferenceSpecSpec, "leader" | "worker"> {
   const servingPort = spec.servingPort || { protocol: null };
+  const exposeExternally =
+    servingPort.clusterLocalAccessOnly === null || servingPort.clusterLocalAccessOnly === undefined
+      ? servingPort.exposeExternally
+      : !servingPort.clusterLocalAccessOnly;
 
   let authorizationType = servingPort.authorizationType;
 
@@ -1577,6 +1587,7 @@ function _getDistributedSpecData(spec: IUISuperWorkloadSpec): Omit<DistributedIn
       authorizationType: authorizationType as unknown as DistributedInferenceServingPortAccessAuthorizationTypeEnum,
       authorizedUsers: servingPort.authorizedUsers || undefined,
       authorizedGroups: servingPort.authorizedGroups || undefined,
+      exposeExternally,
     },
     priorityClass: spec.priorityClass || null,
     preemptibility: spec.preemptibility || undefined,

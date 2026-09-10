@@ -7,6 +7,7 @@ package cli
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/artifacts"
@@ -45,8 +46,17 @@ func newInstallCmd() *cobra.Command {
 		Aliases: []string{"install-new"},
 		Short:   "Install Run:ai using the orchestrator (config-driven)",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if kubeconfig != "" {
+				if err := setHelmKubeconfig(kubeconfig); err != nil {
+					return err
+				}
+			}
 			cfg, err := installconfig.Load(configPath)
 			if err != nil {
+				return err
+			}
+
+			if err := installconfig.ResolveClusterCredentials(cfg); err != nil {
 				return err
 			}
 
@@ -64,7 +74,6 @@ func newInstallCmd() *cobra.Command {
 				EventsFile:    eventsFile,
 				StatusFile:    statusFile,
 				OnFailure:     spec.FailurePolicy(onFailure),
-				Kubeconfig:    kubeconfig,
 				Env:           spec.Env(env),
 				Registry:      registry,
 				DevMode:       devMode,
@@ -143,4 +152,8 @@ func newInstallCmd() *cobra.Command {
 	_ = cmd.MarkFlagRequired("config")
 
 	return cmd
+}
+
+func setHelmKubeconfig(path string) error {
+	return os.Setenv("KUBECONFIG", path)
 }

@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -17,8 +19,8 @@ import (
 // PodGroupsSync struct for PodGroupsSync
 type PodGroupsSync struct {
 	// The project name we are syncing objects in
-	ProjectName string `json:"projectName"`
-	PodGroups []PodGroup `json:"podGroups"`
+	ProjectName string     `json:"projectName"`
+	PodGroups   []PodGroup `json:"podGroups"`
 	// the first podgroup to sync. if empty, all podgroups before the first one sent will be deleted.
 	From *string `json:"from,omitempty"`
 	// the last podgroup to sync. if empty, all podgroups after the last one sent will be deleted.
@@ -208,5 +210,3 @@ func (v *NullablePodGroupsSync) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

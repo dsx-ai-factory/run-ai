@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -18,16 +20,15 @@ import (
 	"net/url"
 )
 
-
 type MetricsApi interface {
 
 	/*
-	GetClusterDashboards Get clusters dashboards.
+		GetClusterDashboards Get clusters dashboards.
 
-	Retrieve the urls for the dashboards in the cluster, by id.
+		Retrieve the urls for the dashboards in the cluster, by id.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return MetricsApiGetClusterDashboardsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return MetricsApiGetClusterDashboardsRequest
 	*/
 	GetClusterDashboards(ctx context.Context) MetricsApiGetClusterDashboardsRequest
 
@@ -36,10 +37,10 @@ type MetricsApi interface {
 	GetClusterDashboardsExecute(r MetricsApiGetClusterDashboardsRequest) (*Dashboards, *http.Response, error)
 
 	/*
-	GetMetrics Get metrics.
+		GetMetrics Get metrics.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return MetricsApiGetMetricsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return MetricsApiGetMetricsRequest
 	*/
 	GetMetrics(ctx context.Context) MetricsApiGetMetricsRequest
 
@@ -52,9 +53,9 @@ type MetricsApi interface {
 type MetricsApiService service
 
 type MetricsApiGetClusterDashboardsRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService MetricsApi
-	clusterId *string
+	clusterId  *string
 }
 
 func (r MetricsApiGetClusterDashboardsRequest) ClusterId(clusterId string) MetricsApiGetClusterDashboardsRequest {
@@ -71,24 +72,25 @@ GetClusterDashboards Get clusters dashboards.
 
 Retrieve the urls for the dashboards in the cluster, by id.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return MetricsApiGetClusterDashboardsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return MetricsApiGetClusterDashboardsRequest
 */
 func (a *MetricsApiService) GetClusterDashboards(ctx context.Context) MetricsApiGetClusterDashboardsRequest {
 	return MetricsApiGetClusterDashboardsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return Dashboards
+//
+//	@return Dashboards
 func (a *MetricsApiService) GetClusterDashboardsExecute(r MetricsApiGetClusterDashboardsRequest) (*Dashboards, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Dashboards
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Dashboards
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "MetricsApiService.GetClusterDashboards")
@@ -219,8 +221,8 @@ func (a *MetricsApiService) GetClusterDashboardsExecute(r MetricsApiGetClusterDa
 }
 
 type MetricsApiGetMetricsRequest struct {
-	ctx context.Context
-	ApiService MetricsApi
+	ctx               context.Context
+	ApiService        MetricsApi
 	metricInformation *MetricInformation
 }
 
@@ -237,24 +239,25 @@ func (r MetricsApiGetMetricsRequest) Execute() (*GetMetrics200Response, *http.Re
 /*
 GetMetrics Get metrics.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return MetricsApiGetMetricsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return MetricsApiGetMetricsRequest
 */
 func (a *MetricsApiService) GetMetrics(ctx context.Context) MetricsApiGetMetricsRequest {
 	return MetricsApiGetMetricsRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return GetMetrics200Response
+//
+//	@return GetMetrics200Response
 func (a *MetricsApiService) GetMetricsExecute(r MetricsApiGetMetricsRequest) (*GetMetrics200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *GetMetrics200Response
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GetMetrics200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "MetricsApiService.GetMetrics")

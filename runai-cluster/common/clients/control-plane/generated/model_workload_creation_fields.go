@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -17,24 +19,24 @@ import (
 
 // WorkloadCreationFields struct for WorkloadCreationFields
 type WorkloadCreationFields struct {
-	Type string `json:"type"`
-	Name string `json:"name"`
-	Id string `json:"id"`
+	Type        string  `json:"type"`
+	Name        string  `json:"name"`
+	Id          string  `json:"id"`
 	SubmittedBy *string `json:"submittedBy,omitempty"`
 	// The id of the cluster.
-	ClusterId string `json:"clusterId"`
-	ProjectId string `json:"projectId"`
-	DepartmentId *string `json:"departmentId,omitempty"`
-	CreatedAt time.Time `json:"createdAt"`
-	RequestedResources NullableWorkloadRequestResources `json:"requestedResources,omitempty"`
-	RequestedPods *RequestedPods `json:"requestedPods,omitempty"`
-	RequestedNodePools []string `json:"requestedNodePools,omitempty"`
-	Datasources []Datasource `json:"datasources,omitempty"`
-	Environments []Environment `json:"environments,omitempty"`
-	ExternalConnections []Connection1 `json:"externalConnections,omitempty"`
-	DistributedFramework *string `json:"distributedFramework,omitempty"`
-	Images []string `json:"images,omitempty"`
-	FullySaasWorkload *bool `json:"fullySaasWorkload,omitempty"`
+	ClusterId            string                           `json:"clusterId"`
+	ProjectId            string                           `json:"projectId"`
+	DepartmentId         *string                          `json:"departmentId,omitempty"`
+	CreatedAt            time.Time                        `json:"createdAt"`
+	RequestedResources   NullableWorkloadRequestResources `json:"requestedResources,omitempty"`
+	RequestedPods        *RequestedPods                   `json:"requestedPods,omitempty"`
+	RequestedNodePools   []string                         `json:"requestedNodePools,omitempty"`
+	Datasources          []Datasource                     `json:"datasources,omitempty"`
+	Environments         []Environment                    `json:"environments,omitempty"`
+	ExternalConnections  []Connection1                    `json:"externalConnections,omitempty"`
+	DistributedFramework *string                          `json:"distributedFramework,omitempty"`
+	Images               []string                         `json:"images,omitempty"`
+	FullySaasWorkload    *bool                            `json:"fullySaasWorkload,omitempty"`
 }
 
 // NewWorkloadCreationFields instantiates a new WorkloadCreationFields object
@@ -300,6 +302,7 @@ func (o *WorkloadCreationFields) HasRequestedResources() bool {
 func (o *WorkloadCreationFields) SetRequestedResources(v WorkloadRequestResources) {
 	o.RequestedResources.Set(&v)
 }
+
 // SetRequestedResourcesNil sets the value for RequestedResources to be an explicit nil
 func (o *WorkloadCreationFields) SetRequestedResourcesNil() {
 	o.RequestedResources.Set(nil)
@@ -657,5 +660,3 @@ func (v *NullableWorkloadCreationFields) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

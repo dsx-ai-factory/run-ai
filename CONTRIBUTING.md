@@ -154,21 +154,33 @@ We split CI into two layers:
 
 ### Running the Checks Locally
 
-Layer 1 is the part you can fully reproduce on your machine, and doing so before you push is the fastest way to a green PR. There is deliberately **no single repo-wide gate command**: this is a monorepo of independent modules, the root `Makefile` targets are placeholders, and Layer 2 (full build and end-to-end tests) needs secrets and a cluster, so it cannot run locally at all.
+Layer 1 is the part you can reproduce on your machine, and doing so before you push is the fastest way to a green PR. There is deliberately **no single repo-wide gate command**: this is a monorepo of independently buildable services, and Layer 2 (full build and end-to-end tests) needs secrets and a cluster, so it cannot run locally at all.
 
-Run the checks matching what you changed, mirroring the corresponding jobs in [`.github/workflows/pr-checks.yaml`](.github/workflows/pr-checks.yaml), at the versions CI pins:
+**Start with the service you changed.** The closest thing to a local gate is each service's own Makefile:
 
-| You changed | Run | Mirrors CI job |
+```bash
+cd <service-dir>            # e.g. runai-cluster/cluster/anyworkload-controller
+make build test lint validate
+```
+
+That is exactly what CI runs for you: the `targets` job in [`pr-fast.yaml`](.github/workflows/pr-fast.yaml) discovers which services your PR touches and runs all four targets in each one, using that service's Makefile.
+
+Then run whichever language-level checks apply. These mirror the corresponding jobs in [`pr-checks.yaml`](.github/workflows/pr-checks.yaml) and the standalone workflows, at the versions CI pins:
+
+| You changed | Run | Mirrors |
 |---|---|---|
-| Go code | `cd <module> && go build ./... && go test ./... && gofmt -l .`<br>`golangci-lint run` (v2.9.0) | `go-lint`, `govulncheck` |
-| Python | `ruff check <files>` (0.15.15) | `py-lint` |
-| JS/TS | `npx eslint <files>` | `js-lint` |
-| Helm charts | `helm dependency update control-plane/control-plane-chart`<br>`helm lint control-plane/control-plane-chart`<br>`helm template control-plane/control-plane-chart > /dev/null` | `helm` |
+| Any service | `cd <service-dir> && make build test lint validate` | `targets` job in `pr-fast.yaml` |
+| Go code | `golangci-lint run` (v2.9.0)<br>`govulncheck ./...` | `go-lint`, `govulncheck` in `pr-checks.yaml` |
+| Python | `ruff check <files>` (0.15.15) | `py-lint` in `pr-checks.yaml` |
+| JS/TS | `npx eslint <files>` | `js-lint` in `pr-checks.yaml` |
+| Helm charts | `helm dependency update control-plane/control-plane-chart`<br>`helm lint control-plane/control-plane-chart`<br>`helm template control-plane/control-plane-chart > /dev/null` | `helm` in `pr-checks.yaml` |
 | GitHub Actions workflows | `actionlint` | `actionlint.yaml` |
-| `CODEOWNERS` | `make validate` | `validate-codeowners` |
-| `docs/` or `fern/` | `fern docs dev` | `fern-docs-ci.yaml` |
+| `docs/` or `fern/` | `fern check`<br>`python3 ./tools/check-fern-nav.py fern` | `fern-docs-ci.yaml` |
+| `CODEOWNERS` | `make validate` (from the repo root) | — not run in CI; local check only |
 
-Each service directory also has its own Makefile with `build`, `test`, `lint`, and `validate` targets scoped to that service; use those when working inside a single component.
+Two things worth knowing about the root `Makefile`: `validate` is real — it runs [`validate-codeowners.py`](.github/scripts/validate-codeowners.py) against `CODEOWNERS` — but `build`, `test`, and `lint` are placeholders that only echo `NA`. Run those per-service, as above, not from the root.
+
+Note that `fern docs dev` starts a local preview server; it does **not** validate anything. Use `fern check` to reproduce the CI check.
 
 ---
 

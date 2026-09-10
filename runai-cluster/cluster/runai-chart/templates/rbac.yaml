@@ -77,14 +77,21 @@ rules:
       - patch
       - update
       - watch
-  # Required to create and bind the accessrule-controller Role, which grants bind on ClusterRoles.
+  # Role creation does not include a resource name in the escalate authorization check.
   - apiGroups:
       - rbac.authorization.k8s.io
     resources:
       - roles
     verbs:
-      - bind
       - escalate
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - roles
+    resourceNames:
+      - accessrule-controller
+    verbs:
+      - bind
   - apiGroups:
       - gateway.networking.k8s.io
     resources:

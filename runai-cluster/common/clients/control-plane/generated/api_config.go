@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -19,17 +21,16 @@ import (
 	"strings"
 )
 
-
 type ConfigApi interface {
 
 	/*
-	GetClusterControlPlaneConfig Retrieve the control plane configuration of a cluster.
+		GetClusterControlPlaneConfig Retrieve the control plane configuration of a cluster.
 
-	Retrieve the control plane configuration of a Kubernetes cluster by Universally Unique Identifier (UUID).
+		Retrieve the control plane configuration of a Kubernetes cluster by Universally Unique Identifier (UUID).
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-	@return ConfigApiGetClusterControlPlaneConfigRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+		@return ConfigApiGetClusterControlPlaneConfigRequest
 	*/
 	GetClusterControlPlaneConfig(ctx context.Context, clusterUuid string) ConfigApiGetClusterControlPlaneConfigRequest
 
@@ -38,12 +39,12 @@ type ConfigApi interface {
 	GetClusterControlPlaneConfigExecute(r ConfigApiGetClusterControlPlaneConfigRequest) (*ClusterControlPlaneConfig, *http.Response, error)
 
 	/*
-	GetTenantConfiguration Get configuration.
+		GetTenantConfiguration Get configuration.
 
-	Retrieve Run:ai configuration settings.
+		Retrieve Run:ai configuration settings.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ConfigApiGetTenantConfigurationRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ConfigApiGetTenantConfigurationRequest
 	*/
 	GetTenantConfiguration(ctx context.Context) ConfigApiGetTenantConfigurationRequest
 
@@ -56,8 +57,8 @@ type ConfigApi interface {
 type ConfigApiService service
 
 type ConfigApiGetClusterControlPlaneConfigRequest struct {
-	ctx context.Context
-	ApiService ConfigApi
+	ctx         context.Context
+	ApiService  ConfigApi
 	clusterUuid string
 }
 
@@ -70,26 +71,27 @@ GetClusterControlPlaneConfig Retrieve the control plane configuration of a clust
 
 Retrieve the control plane configuration of a Kubernetes cluster by Universally Unique Identifier (UUID).
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
- @return ConfigApiGetClusterControlPlaneConfigRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
+	@return ConfigApiGetClusterControlPlaneConfigRequest
 */
 func (a *ConfigApiService) GetClusterControlPlaneConfig(ctx context.Context, clusterUuid string) ConfigApiGetClusterControlPlaneConfigRequest {
 	return ConfigApiGetClusterControlPlaneConfigRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		clusterUuid: clusterUuid,
 	}
 }
 
 // Execute executes the request
-//  @return ClusterControlPlaneConfig
+//
+//	@return ClusterControlPlaneConfig
 func (a *ConfigApiService) GetClusterControlPlaneConfigExecute(r ConfigApiGetClusterControlPlaneConfigRequest) (*ClusterControlPlaneConfig, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ClusterControlPlaneConfig
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ClusterControlPlaneConfig
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ConfigApiService.GetClusterControlPlaneConfig")
@@ -211,7 +213,7 @@ func (a *ConfigApiService) GetClusterControlPlaneConfigExecute(r ConfigApiGetClu
 }
 
 type ConfigApiGetTenantConfigurationRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService ConfigApi
 }
 
@@ -224,24 +226,25 @@ GetTenantConfiguration Get configuration.
 
 Retrieve Run:ai configuration settings.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return ConfigApiGetTenantConfigurationRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ConfigApiGetTenantConfigurationRequest
 */
 func (a *ConfigApiService) GetTenantConfiguration(ctx context.Context) ConfigApiGetTenantConfigurationRequest {
 	return ConfigApiGetTenantConfigurationRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-//  @return AuthConfiguration
+//
+//	@return AuthConfiguration
 func (a *ConfigApiService) GetTenantConfigurationExecute(r ConfigApiGetTenantConfigurationRequest) (*AuthConfiguration, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *AuthConfiguration
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *AuthConfiguration
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ConfigApiService.GetTenantConfiguration")

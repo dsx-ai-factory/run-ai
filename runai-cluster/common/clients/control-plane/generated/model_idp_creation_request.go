@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,12 +18,12 @@ import (
 
 // IdpCreationRequest struct for IdpCreationRequest
 type IdpCreationRequest struct {
-	Name *string `json:"name,omitempty"`
-	Type string `json:"type"`
+	Name     *string                  `json:"name,omitempty"`
+	Type     string                   `json:"type"`
 	SamlData NullableSamlCreationData `json:"samlData,omitempty"`
 	OidcData NullableOidcCreationData `json:"oidcData,omitempty"`
-	OcpData NullableOcpCreationData `json:"ocpData,omitempty"`
-	Mappers *Mappers `json:"mappers,omitempty"`
+	OcpData  NullableOcpCreationData  `json:"ocpData,omitempty"`
+	Mappers  *Mappers                 `json:"mappers,omitempty"`
 }
 
 // NewIdpCreationRequest instantiates a new IdpCreationRequest object
@@ -130,6 +132,7 @@ func (o *IdpCreationRequest) HasSamlData() bool {
 func (o *IdpCreationRequest) SetSamlData(v SamlCreationData) {
 	o.SamlData.Set(&v)
 }
+
 // SetSamlDataNil sets the value for SamlData to be an explicit nil
 func (o *IdpCreationRequest) SetSamlDataNil() {
 	o.SamlData.Set(nil)
@@ -172,6 +175,7 @@ func (o *IdpCreationRequest) HasOidcData() bool {
 func (o *IdpCreationRequest) SetOidcData(v OidcCreationData) {
 	o.OidcData.Set(&v)
 }
+
 // SetOidcDataNil sets the value for OidcData to be an explicit nil
 func (o *IdpCreationRequest) SetOidcDataNil() {
 	o.OidcData.Set(nil)
@@ -214,6 +218,7 @@ func (o *IdpCreationRequest) HasOcpData() bool {
 func (o *IdpCreationRequest) SetOcpData(v OcpCreationData) {
 	o.OcpData.Set(&v)
 }
+
 // SetOcpDataNil sets the value for OcpData to be an explicit nil
 func (o *IdpCreationRequest) SetOcpDataNil() {
 	o.OcpData.Set(nil)
@@ -314,5 +319,3 @@ func (v *NullableIdpCreationRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

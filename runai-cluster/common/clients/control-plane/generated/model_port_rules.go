@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,12 +18,12 @@ import (
 
 // PortRules Rules for port attributes
 type PortRules struct {
-	Container NullableIntegerRules `json:"container,omitempty"`
-	ServiceType NullablePortServiceTypeRules `json:"serviceType,omitempty"`
-	CustomExternalPort NullableBooleanRules `json:"customExternalPort,omitempty"`
-	External NullableIntegerRules `json:"external,omitempty"`
-	ToolType NullableStringRules `json:"toolType,omitempty"`
-	ToolName NullableStringRules `json:"toolName,omitempty"`
+	Container          NullableIntegerRules         `json:"container,omitempty"`
+	ServiceType        NullablePortServiceTypeRules `json:"serviceType,omitempty"`
+	CustomExternalPort NullableBooleanRules         `json:"customExternalPort,omitempty"`
+	External           NullableIntegerRules         `json:"external,omitempty"`
+	ToolType           NullableStringRules          `json:"toolType,omitempty"`
+	ToolName           NullableStringRules          `json:"toolName,omitempty"`
 }
 
 // NewPortRules instantiates a new PortRules object
@@ -73,6 +75,7 @@ func (o *PortRules) HasContainer() bool {
 func (o *PortRules) SetContainer(v IntegerRules) {
 	o.Container.Set(&v)
 }
+
 // SetContainerNil sets the value for Container to be an explicit nil
 func (o *PortRules) SetContainerNil() {
 	o.Container.Set(nil)
@@ -115,6 +118,7 @@ func (o *PortRules) HasServiceType() bool {
 func (o *PortRules) SetServiceType(v PortServiceTypeRules) {
 	o.ServiceType.Set(&v)
 }
+
 // SetServiceTypeNil sets the value for ServiceType to be an explicit nil
 func (o *PortRules) SetServiceTypeNil() {
 	o.ServiceType.Set(nil)
@@ -157,6 +161,7 @@ func (o *PortRules) HasCustomExternalPort() bool {
 func (o *PortRules) SetCustomExternalPort(v BooleanRules) {
 	o.CustomExternalPort.Set(&v)
 }
+
 // SetCustomExternalPortNil sets the value for CustomExternalPort to be an explicit nil
 func (o *PortRules) SetCustomExternalPortNil() {
 	o.CustomExternalPort.Set(nil)
@@ -199,6 +204,7 @@ func (o *PortRules) HasExternal() bool {
 func (o *PortRules) SetExternal(v IntegerRules) {
 	o.External.Set(&v)
 }
+
 // SetExternalNil sets the value for External to be an explicit nil
 func (o *PortRules) SetExternalNil() {
 	o.External.Set(nil)
@@ -241,6 +247,7 @@ func (o *PortRules) HasToolType() bool {
 func (o *PortRules) SetToolType(v StringRules) {
 	o.ToolType.Set(&v)
 }
+
 // SetToolTypeNil sets the value for ToolType to be an explicit nil
 func (o *PortRules) SetToolTypeNil() {
 	o.ToolType.Set(nil)
@@ -283,6 +290,7 @@ func (o *PortRules) HasToolName() bool {
 func (o *PortRules) SetToolName(v StringRules) {
 	o.ToolName.Set(&v)
 }
+
 // SetToolNameNil sets the value for ToolName to be an explicit nil
 func (o *PortRules) SetToolNameNil() {
 	o.ToolName.Set(nil)
@@ -351,5 +359,3 @@ func (v *NullablePortRules) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

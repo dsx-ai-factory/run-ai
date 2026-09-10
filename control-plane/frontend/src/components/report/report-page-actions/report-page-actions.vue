@@ -100,13 +100,16 @@ export default defineComponent({
     },
     isDownloadBtnDisabled(): boolean {
       if (!this.selectedReport) return true;
+      // Download acts on one report; the grid allows selecting many for bulk delete.
+      if (this.selectedRowsAmount > 1) return true;
       return this.selectedReport.status !== ReportStatus.Ready;
     },
     /*** tooltips ***/
     downloadBtnTooltip(): string {
-      return this.isDownloadBtnDisabled && this.selectedReport
-        ? "To download, the selected report must be in status Ready."
-        : "";
+      if (!this.isDownloadBtnDisabled || !this.selectedReport) return "";
+      return this.selectedRowsAmount > 1
+        ? "To download, select a single report."
+        : "To download, the selected report must be in status Ready.";
     },
     deleteBtnTooltip(): string {
       return this.isDeleteBtnDisabled ? EReportActionTooltip.NoDeletePermission : "";

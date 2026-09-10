@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -18,12 +20,12 @@ import (
 // NodePool struct for NodePool
 type NodePool struct {
 	// Node Pool Name
-	Name *string `json:"name,omitempty"`
-	OverProvisioningRatio *int32 `json:"overProvisioningRatio,omitempty"`
+	Name                  *string `json:"name,omitempty"`
+	OverProvisioningRatio *int32  `json:"overProvisioningRatio,omitempty"`
 	// Label key for associated nodes to the Node Pool (with value as in labelValue)
 	LabelKey *string `json:"labelKey,omitempty"`
 	// Label value for associated nodes to the Node Pool (with key as in labelKey)
-	LabelValue *string `json:"labelValue,omitempty"`
+	LabelValue        *string            `json:"labelValue,omitempty"`
 	PlacementStrategy *PlacementStrategy `json:"placementStrategy,omitempty"`
 	// Node Pool unique id
 	Id *float32 `json:"id,omitempty"`
@@ -670,5 +672,3 @@ func (v *NullableNodePool) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

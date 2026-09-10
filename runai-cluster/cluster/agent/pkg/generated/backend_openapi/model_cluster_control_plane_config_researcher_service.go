@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend 
+The aggregated API  of Run:AI backend
 
 API version: 1.5.1
 */
@@ -19,7 +21,7 @@ type ClusterControlPlaneConfigResearcherService struct {
 	// URL to the endpoint that returns JWT validation keys
 	JwksURL *string `json:"jwksURL,omitempty"`
 	// Logout link.
-	LogoutLink *string `json:"logoutLink,omitempty"`
+	LogoutLink *string                                               `json:"logoutLink,omitempty"`
 	OauthProxy *ClusterControlPlaneConfigResearcherServiceOauthProxy `json:"oauthProxy,omitempty"`
 }
 
@@ -185,5 +187,3 @@ func (v *NullableClusterControlPlaneConfigResearcherService) UnmarshalJSON(src [
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

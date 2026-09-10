@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 datavolumes-service
 
@@ -17,7 +19,7 @@ import (
 
 // GetDatavolumesInternal200Response struct for GetDatavolumesInternal200Response
 type GetDatavolumesInternal200Response struct {
-	Next *int32 `json:"next,omitempty"`
+	Next        *int32               `json:"next,omitempty"`
 	Datavolumes []DatavolumeInternal `json:"datavolumes"`
 }
 
@@ -141,5 +143,3 @@ func (v *NullableGetDatavolumesInternal200Response) UnmarshalJSON(src []byte) er
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

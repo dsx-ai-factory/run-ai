@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Project and Department service API
 
-The aggregated API of Run:AI backend projects and departments 
+The aggregated API of Run:AI backend projects and departments
 
 API version: 1.5.1
 */
@@ -16,7 +18,7 @@ import (
 
 // JobsNodeAffinity struct for JobsNodeAffinity
 type JobsNodeAffinity struct {
-	Train *NodeAffinity `json:"train,omitempty"`
+	Train       *NodeAffinity `json:"train,omitempty"`
 	Interactive *NodeAffinity `json:"interactive,omitempty"`
 }
 
@@ -147,5 +149,3 @@ func (v *NullableJobsNodeAffinity) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

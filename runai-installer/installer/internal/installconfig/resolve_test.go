@@ -201,3 +201,29 @@ func TestResolveRegistry_BasicMissingPasswordFile(t *testing.T) {
 	_, err := ResolveRegistry(cfg, "", "")
 	require.Error(t, err)
 }
+
+func TestResolveClusterCredentials(t *testing.T) {
+	tokenPath := writeToken(t, "  bootstrap-token\n")
+	cfg := &Config{Cluster: &Cluster{BootstrapTokenPath: tokenPath}}
+
+	require.NoError(t, ResolveClusterCredentials(cfg))
+	assert.Equal(t, "bootstrap-token", cfg.Cluster.bootstrapToken)
+}
+
+func TestResolveClusterCredentials_ClientSecret(t *testing.T) {
+	secretPath := writeToken(t, "client-secret")
+	cfg := &Config{Cluster: &Cluster{ClientSecretPath: secretPath}}
+
+	require.NoError(t, ResolveClusterCredentials(cfg))
+	assert.Equal(t, "client-secret", cfg.Cluster.clientSecret)
+}
+
+func TestResolveClusterCredentials_RejectsMultipleCredentials(t *testing.T) {
+	cfg := &Config{Cluster: &Cluster{
+		BootstrapTokenPath: "/bootstrap-token",
+		ClientSecretPath:   "/client-secret",
+	}}
+
+	err := ResolveClusterCredentials(cfg)
+	require.ErrorContains(t, err, "mutually exclusive")
+}

@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -77,6 +79,7 @@ func (o *WorkloadSupportedTypes) HasInference() bool {
 func (o *WorkloadSupportedTypes) SetInference(v bool) {
 	o.Inference.Set(&v)
 }
+
 // SetInferenceNil sets the value for Inference to be an explicit nil
 func (o *WorkloadSupportedTypes) SetInferenceNil() {
 	o.Inference.Set(nil)
@@ -119,6 +122,7 @@ func (o *WorkloadSupportedTypes) HasWorkspace() bool {
 func (o *WorkloadSupportedTypes) SetWorkspace(v bool) {
 	o.Workspace.Set(&v)
 }
+
 // SetWorkspaceNil sets the value for Workspace to be an explicit nil
 func (o *WorkloadSupportedTypes) SetWorkspaceNil() {
 	o.Workspace.Set(nil)
@@ -161,6 +165,7 @@ func (o *WorkloadSupportedTypes) HasTraining() bool {
 func (o *WorkloadSupportedTypes) SetTraining(v bool) {
 	o.Training.Set(&v)
 }
+
 // SetTrainingNil sets the value for Training to be an explicit nil
 func (o *WorkloadSupportedTypes) SetTrainingNil() {
 	o.Training.Set(nil)
@@ -203,6 +208,7 @@ func (o *WorkloadSupportedTypes) HasDistributed() bool {
 func (o *WorkloadSupportedTypes) SetDistributed(v bool) {
 	o.Distributed.Set(&v)
 }
+
 // SetDistributedNil sets the value for Distributed to be an explicit nil
 func (o *WorkloadSupportedTypes) SetDistributedNil() {
 	o.Distributed.Set(nil)
@@ -245,6 +251,7 @@ func (o *WorkloadSupportedTypes) HasDistFramework() bool {
 func (o *WorkloadSupportedTypes) SetDistFramework(v string) {
 	o.DistFramework.Set(&v)
 }
+
 // SetDistFrameworkNil sets the value for DistFramework to be an explicit nil
 func (o *WorkloadSupportedTypes) SetDistFrameworkNil() {
 	o.DistFramework.Set(nil)
@@ -310,5 +317,3 @@ func (v *NullableWorkloadSupportedTypes) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

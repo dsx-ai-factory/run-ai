@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 K8sObjectTracker
 
@@ -337,7 +339,9 @@ func (a *SecretsAPIService) CreateClusterWideSecret(ctx context.Context, cluster
 }
 
 // Execute executes the request
+//
 //	@return SecretCreationRequest
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SecretsAPIService) CreateClusterWideSecretExecute(r ApiCreateClusterWideSecretRequest) (*SecretCreationRequest, *http.Response, error) {
 	var (
@@ -504,7 +508,9 @@ func (a *SecretsAPIService) CreateDepartmentWideSecret(ctx context.Context, clus
 }
 
 // Execute executes the request
+//
 //	@return Secret
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SecretsAPIService) CreateDepartmentWideSecretExecute(r ApiCreateDepartmentWideSecretRequest) (*Secret, *http.Response, error) {
 	var (
@@ -672,7 +678,9 @@ func (a *SecretsAPIService) CreateDepartmentsWideSecret(ctx context.Context, clu
 }
 
 // Execute executes the request
+//
 //	@return Secret
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SecretsAPIService) CreateDepartmentsWideSecretExecute(r ApiCreateDepartmentsWideSecretRequest) (*Secret, *http.Response, error) {
 	var (
@@ -851,7 +859,9 @@ func (a *SecretsAPIService) CreateProjectSecret(ctx context.Context, clusterUuid
 }
 
 // Execute executes the request
+//
 //	@return Secret
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SecretsAPIService) CreateProjectSecretExecute(r ApiCreateProjectSecretRequest) (*Secret, *http.Response, error) {
 	var (
@@ -1019,7 +1029,9 @@ func (a *SecretsAPIService) CreateProjectsSecret(ctx context.Context, clusterUui
 }
 
 // Execute executes the request
+//
 //	@return Secret
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SecretsAPIService) CreateProjectsSecretExecute(r ApiCreateProjectsSecretRequest) (*Secret, *http.Response, error) {
 	var (
@@ -2028,7 +2040,9 @@ func (a *SecretsAPIService) ListSecrets(ctx context.Context) ApiListSecretsReque
 }
 
 // Execute executes the request
+//
 //	@return SecretListResponse
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SecretsAPIService) ListSecretsExecute(r ApiListSecretsRequest) (*SecretListResponse, *http.Response, error) {
 	var (
@@ -2213,7 +2227,9 @@ func (a *SecretsAPIService) ObsoleteCreateSecret(ctx context.Context, clusterUui
 }
 
 // Execute executes the request
+//
 //	@return SingleSecret
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SecretsAPIService) ObsoleteCreateSecretExecute(r ApiObsoleteCreateSecretRequest) (*SingleSecret, *http.Response, error) {
 	var (
@@ -2538,7 +2554,9 @@ func (a *SecretsAPIService) ObsoleteSyncSecret(ctx context.Context, clusterUuid 
 }
 
 // Execute executes the request
+//
 //	@return []SingleSecret
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SecretsAPIService) ObsoleteSyncSecretExecute(r ApiObsoleteSyncSecretRequest) ([]SingleSecret, *http.Response, error) {
 	var (
@@ -2699,7 +2717,9 @@ func (a *SecretsAPIService) SyncClusterWideSecrets(ctx context.Context, clusterU
 }
 
 // Execute executes the request
+//
 //	@return Secrets
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SecretsAPIService) SyncClusterWideSecretsExecute(r ApiSyncClusterWideSecretsRequest) (*Secrets, *http.Response, error) {
 	var (
@@ -2862,7 +2882,9 @@ func (a *SecretsAPIService) SyncDepartmentWideSecrets(ctx context.Context, clust
 }
 
 // Execute executes the request
+//
 //	@return Secrets
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SecretsAPIService) SyncDepartmentWideSecretsExecute(r ApiSyncDepartmentWideSecretsRequest) (*Secrets, *http.Response, error) {
 	var (
@@ -3026,7 +3048,9 @@ func (a *SecretsAPIService) SyncDepartmentsWideSecrets(ctx context.Context, clus
 }
 
 // Execute executes the request
+//
 //	@return Secrets
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SecretsAPIService) SyncDepartmentsWideSecretsExecute(r ApiSyncDepartmentsWideSecretsRequest) (*Secrets, *http.Response, error) {
 	var (
@@ -3201,7 +3225,9 @@ func (a *SecretsAPIService) SyncProjectSecrets(ctx context.Context, clusterUuid 
 }
 
 // Execute executes the request
+//
 //	@return Secrets
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SecretsAPIService) SyncProjectSecretsExecute(r ApiSyncProjectSecretsRequest) (*Secrets, *http.Response, error) {
 	var (
@@ -3365,7 +3391,9 @@ func (a *SecretsAPIService) SyncProjectsSecrets(ctx context.Context, clusterUuid
 }
 
 // Execute executes the request
+//
 //	@return Secrets
+//
 // /////// RUNAI (remove isResponseFile filter on pointer)//////////
 func (a *SecretsAPIService) SyncProjectsSecretsExecute(r ApiSyncProjectsSecretsRequest) (*Secrets, *http.Response, error) {
 	var (

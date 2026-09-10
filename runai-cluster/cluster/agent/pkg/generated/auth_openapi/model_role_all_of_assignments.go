@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Authorization
 
@@ -18,11 +20,11 @@ import (
 
 // RoleAllOfAssignments struct for RoleAllOfAssignments
 type RoleAllOfAssignments struct {
-	AssignedTo string `json:"assignedTo"`
-	Type SubjectType `json:"type"`
-	ScopeId string `json:"scopeId"`
-	AssignedBy string `json:"assignedBy"`
-	LastUpdated time.Time `json:"lastUpdated"`
+	AssignedTo  string      `json:"assignedTo"`
+	Type        SubjectType `json:"type"`
+	ScopeId     string      `json:"scopeId"`
+	AssignedBy  string      `json:"assignedBy"`
+	LastUpdated time.Time   `json:"lastUpdated"`
 }
 
 // NewRoleAllOfAssignments instantiates a new RoleAllOfAssignments object
@@ -222,5 +224,3 @@ func (v *NullableRoleAllOfAssignments) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

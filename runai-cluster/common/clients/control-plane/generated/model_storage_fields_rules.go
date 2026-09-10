@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -16,14 +18,14 @@ import (
 
 // StorageFieldsRules struct for StorageFieldsRules
 type StorageFieldsRules struct {
-	DataVolume NullableDataVolumesRules `json:"dataVolume,omitempty"`
-	Pvc NullablePvcsRules `json:"pvc,omitempty"`
-	Git NullableGitsRules `json:"git,omitempty"`
-	ConfigMapVolume NullableConfigMapsRules `json:"configMapVolume,omitempty"`
-	SecretVolume NullableSecretsRules `json:"secretVolume,omitempty"`
-	HostPath NullableHostPathsRules `json:"hostPath,omitempty"`
-	Nfs NullableNfssRules `json:"nfs,omitempty"`
-	S3 NullableS3sRules `json:"s3,omitempty"`
+	DataVolume      NullableDataVolumesRules `json:"dataVolume,omitempty"`
+	Pvc             NullablePvcsRules        `json:"pvc,omitempty"`
+	Git             NullableGitsRules        `json:"git,omitempty"`
+	ConfigMapVolume NullableConfigMapsRules  `json:"configMapVolume,omitempty"`
+	SecretVolume    NullableSecretsRules     `json:"secretVolume,omitempty"`
+	HostPath        NullableHostPathsRules   `json:"hostPath,omitempty"`
+	Nfs             NullableNfssRules        `json:"nfs,omitempty"`
+	S3              NullableS3sRules         `json:"s3,omitempty"`
 }
 
 // NewStorageFieldsRules instantiates a new StorageFieldsRules object
@@ -75,6 +77,7 @@ func (o *StorageFieldsRules) HasDataVolume() bool {
 func (o *StorageFieldsRules) SetDataVolume(v DataVolumesRules) {
 	o.DataVolume.Set(&v)
 }
+
 // SetDataVolumeNil sets the value for DataVolume to be an explicit nil
 func (o *StorageFieldsRules) SetDataVolumeNil() {
 	o.DataVolume.Set(nil)
@@ -117,6 +120,7 @@ func (o *StorageFieldsRules) HasPvc() bool {
 func (o *StorageFieldsRules) SetPvc(v PvcsRules) {
 	o.Pvc.Set(&v)
 }
+
 // SetPvcNil sets the value for Pvc to be an explicit nil
 func (o *StorageFieldsRules) SetPvcNil() {
 	o.Pvc.Set(nil)
@@ -159,6 +163,7 @@ func (o *StorageFieldsRules) HasGit() bool {
 func (o *StorageFieldsRules) SetGit(v GitsRules) {
 	o.Git.Set(&v)
 }
+
 // SetGitNil sets the value for Git to be an explicit nil
 func (o *StorageFieldsRules) SetGitNil() {
 	o.Git.Set(nil)
@@ -201,6 +206,7 @@ func (o *StorageFieldsRules) HasConfigMapVolume() bool {
 func (o *StorageFieldsRules) SetConfigMapVolume(v ConfigMapsRules) {
 	o.ConfigMapVolume.Set(&v)
 }
+
 // SetConfigMapVolumeNil sets the value for ConfigMapVolume to be an explicit nil
 func (o *StorageFieldsRules) SetConfigMapVolumeNil() {
 	o.ConfigMapVolume.Set(nil)
@@ -243,6 +249,7 @@ func (o *StorageFieldsRules) HasSecretVolume() bool {
 func (o *StorageFieldsRules) SetSecretVolume(v SecretsRules) {
 	o.SecretVolume.Set(&v)
 }
+
 // SetSecretVolumeNil sets the value for SecretVolume to be an explicit nil
 func (o *StorageFieldsRules) SetSecretVolumeNil() {
 	o.SecretVolume.Set(nil)
@@ -285,6 +292,7 @@ func (o *StorageFieldsRules) HasHostPath() bool {
 func (o *StorageFieldsRules) SetHostPath(v HostPathsRules) {
 	o.HostPath.Set(&v)
 }
+
 // SetHostPathNil sets the value for HostPath to be an explicit nil
 func (o *StorageFieldsRules) SetHostPathNil() {
 	o.HostPath.Set(nil)
@@ -327,6 +335,7 @@ func (o *StorageFieldsRules) HasNfs() bool {
 func (o *StorageFieldsRules) SetNfs(v NfssRules) {
 	o.Nfs.Set(&v)
 }
+
 // SetNfsNil sets the value for Nfs to be an explicit nil
 func (o *StorageFieldsRules) SetNfsNil() {
 	o.Nfs.Set(nil)
@@ -369,6 +378,7 @@ func (o *StorageFieldsRules) HasS3() bool {
 func (o *StorageFieldsRules) SetS3(v S3sRules) {
 	o.S3.Set(&v)
 }
+
 // SetS3Nil sets the value for S3 to be an explicit nil
 func (o *StorageFieldsRules) SetS3Nil() {
 	o.S3.Set(nil)
@@ -443,5 +453,3 @@ func (v *NullableStorageFieldsRules) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

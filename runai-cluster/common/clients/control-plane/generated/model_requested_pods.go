@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -17,8 +19,8 @@ import (
 // RequestedPods struct for RequestedPods
 type RequestedPods struct {
 	Number NullableInt32 `json:"number,omitempty"`
-	Min NullableInt32 `json:"min,omitempty"`
-	Max NullableInt32 `json:"max,omitempty"`
+	Min    NullableInt32 `json:"min,omitempty"`
+	Max    NullableInt32 `json:"max,omitempty"`
 	// specifies how many Pods can run in parallel
 	Parallelism NullableInt32 `json:"parallelism,omitempty"`
 	// specifies how many Pods should terminate successfully before the Workload is completed
@@ -74,6 +76,7 @@ func (o *RequestedPods) HasNumber() bool {
 func (o *RequestedPods) SetNumber(v int32) {
 	o.Number.Set(&v)
 }
+
 // SetNumberNil sets the value for Number to be an explicit nil
 func (o *RequestedPods) SetNumberNil() {
 	o.Number.Set(nil)
@@ -116,6 +119,7 @@ func (o *RequestedPods) HasMin() bool {
 func (o *RequestedPods) SetMin(v int32) {
 	o.Min.Set(&v)
 }
+
 // SetMinNil sets the value for Min to be an explicit nil
 func (o *RequestedPods) SetMinNil() {
 	o.Min.Set(nil)
@@ -158,6 +162,7 @@ func (o *RequestedPods) HasMax() bool {
 func (o *RequestedPods) SetMax(v int32) {
 	o.Max.Set(&v)
 }
+
 // SetMaxNil sets the value for Max to be an explicit nil
 func (o *RequestedPods) SetMaxNil() {
 	o.Max.Set(nil)
@@ -200,6 +205,7 @@ func (o *RequestedPods) HasParallelism() bool {
 func (o *RequestedPods) SetParallelism(v int32) {
 	o.Parallelism.Set(&v)
 }
+
 // SetParallelismNil sets the value for Parallelism to be an explicit nil
 func (o *RequestedPods) SetParallelismNil() {
 	o.Parallelism.Set(nil)
@@ -242,6 +248,7 @@ func (o *RequestedPods) HasCompletions() bool {
 func (o *RequestedPods) SetCompletions(v int32) {
 	o.Completions.Set(&v)
 }
+
 // SetCompletionsNil sets the value for Completions to be an explicit nil
 func (o *RequestedPods) SetCompletionsNil() {
 	o.Completions.Set(nil)
@@ -307,5 +314,3 @@ func (v *NullableRequestedPods) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

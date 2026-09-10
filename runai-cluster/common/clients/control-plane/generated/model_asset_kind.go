@@ -1,7 +1,9 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 Runai API
 
-# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token). 
+# Introduction  The Run:AI Control-Plane API reference is a guide that provides an easy-to-use programming interface for adding administrative tasks to your application.  Run:ai APIs are accessed using *bearer tokens*. To obtain a token, you need to create an **Application** through the Run:ai user interface. To create an application, in your UI, go to `Settings & Tools`, `Application` and create a new Application.  After you have created a new application, you will need to assign it access rules. To assign access rules to the application, see [Create access rules](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#create-or-delete-rules). Make sure you assign the correct rules to your application. Use the [Roles](https://docs.run.ai/latest/admin/runai-setup/access-control/rbac/?h=create+delete+app#roles) to assign the correct access rules.  To get your access token, follow the instructions in [Request a token](https://docs.run.ai/latest/developer/rest-auth/#request-an-api-token).
 
 API version: 2.0.0
 */
@@ -20,22 +22,22 @@ type AssetKind string
 
 // List of AssetKind
 const (
-	ASSETKIND_COMPUTE AssetKind = "compute"
-	ASSETKIND_ENVIRONMENT AssetKind = "environment"
-	ASSETKIND_ACCESS_KEY AssetKind = "accessKey"
-	ASSETKIND_DOCKER_REGISTRY AssetKind = "dockerRegistry"
-	ASSETKIND_PASSWORD AssetKind = "password"
-	ASSETKIND_GENERIC_SECRET AssetKind = "genericSecret"
-	ASSETKIND_REGISTRY AssetKind = "registry"
-	ASSETKIND_S3 AssetKind = "s3"
-	ASSETKIND_GIT AssetKind = "git"
-	ASSETKIND_NFS AssetKind = "nfs"
-	ASSETKIND_PVC AssetKind = "pvc"
-	ASSETKIND_HOST_PATH AssetKind = "hostPath"
+	ASSETKIND_COMPUTE           AssetKind = "compute"
+	ASSETKIND_ENVIRONMENT       AssetKind = "environment"
+	ASSETKIND_ACCESS_KEY        AssetKind = "accessKey"
+	ASSETKIND_DOCKER_REGISTRY   AssetKind = "dockerRegistry"
+	ASSETKIND_PASSWORD          AssetKind = "password"
+	ASSETKIND_GENERIC_SECRET    AssetKind = "genericSecret"
+	ASSETKIND_REGISTRY          AssetKind = "registry"
+	ASSETKIND_S3                AssetKind = "s3"
+	ASSETKIND_GIT               AssetKind = "git"
+	ASSETKIND_NFS               AssetKind = "nfs"
+	ASSETKIND_PVC               AssetKind = "pvc"
+	ASSETKIND_HOST_PATH         AssetKind = "hostPath"
 	ASSETKIND_WORKLOAD_TEMPLATE AssetKind = "workload-template"
-	ASSETKIND_MODEL AssetKind = "model"
-	ASSETKIND_CONFIG_MAP AssetKind = "config-map"
-	ASSETKIND_SECRET_VOLUME AssetKind = "secret-volume"
+	ASSETKIND_MODEL             AssetKind = "model"
+	ASSETKIND_CONFIG_MAP        AssetKind = "config-map"
+	ASSETKIND_SECRET_VOLUME     AssetKind = "secret-volume"
 )
 
 // All allowed values of AssetKind enum
@@ -136,4 +138,3 @@ func (v *NullableAssetKind) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
