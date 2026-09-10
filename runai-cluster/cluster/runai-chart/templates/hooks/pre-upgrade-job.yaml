@@ -29,6 +29,11 @@ spec:
         - name: pre-upgrade
           image: {{ include "helmHooksHandler.image" . }}
           imagePullPolicy: {{ .Values.helmHooksHandler.image.pullPolicy }}
+{{- if .Values.global.customCA.enabled }}
+          env:
+            - name: SSL_CERT_FILE
+              value: /etc/ssl/certs/runai-ca.pem
+{{- end }}
           args:
             - --pre-upgrade
             - --control-plane-url={{ include "controlPlane.url" . }}

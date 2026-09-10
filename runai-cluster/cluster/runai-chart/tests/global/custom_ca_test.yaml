@@ -27,3 +27,31 @@ tests:
                   path: runai-ca.pem
               optional: true
               secretName: runai-ca-cert
+  - it: should set the custom CA file for the pre-install hook
+    set:
+      global.customCA.enabled: true
+    templates:
+      - templates/hooks/pre-install-job.yaml
+    documentSelector:
+      path: kind
+      value: Job
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SSL_CERT_FILE
+            value: /etc/ssl/certs/runai-ca.pem
+  - it: should set the custom CA file for the pre-upgrade hook
+    set:
+      global.customCA.enabled: true
+    templates:
+      - templates/hooks/pre-upgrade-job.yaml
+    documentSelector:
+      path: kind
+      value: Job
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SSL_CERT_FILE
+            value: /etc/ssl/certs/runai-ca.pem
