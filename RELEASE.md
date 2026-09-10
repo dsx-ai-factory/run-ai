@@ -10,7 +10,7 @@ Releases follow a minor-version cadence aligned with the versions tracked in [Su
 ## Branch Naming
 
 - **`main`** - Active development. All feature work and fixes land here first.
-- **Release branches** - Cut from `main` using the pattern `v<major>.<minor>` (e.g. `v2.26`) or `release-<major>.<minor>`. Creating a branch matching either pattern automatically triggers the release-branch automation (see [`.github/workflows/create-release-branch-oss.yml`](.github/workflows/create-release-branch-oss.yml)).
+- **Release branches** - Cut from `main` using the pattern `v<major>.<minor>` (e.g. `v3.0`) or `release-<major>.<minor>`. Creating a branch matching either pattern automatically triggers the release-branch automation (see [`.github/workflows/create-release-branch-oss.yml`](.github/workflows/create-release-branch-oss.yml)).
 - Fixes that need to reach a supported release are backported via the `backport/v2.X` label (see [`.github/workflows/backport.yaml`](.github/workflows/backport.yaml) and [Maintainers](MAINTAINERS.md)).
 
 ## Tags

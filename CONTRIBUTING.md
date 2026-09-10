@@ -37,19 +37,18 @@ Priority is set by maintainers during triage (see [Maintainers](MAINTAINERS.md))
    cd run-ai
    ```
 
-2. **Build.** Uses Go modules; no private dependencies, so it's fork-safe.
+2. **Build and run the full platform.** `local-dev.sh` builds the control plane and cluster services from source and deploys them to a local Kubernetes (Kind) cluster. See [Local Development Guide](local-dev.md) for prerequisites and all available flags.
 
    ```bash
-   make build
+   ./local-dev.sh
    ```
 
-3. **Run unit tests.**
+3. **Run tests.** Tests run per-service, not from the repo root. Each service directory under `control-plane/` and `runai-cluster/` has its own `README.md` and `Makefile` describing how to build, test, and validate it.
 
    ```bash
+   cd <service-dir>
    make test
    ```
-
-Setup and end-to-end testing on a real cluster are service-specific. Each service directory under `control-plane/` and `runai-cluster/` has its own `README.md` and `Makefile` describing how to build, test, and validate it.
 
 ---
 
@@ -123,7 +122,7 @@ A maintainer approval plus a green `Validate Successful Run` status are both req
 
 - Documentation source lives under [`docs/`](docs/), published via the Fern navigation config in [`fern/`](fern/).
 - Read [Documentation Agent Guide](docs/AGENTS.md) before editing, creating, or reviewing any page.
-- Run `fern docs dev` before opening the PR, and `fern check` too if you changed an OpenAPI spec.
+- Run `fern docs dev` before opening the PR, and `fern check` if you changed an OpenAPI spec.
 
 ---
 

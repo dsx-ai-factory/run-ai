@@ -7,6 +7,8 @@
 [![Latest release](https://img.shields.io/github/v/release/dsx-ai-factory/run-ai)](https://github.com/dsx-ai-factory/run-ai/releases)
 [![Contributors](https://img.shields.io/github/contributors/dsx-ai-factory/run-ai)](https://github.com/dsx-ai-factory/run-ai/graphs/contributors)
 
+[Docs](https://docs.nvidia.com/run-ai/) | [Roadmap](#roadmap) | [Installation](#installation) | [API Reference](https://docs.nvidia.com/run-ai/) | [Contributing](CONTRIBUTING.md) | [License](#license)
+
 **NVIDIA Run:ai is an open-source AI workload and GPU orchestration platform** for managing shared AI infrastructure on Kubernetes.
 
 NVIDIA Run:ai provides a consistent way to run development, training, and inference workloads across Kubernetes environments, whether deployed on-premises, in the cloud, or across hybrid infrastructure. It combines GPU scheduling, resource management, workload orchestration, governance, and observability to help organizations share GPU resources efficiently across teams and clusters.
@@ -71,6 +73,7 @@ If you need GPU sharing, quota enforcement, and multi-tenant governance across t
 | **MCP Server**                  | [`runai-mcp-server/`](runai-mcp-server)                                                                                                                                                                                                   | Model Context Protocol server that exposes NVIDIA Run:ai operations as tools for AI assistants                    |
 | **Clients and shared packages** | [`runai-clients/`](runai-clients), [`runai-common-packages/`](runai-common-packages), [`runai-application-packages/`](runai-application-packages) | Generated API clients and shared Go libraries                                                                     |
 | **Scale/Load Testing**          | [`scale-tests/`](scale-tests)                                                                                                                                                                                                                             | Load-testing SDK and unified load-test suite used to validate platform behavior at scale                          |
+| **Documentation**               | [`docs/`](docs/), [`fern/`](fern/)                                                                                                                                                                                                                        | In-repo developer and product documentation, including the [Architecture Overview](docs/developer/architecture.md) and [Service Reference](docs/developer/services.md), and the Fern navigation config that publishes it |
 | **Local environment**           | [`local-dev.sh`](local-dev.sh), [`local-dev.md`](local-dev.md)                                                                                                                                | One-command local Kubernetes (Kind) development environment                                                       |
 
 For a detailed breakdown of individual services and components, see the [Service Reference](docs/developer/services.md).
@@ -133,7 +136,6 @@ Release cadence, branch naming, and who cuts a release are documented in [Releas
 ## Community
 
 - **[GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues)** - Bug reports, feature requests, documentation issues, and usage questions. This is the project's primary discussion forum; start here.
-- **[Documentation](docs/)** - In-repo developer and product documentation, including the [Architecture Overview](docs/developer/architecture.md) and [Service Reference](docs/developer/services.md).
 - **[Support](SUPPORT.md)** - Supported versions and where to get help, including commercial support.
 
 ## Security & Support
