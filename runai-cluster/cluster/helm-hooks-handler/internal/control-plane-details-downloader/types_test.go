@@ -36,7 +36,7 @@ var _ = Describe("Types", func() {
 						Global: &runaiv1_internal.Global{
 							ClusterURL: "http://localhost:8080",
 							ControlPlane: &runaiv1_internal.ControlPlane{
-								URL: "http://test.run.ai",
+								URL: "http://mock-q7z3k.example.com",
 							},
 						},
 					},

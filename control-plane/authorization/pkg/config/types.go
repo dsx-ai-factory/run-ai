@@ -36,11 +36,3 @@ func (s *SyncJob) SetDefaults() {
 	s.SyncJobIntervalHours = 168
 	s.SyncJobTenantIntervalSeconds = 5
 }
-
-type General struct {
-	UsePermissionSets bool `mapstructure:"use_permission_sets"`
-}
-
-func (g *General) SetDefaults() {
-	g.UsePermissionSets = true
-}

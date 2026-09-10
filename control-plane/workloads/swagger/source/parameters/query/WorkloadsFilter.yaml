@@ -7,6 +7,6 @@ schema:
   maxItems: 10
   items:
     type: string
-    pattern: "^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
+    pattern: "^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
   example: ["name!=some-workload-name", "allocatedGPU>=2", "createdAt>=2021-01-01T00:00:00Z"]
 explode: false

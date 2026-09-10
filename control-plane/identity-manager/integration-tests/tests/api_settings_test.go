@@ -21,7 +21,7 @@ const (
 	SettingsKeyLogoutRedirectUri     = "logoutRedirectUri"
 	DefaultLogoutUri                 = "https://www.example.com/logout"
 
-	TestUserName     = "test@run.ai"
+	TestUserName     = "test@example.com"
 	FieldEnabled     = "enabled"
 	FieldUri         = "uri"
 	FieldIdleTimeout = "idleTimeout"

@@ -55,7 +55,7 @@ func TestExtractTenantNameFromHost(t *testing.T) {
 		},
 		{
 			name:     "subdomain with staging",
-			hostname: "consoletest1.staging.run.ai",
+			hostname: "consoletest1.mock-q7z3k.example.com",
 			want:     "consoletest1",
 		},
 		{

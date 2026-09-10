@@ -415,7 +415,7 @@ func externalConnectionClusterValues(ec *spec.ExternalConnection) []string {
 func clusterExtraValues(s *spec.Spec, c *spec.Cluster) []string {
 	values := externalConnectionClusterValues(s.ExternalConnection)
 	if usesManagedRegistrySecret(s) {
-		values = append(values, "global.imagePullSecrets[0].name="+cpRegistrySecret)
+		values = append(values, "global.additionalImagePullSecrets[0]="+cpRegistrySecret)
 	}
 	// The cluster needs the affinity in two places: global.affinity covers the
 	// operator + hook pods, while runai-operator.config.global.affinity flows

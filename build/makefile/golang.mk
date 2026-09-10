@@ -235,6 +235,8 @@ generate-mocks: git-config-command
 	fi
 	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Generating mocks for ${SERVICE_NAME}" ${BASE_CONSOLE}
 	${DOCKER_MOCKERY_COMMAND} mockery' || ${FAILURE_MESSAGE_HANDLER}
+	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Stamping SPDX headers on generated mocks" ${BASE_CONSOLE}
+	sh ${BUILD_MAKEFILE_DIR}scripts/spdx-header-go.sh .
 	${SUCCESS_MESSAGE_HANDLER}
 .PHONY: generate-mocks
 
@@ -245,6 +247,8 @@ generate-mocks-client: git-config-command
 	fi
 	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Generating mocks for ${SERVICE_NAME} pkg/client" ${BASE_CONSOLE}
 	${DOCKER_MOCKERY_COMMAND} cd pkg/client && mockery' || ${FAILURE_MESSAGE_HANDLER}
+	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Stamping SPDX headers on generated mocks" ${BASE_CONSOLE}
+	sh ${BUILD_MAKEFILE_DIR}scripts/spdx-header-go.sh pkg/client
 	${SUCCESS_MESSAGE_HANDLER}
 .PHONY: generate-mocks-client
 

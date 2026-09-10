@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 /*
 WorkloadsService
 
@@ -18,11 +20,15 @@ import (
 // checks if the WorkloadElementTopology type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &WorkloadElementTopology{}
 
-// WorkloadElementTopology The element's network topology. Returned only when the element's running pods resolve to an actual placement in the topology hierarchy; omitted otherwise (e.g. when the workload has no topology, the cluster doesn't support topology, or there are no running pods to place yet).
+// WorkloadElementTopology The element's network topology. Populated whenever the element requested topology constraints, or its running pods resolve to an actual placement in the topology hierarchy.
 type WorkloadElementTopology struct {
-	// The name of the network topology associated with the element — either inherited from the workload's topology constraints, or inferred from the nodepools the element's running pods are scheduled on.
-	Name            *string                                 `json:"name,omitempty"`
-	ActualPlacement NullableWorkloadTopologyActualPlacement `json:"actualPlacement,omitempty"`
+	// The name of the network topology associated with the element — either as requested via constraints, or inherited from the workload's topology constraints, or inferred from the nodepools the element's running pods are scheduled on.
+	Name *string `json:"name,omitempty"`
+	// The topology level to use as a preferred placement constraint for the element.
+	PreferredPlacement *string `json:"preferredPlacement,omitempty"`
+	// The topology level to use as a required placement constraint for the element. If the requirement cannot be satisfied at this topology level, placement will fail.
+	RequiredPlacement *string                                 `json:"requiredPlacement,omitempty"`
+	ActualPlacement   NullableWorkloadTopologyActualPlacement `json:"actualPlacement,omitempty"`
 }
 
 // NewWorkloadElementTopology instantiates a new WorkloadElementTopology object
@@ -72,6 +78,70 @@ func (o *WorkloadElementTopology) HasName() bool {
 // SetName gets a reference to the given string and assigns it to the Name field.
 func (o *WorkloadElementTopology) SetName(v string) {
 	o.Name = &v
+}
+
+// GetPreferredPlacement returns the PreferredPlacement field value if set, zero value otherwise.
+func (o *WorkloadElementTopology) GetPreferredPlacement() string {
+	if o == nil || IsNil(o.PreferredPlacement) {
+		var ret string
+		return ret
+	}
+	return *o.PreferredPlacement
+}
+
+// GetPreferredPlacementOk returns a tuple with the PreferredPlacement field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *WorkloadElementTopology) GetPreferredPlacementOk() (*string, bool) {
+	if o == nil || IsNil(o.PreferredPlacement) {
+		return nil, false
+	}
+	return o.PreferredPlacement, true
+}
+
+// HasPreferredPlacement returns a boolean if a field has been set.
+func (o *WorkloadElementTopology) HasPreferredPlacement() bool {
+	if o != nil && !IsNil(o.PreferredPlacement) {
+		return true
+	}
+
+	return false
+}
+
+// SetPreferredPlacement gets a reference to the given string and assigns it to the PreferredPlacement field.
+func (o *WorkloadElementTopology) SetPreferredPlacement(v string) {
+	o.PreferredPlacement = &v
+}
+
+// GetRequiredPlacement returns the RequiredPlacement field value if set, zero value otherwise.
+func (o *WorkloadElementTopology) GetRequiredPlacement() string {
+	if o == nil || IsNil(o.RequiredPlacement) {
+		var ret string
+		return ret
+	}
+	return *o.RequiredPlacement
+}
+
+// GetRequiredPlacementOk returns a tuple with the RequiredPlacement field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *WorkloadElementTopology) GetRequiredPlacementOk() (*string, bool) {
+	if o == nil || IsNil(o.RequiredPlacement) {
+		return nil, false
+	}
+	return o.RequiredPlacement, true
+}
+
+// HasRequiredPlacement returns a boolean if a field has been set.
+func (o *WorkloadElementTopology) HasRequiredPlacement() bool {
+	if o != nil && !IsNil(o.RequiredPlacement) {
+		return true
+	}
+
+	return false
+}
+
+// SetRequiredPlacement gets a reference to the given string and assigns it to the RequiredPlacement field.
+func (o *WorkloadElementTopology) SetRequiredPlacement(v string) {
+	o.RequiredPlacement = &v
 }
 
 // GetActualPlacement returns the ActualPlacement field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -129,6 +199,12 @@ func (o WorkloadElementTopology) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
+	}
+	if !IsNil(o.PreferredPlacement) {
+		toSerialize["preferredPlacement"] = o.PreferredPlacement
+	}
+	if !IsNil(o.RequiredPlacement) {
+		toSerialize["requiredPlacement"] = o.RequiredPlacement
 	}
 	if o.ActualPlacement.IsSet() {
 		toSerialize["actualPlacement"] = o.ActualPlacement.Get()

@@ -19,11 +19,11 @@ import (
 // SharedScope struct for SharedScope
 type SharedScope struct {
 	ScopeType ScopeType `json:"scopeType"`
-	ScopeId   string    `json:"scopeId"`
+	ScopeId string `json:"scopeId"`
 	// The name of the scope
-	ScopeName string     `json:"scopeName"`
+	ScopeName string `json:"scopeName"`
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
-	CreatedBy *string    `json:"createdBy,omitempty"`
+	CreatedBy *string `json:"createdBy,omitempty"`
 }
 
 // NewSharedScope instantiates a new SharedScope object
@@ -237,3 +237,5 @@ func (v *NullableSharedScope) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

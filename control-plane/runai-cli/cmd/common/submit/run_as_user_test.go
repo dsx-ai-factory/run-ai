@@ -31,7 +31,7 @@ var _ = Describe("Security Settings Functions", func() {
 		BeforeEach(func() {
 			claims := &auth.CustomClaims{
 				UserID:              "123",
-				UserEmail:           "test@run.ai",
+				UserEmail:           "test@example.com",
 				Uid:                 "1000",
 				Gid:                 "1000",
 				SupplementaryGroups: []int{2000, 3000},
@@ -69,7 +69,7 @@ var _ = Describe("Security Settings Functions", func() {
 			BeforeEach(func() {
 				claims = &auth.CustomClaims{
 					UserID:              "123",
-					UserEmail:           "test@run.ai",
+					UserEmail:           "test@example.com",
 					Uid:                 "1000",
 					Gid:                 "1000",
 					SupplementaryGroups: []int{2000, 3000},
@@ -89,7 +89,7 @@ var _ = Describe("Security Settings Functions", func() {
 			BeforeEach(func() {
 				claims = &auth.CustomClaims{
 					UserID:    "123",
-					UserEmail: "test@run.ai",
+					UserEmail: "test@example.com",
 				}
 			})
 
@@ -105,7 +105,7 @@ var _ = Describe("Security Settings Functions", func() {
 			It("should use only UID", func() {
 				claims = &auth.CustomClaims{
 					UserID:    "123",
-					UserEmail: "test@run.ai",
+					UserEmail: "test@example.com",
 					Uid:       "1000",
 				}
 				uid, gid, sup := getSecurityRunAsUserSettingsFromJWT(claims)
@@ -117,7 +117,7 @@ var _ = Describe("Security Settings Functions", func() {
 			It("should use only GID", func() {
 				claims = &auth.CustomClaims{
 					UserID:    "123",
-					UserEmail: "test@run.ai",
+					UserEmail: "test@example.com",
 					Gid:       "1000",
 				}
 				uid, gid, sup := getSecurityRunAsUserSettingsFromJWT(claims)
@@ -129,7 +129,7 @@ var _ = Describe("Security Settings Functions", func() {
 			It("should use only SupplementaryGroups", func() {
 				claims = &auth.CustomClaims{
 					UserID:              "123",
-					UserEmail:           "test@run.ai",
+					UserEmail:           "test@example.com",
 					SupplementaryGroups: []int{2000, 3000},
 				}
 				uid, gid, sup := getSecurityRunAsUserSettingsFromJWT(claims)

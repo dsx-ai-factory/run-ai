@@ -151,7 +151,7 @@ var _ = Describe("KartaController (Karta-centric)", Ordered, func() {
 		})
 
 		It("restarts when the OSS controller reports the CRD exists but the GVK is not yet registered", func() {
-			barGVK := schema.GroupVersionKind{Group: "test.run.ai", Version: "v1", Kind: "Bar"}
+			barGVK := schema.GroupVersionKind{Group: "mock-q7z3k.example.com", Version: "v1", Kind: "Bar"}
 			karta := buildKarta("karta-bar-unregistered", &barGVK)
 			expectCreate(ctx, k8s, karta)
 			// OSS controller has confirmed the CRD exists.
@@ -167,7 +167,7 @@ var _ = Describe("KartaController (Karta-centric)", Ordered, func() {
 		})
 
 		It("does not restart when the OSS controller has not reported the CRD as existing", func() {
-			barGVK := schema.GroupVersionKind{Group: "test.run.ai", Version: "v1", Kind: "Bar"}
+			barGVK := schema.GroupVersionKind{Group: "mock-q7z3k.example.com", Version: "v1", Kind: "Bar"}
 			karta := buildKarta("karta-bar-no-crd", &barGVK)
 			expectCreate(ctx, k8s, karta)
 
@@ -189,8 +189,8 @@ var _ = Describe("KartaController (Karta-centric)", Ordered, func() {
 	Context("Reconcile RBAC integration", func() {
 		It("sets RBACReady=false and returns error when RBAC update fails", func() {
 			// CRD exists for unsupported kind
-			createCRD(ctx, k8s, "foos.test.run.ai", "test.run.ai", "Foo", []string{"v1"})
-			fooGVK := schema.GroupVersionKind{Group: "test.run.ai", Version: "v1", Kind: "Foo"}
+			createCRD(ctx, k8s, "foos.mock-q7z3k.example.com", "mock-q7z3k.example.com", "Foo", []string{"v1"})
+			fooGVK := schema.GroupVersionKind{Group: "mock-q7z3k.example.com", Version: "v1", Kind: "Foo"}
 			karta := buildKarta("karta-foo", &fooGVK)
 			expectCreate(ctx, k8s, karta)
 			seedKartaCondition(ctx, k8s, karta, runv1alpha1.CRDExists, metav1.ConditionTrue)
@@ -210,11 +210,11 @@ var _ = Describe("KartaController (Karta-centric)", Ordered, func() {
 
 		It("sets RBACReady=true when RBAC update succeeds and writes rule to ClusterRole", func() {
 			// CRD exists for unsupported kind
-			createCRD(ctx, k8s, "bars.test.run.ai", "test.run.ai", "Bar", []string{"v1"})
-			barGVK := schema.GroupVersionKind{Group: "test.run.ai", Version: "v1", Kind: "Bar"}
+			createCRD(ctx, k8s, "bars.mock-q7z3k.example.com", "mock-q7z3k.example.com", "Bar", []string{"v1"})
+			barGVK := schema.GroupVersionKind{Group: "mock-q7z3k.example.com", Version: "v1", Kind: "Bar"}
 			karta := buildKarta("karta-bar", &barGVK)
 			karta.Spec.StructureDefinition.AdditionalChildKinds = []kartav1alpha1.GroupVersionKind{
-				{Group: "test.run.ai", Version: "v1", Kind: "Baz"},
+				{Group: "mock-q7z3k.example.com", Version: "v1", Kind: "Baz"},
 				{Group: "other.run.ai", Version: "v1", Kind: "Qux"},
 			}
 			expectCreate(ctx, k8s, karta)
@@ -238,22 +238,22 @@ var _ = Describe("KartaController (Karta-centric)", Ordered, func() {
 			// verify rule presence on clusterrole
 			updatedCR := &rbacv1.ClusterRole{}
 			Expect(k8s.Get(ctx, client.ObjectKey{Name: cr.Name}, updatedCR)).To(Succeed())
-			Expect(hasAnyRuleWithAllVerbs(updatedCR, "test.run.ai", "bars", false)).To(BeTrue())
+			Expect(hasAnyRuleWithAllVerbs(updatedCR, "mock-q7z3k.example.com", "bars", false)).To(BeTrue())
 			updatedCRCrud := &rbacv1.ClusterRole{}
 			Expect(k8s.Get(ctx, client.ObjectKey{Name: "role-enabled-crud"}, updatedCRCrud)).To(Succeed())
-			Expect(hasAnyRuleWithAllVerbs(updatedCRCrud, "test.run.ai", "bars", true)).To(BeTrue())
-			Expect(hasAnyRuleWithAllVerbs(updatedCRCrud, "test.run.ai", "bazs", true)).To(BeTrue())
+			Expect(hasAnyRuleWithAllVerbs(updatedCRCrud, "mock-q7z3k.example.com", "bars", true)).To(BeTrue())
+			Expect(hasAnyRuleWithAllVerbs(updatedCRCrud, "mock-q7z3k.example.com", "bazs", true)).To(BeTrue())
 			Expect(hasAnyRuleWithAllVerbs(updatedCRCrud, "other.run.ai", "quxs", true)).To(BeTrue())
 			Expect(exitCalled).To(BeFalse())
 
 			additionalGvks := fakeCachedClient.GetAdditionalGroupKinds()
-			Expect(additionalGvks[schema.GroupKind{Group: "test.run.ai", Kind: "Baz"}]).To(Equal(1))
+			Expect(additionalGvks[schema.GroupKind{Group: "mock-q7z3k.example.com", Kind: "Baz"}]).To(Equal(1))
 			Expect(additionalGvks[schema.GroupKind{Group: "other.run.ai", Kind: "Qux"}]).To(Equal(1))
 		})
 
 		It("sets SyncEnabled=false and restarts when gvk not registered and the CRD exists", func() {
-			createCRD(ctx, k8s, "bars.test.run.ai", "test.run.ai", "Bar", []string{"v1"})
-			barGVK := schema.GroupVersionKind{Group: "test.run.ai", Version: "v1", Kind: "Bar"}
+			createCRD(ctx, k8s, "bars.mock-q7z3k.example.com", "mock-q7z3k.example.com", "Bar", []string{"v1"})
+			barGVK := schema.GroupVersionKind{Group: "mock-q7z3k.example.com", Version: "v1", Kind: "Bar"}
 			karta := buildKarta("karta-bar", &barGVK)
 			expectCreate(ctx, k8s, karta)
 			// OSS controller has confirmed the CRD exists, so a restart can register the GVK.
@@ -277,8 +277,8 @@ var _ = Describe("KartaController (Karta-centric)", Ordered, func() {
 
 		It("sets SyncEnabled=true when all succeeds and gvk configured", func() {
 			// CRD exists for unsupported kind
-			createCRD(ctx, k8s, "bars.test.run.ai", "test.run.ai", "Bar", []string{"v1"})
-			barGVK := schema.GroupVersionKind{Group: "test.run.ai", Version: "v1", Kind: "Bar"}
+			createCRD(ctx, k8s, "bars.mock-q7z3k.example.com", "mock-q7z3k.example.com", "Bar", []string{"v1"})
+			barGVK := schema.GroupVersionKind{Group: "mock-q7z3k.example.com", Version: "v1", Kind: "Bar"}
 			karta := buildKarta("karta-bar", &barGVK)
 			expectCreate(ctx, k8s, karta)
 			seedKartaCondition(ctx, k8s, karta, runv1alpha1.CRDExists, metav1.ConditionTrue)
@@ -302,7 +302,7 @@ var _ = Describe("KartaController (Karta-centric)", Ordered, func() {
 
 	Context("Deletion flow", func() {
 		var (
-			barGVK = schema.GroupVersionKind{Group: "test.run.ai", Version: "v1", Kind: "Bar"}
+			barGVK = schema.GroupVersionKind{Group: "mock-q7z3k.example.com", Version: "v1", Kind: "Bar"}
 		)
 
 		BeforeEach(func() {
@@ -543,7 +543,7 @@ var _ = Describe("KartaController (Karta-centric)", Ordered, func() {
 
 		Context("several versions for same GV", func() {
 			var (
-				fooGVK = schema.GroupVersionKind{Group: "test.run.ai", Version: "v1", Kind: "Foo"}
+				fooGVK = schema.GroupVersionKind{Group: "mock-q7z3k.example.com", Version: "v1", Kind: "Foo"}
 				gvkV1  = schema.GroupVersionKind{Group: fooGVK.Group, Version: "v1", Kind: fooGVK.Kind}
 				gvkV2  = schema.GroupVersionKind{Group: fooGVK.Group, Version: "v2", Kind: fooGVK.Kind}
 

@@ -61,7 +61,7 @@ func TestAirgapInstall_LoadsArtifactBundleAndInstalls(t *testing.T) {
 	require.Len(t, clusterCalls, 1)
 	assert.Equal(t, filepath.Join(workingDir, "bundle", "charts", "runai-cluster-3.0.0.tgz"), clusterCalls[0].ChartName)
 	assert.Equal(t, []string{filepath.Join(workingDir, airgapvalues.ClusterValuesFile)}, clusterCalls[0].ValueFiles)
-	assert.Contains(t, clusterCalls[0].Values, "global.imagePullSecrets[0].name=runai-reg-creds")
+	assert.Contains(t, clusterCalls[0].Values, "global.additionalImagePullSecrets[0]=runai-reg-creds")
 	assert.Contains(t, clusterCalls[0].Values, "controlPlane.bootstrapToken=bootstrap-token")
 	assert.NotContains(t, clusterCalls[0].Values, "controlPlane.clientSecret=s3cr3t-airgap")
 

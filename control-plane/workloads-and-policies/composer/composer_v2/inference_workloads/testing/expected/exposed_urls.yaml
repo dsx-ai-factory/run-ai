@@ -8,7 +8,7 @@ Config:
           name: infw-my-llm-url
         spec:
           rules:
-          - host: test.run.ai
+          - host: mock-q7z3k.example.com
             http:
               paths:
               - backend:
@@ -70,14 +70,14 @@ Service:
         - args:
           - --provider=keycloak-oidc
           - --upstream=http://localhost:7860
-          - --redirect-url=https://test.run.ai/team-a/my-llm/oauth2/callback
+          - --redirect-url=https://mock-q7z3k.example.com/team-a/my-llm/oauth2/callback
           - --oidc-issuer-url=/auth/realms/runai
           - --scope=openid
           - --http-address=0.0.0.0:4180
           - --proxy-prefix=/team-a/my-llm/oauth2
           - --skip-provider-button=true
-          - --whitelist-domain=test.run.ai
-          - --cookie-domain=test.run.ai
+          - --whitelist-domain=mock-q7z3k.example.com
+          - --cookie-domain=mock-q7z3k.example.com
           - --cookie-httponly=true
           - --cookie-secure=true
           - --code-challenge-method=S256

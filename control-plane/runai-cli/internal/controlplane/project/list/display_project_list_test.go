@@ -169,7 +169,7 @@ func generateProjectFullSpec(id, name string, createdAt time.Time) openapi.Proje
 	projSample := `{
       "clusterId": "b754457d-7374-4da4-a43f-ac13fb899838",
       "createdAt": "2025-04-09T12:51:39.718826Z",
-      "createdBy": "test@run.ai",
+      "createdBy": "test@example.com",
       "description": "",
       "effective": {
         "defaultNodePools": [

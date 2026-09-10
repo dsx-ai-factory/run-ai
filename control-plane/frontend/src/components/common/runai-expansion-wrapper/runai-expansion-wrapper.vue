@@ -4,5 +4,24 @@
 -->
 
 <template>
-  <q-list><slot /></q-list>
+  <q-list :class="{ 'runai-expansion-wrapper--no-first-top-padding': noFirstTopPadding }"><slot /></q-list>
 </template>
+
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    noFirstTopPadding?: boolean;
+  }>(),
+  {
+    noFirstTopPadding: false,
+  },
+);
+</script>
+
+<style scoped lang="scss">
+.runai-expansion-wrapper--no-first-top-padding {
+  :deep(> .q-expansion-item:first-child) {
+    padding-top: 0 !important;
+  }
+}
+</style>

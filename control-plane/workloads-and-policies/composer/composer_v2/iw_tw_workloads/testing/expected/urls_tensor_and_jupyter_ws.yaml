@@ -9,7 +9,7 @@ BatchJobTarget:
             name: job-urls_tensor_and_jupyter-url-jupyter
           spec:
             rules:
-            - host: test.run.ai
+            - host: mock-q7z3k.example.com
               http:
                 paths:
                 - backend:
@@ -38,7 +38,7 @@ BatchJobTarget:
             name: job-urls_tensor_and_jupyter-url-tensorboard
           spec:
             rules:
-            - host: test.run.ai
+            - host: mock-q7z3k.example.com
               http:
                 paths:
                 - backend:
@@ -127,14 +127,14 @@ BatchJobTarget:
           - args:
             - --provider=keycloak-oidc
             - --upstream=http://localhost:8888
-            - --redirect-url=https://test.run.ai/test/urls_tensor_and_jupyter/oauth2/callback
+            - --redirect-url=https://mock-q7z3k.example.com/test/urls_tensor_and_jupyter/oauth2/callback
             - --oidc-issuer-url=/auth/realms/runai
             - --scope=openid
             - --http-address=0.0.0.0:4180
             - --proxy-prefix=/test/urls_tensor_and_jupyter/oauth2
             - --skip-provider-button=true
-            - --whitelist-domain=test.run.ai
-            - --cookie-domain=test.run.ai
+            - --whitelist-domain=mock-q7z3k.example.com
+            - --cookie-domain=mock-q7z3k.example.com
             - --cookie-httponly=true
             - --cookie-secure=true
             - --code-challenge-method=S256
@@ -169,14 +169,14 @@ BatchJobTarget:
           - args:
             - --provider=keycloak-oidc
             - --upstream=http://localhost:6006
-            - --redirect-url=https://test.run.ai/test/urls_tensor_and_jupyter/url-tensorboard/oauth2/callback
+            - --redirect-url=https://mock-q7z3k.example.com/test/urls_tensor_and_jupyter/url-tensorboard/oauth2/callback
             - --oidc-issuer-url=/auth/realms/runai
             - --scope=openid
             - --http-address=0.0.0.0:4181
             - --proxy-prefix=/test/urls_tensor_and_jupyter/url-tensorboard/oauth2
             - --skip-provider-button=true
-            - --whitelist-domain=test.run.ai
-            - --cookie-domain=test.run.ai
+            - --whitelist-domain=mock-q7z3k.example.com
+            - --cookie-domain=mock-q7z3k.example.com
             - --cookie-httponly=true
             - --cookie-secure=true
             - --code-challenge-method=S256

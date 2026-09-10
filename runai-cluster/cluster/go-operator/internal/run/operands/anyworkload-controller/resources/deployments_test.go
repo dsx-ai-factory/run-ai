@@ -16,6 +16,7 @@ import (
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	anyworkloadcontroller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/anyworkload-controller"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/global"
+	runaiv1internal "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/runai-internal"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -42,6 +43,61 @@ func TestBuildEnvVarsUsesAnyworkloadOpenShiftRouteConfiguration(t *testing.T) {
 	}
 	if value != "passthrough" {
 		t.Fatalf("OPENSHIFT_ROUTE_TERMINATION_POLICY = %q, want %q", value, "passthrough")
+	}
+}
+
+func TestBuildEnvVarsIncludesNetworkingCapabilityFlags(t *testing.T) {
+	tests := []struct {
+		name               string
+		kubernetesFlavor   runaiv1internal.KubernetesFlavor
+		gatewayAPIEnabled  bool
+		expectedOpenShift  string
+		expectedGatewayAPI string
+	}{
+		{
+			name:               "vanilla with gateway API disabled",
+			kubernetesFlavor:   runaiv1internal.KubernetesFlavorVanilla,
+			expectedOpenShift:  "false",
+			expectedGatewayAPI: "false",
+		},
+		{
+			name:               "vanilla with gateway API enabled",
+			kubernetesFlavor:   runaiv1internal.KubernetesFlavorVanilla,
+			gatewayAPIEnabled:  true,
+			expectedOpenShift:  "false",
+			expectedGatewayAPI: "true",
+		},
+		{
+			name:               "OpenShift with gateway API disabled",
+			kubernetesFlavor:   runaiv1internal.KubernetesFlavorOpenShift,
+			expectedOpenShift:  "true",
+			expectedGatewayAPI: "false",
+		},
+		{
+			name:               "OpenShift with gateway API enabled",
+			kubernetesFlavor:   runaiv1internal.KubernetesFlavorOpenShift,
+			gatewayAPIEnabled:  true,
+			expectedOpenShift:  "true",
+			expectedGatewayAPI: "true",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			runaiConfig := &runaiv1.RunaiConfig{}
+			runaiConfig.SetDefaultsWhereNeeded()
+			runaiConfig.Spec.Internal.Global.Platform.KubernetesFlavor = tt.kubernetesFlavor
+			runaiConfig.Spec.Global.GatewayAPI.Enabled = &tt.gatewayAPIEnabled
+			resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
+
+			envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+			if err != nil {
+				t.Fatalf("buildEnvVars() error = %v", err)
+			}
+
+			assertEnvValue(t, envVars, "IS_OPENSHIFT", tt.expectedOpenShift)
+			assertEnvValue(t, envVars, "GATEWAY_API_ENABLED", tt.expectedGatewayAPI)
+		})
 	}
 }
 
@@ -131,6 +187,17 @@ func assertJSONEnvValue(t *testing.T, envVars []corev1.EnvVar, name, expected st
 		t.Fatalf("invalid expected JSON %q: %v", expected, err)
 	}
 	if !reflect.DeepEqual(actualJSON, expectedJSON) {
+		t.Fatalf("env var %s = %q, want %q", name, actual, expected)
+	}
+}
+
+func assertEnvValue(t *testing.T, envVars []corev1.EnvVar, name, expected string) {
+	t.Helper()
+	actual, found := envValue(envVars, name)
+	if !found {
+		t.Fatalf("env var %s not found", name)
+	}
+	if actual != expected {
 		t.Fatalf("env var %s = %q, want %q", name, actual, expected)
 	}
 }

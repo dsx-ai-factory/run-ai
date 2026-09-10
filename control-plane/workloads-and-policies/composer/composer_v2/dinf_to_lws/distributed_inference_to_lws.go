@@ -122,6 +122,7 @@ func (dinfComposer *DistributedInferenceToLWSComposer) Compose(
 		}
 
 		lws := &target.LeaderWorkerSet
+		nimWorkload := isNIMLeader(src.Leader.Get())
 		runner := &composer.StepRunner{}
 		runner.Batch(
 			dinfComposer.fc.CopyString(convutils.Ref(dinfComposer.leaderWorkerSetName()), &lws.Name, composer.StringToString, nil),
@@ -140,6 +141,18 @@ func (dinfComposer *DistributedInferenceToLWSComposer) Compose(
 
 		leader := src.Leader.Get()
 		runner.Run(dinfComposer.processReplica(ctx, src, leader, lws.Spec.LeaderWorkerTemplate.LeaderTemplate, "leader", dinfComposer.LeaderAssetsMapping, target))
+		if nimWorkload {
+			// Preserve v1 behavior and expose NIM identity to both cluster-sync and generated leader pods.
+			runner.Batch(
+				dinfComposer.fc.CopyBoolean(convutils.Ref(true), &lws.Labels, composer.BoolToMapString, constants.LabelNIMWorkload),
+				dinfComposer.fc.CopyBoolean(
+					convutils.Ref(true),
+					&lws.Spec.LeaderWorkerTemplate.LeaderTemplate.Labels,
+					composer.BoolToMapString,
+					constants.LabelNIMWorkload,
+				),
+			)
+		}
 
 		workers := convutils.Deref(src.Workers.Get(), int32(0))
 		worker := src.Worker.Get()
@@ -152,6 +165,8 @@ func (dinfComposer *DistributedInferenceToLWSComposer) Compose(
 
 		runner.Run(dinfComposer.processNetworkingFields(src.ServingPort.Get(), target))
 
+		// ComposeMNNVL runs after both replicas are composed so fc.GpuRequested
+		// reflects the leader and worker compute sections.
 		runner.Run(dinfComposer.fc.ComposeMNNVL(leader.Labels, dinfComposer.defaultMNNVLMode(), &target.Config, composer.MNNVLToWorkloadRunner, nil))
 
 		return runner.Error()
@@ -161,8 +176,12 @@ func (dinfComposer *DistributedInferenceToLWSComposer) Compose(
 // defaultMNNVLMode derives the MNNVL default for distributed-inference workloads
 // from the cluster's inference-workload-controller GPU network acceleration flag.
 // The dinf composer preserves the pre-existing plugin contract of always emitting
-// a mode, so an unset cluster flag defaults to None (never left empty).
+// a mode, so an unset cluster flag defaults to None (never left empty). A workload
+// that requests no GPU always defaults to None regardless of the cluster flag.
 func (dinfComposer *DistributedInferenceToLWSComposer) defaultMNNVLMode() string {
+	if !dinfComposer.fc.GpuRequested {
+		return string(workloadsManagerApi.MNNVLMODE_NONE)
+	}
 	config := dinfComposer.fc.ClusterStorageConfig
 	if config == nil {
 		config = composer.DefaultClusterStorageConfig()

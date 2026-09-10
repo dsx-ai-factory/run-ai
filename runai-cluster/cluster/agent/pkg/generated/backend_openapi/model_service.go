@@ -1,7 +1,7 @@
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend
+The aggregated API  of Run:AI backend 
 
 API version: 1.5.1
 */
@@ -17,12 +17,12 @@ import (
 
 // Service struct for Service
 type Service struct {
-	ClusterUuid string    `json:"clusterUuid"`
-	Url         *string   `json:"url,omitempty"`
-	Id          string    `json:"id"`
-	Name        string    `json:"name"`
-	Namespace   string    `json:"namespace"`
-	CreatedAt   time.Time `json:"createdAt"`
+	ClusterUuid string `json:"clusterUuid"`
+	Url *string `json:"url,omitempty"`
+	Id string `json:"id"`
+	Name string `json:"name"`
+	Namespace string `json:"namespace"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 // NewService instantiates a new Service object
@@ -257,3 +257,5 @@ func (v *NullableService) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

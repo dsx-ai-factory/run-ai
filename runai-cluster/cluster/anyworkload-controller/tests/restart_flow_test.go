@@ -57,7 +57,7 @@ const (
 	restartFlowChildDeletionTimeout = 5 * time.Second
 
 	// childHoldFinalizer keeps a child JobSet terminating so a restart cannot complete.
-	childHoldFinalizer = "test.run.ai/restart-flow-hold"
+	childHoldFinalizer = "mock-q7z3k.example.com/restart-flow-hold"
 )
 
 // newValidRestartRequest builds a valid RestartRequest from a workload

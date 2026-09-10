@@ -8,9 +8,6 @@ info:
     url: https://www.run.ai/
     email: support@run.ai
 servers:
-  - url: https://app.run.ai
-  - url: https://staging.run.ai
-  - url: https://test.run.ai
   - url: http://localhost:8080
 security:
   - bearerAuth: []
@@ -5430,7 +5427,7 @@ components:
         maxItems: 10
         items:
           type: string
-          pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+          pattern: ^(type|name|clusterId|projectId|projectName|departmentId|departmentName|createdAt|deletedAt|submittedBy|phase|completedAt|nodepool|distributedFramework|allocatedGPU|idleAllocatedGpus|phaseUpdatedAt|category|totalPendingTimeSeconds|totalRunningTimeSeconds|priority|priorityClassName|preemptibility|guaranteedRuntimeEndsAt|aiApplicationId|aiApplicationName)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
         example:
           - name!=some-workload-name
           - allocatedGPU>=2
@@ -5529,6 +5526,7 @@ components:
           - totalPendingTimeSeconds
           - totalRunningTimeSeconds
           - priorityClassName
+          - preemptibility
           - guaranteedRuntimeEndsAt
           - aiApplicationId
           - aiApplicationName
@@ -6893,6 +6891,10 @@ components:
         preemptible:
           type: boolean
           nullable: true
+        preemptibility:
+          type: string
+          example: non-preemptible
+          nullable: true
         fullySaasWorkload:
           x-internal: true
           type: boolean
@@ -7118,6 +7120,25 @@ components:
               $ref: '#/components/schemas/QueueResources'
             podGroupRequestedNonPreemptibleResources:
               $ref: '#/components/schemas/QueueResources'
+    WorkloadElementTopology:
+      type: object
+      description: |
+        The element's network topology. Populated whenever the element requested topology constraints, or its running pods resolve to an actual placement in the topology hierarchy.
+      nullable: true
+      properties:
+        name:
+          type: string
+          description: The name of the network topology associated with the element — either as requested via constraints, or inherited from the workload's topology constraints, or inferred from the nodepools the element's running pods are scheduled on.
+        preferredPlacement:
+          x-internal: true
+          type: string
+          description: The topology level to use as a preferred placement constraint for the element.
+        requiredPlacement:
+          x-internal: true
+          type: string
+          description: The topology level to use as a required placement constraint for the element. If the requirement cannot be satisfied at this topology level, placement will fail.
+        actualPlacement:
+          $ref: '#/components/schemas/WorkloadTopologyActualPlacement'
     WorkloadElement:
       type: object
       required:
@@ -7159,6 +7180,8 @@ components:
           format: date-time
           example: '2022-01-01T03:49:52.531Z'
           description: The timestamp when the structure element was created.
+        topology:
+          $ref: '#/components/schemas/WorkloadElementTopology'
         kubernetesRef:
           type: object
           nullable: true
@@ -15646,17 +15669,6 @@ components:
             A flat list of structure elements for this workload, ordered by hierarchy level. This page may contain fewer elements than are stored in the database — use the "next" field to retrieve additional pages. Use the /elements/count endpoint to retrieve total and stored counts.
           items:
             $ref: '#/components/schemas/WorkloadElement'
-    WorkloadElementTopology:
-      type: object
-      description: |
-        The element's network topology. Returned only when the element's running pods resolve to an actual placement in the topology hierarchy; omitted otherwise (e.g. when the workload has no topology, the cluster doesn't support topology, or there are no running pods to place yet).
-      nullable: true
-      properties:
-        name:
-          type: string
-          description: The name of the network topology associated with the element — either inherited from the workload's topology constraints, or inferred from the nodepools the element's running pods are scheduled on.
-        actualPlacement:
-          $ref: '#/components/schemas/WorkloadTopologyActualPlacement'
     WorkloadElementResponse:
       allOf:
         - $ref: '#/components/schemas/WorkloadElement'
@@ -15669,8 +15681,6 @@ components:
               $ref: '#/components/schemas/WorkloadRequestResources'
             allocatedResources:
               $ref: '#/components/schemas/WorkloadAllocatedResources'
-            topology:
-              $ref: '#/components/schemas/WorkloadElementTopology'
     ElementMetricType:
       type: string
       description: Specify which metric data to request for an element.
@@ -16699,6 +16709,7 @@ components:
         - category
         - priority
         - priorityClassName
+        - preemptibility
         - guaranteedRuntimeEndsAt
         - aiApplicationId
         - aiApplicationName

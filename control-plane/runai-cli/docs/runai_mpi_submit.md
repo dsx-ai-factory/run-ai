@@ -131,7 +131,7 @@ runai training mpi submit <workload-name> -p <project-name> -i ubuntu --master-c
   -t, --tty                                                 Allocate a TTY for the container. Useful for interactive workloads.
       --user-group-source string                            How to determine user/group IDs. Valid values: fromTheImage, fromIdpToken.
       --wait-for-submit duration                            How long to wait for the workload to be created in the cluster. Default: 1m.
-      --workers int32                                       the number of workers that will be allocated for running the workload
+      --workers positiveInt                                 the number of workers that will be allocated for running the workload
       --working-dir string                                  Working directory inside the container. Overrides the default working directory set in the image.
 ```
 

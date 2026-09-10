@@ -1,7 +1,7 @@
 /*
 Cluster service API
 
-The aggregated API  of Run:AI backend
+The aggregated API  of Run:AI backend 
 
 API version: 1.5.1
 */
@@ -16,9 +16,9 @@ import (
 
 // AgentSyncDataDepricated struct for AgentSyncDataDepricated
 type AgentSyncDataDepricated struct {
-	Version   string     `json:"version"`
+	Version string `json:"version"`
 	PodGroups []PodGroup `json:"podGroups,omitempty"`
-	Pods      []PodGroup `json:"pods,omitempty"`
+	Pods []PodGroup `json:"pods,omitempty"`
 }
 
 // NewAgentSyncDataDepricated instantiates a new AgentSyncDataDepricated object
@@ -176,3 +176,5 @@ func (v *NullableAgentSyncDataDepricated) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

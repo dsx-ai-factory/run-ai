@@ -298,7 +298,7 @@ func TestIsEmail(t *testing.T) {
 		expected bool
 	}{
 		{"user@example.com", true},
-		{"test@run.ai", true},
+		{"test@example.com", true},
 		{"C086FBSPFGT", false},
 		{"U080U9XK7MY", false},
 		{"", false},

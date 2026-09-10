@@ -12,7 +12,7 @@ spec:
   imagePullPolicy:
     value: Always
   ingressUrl:
-    value: https://app.run.ai/_PROJECT_NAME_/_JOB_NAME_
+    value: https://mock-q7z3k.example.com/_PROJECT_NAME_/_JOB_NAME_
   ports:
     items:
       port-70:
@@ -25,7 +25,7 @@ spec:
       a:
         value:
           containerPort: 443
-          url: https://test.run.ai:8443/my/url
+          url: https://mock-q7z3k.example.com:8443/my/url
           customUrl: true
       b:
         value:
